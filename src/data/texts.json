@@ -1,0 +1,39 @@
+{
+  "center": {
+    "readyTitle": "守住心防",
+    "readyBody": "追求者将从四面八方靠近；清醒炮台会自动迎击",
+    "pausedTitle": "已暂停",
+    "pausedBody": "按 P 或按钮继续"
+  },
+  "buttons": {
+    "start": "开始游戏",
+    "restart": "重新开始",
+    "pause": "暂停",
+    "resume": "继续"
+  },
+  "toast": {
+    "tempCleared": "临时心意已清空 {count} 张",
+    "waveStart": "第 {wave} 波追求者开始",
+    "waveClear": "第 {wave} 波完成 · 整理卡槽",
+    "testDrops": "地面生成四份{name}测试掉落，可合成3星",
+    "cardsFull": "卡槽已满：先换装或腾出位置",
+    "collectMerged": "拾取成功 · 自动合成 {count} 次",
+    "collect": "拾取 {name}卡",
+    "equipFull": "装备栏已满：请拖到指定装备位进行替换",
+    "unequipFull": "下方卡槽已满：请拖到指定卡槽进行替换",
+    "tempInvest": "临时投入{name}卡：本波生效{mergeSuffix}",
+    "equipOnly3Star": "左侧装备栏只可放置3星卡牌",
+    "swapped": "已交换：{a} ↔ {b}",
+    "moved": "已移动{name}卡{mergeSuffix}",
+    "breakthrough": "私人空间受压 -{damage}",
+    "tunerReset": "已恢复默认参数",
+    "perkApplied": "{title} 已生效",
+    "mergeSuffix": "，自动合成 {count} 次"
+  },
+  "result": {
+    "winTitle": "守住了心防",
+    "loseTitle": "被热情淹没",
+    "winDesc": "魅魔主角温和而坚定地守住了私人空间。你拾取 {collected} 份心意，错过 {expired} 份。",
+    "loseDesc": "追求者突破了中心防线。你拾取 {collected} 份心意、错过 {expired} 份；下一局试着调整射程与拾取节奏。"
+  }
+}

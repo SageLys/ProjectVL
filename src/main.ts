@@ -2,6 +2,12 @@
 // 逻辑与数值保持与 legacy 单文件一致，仅去掉 IIFE 包裹、引入 CSS、做最小 TS 适配。
 // 后续步骤会把数据/规则/表现/输入拆分为独立模块，届时本文件将被重写为薄胶水层。
 import './styles/app.css';
+import { gameConfig, cards as cardsData, enemies as enemiesData, waves as wavesData, perks as perksData, texts } from './data';
+
+// 简易文案格式化：把 {token} 替换为 vars[token]。
+function fmt(tpl: string, vars: Record<string, string | number> = {}): string {
+  return tpl.replace(/\{(\w+)\}/g, (_, k) => (k in vars ? String(vars[k]) : ''));
+}
 
 const canvas = document.querySelector('#game') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
@@ -17,32 +23,28 @@ const ui: any = {
   lifeCtl: $('#lifeCtl'), lifeCtlVal: $('#lifeCtlVal'), speedCtl: $('#speedCtl'), speedCtlVal: $('#speedCtlVal'), resetTunerBtn: $('#resetTunerBtn'),
 };
 
-const CARD_TYPES: any = {
-  damage: { name: '清醒', color: '#ff6577', icon: '◆', desc: '清醒弹伤害' },
-  rate: { name: '从容', color: '#4de2ff', icon: 'ϟ', desc: '应对速度' },
-  multi: { name: '界限', color: '#b784ff', icon: '✦', desc: '弹丸数量' },
-  range: { name: '余韵', color: '#5cffb1', icon: '◎', desc: '清醒射程' },
-  luck: { name: '眷恋', color: '#ffd166', icon: '♥', desc: '心意掉落' },
-};
+const CARD_TYPES: any = cardsData.types;
+const CARD_FX = cardsData.effects;
 const TAU = Math.PI * 2;
-const TURRET = { x: 480, y: 300 };
-const DEFAULT_CONFIG = { damage: 16, fireRate: 3.3, range: 430, dropChance: .5, dropLifetime: 6, enemySpeed: 1 };
+const TURRET = gameConfig.turret;
+const CB = gameConfig.combat;
+const DEFAULT_CONFIG = gameConfig.defaultConfig;
 const config: any = { ...DEFAULT_CONFIG };
 let state: any, last = performance.now(), toastTimer: any = 0;
 
 function reset() {
   state = {
-    mode: 'ready', paused: false, time: 0, hp: 100, maxHp: 100, wave: 0, waveTime: 0, between: 0,
-    enemies: [], bullets: [], particles: [], groundDrops: [], cards: Array(7).fill(null), equipment: Array(3).fill(null), tempCards: [], nextCardId: 1, nextDropId: 1,
+    mode: 'ready', paused: false, time: 0, hp: gameConfig.hp.max, maxHp: gameConfig.hp.max, wave: 0, waveTime: 0, between: 0,
+    enemies: [], bullets: [], particles: [], groundDrops: [], cards: Array(gameConfig.slots.cards).fill(null), equipment: Array(gameConfig.slots.equipment).fill(null), tempCards: [], nextCardId: 1, nextDropId: 1,
     spawnLeft: 0, spawnTimer: 0, waveClearPending: false,
     damageBonus: 0, fireRateBonus: 0, multi: 1, shotCd: 0, turretAngle: -Math.PI / 2,
-    xp: 0, xpNeed: 8, level: 1, kills: 0, merges: 0, uses: 0, collected: 0, expired: 0,
+    xp: 0, xpNeed: perksData.xpNeedBase, level: 1, kills: 0, merges: 0, uses: 0, collected: 0, expired: 0,
   };
   ui.resultModal.classList.remove('show');
   ui.levelModal.classList.remove('show');
-  ui.startBtn.textContent = '开始游戏';
-  ui.pauseBtn.textContent = '暂停';
-  message('守住心防', '追求者将从四面八方靠近；清醒炮台会自动迎击', true);
+  ui.startBtn.textContent = texts.buttons.start;
+  ui.pauseBtn.textContent = texts.buttons.pause;
+  message(texts.center.readyTitle, texts.center.readyBody, true);
   renderCards(); renderEquipment(); renderTempSlot(); updateUI();
 }
 
@@ -51,13 +53,13 @@ function start() {
   if (state.mode === 'ready') {
     state.mode = 'playing';
     nextWave();
-    ui.startBtn.textContent = '重新开始';
+    ui.startBtn.textContent = texts.buttons.restart;
     message('', '', false);
   } else {
     reset();
     state.mode = 'playing';
     nextWave();
-    ui.startBtn.textContent = '重新开始';
+    ui.startBtn.textContent = texts.buttons.restart;
     message('', '', false);
   }
 }
@@ -66,47 +68,49 @@ function nextWave() {
   if (state.wave > 0 && state.tempCards.length) {
     const cleared = state.tempCards.length;
     state.tempCards = [];
-    toast(`临时心意已清空 ${cleared} 张`);
+    toast(fmt(texts.toast.tempCleared, { count: cleared }));
   }
   state.wave++;
-  state.spawnLeft = 5 + state.wave * 3;
-  state.spawnTimer = .4;
+  state.spawnLeft = wavesData.enemyCountBase + state.wave * wavesData.enemyCountPerWave;
+  state.spawnTimer = wavesData.firstSpawnDelay;
   state.waveClearPending = false;
   state.between = 0;
-  toast(`第 ${state.wave} 波追求者开始`);
+  toast(fmt(texts.toast.waveStart, { wave: state.wave }));
   renderTempSlot();
   updateUI();
 }
 
 function spawnEnemy() {
+  const tr = wavesData.typeRoll;
   const roll = Math.random();
-  let type = roll < .2 + state.wave * .025 ? 'tank' : roll < .47 ? 'fast' : 'normal';
-  if (state.wave === 5 && state.spawnLeft === 1) type = 'boss';
-  const data = ({
-    normal: { label: '热情追求者', hp: 38 + state.wave * 7, speed: 24 + state.wave * 1.5, r: 16, color: '#f3b95f', damage: 8, xp: 1 },
-    fast: { label: '急切追求者', hp: 23 + state.wave * 5, speed: 42 + state.wave * 2, r: 12, color: '#62d8ff', damage: 6, xp: 1 },
-    tank: { label: '执着追求者', hp: 90 + state.wave * 13, speed: 15 + state.wave * .8, r: 22, color: '#ff7b86', damage: 14, xp: 2 },
-    boss: { label: '命定追求者', hp: 420, speed: 12, r: 35, color: '#c58aff', damage: 28, xp: 5 },
-  } as any)[type];
-  const side = Math.floor(Math.random() * 4), margin = 45;
+  let type = roll < tr.tankBase + state.wave * tr.tankPerWave ? 'tank' : roll < tr.fastThreshold ? 'fast' : 'normal';
+  if (state.wave === wavesData.bossWave && state.spawnLeft === 1) type = 'boss';
+  const def = (enemiesData as any)[type];
+  const data = {
+    label: def.label,
+    hp: def.hpBase + state.wave * def.hpPerWave,
+    speed: def.speedBase + state.wave * def.speedPerWave,
+    r: def.r, color: def.color, damage: def.damage, xp: def.xp,
+  };
+  const side = Math.floor(Math.random() * 4), margin = wavesData.spawnMargin;
   const spawn = side === 0 ? { x: 35 + Math.random() * 890, y: -margin }
     : side === 1 ? { x: 960 + margin, y: 35 + Math.random() * 530 }
     : side === 2 ? { x: 35 + Math.random() * 890, y: 600 + margin }
     : { x: -margin, y: 35 + Math.random() * 530 };
-  state.enemies.push({ ...spawn, type, hp: data.hp, maxHp: data.hp, ...data, hit: 0 });
+  state.enemies.push({ ...spawn, type, maxHp: data.hp, ...data, hit: 0 });
 }
 
-function cardScale(star: number) { return [0, 1, 2.25, 4][star] || 1; }
+function cardScale(star: number) { return gameConfig.starScale[star] || 1; }
 function bonusFromCards(cards: any[]) {
   const bonus = { damage: 0, rate: 0, multi: 0, range: 0, drop: 0 };
   for (const card of cards) {
     if (!card) continue;
     const scale = cardScale(card.star);
-    if (card.type === 'damage') bonus.damage += 5 * scale;
-    if (card.type === 'rate') bonus.rate += .38 * scale;
-    if (card.type === 'multi') card.star >= 2 ? bonus.multi++ : bonus.damage += 2.5 * scale;
-    if (card.type === 'range') bonus.range += 32 * scale;
-    if (card.type === 'luck') bonus.drop += .05 * scale;
+    if (card.type === 'damage') bonus.damage += CARD_FX.damagePerScale * scale;
+    if (card.type === 'rate') bonus.rate += CARD_FX.ratePerScale * scale;
+    if (card.type === 'multi') card.star >= 2 ? bonus.multi++ : bonus.damage += CARD_FX.multiStar1DamagePerScale * scale;
+    if (card.type === 'range') bonus.range += CARD_FX.rangePerScale * scale;
+    if (card.type === 'luck') bonus.drop += CARD_FX.luckPerScale * scale;
   }
   return bonus;
 }
@@ -116,7 +120,7 @@ function totalDamage() { return config.damage + state.damageBonus + equipmentBon
 function totalFireRate() { return config.fireRate + state.fireRateBonus + equipmentBonus().rate; }
 function totalMulti() { return state.multi + equipmentBonus().multi; }
 function totalRange() { return config.range + equipmentBonus().range; }
-function totalDropChance() { return Math.min(.95, config.dropChance + equipmentBonus().drop); }
+function totalDropChance() { return Math.min(gameConfig.drops.chanceCap, config.dropChance + equipmentBonus().drop); }
 
 function findTarget() {
   let best = null, bestDist = Infinity;
@@ -131,13 +135,13 @@ function shoot(target: any) {
   const tx = TURRET.x, ty = TURRET.y;
   const a = Math.atan2(target.y - ty, target.x - tx);
   state.turretAngle = a;
-  const spread = .12;
+  const spread = CB.spread;
   const multi = totalMulti();
   for (let i = 0; i < multi; i++) {
     const offset = (i - (multi - 1) / 2) * spread;
-    state.bullets.push({ x: tx + Math.cos(a) * 24, y: ty + Math.sin(a) * 24, vx: Math.cos(a + offset) * 620, vy: Math.sin(a + offset) * 620, r: 4, life: 1.25, damage: totalDamage() });
+    state.bullets.push({ x: tx + Math.cos(a) * CB.muzzleOffset, y: ty + Math.sin(a) * CB.muzzleOffset, vx: Math.cos(a + offset) * CB.bulletSpeed, vy: Math.sin(a + offset) * CB.bulletSpeed, r: CB.bulletRadius, life: CB.bulletLife, damage: totalDamage() });
   }
-  for (let i = 0; i < 4; i++) particle(tx + Math.cos(a) * 26, ty + Math.sin(a) * 26, '#8cecff', 55);
+  for (let i = 0; i < gameConfig.vfx.shootParticles; i++) particle(tx + Math.cos(a) * 26, ty + Math.sin(a) * 26, '#8cecff', 55);
 }
 
 function particle(x: number, y: number, color: string, speed = 80) {
@@ -148,7 +152,7 @@ function particle(x: number, y: number, color: string, speed = 80) {
 function killEnemy(enemy: any) {
   state.kills++;
   state.xp += enemy.xp;
-  for (let i = 0; i < 12; i++) particle(enemy.x, enemy.y, enemy.color, 150);
+  for (let i = 0; i < gameConfig.vfx.killParticles; i++) particle(enemy.x, enemy.y, enemy.color, 150);
   if (Math.random() < totalDropChance() || enemy.type === 'boss') spawnGroundDrop(enemy.x, enemy.y);
   if (state.xp >= state.xpNeed) levelUp();
 }
@@ -165,17 +169,17 @@ function addTestPair() {
   spawnGroundDrop(440, 370, type);
   spawnGroundDrop(520, 370, type);
   spawnGroundDrop(600, 370, type);
-  toast(`地面生成四份${CARD_TYPES[type].name}测试掉落，可合成3星`);
+  toast(fmt(texts.toast.testDrops, { name: CARD_TYPES[type].name }));
 }
 
 function collectDrop(drop: any) {
   const empty = state.cards.findIndex((card: any) => card === null);
-  if (empty < 0) { toast('卡槽已满：先换装或腾出位置'); return; }
+  if (empty < 0) { toast(texts.toast.cardsFull); return; }
   state.groundDrops = state.groundDrops.filter((d: any) => d.id !== drop.id);
   state.cards[empty] = { id: state.nextCardId++, type: drop.type, star: drop.star };
   state.collected++;
   const merged = autoMergeCards();
-  toast(merged ? `拾取成功 · 自动合成 ${merged} 次` : `拾取 ${CARD_TYPES[drop.type].name}卡`);
+  toast(merged ? fmt(texts.toast.collectMerged, { count: merged }) : fmt(texts.toast.collect, { name: CARD_TYPES[drop.type].name }));
   renderCards(); updateUI();
 }
 
@@ -186,7 +190,7 @@ function autoMergeCards() {
     outer: for (let i = 0; i < state.cards.length; i++) {
       const a = state.cards[i];
       if (!a) continue;
-      if (a.star >= 3) continue;
+      if (a.star >= gameConfig.maxStar) continue;
       for (let j = i + 1; j < state.cards.length; j++) {
         const b = state.cards[j];
         if (!b) continue;
@@ -205,7 +209,7 @@ function autoMergeCards() {
 function levelUp() {
   state.xp -= state.xpNeed;
   state.level++;
-  state.xpNeed = Math.round(state.xpNeed * 1.35);
+  state.xpNeed = Math.round(state.xpNeed * perksData.xpGrowth);
   state.paused = true;
   ui.levelModal.classList.add('show');
   updateUI();
@@ -213,13 +217,13 @@ function levelUp() {
 
 function quickEquip(cardIndex: number) {
   const target = state.equipment.findIndex((card: any) => card === null);
-  if (target < 0) { toast('装备栏已满：请拖到指定装备位进行替换'); return; }
+  if (target < 0) { toast(texts.toast.equipFull); return; }
   moveOrSwap('cards', cardIndex, 'equipment', target);
 }
 
 function quickUnequip(equipIndex: number) {
   const target = state.cards.findIndex((card: any) => card === null);
-  if (target < 0) { toast('下方卡槽已满：请拖到指定卡槽进行替换'); return; }
+  if (target < 0) { toast(texts.toast.unequipFull); return; }
   moveOrSwap('equipment', equipIndex, 'cards', target);
 }
 
@@ -238,7 +242,7 @@ function absorbTempCard(sourceKind: string, sourceIndex: number) {
   state.tempCards.push(moving);
   state.uses++;
   const merged = sourceKind === 'cards' ? autoMergeCards() : 0;
-  toast(`临时投入${CARD_TYPES[moving.type].name}卡：本波生效${merged ? `，自动合成 ${merged} 次` : ''}`);
+  toast(fmt(texts.toast.tempInvest, { name: CARD_TYPES[moving.type].name, mergeSuffix: merged ? fmt(texts.toast.mergeSuffix, { count: merged }) : '' }));
   renderCards(); renderEquipment(); renderTempSlot(); updateUI();
 }
 
@@ -250,8 +254,8 @@ function moveOrSwap(sourceKind: string, sourceIndex: number, targetKind: string,
   if (!source || !target) return;
   const moving = source[sourceIndex];
   if (!moving) return;
-  if (targetKind === 'equipment' && moving.star < 3) {
-    toast('左侧装备栏只可放置3星卡牌');
+  if (targetKind === 'equipment' && moving.star < gameConfig.maxStar) {
+    toast(texts.toast.equipOnly3Star);
     return;
   }
   const replaced = target[targetIndex];
@@ -259,7 +263,9 @@ function moveOrSwap(sourceKind: string, sourceIndex: number, targetKind: string,
   source[sourceIndex] = replaced || null;
   const merged = targetKind === 'cards' || sourceKind === 'cards' ? autoMergeCards() : 0;
   state.uses++;
-  toast(replaced ? `已交换：${CARD_TYPES[moving.type].name} ↔ ${CARD_TYPES[replaced.type].name}` : `已移动${CARD_TYPES[moving.type].name}卡${merged ? `，自动合成 ${merged} 次` : ''}`);
+  toast(replaced
+    ? fmt(texts.toast.swapped, { a: CARD_TYPES[moving.type].name, b: CARD_TYPES[replaced.type].name })
+    : fmt(texts.toast.moved, { name: CARD_TYPES[moving.type].name, mergeSuffix: merged ? fmt(texts.toast.mergeSuffix, { count: merged }) : '' }));
   renderCards(); renderEquipment(); renderTempSlot(); updateUI();
 }
 
@@ -317,12 +323,12 @@ function makeSlot(kind: string, index: number, card: any) {
 
 function renderCards() {
   ui.cards.innerHTML = '';
-  for (let i = 0; i < 7; i++) ui.cards.append(makeSlot('cards', i, state.cards[i]));
+  for (let i = 0; i < gameConfig.slots.cards; i++) ui.cards.append(makeSlot('cards', i, state.cards[i]));
 }
 
 function renderEquipment() {
   ui.equipmentSlots.innerHTML = '';
-  for (let i = 0; i < 3; i++) ui.equipmentSlots.append(makeSlot('equipment', i, state.equipment[i]));
+  for (let i = 0; i < gameConfig.slots.equipment; i++) ui.equipmentSlots.append(makeSlot('equipment', i, state.equipment[i]));
 }
 
 function renderTempSlot() {
@@ -368,10 +374,10 @@ function update(dt: number) {
     const e = state.enemies[i];
     const dx = TURRET.x - e.x, dy = TURRET.y - e.y, len = Math.hypot(dx, dy) || 1;
     e.x += dx / len * e.speed * config.enemySpeed * dt; e.y += dy / len * e.speed * config.enemySpeed * dt; e.hit -= dt;
-    if (Math.hypot(dx, dy) < 55) {
+    if (Math.hypot(dx, dy) < CB.breakthroughDist) {
       state.hp -= e.damage; state.enemies.splice(i, 1);
-      for (let k = 0; k < 10; k++) particle(TURRET.x, TURRET.y, '#ff6677', 170);
-      toast(`私人空间受压 -${e.damage}`);
+      for (let k = 0; k < gameConfig.vfx.breakthroughParticles; k++) particle(TURRET.x, TURRET.y, '#ff6677', 170);
+      toast(fmt(texts.toast.breakthrough, { damage: e.damage }));
       if (state.hp <= 0) end(false);
     }
   }
@@ -386,8 +392,8 @@ function update(dt: number) {
 
   if (state.spawnLeft === 0 && state.enemies.length === 0 && !state.waveClearPending && state.mode === 'playing') {
     state.waveClearPending = true;
-    if (state.wave >= 5) end(true);
-    else { state.between = 2.4; toast(`第 ${state.wave} 波完成 · 整理卡槽`); }
+    if (state.wave >= wavesData.totalWaves) end(true);
+    else { state.between = wavesData.betweenWaves; toast(fmt(texts.toast.waveClear, { wave: state.wave })); }
   }
   if (state.between > 0) { state.between -= dt; if (state.between <= 0) nextWave(); }
   updateUI();
@@ -395,8 +401,8 @@ function update(dt: number) {
 
 function end(win: boolean) {
   state.mode = 'ended'; state.paused = true;
-  ui.resultTitle.textContent = win ? '守住了心防' : '被热情淹没';
-  ui.resultDesc.textContent = win ? `魅魔主角温和而坚定地守住了私人空间。你拾取 ${state.collected} 份心意，错过 ${state.expired} 份。` : `追求者突破了中心防线。你拾取 ${state.collected} 份心意、错过 ${state.expired} 份；下一局试着调整射程与拾取节奏。`;
+  ui.resultTitle.textContent = win ? texts.result.winTitle : texts.result.loseTitle;
+  ui.resultDesc.textContent = fmt(win ? texts.result.winDesc : texts.result.loseDesc, { collected: state.collected, expired: state.expired });
   ui.resultKills.textContent = state.kills; ui.resultMerges.textContent = state.merges; ui.resultUses.textContent = state.uses;
   ui.resultModal.classList.add('show');
 }
@@ -447,12 +453,12 @@ function draw() {
   ctx.rotate(a); ctx.fillStyle = '#68e8fa'; ctx.fillRect(3, -7, 42, 14); ctx.fillStyle = '#d9fbff'; ctx.fillRect(34, -4, 18, 8); ctx.restore(); ctx.shadowBlur = 0;
 }
 
-function loop(now: number) { const dt = Math.min(.033, (now - last) / 1000); last = now; update(dt); draw(); requestAnimationFrame(loop); }
+function loop(now: number) { const dt = Math.min(CB.dtCap, (now - last) / 1000); last = now; update(dt); draw(); requestAnimationFrame(loop); }
 function canvasPoint(e: PointerEvent) { const r = canvas.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * canvas.width, y: (e.clientY - r.top) / r.height * canvas.height }; }
-canvas.addEventListener('pointerdown', e => { const p = canvasPoint(e); let nearest = null, best = Infinity; for (const drop of state.groundDrops) { const d = Math.hypot(drop.x - p.x, drop.y - p.y); if (d < 34 && d < best) { nearest = drop; best = d; } } if (nearest) collectDrop(nearest); });
+canvas.addEventListener('pointerdown', e => { const p = canvasPoint(e); let nearest = null, best = Infinity; for (const drop of state.groundDrops) { const d = Math.hypot(drop.x - p.x, drop.y - p.y); if (d < gameConfig.drops.pickupRadius && d < best) { nearest = drop; best = d; } } if (nearest) collectDrop(nearest); });
 addEventListener('keydown', e => { if (e.code === 'KeyP') togglePause(); });
 ui.startBtn.addEventListener('click', start); ui.pauseBtn.addEventListener('click', togglePause); ($('#testCardBtn') as HTMLElement).addEventListener('click', addTestPair); ($('#restartBtn') as HTMLElement).addEventListener('click', () => { reset(); start(); });
-function togglePause() { if (state.mode !== 'playing') return; state.paused = !state.paused; ui.pauseBtn.textContent = state.paused ? '继续' : '暂停'; message(state.paused ? '已暂停' : '', '按 P 或按钮继续', state.paused); }
+function togglePause() { if (state.mode !== 'playing') return; state.paused = !state.paused; ui.pauseBtn.textContent = state.paused ? texts.buttons.resume : texts.buttons.pause; message(state.paused ? texts.center.pausedTitle : '', texts.center.pausedBody, state.paused); }
 function syncTunerInputs() {
   ui.damageCtl.value = config.damage; ui.rateCtl.value = config.fireRate; ui.rangeCtl.value = config.range; ui.dropCtl.value = config.dropChance * 100; ui.lifeCtl.value = config.dropLifetime; ui.speedCtl.value = config.enemySpeed * 100; updateUI();
 }
@@ -462,15 +468,17 @@ ui.rangeCtl.addEventListener('input', () => { config.range = Number(ui.rangeCtl.
 ui.dropCtl.addEventListener('input', () => { config.dropChance = Number(ui.dropCtl.value) / 100; updateUI(); });
 ui.lifeCtl.addEventListener('input', () => { config.dropLifetime = Number(ui.lifeCtl.value); updateUI(); });
 ui.speedCtl.addEventListener('input', () => { config.enemySpeed = Number(ui.speedCtl.value) / 100; updateUI(); });
-ui.resetTunerBtn.addEventListener('click', () => { Object.assign(config, DEFAULT_CONFIG); syncTunerInputs(); toast('已恢复默认参数'); });
+ui.resetTunerBtn.addEventListener('click', () => { Object.assign(config, DEFAULT_CONFIG); syncTunerInputs(); toast(texts.toast.tunerReset); });
+const PERK_BY_ID: any = Object.fromEntries(perksData.perks.map(p => [p.id, p]));
 document.querySelectorAll('[data-perk]').forEach(btn => btn.addEventListener('click', () => {
-  const perk = (btn as HTMLElement).dataset.perk;
-  if (perk === 'damage') state.damageBonus += totalDamage() * .2;
-  if (perk === 'rate') state.fireRateBonus += totalFireRate() * .15;
-  if (perk === 'repair') state.hp = Math.min(state.maxHp, state.hp + 20);
+  const perk = PERK_BY_ID[(btn as HTMLElement).dataset.perk as string];
+  if (!perk) return;
+  if (perk.kind === 'damagePct') state.damageBonus += totalDamage() * perk.value;
+  if (perk.kind === 'fireRatePct') state.fireRateBonus += totalFireRate() * perk.value;
+  if (perk.kind === 'heal') state.hp = Math.min(state.maxHp, state.hp + perk.value);
   state.paused = false;
   ui.levelModal.classList.remove('show');
-  toast((btn.querySelector('b') as HTMLElement).textContent + ' 已生效');
+  toast(fmt(texts.toast.perkApplied, { title: perk.title }));
   updateUI();
 }));
 reset(); requestAnimationFrame(loop);

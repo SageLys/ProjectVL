@@ -1,0 +1,9 @@
+{
+  "xpNeedBase": 8,
+  "xpGrowth": 1.35,
+  "perks": [
+    { "id": "damage", "title": "高能弹芯", "desc": "基础伤害 +20%", "kind": "damagePct", "value": 0.2 },
+    { "id": "rate",   "title": "过载供能", "desc": "射速 +15%",     "kind": "fireRatePct", "value": 0.15 },
+    { "id": "repair", "title": "重整心防", "desc": "私人空间恢复 20 点", "kind": "heal", "value": 20 }
+  ]
+}
