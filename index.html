@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>魅魔心防战｜可玩原型</title>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand"><small>360° DEFENSE PROTOTYPE · V0.2</small><h1>魅魔心防战</h1></div>
+      <div class="status">
+        <div class="pill">目标：<strong>守住 5 波追求者</strong></div>
+        <div class="pill">核心：<strong>自动攻击 → 点击拾取 → 自动合成 → 装配</strong></div>
+      </div>
+    </header>
+    <section class="layout">
+      <div class="arena-wrap" id="arenaWrap">
+        <canvas id="game" width="960" height="600" aria-label="魅魔心防战游戏区域"></canvas>
+        <div class="hud">
+          <div class="hud-box"><div class="label">私人空间</div><div class="value"><span id="hpText">100</span> / 100</div><div class="bar"><i id="hpBar"></i></div></div>
+          <div class="hud-box"><div class="label">经验 · Lv.<span id="levelText">1</span></div><div class="value"><span id="xpText">0</span> / <span id="xpNeed">8</span></div><div class="bar xp"><i id="xpBar" style="width:0%"></i></div></div>
+        </div>
+        <div class="equipment-bar" aria-label="装备栏">
+          <h3>魅魔装备</h3><small>3栏 · 仅限3星卡</small>
+          <div class="equipment-slots" id="equipmentSlots"></div>
+        </div>
+        <div class="temp-equipment-bar" aria-label="临时装备栏">
+          <h3>临时心意</h3><small>无限拖入 · 本波生效</small>
+          <div class="temp-slot" id="tempSlot" data-testid="temp-slot">拖入卡牌<br>叠加到本波</div>
+        </div>
+        <div class="center-msg" id="centerMsg"><h2>守住心防</h2><p>追求者将从四面八方靠近；清醒炮台会自动迎击</p></div>
+        <div class="toast" id="toast"></div>
+        <div class="cards-area">
+          <div class="cards-head"><strong>升级卡槽</strong><span>自动合成 · 3星可放左侧 · 右侧临时本波生效</span></div>
+          <div class="drop-telemetry" id="dropTelemetry">地面 0 · 已拾取 0 · 超时 0</div>
+          <div class="cards" id="cards"></div>
+        </div>
+      </div>
+      <aside class="side">
+        <section class="panel story">
+          <h3>故事背景</h3>
+          <p>月蚀之夜，主角作为魅魔觉醒了无法收束的魅力。城里的每一位来访者都坚信自己应该和他在一起，于是从四面八方涌向心之庭院。</p>
+          <p><strong>他们并非恶人，只是热情过载。</strong>主角启动中央“清醒炮台”，用温和但坚定的清醒弹守住私人空间；追求者冷静离开时，会留下可强化炮台的心意卡。</p>
+        </section>
+        <section class="panel">
+          <h3>清醒炮台</h3>
+          <div class="dropzone"><div class="turret-icon">⌁</div><strong>装备与临装已启用</strong><p>左侧装备栏只收 3 星卡<br>右侧临时卡只本波生效</p></div>
+          <div class="stats">
+            <div class="stat"><span>伤害</span><strong id="damageStat">16</strong></div>
+            <div class="stat"><span>射速</span><strong id="rateStat">3.3/s</strong></div>
+            <div class="stat"><span>弹丸</span><strong id="multiStat">1</strong></div>
+            <div class="stat"><span>波次</span><strong><span id="waveText">0</span> / 5</strong></div>
+          </div>
+        </section>
+        <section class="panel">
+          <h3>战斗控制</h3>
+          <div class="controls"><button class="btn primary" id="startBtn">开始游戏</button><button class="btn" id="pauseBtn">暂停</button><button class="btn" id="testCardBtn">生成测试掉落</button></div>
+          <p>炮台：自动锁定最近的追求者<br>战场：点击限时心意拾取<br>卡牌：3星卡可进左侧装备；右侧临时格可无限投入</p>
+        </section>
+        <section class="panel">
+          <h3>实时参数控制</h3>
+          <div class="tuner">
+            <div class="tune-row"><label for="damageCtl">基础伤害 <output id="damageCtlVal">16</output></label><input id="damageCtl" data-testid="damage-control" type="range" min="6" max="40" value="16" step="1"></div>
+            <div class="tune-row"><label for="rateCtl">每秒攻击 <output id="rateCtlVal">3.3</output></label><input id="rateCtl" data-testid="rate-control" type="range" min="1" max="10" value="3.3" step="0.1"></div>
+            <div class="tune-row"><label for="rangeCtl">攻击射程 <output id="rangeCtlVal">430</output></label><input id="rangeCtl" data-testid="range-control" type="range" min="160" max="520" value="430" step="10"></div>
+            <div class="tune-row"><label for="dropCtl">掉落概率 <output id="dropCtlVal">50%</output></label><input id="dropCtl" data-testid="drop-control" type="range" min="0" max="100" value="50" step="5"></div>
+            <div class="tune-row"><label for="lifeCtl">存在时间 <output id="lifeCtlVal">6.0秒</output></label><input id="lifeCtl" data-testid="life-control" type="range" min="2" max="15" value="6" step="0.5"></div>
+            <div class="tune-row"><label for="speedCtl">追求者速度 <output id="speedCtlVal">100%</output></label><input id="speedCtl" data-testid="speed-control" type="range" min="40" max="180" value="100" step="10"></div>
+          </div>
+          <p class="tune-note">参数修改即时生效；卡牌强化会叠加在基础伤害与射速之上。</p>
+          <button class="btn" id="resetTunerBtn">恢复默认参数</button>
+        </section>
+        <section class="panel guide">
+          <h3>验证重点</h3>
+          <ol><li>360°来袭是否形成清晰而紧张的战场观察？</li><li>点击限时心意是否带来合理的注意力取舍？</li><li>自动合成与三栏换装是否形成构筑策略？</li></ol>
+        </section>
+      </aside>
+    </section>
+  </main>
+
+  <div class="modal" id="levelModal">
+    <div class="modal-card"><h2>经验升级</h2><p>选择一个即时强化，然后继续战斗。</p><div class="choices">
+      <button class="choice" data-perk="damage"><b>高能弹芯</b>基础伤害 +20%</button>
+      <button class="choice" data-perk="rate"><b>过载供能</b>射速 +15%</button>
+      <button class="choice" data-perk="repair"><b>重整心防</b>私人空间恢复 20 点</button>
+    </div></div>
+  </div>
+  <div class="modal" id="resultModal">
+    <div class="modal-card"><h2 id="resultTitle">防守完成</h2><p id="resultDesc"></p><div class="result-grid">
+      <div class="stat"><span>击杀</span><strong id="resultKills">0</strong></div>
+      <div class="stat"><span>合成</span><strong id="resultMerges">0</strong></div>
+      <div class="stat"><span>装配</span><strong id="resultUses">0</strong></div>
+    </div><button class="btn primary" id="restartBtn">再来一局</button></div>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

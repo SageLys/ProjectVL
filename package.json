@@ -1,0 +1,22 @@
+{
+  "name": "projectvl",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "description": "魅魔心防战 · 360° 塔防可玩原型（Vite + TypeScript + Canvas 2D）",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10",
+    "vitest": "^2.1.5"
+  },
+  "allowScripts": {
+    "esbuild@0.21.5": true
+  }
+}
