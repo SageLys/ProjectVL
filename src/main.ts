@@ -7,7 +7,7 @@ import { createInitialState, createDefaultConfig } from './core/createInitialSta
 import { updateGame } from './core/updateGame';
 import { startNextWave } from './core/systems/waveSystem';
 import { moveOrSwap, quickEquip, quickUnequip } from './core/systems/equipmentSystem';
-import { collectNearest, spawnTestDrops } from './core/systems/dropSystem';
+import { collectNearest, spawnTestDrops, spawnGroundDrop } from './core/systems/dropSystem';
 import { applyPerk } from './core/systems/progressionSystem';
 import { createRenderer } from './render/canvasRenderer';
 import { getDomRefs } from './ui/domRefs';
@@ -23,6 +23,7 @@ import type { SlotHandlers } from './ui/slotFactory';
 import { createPointerDrag } from './input/pointerDrag';
 import { createDropClick } from './input/dropClick';
 import { createKeyboard } from './input/keyboard';
+import { exposeDebugApi } from './debug/exposeDebugApi';
 
 const rng: () => number = Math.random;
 const refs = getDomRefs();
@@ -127,6 +128,17 @@ function loop(now: number): void {
   render(state, config);
   requestAnimationFrame(loop);
 }
+
+// 调试接口（仅 DEV 注入）：供控制台与浏览器自动化驱动。
+exposeDebugApi({
+  getState: () => ({ ...state, enemies: state.enemies.length, bullets: state.bullets.length, config: { ...config } }),
+  start,
+  reset,
+  spawnGroundDrop: (x, y, type = null) => spawnGroundDrop(state, config, rng, x, y, type),
+  addTestPair: () => dispatch(spawnTestDrops(state, config, rng)),
+  moveOrSwap: (source, index, targetKind, targetIndex) => dispatch(moveOrSwap(state, source, index, targetKind, targetIndex)),
+  setConfig: patch => { Object.assign(config, patch); tuner.syncInputs(); renderHud(refs, state, config); },
+});
 
 tuner.syncInputs();
 reset();
