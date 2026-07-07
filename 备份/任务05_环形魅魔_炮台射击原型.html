@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>炮台射击｜可玩原型</title>
+  <style>
+    :root {
+      --bg: #07101f;
+      --panel: rgba(13, 25, 45, .92);
+      --line: rgba(126, 231, 255, .18);
+      --cyan: #67e8f9;
+      --gold: #ffd166;
+      --red: #ff6b6b;
+      --text: #e8f2ff;
+      --muted: #8ea4bd;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: radial-gradient(circle at 50% 0, #112742 0, var(--bg) 48%, #040913 100%); color: var(--text); font-family: Inter, "Microsoft YaHei", system-ui, sans-serif; }
+    body { display: grid; place-items: center; padding: 16px; overflow-x: hidden; }
+    button { font: inherit; }
+    .app { width: min(1180px, 100%); }
+    .topbar { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin: 0 0 12px; }
+    .brand small { display: block; color: var(--cyan); letter-spacing: .18em; font-weight: 800; font-size: 11px; }
+    .brand h1 { margin: 4px 0 0; font-size: clamp(22px, 4vw, 34px); letter-spacing: -.04em; }
+    .status { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+    .pill { padding: 7px 10px; border: 1px solid var(--line); border-radius: 999px; background: rgba(10, 23, 41, .75); color: var(--muted); font-size: 13px; }
+    .pill strong { color: var(--text); }
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 12px; }
+    .arena-wrap { position: relative; align-self: start; overflow: hidden; padding-bottom: 116px; border: 1px solid var(--line); border-radius: 18px; background: #06101d; box-shadow: 0 24px 70px rgba(0,0,0,.38); }
+    canvas { display: block; width: 100%; aspect-ratio: 16 / 10; touch-action: none; cursor: pointer; }
+    .hud { position: absolute; z-index: 4; inset: 14px 14px auto; display: flex; justify-content: space-between; gap: 10px; pointer-events: none; }
+    .hud-box { min-width: 126px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 12px; background: rgba(5, 13, 25, .74); backdrop-filter: blur(8px); }
+    .label { color: var(--muted); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
+    .value { margin-top: 3px; font-size: 19px; font-weight: 900; }
+    .bar { height: 7px; margin-top: 7px; overflow: hidden; border-radius: 99px; background: rgba(255,255,255,.08); }
+    .bar i { display: block; width: 100%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #ff5263, #ffb86b); transition: width .2s; }
+    .xp i { background: linear-gradient(90deg, #37d5ff, #8d79ff); }
+    .center-msg { position: absolute; z-index: 4; left: 50%; top: 46%; transform: translate(-50%, -50%); width: min(520px, 88%); text-align: center; pointer-events: none; text-shadow: 0 2px 16px #000; }
+    .center-msg h2 { margin: 0; font-size: clamp(24px, 5vw, 46px); }
+    .center-msg p { margin: 8px 0 0; color: #c7d7e9; }
+    .toast { position: absolute; z-index: 5; left: 50%; bottom: 126px; translate: -50% 8px; opacity: 0; padding: 8px 13px; border: 1px solid var(--line); border-radius: 99px; background: rgba(4,12,23,.9); color: var(--text); font-size: 13px; transition: .2s; pointer-events: none; white-space: nowrap; }
+    .toast.show { opacity: 1; translate: -50% 0; }
+    .cards-area { position: absolute; z-index: 5; inset: auto 12px 12px; min-height: 98px; padding: 10px; border: 1px solid var(--line); border-radius: 14px; background: rgba(5,13,24,.88); backdrop-filter: blur(8px); }
+    .cards-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 7px; }
+    .cards-head span { color: var(--muted); font-size: 12px; }
+    .drop-telemetry { margin: -2px 0 7px; color: var(--muted); font-size: 10px; text-align: right; }
+    .cards { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 7px; }
+    .card-slot { min-width: 0; height: 58px; display: grid; place-items: center; border: 1px dashed rgba(142,164,189,.23); border-radius: 10px; color: rgba(142,164,189,.35); font-size: 18px; }
+    .card { position: relative; width: 100%; height: 58px; padding: 6px; display: grid; place-items: center; border: 1px solid color-mix(in srgb, var(--card) 55%, white 5%); border-radius: 10px; background: linear-gradient(145deg, color-mix(in srgb, var(--card) 25%, #0b1524), #09111e 68%); color: white; cursor: grab; user-select: none; transition: transform .12s, border-color .12s, box-shadow .12s; }
+    .card:hover { transform: translateY(-2px); }
+    .card.selected { border-color: white; box-shadow: 0 0 0 2px var(--card), 0 0 20px color-mix(in srgb, var(--card) 45%, transparent); }
+    .card b { font-size: 12px; }
+    .card em { color: var(--gold); font-size: 10px; font-style: normal; letter-spacing: -1px; }
+    .card small { color: #cfe0f2; font-size: 9px; }
+    .side { display: flex; flex-direction: column; gap: 12px; }
+    .panel { padding: 15px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); box-shadow: 0 16px 45px rgba(0,0,0,.22); }
+    .panel h3 { margin: 0 0 10px; font-size: 14px; }
+    .panel p { margin: 7px 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .dropzone { padding: 14px; border: 1px dashed rgba(103,232,249,.45); border-radius: 12px; background: rgba(103,232,249,.05); text-align: center; transition: .15s; }
+    .dropzone.hot { border-color: white; background: rgba(103,232,249,.14); transform: scale(1.02); }
+    .dropzone .turret-icon { font-size: 30px; }
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .stat { padding: 9px; border-radius: 10px; background: rgba(255,255,255,.04); }
+    .stat span { display: block; color: var(--muted); font-size: 10px; }
+    .stat strong { display: block; margin-top: 3px; font-size: 15px; }
+    .actions { display: flex; gap: 6px; margin: 10px 0; }
+    .action-dot { width: 22px; height: 8px; border-radius: 99px; background: rgba(255,255,255,.08); }
+    .action-dot.on { background: var(--gold); box-shadow: 0 0 14px rgba(255,209,102,.52); }
+    .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .btn { padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.055); color: var(--text); cursor: pointer; }
+    .btn:hover { border-color: var(--cyan); }
+    .btn.primary { background: linear-gradient(135deg, #1d91b5, #5a5de6); border-color: transparent; font-weight: 800; }
+    .guide ol { margin: 8px 0 0; padding-left: 20px; color: var(--muted); font-size: 12px; line-height: 1.7; }
+    .tuner { display: grid; gap: 12px; }
+    .tune-row label { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 5px; color: var(--muted); font-size: 11px; }
+    .tune-row output { color: var(--cyan); font-weight: 900; }
+    .tune-row input { width: 100%; accent-color: #55dff4; cursor: ew-resize; }
+    .tune-note { margin-top: 0 !important; padding: 8px 9px; border-radius: 9px; background: rgba(103,232,249,.05); }
+    .modal { position: fixed; inset: 0; z-index: 20; display: none; place-items: center; padding: 18px; background: rgba(2,7,15,.8); backdrop-filter: blur(8px); }
+    .modal.show { display: grid; }
+    .modal-card { width: min(680px, 100%); padding: 24px; border: 1px solid var(--line); border-radius: 18px; background: #0b1728; box-shadow: 0 28px 90px #000; }
+    .modal-card h2 { margin: 0 0 6px; }
+    .modal-card > p { margin: 0 0 18px; color: var(--muted); }
+    .choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .choice { min-height: 120px; padding: 14px; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.04); color: var(--text); text-align: left; cursor: pointer; }
+    .choice:hover { border-color: var(--cyan); transform: translateY(-2px); }
+    .choice b { display: block; margin-bottom: 7px; color: var(--cyan); }
+    .result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px 0; }
+    .result-grid .stat { text-align: center; }
+    @media (max-width: 880px) {
+      body { padding: 8px; }
+      .layout { grid-template-columns: 1fr; }
+      .side { display: grid; grid-template-columns: 1fr 1fr; }
+      .guide { grid-column: 1 / -1; }
+      .cards { grid-template-columns: repeat(7, minmax(44px, 1fr)); overflow-x: auto; }
+    }
+    @media (max-width: 560px) {
+      .topbar { align-items: flex-start; }
+      .status { display: none; }
+      .side { grid-template-columns: 1fr; }
+      .choices { grid-template-columns: 1fr; }
+      .hud-box { min-width: 104px; padding: 7px 8px; }
+      .value { font-size: 15px; }
+      .cards-area { inset: auto 6px 6px; padding: 7px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand"><small>PLAYABLE PROTOTYPE · V0.1</small><h1>炮台射击</h1></div>
+      <div class="status">
+        <div class="pill">目标：<strong>守住 5 波</strong></div>
+        <div class="pill">核心：<strong>自动攻击 → 点击拾取 → 自动合成 → 装配</strong></div>
+      </div>
+    </header>
+    <section class="layout">
+      <div class="arena-wrap" id="arenaWrap">
+        <canvas id="game" width="960" height="600" aria-label="炮台射击游戏区域"></canvas>
+        <div class="hud">
+          <div class="hud-box"><div class="label">基地耐久</div><div class="value"><span id="hpText">100</span> / 100</div><div class="bar"><i id="hpBar"></i></div></div>
+          <div class="hud-box"><div class="label">经验 · Lv.<span id="levelText">1</span></div><div class="value"><span id="xpText">0</span> / <span id="xpNeed">8</span></div><div class="bar xp"><i id="xpBar" style="width:0%"></i></div></div>
+        </div>
+        <div class="center-msg" id="centerMsg"><h2>准备防守</h2><p>炮台会自动攻击，点击地面掉落物完成拾取</p></div>
+        <div class="toast" id="toast"></div>
+        <div class="cards-area">
+          <div class="cards-head"><strong>升级卡槽</strong><span>拾取后同类同星卡自动合成 · 拖到右侧炮台装配</span></div>
+          <div class="drop-telemetry" id="dropTelemetry">地面 0 · 已拾取 0 · 超时 0</div>
+          <div class="cards" id="cards"></div>
+        </div>
+      </div>
+      <aside class="side">
+        <section class="panel">
+          <h3>炮台构筑</h3>
+          <div class="dropzone" id="dropzone"><div class="turret-icon">⌁</div><strong>拖卡到这里装配</strong><p>每次装配消耗 1 次行动<br>高星卡仍只消耗 1 次</p></div>
+          <div class="actions" id="actions"></div>
+          <div class="stats">
+            <div class="stat"><span>伤害</span><strong id="damageStat">16</strong></div>
+            <div class="stat"><span>射速</span><strong id="rateStat">3.3/s</strong></div>
+            <div class="stat"><span>弹丸</span><strong id="multiStat">1</strong></div>
+            <div class="stat"><span>波次</span><strong><span id="waveText">0</span> / 5</strong></div>
+          </div>
+        </section>
+        <section class="panel">
+          <h3>战斗控制</h3>
+          <div class="controls"><button class="btn primary" id="startBtn">开始游戏</button><button class="btn" id="pauseBtn">暂停</button><button class="btn" id="testCardBtn">生成测试掉落</button></div>
+          <p>炮台：自动锁定射程内最近敌人<br>战场：点击有倒计时的掉落物拾取<br>卡槽：自动合成；双击卡牌可快速装配</p>
+        </section>
+        <section class="panel">
+          <h3>实时参数控制</h3>
+          <div class="tuner">
+            <div class="tune-row"><label for="damageCtl">基础伤害 <output id="damageCtlVal">16</output></label><input id="damageCtl" data-testid="damage-control" type="range" min="6" max="40" value="16" step="1"></div>
+            <div class="tune-row"><label for="rateCtl">每秒攻击 <output id="rateCtlVal">3.3</output></label><input id="rateCtl" data-testid="rate-control" type="range" min="1" max="10" value="3.3" step="0.1"></div>
+            <div class="tune-row"><label for="rangeCtl">攻击射程 <output id="rangeCtlVal">430</output></label><input id="rangeCtl" data-testid="range-control" type="range" min="160" max="520" value="430" step="10"></div>
+            <div class="tune-row"><label for="dropCtl">掉落概率 <output id="dropCtlVal">50%</output></label><input id="dropCtl" data-testid="drop-control" type="range" min="0" max="100" value="50" step="5"></div>
+            <div class="tune-row"><label for="lifeCtl">存在时间 <output id="lifeCtlVal">6.0秒</output></label><input id="lifeCtl" data-testid="life-control" type="range" min="2" max="15" value="6" step="0.5"></div>
+            <div class="tune-row"><label for="speedCtl">敌人速度 <output id="speedCtlVal">100%</output></label><input id="speedCtl" data-testid="speed-control" type="range" min="40" max="180" value="100" step="10"></div>
+          </div>
+          <p class="tune-note">参数修改即时生效；卡牌强化会叠加在基础伤害与射速之上。</p>
+          <button class="btn" id="resetTunerBtn">恢复默认参数</button>
+        </section>
+        <section class="panel guide">
+          <h3>验证重点</h3>
+          <ol><li>射击与处理敌潮是否有即时乐趣？</li><li>要不要立即用卡，还是等两张合成？</li><li>有限行动有没有形成策略，而非单纯卡手？</li></ol>
+        </section>
+      </aside>
+    </section>
+  </main>
+
+  <div class="modal" id="levelModal">
+    <div class="modal-card"><h2>经验升级</h2><p>选择一个即时强化，然后继续战斗。</p><div class="choices">
+      <button class="choice" data-perk="damage"><b>高能弹芯</b>基础伤害 +20%</button>
+      <button class="choice" data-perk="rate"><b>过载供能</b>射速 +15%</button>
+      <button class="choice" data-perk="repair"><b>应急维修</b>基地恢复 20 点耐久</button>
+    </div></div>
+  </div>
+  <div class="modal" id="resultModal">
+    <div class="modal-card"><h2 id="resultTitle">防守完成</h2><p id="resultDesc"></p><div class="result-grid">
+      <div class="stat"><span>击杀</span><strong id="resultKills">0</strong></div>
+      <div class="stat"><span>合成</span><strong id="resultMerges">0</strong></div>
+      <div class="stat"><span>装配</span><strong id="resultUses">0</strong></div>
+    </div><button class="btn primary" id="restartBtn">再来一局</button></div>
+  </div>
+
+  <script>
+    (() => {
+      'use strict';
+      const canvas = document.querySelector('#game');
+      const ctx = canvas.getContext('2d');
+      const $ = s => document.querySelector(s);
+      const ui = {
+        hpText: $('#hpText'), hpBar: $('#hpBar'), xpText: $('#xpText'), xpNeed: $('#xpNeed'), xpBar: $('#xpBar'), levelText: $('#levelText'),
+        waveText: $('#waveText'), damageStat: $('#damageStat'), rateStat: $('#rateStat'), multiStat: $('#multiStat'), cards: $('#cards'), actions: $('#actions'),
+        centerMsg: $('#centerMsg'), toast: $('#toast'), startBtn: $('#startBtn'), pauseBtn: $('#pauseBtn'), dropzone: $('#dropzone'),
+        levelModal: $('#levelModal'), resultModal: $('#resultModal'), resultTitle: $('#resultTitle'), resultDesc: $('#resultDesc'),
+        resultKills: $('#resultKills'), resultMerges: $('#resultMerges'), resultUses: $('#resultUses'), dropTelemetry: $('#dropTelemetry'),
+        damageCtl: $('#damageCtl'), damageCtlVal: $('#damageCtlVal'), rateCtl: $('#rateCtl'), rateCtlVal: $('#rateCtlVal'),
+        rangeCtl: $('#rangeCtl'), rangeCtlVal: $('#rangeCtlVal'), dropCtl: $('#dropCtl'), dropCtlVal: $('#dropCtlVal'),
+        lifeCtl: $('#lifeCtl'), lifeCtlVal: $('#lifeCtlVal'), speedCtl: $('#speedCtl'), speedCtlVal: $('#speedCtlVal'), resetTunerBtn: $('#resetTunerBtn')
+      };
+
+      const CARD_TYPES = {
+        damage: { name: '火力', color: '#ff6577', icon: '◆', desc: '伤害' },
+        rate: { name: '供能', color: '#4de2ff', icon: 'ϟ', desc: '射速' },
+        multi: { name: '分裂', color: '#b784ff', icon: '✦', desc: '弹丸' }
+      };
+      const TAU = Math.PI * 2;
+      const DEFAULT_CONFIG = { damage: 16, fireRate: 3.3, range: 430, dropChance: .5, dropLifetime: 6, enemySpeed: 1 };
+      const config = { ...DEFAULT_CONFIG };
+      let state, raf = 0, last = performance.now(), toastTimer = 0;
+
+      function reset() {
+        state = {
+          mode: 'ready', paused: false, time: 0, hp: 100, maxHp: 100, wave: 0, waveTime: 0, between: 0,
+          enemies: [], bullets: [], particles: [], groundDrops: [], cards: [], nextCardId: 1, nextDropId: 1,
+          spawnLeft: 0, spawnTimer: 0, waveClearPending: false,
+          damageBonus: 0, fireRateBonus: 0, multi: 1, shotCd: 0, turretAngle: -Math.PI/2, actions: 3, maxActions: 3,
+          xp: 0, xpNeed: 8, level: 1, kills: 0, merges: 0, uses: 0, collected: 0, expired: 0
+        };
+        ui.resultModal.classList.remove('show');
+        ui.levelModal.classList.remove('show');
+        ui.startBtn.textContent = '开始游戏';
+        ui.pauseBtn.textContent = '暂停';
+        message('准备防守', '炮台会自动攻击，点击地面掉落物完成拾取', true);
+        renderCards(); updateUI();
+      }
+
+      function start() {
+        if (state.mode === 'ended') reset();
+        if (state.mode === 'ready') {
+          state.mode = 'playing';
+          nextWave();
+          ui.startBtn.textContent = '重新开始';
+          message('', '', false);
+        } else {
+          reset();
+          state.mode = 'playing';
+          nextWave();
+          ui.startBtn.textContent = '重新开始';
+          message('', '', false);
+        }
+      }
+
+      function nextWave() {
+        state.wave++;
+        state.actions = state.maxActions;
+        state.spawnLeft = 5 + state.wave * 3;
+        state.spawnTimer = .4;
+        state.waveClearPending = false;
+        state.between = 0;
+        toast(`第 ${state.wave} 波 · 行动次数已恢复`);
+        updateUI();
+      }
+
+      function spawnEnemy() {
+        const roll = Math.random();
+        let type = roll < .2 + state.wave * .025 ? 'tank' : roll < .47 ? 'fast' : 'normal';
+        if (state.wave === 5 && state.spawnLeft === 1) type = 'boss';
+        const data = {
+          normal: { hp: 38 + state.wave * 7, speed: 24 + state.wave * 1.5, r: 16, color: '#f3b95f', damage: 8, xp: 1 },
+          fast: { hp: 23 + state.wave * 5, speed: 42 + state.wave * 2, r: 12, color: '#62d8ff', damage: 6, xp: 1 },
+          tank: { hp: 90 + state.wave * 13, speed: 15 + state.wave * .8, r: 22, color: '#ff7b86', damage: 14, xp: 2 },
+          boss: { hp: 420, speed: 12, r: 35, color: '#c58aff', damage: 28, xp: 5 }
+        }[type];
+        state.enemies.push({ x: 70 + Math.random() * 820, y: -45, type, hp: data.hp, maxHp: data.hp, ...data, hit: 0 });
+      }
+
+      function totalDamage() { return config.damage + state.damageBonus; }
+      function totalFireRate() { return config.fireRate + state.fireRateBonus; }
+
+      function findTarget() {
+        let best = null, bestDist = Infinity;
+        for (const enemy of state.enemies) {
+          const dist = Math.hypot(enemy.x - 480, enemy.y - 482);
+          if (dist <= config.range && dist < bestDist) { best = enemy; bestDist = dist; }
+        }
+        return best;
+      }
+
+      function shoot(target) {
+        const tx = 480, ty = 482;
+        const a = Math.atan2(target.y - ty, target.x - tx);
+        state.turretAngle = a;
+        const spread = .12;
+        for (let i = 0; i < state.multi; i++) {
+          const offset = (i - (state.multi - 1) / 2) * spread;
+          state.bullets.push({ x: tx + Math.cos(a) * 24, y: ty + Math.sin(a) * 24, vx: Math.cos(a + offset) * 620, vy: Math.sin(a + offset) * 620, r: 4, life: 1.25, damage: totalDamage() });
+        }
+        for (let i = 0; i < 4; i++) particle(tx + Math.cos(a)*26, ty + Math.sin(a)*26, '#8cecff', 55);
+      }
+
+      function particle(x, y, color, speed = 80) {
+        const a = Math.random() * TAU, s = Math.random() * speed;
+        state.particles.push({ x, y, vx: Math.cos(a)*s, vy: Math.sin(a)*s, life: .25 + Math.random()*.35, max: .6, color, size: 2 + Math.random()*3 });
+      }
+
+      function killEnemy(enemy) {
+        state.kills++;
+        state.xp += enemy.xp;
+        for (let i = 0; i < 12; i++) particle(enemy.x, enemy.y, enemy.color, 150);
+        if (Math.random() < config.dropChance || enemy.type === 'boss') spawnGroundDrop(enemy.x, enemy.y);
+        if (state.xp >= state.xpNeed) levelUp();
+      }
+
+      function spawnGroundDrop(x, y, forcedType = null) {
+        const keys = Object.keys(CARD_TYPES);
+        const type = forcedType || keys[Math.floor(Math.random()*keys.length)];
+        state.groundDrops.push({ id: state.nextDropId++, x, y, type, star: 1, life: config.dropLifetime, maxLife: config.dropLifetime, pulse: Math.random()*TAU });
+      }
+
+      function addTestPair() {
+        const type = Object.keys(CARD_TYPES)[state.merges % 3];
+        spawnGroundDrop(410, 345, type);
+        spawnGroundDrop(550, 345, type);
+        toast(`地面生成两份${CARD_TYPES[type].name}测试掉落`);
+      }
+
+      function collectDrop(drop) {
+        if (state.cards.length >= 7) { toast('卡槽已满：先装配卡牌再拾取'); return; }
+        state.groundDrops = state.groundDrops.filter(d => d.id !== drop.id);
+        state.cards.push({ id: state.nextCardId++, type: drop.type, star: drop.star });
+        state.collected++;
+        const merged = autoMergeCards();
+        toast(merged ? `拾取成功 · 自动合成 ${merged} 次` : `拾取 ${CARD_TYPES[drop.type].name}卡`);
+        renderCards();
+      }
+
+      function autoMergeCards() {
+        let merged = 0, changed = true;
+        while (changed) {
+          changed = false;
+          outer: for (let i = 0; i < state.cards.length; i++) {
+            const a = state.cards[i];
+            if (a.star >= 3) continue;
+            for (let j = i + 1; j < state.cards.length; j++) {
+              const b = state.cards[j];
+              if (a.type === b.type && a.star === b.star) {
+                state.cards.splice(j, 1);
+                state.cards.splice(i, 1);
+                state.cards.push({ id: state.nextCardId++, type: a.type, star: a.star + 1 });
+                state.merges++; merged++; changed = true;
+                break outer;
+              }
+            }
+          }
+        }
+        return merged;
+      }
+
+      function levelUp() {
+        state.xp -= state.xpNeed;
+        state.level++;
+        state.xpNeed = Math.round(state.xpNeed * 1.35);
+        state.paused = true;
+        ui.levelModal.classList.add('show');
+        updateUI();
+      }
+
+      function useCard(id) {
+        const card = state.cards.find(c => c.id === id);
+        if (!card) return;
+        if (state.actions <= 0) { toast('本波行动次数已用完'); return; }
+        const scale = [0, 1, 2.25, 4][card.star];
+        if (card.type === 'damage') state.damageBonus += 5 * scale;
+        if (card.type === 'rate') state.fireRateBonus += .38 * scale;
+        if (card.type === 'multi') {
+          if (card.star >= 2 && state.multi < 5) state.multi++;
+          else state.damageBonus += 2.5 * scale;
+        }
+        state.actions--; state.uses++;
+        state.cards = state.cards.filter(c => c.id !== id);
+        toast(`装配 ${card.star} 星${CARD_TYPES[card.type].name} · 消耗 1 行动`);
+        renderCards(); updateUI();
+      }
+
+      function renderCards() {
+        ui.cards.innerHTML = '';
+        for (let i = 0; i < 7; i++) {
+          const card = state.cards[i];
+          if (!card) { const slot = document.createElement('div'); slot.className = 'card-slot'; slot.textContent = '+'; ui.cards.append(slot); continue; }
+          const meta = CARD_TYPES[card.type];
+          const el = document.createElement('button');
+          el.type = 'button';
+          el.className = 'card';
+          el.draggable = true; el.dataset.id = card.id; el.dataset.testid = 'upgrade-card'; el.setAttribute('aria-label', `${card.star}星${meta.name}卡`); el.style.setProperty('--card', meta.color);
+          el.innerHTML = `<b>${meta.icon} ${meta.name}</b><em>${'★'.repeat(card.star)}</em><small>${meta.desc}强化</small>`;
+          el.addEventListener('dblclick', e => { e.preventDefault(); useCard(card.id); });
+          el.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', card.id); e.dataTransfer.effectAllowed = 'move'; });
+          ui.cards.append(el);
+        }
+      }
+
+      function update(dt) {
+        if (state.mode !== 'playing' || state.paused) return;
+        state.time += dt;
+        state.shotCd -= dt;
+        const target = findTarget();
+        if (target) state.turretAngle = Math.atan2(target.y - 482, target.x - 480);
+        if (target && state.shotCd <= 0) { shoot(target); state.shotCd = 1 / totalFireRate(); }
+
+        if (state.spawnLeft > 0) {
+          state.spawnTimer -= dt;
+          if (state.spawnTimer <= 0) { spawnEnemy(); state.spawnLeft--; state.spawnTimer = Math.max(.28, .72 - state.wave*.05); }
+        }
+
+        for (let i = state.bullets.length - 1; i >= 0; i--) {
+          const b = state.bullets[i]; b.x += b.vx*dt; b.y += b.vy*dt; b.life -= dt;
+          let hit = false;
+          for (let j = state.enemies.length - 1; j >= 0; j--) {
+            const e = state.enemies[j];
+            if ((b.x-e.x)**2 + (b.y-e.y)**2 < (b.r+e.r)**2) {
+              e.hp -= b.damage; e.hit = .08; hit = true; particle(b.x,b.y,'#d8fbff',50);
+              if (e.hp <= 0) { state.enemies.splice(j,1); killEnemy(e); }
+              break;
+            }
+          }
+          if (hit || b.life <= 0 || b.x < -20 || b.x > 980 || b.y < -20 || b.y > 620) state.bullets.splice(i,1);
+        }
+
+        for (let i = state.enemies.length - 1; i >= 0; i--) {
+          const e = state.enemies[i];
+          const dx = 480-e.x, dy = 500-e.y, len = Math.hypot(dx,dy) || 1;
+          e.x += dx/len*e.speed*config.enemySpeed*dt; e.y += dy/len*e.speed*config.enemySpeed*dt; e.hit -= dt;
+          if (Math.hypot(dx,dy) < 55) {
+            state.hp -= e.damage; state.enemies.splice(i,1);
+            for (let k=0;k<10;k++) particle(480,490,'#ff6677',170);
+            toast(`基地受损 -${e.damage}`);
+            if (state.hp <= 0) end(false);
+          }
+        }
+
+        for (let i = state.groundDrops.length - 1; i >= 0; i--) {
+          const drop = state.groundDrops[i];
+          drop.life -= dt; drop.pulse += dt * 3;
+          if (drop.life <= 0) { state.groundDrops.splice(i, 1); state.expired++; }
+        }
+
+        for (let i=state.particles.length-1;i>=0;i--) { const p=state.particles[i]; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vx*=.97; p.vy*=.97; p.life-=dt; if(p.life<=0)state.particles.splice(i,1); }
+
+        if (state.spawnLeft === 0 && state.enemies.length === 0 && !state.waveClearPending && state.mode === 'playing') {
+          state.waveClearPending = true;
+          if (state.wave >= 5) end(true);
+          else { state.between = 2.4; toast(`第 ${state.wave} 波完成 · 整理卡槽`); }
+        }
+        if (state.between > 0) { state.between -= dt; if (state.between <= 0) nextWave(); }
+        updateUI();
+      }
+
+      function end(win) {
+        state.mode = 'ended'; state.paused = true;
+        ui.resultTitle.textContent = win ? '防守完成' : '基地失守';
+        ui.resultDesc.textContent = win ? `你完成了自动攻击、手动拾取与自动合成循环。本局拾取 ${state.collected} 个，错过 ${state.expired} 个掉落。` : `本轮结束。本局拾取 ${state.collected} 个、错过 ${state.expired} 个掉落；观察注意力是否能兼顾战场和卡槽。`;
+        ui.resultKills.textContent = state.kills; ui.resultMerges.textContent = state.merges; ui.resultUses.textContent = state.uses;
+        ui.resultModal.classList.add('show');
+      }
+
+      function updateUI() {
+        ui.hpText.textContent = Math.max(0, Math.round(state.hp)); ui.hpBar.style.width = `${Math.max(0,state.hp/state.maxHp*100)}%`;
+        ui.xpText.textContent = state.xp; ui.xpNeed.textContent = state.xpNeed; ui.xpBar.style.width = `${state.xp/state.xpNeed*100}%`; ui.levelText.textContent = state.level;
+        ui.waveText.textContent = state.wave; ui.damageStat.textContent = Math.round(totalDamage()); ui.rateStat.textContent = `${totalFireRate().toFixed(1)}/s`; ui.multiStat.textContent = state.multi;
+        ui.damageCtlVal.textContent = config.damage.toFixed(0); ui.rateCtlVal.textContent = config.fireRate.toFixed(1); ui.rangeCtlVal.textContent = config.range.toFixed(0);
+        ui.dropCtlVal.textContent = `${Math.round(config.dropChance*100)}%`; ui.lifeCtlVal.textContent = `${config.dropLifetime.toFixed(1)}秒`; ui.speedCtlVal.textContent = `${Math.round(config.enemySpeed*100)}%`;
+        ui.dropTelemetry.textContent = `地面 ${state.groundDrops.length} · 已拾取 ${state.collected} · 超时 ${state.expired}`;
+        ui.actions.innerHTML = ''; for(let i=0;i<state.maxActions;i++){const d=document.createElement('i');d.className='action-dot'+(i<state.actions?' on':'');ui.actions.append(d);}
+      }
+
+      function message(title, body, show) { ui.centerMsg.innerHTML = `<h2>${title}</h2><p>${body}</p>`; ui.centerMsg.style.display = show ? 'block' : 'none'; }
+      function toast(text) { ui.toast.textContent = text; ui.toast.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>ui.toast.classList.remove('show'),1500); }
+
+      function drawGrid() {
+        ctx.fillStyle='#06101d';ctx.fillRect(0,0,960,600);
+        const g=ctx.createLinearGradient(0,0,0,600);g.addColorStop(0,'rgba(29,79,112,.18)');g.addColorStop(1,'rgba(3,9,18,.05)');ctx.fillStyle=g;ctx.fillRect(0,0,960,600);
+        ctx.strokeStyle='rgba(103,232,249,.055)';ctx.lineWidth=1;
+        for(let x=0;x<960;x+=48){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,600);ctx.stroke();}
+        for(let y=0;y<600;y+=48){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(960,y);ctx.stroke();}
+        ctx.strokeStyle='rgba(255,100,110,.18)';ctx.beginPath();ctx.arc(480,500,64,Math.PI,TAU);ctx.stroke();
+        ctx.save();ctx.setLineDash([7,9]);ctx.strokeStyle='rgba(103,232,249,.13)';ctx.beginPath();ctx.arc(480,482,config.range,0,TAU);ctx.stroke();ctx.restore();
+      }
+
+      function draw() {
+        drawGrid();
+        for (const p of state.particles) { ctx.globalAlpha=Math.max(0,p.life/p.max);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,TAU);ctx.fill(); } ctx.globalAlpha=1;
+        for (const b of state.bullets) { ctx.shadowBlur=14;ctx.shadowColor='#70ecff';ctx.fillStyle='#c7f8ff';ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,TAU);ctx.fill(); } ctx.shadowBlur=0;
+        for (const e of state.enemies) {
+          ctx.save();ctx.translate(e.x,e.y);if(e.hit>0)ctx.globalAlpha=.55;ctx.shadowBlur=18;ctx.shadowColor=e.color;ctx.fillStyle=e.color;ctx.beginPath();
+          const sides=e.type==='fast'?3:e.type==='tank'?6:e.type==='boss'?8:4;
+          for(let i=0;i<sides;i++){const a=-Math.PI/2+i*TAU/sides;const r=e.r*(i%2?0.82:1);const x=Math.cos(a)*r,y=Math.sin(a)*r;i?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.closePath();ctx.fill();ctx.shadowBlur=0;
+          ctx.fillStyle='rgba(2,8,17,.86)';ctx.beginPath();ctx.arc(0,0,e.r*.38,0,TAU);ctx.fill();ctx.restore();
+          ctx.fillStyle='rgba(255,255,255,.12)';ctx.fillRect(e.x-e.r,e.y-e.r-9,e.r*2,4);ctx.fillStyle=e.color;ctx.fillRect(e.x-e.r,e.y-e.r-9,e.r*2*Math.max(0,e.hp/e.maxHp),4);
+        }
+        for (const drop of state.groundDrops) {
+          const meta = CARD_TYPES[drop.type], ratio = Math.max(0, drop.life / drop.maxLife), bob = Math.sin(drop.pulse) * 3;
+          ctx.save();ctx.translate(drop.x,drop.y+bob);ctx.shadowBlur=18;ctx.shadowColor=meta.color;ctx.fillStyle='rgba(5,13,24,.92)';ctx.strokeStyle=meta.color;ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,20,0,TAU);ctx.fill();ctx.stroke();ctx.shadowBlur=0;
+          ctx.fillStyle=meta.color;ctx.font='bold 17px Microsoft YaHei';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(meta.icon,0,0);
+          ctx.strokeStyle='rgba(255,255,255,.2)';ctx.lineWidth=4;ctx.beginPath();ctx.arc(0,0,27,-Math.PI/2,TAU-Math.PI/2);ctx.stroke();ctx.strokeStyle=ratio>.35?'#67e8f9':'#ff6b6b';ctx.beginPath();ctx.arc(0,0,27,-Math.PI/2,-Math.PI/2+TAU*ratio);ctx.stroke();
+          ctx.fillStyle='#e8f2ff';ctx.font='bold 10px Microsoft YaHei';ctx.fillText(`${drop.life.toFixed(1)}s`,0,36);ctx.restore();
+        }
+        const a=state.turretAngle;
+        ctx.save();ctx.translate(480,500);ctx.fillStyle='#152d45';ctx.strokeStyle='#68e8fa';ctx.lineWidth=3;ctx.shadowBlur=18;ctx.shadowColor='rgba(103,232,249,.55)';ctx.beginPath();ctx.arc(0,0,32,0,TAU);ctx.fill();ctx.stroke();
+        ctx.rotate(a);ctx.fillStyle='#68e8fa';ctx.fillRect(3,-7,42,14);ctx.fillStyle='#d9fbff';ctx.fillRect(34,-4,18,8);ctx.restore();ctx.shadowBlur=0;
+      }
+
+      function loop(now) { const dt=Math.min(.033,(now-last)/1000);last=now;update(dt);draw();raf=requestAnimationFrame(loop); }
+      function canvasPoint(e) { const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)/r.width*canvas.width,y:(e.clientY-r.top)/r.height*canvas.height}; }
+      canvas.addEventListener('pointerdown', e=>{const p=canvasPoint(e);let nearest=null,best=Infinity;for(const drop of state.groundDrops){const d=Math.hypot(drop.x-p.x,drop.y-p.y);if(d<34&&d<best){nearest=drop;best=d;}}if(nearest)collectDrop(nearest);});
+      addEventListener('keydown',e=>{if(e.code==='KeyP') togglePause();});
+      ui.startBtn.addEventListener('click',start); ui.pauseBtn.addEventListener('click',togglePause); $('#testCardBtn').addEventListener('click',addTestPair); $('#restartBtn').addEventListener('click',()=>{reset();start();});
+      function togglePause(){if(state.mode!=='playing')return;state.paused=!state.paused;ui.pauseBtn.textContent=state.paused?'继续':'暂停';message(state.paused?'已暂停':'','按 P 或按钮继续',state.paused);}
+      ui.dropzone.addEventListener('dragover',e=>{e.preventDefault();ui.dropzone.classList.add('hot');}); ui.dropzone.addEventListener('dragleave',()=>ui.dropzone.classList.remove('hot'));
+      ui.dropzone.addEventListener('drop',e=>{e.preventDefault();ui.dropzone.classList.remove('hot');useCard(Number(e.dataTransfer.getData('text/plain')));});
+      function syncTunerInputs() {
+        ui.damageCtl.value=config.damage;ui.rateCtl.value=config.fireRate;ui.rangeCtl.value=config.range;ui.dropCtl.value=config.dropChance*100;ui.lifeCtl.value=config.dropLifetime;ui.speedCtl.value=config.enemySpeed*100;updateUI();
+      }
+      ui.damageCtl.addEventListener('input',()=>{config.damage=Number(ui.damageCtl.value);updateUI();});
+      ui.rateCtl.addEventListener('input',()=>{config.fireRate=Number(ui.rateCtl.value);updateUI();});
+      ui.rangeCtl.addEventListener('input',()=>{config.range=Number(ui.rangeCtl.value);updateUI();});
+      ui.dropCtl.addEventListener('input',()=>{config.dropChance=Number(ui.dropCtl.value)/100;updateUI();});
+      ui.lifeCtl.addEventListener('input',()=>{config.dropLifetime=Number(ui.lifeCtl.value);updateUI();});
+      ui.speedCtl.addEventListener('input',()=>{config.enemySpeed=Number(ui.speedCtl.value)/100;updateUI();});
+      ui.resetTunerBtn.addEventListener('click',()=>{Object.assign(config,DEFAULT_CONFIG);syncTunerInputs();toast('已恢复默认参数');});
+      document.querySelectorAll('[data-perk]').forEach(btn=>btn.addEventListener('click',()=>{const perk=btn.dataset.perk;if(perk==='damage')state.damageBonus+=totalDamage()*.2;if(perk==='rate')state.fireRateBonus+=totalFireRate()*.15;if(perk==='repair')state.hp=Math.min(state.maxHp,state.hp+20);state.paused=false;ui.levelModal.classList.remove('show');toast(btn.querySelector('b').textContent+' 已生效');updateUI();}));
+      reset(); raf=requestAnimationFrame(loop);
+      window.__game = { getState: () => ({...state, enemies: state.enemies.length, bullets: state.bullets.length, config:{...config}}), start, reset, spawnGroundDrop, addTestPair, useCard };
+    })();
+  </script>
+</body>
+</html>

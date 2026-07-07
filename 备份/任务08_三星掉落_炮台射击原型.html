@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>魅魔心防战｜可玩原型</title>
+  <style>
+    :root {
+      --bg: #07101f;
+      --panel: rgba(13, 25, 45, .92);
+      --line: rgba(126, 231, 255, .18);
+      --cyan: #67e8f9;
+      --gold: #ffd166;
+      --red: #ff6b6b;
+      --text: #e8f2ff;
+      --muted: #8ea4bd;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: radial-gradient(circle at 50% 0, #112742 0, var(--bg) 48%, #040913 100%); color: var(--text); font-family: Inter, "Microsoft YaHei", system-ui, sans-serif; }
+    body { display: grid; place-items: center; padding: 16px; overflow-x: hidden; }
+    button { font: inherit; }
+    .app { width: min(1180px, 100%); }
+    .topbar { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin: 0 0 12px; }
+    .brand small { display: block; color: var(--cyan); letter-spacing: .18em; font-weight: 800; font-size: 11px; }
+    .brand h1 { margin: 4px 0 0; font-size: clamp(22px, 4vw, 34px); letter-spacing: -.04em; }
+    .status { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+    .pill { padding: 7px 10px; border: 1px solid var(--line); border-radius: 999px; background: rgba(10, 23, 41, .75); color: var(--muted); font-size: 13px; }
+    .pill strong { color: var(--text); }
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 12px; }
+    .arena-wrap { position: relative; align-self: start; overflow: hidden; padding-bottom: 116px; border: 1px solid var(--line); border-radius: 18px; background: #06101d; box-shadow: 0 24px 70px rgba(0,0,0,.38); }
+    canvas { display: block; width: 100%; aspect-ratio: 16 / 10; touch-action: none; cursor: pointer; }
+    .hud { position: absolute; z-index: 4; inset: 14px 14px auto; display: flex; justify-content: space-between; gap: 10px; pointer-events: none; }
+    .hud-box { min-width: 126px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 12px; background: rgba(5, 13, 25, .74); backdrop-filter: blur(8px); }
+    .label { color: var(--muted); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
+    .value { margin-top: 3px; font-size: 19px; font-weight: 900; }
+    .bar { height: 7px; margin-top: 7px; overflow: hidden; border-radius: 99px; background: rgba(255,255,255,.08); }
+    .bar i { display: block; width: 100%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #ff5263, #ffb86b); transition: width .2s; }
+    .xp i { background: linear-gradient(90deg, #37d5ff, #8d79ff); }
+    .center-msg { position: absolute; z-index: 4; left: 50%; top: 65%; transform: translate(-50%, -50%); width: min(520px, 88%); text-align: center; pointer-events: none; text-shadow: 0 2px 16px #000; }
+    .center-msg h2 { margin: 0; font-size: clamp(24px, 5vw, 46px); }
+    .center-msg p { margin: 8px 0 0; color: #c7d7e9; }
+    .toast { position: absolute; z-index: 5; left: 50%; bottom: 126px; translate: -50% 8px; opacity: 0; padding: 8px 13px; border: 1px solid var(--line); border-radius: 99px; background: rgba(4,12,23,.9); color: var(--text); font-size: 13px; transition: .2s; pointer-events: none; white-space: nowrap; }
+    .toast.show { opacity: 1; translate: -50% 0; }
+    .cards-area { position: absolute; z-index: 5; inset: auto 12px 12px; min-height: 98px; padding: 10px; border: 1px solid var(--line); border-radius: 14px; background: rgba(5,13,24,.88); backdrop-filter: blur(8px); }
+    .cards-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 7px; }
+    .cards-head span { color: var(--muted); font-size: 12px; }
+    .drop-telemetry { margin: -2px 0 7px; color: var(--muted); font-size: 10px; text-align: right; }
+    .cards { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 7px; }
+    .card-slot { min-width: 0; height: 58px; display: grid; place-items: center; border: 1px dashed rgba(142,164,189,.23); border-radius: 10px; color: rgba(142,164,189,.35); font-size: 18px; }
+    .card-slot.hot, .equip-slot.hot, .temp-slot.hot { border-color: var(--cyan); background: rgba(103,232,249,.13); box-shadow: inset 0 0 20px rgba(103,232,249,.08); }
+    .card { position: relative; width: 100%; height: 58px; padding: 6px; display: grid; place-items: center; border: 1px solid color-mix(in srgb, var(--card) 55%, white 5%); border-radius: 10px; background: linear-gradient(145deg, color-mix(in srgb, var(--card) 25%, #0b1524), #09111e 68%); color: white; cursor: grab; user-select: none; transition: transform .12s, border-color .12s, box-shadow .12s; }
+    .card:hover { transform: translateY(-2px); }
+    .card.selected { border-color: white; box-shadow: 0 0 0 2px var(--card), 0 0 20px color-mix(in srgb, var(--card) 45%, transparent); }
+    .card.dragging { opacity: .55; transform: scale(.96); cursor: grabbing; }
+    .card b { font-size: 12px; }
+    .card em { color: var(--gold); font-size: 10px; font-style: normal; letter-spacing: -1px; }
+    .card small { color: #cfe0f2; font-size: 9px; }
+    .side { display: flex; flex-direction: column; gap: 12px; }
+    .panel { padding: 15px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); box-shadow: 0 16px 45px rgba(0,0,0,.22); }
+    .panel h3 { margin: 0 0 10px; font-size: 14px; }
+    .panel p { margin: 7px 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .dropzone { padding: 14px; border: 1px dashed rgba(103,232,249,.45); border-radius: 12px; background: rgba(103,232,249,.05); text-align: center; transition: .15s; }
+    .dropzone.hot { border-color: white; background: rgba(103,232,249,.14); transform: scale(1.02); }
+    .dropzone .turret-icon { font-size: 30px; }
+    .equipment-bar { position: absolute; z-index: 7; left: 14px; top: 50%; width: 108px; padding: 10px; transform: translateY(-50%); border: 1px solid rgba(213,155,255,.34); border-radius: 14px; background: rgba(12,17,33,.9); backdrop-filter: blur(8px); box-shadow: 0 14px 34px rgba(0,0,0,.28); }
+    .equipment-bar h3 { margin: 0 0 3px; color: #e9c8ff; font-size: 13px; text-align: center; }
+    .equipment-bar > small { display: block; margin-bottom: 8px; color: var(--muted); font-size: 9px; text-align: center; }
+    .equipment-slots { display: grid; gap: 7px; }
+    .equip-slot { height: 70px; display: grid; place-items: center; border: 1px dashed rgba(213,155,255,.32); border-radius: 10px; color: rgba(213,155,255,.45); font-size: 10px; text-align: center; transition: .15s; }
+    .equip-slot .card { height: 64px; }
+    .equip-slot .card b { font-size: 10px; }
+    .equip-slot .card small { font-size: 8px; }
+    .temp-equipment-bar { position: absolute; z-index: 7; right: 14px; top: 50%; width: 118px; padding: 10px; transform: translateY(-50%); border: 1px solid rgba(103,232,249,.34); border-radius: 14px; background: rgba(12,17,33,.9); backdrop-filter: blur(8px); box-shadow: 0 14px 34px rgba(0,0,0,.28); }
+    .temp-equipment-bar h3 { margin: 0 0 3px; color: var(--cyan); font-size: 13px; text-align: center; }
+    .temp-equipment-bar > small { display: block; margin-bottom: 8px; color: var(--muted); font-size: 9px; text-align: center; }
+    .temp-slot { min-height: 84px; display: grid; place-items: center; padding: 7px; border: 1px dashed rgba(103,232,249,.36); border-radius: 10px; color: rgba(103,232,249,.55); font-size: 10px; text-align: center; transition: .15s; }
+    .temp-slot.has-temp { border-style: solid; background: rgba(103,232,249,.08); }
+    .temp-summary b { display: block; margin-bottom: 4px; color: #fff; font-size: 12px; }
+    .temp-summary em { display: block; color: var(--gold); font-size: 10px; font-style: normal; }
+    .temp-summary small { display: block; margin-top: 4px; color: var(--muted); font-size: 9px; }
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .stat { padding: 9px; border-radius: 10px; background: rgba(255,255,255,.04); }
+    .stat span { display: block; color: var(--muted); font-size: 10px; }
+    .stat strong { display: block; margin-top: 3px; font-size: 15px; }
+    .actions { display: flex; gap: 6px; margin: 10px 0; }
+    .action-dot { display: block; width: 22px; height: 8px; border-radius: 99px; background: rgba(255,255,255,.08); }
+    .action-dot.on { background: var(--gold); box-shadow: 0 0 14px rgba(255,209,102,.52); }
+    .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .btn { padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.055); color: var(--text); cursor: pointer; }
+    .btn:hover { border-color: var(--cyan); }
+    .btn.primary { background: linear-gradient(135deg, #1d91b5, #5a5de6); border-color: transparent; font-weight: 800; }
+    .guide ol { margin: 8px 0 0; padding-left: 20px; color: var(--muted); font-size: 12px; line-height: 1.7; }
+    .story { background: linear-gradient(150deg, rgba(117,70,166,.18), rgba(13,25,45,.94) 62%); }
+    .story p { color: #c9b9dd; }
+    .story strong { color: #e9c8ff; }
+    .tuner { display: grid; gap: 12px; }
+    .tune-row label { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 5px; color: var(--muted); font-size: 11px; }
+    .tune-row output { color: var(--cyan); font-weight: 900; }
+    .tune-row input { width: 100%; accent-color: #55dff4; cursor: ew-resize; }
+    .tune-note { margin-top: 0 !important; padding: 8px 9px; border-radius: 9px; background: rgba(103,232,249,.05); }
+    .modal { position: fixed; inset: 0; z-index: 20; display: none; place-items: center; padding: 18px; background: rgba(2,7,15,.8); backdrop-filter: blur(8px); }
+    .modal.show { display: grid; }
+    .modal-card { width: min(680px, 100%); padding: 24px; border: 1px solid var(--line); border-radius: 18px; background: #0b1728; box-shadow: 0 28px 90px #000; }
+    .modal-card h2 { margin: 0 0 6px; }
+    .modal-card > p { margin: 0 0 18px; color: var(--muted); }
+    .choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .choice { min-height: 120px; padding: 14px; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.04); color: var(--text); text-align: left; cursor: pointer; }
+    .choice:hover { border-color: var(--cyan); transform: translateY(-2px); }
+    .choice b { display: block; margin-bottom: 7px; color: var(--cyan); }
+    .result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px 0; }
+    .result-grid .stat { text-align: center; }
+    @media (max-width: 880px) {
+      body { padding: 8px; }
+      .layout { grid-template-columns: 1fr; }
+      .side { display: grid; grid-template-columns: 1fr 1fr; }
+      .guide { grid-column: 1 / -1; }
+      .cards { grid-template-columns: repeat(7, minmax(44px, 1fr)); overflow-x: auto; }
+    }
+    @media (max-width: 560px) {
+      .topbar { align-items: flex-start; }
+      .status { display: none; }
+      .side { grid-template-columns: 1fr; }
+      .choices { grid-template-columns: 1fr; }
+      .hud-box { min-width: 104px; padding: 7px 8px; }
+      .value { font-size: 15px; }
+      .cards-area { inset: auto 6px 6px; padding: 7px; }
+      .equipment-bar { left: 6px; width: 78px; padding: 6px; }
+      .temp-equipment-bar { right: 6px; width: 82px; padding: 6px; }
+      .equip-slot { height: 56px; }
+      .temp-slot { min-height: 62px; padding: 5px; }
+      .equip-slot .card { height: 50px; padding: 3px; }
+      .equip-slot .card small { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand"><small>360° DEFENSE PROTOTYPE · V0.2</small><h1>魅魔心防战</h1></div>
+      <div class="status">
+        <div class="pill">目标：<strong>守住 5 波追求者</strong></div>
+        <div class="pill">核心：<strong>自动攻击 → 点击拾取 → 自动合成 → 装配</strong></div>
+      </div>
+    </header>
+    <section class="layout">
+      <div class="arena-wrap" id="arenaWrap">
+        <canvas id="game" width="960" height="600" aria-label="魅魔心防战游戏区域"></canvas>
+        <div class="hud">
+          <div class="hud-box"><div class="label">私人空间</div><div class="value"><span id="hpText">100</span> / 100</div><div class="bar"><i id="hpBar"></i></div></div>
+          <div class="hud-box"><div class="label">经验 · Lv.<span id="levelText">1</span></div><div class="value"><span id="xpText">0</span> / <span id="xpNeed">8</span></div><div class="bar xp"><i id="xpBar" style="width:0%"></i></div></div>
+        </div>
+        <div class="equipment-bar" aria-label="装备栏">
+          <h3>魅魔装备</h3><small>3栏 · 本波行动 <span id="actionText">3/3</span></small>
+          <div class="actions" id="actionDots" aria-label="行动次数"></div>
+          <div class="equipment-slots" id="equipmentSlots"></div>
+        </div>
+        <div class="temp-equipment-bar" aria-label="临时装备栏">
+          <h3>临时心意</h3><small>无限拖入 · 本波生效</small>
+          <div class="temp-slot" id="tempSlot" data-testid="temp-slot">拖入卡牌<br>叠加到本波</div>
+        </div>
+        <div class="center-msg" id="centerMsg"><h2>守住心防</h2><p>追求者将从四面八方靠近；清醒炮台会自动迎击</p></div>
+        <div class="toast" id="toast"></div>
+        <div class="cards-area">
+          <div class="cards-head"><strong>升级卡槽</strong><span>自动合成 · 左侧装备消耗行动 · 右侧临时本波生效</span></div>
+          <div class="drop-telemetry" id="dropTelemetry">地面 0 · 已拾取 0 · 超时 0</div>
+          <div class="cards" id="cards"></div>
+        </div>
+      </div>
+      <aside class="side">
+        <section class="panel story">
+          <h3>故事背景</h3>
+          <p>月蚀之夜，主角作为魅魔觉醒了无法收束的魅力。城里的每一位来访者都坚信自己应该和他在一起，于是从四面八方涌向心之庭院。</p>
+          <p><strong>他们并非恶人，只是热情过载。</strong>主角启动中央“清醒炮台”，用温和但坚定的清醒弹守住私人空间；追求者冷静离开时，会留下可强化炮台的心意卡。</p>
+        </section>
+        <section class="panel">
+          <h3>清醒炮台</h3>
+          <div class="dropzone"><div class="turret-icon">⌁</div><strong>装备与临装已启用</strong><p>左侧换装每波 3 次行动<br>右侧临时卡只本波生效</p></div>
+          <div class="stats">
+            <div class="stat"><span>伤害</span><strong id="damageStat">16</strong></div>
+            <div class="stat"><span>射速</span><strong id="rateStat">3.3/s</strong></div>
+            <div class="stat"><span>弹丸</span><strong id="multiStat">1</strong></div>
+            <div class="stat"><span>波次</span><strong><span id="waveText">0</span> / 5</strong></div>
+          </div>
+        </section>
+        <section class="panel">
+          <h3>战斗控制</h3>
+          <div class="controls"><button class="btn primary" id="startBtn">开始游戏</button><button class="btn" id="pauseBtn">暂停</button><button class="btn" id="testCardBtn">生成测试掉落</button></div>
+          <p>炮台：自动锁定最近的追求者<br>战场：点击限时心意拾取<br>卡牌：左侧装备受行动限制；右侧临时格可无限投入</p>
+        </section>
+        <section class="panel">
+          <h3>实时参数控制</h3>
+          <div class="tuner">
+            <div class="tune-row"><label for="damageCtl">基础伤害 <output id="damageCtlVal">16</output></label><input id="damageCtl" data-testid="damage-control" type="range" min="6" max="40" value="16" step="1"></div>
+            <div class="tune-row"><label for="rateCtl">每秒攻击 <output id="rateCtlVal">3.3</output></label><input id="rateCtl" data-testid="rate-control" type="range" min="1" max="10" value="3.3" step="0.1"></div>
+            <div class="tune-row"><label for="rangeCtl">攻击射程 <output id="rangeCtlVal">430</output></label><input id="rangeCtl" data-testid="range-control" type="range" min="160" max="520" value="430" step="10"></div>
+            <div class="tune-row"><label for="dropCtl">掉落概率 <output id="dropCtlVal">50%</output></label><input id="dropCtl" data-testid="drop-control" type="range" min="0" max="100" value="50" step="5"></div>
+            <div class="tune-row"><label for="lifeCtl">存在时间 <output id="lifeCtlVal">6.0秒</output></label><input id="lifeCtl" data-testid="life-control" type="range" min="2" max="15" value="6" step="0.5"></div>
+            <div class="tune-row"><label for="speedCtl">追求者速度 <output id="speedCtlVal">100%</output></label><input id="speedCtl" data-testid="speed-control" type="range" min="40" max="180" value="100" step="10"></div>
+          </div>
+          <p class="tune-note">参数修改即时生效；卡牌强化会叠加在基础伤害与射速之上。</p>
+          <button class="btn" id="resetTunerBtn">恢复默认参数</button>
+        </section>
+        <section class="panel guide">
+          <h3>验证重点</h3>
+          <ol><li>360°来袭是否形成清晰而紧张的战场观察？</li><li>点击限时心意是否带来合理的注意力取舍？</li><li>自动合成与三栏换装是否形成构筑策略？</li></ol>
+        </section>
+      </aside>
+    </section>
+  </main>
+
+  <div class="modal" id="levelModal">
+    <div class="modal-card"><h2>经验升级</h2><p>选择一个即时强化，然后继续战斗。</p><div class="choices">
+      <button class="choice" data-perk="damage"><b>高能弹芯</b>基础伤害 +20%</button>
+      <button class="choice" data-perk="rate"><b>过载供能</b>射速 +15%</button>
+      <button class="choice" data-perk="repair"><b>重整心防</b>私人空间恢复 20 点</button>
+    </div></div>
+  </div>
+  <div class="modal" id="resultModal">
+    <div class="modal-card"><h2 id="resultTitle">防守完成</h2><p id="resultDesc"></p><div class="result-grid">
+      <div class="stat"><span>击杀</span><strong id="resultKills">0</strong></div>
+      <div class="stat"><span>合成</span><strong id="resultMerges">0</strong></div>
+      <div class="stat"><span>装配</span><strong id="resultUses">0</strong></div>
+    </div><button class="btn primary" id="restartBtn">再来一局</button></div>
+  </div>
+
+  <script>
+    (() => {
+      'use strict';
+      const canvas = document.querySelector('#game');
+      const ctx = canvas.getContext('2d');
+      const $ = s => document.querySelector(s);
+      const ui = {
+        hpText: $('#hpText'), hpBar: $('#hpBar'), xpText: $('#xpText'), xpNeed: $('#xpNeed'), xpBar: $('#xpBar'), levelText: $('#levelText'),
+        waveText: $('#waveText'), damageStat: $('#damageStat'), rateStat: $('#rateStat'), multiStat: $('#multiStat'), cards: $('#cards'), equipmentSlots: $('#equipmentSlots'), tempSlot: $('#tempSlot'), actionText: $('#actionText'), actionDots: $('#actionDots'),
+        centerMsg: $('#centerMsg'), toast: $('#toast'), startBtn: $('#startBtn'), pauseBtn: $('#pauseBtn'),
+        levelModal: $('#levelModal'), resultModal: $('#resultModal'), resultTitle: $('#resultTitle'), resultDesc: $('#resultDesc'),
+        resultKills: $('#resultKills'), resultMerges: $('#resultMerges'), resultUses: $('#resultUses'), dropTelemetry: $('#dropTelemetry'),
+        damageCtl: $('#damageCtl'), damageCtlVal: $('#damageCtlVal'), rateCtl: $('#rateCtl'), rateCtlVal: $('#rateCtlVal'),
+        rangeCtl: $('#rangeCtl'), rangeCtlVal: $('#rangeCtlVal'), dropCtl: $('#dropCtl'), dropCtlVal: $('#dropCtlVal'),
+        lifeCtl: $('#lifeCtl'), lifeCtlVal: $('#lifeCtlVal'), speedCtl: $('#speedCtl'), speedCtlVal: $('#speedCtlVal'), resetTunerBtn: $('#resetTunerBtn')
+      };
+
+      const CARD_TYPES = {
+        damage: { name: '清醒', color: '#ff6577', icon: '◆', desc: '清醒弹伤害' },
+        rate: { name: '从容', color: '#4de2ff', icon: 'ϟ', desc: '应对速度' },
+        multi: { name: '界限', color: '#b784ff', icon: '✦', desc: '弹丸数量' }
+      };
+      const TAU = Math.PI * 2;
+      const TURRET = { x: 480, y: 300 };
+      const DEFAULT_CONFIG = { damage: 16, fireRate: 3.3, range: 430, dropChance: .5, dropLifetime: 6, enemySpeed: 1 };
+      const config = { ...DEFAULT_CONFIG };
+      let state, raf = 0, last = performance.now(), toastTimer = 0;
+
+      function reset() {
+        state = {
+          mode: 'ready', paused: false, time: 0, hp: 100, maxHp: 100, wave: 0, waveTime: 0, between: 0,
+          enemies: [], bullets: [], particles: [], groundDrops: [], cards: Array(7).fill(null), equipment: Array(3).fill(null), tempCards: [], nextCardId: 1, nextDropId: 1,
+          spawnLeft: 0, spawnTimer: 0, waveClearPending: false,
+          damageBonus: 0, fireRateBonus: 0, multi: 1, shotCd: 0, turretAngle: -Math.PI/2,
+          xp: 0, xpNeed: 8, level: 1, kills: 0, merges: 0, uses: 0, collected: 0, expired: 0, maxActions: 3, actions: 3
+        };
+        ui.resultModal.classList.remove('show');
+        ui.levelModal.classList.remove('show');
+        ui.startBtn.textContent = '开始游戏';
+        ui.pauseBtn.textContent = '暂停';
+        message('守住心防', '追求者将从四面八方靠近；清醒炮台会自动迎击', true);
+        renderCards(); renderEquipment(); renderTempSlot(); updateUI();
+      }
+
+      function start() {
+        if (state.mode === 'ended') reset();
+        if (state.mode === 'ready') {
+          state.mode = 'playing';
+          nextWave();
+          ui.startBtn.textContent = '重新开始';
+          message('', '', false);
+        } else {
+          reset();
+          state.mode = 'playing';
+          nextWave();
+          ui.startBtn.textContent = '重新开始';
+          message('', '', false);
+        }
+      }
+
+      function nextWave() {
+        if (state.wave > 0 && state.tempCards.length) {
+          const cleared = state.tempCards.length;
+          state.tempCards = [];
+          toast(`临时心意已清空 ${cleared} 张`);
+        }
+        state.wave++;
+        state.actions = state.maxActions;
+        state.spawnLeft = 5 + state.wave * 3;
+        state.spawnTimer = .4;
+        state.waveClearPending = false;
+        state.between = 0;
+        toast(`第 ${state.wave} 波追求者开始`);
+        renderTempSlot();
+        updateUI();
+      }
+
+      function spawnEnemy() {
+        const roll = Math.random();
+        let type = roll < .2 + state.wave * .025 ? 'tank' : roll < .47 ? 'fast' : 'normal';
+        if (state.wave === 5 && state.spawnLeft === 1) type = 'boss';
+        const data = {
+          normal: { label: '热情追求者', hp: 38 + state.wave * 7, speed: 24 + state.wave * 1.5, r: 16, color: '#f3b95f', damage: 8, xp: 1 },
+          fast: { label: '急切追求者', hp: 23 + state.wave * 5, speed: 42 + state.wave * 2, r: 12, color: '#62d8ff', damage: 6, xp: 1 },
+          tank: { label: '执着追求者', hp: 90 + state.wave * 13, speed: 15 + state.wave * .8, r: 22, color: '#ff7b86', damage: 14, xp: 2 },
+          boss: { label: '命定追求者', hp: 420, speed: 12, r: 35, color: '#c58aff', damage: 28, xp: 5 }
+        }[type];
+        const side = Math.floor(Math.random() * 4), margin = 45;
+        const spawn = side === 0 ? { x: 35 + Math.random()*890, y: -margin }
+          : side === 1 ? { x: 960 + margin, y: 35 + Math.random()*530 }
+          : side === 2 ? { x: 35 + Math.random()*890, y: 600 + margin }
+          : { x: -margin, y: 35 + Math.random()*530 };
+        state.enemies.push({ ...spawn, type, hp: data.hp, maxHp: data.hp, ...data, hit: 0 });
+      }
+
+      function cardScale(star) { return [0, 1, 2.25, 4][star] || 1; }
+      function bonusFromCards(cards) {
+        const bonus = { damage: 0, rate: 0, multi: 0 };
+        for (const card of cards) {
+          if (!card) continue;
+          const scale = cardScale(card.star);
+          if (card.type === 'damage') bonus.damage += 5 * scale;
+          if (card.type === 'rate') bonus.rate += .38 * scale;
+          if (card.type === 'multi') card.star >= 2 ? bonus.multi++ : bonus.damage += 2.5 * scale;
+        }
+        return bonus;
+      }
+      function addBonus(a, b) { return { damage: a.damage + b.damage, rate: a.rate + b.rate, multi: a.multi + b.multi }; }
+      function equipmentBonus() { return addBonus(bonusFromCards(state.equipment), bonusFromCards(state.tempCards)); }
+      function totalDamage() { return config.damage + state.damageBonus + equipmentBonus().damage; }
+      function totalFireRate() { return config.fireRate + state.fireRateBonus + equipmentBonus().rate; }
+      function totalMulti() { return state.multi + equipmentBonus().multi; }
+
+      function findTarget() {
+        let best = null, bestDist = Infinity;
+        for (const enemy of state.enemies) {
+          const dist = Math.hypot(enemy.x - TURRET.x, enemy.y - TURRET.y);
+          if (dist <= config.range && dist < bestDist) { best = enemy; bestDist = dist; }
+        }
+        return best;
+      }
+
+      function shoot(target) {
+        const tx = TURRET.x, ty = TURRET.y;
+        const a = Math.atan2(target.y - ty, target.x - tx);
+        state.turretAngle = a;
+        const spread = .12;
+        const multi = totalMulti();
+        for (let i = 0; i < multi; i++) {
+          const offset = (i - (multi - 1) / 2) * spread;
+          state.bullets.push({ x: tx + Math.cos(a) * 24, y: ty + Math.sin(a) * 24, vx: Math.cos(a + offset) * 620, vy: Math.sin(a + offset) * 620, r: 4, life: 1.25, damage: totalDamage() });
+        }
+        for (let i = 0; i < 4; i++) particle(tx + Math.cos(a)*26, ty + Math.sin(a)*26, '#8cecff', 55);
+      }
+
+      function particle(x, y, color, speed = 80) {
+        const a = Math.random() * TAU, s = Math.random() * speed;
+        state.particles.push({ x, y, vx: Math.cos(a)*s, vy: Math.sin(a)*s, life: .25 + Math.random()*.35, max: .6, color, size: 2 + Math.random()*3 });
+      }
+
+      function killEnemy(enemy) {
+        state.kills++;
+        state.xp += enemy.xp;
+        for (let i = 0; i < 12; i++) particle(enemy.x, enemy.y, enemy.color, 150);
+        if (Math.random() < config.dropChance || enemy.type === 'boss') spawnGroundDrop(enemy.x, enemy.y);
+        if (state.xp >= state.xpNeed) levelUp();
+      }
+
+      function spawnGroundDrop(x, y, forcedType = null) {
+        const keys = Object.keys(CARD_TYPES);
+        const type = forcedType || keys[Math.floor(Math.random()*keys.length)];
+        state.groundDrops.push({ id: state.nextDropId++, x, y, type, star: 1, life: config.dropLifetime, maxLife: config.dropLifetime, pulse: Math.random()*TAU });
+      }
+
+      function addTestPair() {
+        const type = Object.keys(CARD_TYPES)[state.merges % 3];
+        spawnGroundDrop(400, 380, type);
+        spawnGroundDrop(560, 380, type);
+        toast(`地面生成两份${CARD_TYPES[type].name}测试掉落`);
+      }
+
+      function collectDrop(drop) {
+        const empty = state.cards.findIndex(card => card === null);
+        if (empty < 0) { toast('卡槽已满：先换装或腾出位置'); return; }
+        state.groundDrops = state.groundDrops.filter(d => d.id !== drop.id);
+        state.cards[empty] = { id: state.nextCardId++, type: drop.type, star: drop.star };
+        state.collected++;
+        const merged = autoMergeCards();
+        toast(merged ? `拾取成功 · 自动合成 ${merged} 次` : `拾取 ${CARD_TYPES[drop.type].name}卡`);
+        renderCards(); updateUI();
+      }
+
+      function autoMergeCards() {
+        let merged = 0, changed = true;
+        while (changed) {
+          changed = false;
+          outer: for (let i = 0; i < state.cards.length; i++) {
+            const a = state.cards[i];
+            if (!a) continue;
+            if (a.star >= 3) continue;
+            for (let j = i + 1; j < state.cards.length; j++) {
+              const b = state.cards[j];
+              if (!b) continue;
+              if (a.type === b.type && a.star === b.star) {
+                state.cards[i] = { id: state.nextCardId++, type: a.type, star: a.star + 1 };
+                state.cards[j] = null;
+                state.merges++; merged++; changed = true;
+                break outer;
+              }
+            }
+          }
+        }
+        return merged;
+      }
+
+      function levelUp() {
+        state.xp -= state.xpNeed;
+        state.level++;
+        state.xpNeed = Math.round(state.xpNeed * 1.35);
+        state.paused = true;
+        ui.levelModal.classList.add('show');
+        updateUI();
+      }
+
+      function quickEquip(cardIndex) {
+        const target = state.equipment.findIndex(card => card === null);
+        if (target < 0) { toast('装备栏已满：请拖到指定装备位进行替换'); return; }
+        moveOrSwap('cards', cardIndex, 'equipment', target);
+      }
+
+      function quickUnequip(equipIndex) {
+        const target = state.cards.findIndex(card => card === null);
+        if (target < 0) { toast('下方卡槽已满：请拖到指定卡槽进行替换'); return; }
+        moveOrSwap('equipment', equipIndex, 'cards', target);
+      }
+
+      function collectionFor(kind) {
+        if (kind === 'cards') return state.cards;
+        if (kind === 'equipment') return state.equipment;
+        return null;
+      }
+
+      function consumesLeftAction(sourceKind, targetKind) {
+        return sourceKind === 'equipment' || targetKind === 'equipment';
+      }
+
+      function spendLeftAction(sourceKind, targetKind) {
+        if (!consumesLeftAction(sourceKind, targetKind)) return true;
+        if (state.actions <= 0) { toast('本波左侧装备行动次数已用完'); return false; }
+        state.actions--;
+        return true;
+      }
+
+      function absorbTempCard(sourceKind, sourceIndex) {
+        const source = collectionFor(sourceKind);
+        if (!source) return;
+        const moving = source[sourceIndex];
+        if (!moving) return;
+        if (!spendLeftAction(sourceKind, 'temp')) return;
+        source[sourceIndex] = null;
+        state.tempCards.push(moving);
+        state.uses++;
+        const merged = sourceKind === 'cards' ? autoMergeCards() : 0;
+        toast(`临时投入${CARD_TYPES[moving.type].name}卡：本波生效${merged ? `，自动合成 ${merged} 次` : ''}`);
+        renderCards(); renderEquipment(); renderTempSlot(); updateUI();
+      }
+
+      function moveOrSwap(sourceKind, sourceIndex, targetKind, targetIndex) {
+        if (sourceKind === targetKind && sourceIndex === targetIndex) return;
+        if (targetKind === 'temp') { absorbTempCard(sourceKind, sourceIndex); return; }
+        const source = collectionFor(sourceKind);
+        const target = collectionFor(targetKind);
+        if (!source || !target) return;
+        const moving = source[sourceIndex];
+        if (!moving) return;
+        if (!spendLeftAction(sourceKind, targetKind)) return;
+        const replaced = target[targetIndex];
+        target[targetIndex] = moving;
+        source[sourceIndex] = replaced || null;
+        const merged = targetKind === 'cards' || sourceKind === 'cards' ? autoMergeCards() : 0;
+        state.uses++;
+        toast(replaced ? `已交换：${CARD_TYPES[moving.type].name} ↔ ${CARD_TYPES[replaced.type].name}` : `已移动${CARD_TYPES[moving.type].name}卡${merged ? `，自动合成 ${merged} 次` : ''}`);
+        renderCards(); renderEquipment(); renderTempSlot(); updateUI();
+      }
+
+      function dragPayload(e, source, index) {
+        e.dataTransfer.setData('text/plain', JSON.stringify({ source, index }));
+        e.dataTransfer.effectAllowed = 'move';
+      }
+
+      let activePointerDrag = null, activeHotSlot = null;
+      function beginPointerDrag(e, source, index, el) {
+        if (e.button != null && e.button !== 0) return;
+        activePointerDrag = { source, index, el };
+        el.classList.add('dragging');
+      }
+
+      function slotFromPoint(x, y) {
+        return document.elementFromPoint(x, y)?.closest?.('.card-slot, .equip-slot, .temp-slot') || null;
+      }
+
+      document.addEventListener('pointermove', e => {
+        if (!activePointerDrag) return;
+        const slot = slotFromPoint(e.clientX, e.clientY);
+        if (activeHotSlot !== slot) {
+          activeHotSlot?.classList.remove('hot');
+          activeHotSlot = slot;
+          activeHotSlot?.classList.add('hot');
+        }
+      });
+
+      document.addEventListener('pointerup', e => {
+        if (!activePointerDrag) return;
+        const drag = activePointerDrag, slot = slotFromPoint(e.clientX, e.clientY);
+        drag.el.classList.remove('dragging');
+        activeHotSlot?.classList.remove('hot');
+        activePointerDrag = null; activeHotSlot = null;
+        if (!slot) return;
+        const targetKind = slot.dataset.testid === 'card-slot' ? 'cards' : slot.dataset.testid === 'temp-slot' ? 'temp' : 'equipment';
+        moveOrSwap(drag.source, drag.index, targetKind, Number(slot.dataset.index));
+      });
+
+      function parsePayload(e) {
+        try { return JSON.parse(e.dataTransfer.getData('text/plain')); } catch { return null; }
+      }
+
+      function createCardElement(card, source, index) {
+        const meta = CARD_TYPES[card.type];
+        const el = document.createElement('button');
+        el.type = 'button'; el.className = 'card'; el.draggable = false;
+        el.dataset.id = card.id; el.dataset.testid = source === 'cards' ? 'upgrade-card' : 'equipped-card';
+        el.setAttribute('aria-label', `${source === 'equipment' ? '已装备' : ''}${card.star}星${meta.name}卡`); el.style.setProperty('--card', meta.color);
+        el.innerHTML = `<b>${meta.icon} ${meta.name}</b><em>${'★'.repeat(card.star)}</em><small>${meta.desc}强化</small>`;
+        el.addEventListener('dblclick', e => { e.preventDefault(); source === 'cards' ? quickEquip(index) : quickUnequip(index); });
+        el.addEventListener('pointerdown', e => beginPointerDrag(e, source, index, el));
+        return el;
+      }
+
+      function makeSlot(kind, index, card) {
+        const slot = document.createElement('div');
+        slot.className = kind === 'cards' ? 'card-slot' : 'equip-slot';
+        slot.dataset.testid = kind === 'cards' ? 'card-slot' : 'equipment-slot'; slot.dataset.index = index;
+        if (card) slot.append(createCardElement(card, kind, index)); else slot.textContent = kind === 'cards' ? '+' : `装备 ${index + 1}`;
+        slot.addEventListener('dragover', e => { e.preventDefault(); slot.classList.add('hot'); });
+        slot.addEventListener('dragleave', () => slot.classList.remove('hot'));
+        slot.addEventListener('drop', e => { e.preventDefault(); slot.classList.remove('hot'); const data = parsePayload(e); if (data) moveOrSwap(data.source, Number(data.index), kind, index); });
+        return slot;
+      }
+
+      function renderCards() {
+        ui.cards.innerHTML = '';
+        for (let i = 0; i < 7; i++) ui.cards.append(makeSlot('cards', i, state.cards[i]));
+      }
+
+      function renderEquipment() {
+        ui.equipmentSlots.innerHTML = '';
+        for (let i = 0; i < 3; i++) ui.equipmentSlots.append(makeSlot('equipment', i, state.equipment[i]));
+      }
+
+      function renderTempSlot() {
+        const counts = state.tempCards.reduce((acc, card) => {
+          const key = `${card.type}-${card.star}`;
+          acc[key] = (acc[key] || 0) + 1;
+          return acc;
+        }, {});
+        ui.tempSlot.classList.toggle('has-temp', state.tempCards.length > 0);
+        ui.tempSlot.innerHTML = state.tempCards.length
+          ? `<div class="temp-summary"><b>已投入 ${state.tempCards.length} 张</b><em>${Object.entries(counts).map(([key, count]) => { const [type, star] = key.split('-'); return `${CARD_TYPES[type].name}${star}星×${count}`; }).join(' / ')}</em><small>下一波开始时清空</small></div>`
+          : '拖入卡牌<br>叠加到本波';
+      }
+
+      function update(dt) {
+        if (state.mode !== 'playing' || state.paused) return;
+        state.time += dt;
+        state.shotCd -= dt;
+        const target = findTarget();
+        if (target) state.turretAngle = Math.atan2(target.y - TURRET.y, target.x - TURRET.x);
+        if (target && state.shotCd <= 0) { shoot(target); state.shotCd = 1 / totalFireRate(); }
+
+        if (state.spawnLeft > 0) {
+          state.spawnTimer -= dt;
+          if (state.spawnTimer <= 0) { spawnEnemy(); state.spawnLeft--; state.spawnTimer = Math.max(.28, .72 - state.wave*.05); }
+        }
+
+        for (let i = state.bullets.length - 1; i >= 0; i--) {
+          const b = state.bullets[i]; b.x += b.vx*dt; b.y += b.vy*dt; b.life -= dt;
+          let hit = false;
+          for (let j = state.enemies.length - 1; j >= 0; j--) {
+            const e = state.enemies[j];
+            if ((b.x-e.x)**2 + (b.y-e.y)**2 < (b.r+e.r)**2) {
+              e.hp -= b.damage; e.hit = .08; hit = true; particle(b.x,b.y,'#d8fbff',50);
+              if (e.hp <= 0) { state.enemies.splice(j,1); killEnemy(e); }
+              break;
+            }
+          }
+          if (hit || b.life <= 0 || b.x < -20 || b.x > 980 || b.y < -20 || b.y > 620) state.bullets.splice(i,1);
+        }
+
+        for (let i = state.enemies.length - 1; i >= 0; i--) {
+          const e = state.enemies[i];
+          const dx = TURRET.x-e.x, dy = TURRET.y-e.y, len = Math.hypot(dx,dy) || 1;
+          e.x += dx/len*e.speed*config.enemySpeed*dt; e.y += dy/len*e.speed*config.enemySpeed*dt; e.hit -= dt;
+          if (Math.hypot(dx,dy) < 55) {
+            state.hp -= e.damage; state.enemies.splice(i,1);
+            for (let k=0;k<10;k++) particle(TURRET.x,TURRET.y,'#ff6677',170);
+            toast(`私人空间受压 -${e.damage}`);
+            if (state.hp <= 0) end(false);
+          }
+        }
+
+        for (let i = state.groundDrops.length - 1; i >= 0; i--) {
+          const drop = state.groundDrops[i];
+          drop.life -= dt; drop.pulse += dt * 3;
+          if (drop.life <= 0) { state.groundDrops.splice(i, 1); state.expired++; }
+        }
+
+        for (let i=state.particles.length-1;i>=0;i--) { const p=state.particles[i]; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vx*=.97; p.vy*=.97; p.life-=dt; if(p.life<=0)state.particles.splice(i,1); }
+
+        if (state.spawnLeft === 0 && state.enemies.length === 0 && !state.waveClearPending && state.mode === 'playing') {
+          state.waveClearPending = true;
+          if (state.wave >= 5) end(true);
+          else { state.between = 2.4; toast(`第 ${state.wave} 波完成 · 整理卡槽`); }
+        }
+        if (state.between > 0) { state.between -= dt; if (state.between <= 0) nextWave(); }
+        updateUI();
+      }
+
+      function end(win) {
+        state.mode = 'ended'; state.paused = true;
+        ui.resultTitle.textContent = win ? '守住了心防' : '被热情淹没';
+        ui.resultDesc.textContent = win ? `魅魔主角温和而坚定地守住了私人空间。你拾取 ${state.collected} 份心意，错过 ${state.expired} 份。` : `追求者突破了中心防线。你拾取 ${state.collected} 份心意、错过 ${state.expired} 份；下一局试着调整射程与拾取节奏。`;
+        ui.resultKills.textContent = state.kills; ui.resultMerges.textContent = state.merges; ui.resultUses.textContent = state.uses;
+        ui.resultModal.classList.add('show');
+      }
+
+      function updateUI() {
+        ui.hpText.textContent = Math.max(0, Math.round(state.hp)); ui.hpBar.style.width = `${Math.max(0,state.hp/state.maxHp*100)}%`;
+        ui.xpText.textContent = state.xp; ui.xpNeed.textContent = state.xpNeed; ui.xpBar.style.width = `${state.xp/state.xpNeed*100}%`; ui.levelText.textContent = state.level;
+        ui.waveText.textContent = state.wave; ui.damageStat.textContent = Math.round(totalDamage()); ui.rateStat.textContent = `${totalFireRate().toFixed(1)}/s`; ui.multiStat.textContent = totalMulti();
+        ui.actionText.textContent = `${state.actions}/${state.maxActions}`;
+        ui.actionDots.innerHTML = '';
+        for (let i = 0; i < state.maxActions; i++) {
+          const dot = document.createElement('i');
+          dot.className = `action-dot${i < state.actions ? ' on' : ''}`;
+          ui.actionDots.append(dot);
+        }
+        ui.damageCtlVal.textContent = config.damage.toFixed(0); ui.rateCtlVal.textContent = config.fireRate.toFixed(1); ui.rangeCtlVal.textContent = config.range.toFixed(0);
+        ui.dropCtlVal.textContent = `${Math.round(config.dropChance*100)}%`; ui.lifeCtlVal.textContent = `${config.dropLifetime.toFixed(1)}秒`; ui.speedCtlVal.textContent = `${Math.round(config.enemySpeed*100)}%`;
+        ui.dropTelemetry.textContent = `地面 ${state.groundDrops.length} · 已拾取 ${state.collected} · 超时 ${state.expired}`;
+      }
+
+      function message(title, body, show) { ui.centerMsg.innerHTML = `<h2>${title}</h2><p>${body}</p>`; ui.centerMsg.style.display = show ? 'block' : 'none'; }
+      function toast(text) { ui.toast.textContent = text; ui.toast.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>ui.toast.classList.remove('show'),1500); }
+
+      function drawGrid() {
+        ctx.fillStyle='#06101d';ctx.fillRect(0,0,960,600);
+        const g=ctx.createLinearGradient(0,0,0,600);g.addColorStop(0,'rgba(29,79,112,.18)');g.addColorStop(1,'rgba(3,9,18,.05)');ctx.fillStyle=g;ctx.fillRect(0,0,960,600);
+        ctx.strokeStyle='rgba(103,232,249,.055)';ctx.lineWidth=1;
+        for(let x=0;x<960;x+=48){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,600);ctx.stroke();}
+        for(let y=0;y<600;y+=48){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(960,y);ctx.stroke();}
+        ctx.strokeStyle='rgba(197,138,255,.3)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(TURRET.x,TURRET.y,62,0,TAU);ctx.stroke();
+        ctx.save();ctx.setLineDash([7,9]);ctx.strokeStyle='rgba(103,232,249,.13)';ctx.beginPath();ctx.arc(TURRET.x,TURRET.y,config.range,0,TAU);ctx.stroke();ctx.restore();
+      }
+
+      function draw() {
+        drawGrid();
+        for (const p of state.particles) { ctx.globalAlpha=Math.max(0,p.life/p.max);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,TAU);ctx.fill(); } ctx.globalAlpha=1;
+        for (const b of state.bullets) { ctx.shadowBlur=14;ctx.shadowColor='#70ecff';ctx.fillStyle='#c7f8ff';ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,TAU);ctx.fill(); } ctx.shadowBlur=0;
+        for (const e of state.enemies) {
+          ctx.save();ctx.translate(e.x,e.y);if(e.hit>0)ctx.globalAlpha=.55;ctx.shadowBlur=18;ctx.shadowColor=e.color;ctx.fillStyle=e.color;ctx.beginPath();
+          const sides=e.type==='fast'?3:e.type==='tank'?6:e.type==='boss'?8:4;
+          for(let i=0;i<sides;i++){const a=-Math.PI/2+i*TAU/sides;const r=e.r*(i%2?0.82:1);const x=Math.cos(a)*r,y=Math.sin(a)*r;i?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.closePath();ctx.fill();ctx.shadowBlur=0;
+          ctx.fillStyle='rgba(2,8,17,.86)';ctx.beginPath();ctx.arc(0,0,e.r*.38,0,TAU);ctx.fill();ctx.restore();
+          ctx.fillStyle='rgba(255,255,255,.12)';ctx.fillRect(e.x-e.r,e.y-e.r-9,e.r*2,4);ctx.fillStyle=e.color;ctx.fillRect(e.x-e.r,e.y-e.r-9,e.r*2*Math.max(0,e.hp/e.maxHp),4);
+        }
+        for (const drop of state.groundDrops) {
+          const meta = CARD_TYPES[drop.type], ratio = Math.max(0, drop.life / drop.maxLife), bob = Math.sin(drop.pulse) * 3;
+          ctx.save();ctx.translate(drop.x,drop.y+bob);ctx.shadowBlur=18;ctx.shadowColor=meta.color;ctx.fillStyle='rgba(5,13,24,.92)';ctx.strokeStyle=meta.color;ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,20,0,TAU);ctx.fill();ctx.stroke();ctx.shadowBlur=0;
+          ctx.fillStyle=meta.color;ctx.font='bold 17px Microsoft YaHei';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(meta.icon,0,0);
+          ctx.strokeStyle='rgba(255,255,255,.2)';ctx.lineWidth=4;ctx.beginPath();ctx.arc(0,0,27,-Math.PI/2,TAU-Math.PI/2);ctx.stroke();ctx.strokeStyle=ratio>.35?'#67e8f9':'#ff6b6b';ctx.beginPath();ctx.arc(0,0,27,-Math.PI/2,-Math.PI/2+TAU*ratio);ctx.stroke();
+          ctx.fillStyle='#e8f2ff';ctx.font='bold 10px Microsoft YaHei';ctx.fillText(`${drop.life.toFixed(1)}s`,0,36);ctx.restore();
+        }
+        const a=state.turretAngle;
+        ctx.save();ctx.translate(TURRET.x,TURRET.y);ctx.fillStyle='#241a3d';ctx.strokeStyle='#d59bff';ctx.lineWidth=3;ctx.shadowBlur=20;ctx.shadowColor='rgba(197,138,255,.65)';ctx.beginPath();ctx.arc(0,0,32,0,TAU);ctx.fill();ctx.stroke();
+        ctx.shadowBlur=0;ctx.strokeStyle='#ff8ed4';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-19,-21);ctx.quadraticCurveTo(-31,-38,-9,-30);ctx.moveTo(19,-21);ctx.quadraticCurveTo(31,-38,9,-30);ctx.stroke();ctx.fillStyle='#ff8ed4';ctx.font='bold 15px Microsoft YaHei';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('♥',0,1);
+        ctx.rotate(a);ctx.fillStyle='#68e8fa';ctx.fillRect(3,-7,42,14);ctx.fillStyle='#d9fbff';ctx.fillRect(34,-4,18,8);ctx.restore();ctx.shadowBlur=0;
+      }
+
+      function loop(now) { const dt=Math.min(.033,(now-last)/1000);last=now;update(dt);draw();raf=requestAnimationFrame(loop); }
+      function canvasPoint(e) { const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)/r.width*canvas.width,y:(e.clientY-r.top)/r.height*canvas.height}; }
+      canvas.addEventListener('pointerdown', e=>{const p=canvasPoint(e);let nearest=null,best=Infinity;for(const drop of state.groundDrops){const d=Math.hypot(drop.x-p.x,drop.y-p.y);if(d<34&&d<best){nearest=drop;best=d;}}if(nearest)collectDrop(nearest);});
+      addEventListener('keydown',e=>{if(e.code==='KeyP') togglePause();});
+      ui.startBtn.addEventListener('click',start); ui.pauseBtn.addEventListener('click',togglePause); $('#testCardBtn').addEventListener('click',addTestPair); $('#restartBtn').addEventListener('click',()=>{reset();start();});
+      function togglePause(){if(state.mode!=='playing')return;state.paused=!state.paused;ui.pauseBtn.textContent=state.paused?'继续':'暂停';message(state.paused?'已暂停':'','按 P 或按钮继续',state.paused);}
+      function syncTunerInputs() {
+        ui.damageCtl.value=config.damage;ui.rateCtl.value=config.fireRate;ui.rangeCtl.value=config.range;ui.dropCtl.value=config.dropChance*100;ui.lifeCtl.value=config.dropLifetime;ui.speedCtl.value=config.enemySpeed*100;updateUI();
+      }
+      ui.damageCtl.addEventListener('input',()=>{config.damage=Number(ui.damageCtl.value);updateUI();});
+      ui.rateCtl.addEventListener('input',()=>{config.fireRate=Number(ui.rateCtl.value);updateUI();});
+      ui.rangeCtl.addEventListener('input',()=>{config.range=Number(ui.rangeCtl.value);updateUI();});
+      ui.dropCtl.addEventListener('input',()=>{config.dropChance=Number(ui.dropCtl.value)/100;updateUI();});
+      ui.lifeCtl.addEventListener('input',()=>{config.dropLifetime=Number(ui.lifeCtl.value);updateUI();});
+      ui.speedCtl.addEventListener('input',()=>{config.enemySpeed=Number(ui.speedCtl.value)/100;updateUI();});
+      ui.resetTunerBtn.addEventListener('click',()=>{Object.assign(config,DEFAULT_CONFIG);syncTunerInputs();toast('已恢复默认参数');});
+      document.querySelectorAll('[data-perk]').forEach(btn=>btn.addEventListener('click',()=>{const perk=btn.dataset.perk;if(perk==='damage')state.damageBonus+=totalDamage()*.2;if(perk==='rate')state.fireRateBonus+=totalFireRate()*.15;if(perk==='repair')state.hp=Math.min(state.maxHp,state.hp+20);state.paused=false;ui.levelModal.classList.remove('show');toast(btn.querySelector('b').textContent+' 已生效');updateUI();}));
+      reset(); raf=requestAnimationFrame(loop);
+      window.__game = { getState: () => ({...state, enemies: state.enemies.length, bullets: state.bullets.length, config:{...config}}), start, reset, spawnGroundDrop, addTestPair, moveOrSwap };
+    })();
+  </script>
+</body>
+</html>
