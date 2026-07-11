@@ -25,7 +25,7 @@ export function createModals(refs: DomRefs, hooks: { onPerk(id: string): void; o
       refs.resultDesc.textContent = fmt(win ? texts.result.winDesc : texts.result.loseDesc, { collected: state.collected, expired: state.expired });
       refs.resultKills.textContent = String(state.kills);
       refs.resultMerges.textContent = String(state.merges);
-      refs.resultUses.textContent = String(state.uses);
+      refs.resultUses.textContent = String(state.consumes);
       refs.resultModal.classList.add('show');
     },
   };

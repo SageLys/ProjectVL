@@ -1,14 +1,14 @@
-import { gameConfig } from '../data';
+import { cfg } from '../config';
 import type { Config, GameState } from '../core/types';
 import { totalRange } from '../core/stats';
 
 const TAU = Math.PI * 2;
-const T = gameConfig.turret;
-const W = gameConfig.canvas.width;
-const H = gameConfig.canvas.height;
 
 /** 背景网格、内圈与当前射程虚线圈。 */
 export function drawArena(ctx: CanvasRenderingContext2D, state: GameState, config: Config): void {
+  const T = cfg.combat.turret;
+  const W = cfg.combat.canvas.width;
+  const H = cfg.combat.canvas.height;
   ctx.fillStyle = '#06101d';
   ctx.fillRect(0, 0, W, H);
   const g = ctx.createLinearGradient(0, 0, 0, H);

@@ -1,11 +1,11 @@
-import { gameConfig } from '../data';
+import { cfg } from '../config';
 import type { GameState } from '../core/types';
 
 const TAU = Math.PI * 2;
-const T = gameConfig.turret;
 
 /** 中央清醒炮台：本体 + 恶魔角 + ♥，并按 turretAngle 旋转炮管。 */
 export function drawTurret(ctx: CanvasRenderingContext2D, state: GameState): void {
+  const T = cfg.combat.turret;
   const a = state.turretAngle;
   ctx.save();
   ctx.translate(T.x, T.y);

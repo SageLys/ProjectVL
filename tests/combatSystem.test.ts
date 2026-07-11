@@ -1,14 +1,17 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { findTarget, shoot, updateBullets } from '../src/core/systems/combatSystem';
 import { totalMulti } from '../src/core/stats';
-import { enemy, freshState, createDefaultConfig, constRng } from './helpers';
+import { applyBrand } from '../src/core/effects/statusSystem';
+import { enemy, freshState, createDefaultConfig, constRng, resetTestEnv } from './helpers';
+
+beforeEach(resetTestEnv);
 
 describe('combatSystem · 锁定', () => {
   it('锁定射程内最近的敌人', () => {
     const s = freshState();
     const config = createDefaultConfig();
-    const near = enemy({ x: 500, y: 300 }); // 距炮台 20
-    const far = enemy({ x: 600, y: 300 }); // 距炮台 120
+    const near = enemy({ x: 500, y: 300 });
+    const far = enemy({ x: 600, y: 300 });
     s.enemies = [far, near];
     expect(findTarget(s, config)).toBe(near);
   });
@@ -17,8 +20,18 @@ describe('combatSystem · 锁定', () => {
     const s = freshState();
     const config = createDefaultConfig();
     config.range = 430;
-    s.enemies = [enemy({ x: 980, y: 300 })]; // 距炮台 500 > 430
+    s.enemies = [enemy({ x: 980, y: 300 })];
     expect(findTarget(s, config)).toBeNull();
+  });
+
+  it('烙印（focusPriority）权重优先于最近（仲裁规则5）', () => {
+    const s = freshState();
+    const config = createDefaultConfig();
+    const near = enemy({ x: 500, y: 300 });
+    const branded = enemy({ x: 620, y: 300 });
+    applyBrand(branded, 2, 4);
+    s.enemies = [near, branded];
+    expect(findTarget(s, config)).toBe(branded);
   });
 });
 
@@ -35,25 +48,36 @@ describe('combatSystem · 射击与命中', () => {
   it('子弹命中扣血；致命命中触发击杀', () => {
     const s = freshState();
     const config = createDefaultConfig();
-    const e = enemy({ x: 500, y: 300, hp: 10, maxHp: 10, xp: 1 });
-    s.enemies = [e];
+    s.enemies = [enemy({ x: 500, y: 300, hp: 10, maxHp: 10, xp: 1 })];
     s.bullets = [{ x: 500, y: 300, vx: 0, vy: 0, r: 4, life: 1, damage: 16 }];
-    const ev = updateBullets(s, config, constRng(0.99), 0.016);
-    expect(s.enemies).toHaveLength(0); // 被击杀移除
+    updateBullets(s, config, constRng(0.99), 0.016);
+    expect(s.enemies).toHaveLength(0);
     expect(s.kills).toBe(1);
     expect(s.xp).toBe(1);
-    expect(s.bullets).toHaveLength(0); // 命中后子弹消失
-    void ev;
+    expect(s.bullets).toHaveLength(0);
   });
 
   it('非致命命中只扣血，敌人存活', () => {
     const s = freshState();
     const config = createDefaultConfig();
-    const e = enemy({ x: 500, y: 300, hp: 100, maxHp: 100 });
-    s.enemies = [e];
+    s.enemies = [enemy({ x: 500, y: 300, hp: 100, maxHp: 100 })];
     s.bullets = [{ x: 500, y: 300, vx: 0, vy: 0, r: 4, life: 1, damage: 16 }];
     updateBullets(s, config, constRng(0.99), 0.016);
     expect(s.enemies).toHaveLength(1);
     expect(s.enemies[0].hp).toBe(84);
+  });
+
+  it('穿透弹：命中不消耗，伤害按保留比衰减，且不重复命中同一敌人', () => {
+    const s = freshState();
+    const config = createDefaultConfig();
+    const a = enemy({ x: 500, y: 300, hp: 100, maxHp: 100 });
+    s.enemies = [a];
+    s.bullets = [{ x: 500, y: 300, vx: 0, vy: 0, r: 4, life: 1, damage: 20, pierceLeft: 2, damageRetention: 0.5, hitIds: [] }];
+    updateBullets(s, config, constRng(0.99), 0.016);
+    expect(s.enemies[0].hp).toBe(80);       // 命中一次
+    expect(s.bullets).toHaveLength(1);      // 未消耗
+    expect(s.bullets[0].damage).toBe(10);   // 20 × 0.5
+    updateBullets(s, config, constRng(0.99), 0.016);
+    expect(s.enemies[0].hp).toBe(80);       // hitIds 防重复命中
   });
 });

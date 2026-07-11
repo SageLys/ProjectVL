@@ -32,27 +32,28 @@ ProjectVL/
 ├─ src/
 │  ├─ main.ts              # 薄胶水：加载数据 → 建状态 → 绑输入 → 主循环
 │  ├─ styles/app.css       # 全部样式（含 880/560px 响应式断点）
-│  ├─ data/                # 唯一数值/文案来源（JSON）
-│  │  ├─ gameConfig.json   # 画布/炮台/HP/卡槽/星级倍率/默认参数/战斗常量/调参范围
-│  │  ├─ cards.json        # 卡牌元数据 + 效果系数
-│  │  ├─ enemies.json      # 敌人基础值与每波成长
-│  │  ├─ waves.json        # 波次数量/节奏/类型判定/boss 波
-│  │  ├─ perks.json        # 经验成长与升级三选一
-│  │  └─ texts.json        # 界面文案与 toast 模板
+│  ├─ config/              # 唯一数值/规则配置来源（P3 六域拆分 + variant 机制）
+│  │  ├─ base/             # combat / waves / enemies / skills / progression / economy / tuner
+│  │  ├─ variants/         # 覆盖文件（equip-slots=方案A装备格、dev-short=3波短局）
+│  │  ├─ loader.ts         # 深合并 + URL ?variant= 解析（A/B 测试基建）
+│  │  └─ index.ts          # 运行配置单例 cfg / applyVariants
+│  ├─ data/texts.json      # 皮肤层文案（题材解耦 P0-5，可整体替换）
 │  ├─ core/                # 纯规则层（禁止 DOM/Canvas）
 │  │  ├─ types.ts          # State/Card/Enemy/... 与 GameEvent 事件类型
 │  │  ├─ createInitialState.ts
-│  │  ├─ stats.ts          # 总伤害/射速/弹丸/射程/掉落概率
+│  │  ├─ stats.ts          # 总伤害/射速/弹丸/射程/掉落概率与时限（含修饰乘数）
 │  │  ├─ endGame.ts
 │  │  ├─ updateGame.ts     # 单帧编排，返回 GameEvent[]
-│  │  └─ systems/          # waveSystem/enemySystem/combatSystem/dropSystem/
+│  │  ├─ effects/          # 效果解释器：defs(数据模型)/registry(31原子)/interpreter(触发器总线
+│  │  │                    # +passive聚合+消耗释放)/statusSystem(状态+冲突仲裁)/runtime(区域/光环/召唤/护盾 tick)
+│  │  └─ systems/          # waveSystem/enemySystem/combatSystem/dropSystem/damageSystem/
 │  │                       # cardSystem/equipmentSystem/progressionSystem/particleSystem
-│  ├─ render/              # canvasRenderer + drawArena/Enemies/Bullets/Drops/Particles/Turret
-│  ├─ ui/                  # domRefs/renderHud/renderCards/renderEquipment/renderTempSlot/
+│  ├─ render/              # canvasRenderer + drawArena/Enemies/Bullets/Drops/Particles/Turret/Effects
+│  ├─ ui/                  # domRefs/renderHud/renderCards/renderEquipment/
 │  │                       # tunerPanel/modals/toast/slotFactory/eventText/format
-│  ├─ input/               # pointerDrag / dropClick / keyboard
+│  ├─ input/               # pointerDrag（含拖入主画面=消耗释放）/ dropClick / keyboard
 │  └─ debug/exposeDebugApi.ts
-├─ tests/                  # Vitest：6 个系统测试 + helpers
+├─ tests/                  # Vitest：系统测试 + 原子/解释器/加载器/整局冒烟 + helpers
 ├─ legacy/                 # 归档（勿删）：单文件原型 + 历史备份 + 任务记录
 └─ docs/                   # 立项案 docx 等
 ```
@@ -64,18 +65,22 @@ ProjectVL/
 2. **表现副作用（toast、弹窗、粒子表现、UI 刷新）统一由事件驱动**：`updateGame` 与各系统返回语义化
    `GameEvent[]`，在 `ui/` 的 `dispatch` 中翻译为文案并触发弹窗与重绘。core 不产出最终文案。
 3. **按层改动**：
-   - 改数值 → 只改 `src/data/*.json`
+   - 改数值/规则参数 → 只改 `src/config/base/*.json`；做 A/B 对照 → 加 `src/config/variants/*.json` 并在 `loader.ts` 登记（URL `?variant=名字` 或调参面板切换）
+   - 改技能卡 → 只改 `src/config/base/skills.json` 的 cards（数据）——**禁止在 core 里为某张卡写 if**，效果由 `core/effects` 通用解释器结算
+   - 改皮肤文案 → `src/data/texts.json`
    - 改规则 → `src/core`（**必须补测试**）
    - 改画面 → `src/render`
    - 改界面 → `src/ui`
    - 改输入 → `src/input`
 4. **调试口**：`window.__game` 暴露 `getState / start / reset / spawnGroundDrop / addTestPair /
-   moveOrSwap / setConfig`，**仅 DEV 模式注入**（生产构建自动摇树移除），供人工与浏览器自动化测试使用。
+   moveOrSwap / consumeAt / toggleLock / setConfig / getVariants`，**仅 DEV 模式注入**（生产构建自动摇树移除），供人工与浏览器自动化测试使用。
 
 ## 行为契约
 
-重构前后玩法逐条一致（伤害/射速/射程/掉落、波次生成与成长、卡牌合成与倍率、装备栏 3 星门槛、
-临时栏本波生效、经验升级三选一等）。这些规则由 `tests/` 下的 Vitest 固化，改规则时先更新/新增测试。
+**P3（2026-07-12）起行为按 P2/P3 设计变更，与单文件原型不再逐条一致**：临时栏已移除（拖入主画面=
+消耗释放，落点=技能锚点）；入装门槛 2★、上限 3★、二合、同类型唯一、喂养合成；基座默认「锁定即装备」
+（方案B，共享 10 格锁 3），独立装备格为 `equip-slots` variant。技能=JSON 数据+通用解释器
+（8 触发器×31 效果原子）。全部规则由 `tests/` 下 108 个 Vitest 用例固化，改规则时先更新/新增测试。
 
 ## 归档
 

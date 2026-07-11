@@ -6,10 +6,16 @@ export interface DebugApi {
   getState(): unknown;
   start(): void;
   reset(): void;
-  spawnGroundDrop(x: number, y: number, type?: CardType | null): void;
+  spawnGroundDrop(x: number, y: number, type?: CardType | null, star?: number): void;
   addTestPair(): void;
   moveOrSwap(source: SlotSource, index: number, targetKind: SlotKind, targetIndex: number): void;
+  /** 消耗释放：手牌 index 卡在画布坐标 (x,y) 落点释放。 */
+  consumeAt(index: number, x: number, y: number): void;
+  /** 锁定即装备（方案B）：切换手牌 index 卡的锁定态。 */
+  toggleLock(index: number): void;
   setConfig(patch: Partial<Config>): void;
+  /** 当前生效的 variant 名单。 */
+  getVariants(): string[];
 }
 
 declare global {

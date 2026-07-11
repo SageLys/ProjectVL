@@ -2,9 +2,9 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "urn:projectvl:skills-schema",
   "title": "ProjectVL 技能卡数据模型",
-  "version": "0.2.0",
-  "date": "2026-07-10",
-  "description": "P2 交付：功能型技能卡的数据模型。技能 = 数据(本模型的实例 JSON) + 通用解释器(触发器→效果原子)，P3 实现解释器时禁止每张卡硬编码 if。设计说明与首批 12 张卡见 docs/P2_技能体系框架与首批卡牌设计表.md。v0.2.0：按 docs/P4前置_星级合成与卡槽_结论.md（D1–D6）修订——3★ 上限/二合/入装门槛 2★（1★ 无装备态）/手牌 7+装备 3/喂养合成，新增 mechanisms.economy。所有数值均为占位，P4 统一标定。",
+  "version": "0.3.0",
+  "date": "2026-07-12",
+  "description": "P2 交付：功能型技能卡的数据模型。技能 = 数据(本模型的实例 JSON) + 通用解释器(触发器→效果原子)，P3 实现解释器时禁止每张卡硬编码 if。设计说明与首批 12 张卡见 docs/P2_技能体系框架与首批卡牌设计表.md。v0.2.0：按 docs/P4前置_星级合成与卡槽_结论.md（D1–D6）修订——3★ 上限/二合/入装门槛 2★（1★ 无装备态）/手牌 7+装备 3/喂养合成，新增 mechanisms.economy。所有数值均为占位，P4 统一标定。v0.3.0（P3 实施时修订）：触发器新增 passive——承载常驻修饰类装备态（掉率/时限/经验乘数、反伤、突破减免、处决线、破盾新星、换形 beamMorph/mortarMorph、常驻光环 aura、mergeRule），此前设计表中「掉率+25%」类无事件语义的装备态在 schema 中无处安放；解释器对 passive 绑定做聚合读取（getModifiers）而非事件触发。",
 
   "type": "object",
   "required": ["version", "cards", "mechanisms"],
@@ -43,7 +43,8 @@
         "onBreach",
         "onPickup",
         "interval",
-        "onMerge"
+        "onMerge",
+        "passive"
       ]
     },
 
@@ -56,7 +57,8 @@
       "onBreach": "敌人突破触及炮台时。上下文: enemy, damage。用于突破减免、反伤。",
       "onPickup": "玩家点击拾取地面掉落时。上下文: drop。经济类联动。",
       "interval": "固定周期。参数: seconds。3★ 形态（雷暴/新星/脉冲光环）的主要载体。",
-      "onMerge": "卡牌合成完成时。上下文: cardType, resultStar。合成规则类效果的载体。"
+      "onMerge": "卡牌合成完成时。上下文: cardType, resultStar。合成规则类效果的载体。",
+      "passive": "（v0.3.0 新增）常驻修饰，无事件时机。解释器聚合读取：经济乘数/防御修饰/换形/常驻光环/mergeRule。"
     },
 
     "atom": {

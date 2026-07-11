@@ -1,0 +1,9 @@
+{
+  "$comment": "方案A：独立装备格（A/B 测试对照组）。基座默认为方案B锁定即装备（共享 10 格锁 3）。",
+  "economy": {
+    "equipMode": "slots",
+    "handSlots": 7,
+    "equipSlots": 3,
+    "maxLocked": 0
+  }
+}

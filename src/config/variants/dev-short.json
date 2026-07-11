@@ -1,0 +1,7 @@
+{
+  "$comment": "开发用短局：3 波速通，验证 variant 深合并与波次配置化。",
+  "waves": {
+    "totalWaves": 3,
+    "bossWave": 3
+  }
+}

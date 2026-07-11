@@ -1,0 +1,15 @@
+{
+  "maxStar": 3,
+  "mergeCopies": 2,
+  "equipThreshold": 2,
+  "equipMode": "lock",
+  "handSlots": 10,
+  "equipSlots": 0,
+  "maxLocked": 3,
+  "inRunSlotExpansion": false,
+  "equipDistinctTypes": true,
+  "feedEquipped": true,
+  "dropStarPolicy": { "normal": 1, "bountyBossMax": 2, "star2Share": 0.05 },
+  "drops": { "pickupRadius": 34, "chanceCap": 0.95 },
+  "defaults": { "dropChance": 0.5, "dropLifetime": 6 }
+}

@@ -8,10 +8,10 @@
 <body>
   <main class="app">
     <header class="topbar">
-      <div class="brand"><small>360° DEFENSE PROTOTYPE · V0.2</small><h1>魅魔心防战</h1></div>
+      <div class="brand"><small>360° DEFENSE PROTOTYPE · V0.3</small><h1>魅魔心防战</h1></div>
       <div class="status">
-        <div class="pill">目标：<strong>守住 5 波追求者</strong></div>
-        <div class="pill">核心：<strong>自动攻击 → 点击拾取 → 自动合成 → 装配</strong></div>
+        <div class="pill">目标：<strong>守住全部波次</strong></div>
+        <div class="pill">核心：<strong>自动攻击 → 点击拾取 → 合成 → 锁定装备 / 拖入战场消耗</strong></div>
       </div>
     </header>
     <section class="layout">
@@ -21,18 +21,14 @@
           <div class="hud-box"><div class="label">私人空间</div><div class="value"><span id="hpText">100</span> / 100</div><div class="bar"><i id="hpBar"></i></div></div>
           <div class="hud-box"><div class="label">经验 · Lv.<span id="levelText">1</span></div><div class="value"><span id="xpText">0</span> / <span id="xpNeed">8</span></div><div class="bar xp"><i id="xpBar" style="width:0%"></i></div></div>
         </div>
-        <div class="equipment-bar" aria-label="装备栏">
-          <h3>魅魔装备</h3><small>3栏 · 仅限3星卡</small>
+        <div class="equipment-bar" id="equipmentBar" aria-label="装备栏">
+          <h3>魅魔装备</h3><small id="equipmentHint">独立装备格</small>
           <div class="equipment-slots" id="equipmentSlots"></div>
-        </div>
-        <div class="temp-equipment-bar" aria-label="临时装备栏">
-          <h3>临时心意</h3><small>无限拖入 · 本波生效</small>
-          <div class="temp-slot" id="tempSlot" data-testid="temp-slot">拖入卡牌<br>叠加到本波</div>
         </div>
         <div class="center-msg" id="centerMsg"><h2>守住心防</h2><p>追求者将从四面八方靠近；清醒炮台会自动迎击</p></div>
         <div class="toast" id="toast"></div>
         <div class="cards-area">
-          <div class="cards-head"><strong>升级卡槽</strong><span>自动合成 · 3星可放左侧 · 右侧临时本波生效</span></div>
+          <div class="cards-head"><strong>手牌卡槽</strong><span id="cardsHint">自动合成 · 单击锁定=装备 · 拖入战场=消耗释放</span></div>
           <div class="drop-telemetry" id="dropTelemetry">地面 0 · 已拾取 0 · 超时 0</div>
           <div class="cards" id="cards"></div>
         </div>
@@ -45,18 +41,18 @@
         </section>
         <section class="panel">
           <h3>清醒炮台</h3>
-          <div class="dropzone"><div class="turret-icon">⌁</div><strong>装备与临装已启用</strong><p>左侧装备栏只收 3 星卡<br>右侧临时卡只本波生效</p></div>
+          <div class="dropzone"><div class="turret-icon">⌁</div><strong>一卡两用</strong><p>锁定/装备 = 持续强化<br>拖入战场 = 落点即时释放</p></div>
           <div class="stats">
             <div class="stat"><span>伤害</span><strong id="damageStat">16</strong></div>
             <div class="stat"><span>射速</span><strong id="rateStat">3.3/s</strong></div>
             <div class="stat"><span>弹丸</span><strong id="multiStat">1</strong></div>
-            <div class="stat"><span>波次</span><strong><span id="waveText">0</span> / 5</strong></div>
+            <div class="stat"><span>波次</span><strong><span id="waveText">0</span> / <span id="totalWavesText">5</span></strong></div>
           </div>
         </section>
         <section class="panel">
           <h3>战斗控制</h3>
           <div class="controls"><button class="btn primary" id="startBtn">开始游戏</button><button class="btn" id="pauseBtn">暂停</button><button class="btn" id="testCardBtn">生成测试掉落</button></div>
-          <p>炮台：自动锁定最近的追求者<br>战场：点击限时心意拾取<br>卡牌：3星卡可进左侧装备；右侧临时格可无限投入</p>
+          <p>炮台：自动锁定（烙印优先）<br>战场：点击限时心意拾取<br>卡牌：单击锁定=装备；拖入战场=消耗</p>
         </section>
         <section class="panel">
           <h3>实时参数控制</h3>
@@ -67,13 +63,14 @@
             <div class="tune-row"><label for="dropCtl">掉落概率 <output id="dropCtlVal">50%</output></label><input id="dropCtl" data-testid="drop-control" type="range" min="0" max="100" value="50" step="5"></div>
             <div class="tune-row"><label for="lifeCtl">存在时间 <output id="lifeCtlVal">6.0秒</output></label><input id="lifeCtl" data-testid="life-control" type="range" min="2" max="15" value="6" step="0.5"></div>
             <div class="tune-row"><label for="speedCtl">追求者速度 <output id="speedCtlVal">100%</output></label><input id="speedCtl" data-testid="speed-control" type="range" min="40" max="180" value="100" step="10"></div>
+            <div class="tune-row"><label for="variantSel">配置 Variant</label><select id="variantSel" data-testid="variant-select"></select></div>
           </div>
-          <p class="tune-note">参数修改即时生效；卡牌强化会叠加在基础伤害与射速之上。</p>
+          <p class="tune-note">参数修改即时生效；Variant 切换将重载页面（A/B 测试基建，也可用 URL ?variant= 指定）。</p>
           <button class="btn" id="resetTunerBtn">恢复默认参数</button>
         </section>
         <section class="panel guide">
           <h3>验证重点</h3>
-          <ol><li>360°来袭是否形成清晰而紧张的战场观察？</li><li>点击限时心意是否带来合理的注意力取舍？</li><li>自动合成与三栏换装是否形成构筑策略？</li></ol>
+          <ol><li>锁定即装备是否比拖拽换装更省注意力？</li><li>拖入战场的落点释放是否形成有操作感的决策？</li><li>合成、锁定与消耗是否构成清晰的取舍三角？</li></ol>
         </section>
       </aside>
     </section>
@@ -90,7 +87,7 @@
     <div class="modal-card"><h2 id="resultTitle">防守完成</h2><p id="resultDesc"></p><div class="result-grid">
       <div class="stat"><span>击杀</span><strong id="resultKills">0</strong></div>
       <div class="stat"><span>合成</span><strong id="resultMerges">0</strong></div>
-      <div class="stat"><span>装配</span><strong id="resultUses">0</strong></div>
+      <div class="stat"><span>消耗</span><strong id="resultUses">0</strong></div>
     </div><button class="btn primary" id="restartBtn">再来一局</button></div>
   </div>
 

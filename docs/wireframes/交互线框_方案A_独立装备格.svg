@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 900" font-family="'PingFang SC','Microsoft YaHei',sans-serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#67e8f9"/>
+    </marker>
+  </defs>
+  <rect width="860" height="900" fill="#06101d"/>
+  <text x="30" y="34" fill="#e9eef5" font-size="20" font-weight="bold">交互线框 · 方案A：独立装备格（默认方案）</text>
+  <text x="30" y="56" fill="#8ea4bd" font-size="12">竖屏触控 · 双手持机 ｜ 手牌7 + 装备3（P4前置定案默认值） ｜ 2026-07-10</text>
+
+  <!-- ============ 手机框 ============ -->
+  <rect x="30" y="80" width="380" height="790" rx="28" fill="#0b1524" stroke="#3b5068" stroke-width="3"/>
+
+  <!-- HUD 条 -->
+  <rect x="46" y="96" width="348" height="44" rx="8" fill="#0e1a2c" stroke="#22344a"/>
+  <rect x="56" y="108" width="120" height="8" rx="4" fill="#1d3350"/>
+  <rect x="56" y="108" width="86" height="8" rx="4" fill="#e0567a"/>
+  <text x="56" y="132" fill="#8ea4bd" font-size="10">HP 72/100</text>
+  <text x="220" y="118" fill="#e9eef5" font-size="11">波次 4/8</text>
+  <text x="220" y="132" fill="#8ea4bd" font-size="10">Lv.5 ▓▓▓░</text>
+  <text x="330" y="124" fill="#8ea4bd" font-size="10">⏸</text>
+
+  <!-- 主画面（释放区） -->
+  <rect x="46" y="148" width="348" height="470" rx="10" fill="#081221" stroke="#22344a"/>
+  <rect x="54" y="156" width="332" height="454" rx="8" fill="none" stroke="#67e8f9" stroke-width="1.5" stroke-dasharray="7 5" opacity=".55"/>
+  <text x="220" y="174" fill="#67e8f9" font-size="10" text-anchor="middle" opacity=".8">① 整个主画面 = 消耗释放区（临时栏已移除）</text>
+
+  <!-- 炮台 -->
+  <circle cx="220" cy="380" r="22" fill="#12233b" stroke="#d59bff" stroke-width="2"/>
+  <text x="220" y="386" fill="#d59bff" font-size="14" text-anchor="middle">⌁</text>
+  <circle cx="220" cy="380" r="120" fill="none" stroke="#d59bff" stroke-width="1" stroke-dasharray="2 6" opacity=".3"/>
+
+  <!-- 敌人 -->
+  <circle cx="110" cy="250" r="9" fill="#37507a"/>
+  <circle cx="330" cy="300" r="9" fill="#37507a"/>
+  <circle cx="140" cy="520" r="9" fill="#37507a"/>
+  <!-- 精英 bounty -->
+  <circle cx="320" cy="490" r="13" fill="#503752" stroke="#ffcf5c" stroke-width="2"/>
+  <text x="320" y="472" fill="#ffcf5c" font-size="11" text-anchor="middle">⚑ 赏金</text>
+
+  <!-- 掉落（限时环） -->
+  <circle cx="150" cy="330" r="10" fill="#0d2438" stroke="#67e8f9" stroke-width="2"/>
+  <path d="M150 320 A10 10 0 0 1 159 335" fill="none" stroke="#ffcf5c" stroke-width="3"/>
+
+  <!-- 拖拽中：手指 + 偏移落点预览 -->
+  <circle cx="285" cy="285" r="34" fill="none" stroke="#67e8f9" stroke-width="2" stroke-dasharray="5 4"/>
+  <circle cx="285" cy="285" r="3.5" fill="#67e8f9"/>
+  <text x="285" y="243" fill="#67e8f9" font-size="10" text-anchor="middle">落点预览环（AoE 半径）</text>
+  <circle cx="285" cy="345" r="12" fill="#e9eef5" opacity=".25"/>
+  <text x="304" y="349" fill="#8ea4bd" font-size="10">手指</text>
+  <line x1="285" y1="341" x2="285" y2="292" stroke="#67e8f9" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="292" y="322" fill="#67e8f9" font-size="10">偏移Δy（T1校准）</text>
+  <!-- 拖拽 ghost 卡 -->
+  <rect x="255" y="352" width="44" height="30" rx="6" fill="#67e8f9" opacity=".35"/>
+  <text x="277" y="371" fill="#e9eef5" font-size="10" text-anchor="middle">❄2★</text>
+
+  <!-- 点击拾取注释 -->
+  <line x1="150" y1="330" x2="90" y2="330" stroke="#8ea4bd" stroke-width="1" stroke-dasharray="3 3"/>
+  <text x="60" y="318" fill="#8ea4bd" font-size="9">③ 点击=拾取</text>
+  <text x="60" y="330" fill="#8ea4bd" font-size="9">/接赏金</text>
+
+  <!-- ============ 底部 dock ============ -->
+  <rect x="46" y="626" width="348" height="228" rx="12" fill="#0a1626" stroke="#22344a"/>
+
+  <!-- 装备行 -->
+  <text x="58" y="648" fill="#e9c8ff" font-size="11" font-weight="bold">装备 ④</text>
+  <text x="110" y="648" fill="#8ea4bd" font-size="9">≥2★ · 同类型唯一 · 同型再入=喂养合成</text>
+  <g>
+    <rect x="58" y="656" width="66" height="56" rx="8" fill="#131c30" stroke="#d59bff" stroke-width="1.5"/>
+    <text x="91" y="680" fill="#e9eef5" font-size="11" text-anchor="middle">⚡3★</text>
+    <text x="91" y="698" fill="#d59bff" font-size="9" text-anchor="middle">连锁</text>
+    <rect x="132" y="656" width="66" height="56" rx="8" fill="#131c30" stroke="#d59bff" stroke-width="1.5"/>
+    <text x="165" y="680" fill="#e9eef5" font-size="11" text-anchor="middle">❄2★</text>
+    <text x="165" y="698" fill="#d59bff" font-size="9" text-anchor="middle">冰冻</text>
+    <rect x="206" y="656" width="66" height="56" rx="8" fill="none" stroke="#d59bff" stroke-width="1.2" stroke-dasharray="5 4" opacity=".5"/>
+    <text x="239" y="688" fill="#d59bff" font-size="10" text-anchor="middle" opacity=".5">装备3</text>
+  </g>
+  <!-- 装备行右侧：波间信息 -->
+  <rect x="286" y="656" width="96" height="56" rx="8" fill="#0e1a2c"/>
+  <text x="334" y="678" fill="#8ea4bd" font-size="9" text-anchor="middle">地面 2 · 拾取 23</text>
+  <text x="334" y="694" fill="#8ea4bd" font-size="9" text-anchor="middle">下一波 00:07</text>
+
+  <!-- 手牌行 -->
+  <text x="58" y="738" fill="#e9eef5" font-size="11" font-weight="bold">手牌 ⑥</text>
+  <text x="110" y="738" fill="#8ea4bd" font-size="9">7格 · 自动合成 · 上限3★</text>
+  <g>
+    <rect x="58" y="746" width="42" height="52" rx="7" fill="#131c30" stroke="#3b5068"/>
+    <text x="79" y="770" fill="#e9eef5" font-size="10" text-anchor="middle">❄1★</text>
+    <rect x="105" y="746" width="42" height="52" rx="7" fill="#131c30" stroke="#3b5068"/>
+    <text x="126" y="770" fill="#e9eef5" font-size="10" text-anchor="middle">⚡1★</text>
+    <rect x="152" y="746" width="42" height="52" rx="7" fill="#131c30" stroke="#67e8f9" stroke-width="1.5"/>
+    <text x="173" y="770" fill="#e9eef5" font-size="10" text-anchor="middle">❄2★</text>
+    <rect x="199" y="746" width="42" height="52" rx="7" fill="#131c30" stroke="#3b5068"/>
+    <text x="220" y="770" fill="#e9eef5" font-size="10" text-anchor="middle">🛡1★</text>
+    <rect x="246" y="746" width="42" height="52" rx="7" fill="none" stroke="#3b5068" stroke-dasharray="4 4"/>
+    <rect x="293" y="746" width="42" height="52" rx="7" fill="none" stroke="#3b5068" stroke-dasharray="4 4"/>
+    <rect x="340" y="746" width="42" height="52" rx="7" fill="none" stroke="#3b5068" stroke-dasharray="4 4"/>
+  </g>
+
+  <!-- 装备拖拽路径 ⑤ -->
+  <path d="M173 746 Q170 726 165 716" fill="none" stroke="#d59bff" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="182" y="728" fill="#d59bff" font-size="9">⑤ 拖入/双击=装备</text>
+
+  <!-- 拇指热区 -->
+  <path d="M58 848 Q220 800 382 848" fill="none" stroke="#ffcf5c" stroke-width="1" stroke-dasharray="3 4" opacity=".6"/>
+  <text x="220" y="842" fill="#ffcf5c" font-size="9" text-anchor="middle" opacity=".8">双手拇指热区（T1 实测校准）</text>
+
+  <!-- ============ 右侧注释列 ============ -->
+  <g font-size="12" fill="#c6d3e2">
+    <text x="440" y="110" fill="#e9eef5" font-size="14" font-weight="bold">交互注释</text>
+
+    <text x="440" y="140" fill="#67e8f9" font-weight="bold">① 消耗释放（取代临时栏）</text>
+    <text x="440" y="158">从手牌拖卡进主画面任意位置，抬指即释放。</text>
+    <text x="440" y="174">释放点 = 技能落点：AoE/冰冻/领域按落点结算，</text>
+    <text x="440" y="190">消耗用法从「全屏一刀切」变为空间瞄准决策。</text>
+    <text x="440" y="206" fill="#8ea4bd" font-size="11">任意星级可消耗；1★ 无装备态、仅素材/消耗。</text>
+
+    <text x="440" y="236" fill="#67e8f9" font-weight="bold">② 手指遮挡对策</text>
+    <text x="440" y="254">拖拽时落点预览环偏移在手指上方 Δy 显示，</text>
+    <text x="440" y="270">Δy 与预览环样式由 T1 触控验证定，落进</text>
+    <text x="440" y="286">skills-schema 的 aoeRadius 字段驱动半径。</text>
+
+    <text x="440" y="316" fill="#67e8f9" font-weight="bold">③ 点击动词复用（P2 定案）</text>
+    <text x="440" y="334">主画面单击 = 拾取最近掉落 / 接精英赏金。</text>
+    <text x="440" y="350">与拖拽由移动阈值区分：按下后位移 &lt; 8px 判点击。</text>
+
+    <text x="440" y="380" fill="#d59bff" font-weight="bold">④ 装备区并入底部 dock</text>
+    <text x="440" y="398">从画面左侧绝对定位移到手牌正上方，</text>
+    <text x="440" y="414">消灭跨屏拖拽；装备/手牌间拖拽路径 ≤ 90px。</text>
+
+    <text x="440" y="444" fill="#d59bff" font-weight="bold">⑤ 装备操作</text>
+    <text x="440" y="462">拖入装备格或双击快速装备（触屏可换长按）。</text>
+    <text x="440" y="478">门槛 ≥2★（P4前置定案，现代码 3★ 需改）；</text>
+    <text x="440" y="494">同类型唯一：拖入已有同型 = 喂养合成升星。</text>
+
+    <text x="440" y="524" fill="#e9eef5" font-weight="bold">⑥ 手牌与合成（不变）</text>
+    <text x="440" y="542">7 格自动合成，二合升星，上限 3★。</text>
+
+    <rect x="440" y="570" width="390" height="130" rx="10" fill="#0e1a2c" stroke="#22344a"/>
+    <text x="456" y="594" fill="#ffcf5c" font-weight="bold">方案A 取舍</text>
+    <text x="456" y="616" font-size="11">＋ 库存与装备职责清晰，槽位压力（7格周转）独立于装备数</text>
+    <text x="456" y="634" font-size="11">＋ 与 P4前置合成经济模型的默认参数（7+3）一致，无需重标定</text>
+    <text x="456" y="652" font-size="11">－ 保留拖拽/双击两种装备动词，操作成本高于方案B 的单击</text>
+    <text x="456" y="670" font-size="11">－ 底部 dock 两行高度 ≈228px，压缩主画面竖向空间</text>
+    <text x="456" y="688" font-size="11" fill="#8ea4bd">A/B 判据见《交互重设计》文档 §4</text>
+  </g>
+</svg>
