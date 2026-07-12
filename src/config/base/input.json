@@ -1,7 +1,7 @@
 {
   "tapMaxPx": 8,
-  "tapMaxMs": 250,
-  "reticleOffsetY": 60,
-  "confirmStyle": "bubble",
-  "holdOrDbl": "long-press"
+  "tapMaxMs": 150,
+  "reticleOffsetY": 30,
+  "confirmStyle": "hold-ring",
+  "holdOrDbl": "double-tap"
 }
