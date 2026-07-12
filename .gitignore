@@ -1,4 +1,5 @@
 node_modules/
+.codex_tmp/
 dist/
 *.local
 .DS_Store
