@@ -7,7 +7,7 @@ import { fireTrigger, getModifiers } from '../effects/interpreter';
 import { canIssueGameplayCommand } from '../gameplayCommand';
 
 const TAU = Math.PI * 2;
-export const CARD_KEYS: CardType[] = ['damage', 'rate', 'multi', 'range', 'luck'];
+export const CARD_KEYS: CardType[] = cfg.skills.cards.map(card => card.id).filter(id => id !== 'wildcard');
 
 /** 计算某类卡当前持有的 1★ 等价值。锁定模式的锁卡仍在手牌中；独立装备格模式另计装备。 */
 function ownedStar1Value(state: GameState, type: CardType): number {
@@ -28,7 +28,16 @@ function ownedStar1Value(state: GameState, type: CardType): number {
 function randomDropType(state: GameState, rng: Rng): CardType {
   const targeting = cfg.economy.dropTargeting;
   const canCompleteThreeStar = cfg.economy.maxStar >= 3;
-  const activeKeys = CARD_KEYS.slice(0, Math.max(1, Math.min(CARD_KEYS.length, cfg.economy.dropPool.activePoolSize)));
+  const catalog = cfg.skills.cards.map(card => card.id).filter(id => id !== 'wildcard');
+  if (state.activeCardPool.length === 0) {
+    const shuffled = [...catalog];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(rng() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    state.activeCardPool = shuffled.slice(0, Math.max(1, Math.min(shuffled.length, cfg.economy.dropPool.activePoolSize)));
+  }
+  const activeKeys = state.activeCardPool;
   const weights = activeKeys.map(type =>
     targeting.enabled && canCompleteThreeStar && ownedStar1Value(state, type) === 3
       ? targeting.nearCompletionWeight
@@ -95,6 +104,10 @@ export function spawnBountyRewards(
 
 /** 击杀掉落判定：概率命中或 boss 必掉，则在敌人位置生成掉落。 */
 export function rollDropOnKill(state: GameState, config: Config, rng: Rng, enemy: Enemy): void {
+  const wildcardRule = getModifiers(state).mergeRules.find(rule => rule.rule === 'wildcardDrop');
+  if (wildcardRule && (enemy.type === 'boss' || enemy.bounty?.phase === 'accepted')) {
+    spawnGroundDrop(state, config, rng, enemy.x, enemy.y, 'wildcard', 1, 1, enemy.type === 'boss' ? 'boss' : 'bounty');
+  }
   if (enemy.type === 'boss') {
     const star = rng() < cfg.economy.dropStarPolicy.bossStar2Chance
       ? 2

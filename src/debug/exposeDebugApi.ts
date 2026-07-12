@@ -21,6 +21,8 @@ export interface DebugApi {
   getVariants(): string[];
   /** P4.1 触控与语义动作遥测；用于 T1/T2 导出。 */
   getAttentionTelemetry(): AttentionTelemetrySnapshot;
+  /** P5 T2 导出：结算指标 + 最终构筑。 */
+  getRunStats(): unknown;
   clearAttentionTelemetry(): void;
 }
 

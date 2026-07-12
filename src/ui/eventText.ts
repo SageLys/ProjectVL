@@ -3,7 +3,7 @@ import { texts } from '../data';
 import type { CardType, GameEvent } from '../core/types';
 import { fmt } from './format';
 
-const name = (t: CardType) => cfg.skills.legacy.types[t]?.name ?? t;
+const name = (t: CardType) => cfg.skills.legacy.types[t]?.name ?? cfg.skills.cards.find(card => card.id === t)?.textKey.split('.').pop() ?? t;
 const T = texts.toast;
 
 /** 事件类型中会改变卡槽/装备内容、需要重绘槽位的集合。 */

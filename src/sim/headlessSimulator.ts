@@ -131,6 +131,9 @@ export interface HeadlessRunResult {
   formed3Star: number;
   locked3Star: number;
   consumes: number;
+  /** P5 每局构筑导出：本局活跃池与结算时卡牌/装备。 */
+  activeCardPool: string[];
+  finalBuild: { type: string; star: number; equipped: boolean }[];
   dropsGenerated: number;
   collected: number;
   expired: number;
@@ -1567,6 +1570,11 @@ function runOne(
     formed3Star: metrics.formed3Star,
     locked3Star: settlementEconomy.locked3Star,
     consumes: state.consumes,
+    activeCardPool: [...state.activeCardPool],
+    finalBuild: [...state.cards, ...state.equipment].filter((card): card is Card => !!card).map(card => ({
+      type: card.type, star: card.star,
+      equipped: !!card.locked || state.equipment.includes(card),
+    })),
     dropsGenerated,
     collected: state.collected,
     expired: state.expired,

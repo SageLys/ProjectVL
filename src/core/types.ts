@@ -2,7 +2,8 @@
 import type { EffectDef } from './effects/defs';
 
 /** 卡牌类型：P3 过渡期为 5 种旧数值卡；P5 实装技能卡后扩展为技能 id 字符串。 */
-export type CardType = 'damage' | 'rate' | 'multi' | 'range' | 'luck';
+/** 技能 id。保留 string 开放集，正式目录由 skills.json 驱动。 */
+export type CardType = string;
 export type EnemyType = 'normal' | 'fast' | 'tank' | 'boss';
 export type DropSource = 'normal' | 'boss' | 'bounty';
 export type GameMode = 'ready' | 'playing' | 'ended';
@@ -198,6 +199,8 @@ export interface GameState {
   bullets: Bullet[];
   particles: Particle[];
   groundDrops: GroundDrop[];
+  /** 本局从正式目录抽出的活跃掉落池。 */
+  activeCardPool: CardType[];
   cards: (Card | null)[];
   /** 独立装备格（equipMode='slots' 时使用；lock 模式下长度 0，装备=锁定卡）。 */
   equipment: (Card | null)[];

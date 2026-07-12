@@ -1,113 +1,26 @@
 {
-  "version": "0.4.0",
+  "version": "1.0.0-p5",
   "legacy": {
     "starScale": [0, 1, 2.25, 4],
     "types": {
-      "damage": { "name": "清醒", "color": "#ff6577", "icon": "◆", "desc": "清醒弹伤害" },
-      "rate":   { "name": "从容", "color": "#4de2ff", "icon": "ϟ", "desc": "应对速度" },
-      "multi":  { "name": "界限", "color": "#b784ff", "icon": "✦", "desc": "弹丸数量" },
-      "range":  { "name": "余韵", "color": "#5cffb1", "icon": "◎", "desc": "清醒射程" },
-      "luck":   { "name": "眷恋", "color": "#ffd166", "icon": "♥", "desc": "心意掉落" }
+      "damage":{"name":"清醒","color":"#ff6577","icon":"◆","desc":"兼容卡"},"rate":{"name":"从容","color":"#4de2ff","icon":"ϟ","desc":"兼容卡"},"multi":{"name":"界限","color":"#b784ff","icon":"✦","desc":"兼容卡"},"range":{"name":"余韵","color":"#5cffb1","icon":"◎","desc":"兼容卡"},"luck":{"name":"眷恋","color":"#ffd166","icon":"♥","desc":"兼容卡"},
+      "pierce":{"name":"贯穿","color":"#d8fbff","icon":"➤","desc":"穿透与光束"},"chainLightning":{"name":"连锁闪电","color":"#8cecff","icon":"ϟ","desc":"弹跳与雷暴"},"splitBlast":{"name":"分裂爆破","color":"#ffb347","icon":"✹","desc":"分裂与榴弹"},"frost":{"name":"冰霜","color":"#9de7ff","icon":"❄","desc":"减速与冻结"},"decoy":{"name":"诱饵","color":"#ffd166","icon":"♟","desc":"嘲讽与镜像"},"impact":{"name":"冲击","color":"#ffcf8c","icon":"◉","desc":"击退与新星"},"scorch":{"name":"灼痕","color":"#ff765c","icon":"♨","desc":"燃烧领域"},"sanctum":{"name":"圣域","color":"#fff0a8","icon":"✧","desc":"易伤与集火"},"harvest":{"name":"丰收","color":"#8cff9d","icon":"❖","desc":"掉落与经验"},"resonance":{"name":"同调","color":"#d7a6ff","icon":"∞","desc":"合成脉冲与万能卡"},"aegis":{"name":"庇护","color":"#79b8ff","icon":"⬡","desc":"护盾与碎盾新星"},"thorns":{"name":"荆棘","color":"#86d47b","icon":"♜","desc":"反伤与处决"},"wildcard":{"name":"万能卡","color":"#ffffff","icon":"★","desc":"可与任意同星卡合成"}
     },
-    "effects": {
-      "damagePerScale": 5,
-      "ratePerScale": 0.38,
-      "rangePerScale": 32,
-      "luckPerScale": 0.025,
-      "multiStar1DamagePerScale": 2.5
-    }
+    "effects":{"damagePerScale":5,"ratePerScale":0.38,"rangePerScale":32,"luckPerScale":0.025,"multiStar1DamagePerScale":2.5}
   },
   "cards": [
-    {
-      "id": "damage",
-      "category": "projectile",
-      "textKey": "cards.legacy.damage",
-      "teaching": true,
-      "legacyPlaceholder": true,
-      "designNotes": "占位消耗态（P5 换 12 张正式卡）：落点爆发",
-      "consumable": {
-        "placement": "point",
-        "byStar": {
-          "1": { "radius": 90,  "effects": [{ "atom": "burstDamage", "params": { "damageMul": 3, "radius": 90 } }] },
-          "2": { "radius": 120, "effects": [{ "atom": "burstDamage", "params": { "damageMul": 5, "radius": 120 } }] },
-          "3": { "radius": 150, "effects": [{ "atom": "burstDamage", "params": { "damageMul": 8, "radius": 150 } }] }
-        }
-      }
-    },
-    {
-      "id": "rate",
-      "category": "control",
-      "textKey": "cards.legacy.rate",
-      "teaching": true,
-      "legacyPlaceholder": true,
-      "designNotes": "占位消耗态：落点减速区",
-      "consumable": {
-        "placement": "point",
-        "byStar": {
-          "1": { "radius": 100, "duration": 3, "effects": [{ "atom": "groundZone", "params": { "radius": 100, "duration": 3, "tickInterval": 0.5, "effects": [{ "atom": "slow", "params": { "ratio": 0.3, "duration": 0.6 } }] } }] },
-          "2": { "radius": 130, "duration": 4, "effects": [{ "atom": "groundZone", "params": { "radius": 130, "duration": 4, "tickInterval": 0.5, "effects": [{ "atom": "slow", "params": { "ratio": 0.4, "duration": 0.6 } }] } }] },
-          "3": { "radius": 160, "duration": 4, "effects": [{ "atom": "freeze", "params": { "duration": 2 } }, { "atom": "groundZone", "params": { "radius": 160, "duration": 4, "tickInterval": 0.5, "effects": [{ "atom": "slow", "params": { "ratio": 0.5, "duration": 0.6 } }] } }] }
-        }
-      }
-    },
-    {
-      "id": "multi",
-      "category": "projectile",
-      "textKey": "cards.legacy.multi",
-      "teaching": true,
-      "legacyPlaceholder": true,
-      "designNotes": "占位消耗态：落点连锁放电",
-      "consumable": {
-        "placement": "point",
-        "byStar": {
-          "1": { "radius": 120, "effects": [{ "atom": "chain", "params": { "bounces": 3, "damageRetention": 0.8, "searchRange": 140, "damageMul": 1.5 } }] },
-          "2": { "radius": 140, "effects": [{ "atom": "chain", "params": { "bounces": 6, "damageRetention": 0.8, "searchRange": 140, "damageMul": 2 } }] },
-          "3": { "radius": 160, "effects": [{ "atom": "chain", "params": { "bounces": 10, "damageRetention": 0.85, "searchRange": 160, "damageMul": 3 } }, { "atom": "stun", "params": { "duration": 0.5 } }] }
-        }
-      }
-    },
-    {
-      "id": "range",
-      "category": "control",
-      "textKey": "cards.legacy.range",
-      "teaching": true,
-      "legacyPlaceholder": true,
-      "designNotes": "占位消耗态：落点冲击击退",
-      "consumable": {
-        "placement": "point",
-        "byStar": {
-          "1": { "radius": 100, "effects": [{ "atom": "knockback", "params": { "distance": 70 } }] },
-          "2": { "radius": 140, "effects": [{ "atom": "knockback", "params": { "distance": 100 } }, { "atom": "stun", "params": { "duration": 0.5 } }] },
-          "3": { "radius": 180, "effects": [{ "atom": "knockback", "params": { "distance": 140 } }, { "atom": "stun", "params": { "duration": 1 } }] }
-        }
-      }
-    },
-    {
-      "id": "luck",
-      "category": "economy",
-      "textKey": "cards.legacy.luck",
-      "teaching": true,
-      "legacyPlaceholder": true,
-      "designNotes": "占位消耗态：落点掉落雨",
-      "consumable": {
-        "placement": "point",
-        "byStar": {
-          "1": { "radius": 90,  "effects": [{ "atom": "extraDrop", "params": { "count": 1, "at": "point" } }] },
-          "2": { "radius": 110, "effects": [{ "atom": "extraDrop", "params": { "count": 2, "at": "point" } }] },
-          "3": { "radius": 130, "effects": [{ "atom": "extraDrop", "params": { "count": 3, "at": "point" } }] }
-        }
-      }
-    }
+    {"id":"pierce","category":"projectile","textKey":"cards.pierce","teaching":true,"implementationBatch":1,"stars":{"2":{"tier":"core","equip":[{"trigger":"onFire","effects":[{"atom":"pierce","params":{"count":2,"damageRetention":0.8,"rampPerPierce":0.1}}]}]},"3":{"tier":"transform","equip":[{"trigger":"passive","effects":[{"atom":"beamMorph","params":{"interval":0.9,"width":34,"damageRatio":1.8}}]}]}},"consumable":{"placement":"point","byStar":{"1":{"radius":30,"effects":[{"atom":"pierce","params":{"damageMul":3,"width":12}}]},"2":{"radius":50,"effects":[{"atom":"pierce","params":{"damageMul":5,"width":20}}]},"3":{"radius":75,"effects":[{"atom":"pierce","params":{"damageMul":8,"width":30}},{"atom":"knockback","params":{"distance":70,"radius":75}}]}}}},
+    {"id":"chainLightning","category":"projectile","textKey":"cards.chainLightning","teaching":false,"implementationBatch":1,"stars":{"2":{"tier":"core","equip":[{"trigger":"onHit","effects":[{"atom":"chain","params":{"bounces":2,"damageRetention":0.7,"searchRange":120}},{"atom":"slow","params":{"ratio":0.2,"duration":1.2}}]}]},"3":{"tier":"transform","equip":[{"trigger":"interval","triggerParams":{"seconds":1.2},"effects":[{"atom":"chain","params":{"targets":3,"bounces":2,"damageRetention":0.7,"searchRange":130,"damageMul":1.1}}]}]}},"consumable":{"placement":"point","byStar":{"1":{"radius":140,"effects":[{"atom":"chain","params":{"bounces":4,"damageMul":2,"searchRange":140}}]},"2":{"radius":160,"effects":[{"atom":"chain","params":{"bounces":7,"damageMul":2.5,"searchRange":150}},{"atom":"slow","params":{"ratio":0.25,"duration":1.5}}]},"3":{"radius":180,"effects":[{"atom":"chain","params":{"bounces":12,"damageMul":3,"searchRange":170}},{"atom":"stun","params":{"duration":0.5}}]}}}},
+    {"id":"splitBlast","category":"projectile","textKey":"cards.splitBlast","teaching":false,"implementationBatch":2,"stars":{"2":{"tier":"core","equip":[{"trigger":"onHit","effects":[{"atom":"split","params":{"count":2,"damageRatio":0.5}},{"atom":"aoeOnHit","params":{"radius":40,"damageRatio":0.6}}]}]},"3":{"tier":"transform","equip":[{"trigger":"passive","effects":[{"atom":"mortarMorph","params":{"radius":90,"damageRatio":1.45,"falloff":0.5}}]}]}},"consumable":{"placement":"point","byStar":{"1":{"radius":110,"effects":[{"atom":"burstDamage","params":{"damageMul":4,"radius":110}}]},"2":{"radius":140,"effects":[{"atom":"burstDamage","params":{"damageMul":6,"radius":140}},{"atom":"split","params":{"count":4,"damageRatio":0.6}}]},"3":{"radius":180,"effects":[{"atom":"burstDamage","params":{"damageMul":9,"radius":180}},{"atom":"aoeOnHit","params":{"radius":110,"damageRatio":2}}]}}}},
+    {"id":"frost","category":"control","textKey":"cards.frost","teaching":false,"implementationBatch":1,"stars":{"2":{"tier":"core","equip":[{"trigger":"onFire","effects":[{"atom":"slow","params":{"ratio":0.3,"duration":1.5}},{"atom":"freeze","params":{"duration":0.8,"stacksToTrigger":3}}]}]},"3":{"tier":"transform","equip":[{"trigger":"passive","effects":[{"atom":"aura","params":{"radiusRatioOfRange":0.6,"tickInterval":0.5,"effects":[{"atom":"slow","params":{"ratio":0.35,"duration":0.7}}]}}]},{"trigger":"interval","triggerParams":{"seconds":4},"effects":[{"atom":"freeze","params":{"radius":260,"duration":0.6}}]}]}},"consumable":{"placement":"point","byStar":{"1":{"radius":90,"effects":[{"atom":"freeze","params":{"radius":90,"duration":3}}]},"2":{"radius":130,"effects":[{"atom":"freeze","params":{"radius":130,"duration":3}},{"atom":"slow","params":{"radius":130,"ratio":0.3,"duration":4}}]},"3":{"radius":170,"effects":[{"atom":"freeze","params":{"radius":170,"duration":3}},{"atom":"vulnerable","params":{"radius":170,"ratio":0.3,"duration":3}}]}}}},
+    {"id":"decoy","category":"control","textKey":"cards.decoy","teaching":false,"implementationBatch":1,"stars":{"2":{"tier":"core","equip":[{"trigger":"onWaveStart","effects":[{"atom":"summon","params":{"kind":"decoy","hp":55,"duration":20,"tauntRadius":140,"explode":true,"explodeDamageMul":1.5,"knockbackDistance":80}}]}]},"3":{"tier":"transform","equip":[{"trigger":"onWaveStart","effects":[{"atom":"summon","params":{"kind":"mirrorTurret","hp":90,"duration":25,"tauntRadius":400,"damageRatio":0.3}}]}]}},"consumable":{"placement":"point","byStar":{"1":{"radius":120,"duration":4,"effects":[{"atom":"summon","params":{"kind":"decoy","hp":45,"duration":4,"tauntRadius":120}}]},"2":{"radius":160,"duration":4,"effects":[{"atom":"summon","params":{"kind":"decoy","hp":70,"duration":4,"tauntRadius":160,"explode":true}}]},"3":{"radius":220,"duration":5,"effects":[{"atom":"summon","params":{"kind":"mirrorTurret","hp":90,"duration":5,"tauntRadius":220,"damageRatio":0.45}}]}}}},
+    {"id":"impact","category":"control","textKey":"cards.impact","teaching":true,"implementationBatch":2,"stars":{"2":{"tier":"core","equip":[{"trigger":"onFire","effects":[{"atom":"knockback","params":{"distance":22,"collisionDamage":0.4}}]}]},"3":{"tier":"transform","equip":[{"trigger":"interval","triggerParams":{"seconds":4},"effects":[{"atom":"knockback","params":{"radius":240,"distance":90}},{"atom":"stun","params":{"radius":240,"duration":0.4}}]}]}},"consumable":{"placement":"point","byStar":{"1":{"radius":100,"effects":[{"atom":"knockback","params":{"radius":100,"distance":75}}]},"2":{"radius":140,"effects":[{"atom":"knockback","params":{"radius":140,"distance":110}},{"atom":"stun","params":{"radius":140,"duration":0.5}}]},"3":{"radius":180,"effects":[{"atom":"knockback","params":{"radius":180,"distance":150,"collisionDamage":0.7}},{"atom":"stun","params":{"radius":180,"duration":1}}]}}}},
+    {"id":"scorch","category":"domain","textKey":"cards.scorch","teaching":false,"implementationBatch":1,"stars":{"2":{"tier":"core","equip":[{"trigger":"onHit","effects":[{"atom":"groundZone","params":{"radius":40,"duration":2.5,"tickInterval":0.5,"effects":[{"atom":"dot","params":{"damageRatio":0.15}}]}}]}]},"3":{"tier":"transform","equip":[{"trigger":"passive","effects":[{"atom":"aura","params":{"radius":250,"tickInterval":0.5,"effects":[{"atom":"dot","params":{"damageRatio":0.22}},{"atom":"slow","params":{"ratio":0.1,"duration":0.7}}]}}]}]}},"consumable":{"placement":"point","byStar":{"1":{"radius":110,"duration":3,"effects":[{"atom":"groundZone","params":{"radius":110,"duration":3,"tickInterval":0.5,"effects":[{"atom":"dot","params":{"damageRatio":0.6}}]}}]},"2":{"radius":140,"duration":4,"effects":[{"atom":"groundZone","params":{"radius":140,"duration":4,"tickInterval":0.5,"effects":[{"atom":"dot","params":{"damageRatio":0.8}},{"atom":"vulnerable","params":{"ratio":0.15,"duration":0.7}}]}}]},"3":{"radius":180,"duration":5,"effects":[{"atom":"groundZone","params":{"radius":180,"duration":5,"tickInterval":0.5,"effects":[{"atom":"dot","params":{"damageRatio":1.1}}]}}]}}}},
+    {"id":"sanctum","category":"domain","textKey":"cards.sanctum","teaching":false,"implementationBatch":2,"stars":{"2":{"tier":"core","equip":[{"trigger":"passive","effects":[{"atom":"aura","params":{"radiusRatioOfRange":0.5,"tickInterval":0.5,"effects":[{"atom":"vulnerable","params":{"ratio":0.2,"duration":0.7}},{"atom":"slow","params":{"ratio":0.1,"duration":0.7}}]}}]}]},"3":{"tier":"transform","equip":[{"trigger":"interval","triggerParams":{"seconds":3},"effects":[{"atom":"vulnerable","params":{"radius":260,"ratio":0.4,"duration":2}},{"atom":"focusPriority","params":{"radius":260,"priorityWeight":3,"duration":2}}]}]}},"consumable":{"placement":"point","byStar":{"1":{"radius":110,"duration":4,"effects":[{"atom":"vulnerable","params":{"radius":110,"ratio":0.3,"duration":4}}]},"2":{"radius":140,"duration":5,"effects":[{"atom":"vulnerable","params":{"radius":140,"ratio":0.4,"duration":5}}]},"3":{"radius":170,"duration":5,"effects":[{"atom":"vulnerable","params":{"radius":170,"ratio":0.5,"duration":5}},{"atom":"focusPriority","params":{"radius":170,"priorityWeight":4,"duration":5}}]}}}},
+    {"id":"harvest","category":"economy","textKey":"cards.harvest","teaching":true,"implementationBatch":1,"stars":{"2":{"tier":"core","equip":[{"trigger":"passive","effects":[{"atom":"dropRateMul","params":{"mul":1.25}},{"atom":"dropLifetimeMul","params":{"mul":1.25}}]}]},"3":{"tier":"transform","equip":[{"trigger":"onWaveStart","effects":[{"atom":"extraDrop","params":{"count":2,"at":"turret"}}]},{"trigger":"passive","effects":[{"atom":"expiryConvert","params":{"ratio":0.5}}]}]}},"consumable":{"placement":"point","byStar":{"1":{"radius":90,"effects":[{"atom":"extraDrop","params":{"count":2,"at":"point"}}]},"2":{"radius":110,"effects":[{"atom":"extraDrop","params":{"count":3,"at":"point","starWeights":{"1":0.8,"2":0.2}}}]},"3":{"radius":130,"effects":[{"atom":"extraDrop","params":{"count":4,"at":"point","starWeights":{"1":0.75,"2":0.25}}}]}}}},
+    {"id":"resonance","category":"economy","textKey":"cards.resonance","teaching":false,"implementationBatch":2,"stars":{"2":{"tier":"core","equip":[{"trigger":"onMerge","effects":[{"atom":"mergePulse","params":{"damagePerMergeCount":8,"radius":"all"}}]}]},"3":{"tier":"transform","equip":[{"trigger":"passive","effects":[{"atom":"mergeRule","params":{"rule":"wildcardDrop","value":1}}]},{"trigger":"onMerge","effects":[{"atom":"mergePulse","params":{"damagePerMergeCount":12,"radius":"all"}}]}]}},"consumable":{"placement":"point","byStar":{"1":{"radius":100,"effects":[{"atom":"mergePulse","params":{"damagePerMergeCount":5,"radius":100}}]},"2":{"radius":130,"duration":3,"effects":[{"atom":"mergePulse","params":{"damagePerMergeCount":8,"radius":130}}]},"3":{"radius":160,"effects":[{"atom":"mergePulse","params":{"damagePerMergeCount":12,"radius":160}},{"atom":"vulnerable","params":{"radius":160,"ratio":0.25,"duration":4}}]}}}},
+    {"id":"aegis","category":"defense","textKey":"cards.aegis","teaching":false,"implementationBatch":1,"stars":{"2":{"tier":"core","equip":[{"trigger":"onWaveStart","effects":[{"atom":"shield","params":{"absorbHits":2,"regenSeconds":10}}]},{"trigger":"passive","effects":[{"atom":"breachReduction","params":{"ratio":0.2}}]}]},"3":{"tier":"transform","equip":[{"trigger":"onWaveStart","effects":[{"atom":"shield","params":{"absorbHits":3,"regenSeconds":7}}]},{"trigger":"passive","effects":[{"atom":"novaOnBreak","params":{"damage":45,"knockbackDistance":110}}]}]}},"consumable":{"placement":"point","byStar":{"1":{"radius":90,"effects":[{"atom":"shield","params":{"absorbHits":4}},{"atom":"knockback","params":{"radius":90,"distance":60}}]},"2":{"radius":120,"effects":[{"atom":"shield","params":{"absorbHits":6}},{"atom":"knockback","params":{"radius":120,"distance":85}}]},"3":{"radius":150,"effects":[{"atom":"shield","params":{"absorbHits":8}},{"atom":"knockback","params":{"radius":150,"distance":110}},{"atom":"burstDamage","params":{"radius":150,"damageMul":3}}]}}}},
+    {"id":"thorns","category":"defense","textKey":"cards.thorns","teaching":false,"implementationBatch":2,"stars":{"2":{"tier":"core","equip":[{"trigger":"passive","effects":[{"atom":"breachReduction","params":{"ratio":0.35}},{"atom":"thorns","params":{"ratio":1.5}}]}]},"3":{"tier":"transform","equip":[{"trigger":"passive","effects":[{"atom":"aura","params":{"radius":90,"tickInterval":0.5,"effects":[{"atom":"dot","params":{"damageRatio":0.35}}]}},{"atom":"execute","params":{"hpThresholdRatio":0.2}}]}]}},"consumable":{"placement":"point","byStar":{"1":{"radius":90,"duration":4,"effects":[{"atom":"groundZone","params":{"radius":90,"duration":4,"tickInterval":0.5,"effects":[{"atom":"dot","params":{"damageRatio":0.5}},{"atom":"slow","params":{"ratio":0.3,"duration":0.7}}]}}]},"2":{"radius":120,"duration":4,"effects":[{"atom":"groundZone","params":{"radius":120,"duration":4,"tickInterval":0.5,"effects":[{"atom":"dot","params":{"damageRatio":0.7}},{"atom":"slow","params":{"ratio":0.3,"duration":0.7}}]}}]},"3":{"radius":150,"duration":5,"effects":[{"atom":"groundZone","params":{"radius":150,"duration":5,"tickInterval":0.5,"effects":[{"atom":"dot","params":{"damageRatio":0.9}},{"atom":"execute","params":{"hpThresholdRatio":0.15}}]}}]}}}}
   ],
-  "mechanisms": {
-    "bounty": {
-      "enabled": true,
-      "enabledFromWave": 3,
-      "spawnChancePerWave": 0.55,
-      "markWindowSeconds": 8,
-      "hitRadiusPadding": 12,
-      "acceptEffects": { "focusFire": true, "enrage": { "speedMul": 1.35, "hpMul": 10 } },
-      "rewards": { "dropCount": 2, "starWeightShift": 3, "dropLifetimeMul": 0.6 }
-    }
-  }
+  "mechanisms":{"bounty":{"enabled":true,"enabledFromWave":3,"spawnChancePerWave":0.55,"markWindowSeconds":8,"hitRadiusPadding":12,"acceptEffects":{"focusFire":true,"enrage":{"speedMul":1.35,"hpMul":10}},"rewards":{"dropCount":2,"starWeightShift":3,"dropLifetimeMul":0.6}}}
 }

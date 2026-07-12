@@ -13,7 +13,7 @@ describe('P4 balance JSON v2 · 历史基线与未改域防漂移', () => {
     for (const type of ['normal', 'fast', 'tank'] as const) {
       expect(config.enemies.types[type]).toMatchObject(balanceV2.base.enemies.types[type]);
     }
-    expect(config.progression).toMatchObject(balanceV2.base.progression);
+    expect({ ...config.progression, perks: config.progression.perks.slice(0, 3) }).toMatchObject(balanceV2.base.progression);
     const { defaults: currentDefaults, ...currentEconomy } = config.economy;
     const { defaults: v2Defaults, ...v2Economy } = balanceV2.base.economy;
     expect(currentEconomy).toEqual(v2Economy);

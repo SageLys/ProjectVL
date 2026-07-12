@@ -317,6 +317,18 @@ exposeDebugApi({
   setConfig: patch => { Object.assign(config, patch); tuner.syncInputs(); renderHud(refs, state, config); },
   getVariants: () => activeVariants,
   getAttentionTelemetry,
+  getRunStats: () => ({
+    session: getAttentionTelemetry().sessionId,
+    ended: state.mode === 'ended', gameTime: state.time, wave: state.wave,
+    level: state.level, hp: state.hp, kills: state.kills, merges: state.merges,
+    consumes: state.consumes, collected: state.collected, expired: state.expired,
+    equipOps: state.equipOps,
+    bounty: { offered: state.bountyOffered, accepted: state.bountyAccepted, completed: state.bountyCompleted, failed: state.bountyFailed },
+    build: [...state.cards, ...state.equipment].filter(Boolean).map(card => ({
+      type: card!.type, star: card!.star,
+      equipped: !!card!.locked || state.equipment.includes(card),
+    })),
+  }),
   clearAttentionTelemetry,
 });
 

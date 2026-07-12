@@ -83,63 +83,63 @@ describe('dropSystem · 概率与 boss', () => {
 });
 
 describe('dropSystem · 定向掉落保底', () => {
-  it('没有候选时维持五类等权，类型选择仅消费一次 RNG', () => {
+  it('没有候选时维持单局五类正式池等权，类型选择仅消费一次 RNG', () => {
     const s = freshState();
     const config = createDefaultConfig();
     const values = [0.3, 0];
     let calls = 0;
     const rng = () => values[calls++] ?? 0;
     spawnGroundDrop(s, config, rng, 10, 20);
-    expect(s.groundDrops[0].type).toBe('rate');
+    expect(s.groundDrops[0].type).toBe('chainLightning');
     expect(calls).toBe(2); // 类型一次 + pulse 一次
   });
 
   it('首张 3★ 恰缺一份时按配置权重稳定抽样', () => {
     const s = freshState();
     const config = createDefaultConfig();
-    s.cards[0] = card('damage', 2);
-    s.cards[1] = card('damage', 1);
+    s.cards[0] = card('pierce', 2);
+    s.cards[1] = card('pierce', 1);
     spawnGroundDrop(s, config, constRng(0.3), 10, 20);
-    expect(s.groundDrops[0].type).toBe('damage');
+    expect(s.groundDrops[0].type).toBe('pierce');
   });
 
   it('定向关闭时即使恰缺一份也保持等权', () => {
     const s = freshState();
     const config = createDefaultConfig();
-    s.cards[0] = card('damage', 2);
-    s.cards[1] = card('damage', 1);
+    s.cards[0] = card('pierce', 2);
+    s.cards[1] = card('pierce', 1);
     cfg.economy.dropTargeting.enabled = false;
     spawnGroundDrop(s, config, constRng(0.3), 10, 20);
-    expect(s.groundDrops[0].type).toBe('rate');
+    expect(s.groundDrops[0].type).toBe('chainLightning');
   });
 
   it('锁定模式把锁卡计入 1★ 等价值', () => {
     const s = freshState();
     const config = createDefaultConfig();
-    s.cards[0] = card('range', 2, true);
-    s.cards[1] = card('range', 1);
+    s.cards[0] = card('frost', 2, true);
+    s.cards[1] = card('frost', 1);
     spawnGroundDrop(s, config, constRng(0.82), 10, 20);
-    expect(s.groundDrops[0].type).toBe('range');
+    expect(s.groundDrops[0].type).toBe('frost');
   });
 
   it('独立装备格模式把 equipment 计入 1★ 等价值', () => {
     applyVariants(['equip-slots']);
     const s = freshState();
     const config = createDefaultConfig();
-    s.equipment[0] = card('damage', 2);
-    s.cards[0] = card('damage', 1);
+    s.equipment[0] = card('pierce', 2);
+    s.cards[0] = card('pierce', 1);
     spawnGroundDrop(s, config, constRng(0.3), 10, 20);
-    expect(s.groundDrops[0].type).toBe('damage');
+    expect(s.groundDrops[0].type).toBe('pierce');
   });
 
   it('已有同型 3★ 时不再为重复 3★ 定向', () => {
     const s = freshState();
     const config = createDefaultConfig();
-    s.cards[0] = card('damage', 3);
-    s.cards[1] = card('damage', 2);
-    s.cards[2] = card('damage', 1);
+    s.cards[0] = card('pierce', 3);
+    s.cards[1] = card('pierce', 2);
+    s.cards[2] = card('pierce', 1);
     spawnGroundDrop(s, config, constRng(0.3), 10, 20);
-    expect(s.groundDrops[0].type).toBe('rate');
+    expect(s.groundDrops[0].type).toBe('chainLightning');
   });
 
   it('forcedType 与 forced star 不参与随机选择且原样保留', () => {

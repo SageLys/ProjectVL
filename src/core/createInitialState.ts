@@ -26,6 +26,7 @@ export function createInitialState(): GameState {
     bullets: [],
     particles: [],
     groundDrops: [],
+    activeCardPool: [],
     cards: Array(cfg.economy.handSlots).fill(null),
     equipment: Array(cfg.economy.equipSlots).fill(null),
     zones: [],

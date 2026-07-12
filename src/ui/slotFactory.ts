@@ -12,7 +12,8 @@ export interface SlotHandlers {
 
 /** 构造一张卡牌按钮。锁定卡三重视觉冗余（金框/🔒角标/底色）由 .locked class 承担。 */
 export function createCardElement(card: Card, source: SlotSource, index: number, handlers: SlotHandlers): HTMLButtonElement {
-  const meta = cfg.skills.legacy.types[card.type];
+  const def = cfg.skills.cards.find(value => value.id === card.type);
+  const meta = cfg.skills.legacy.types[card.type] ?? { name: def?.textKey.split('.').pop() ?? card.type, color: '#8cecff', icon: '✦', desc: def?.designNotes ?? '' };
   const el = document.createElement('button');
   el.type = 'button';
   el.className = card.locked ? 'card locked' : 'card';

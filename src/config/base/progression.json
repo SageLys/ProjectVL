@@ -5,6 +5,12 @@
   "perks": [
     { "id": "damage", "title": "高能弹芯", "desc": "伤害 +15%", "kind": "damagePct", "value": 0.15 },
     { "id": "rate",   "title": "过载供能", "desc": "射速 +12%", "kind": "fireRatePct", "value": 0.12 },
-    { "id": "repair", "title": "重整心防", "desc": "私人空间恢复 20 点", "kind": "heal", "value": 20 }
+    { "id": "repair", "title": "重整心防", "desc": "私人空间恢复 20 点", "kind": "heal", "value": 20 },
+    { "id": "damage2", "title": "锐化弹头", "desc": "伤害 +10%", "kind": "damagePct", "value": 0.10 },
+    { "id": "rate2", "title": "冷却回路", "desc": "射速 +8%", "kind": "fireRatePct", "value": 0.08 },
+    { "id": "repair2", "title": "紧急修补", "desc": "私人空间恢复 12 点", "kind": "heal", "value": 12 },
+    { "id": "damage3", "title": "聚焦校准", "desc": "伤害 +20%", "kind": "damagePct", "value": 0.20 },
+    { "id": "rate3", "title": "超频协议", "desc": "射速 +16%", "kind": "fireRatePct", "value": 0.16 },
+    { "id": "repair3", "title": "完整整备", "desc": "私人空间恢复 30 点", "kind": "heal", "value": 30 }
   ]
 }

@@ -55,16 +55,18 @@ export function autoMergeCards(state: GameState, config: Config, rng: Rng): { me
       for (let j = i + 1; j < state.cards.length && partners.length < mergeCopies - 1; j++) {
         const b = state.cards[j];
         if (!b || b.locked) continue;
-        if (a.type === b.type && a.star === b.star) partners.push(j);
+        if ((a.type === b.type || a.type === 'wildcard' || b.type === 'wildcard') && a.star === b.star) partners.push(j);
       }
       if (partners.length === mergeCopies - 1) {
         const resultStar = a.star + 1;
-        state.cards[i] = { id: state.nextCardId++, type: a.type, star: resultStar };
+        const partner = state.cards[partners[0]]!;
+        const resultType = a.type === 'wildcard' ? partner.type : a.type;
+        state.cards[i] = { id: state.nextCardId++, type: resultType, star: resultStar };
         for (const j of partners) state.cards[j] = null;
         state.merges++;
         merged++;
-        events.push({ type: 'merged', cardType: a.type, resultStar });
-        events.push(...fireTrigger(state, config, rng, 'onMerge', { merge: { cardType: a.type, resultStar } }));
+        events.push({ type: 'merged', cardType: resultType, resultStar });
+        events.push(...fireTrigger(state, config, rng, 'onMerge', { merge: { cardType: resultType, resultStar } }));
         changed = true;
         break outer;
       }
