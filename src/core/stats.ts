@@ -15,11 +15,16 @@ function buffMul(state: GameState, kind: 'fireRateMul' | 'damageMul'): number {
 }
 
 export function totalDamage(state: GameState, config: Config): number {
-  return (config.damage + state.damageBonus + equipmentBonus(state).damage) * buffMul(state, 'damageMul');
+  return (config.damage + equipmentBonus(state).damage)
+    * state.damagePerkMultiplier
+    * config.metaPowerMultiplier
+    * buffMul(state, 'damageMul');
 }
 
 export function totalFireRate(state: GameState, config: Config): number {
-  return (config.fireRate + state.fireRateBonus + equipmentBonus(state).rate) * buffMul(state, 'fireRateMul');
+  return (config.fireRate + equipmentBonus(state).rate)
+    * state.fireRatePerkMultiplier
+    * buffMul(state, 'fireRateMul');
 }
 
 export function totalMulti(state: GameState): number {

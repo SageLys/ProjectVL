@@ -7,6 +7,7 @@ export function createDefaultConfig(): Config {
     ...cfg.combat.defaults,
     ...cfg.economy.defaults,
     ...cfg.enemies.defaults,
+    metaPowerMultiplier: cfg.progression.metaPowerMultiplier,
   };
 }
 
@@ -39,8 +40,8 @@ export function createInitialState(): GameState {
     spawnLeft: 0,
     spawnTimer: 0,
     waveClearPending: false,
-    damageBonus: 0,
-    fireRateBonus: 0,
+    damagePerkMultiplier: 1,
+    fireRatePerkMultiplier: 1,
     multi: 1,
     shotCd: 0,
     turretAngle: -Math.PI / 2,

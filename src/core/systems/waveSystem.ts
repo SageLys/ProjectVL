@@ -41,6 +41,8 @@ export function tickSpawns(state: GameState, rng: Rng, dt: number): void {
  */
 export function checkWaveClear(state: GameState): GameEvent[] {
   if (state.spawnLeft === 0 && state.enemies.length === 0 && !state.waveClearPending && state.mode === 'playing') {
+    // 尾波保留地面奖励的拾取窗口；全部拾取或自然过期后再结算，避免 Boss 奖励在同帧胜利时失效。
+    if (state.wave >= cfg.waves.totalWaves && state.groundDrops.length > 0) return [];
     state.waveClearPending = true;
     if (state.wave >= cfg.waves.totalWaves) return endGame(state, true);
     state.between = cfg.waves.betweenWaves;

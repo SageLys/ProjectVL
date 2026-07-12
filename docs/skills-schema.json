@@ -224,23 +224,47 @@
     },
 
     "economyConfig": {
-      "description": "合成经济骨架（定案值，依据 docs/P4前置_星级合成与卡槽_结论.md 的仿真推导；标 [P4] 的为待标定项）。",
+      "description": "合成经济骨架（P4 v2；基座采用方案B锁定即装备，共享10格锁3；方案A 7+3 仅作variant对照）。",
       "type": "object",
-      "required": ["maxStar", "mergeCopies", "equipThreshold", "handSlots", "equipSlots"],
+      "required": ["maxStar", "mergeCopies", "equipThreshold", "equipMode", "handSlots", "equipSlots", "maxLocked", "dropPool", "dropTargeting"],
       "properties": {
         "maxStar": { "type": "integer", "const": 3, "description": "D1：最高星级 3★（4★ 仿真否决：首件@31 拾取；N=60 上限与定向权重×2 下复检维持；若 P4 定向保底比 ×2 更激进须回检）" },
         "mergeCopies": { "type": "integer", "const": 2, "description": "D2：二合（2 张同型同星→+1 星；3★=4 张同型。三合否决：合成 8.8 次/局击穿 KPI ≥16）" },
         "equipThreshold": { "type": "integer", "const": 2, "description": "D3：2★ 起可装备；1★=素材/即时消耗（经济上门槛无差异，体验+内容效率定案）" },
-        "handSlots": { "type": "integer", "const": 7, "description": "D4：手牌 7 格。**默认值级别，非推导最优**——平衡点随拾取锚点漂移，P4 全局仿真复检（真实波次+真人囤卡偏差）" },
-        "equipSlots": { "type": "integer", "const": 3, "description": "D4：独立装备 3 格。若 P0-3 A/B 改为锁定即装备（占手牌槽），共享槽须 ~10 格才等效" },
+        "equipMode": { "type": "string", "const": "lock", "description": "2026-07-12 暂定方案B：锁定即装备" },
+        "handSlots": { "type": "integer", "const": 10, "description": "P4复检基座：装备与库存共享10格；与方案A手牌7+装备3的容量近似等效" },
+        "equipSlots": { "type": "integer", "const": 0, "description": "方案B无独立装备栏；方案A由equip-slots variant覆盖为3" },
+        "maxLocked": { "type": "integer", "const": 3, "description": "最多3张锁定卡同时作为装备生效" },
         "inRunSlotExpansion": { "type": "boolean", "const": false, "description": "D4：局内不可扩容（+1 格即显著改变成型率，会成必选强度）；配置保留，P5 后可作 perk 实验" },
         "equipDistinctTypes": { "type": "boolean", "const": true, "description": "D6：装备栏同类型唯一" },
         "feedEquipped": { "type": "boolean", "const": true, "description": "D6：喂养合成——手牌卡与已装备同型同星直接合成升星（免卸装；砍掉≈手牌 −1 格）" },
+        "dropPool": {
+          "type": "object",
+          "description": "P4 v2：目录规模与单局有效池解耦。P5目录12张，但每局基础掉落池仅5张，避免12类等权使指定3★期望升至48掉落。",
+          "required": ["catalogSize", "activePoolSize", "selection"],
+          "properties": {
+            "catalogSize": { "type": "integer", "const": 12 },
+            "activePoolSize": { "type": "integer", "const": 5 },
+            "selection": { "type": "string", "const": "run-loadout" }
+          },
+          "additionalProperties": false
+        },
+        "dropTargeting": {
+          "type": "object",
+          "description": "差一张保底：某类型首张3★恰缺1份时提高该类型权重；已有同型3★后停止定向。",
+          "required": ["enabled", "nearCompletionWeight"],
+          "properties": {
+            "enabled": { "type": "boolean", "const": true },
+            "nearCompletionWeight": { "type": "number", "const": 2.25 }
+          },
+          "additionalProperties": false
+        },
         "dropStarPolicy": {
           "type": "object",
           "description": "D5：普通掉落一律 1★；2★ 仅经 bounty/Boss/经济卡（占总量 ~5% [P4]）；3★ 永不直掉",
           "properties": {
             "normal": { "type": "integer", "const": 1 },
+            "bossStar2Chance": { "type": "number", "const": 1 },
             "bountyBossMax": { "type": "integer", "const": 2 },
             "star2Share": { "type": "number", "description": "[P4] 占位 0.05" }
           }

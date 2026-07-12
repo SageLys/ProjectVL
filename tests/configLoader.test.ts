@@ -23,6 +23,7 @@ describe('config · variant 加载器（A/B 测试基建）', () => {
     expect(c.economy.equipThreshold).toBe(2);
     expect(c.economy.mergeCopies).toBe(2);
     expect(c.economy.maxStar).toBe(3);
+    expect(c.economy.dropPool).toEqual({ catalogSize: 12, activePoolSize: 5, selection: 'run-loadout' });
   });
 
   it('equip-slots variant：方案A 手牌7+装备3，其余域不受影响', () => {
@@ -41,6 +42,17 @@ describe('config · variant 加载器（A/B 测试基建）', () => {
     expect(c.waves.bossWave).toBe(3);
   });
 
+  it('P4 难度 variant 只覆盖数值层，保留方案B经济骨架', () => {
+    const easy = buildConfig(['difficulty-easy']);
+    const hard = buildConfig(['difficulty-hard']);
+    expect(easy.combat.hp.max).toBe(120);
+    expect(hard.combat.hp.max).toBe(90);
+    expect(easy.enemies.types.boss.hpBase).toBeLessThan(hard.enemies.types.boss.hpBase);
+    expect(easy.economy.defaults.dropLifetime).toBeGreaterThan(hard.economy.defaults.dropLifetime);
+    expect(easy.economy.equipMode).toBe('lock');
+    expect(hard.economy.handSlots).toBe(10);
+  });
+
   it('未知 variant 忽略不炸', () => {
     expect(buildConfig(['nope']).economy.handSlots).toBe(10);
   });
@@ -56,6 +68,6 @@ describe('config · variant 加载器（A/B 测试基建）', () => {
     applyVariants(['dev-short']);
     expect(ref.waves.totalWaves).toBe(3);
     applyVariants([]);
-    expect(ref.waves.totalWaves).toBe(5);
+    expect(ref.waves.totalWaves).toBe(9);
   });
 });

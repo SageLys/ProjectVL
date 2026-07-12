@@ -169,6 +169,8 @@ export interface Config {
   dropChance: number;
   dropLifetime: number;
   enemySpeed: number;
+  /** 局外成长唯一旋钮：线性乘全部玩家输出伤害。 */
+  metaPowerMultiplier: number;
 }
 
 export interface GameState {
@@ -200,8 +202,9 @@ export interface GameState {
   spawnLeft: number;
   spawnTimer: number;
   waveClearPending: boolean;
-  damageBonus: number;
-  fireRateBonus: number;
+  /** perk 独立乘数层，避免把选择瞬间的装备/限时 buff 快照成永久 flat bonus。 */
+  damagePerkMultiplier: number;
+  fireRatePerkMultiplier: number;
   multi: number;
   shotCd: number;
   turretAngle: number;

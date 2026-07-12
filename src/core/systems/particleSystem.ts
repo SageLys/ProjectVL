@@ -2,8 +2,20 @@ import type { GameState, Rng } from '../types';
 
 const TAU = Math.PI * 2;
 
+let particleSimulationEnabled = true;
+
+/** Headless 仿真可暂时关闭纯表现粒子，避免其消耗玩法 RNG 与 CPU。 */
+export function setParticleSimulationEnabled(enabled: boolean): void {
+  particleSimulationEnabled = enabled;
+}
+
+export function isParticleSimulationEnabled(): boolean {
+  return particleSimulationEnabled;
+}
+
 /** 生成一枚粒子（纯模拟数据，渲染在表现层读取）。 */
 export function spawnParticle(state: GameState, rng: Rng, x: number, y: number, color: string, speed = 80): void {
+  if (!particleSimulationEnabled) return;
   const a = rng() * TAU;
   const s = rng() * speed;
   state.particles.push({

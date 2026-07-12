@@ -8,9 +8,44 @@ import { fireTrigger, getModifiers } from '../effects/interpreter';
 const TAU = Math.PI * 2;
 export const CARD_KEYS: CardType[] = ['damage', 'rate', 'multi', 'range', 'luck'];
 
+/** 计算某类卡当前持有的 1★ 等价值。锁定模式的锁卡仍在手牌中；独立装备格模式另计装备。 */
+function ownedStar1Value(state: GameState, type: CardType): number {
+  const cards = cfg.economy.equipMode === 'slots'
+    ? [...state.cards, ...state.equipment]
+    : state.cards;
+  let value = 0;
+  for (const card of cards) {
+    if (!card || card.type !== type) continue;
+    if (card.star === 1) value += 1;
+    else if (card.star === 2) value += 2;
+    else if (card.star >= 3) value += 4;
+  }
+  return value;
+}
+
+/** 固定 CARD_KEYS 顺序的一次加权抽样；仅首张 3★ 恰缺一份（总等价值=3）的类型获得加权。 */
+function randomDropType(state: GameState, rng: Rng): CardType {
+  const targeting = cfg.economy.dropTargeting;
+  const canCompleteThreeStar = cfg.economy.maxStar >= 3;
+  const activeKeys = CARD_KEYS.slice(0, Math.max(1, Math.min(CARD_KEYS.length, cfg.economy.dropPool.activePoolSize)));
+  const weights = activeKeys.map(type =>
+    targeting.enabled && canCompleteThreeStar && ownedStar1Value(state, type) === 3
+      ? targeting.nearCompletionWeight
+      : 1,
+  );
+  const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+  const roll = rng() * totalWeight;
+  let cumulative = 0;
+  for (let i = 0; i < activeKeys.length; i++) {
+    cumulative += weights[i];
+    if (roll < cumulative) return activeKeys[i];
+  }
+  return activeKeys[activeKeys.length - 1];
+}
+
 /** 在 (x,y) 生成一枚限时地面掉落。type 缺省随机；star 缺省按掉落星级策略（普通=1★）。 */
 export function spawnGroundDrop(state: GameState, config: Config, rng: Rng, x: number, y: number, forcedType: CardType | null = null, star?: number): void {
-  const type = forcedType ?? CARD_KEYS[Math.floor(rng() * CARD_KEYS.length)];
+  const type = forcedType ?? randomDropType(state, rng);
   const life = totalDropLifetime(state, config);
   state.groundDrops.push({
     id: state.nextDropId++,
@@ -24,9 +59,14 @@ export function spawnGroundDrop(state: GameState, config: Config, rng: Rng, x: n
 
 /** 击杀掉落判定：概率命中或 boss 必掉，则在敌人位置生成掉落。 */
 export function rollDropOnKill(state: GameState, config: Config, rng: Rng, enemy: Enemy): void {
-  if (rng() < totalDropChance(state, config) || enemy.type === 'boss') {
-    spawnGroundDrop(state, config, rng, enemy.x, enemy.y);
+  if (enemy.type === 'boss') {
+    const star = rng() < cfg.economy.dropStarPolicy.bossStar2Chance
+      ? 2
+      : cfg.economy.dropStarPolicy.normal;
+    spawnGroundDrop(state, config, rng, enemy.x, enemy.y, null, star);
+    return;
   }
+  if (rng() < totalDropChance(state, config)) spawnGroundDrop(state, config, rng, enemy.x, enemy.y);
 }
 
 /**

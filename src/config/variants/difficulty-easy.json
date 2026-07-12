@@ -1,0 +1,18 @@
+{
+  "$comment": "P4 v2 宽容档：首胜学习用。降低 EHP/突破伤害，延长反应与呼吸窗口，并略提高资源供给。",
+  "combat": { "hp": { "max": 120 } },
+  "waves": {
+    "spawnInterval": { "base": 5.7, "perWave": 0.48, "min": 1.35 },
+    "betweenWaves": 21
+  },
+  "enemies": {
+    "types": {
+      "normal": { "hpBase": 34, "hpPerWave": 6, "damage": 7 },
+      "fast":   { "hpBase": 21, "hpPerWave": 4, "damage": 5 },
+      "tank":   { "hpBase": 82, "hpPerWave": 11, "damage": 12 },
+      "boss":   { "hpBase": 42000, "speedBase": 3, "damage": 999 }
+    }
+  },
+  "economy": { "defaults": { "dropChance": 0.22, "dropLifetime": 9 } },
+  "progression": { "xpNeedBase": 10, "xpGrowth": 1.35 }
+}

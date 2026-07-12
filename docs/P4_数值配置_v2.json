@@ -1,0 +1,192 @@
+{
+  "$comment": "P4 数值标定交付快照。运行时真值仍位于 src/config/base/*.json 与 src/config/variants/*.json；本文件用于审阅、Unity移交和防止口径散落。",
+  "schemaVersion": 2,
+  "id": "projectvl-p4-balance-v2",
+  "calibratedAt": "2026-07-12",
+  "status": "gameplay-calibrated-performance-provisional",
+  "calibration": {
+    "interpretation": "8个普通波 + 第9阶段Boss；合成KPI分母固定8，不计Boss尾奖",
+    "coreMonteCarlo": {
+      "runsPerDifficulty": 3000,
+      "totalRuns": 9000,
+      "seed": 20260712,
+      "fixedStepHz": 30,
+      "vfxEnabled": false,
+      "botProfile": {
+        "permanentMissChance": 0.12,
+        "pickupReactionSeconds": 0.45,
+        "pickupReactionJitterSeconds": 0.2,
+        "pickupActionIntervalSeconds": 0.18,
+        "equipmentDecisionIntervalSeconds": 0.35,
+        "perkDecisionSeconds": 3
+      }
+    },
+    "economyMonteCarlo": {
+      "runsPerScenario": 4000,
+      "scenarioCount": 12,
+      "totalRuns": 48000,
+      "sweeps": {
+        "activePoolSize": [5, 7, 12],
+        "effectivePickups": [38, 45],
+        "nearCompletionWeight": [1, 2.25]
+      }
+    },
+    "metaMultiplierSweep": [
+      { "multiplier": 1.0, "runs": 3000, "winRate": 0.2, "medianMinutes": 13.75, "winningBossSecondsP50": 120.6 },
+      { "multiplier": 1.05, "runs": 1000, "winRate": 0.265, "medianMinutes": 13.71, "winningBossSecondsP50": 117.9 },
+      { "multiplier": 1.1, "runs": 1000, "winRate": 0.286, "medianMinutes": 13.66, "winningBossSecondsP50": 113.3 },
+      { "multiplier": 1.15, "runs": 1000, "winRate": 0.323, "medianMinutes": 13.64, "winningBossSecondsP50": 109.8 },
+      { "multiplier": 1.2, "runs": 1000, "winRate": 0.353, "medianMinutes": 13.61, "winningBossSecondsP50": 110.9 }
+    ],
+    "p1Kpi": {
+      "firstRunWinRate": { "min": 0.15, "max": 0.25 },
+      "medianRunMinutes": { "min": 10, "max": 14 },
+      "mergesPerRegularWaveMin": 2,
+      "dropExpiryRateMax": 0.2,
+      "breatherShare": { "min": 0.2, "max": 0.3 },
+      "winningBossShare": { "min": 0.12, "max": 0.18 },
+      "winningBossSeconds": { "min": 100, "max": 120 },
+      "effectivePickups": { "min": 38, "max": 45 }
+    },
+    "performanceAssumption": {
+      "status": "T1_MISSING",
+      "targetDisplayFps": 60,
+      "simulationFloorHz": 30,
+      "browserDtCapSeconds": 0.033,
+      "provisionalEntityEnvelope": { "enemies": 40, "bullets": 80 },
+      "warning": "仓库没有T1手机型号、帧时间分位或同屏上限实测；headless关闭VFX，不能作为设备性能证据。"
+    }
+  },
+  "decisions": {
+    "interaction": "lock-is-equip",
+    "maxStar": 3,
+    "mergeCopies": 2,
+    "equipThreshold": 2,
+    "handSlots": 10,
+    "maxLocked": 3,
+    "catalogSize": 12,
+    "activePoolSize": 5,
+    "activePoolSelection": "run-loadout",
+    "activePoolContract": "P5实现12张内容时，每局必须只激活5张；不得直接把等权掉落池扩成12张。",
+    "nearCompletionTargeting": {
+      "enabled": true,
+      "weight": 2.25,
+      "trigger": "某类型尚无3★且当前1★等价值严格等于3",
+      "reset": "形成该类型首张3★后停止"
+    },
+    "metaProgression": {
+      "singleMultiplier": "metaPowerMultiplier",
+      "application": "final outgoing damage once",
+      "default": 1
+    }
+  },
+  "base": {
+    "combat": {
+      "canvas": { "width": 960, "height": 600 },
+      "turret": { "x": 480, "y": 300 },
+      "hp": { "max": 100 },
+      "defaults": { "damage": 16, "fireRate": 3.3, "range": 430 },
+      "bullet": { "speed": 620, "life": 1.25, "radius": 4, "spread": 0.12, "muzzleOffset": 24 },
+      "breakthroughDist": 55,
+      "dtCap": 0.033
+    },
+    "waves": {
+      "totalWaves": 9,
+      "enemyCountBase": 5,
+      "enemyCountPerWave": 3,
+      "firstSpawnDelay": 0.6,
+      "spawnInterval": { "base": 5.6, "perWave": 0.48, "min": 1.35 },
+      "betweenWaves": 21,
+      "spawnMargin": 45,
+      "typeRoll": { "tankBase": 0.2, "tankPerWave": 0.025, "fastThreshold": 0.47 },
+      "bossWave": 9
+    },
+    "enemies": {
+      "defaults": { "enemySpeed": 1 },
+      "types": {
+        "normal": { "hpBase": 38, "hpPerWave": 7, "speedBase": 24, "speedPerWave": 1.5, "damage": 8, "xp": 1 },
+        "fast": { "hpBase": 23, "hpPerWave": 5, "speedBase": 42, "speedPerWave": 2, "damage": 6, "xp": 1 },
+        "tank": { "hpBase": 90, "hpPerWave": 13, "speedBase": 15, "speedPerWave": 0.8, "damage": 14, "xp": 2 },
+        "boss": { "hpBase": 56000, "hpPerWave": 0, "speedBase": 3.2, "speedPerWave": 0, "damage": 999, "xp": 10 }
+      }
+    },
+    "progression": {
+      "xpNeedBase": 12,
+      "xpGrowth": 1.38,
+      "metaPowerMultiplier": 1,
+      "perks": [
+        { "id": "damage", "kind": "damagePct", "value": 0.15 },
+        { "id": "rate", "kind": "fireRatePct", "value": 0.12 },
+        { "id": "repair", "kind": "heal", "value": 20 }
+      ]
+    },
+    "economy": {
+      "maxStar": 3,
+      "mergeCopies": 2,
+      "equipThreshold": 2,
+      "equipMode": "lock",
+      "handSlots": 10,
+      "equipSlots": 0,
+      "maxLocked": 3,
+      "inRunSlotExpansion": false,
+      "equipDistinctTypes": true,
+      "feedEquipped": true,
+      "dropPool": { "catalogSize": 12, "activePoolSize": 5, "selection": "run-loadout" },
+      "dropTargeting": { "enabled": true, "nearCompletionWeight": 2.25 },
+      "dropStarPolicy": { "normal": 1, "bossStar2Chance": 1, "bountyBossMax": 2, "star2Share": 0.05 },
+      "drops": { "pickupRadius": 34, "chanceCap": 0.95 },
+      "defaults": { "dropChance": 0.2, "dropLifetime": 7.5 }
+    },
+    "skillsLegacyOverride": {
+      "luckPerScale": 0.025
+    }
+  },
+  "difficultyVariants": {
+    "easy": {
+      "runtimeId": "difficulty-easy",
+      "source": "src/config/variants/difficulty-easy.json",
+      "result": {
+        "winRate": 0.6087,
+        "medianMinutes": 13.74,
+        "expiryRate": 0.1205,
+        "mergesPerRegularWave": 2.535,
+        "winningBossSecondsP50": 109.9
+      }
+    },
+    "standard": {
+      "runtimeId": "base",
+      "source": "src/config/base/*.json",
+      "result": {
+        "winRate": 0.2,
+        "medianMinutes": 13.75,
+        "expiryRate": 0.1215,
+        "effectivePickupsP50": 40,
+        "mergesPerRegularWave": 2.344,
+        "formedAtBossEntryP50": 5,
+        "breatherShare": 0.209,
+        "winningBossSecondsP50": 120.6,
+        "winningBossShareMean": 0.1473
+      }
+    },
+    "hard": {
+      "runtimeId": "difficulty-hard",
+      "source": "src/config/variants/difficulty-hard.json",
+      "result": {
+        "winRate": 0.0427,
+        "medianMinutes": 13.47,
+        "expiryRate": 0.1212,
+        "mergesPerRegularWave": 2.034,
+        "winningBossSecondsP50": 140.6
+      }
+    }
+  },
+  "evidence": {
+    "workbook": "outputs/p4_20260712/ProjectVL_P4_数值设计工作簿_v2.xlsx",
+    "coreRuns": [
+      "outputs/p4_20260712/sim/base_3000.json",
+      "outputs/p4_20260712/sim/easy_3000.json",
+      "outputs/p4_20260712/sim/hard_3000.json"
+    ],
+    "economyRuns": "outputs/p4_20260712/sim/merge_sim_summary.json"
+  }
+}

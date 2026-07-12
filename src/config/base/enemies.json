@@ -4,6 +4,6 @@
     "normal": { "label": "热情追求者", "hpBase": 38, "hpPerWave": 7,  "speedBase": 24, "speedPerWave": 1.5, "r": 16, "color": "#f3b95f", "damage": 8,  "xp": 1, "sides": 4 },
     "fast":   { "label": "急切追求者", "hpBase": 23, "hpPerWave": 5,  "speedBase": 42, "speedPerWave": 2,   "r": 12, "color": "#62d8ff", "damage": 6,  "xp": 1, "sides": 3 },
     "tank":   { "label": "执着追求者", "hpBase": 90, "hpPerWave": 13, "speedBase": 15, "speedPerWave": 0.8, "r": 22, "color": "#ff7b86", "damage": 14, "xp": 2, "sides": 6 },
-    "boss":   { "label": "命定追求者", "hpBase": 420, "hpPerWave": 0, "speedBase": 12, "speedPerWave": 0,   "r": 35, "color": "#c58aff", "damage": 28, "xp": 5, "sides": 8 }
+    "boss":   { "label": "命定追求者", "hpBase": 56000, "hpPerWave": 0, "speedBase": 3.2, "speedPerWave": 0, "r": 35, "color": "#c58aff", "damage": 999, "xp": 10, "sides": 8 }
   }
 }

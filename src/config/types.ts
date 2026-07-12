@@ -78,6 +78,8 @@ export interface PerkDef {
 export interface ProgressionConfig {
   xpNeedBase: number;
   xpGrowth: number;
+  /** 局外成长唯一旋钮：线性乘全部玩家输出伤害；首局/无成长为 1。 */
+  metaPowerMultiplier: number;
   perks: PerkDef[];
 }
 
@@ -95,7 +97,10 @@ export interface EconomyConfig {
   inRunSlotExpansion: boolean;
   equipDistinctTypes: boolean;
   feedEquipped: boolean;
-  dropStarPolicy: { normal: number; bountyBossMax: number; star2Share: number };
+  /** P5 全目录可有 12 张，但每局只把 activePoolSize 张放入等权基础池，避免目录规模稀释构筑。 */
+  dropPool: { catalogSize: number; activePoolSize: number; selection: 'run-loadout' };
+  dropTargeting: { enabled: boolean; nearCompletionWeight: number };
+  dropStarPolicy: { normal: number; bossStar2Chance: number; bountyBossMax: number; star2Share: number };
   drops: { pickupRadius: number; chanceCap: number };
   defaults: { dropChance: number; dropLifetime: number };
 }

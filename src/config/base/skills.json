@@ -13,7 +13,7 @@
       "damagePerScale": 5,
       "ratePerScale": 0.38,
       "rangePerScale": 32,
-      "luckPerScale": 0.05,
+      "luckPerScale": 0.025,
       "multiStar1DamagePerScale": 2.5
     }
   },

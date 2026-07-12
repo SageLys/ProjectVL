@@ -1,0 +1,1336 @@
+{
+  "model": "lock-equip-shared-slots-runtime-approximation",
+  "notes": [
+    "active pool 中卡型经济上对称；fixed-symmetric-loadout 等价于从 catalog 选择任意同规模组合。",
+    "N 是有效拾取预算，不含掉率、过期和反应延迟；这些由完整 headless simulator 建模。",
+    "p2=0.05 是P4经济敏感性假设，不代表普通击杀运行时必有5%二星掉落。",
+    "cardsFull 先发生，bot 消耗后重试；在合法槽位参数下应与 forcedConsumes 一一对应。"
+  ],
+  "runsPerScenario": 4000,
+  "scenarioCount": 12,
+  "schemaVersion": "1.0.0",
+  "seed": 20260712,
+  "summaries": [
+    {
+      "invariants": {
+        "cardsFullEqualsForcedConsumes": true,
+        "violationRuns": 0
+      },
+      "metrics": {
+        "cardsFull": {
+          "max": 14.0,
+          "mean": 7.76125,
+          "min": 3.0,
+          "p10": 5.0,
+          "p25": 6.0,
+          "p50": 8.0,
+          "p75": 9.0,
+          "p90": 10.0,
+          "p95": 11.0
+        },
+        "first3At": {
+          "completionRate": 1.0,
+          "distributionCompleted": {
+            "max": 17.0,
+            "mean": 9.31475,
+            "min": 3.0,
+            "p10": 6.0,
+            "p25": 7.0,
+            "p50": 9.0,
+            "p75": 11.0,
+            "p90": 13.0,
+            "p95": 14.0
+          },
+          "missing": 0,
+          "observed": 4000
+        },
+        "firstEquipAt": {
+          "completionRate": 1.0,
+          "distributionCompleted": {
+            "max": 6.0,
+            "mean": 3.28675,
+            "min": 1.0,
+            "p10": 2.0,
+            "p25": 2.0,
+            "p50": 3.0,
+            "p75": 4.0,
+            "p90": 5.0,
+            "p95": 5.0
+          },
+          "missing": 0,
+          "observed": 4000
+        },
+        "forcedConsumes": {
+          "max": 14.0,
+          "mean": 7.76125,
+          "min": 3.0,
+          "p10": 5.0,
+          "p25": 6.0,
+          "p50": 8.0,
+          "p75": 9.0,
+          "p90": 10.0,
+          "p95": 11.0
+        },
+        "formed3": {
+          "max": 9.0,
+          "mean": 6.5425,
+          "min": 4.0,
+          "p10": 6.0,
+          "p25": 6.0,
+          "p50": 7.0,
+          "p75": 7.0,
+          "p90": 8.0,
+          "p95": 8.0
+        },
+        "locked3": {
+          "max": 3.0,
+          "mean": 2.78625,
+          "min": 0.0,
+          "p10": 2.0,
+          "p25": 3.0,
+          "p50": 3.0,
+          "p75": 3.0,
+          "p90": 3.0,
+          "p95": 3.0
+        },
+        "merges": {
+          "max": 27.0,
+          "mean": 20.735,
+          "min": 14.0,
+          "p10": 18.0,
+          "p25": 19.75,
+          "p50": 21.0,
+          "p75": 22.0,
+          "p90": 23.0,
+          "p95": 24.0
+        }
+      },
+      "runs": 4000,
+      "scenario": {
+        "activePoolSelection": "fixed-symmetric-loadout",
+        "activePoolSize": 5,
+        "catalogSize": 12,
+        "equipThreshold": 2,
+        "maxLocked": 3,
+        "maxStar": 3,
+        "mergeCopies": 2,
+        "nearCompletionWeight": 1.0,
+        "p2": 0.05,
+        "pickups": 38,
+        "sharedSlots": 10
+      },
+      "streamSeed": 16724622515838960717
+    },
+    {
+      "invariants": {
+        "cardsFullEqualsForcedConsumes": true,
+        "violationRuns": 0
+      },
+      "metrics": {
+        "cardsFull": {
+          "max": 14.0,
+          "mean": 7.47625,
+          "min": 2.0,
+          "p10": 5.0,
+          "p25": 6.0,
+          "p50": 7.0,
+          "p75": 9.0,
+          "p90": 10.0,
+          "p95": 11.0
+        },
+        "first3At": {
+          "completionRate": 1.0,
+          "distributionCompleted": {
+            "max": 15.0,
+            "mean": 8.38825,
+            "min": 3.0,
+            "p10": 5.0,
+            "p25": 7.0,
+            "p50": 8.0,
+            "p75": 10.0,
+            "p90": 11.0,
+            "p95": 12.0
+          },
+          "missing": 0,
+          "observed": 4000
+        },
+        "firstEquipAt": {
+          "completionRate": 1.0,
+          "distributionCompleted": {
+            "max": 6.0,
+            "mean": 3.28675,
+            "min": 1.0,
+            "p10": 2.0,
+            "p25": 2.0,
+            "p50": 3.0,
+            "p75": 4.0,
+            "p90": 5.0,
+            "p95": 5.0
+          },
+          "missing": 0,
+          "observed": 4000
+        },
+        "forcedConsumes": {
+          "max": 14.0,
+          "mean": 7.47625,
+          "min": 2.0,
+          "p10": 5.0,
+          "p25": 6.0,
+          "p50": 7.0,
+          "p75": 9.0,
+          "p90": 10.0,
+          "p95": 11.0
+        },
+        "formed3": {
+          "max": 10.0,
+          "mean": 6.68575,
+          "min": 4.0,
+          "p10": 6.0,
+          "p25": 6.0,
+          "p50": 7.0,
+          "p75": 7.0,
+          "p90": 8.0,
+          "p95": 8.0
+        },
+        "locked3": {
+          "max": 3.0,
+          "mean": 2.8895,
+          "min": 1.0,
+          "p10": 2.0,
+          "p25": 3.0,
+          "p50": 3.0,
+          "p75": 3.0,
+          "p90": 3.0,
+          "p95": 3.0
+        },
+        "merges": {
+          "max": 27.0,
+          "mean": 21.03125,
+          "min": 14.0,
+          "p10": 18.0,
+          "p25": 20.0,
+          "p50": 21.0,
+          "p75": 22.0,
+          "p90": 23.0,
+          "p95": 24.0
+        }
+      },
+      "runs": 4000,
+      "scenario": {
+        "activePoolSelection": "fixed-symmetric-loadout",
+        "activePoolSize": 5,
+        "catalogSize": 12,
+        "equipThreshold": 2,
+        "maxLocked": 3,
+        "maxStar": 3,
+        "mergeCopies": 2,
+        "nearCompletionWeight": 2.25,
+        "p2": 0.05,
+        "pickups": 38,
+        "sharedSlots": 10
+      },
+      "streamSeed": 16724622515838960717
+    },
+    {
+      "invariants": {
+        "cardsFullEqualsForcedConsumes": true,
+        "violationRuns": 0
+      },
+      "metrics": {
+        "cardsFull": {
+          "max": 20.0,
+          "mean": 12.353,
+          "min": 6.0,
+          "p10": 10.0,
+          "p25": 11.0,
+          "p50": 12.0,
+          "p75": 14.0,
+          "p90": 15.0,
+          "p95": 16.0
+        },
+        "first3At": {
+          "completionRate": 1.0,
+          "distributionCompleted": {
+            "max": 18.0,
+            "mean": 9.35725,
+            "min": 2.0,
+            "p10": 6.0,
+            "p25": 8.0,
+            "p50": 9.0,
+            "p75": 11.0,
+            "p90": 13.0,
+            "p95": 14.0
+          },
+          "missing": 0,
+          "observed": 4000
+        },
+        "firstEquipAt": {
+          "completionRate": 1.0,
+          "distributionCompleted": {
+            "max": 6.0,
+            "mean": 3.2445,
+            "min": 1.0,
+            "p10": 2.0,
+            "p25": 2.0,
+            "p50": 3.0,
+            "p75": 4.0,
+            "p90": 5.0,
+            "p95": 5.0
+          },
+          "missing": 0,
+          "observed": 4000
+        },
+        "forcedConsumes": {
+          "max": 20.0,
+          "mean": 12.353,
+          "min": 6.0,
+          "p10": 10.0,
+          "p25": 11.0,
+          "p50": 12.0,
+          "p75": 14.0,
+          "p90": 15.0,
+          "p95": 16.0
+        },
+        "formed3": {
+          "max": 11.0,
+          "mean": 7.30275,
+          "min": 4.0,
+          "p10": 6.0,
+          "p25": 7.0,
+          "p50": 7.0,
+          "p75": 8.0,
+          "p90": 8.0,
+          "p95": 9.0
+        },
+        "locked3": {
+          "max": 3.0,
+          "mean": 2.8285,
+          "min": 1.0,
+          "p10": 2.0,
+          "p25": 3.0,
+          "p50": 3.0,
+          "p75": 3.0,
+          "p90": 3.0,
+          "p95": 3.0
+        },
+        "merges": {
+          "max": 31.0,
+          "mean": 23.04075,
+          "min": 15.0,
+          "p10": 20.0,
+          "p25": 22.0,
+          "p50": 23.0,
+          "p75": 24.0,
+          "p90": 26.0,
+          "p95": 26.0
+        }
+      },
+      "runs": 4000,
+      "scenario": {
+        "activePoolSelection": "fixed-symmetric-loadout",
+        "activePoolSize": 5,
+        "catalogSize": 12,
+        "equipThreshold": 2,
+        "maxLocked": 3,
+        "maxStar": 3,
+        "mergeCopies": 2,
+        "nearCompletionWeight": 1.0,
+        "p2": 0.05,
+        "pickups": 45,
+        "sharedSlots": 10
+      },
+      "streamSeed": 15606229385019928611
+    },
+    {
+      "invariants": {
+        "cardsFullEqualsForcedConsumes": true,
+        "violationRuns": 0
+      },
+      "metrics": {
+        "cardsFull": {
+          "max": 19.0,
+          "mean": 12.01975,
+          "min": 5.0,
+          "p10": 9.0,
+          "p25": 11.0,
+          "p50": 12.0,
+          "p75": 13.0,
+          "p90": 15.0,
+          "p95": 16.0
+        },
+        "first3At": {
+          "completionRate": 1.0,
+          "distributionCompleted": {
+            "max": 16.0,
+            "mean": 8.33375,
+            "min": 2.0,
+            "p10": 5.0,
+            "p25": 7.0,
+            "p50": 8.0,
+            "p75": 10.0,
+            "p90": 11.0,
+            "p95": 12.0
+          },
+          "missing": 0,
+          "observed": 4000
+        },
+        "firstEquipAt": {
+          "completionRate": 1.0,
+          "distributionCompleted": {
+            "max": 6.0,
+            "mean": 3.2445,
+            "min": 1.0,
+            "p10": 2.0,
+            "p25": 2.0,
+            "p50": 3.0,
+            "p75": 4.0,
+            "p90": 5.0,
+            "p95": 5.0
+          },
+          "missing": 0,
+          "observed": 4000
+        },
+        "forcedConsumes": {
+          "max": 19.0,
+          "mean": 12.01975,
+          "min": 5.0,
+          "p10": 9.0,
+          "p25": 11.0,
+          "p50": 12.0,
+          "p75": 13.0,
+          "p90": 15.0,
+          "p95": 16.0
+        },
+        "formed3": {
+          "max": 10.0,
+          "mean": 7.462,
+          "min": 5.0,
+          "p10": 6.0,
+          "p25": 7.0,
+          "p50": 7.0,
+          "p75": 8.0,
+          "p90": 8.0,
+          "p95": 9.0
+        },
+        "locked3": {
+          "max": 3.0,
+          "mean": 2.9055,
+          "min": 1.0,
+          "p10": 3.0,
+          "p25": 3.0,
+          "p50": 3.0,
+          "p75": 3.0,
+          "p90": 3.0,
+          "p95": 3.0
+        },
+        "merges": {
+          "max": 30.0,
+          "mean": 23.38275,
+          "min": 16.0,
+          "p10": 21.0,
+          "p25": 22.0,
+          "p50": 23.0,
+          "p75": 25.0,
+          "p90": 26.0,
+          "p95": 27.0
+        }
+      },
+      "runs": 4000,
+      "scenario": {
+        "activePoolSelection": "fixed-symmetric-loadout",
+        "activePoolSize": 5,
+        "catalogSize": 12,
+        "equipThreshold": 2,
+        "maxLocked": 3,
+        "maxStar": 3,
+        "mergeCopies": 2,
+        "nearCompletionWeight": 2.25,
+        "p2": 0.05,
+        "pickups": 45,
+        "sharedSlots": 10
+      },
+      "streamSeed": 15606229385019928611
+    },
+    {
+      "invariants": {
+        "cardsFullEqualsForcedConsumes": true,
+        "violationRuns": 0
+      },
+      "metrics": {
+        "cardsFull": {
+          "max": 20.0,
+          "mean": 10.1665,
+          "min": 4.0,
+          "p10": 8.0,
+          "p25": 9.0,
+          "p50": 10.0,
+          "p75": 11.0,
+          "p90": 13.0,
+          "p95": 14.0
+        },
+        "first3At": {
+          "completionRate": 1.0,
+          "distributionCompleted": {
+            "max": 24.0,
+            "mean": 11.371,
+            "min": 3.0,
+            "p10": 7.0,
+            "p25": 9.0,
+            "p50": 11.0,
+            "p75": 14.0,
+            "p90": 16.0,
+            "p95": 17.0
+          },
+          "missing": 0,
+          "observed": 4000
+        },
+        "firstEquipAt": {
+          "completionRate": 1.0,
+          "distributionCompleted": {
+            "max": 8.0,
+            "mean": 3.681,
+            "min": 1.0,
+            "p10": 2.0,
+            "p25": 3.0,
+            "p50": 4.0,
+            "p75": 5.0,
+            "p90": 6.0,
+            "p95": 6.0
+          },
+          "missing": 0,
+          "observed": 4000
+        },
+        "forcedConsumes": {
+          "max": 20.0,
+          "mean": 10.1665,
+          "min": 4.0,
+          "p10": 8.0,
+          "p25": 9.0,
+          "p50": 10.0,
+          "p75": 11.0,
+          "p90": 13.0,
+          "p95": 14.0
+        },
+        "formed3": {
+          "max": 9.0,
+          "mean": 5.454,
+          "min": 2.0,
+          "p10": 4.0,
+          "p25": 5.0,
+          "p50": 5.0,
+          "p75": 6.0,
+          "p90": 7.0,
+          "p95": 7.0
+        },
+        "locked3": {
+          "max": 3.0,
+          "mean": 2.63425,
+          "min": 0.0,
+          "p10": 2.0,
+          "p25": 2.0,
+          "p50": 3.0,
+          "p75": 3.0,
+          "p90": 3.0,
+          "p95": 3.0
+        },
+        "merges": {
+          "max": 25.0,
+          "mean": 18.33075,
+          "min": 8.0,
+          "p10": 16.0,
+          "p25": 17.0,
+          "p50": 18.0,
+          "p75": 20.0,
+          "p90": 21.0,
+          "p95": 22.0
+        }
+      },
+      "runs": 4000,
+      "scenario": {
+        "activePoolSelection": "fixed-symmetric-loadout",
+        "activePoolSize": 7,
+        "catalogSize": 12,
+        "equipThreshold": 2,
+        "maxLocked": 3,
+        "maxStar": 3,
+        "mergeCopies": 2,
+        "nearCompletionWeight": 1.0,
+        "p2": 0.05,
+        "pickups": 38,
+        "sharedSlots": 10
+      },
+      "streamSeed": 7749012475027551465
+    },
+    {
+      "invariants": {
+        "cardsFullEqualsForcedConsumes": true,
+        "violationRuns": 0
+      },
+      "metrics": {
+        "cardsFull": {
+          "max": 15.0,
+          "mean": 9.37875,
+          "min": 4.0,
+          "p10": 7.0,
+          "p25": 8.0,
+          "p50": 9.0,
+          "p75": 11.0,
+          "p90": 12.0,
+          "p95": 13.0
+        },
+        "first3At": {
+          "completionRate": 1.0,
+          "distributionCompleted": {
+            "max": 20.0,
+            "mean": 10.06775,
+            "min": 3.0,
+            "p10": 6.0,
+            "p25": 8.0,
+            "p50": 10.0,
+            "p75": 12.0,
+            "p90": 14.0,
+            "p95": 15.0
+          },
+          "missing": 0,
+          "observed": 4000
+        },
+        "firstEquipAt": {
+          "completionRate": 1.0,
+          "distributionCompleted": {
+            "max": 8.0,
+            "mean": 3.681,
+            "min": 1.0,
+            "p10": 2.0,
+            "p25": 3.0,
+            "p50": 4.0,
+            "p75": 5.0,
+            "p90": 6.0,
+            "p95": 6.0
+          },
+          "missing": 0,
+          "observed": 4000
+        },
+        "forcedConsumes": {
+          "max": 15.0,
+          "mean": 9.37875,
+          "min": 4.0,
+          "p10": 7.0,
+          "p25": 8.0,
+          "p50": 9.0,
+          "p75": 11.0,
+          "p90": 12.0,
+          "p95": 13.0
+        },
+        "formed3": {
+          "max": 9.0,
+          "mean": 5.806,
+          "min": 3.0,
+          "p10": 5.0,
+          "p25": 5.0,
+          "p50": 6.0,
+          "p75": 6.0,
+          "p90": 7.0,
+          "p95": 7.0
+        },
+        "locked3": {
+          "max": 3.0,
+          "mean": 2.77025,
+          "min": 1.0,
+          "p10": 2.0,
+          "p25": 3.0,
+          "p50": 3.0,
+          "p75": 3.0,
+          "p90": 3.0,
+          "p95": 3.0
+        },
+        "merges": {
+          "max": 26.0,
+          "mean": 19.1095,
+          "min": 13.0,
+          "p10": 17.0,
+          "p25": 18.0,
+          "p50": 19.0,
+          "p75": 20.0,
+          "p90": 22.0,
+          "p95": 22.0
+        }
+      },
+      "runs": 4000,
+      "scenario": {
+        "activePoolSelection": "fixed-symmetric-loadout",
+        "activePoolSize": 7,
+        "catalogSize": 12,
+        "equipThreshold": 2,
+        "maxLocked": 3,
+        "maxStar": 3,
+        "mergeCopies": 2,
+        "nearCompletionWeight": 2.25,
+        "p2": 0.05,
+        "pickups": 38,
+        "sharedSlots": 10
+      },
+      "streamSeed": 7749012475027551465
+    },
+    {
+      "invariants": {
+        "cardsFullEqualsForcedConsumes": true,
+        "violationRuns": 0
+      },
+      "metrics": {
+        "cardsFull": {
+          "max": 23.0,
+          "mean": 14.89075,
+          "min": 8.0,
+          "p10": 12.0,
+          "p25": 13.0,
+          "p50": 15.0,
+          "p75": 16.0,
+          "p90": 18.0,
+          "p95": 19.0
+        },
+        "first3At": {
+          "completionRate": 1.0,
+          "distributionCompleted": {
+            "max": 24.0,
+            "mean": 11.32525,
+            "min": 2.0,
+            "p10": 7.0,
+            "p25": 9.0,
+            "p50": 11.0,
+            "p75": 14.0,
+            "p90": 16.0,
+            "p95": 17.0
+          },
+          "missing": 0,
+          "observed": 4000
+        },
+        "firstEquipAt": {
+          "completionRate": 1.0,
+          "distributionCompleted": {
+            "max": 8.0,
+            "mean": 3.70525,
+            "min": 1.0,
+            "p10": 2.0,
+            "p25": 3.0,
+            "p50": 4.0,
+            "p75": 5.0,
+            "p90": 6.0,
+            "p95": 6.0
+          },
+          "missing": 0,
+          "observed": 4000
+        },
+        "forcedConsumes": {
+          "max": 23.0,
+          "mean": 14.89075,
+          "min": 8.0,
+          "p10": 12.0,
+          "p25": 13.0,
+          "p50": 15.0,
+          "p75": 16.0,
+          "p90": 18.0,
+          "p95": 19.0
+        },
+        "formed3": {
+          "max": 9.0,
+          "mean": 6.21675,
+          "min": 3.0,
+          "p10": 5.0,
+          "p25": 6.0,
+          "p50": 6.0,
+          "p75": 7.0,
+          "p90": 7.0,
+          "p95": 8.0
+        },
+        "locked3": {
+          "max": 3.0,
+          "mean": 2.64725,
+          "min": 1.0,
+          "p10": 2.0,
+          "p25": 2.0,
+          "p50": 3.0,
+          "p75": 3.0,
+          "p90": 3.0,
+          "p95": 3.0
+        },
+        "merges": {
+          "max": 28.0,
+          "mean": 20.50225,
+          "min": 13.0,
+          "p10": 18.0,
+          "p25": 19.0,
+          "p50": 21.0,
+          "p75": 22.0,
+          "p90": 23.0,
+          "p95": 24.0
+        }
+      },
+      "runs": 4000,
+      "scenario": {
+        "activePoolSelection": "fixed-symmetric-loadout",
+        "activePoolSize": 7,
+        "catalogSize": 12,
+        "equipThreshold": 2,
+        "maxLocked": 3,
+        "maxStar": 3,
+        "mergeCopies": 2,
+        "nearCompletionWeight": 1.0,
+        "p2": 0.05,
+        "pickups": 45,
+        "sharedSlots": 10
+      },
+      "streamSeed": 16150951169119992256
+    },
+    {
+      "invariants": {
+        "cardsFullEqualsForcedConsumes": true,
+        "violationRuns": 0
+      },
+      "metrics": {
+        "cardsFull": {
+          "max": 23.0,
+          "mean": 14.127,
+          "min": 7.0,
+          "p10": 11.0,
+          "p25": 13.0,
+          "p50": 14.0,
+          "p75": 16.0,
+          "p90": 17.0,
+          "p95": 18.0
+        },
+        "first3At": {
+          "completionRate": 1.0,
+          "distributionCompleted": {
+            "max": 20.0,
+            "mean": 10.026,
+            "min": 2.0,
+            "p10": 6.0,
+            "p25": 8.0,
+            "p50": 10.0,
+            "p75": 12.0,
+            "p90": 14.0,
+            "p95": 15.0
+          },
+          "missing": 0,
+          "observed": 4000
+        },
+        "firstEquipAt": {
+          "completionRate": 1.0,
+          "distributionCompleted": {
+            "max": 8.0,
+            "mean": 3.70525,
+            "min": 1.0,
+            "p10": 2.0,
+            "p25": 3.0,
+            "p50": 4.0,
+            "p75": 5.0,
+            "p90": 6.0,
+            "p95": 6.0
+          },
+          "missing": 0,
+          "observed": 4000
+        },
+        "forcedConsumes": {
+          "max": 23.0,
+          "mean": 14.127,
+          "min": 7.0,
+          "p10": 11.0,
+          "p25": 13.0,
+          "p50": 14.0,
+          "p75": 16.0,
+          "p90": 17.0,
+          "p95": 18.0
+        },
+        "formed3": {
+          "max": 10.0,
+          "mean": 6.58675,
+          "min": 3.0,
+          "p10": 5.0,
+          "p25": 6.0,
+          "p50": 7.0,
+          "p75": 7.0,
+          "p90": 8.0,
+          "p95": 8.0
+        },
+        "locked3": {
+          "max": 3.0,
+          "mean": 2.78175,
+          "min": 1.0,
+          "p10": 2.0,
+          "p25": 3.0,
+          "p50": 3.0,
+          "p75": 3.0,
+          "p90": 3.0,
+          "p95": 3.0
+        },
+        "merges": {
+          "max": 29.0,
+          "mean": 21.27575,
+          "min": 12.0,
+          "p10": 18.0,
+          "p25": 20.0,
+          "p50": 21.0,
+          "p75": 23.0,
+          "p90": 24.0,
+          "p95": 25.0
+        }
+      },
+      "runs": 4000,
+      "scenario": {
+        "activePoolSelection": "fixed-symmetric-loadout",
+        "activePoolSize": 7,
+        "catalogSize": 12,
+        "equipThreshold": 2,
+        "maxLocked": 3,
+        "maxStar": 3,
+        "mergeCopies": 2,
+        "nearCompletionWeight": 2.25,
+        "p2": 0.05,
+        "pickups": 45,
+        "sharedSlots": 10
+      },
+      "streamSeed": 16150951169119992256
+    },
+    {
+      "invariants": {
+        "cardsFullEqualsForcedConsumes": true,
+        "violationRuns": 0
+      },
+      "metrics": {
+        "cardsFull": {
+          "max": 22.0,
+          "mean": 14.78325,
+          "min": 8.0,
+          "p10": 12.0,
+          "p25": 13.0,
+          "p50": 15.0,
+          "p75": 16.0,
+          "p90": 18.0,
+          "p95": 19.0
+        },
+        "first3At": {
+          "completionRate": 1.0,
+          "distributionCompleted": {
+            "max": 38.0,
+            "mean": 15.932,
+            "min": 3.0,
+            "p10": 9.0,
+            "p25": 12.0,
+            "p50": 16.0,
+            "p75": 19.0,
+            "p90": 23.0,
+            "p95": 25.0
+          },
+          "missing": 0,
+          "observed": 4000
+        },
+        "firstEquipAt": {
+          "completionRate": 1.0,
+          "distributionCompleted": {
+            "max": 12.0,
+            "mean": 4.42125,
+            "min": 1.0,
+            "p10": 2.0,
+            "p25": 3.0,
+            "p50": 4.0,
+            "p75": 6.0,
+            "p90": 7.0,
+            "p95": 8.0
+          },
+          "missing": 0,
+          "observed": 4000
+        },
+        "forcedConsumes": {
+          "max": 22.0,
+          "mean": 14.78325,
+          "min": 8.0,
+          "p10": 12.0,
+          "p25": 13.0,
+          "p50": 15.0,
+          "p75": 16.0,
+          "p90": 18.0,
+          "p95": 19.0
+        },
+        "formed3": {
+          "max": 7.0,
+          "mean": 3.77875,
+          "min": 1.0,
+          "p10": 3.0,
+          "p25": 3.0,
+          "p50": 4.0,
+          "p75": 4.0,
+          "p90": 5.0,
+          "p95": 5.0
+        },
+        "locked3": {
+          "max": 3.0,
+          "mean": 2.15875,
+          "min": 0.0,
+          "p10": 1.0,
+          "p25": 2.0,
+          "p50": 2.0,
+          "p75": 3.0,
+          "p90": 3.0,
+          "p95": 3.0
+        },
+        "merges": {
+          "max": 22.0,
+          "mean": 13.665,
+          "min": 6.0,
+          "p10": 11.0,
+          "p25": 12.0,
+          "p50": 14.0,
+          "p75": 15.0,
+          "p90": 17.0,
+          "p95": 17.0
+        }
+      },
+      "runs": 4000,
+      "scenario": {
+        "activePoolSelection": "fixed-symmetric-loadout",
+        "activePoolSize": 12,
+        "catalogSize": 12,
+        "equipThreshold": 2,
+        "maxLocked": 3,
+        "maxStar": 3,
+        "mergeCopies": 2,
+        "nearCompletionWeight": 1.0,
+        "p2": 0.05,
+        "pickups": 38,
+        "sharedSlots": 10
+      },
+      "streamSeed": 9755335201013447574
+    },
+    {
+      "invariants": {
+        "cardsFullEqualsForcedConsumes": true,
+        "violationRuns": 0
+      },
+      "metrics": {
+        "cardsFull": {
+          "max": 21.0,
+          "mean": 13.14775,
+          "min": 6.0,
+          "p10": 10.0,
+          "p25": 12.0,
+          "p50": 13.0,
+          "p75": 15.0,
+          "p90": 16.0,
+          "p95": 16.0
+        },
+        "first3At": {
+          "completionRate": 1.0,
+          "distributionCompleted": {
+            "max": 29.0,
+            "mean": 13.7135,
+            "min": 3.0,
+            "p10": 8.0,
+            "p25": 11.0,
+            "p50": 13.0,
+            "p75": 17.0,
+            "p90": 19.09999999999991,
+            "p95": 21.0
+          },
+          "missing": 0,
+          "observed": 4000
+        },
+        "firstEquipAt": {
+          "completionRate": 1.0,
+          "distributionCompleted": {
+            "max": 12.0,
+            "mean": 4.42125,
+            "min": 1.0,
+            "p10": 2.0,
+            "p25": 3.0,
+            "p50": 4.0,
+            "p75": 6.0,
+            "p90": 7.0,
+            "p95": 8.0
+          },
+          "missing": 0,
+          "observed": 4000
+        },
+        "forcedConsumes": {
+          "max": 21.0,
+          "mean": 13.14775,
+          "min": 6.0,
+          "p10": 10.0,
+          "p25": 12.0,
+          "p50": 13.0,
+          "p75": 15.0,
+          "p90": 16.0,
+          "p95": 16.0
+        },
+        "formed3": {
+          "max": 8.0,
+          "mean": 4.4615,
+          "min": 1.0,
+          "p10": 3.0,
+          "p25": 4.0,
+          "p50": 4.0,
+          "p75": 5.0,
+          "p90": 6.0,
+          "p95": 6.0
+        },
+        "locked3": {
+          "max": 3.0,
+          "mean": 2.46275,
+          "min": 0.0,
+          "p10": 2.0,
+          "p25": 2.0,
+          "p50": 3.0,
+          "p75": 3.0,
+          "p90": 3.0,
+          "p95": 3.0
+        },
+        "merges": {
+          "max": 23.0,
+          "mean": 15.282,
+          "min": 7.0,
+          "p10": 13.0,
+          "p25": 14.0,
+          "p50": 15.0,
+          "p75": 17.0,
+          "p90": 18.0,
+          "p95": 19.0
+        }
+      },
+      "runs": 4000,
+      "scenario": {
+        "activePoolSelection": "fixed-symmetric-loadout",
+        "activePoolSize": 12,
+        "catalogSize": 12,
+        "equipThreshold": 2,
+        "maxLocked": 3,
+        "maxStar": 3,
+        "mergeCopies": 2,
+        "nearCompletionWeight": 2.25,
+        "p2": 0.05,
+        "pickups": 38,
+        "sharedSlots": 10
+      },
+      "streamSeed": 9755335201013447574
+    },
+    {
+      "invariants": {
+        "cardsFullEqualsForcedConsumes": true,
+        "violationRuns": 0
+      },
+      "metrics": {
+        "cardsFull": {
+          "max": 28.0,
+          "mean": 19.87775,
+          "min": 12.0,
+          "p10": 17.0,
+          "p25": 18.0,
+          "p50": 20.0,
+          "p75": 21.0,
+          "p90": 23.0,
+          "p95": 24.0
+        },
+        "first3At": {
+          "completionRate": 1.0,
+          "distributionCompleted": {
+            "max": 41.0,
+            "mean": 16.10125,
+            "min": 3.0,
+            "p10": 10.0,
+            "p25": 12.0,
+            "p50": 16.0,
+            "p75": 20.0,
+            "p90": 23.0,
+            "p95": 25.0
+          },
+          "missing": 0,
+          "observed": 4000
+        },
+        "firstEquipAt": {
+          "completionRate": 1.0,
+          "distributionCompleted": {
+            "max": 12.0,
+            "mean": 4.5075,
+            "min": 1.0,
+            "p10": 2.0,
+            "p25": 3.0,
+            "p50": 4.0,
+            "p75": 6.0,
+            "p90": 7.0,
+            "p95": 8.0
+          },
+          "missing": 0,
+          "observed": 4000
+        },
+        "forcedConsumes": {
+          "max": 28.0,
+          "mean": 19.87775,
+          "min": 12.0,
+          "p10": 17.0,
+          "p25": 18.0,
+          "p50": 20.0,
+          "p75": 21.0,
+          "p90": 23.0,
+          "p95": 24.0
+        },
+        "formed3": {
+          "max": 7.0,
+          "mean": 4.402,
+          "min": 1.0,
+          "p10": 3.0,
+          "p25": 4.0,
+          "p50": 4.0,
+          "p75": 5.0,
+          "p90": 6.0,
+          "p95": 6.0
+        },
+        "locked3": {
+          "max": 3.0,
+          "mean": 2.32975,
+          "min": 0.0,
+          "p10": 1.0,
+          "p25": 2.0,
+          "p50": 2.0,
+          "p75": 3.0,
+          "p90": 3.0,
+          "p95": 3.0
+        },
+        "merges": {
+          "max": 23.0,
+          "mean": 15.46025,
+          "min": 7.0,
+          "p10": 12.0,
+          "p25": 14.0,
+          "p50": 15.0,
+          "p75": 17.0,
+          "p90": 18.0,
+          "p95": 19.0
+        }
+      },
+      "runs": 4000,
+      "scenario": {
+        "activePoolSelection": "fixed-symmetric-loadout",
+        "activePoolSize": 12,
+        "catalogSize": 12,
+        "equipThreshold": 2,
+        "maxLocked": 3,
+        "maxStar": 3,
+        "mergeCopies": 2,
+        "nearCompletionWeight": 1.0,
+        "p2": 0.05,
+        "pickups": 45,
+        "sharedSlots": 10
+      },
+      "streamSeed": 12889238157779413199
+    },
+    {
+      "invariants": {
+        "cardsFullEqualsForcedConsumes": true,
+        "violationRuns": 0
+      },
+      "metrics": {
+        "cardsFull": {
+          "max": 26.0,
+          "mean": 18.28025,
+          "min": 10.0,
+          "p10": 16.0,
+          "p25": 17.0,
+          "p50": 18.0,
+          "p75": 20.0,
+          "p90": 21.0,
+          "p95": 22.0
+        },
+        "first3At": {
+          "completionRate": 1.0,
+          "distributionCompleted": {
+            "max": 32.0,
+            "mean": 13.86775,
+            "min": 3.0,
+            "p10": 8.0,
+            "p25": 11.0,
+            "p50": 14.0,
+            "p75": 17.0,
+            "p90": 20.0,
+            "p95": 21.0
+          },
+          "missing": 0,
+          "observed": 4000
+        },
+        "firstEquipAt": {
+          "completionRate": 1.0,
+          "distributionCompleted": {
+            "max": 12.0,
+            "mean": 4.5075,
+            "min": 1.0,
+            "p10": 2.0,
+            "p25": 3.0,
+            "p50": 4.0,
+            "p75": 6.0,
+            "p90": 7.0,
+            "p95": 8.0
+          },
+          "missing": 0,
+          "observed": 4000
+        },
+        "forcedConsumes": {
+          "max": 26.0,
+          "mean": 18.28025,
+          "min": 10.0,
+          "p10": 16.0,
+          "p25": 17.0,
+          "p50": 18.0,
+          "p75": 20.0,
+          "p90": 21.0,
+          "p95": 22.0
+        },
+        "formed3": {
+          "max": 8.0,
+          "mean": 5.02525,
+          "min": 2.0,
+          "p10": 4.0,
+          "p25": 4.0,
+          "p50": 5.0,
+          "p75": 6.0,
+          "p90": 6.0,
+          "p95": 6.0
+        },
+        "locked3": {
+          "max": 3.0,
+          "mean": 2.56375,
+          "min": 0.0,
+          "p10": 2.0,
+          "p25": 2.0,
+          "p50": 3.0,
+          "p75": 3.0,
+          "p90": 3.0,
+          "p95": 3.0
+        },
+        "merges": {
+          "max": 25.0,
+          "mean": 17.03075,
+          "min": 9.0,
+          "p10": 14.0,
+          "p25": 15.0,
+          "p50": 17.0,
+          "p75": 19.0,
+          "p90": 20.0,
+          "p95": 21.0
+        }
+      },
+      "runs": 4000,
+      "scenario": {
+        "activePoolSelection": "fixed-symmetric-loadout",
+        "activePoolSize": 12,
+        "catalogSize": 12,
+        "equipThreshold": 2,
+        "maxLocked": 3,
+        "maxStar": 3,
+        "mergeCopies": 2,
+        "nearCompletionWeight": 2.25,
+        "p2": 0.05,
+        "pickups": 45,
+        "sharedSlots": 10
+      },
+      "streamSeed": 12889238157779413199
+    }
+  ],
+  "toolVersion": "2.0.0"
+}

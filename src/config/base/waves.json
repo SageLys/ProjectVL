@@ -1,15 +1,15 @@
 {
-  "totalWaves": 5,
+  "totalWaves": 9,
   "enemyCountBase": 5,
   "enemyCountPerWave": 3,
-  "firstSpawnDelay": 0.4,
-  "spawnInterval": { "base": 0.72, "perWave": 0.05, "min": 0.28 },
-  "betweenWaves": 2.4,
+  "firstSpawnDelay": 0.6,
+  "spawnInterval": { "base": 5.6, "perWave": 0.48, "min": 1.35 },
+  "betweenWaves": 21,
   "spawnMargin": 45,
   "typeRoll": {
     "tankBase": 0.2,
     "tankPerWave": 0.025,
     "fastThreshold": 0.47
   },
-  "bossWave": 5
+  "bossWave": 9
 }
