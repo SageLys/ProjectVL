@@ -24,6 +24,7 @@ const quickOptions = {
     pickupReactionSeconds: 0,
     pickupReactionJitterSeconds: 0,
     perkDecisionSeconds: 4,
+    actionErrorChance: 0,
   },
 };
 
@@ -67,9 +68,9 @@ describe('headlessSimulator · 真实 core、bot 与指标', () => {
     expect(result.config.simulatedDamage).toBe(result.config.baseDamage * 10);
     expect(run.win).toBe(true);
     expect(run.timedOut).toBe(false);
-    expect(run.estimatedWallDurationSeconds).toBeCloseTo(
-      run.activeDurationSeconds + run.perkDecisions * 4,
-    );
+    const minimumWallSeconds = run.activeDurationSeconds + run.perkDecisions * 4;
+    expect(run.estimatedWallDurationSeconds).toBeGreaterThanOrEqual(minimumWallSeconds);
+    expect(run.estimatedWallDurationSeconds - minimumWallSeconds).toBeLessThan(2);
     expect(run.waveStats).toHaveLength(3);
     expect(run.waveStats.every(wave => wave.startActiveSeconds !== null)).toBe(true);
     expect(run.waveStats.reduce((sum, wave) => sum + wave.merges, 0)).toBe(run.merges);
@@ -83,6 +84,11 @@ describe('headlessSimulator · 真实 core、bot 与指标', () => {
     expect(run.bossFightDurationSeconds).toBeGreaterThan(0);
     expect(run.breatherSeconds).toBeGreaterThan(0);
     expect(run.dropsGenerated).toBe(run.collected + run.expired + run.unresolvedDrops);
+    expect(run.attention.profile).toBe('target');
+    expect(run.attention.actions).toBeGreaterThan(0);
+    expect(run.attention.perkActions).toBe(run.perkDecisions);
+    expect(run.attention.actionsPerMinute).toBeGreaterThan(0);
+    expect(run.attention.queueDelayP95Seconds).toBeGreaterThanOrEqual(0);
   });
 
   it('永久漏点只抽一次；Boss 尾奖自然过期后仍能结算', () => {
@@ -125,12 +131,93 @@ describe('headlessSimulator · 真实 core、bot 与指标', () => {
     expect(result.summary.metrics.bossShare).toBeDefined();
     expect(result.summary.winningBossFightDurationSeconds.mean).toBeGreaterThan(0);
     expect(result.summary.winningBossShare.mean).toBeGreaterThan(0);
+    expect(result.summary.attention.profile).toBe('target');
+    expect(result.summary.attention.actionsPerMinute.mean).toBeGreaterThan(0);
+    expect(result.summary.metrics.attentionRolling3sP95).toBeDefined();
+    expect(result.summary.metrics.bountyAcceptedRunDeaths).toBeDefined();
 
     const csv = headlessRunsToCsv(result.runs).trim().split('\n');
     expect(csv).toHaveLength(result.runs.length + 1);
     expect(csv[0]).toContain('gameplaySeed');
     expect(csv[0]).toContain('preBossKillCollected');
     expect(csv[0]).toContain('expiredRate');
+    expect(csv[0]).toContain('attentionActionsPerMinute');
     expect(headlessBatchToCsv(result).split('\n')[0]).toContain('metaPowerMultiplier');
+    expect(headlessBatchToCsv(result).split('\n')[0]).toContain('attentionProfile');
+  });
+});
+
+describe('headlessSimulator · P4.1 共享注意力', () => {
+  it('默认 target，并提供 fast/target/stressed 三组可审计参数', () => {
+    const profileOptions = {
+      runs: 1,
+      seed: 424242,
+      variantNames: ['dev-short'],
+      metaPowerMultiplier: 10,
+      maxActiveSeconds: 300,
+    };
+    const target = runHeadlessBatch(profileOptions);
+    const fast = runHeadlessBatch({ ...profileOptions, attentionProfile: 'fast' as const });
+    const stressed = runHeadlessBatch({ ...profileOptions, attentionProfile: 'stressed' as const });
+
+    expect(target.options.attentionProfile).toBe('target');
+    expect(fast.options.bot.verbSwitchSeconds).toBeLessThan(target.options.bot.verbSwitchSeconds);
+    expect(stressed.options.bot.verbSwitchSeconds).toBeGreaterThan(target.options.bot.verbSwitchSeconds);
+    expect(fast.options.bot.actionErrorChance).toBeLessThan(stressed.options.bot.actionErrorChance);
+    expect(stressed.runs[0].attention.profile).toBe('stressed');
+  });
+
+  it('长动作会让已看见的掉落在共享队列中额外过期', () => {
+    const result = runHeadlessBatch({
+      runs: 1,
+      seed: 77,
+      variantNames: ['dev-short'],
+      metaPowerMultiplier: 10,
+      maxActiveSeconds: 300,
+      attentionProfile: 'target',
+      bot: {
+        permanentMissChance: 0,
+        pickupReactionSeconds: 0,
+        pickupReactionJitterSeconds: 0,
+        pickupActionIntervalSeconds: 20,
+        equipmentActionSeconds: 20,
+        consumeActionSeconds: 20,
+        bountyActionSeconds: 20,
+        verbSwitchSeconds: 0,
+        spatialTravelSecondsPer100Px: 0,
+        actionErrorChance: 0,
+      },
+    });
+    const attention = result.runs[0].attention;
+    expect(attention.attentionExtraExpired).toBeGreaterThan(0);
+    expect(attention.abandoned.expiredInQueue).toBe(attention.attentionExtraExpired);
+  });
+
+  it('Bounty 接单、击杀和奖励拾取进入同一批次统计', () => {
+    const result = runHeadlessBatch({
+      runs: 12,
+      seed: 20260712,
+      variantNames: ['dev-short'],
+      metaPowerMultiplier: 2,
+      maxActiveSeconds: 300,
+      attentionProfile: 'fast',
+      bot: {
+        permanentMissChance: 0,
+        pickupReactionSeconds: 0,
+        pickupReactionJitterSeconds: 0,
+        bountyActionSeconds: 1 / 30,
+        verbSwitchSeconds: 0,
+        spatialTravelSecondsPer100Px: 0,
+        actionErrorChance: 0,
+        bountyAcceptChance: 1,
+        rescueDistance: 0,
+      },
+    });
+    const attention = result.summary.attention;
+    expect(attention.bountyOffered).toBeGreaterThan(0);
+    expect(attention.bountyAccepted).toBeGreaterThan(0);
+    expect(attention.bountyCompleted + attention.bountyFailed)
+      .toBeLessThanOrEqual(attention.bountyAccepted);
+    expect(attention.bountyRewardCollected).toBeLessThanOrEqual(attention.bountyRewardDrops);
   });
 });

@@ -3,6 +3,7 @@ import type { Config, GameEvent, GameState, Rng } from '../types';
 import { endGame } from '../endGame';
 import { spawnEnemy } from './enemySystem';
 import { fireTrigger } from '../effects/interpreter';
+import { rollBountyForWave } from './bountySystem';
 
 /** 第 wave 波的敌人数量：base + wave*perWave。 */
 export function enemyCountFor(wave: number): number {
@@ -18,21 +19,24 @@ export function startNextWave(state: GameState, config: Config, rng: Rng): GameE
   state.spawnTimer = cfg.waves.firstSpawnDelay;
   state.waveClearPending = false;
   state.between = 0;
+  rollBountyForWave(state, rng);
   const events: GameEvent[] = [{ type: 'waveStart', wave: state.wave }];
   events.push(...fireTrigger(state, config, rng, 'onWaveStart', { wave: state.wave }));
   return events;
 }
 
 /** 按节奏生成敌人：间隔 max(min, base - wave*perWave)。 */
-export function tickSpawns(state: GameState, rng: Rng, dt: number): void {
-  if (state.spawnLeft <= 0) return;
+export function tickSpawns(state: GameState, rng: Rng, dt: number): GameEvent[] {
+  if (state.spawnLeft <= 0) return [];
   state.spawnTimer -= dt;
   if (state.spawnTimer <= 0) {
-    spawnEnemy(state, rng);
+    const events = spawnEnemy(state, rng);
     state.spawnLeft--;
     const si = cfg.waves.spawnInterval;
     state.spawnTimer = Math.max(si.min, si.base - state.wave * si.perWave);
+    return events;
   }
+  return [];
 }
 
 /**

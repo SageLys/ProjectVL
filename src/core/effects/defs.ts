@@ -1,4 +1,4 @@
-// 技能数据模型（对应 docs/skills-schema.json v0.3.0）。
+// 技能数据模型（对应 docs/skills-schema.json v0.4.0）。
 // 技能 = 数据（JSON 实例）+ 通用解释器（触发器 → 效果原子）。禁止每张卡硬编码 if。
 // v0.3.0（P3）：新增 'passive' 触发器承载常驻修饰类原子（掉率/反伤/突破减免等，
 // 设计表中"掉率+25%"这类无事件语义的装备态此前在 schema 中无处安放）。
@@ -76,12 +76,14 @@ export interface CardDef {
   designNotes?: string;
 }
 
-/** 精英 Bounty 机制配置（框架级；P3 仅落配置与索敌优先级基建，流程 P5 实装）。 */
+/** 精英 Bounty 机制配置：可选接单、集火狂暴，以及“肥而急”赏金。 */
 export interface BountyConfig {
   enabled: boolean;
   enabledFromWave: number;
   spawnChancePerWave: number;
   markWindowSeconds: number;
+  /** 敌人视觉半径外的额外点击热区，供 T1 手机实测回填。 */
+  hitRadiusPadding: number;
   acceptEffects: { focusFire: boolean; enrage: { speedMul: number; hpMul: number } };
   rewards: { dropCount: number; starWeightShift: number; dropLifetimeMul: number };
 }

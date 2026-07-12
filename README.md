@@ -9,7 +9,7 @@
 ## 技术栈
 
 Vite + TypeScript + Canvas 2D + 原生 DOM UI + JSON 配置 + Vitest。
-不引入任何游戏/UI/状态管理/CSS 框架，不使用 localStorage 等持久化。
+不引入游戏/UI/状态管理/CSS 框架。玩法状态暂不持久化；P4.1 注意力遥测是唯一 localStorage 例外，可由 DEV API 导出/清空。
 
 ## 运行 / 构建 / 测试
 
@@ -21,6 +21,9 @@ npm run preview   # 预览 dist/ 构建产物
 npm run test      # 运行 Vitest（core/ 系统单元测试）
 npm run test:watch
 npm run sim:balance -- --runs 1000 --json outputs/sim.json --csv outputs/sim.csv
+npm run sim:attention -- --runs 2000 --json outputs/attention.json --csv outputs/attention.csv
+npm run sim:attention:aggregate
+npm run p4.1:snapshot
 ```
 
 > `dist/` 由 `npm run build` 生成，不再手工复制打包。
@@ -34,7 +37,7 @@ ProjectVL/
 │  ├─ main.ts              # 薄胶水：加载数据 → 建状态 → 绑输入 → 主循环
 │  ├─ styles/app.css       # 全部样式（含 880/560px 响应式断点）
 │  ├─ config/              # 唯一数值/规则配置来源（P3 六域拆分 + variant 机制）
-│  │  ├─ base/             # combat / waves / enemies / skills / progression / economy / tuner
+│  │  ├─ base/             # combat / input / waves / enemies / skills / progression / economy / tuner
 │  │  ├─ variants/         # 覆盖文件（方案A、短局、P4 easy/hard 难度）
 │  │  ├─ loader.ts         # 深合并 + URL ?variant= 解析（A/B 测试基建）
 │  │  └─ index.ts          # 运行配置单例 cfg / applyVariants
@@ -48,14 +51,15 @@ ProjectVL/
 │  │  ├─ effects/          # 效果解释器：defs(数据模型)/registry(31原子)/interpreter(触发器总线
 │  │  │                    # +passive聚合+消耗释放)/statusSystem(状态+冲突仲裁)/runtime(区域/光环/召唤/护盾 tick)
 │  │  └─ systems/          # waveSystem/enemySystem/combatSystem/dropSystem/damageSystem/
-│  │                       # cardSystem/equipmentSystem/progressionSystem/particleSystem
-│  ├─ sim/                 # P4 真实 core headless Monte Carlo + baseline bot
+│  │                       # cardSystem/equipmentSystem/progressionSystem/bountySystem/particleSystem
+│  ├─ sim/                 # P4/P4.1 真实 core Monte Carlo + 共享注意力动作队列 bot
 │  ├─ render/              # canvasRenderer + drawArena/Enemies/Bullets/Drops/Particles/Turret/Effects
 │  ├─ ui/                  # domRefs/renderHud/renderCards/renderEquipment/
 │  │                       # tunerPanel/modals/toast/slotFactory/eventText/format
-│  ├─ input/               # pointerDrag（含拖入主画面=消耗释放）/ dropClick / keyboard
-│  └─ debug/exposeDebugApi.ts
-├─ scripts/                # runBalanceSim.ts 等可复现实验入口
+│  ├─ input/               # pointerRouter / arenaTapResolver / keyboard
+│  ├─ telemetry/           # P4.1 延迟持久化的指针+语义动作遥测
+│  └─ debug/               # DEV API + 确定性浏览器测试动作
+├─ scripts/                # balance/attention sweep、正式汇总、v3快照
 ├─ tests/                  # Vitest：系统测试 + 原子/解释器/加载器/整局/模拟器 + helpers
 ├─ legacy/                 # 归档（勿删）：单文件原型 + 历史备份 + 任务记录
 └─ docs/                   # 立项案 docx 等
@@ -75,8 +79,9 @@ ProjectVL/
    - 改画面 → `src/render`
    - 改界面 → `src/ui`
    - 改输入 → `src/input`
-4. **调试口**：`window.__game` 暴露 `getState / start / reset / spawnGroundDrop / addTestPair /
-   moveOrSwap / consumeAt / toggleLock / setConfig / getVariants`，**仅 DEV 模式注入**（生产构建自动摇树移除），供人工与浏览器自动化测试使用。
+4. **调试口**：`window.__game` 暴露 `getState / start / reset / spawnGroundDrop / offerBounty /
+   addTestPair / moveOrSwap / consumeAt / toggleLock / setConfig / getVariants / getAttentionTelemetry /
+   clearAttentionTelemetry`，**仅 DEV 模式注入**。`getState` 返回深拷贝，避免测试误改真实状态。
 
 ## 行为契约
 
@@ -84,8 +89,10 @@ ProjectVL/
 消耗释放，落点=技能锚点）；入装门槛 2★、上限 3★、二合、同类型唯一、喂养合成；基座默认「锁定即装备」
 （方案B，共享 10 格锁 3），独立装备格为 `equip-slots` variant。技能=JSON 数据+通用解释器
 （8 触发器×31 效果原子）。P4 起基座为 8 普通波+Boss、单局有效卡池 5/目录 12、差一张权重
-2.25、单一局外火力乘数；`difficulty-easy` / `difficulty-hard` 为数值覆盖。全部规则由 `tests/`
-下 Vitest 用例固化，改规则时先更新/新增测试。
+2.25、单一局外火力乘数；`difficulty-easy` / `difficulty-hard` 为数值覆盖。P4.1 增加统一 Pointer Router、
+Bounty 主动风险、严格暂停守卫和共享注意力队列：标准 Target 18,000局九宫格中的主格为18.9%通关、
+3s/10s峰值2/5、队列P95 1.13s。8px/250ms、60px、44px与三种行为画像仍是 provisional；
+测试通过不等于真机/真人验收。全部规则由 `tests/` 下 Vitest 用例固化。
 
 ## 归档
 

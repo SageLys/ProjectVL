@@ -13,6 +13,11 @@
       "boss":   { "hpBase": 42000, "speedBase": 3, "damage": 999 }
     }
   },
+  "skills": {
+    "mechanisms": {
+      "bounty": { "acceptEffects": { "enrage": { "speedMul": 1.4, "hpMul": 12 } } }
+    }
+  },
   "economy": { "defaults": { "dropChance": 0.22, "dropLifetime": 9 } },
   "progression": { "xpNeedBase": 10, "xpGrowth": 1.35 }
 }

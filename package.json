@@ -10,7 +10,10 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "sim:balance": "vite-node scripts/runBalanceSim.ts"
+    "sim:balance": "vite-node scripts/runBalanceSim.ts",
+    "sim:attention": "vite-node scripts/runAttentionSweep.ts",
+    "sim:attention:aggregate": "vite-node scripts/aggregateAttentionSweeps.ts",
+    "p4.1:snapshot": "vite-node scripts/buildP41Snapshot.ts"
   },
   "devDependencies": {
     "typescript": "^5.6.3",

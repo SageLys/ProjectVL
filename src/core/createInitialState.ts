@@ -16,6 +16,7 @@ export function createInitialState(): GameState {
   return {
     mode: 'ready',
     paused: false,
+    pauseReason: null,
     time: 0,
     hp: cfg.combat.hp.max,
     maxHp: cfg.combat.hp.max,
@@ -40,6 +41,7 @@ export function createInitialState(): GameState {
     spawnLeft: 0,
     spawnTimer: 0,
     waveClearPending: false,
+    bountyWavePending: false,
     damagePerkMultiplier: 1,
     fireRatePerkMultiplier: 1,
     multi: 1,
@@ -55,5 +57,13 @@ export function createInitialState(): GameState {
     collected: 0,
     expired: 0,
     expiredConverted: 0,
+    bountyOffered: 0,
+    bountyAccepted: 0,
+    bountyExpired: 0,
+    bountyCompleted: 0,
+    bountyFailed: 0,
+    bountyRewardDrops: 0,
+    bountyRewardCollected: 0,
+    bountyRewardExpired: 0,
   };
 }

@@ -6,6 +6,7 @@ import { killEnemy } from './damageSystem';
 import { emptyStatus, speedMultiplier } from '../effects/statusSystem';
 import { absorbBreach } from '../effects/runtime';
 import { fireTrigger, getModifiers } from '../effects/interpreter';
+import { offerPendingBounty, settleRemovedBounty, tickBountyOffers } from './bountySystem';
 
 /**
  * 敌人类型判定：roll < tankBase + wave*tankPerWave → 重装；
@@ -19,9 +20,11 @@ export function determineType(wave: number, roll: number, spawnLeft: number): En
 }
 
 /** 生成一只敌人：类型判定 → 取基础值+每波成长 → 四边随机出生（边缘外 spawnMargin）。 */
-export function spawnEnemy(state: GameState, rng: Rng): void {
+export function spawnEnemy(state: GameState, rng: Rng): GameEvent[] {
   const roll = rng();
-  const type = determineType(state.wave, roll, state.spawnLeft);
+  const rolledType = determineType(state.wave, roll, state.spawnLeft);
+  // 命中本波 bounty 时强制由下一只非 Boss 槽位生成普通载体，保证每次判定都有可读的 opt-in 目标。
+  const type = state.bountyWavePending && rolledType !== 'boss' ? 'normal' : rolledType;
   const def = cfg.enemies.types[type];
   const { width, height } = cfg.combat.canvas;
   const hp = def.hpBase + state.wave * def.hpPerWave;
@@ -32,12 +35,14 @@ export function spawnEnemy(state: GameState, rng: Rng): void {
     : side === 1 ? { x: width + margin, y: 35 + rng() * (height - 70) }
     : side === 2 ? { x: 35 + rng() * (width - 70), y: height + margin }
     : { x: -margin, y: 35 + rng() * (height - 70) };
-  state.enemies.push({
+  const enemy: Enemy = {
     id: state.nextEnemyId++,
     x: spawn.x, y: spawn.y, type, label: def.label,
     hp, maxHp: hp, speed, r: def.r, color: def.color, damage: def.damage, xp: def.xp, hit: 0,
     status: emptyStatus(),
-  });
+  };
+  state.enemies.push(enemy);
+  return offerPendingBounty(state, enemy);
 }
 
 /** 移动目标解析（仲裁规则 6）：嘲讽（点/召唤物）> 嘲讽半径内的召唤物 > 炮台。 */
@@ -66,7 +71,7 @@ function moveTargetFor(state: GameState, e: Enemy): { x: number; y: number; summ
  * 触及炮台 → 护盾吸收/减免/反伤 → 扣血、breakthrough 事件、onBreach 触发；HP 归零判负。
  */
 export function moveEnemies(state: GameState, config: Config, rng: Rng, dt: number): GameEvent[] {
-  const events: GameEvent[] = [];
+  const events: GameEvent[] = tickBountyOffers(state, dt);
   const t = cfg.combat.turret;
   for (let i = state.enemies.length - 1; i >= 0; i--) {
     const e = state.enemies[i];
@@ -84,6 +89,7 @@ export function moveEnemies(state: GameState, config: Config, rng: Rng, dt: numb
       target.summon.hp -= e.damage;
       for (let k = 0; k < 6; k++) spawnParticle(state, rng, e.x, e.y, e.color, 120);
       state.enemies.splice(i, 1);
+      events.push(...settleRemovedBounty(state, e, 'summon'));
       continue;
     }
 
@@ -97,6 +103,7 @@ export function moveEnemies(state: GameState, config: Config, rng: Rng, dt: numb
       }
       const damage = absorbBreach(state, config, rng, e.damage, events);
       state.enemies.splice(i, 1);
+      events.push(...settleRemovedBounty(state, e, 'breach'));
       for (let k = 0; k < cfg.combat.vfx.breakthroughParticles; k++) spawnParticle(state, rng, t.x, t.y, '#ff6677', 170);
       if (damage != null) {
         state.hp -= damage;

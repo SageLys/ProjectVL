@@ -8,10 +8,10 @@
 <body>
   <main class="app">
     <header class="topbar">
-      <div class="brand"><small>360° DEFENSE PROTOTYPE · V0.3</small><h1>魅魔心防战</h1></div>
+      <div class="brand"><small>360° DEFENSE PROTOTYPE · V0.4</small><h1>魅魔心防战</h1></div>
       <div class="status">
         <div class="pill">目标：<strong>守住全部波次</strong></div>
-        <div class="pill">核心：<strong>自动攻击 → 点击拾取 → 合成 → 锁定装备 / 拖入战场消耗</strong></div>
+        <div class="pill">核心：<strong>自动攻击 → 点击拾取 / 接赏金 → 合成 → 锁定装备 / 拖卡释放</strong></div>
       </div>
     </header>
     <section class="layout">
@@ -19,7 +19,7 @@
         <canvas id="game" width="960" height="600" aria-label="魅魔心防战游戏区域"></canvas>
         <div class="hud">
           <div class="hud-box"><div class="label">私人空间</div><div class="value"><span id="hpText">100</span> / 100</div><div class="bar"><i id="hpBar"></i></div></div>
-          <div class="hud-box"><div class="label">经验 · Lv.<span id="levelText">1</span></div><div class="value"><span id="xpText">0</span> / <span id="xpNeed">8</span></div><div class="bar xp"><i id="xpBar" style="width:0%"></i></div></div>
+          <div class="hud-box"><div class="label">经验 · Lv.<span id="levelText">1</span></div><div class="value"><span id="xpText">0</span> / <span id="xpNeed">12</span></div><div class="bar xp"><i id="xpBar" style="width:0%"></i></div></div>
         </div>
         <div class="equipment-bar" id="equipmentBar" aria-label="装备栏">
           <h3>魅魔装备</h3><small id="equipmentHint">独立装备格</small>
@@ -46,13 +46,13 @@
             <div class="stat"><span>伤害</span><strong id="damageStat">16</strong></div>
             <div class="stat"><span>射速</span><strong id="rateStat">3.3/s</strong></div>
             <div class="stat"><span>弹丸</span><strong id="multiStat">1</strong></div>
-            <div class="stat"><span>波次</span><strong><span id="waveText">0</span> / <span id="totalWavesText">5</span></strong></div>
+            <div class="stat"><span>波次</span><strong><span id="waveText">0</span> / <span id="totalWavesText">9</span></strong></div>
           </div>
         </section>
         <section class="panel">
           <h3>战斗控制</h3>
-          <div class="controls"><button class="btn primary" id="startBtn">开始游戏</button><button class="btn" id="pauseBtn">暂停</button><button class="btn" id="testCardBtn">生成测试掉落</button></div>
-          <p>炮台：自动锁定（烙印优先）<br>战场：点击限时心意拾取<br>卡牌：单击锁定=装备；拖入战场=消耗</p>
+          <div class="controls"><button class="btn primary" id="startBtn">开始游戏</button><button class="btn" id="pauseBtn">暂停</button><button class="btn" id="testCardBtn">生成测试掉落</button><button class="btn" id="testBountyBtn">生成测试赏金</button></div>
+          <p>炮台：自动锁定（已接赏金优先）<br>战场：点掉落拾取；点金色倒计时精英接单<br>接单后精英狂暴，击杀掉两张寿命更短的赏金；不接无惩罚<br>卡牌：单击锁定=装备；拖入战场=消耗</p>
         </section>
         <section class="panel">
           <h3>实时参数控制</h3>
@@ -60,8 +60,8 @@
             <div class="tune-row"><label for="damageCtl">基础伤害 <output id="damageCtlVal">16</output></label><input id="damageCtl" data-testid="damage-control" type="range" min="6" max="40" value="16" step="1"></div>
             <div class="tune-row"><label for="rateCtl">每秒攻击 <output id="rateCtlVal">3.3</output></label><input id="rateCtl" data-testid="rate-control" type="range" min="1" max="10" value="3.3" step="0.1"></div>
             <div class="tune-row"><label for="rangeCtl">攻击射程 <output id="rangeCtlVal">430</output></label><input id="rangeCtl" data-testid="range-control" type="range" min="160" max="520" value="430" step="10"></div>
-            <div class="tune-row"><label for="dropCtl">掉落概率 <output id="dropCtlVal">50%</output></label><input id="dropCtl" data-testid="drop-control" type="range" min="0" max="100" value="50" step="5"></div>
-            <div class="tune-row"><label for="lifeCtl">存在时间 <output id="lifeCtlVal">6.0秒</output></label><input id="lifeCtl" data-testid="life-control" type="range" min="2" max="15" value="6" step="0.5"></div>
+            <div class="tune-row"><label for="dropCtl">掉落概率 <output id="dropCtlVal">18%</output></label><input id="dropCtl" data-testid="drop-control" type="range" min="0" max="100" value="18" step="1"></div>
+            <div class="tune-row"><label for="lifeCtl">存在时间 <output id="lifeCtlVal">7.5秒</output></label><input id="lifeCtl" data-testid="life-control" type="range" min="2" max="15" value="7.5" step="0.5"></div>
             <div class="tune-row"><label for="speedCtl">追求者速度 <output id="speedCtlVal">100%</output></label><input id="speedCtl" data-testid="speed-control" type="range" min="40" max="180" value="100" step="10"></div>
             <div class="tune-row"><label for="variantSel">配置 Variant</label><select id="variantSel" data-testid="variant-select"></select></div>
           </div>
@@ -70,7 +70,7 @@
         </section>
         <section class="panel guide">
           <h3>验证重点</h3>
-          <ol><li>锁定即装备是否比拖拽换装更省注意力？</li><li>拖入战场的落点释放是否形成有操作感的决策？</li><li>合成、锁定与消耗是否构成清晰的取舍三角？</li></ol>
+          <ol><li>锁定即装备是否比拖拽换装更省注意力？</li><li>拾取、接赏金与拖卡解围重叠时，是否仍理解“点谁=选择哪种风险”？</li><li>合成、锁定与消耗是否构成清晰的取舍三角？</li></ol>
         </section>
       </aside>
     </section>
@@ -78,8 +78,8 @@
 
   <div class="modal" id="levelModal">
     <div class="modal-card"><h2>经验升级</h2><p>选择一个即时强化，然后继续战斗。</p><div class="choices">
-      <button class="choice" data-perk="damage"><b>高能弹芯</b>基础伤害 +20%</button>
-      <button class="choice" data-perk="rate"><b>过载供能</b>射速 +15%</button>
+      <button class="choice" data-perk="damage"><b>高能弹芯</b>基础伤害 +15%</button>
+      <button class="choice" data-perk="rate"><b>过载供能</b>射速 +12%</button>
       <button class="choice" data-perk="repair"><b>重整心防</b>私人空间恢复 20 点</button>
     </div></div>
   </div>

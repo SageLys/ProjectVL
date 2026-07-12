@@ -17,12 +17,21 @@ Options:
   --seed <uint32>            批次种子（默认 20260712）
   --variant <a,b>            variant，可重复传入
   --meta <n>                 metaPowerMultiplier（默认 1）
-  --miss <0..1>              永久漏点概率（默认 0.12）
-  --reaction <seconds>       拾取基础反应延迟（默认 0.45）
-  --reaction-jitter <sec>    反应延迟抖动（默认 ±0.2）
-  --pickup-interval <sec>    连续拾取动作间隔（默认 0.18）
-  --equip-interval <sec>     装备/喂养检查间隔（默认 0.35）
-  --perk-decision <sec>      每次 perk 决策折算墙钟耗时（默认 3）
+  --profile <name>           注意力参数组：fast|target|stressed（默认 target）
+  --miss <0..1>              覆盖参数组的永久漏点概率
+  --reaction <seconds>       覆盖基础反应延迟
+  --reaction-jitter <sec>    覆盖反应延迟抖动
+  --pickup-interval <sec>    覆盖一次点击拾取耗时（兼容旧参数名）
+  --equip-interval <sec>     覆盖装备/喂养检查间隔（兼容旧参数名）
+  --perk-decision <sec>      覆盖 perk 选择耗时（兼容旧参数名）
+  --equipment-action <sec>   覆盖一次锁定/喂养动作耗时
+  --consume-action <sec>     覆盖一次拖卡释放动作耗时
+  --bounty-action <sec>      覆盖一次 Bounty 接单动作耗时
+  --switch-cost <sec>        覆盖动词切换成本
+  --travel-per-100 <sec>     覆盖视线/指针跨越 100px 的时间成本
+  --error <0..1>             覆盖误点概率
+  --bounty-accept <0..1>     覆盖主动接单倾向
+  --rescue-distance <px>     覆盖触发拖卡解围的敌人距离
   --max-active <seconds>     单局 active time 超时（默认 1200）
   --json <path>              导出完整 JSON（summary + runs）
   --csv <path>               导出逐局 CSV
@@ -61,12 +70,21 @@ function parseArgs(argv: string[]) {
     else if (arg === '--seed') options.seed = finiteNumber(raw, arg) >>> 0;
     else if (arg === '--variant') variants.push(...raw.split(',').map(v => v.trim()).filter(Boolean));
     else if (arg === '--meta') options.metaPowerMultiplier = finiteNumber(raw, arg);
+    else if (arg === '--profile') options.attentionProfile = raw;
     else if (arg === '--miss') bot.permanentMissChance = finiteNumber(raw, arg);
     else if (arg === '--reaction') bot.pickupReactionSeconds = finiteNumber(raw, arg);
     else if (arg === '--reaction-jitter') bot.pickupReactionJitterSeconds = finiteNumber(raw, arg);
     else if (arg === '--pickup-interval') bot.pickupActionIntervalSeconds = finiteNumber(raw, arg);
     else if (arg === '--equip-interval') bot.equipmentDecisionIntervalSeconds = finiteNumber(raw, arg);
     else if (arg === '--perk-decision') bot.perkDecisionSeconds = finiteNumber(raw, arg);
+    else if (arg === '--equipment-action') bot.equipmentActionSeconds = finiteNumber(raw, arg);
+    else if (arg === '--consume-action') bot.consumeActionSeconds = finiteNumber(raw, arg);
+    else if (arg === '--bounty-action') bot.bountyActionSeconds = finiteNumber(raw, arg);
+    else if (arg === '--switch-cost') bot.verbSwitchSeconds = finiteNumber(raw, arg);
+    else if (arg === '--travel-per-100') bot.spatialTravelSecondsPer100Px = finiteNumber(raw, arg);
+    else if (arg === '--error') bot.actionErrorChance = finiteNumber(raw, arg);
+    else if (arg === '--bounty-accept') bot.bountyAcceptChance = finiteNumber(raw, arg);
+    else if (arg === '--rescue-distance') bot.rescueDistance = finiteNumber(raw, arg);
     else if (arg === '--max-active') options.maxActiveSeconds = finiteNumber(raw, arg);
     else if (arg === '--json') jsonPath = raw;
     else if (arg === '--csv') csvPath = raw;

@@ -70,6 +70,7 @@ describe('dropSystem · 概率与 boss', () => {
     rollDropOnKill(s, config, constRng(0.99), enemy({ type: 'boss', x: 10, y: 10 }));
     expect(s.groundDrops).toHaveLength(1);
     expect(s.groundDrops[0].star).toBe(2);
+    expect(s.groundDrops[0].source).toBe('boss');
   });
 
   it('非 boss 且 rng 高于概率则不掉', () => {
@@ -159,6 +160,7 @@ describe('dropSystem · Boss 星级策略', () => {
     rollDropOnKill(s, config, constRng(0), enemy({ type: 'normal', x: 10, y: 10 }));
     expect(s.groundDrops).toHaveLength(1);
     expect(s.groundDrops[0].star).toBe(1);
+    expect(s.groundDrops[0].source).toBe('normal');
   });
 
   it('Boss 的 2★ 概率未命中时仍必掉 1★', () => {

@@ -2,6 +2,7 @@
   "$comment": "P4 数值标定交付快照。运行时真值仍位于 src/config/base/*.json 与 src/config/variants/*.json；本文件用于审阅、Unity移交和防止口径散落。",
   "schemaVersion": 2,
   "id": "projectvl-p4-balance-v2",
+  "supersededBy": "docs/P4.1_数值配置_v3.json",
   "calibratedAt": "2026-07-12",
   "status": "gameplay-calibrated-performance-provisional",
   "calibration": {

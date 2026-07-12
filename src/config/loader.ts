@@ -1,6 +1,7 @@
-// variant 加载器：base（六域）+ 若干覆盖文件深合并 → 运行配置。
+// variant 加载器：base（战斗、输入等八域）+ 若干覆盖文件深合并 → 运行配置。
 // A/B 测试基建：URL 参数 ?variant=a,b 或调参面板切换（切换=带参重载，保证一局内配置不漂移）。
 import combat from './base/combat.json';
+import input from './base/input.json';
 import waves from './base/waves.json';
 import enemies from './base/enemies.json';
 import skills from './base/skills.json';
@@ -41,6 +42,7 @@ export function deepMerge<T>(base: T, patch: DeepPartial<T>): T {
 function assembleBase(): GameConfig {
   return structuredClone({
     combat,
+    input,
     waves,
     enemies,
     skills,

@@ -41,6 +41,14 @@ export function formatToast(ev: GameEvent): string | null {
     case 'shieldBroken': return T.shieldBroken;
     case 'testDrops': return fmt(T.testDrops, { name: name(ev.cardType) });
     case 'perkApplied': return fmt(T.perkApplied, { title: ev.title });
+    case 'bountyOffered':
+    case 'bountyAccepted':
+    case 'bountyExpired':
+    case 'bountyCompleted':
+    case 'bountyFailed':
+    case 'bountyRewardCollected':
+    case 'bountyRewardExpired':
+      return null; // 赏金用画布标记/倒计时表达，避免高压节点再叠 toast。
     case 'levelUp':
     case 'gameEnd':
       return null;

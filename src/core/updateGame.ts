@@ -16,7 +16,7 @@ export function updateGame(state: GameState, config: Config, rng: Rng, dt: numbe
   state.time += dt;
 
   events.push(...updateTurret(state, config, rng, dt));
-  tickSpawns(state, rng, dt);
+  events.push(...tickSpawns(state, rng, dt));
   events.push(...updateBullets(state, config, rng, dt));
   events.push(...moveEnemies(state, config, rng, dt));
   events.push(...tickEffects(state, config, rng, dt));

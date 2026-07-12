@@ -15,12 +15,22 @@ import {
 } from '../core/systems/equipmentSystem';
 import { applyPerk } from '../core/systems/progressionSystem';
 import { startNextWave } from '../core/systems/waveSystem';
+import { acceptBountyAt } from '../core/systems/bountySystem';
 import type { Card, Config, GameEvent, GameState, GroundDrop, Rng } from '../core/types';
 import { updateGame } from '../core/updateGame';
 
 export const HEADLESS_HZ = 30;
 export const HEADLESS_DT = 1 / HEADLESS_HZ;
 export const P4_REGULAR_WAVE_KPI_DENOMINATOR = 8;
+
+export type AttentionProfileName = 'fast' | 'target' | 'stressed';
+
+export type AttentionActionKind =
+  | 'pickup'
+  | 'bountyAccept'
+  | 'equipment'
+  | 'consume'
+  | 'perk';
 
 export interface HeadlessBotOptions {
   /** 掉落第一次进入视野时，永久忽略它的概率。 */
@@ -35,6 +45,24 @@ export interface HeadlessBotOptions {
   pickupActionIntervalSeconds: number;
   /** 每次三选一暂停折算进墙钟时长的决策耗时。 */
   perkDecisionSeconds: number;
+  /** 喂养或锁定一次卡牌占用注意力通道的时间。 */
+  equipmentActionSeconds: number;
+  /** 拖卡并在战场落点释放一次卡牌占用注意力通道的时间。 */
+  consumeActionSeconds: number;
+  /** 点击接受一次 Bounty 占用注意力通道的时间。 */
+  bountyActionSeconds: number;
+  /** 在不同动词之间切换的额外成本。 */
+  verbSwitchSeconds: number;
+  /** 指针/视线跨越 100px 的时间成本。 */
+  spatialTravelSecondsPer100Px: number;
+  /** 已决定动作在执行时发生误点/取消的概率。 */
+  actionErrorChance: number;
+  /** 看见 Bounty 后愿意主动接单的基础概率。 */
+  bountyAcceptChance: number;
+  /** 敌人进入炮台多少像素内时，Bot 会考虑消耗卡解围。 */
+  rescueDistance: number;
+  /** 两次主动解围判断之间的最短间隔。 */
+  rescueDecisionIntervalSeconds: number;
 }
 
 export interface HeadlessBatchOptions {
@@ -44,7 +72,19 @@ export interface HeadlessBatchOptions {
   /** 局外成长占位：只乘运行期基础 damage，不修改 core 或磁盘配置。 */
   metaPowerMultiplier?: number;
   maxActiveSeconds?: number;
+  /** 共享注意力参数组；默认 target。 */
+  attentionProfile?: AttentionProfileName;
   bot?: Partial<HeadlessBotOptions>;
+}
+
+export interface ResolvedHeadlessBatchOptions {
+  runs: number;
+  seed: number;
+  variantNames: string[];
+  metaPowerMultiplier: number;
+  maxActiveSeconds: number;
+  attentionProfile: AttentionProfileName;
+  bot: HeadlessBotOptions;
 }
 
 export interface PeakEntities {
@@ -118,6 +158,60 @@ export interface HeadlessRunResult {
   bossShare: number;
   waveStats: WaveStats[];
   peak: PeakEntities;
+  attention: AttentionRunMetrics;
+}
+
+export interface AttentionAbandonCounts {
+  permanentMiss: number;
+  expiredBeforeReady: number;
+  expiredInQueue: number;
+  bountyRiskRejected: number;
+  bountyWindowExpired: number;
+  invalidated: number;
+  gameEnded: number;
+}
+
+/** P4.1：单局共享注意力/点击压力结果。滚动窗口字段均为“窗口内动作数”。 */
+export interface AttentionRunMetrics {
+  profile: AttentionProfileName;
+  actions: number;
+  actionsPerMinute: number;
+  successfulActions: number;
+  pickupActions: number;
+  bountyAcceptActions: number;
+  equipmentActions: number;
+  consumeActions: number;
+  perkActions: number;
+  consumeActionsPerMinute: number;
+  rolling3sP50: number;
+  rolling3sP95: number;
+  rolling10sP50: number;
+  rolling10sP95: number;
+  queueDelayMeanSeconds: number;
+  queueDelayP50Seconds: number;
+  queueDelayP95Seconds: number;
+  queueDelayMaxSeconds: number;
+  attentionWindowSeconds: number;
+  overlappingWindowSeconds: number;
+  overlappingWindowShare: number;
+  overlapEpisodes: number;
+  maxConcurrentWindows: number;
+  attentionExtraExpired: number;
+  reactionExpired: number;
+  errorActions: number;
+  errorRate: number;
+  positionSwitches: number;
+  verbSwitches: number;
+  bountyOffered: number;
+  bountyAccepted: number;
+  bountyCompleted: number;
+  bountyExpired: number;
+  bountyFailed: number;
+  bountyRewardDrops: number;
+  bountyRewardCollected: number;
+  bountyAcceptedBreaches: number;
+  bountyAcceptedRunDeaths: number;
+  abandoned: AttentionAbandonCounts;
 }
 
 export interface DistributionSummary {
@@ -148,11 +242,37 @@ export interface HeadlessBatchSummary {
   mergesPerRegularWave: number;
   breatherShare: number;
   bossShare: number;
+  attention: AttentionBatchSummary;
   metrics: Record<string, DistributionSummary>;
 }
 
+export interface AttentionBatchSummary {
+  profile: AttentionProfileName;
+  actionsPerMinute: DistributionSummary;
+  rolling3sP50: DistributionSummary;
+  rolling3sP95: DistributionSummary;
+  rolling10sP50: DistributionSummary;
+  rolling10sP95: DistributionSummary;
+  queueDelayP50Seconds: DistributionSummary;
+  queueDelayP95Seconds: DistributionSummary;
+  overlappingWindowShare: DistributionSummary;
+  attentionExtraExpired: DistributionSummary;
+  consumeActionsPerMinute: DistributionSummary;
+  errorRate: DistributionSummary;
+  positionSwitches: DistributionSummary;
+  bountyOffered: number;
+  bountyAccepted: number;
+  bountyCompleted: number;
+  bountyFailed: number;
+  bountyRewardDrops: number;
+  bountyRewardCollected: number;
+  bountyAcceptanceRate: number;
+  bountyCompletionRate: number;
+  bountyRewardCollectionRate: number;
+}
+
 export interface HeadlessBatchResult {
-  options: Required<Omit<HeadlessBatchOptions, 'bot'>> & { bot: HeadlessBotOptions };
+  options: ResolvedHeadlessBatchOptions;
   simulation: { hz: number; dt: number; vfxEnabled: false };
   /** 实际注入 core 的完整配置快照，供结果复现与事后审计。 */
   configSnapshot: GameConfig;
@@ -175,8 +295,77 @@ export interface HeadlessBatchResult {
 }
 
 interface DropDecision {
-  readyAt: number;
+  /** 以墙钟计时，避免 perk 暂停期间反应永远无法结束。 */
+  readyAtWall: number;
   missed: boolean;
+  seenAtWall: number;
+  collected: boolean;
+}
+
+type AttentionRegion = 'field' | 'bounty' | 'inventory' | 'perk';
+
+interface AttentionActionBase {
+  key: string;
+  kind: AttentionActionKind;
+  region: AttentionRegion;
+  x: number;
+  y: number;
+  createdAtWall: number;
+  readyAtWall: number;
+  priority: number;
+}
+
+type EquipmentPlan =
+  | { operation: 'feedLock'; sourceCardId: number; targetCardId: number }
+  | { operation: 'feedSlot'; sourceCardId: number; targetCardId: number }
+  | { operation: 'lock'; cardId: number }
+  | { operation: 'quickEquip'; cardId: number };
+
+type AttentionAction = AttentionActionBase & (
+  | { kind: 'pickup'; dropId: number }
+  | { kind: 'bountyAccept'; enemyId: number }
+  | { kind: 'equipment'; plan: EquipmentPlan }
+  | { kind: 'consume'; cardId: number; reason: 'space' | 'rescue' }
+  | { kind: 'perk'; perkId: string }
+);
+
+interface ActiveAttentionAction {
+  action: AttentionAction;
+  startedAtWall: number;
+  completeAtWall: number;
+}
+
+interface MutableAttentionMetrics {
+  queue: AttentionAction[];
+  current: ActiveAttentionAction | null;
+  completedAtWall: number[];
+  delays: number[];
+  successfulActions: number;
+  actionCounts: Record<AttentionActionKind, number>;
+  errorActions: number;
+  positionSwitches: number;
+  verbSwitches: number;
+  lastRegion: AttentionRegion | null;
+  lastVerb: AttentionActionKind | null;
+  lastX: number;
+  lastY: number;
+  attentionWindowSeconds: number;
+  overlappingWindowSeconds: number;
+  overlapEpisodes: number;
+  overlapActive: boolean;
+  maxConcurrentWindows: number;
+  attentionExtraExpired: number;
+  reactionExpired: number;
+  bountyRewardCollected: number;
+  bountyAcceptedBreaches: number;
+  bountyOffered: number;
+  bountyAccepted: number;
+  bountyCompleted: number;
+  bountyExpired: number;
+  bountyFailed: number;
+  bountyRewardDrops: number;
+  nextRescueDecisionAtWall: number;
+  abandoned: AttentionAbandonCounts;
 }
 
 interface MutableRunMetrics {
@@ -195,6 +384,7 @@ interface MutableRunMetrics {
   mergesBeforeBoss: number | null;
   breatherSeconds: number;
   peak: PeakEntities;
+  attention: MutableAttentionMetrics;
 }
 
 interface WaveBaseline {
@@ -212,13 +402,59 @@ interface WaveTracker {
   finalized: Set<number>;
 }
 
-const DEFAULT_BOT: HeadlessBotOptions = {
-  permanentMissChance: 0.12,
-  pickupReactionSeconds: 0.45,
-  pickupReactionJitterSeconds: 0.2,
-  equipmentDecisionIntervalSeconds: 0.35,
-  pickupActionIntervalSeconds: 0.18,
-  perkDecisionSeconds: 3,
+/** 三种参数组不是难度修正，而是同一局面对不同反应/切换能力玩家的压力投影。 */
+export const ATTENTION_PROFILES: Record<AttentionProfileName, Readonly<HeadlessBotOptions>> = {
+  fast: {
+    permanentMissChance: 0.04,
+    pickupReactionSeconds: 0.28,
+    pickupReactionJitterSeconds: 0.1,
+    equipmentDecisionIntervalSeconds: 0.25,
+    pickupActionIntervalSeconds: 0.14,
+    perkDecisionSeconds: 1.6,
+    equipmentActionSeconds: 0.24,
+    consumeActionSeconds: 0.42,
+    bountyActionSeconds: 0.24,
+    verbSwitchSeconds: 0.08,
+    spatialTravelSecondsPer100Px: 0.025,
+    actionErrorChance: 0.01,
+    bountyAcceptChance: 0.82,
+    rescueDistance: 105,
+    rescueDecisionIntervalSeconds: 1.5,
+  },
+  target: {
+    permanentMissChance: 0.08,
+    pickupReactionSeconds: 0.45,
+    pickupReactionJitterSeconds: 0.2,
+    equipmentDecisionIntervalSeconds: 0.35,
+    pickupActionIntervalSeconds: 0.2,
+    perkDecisionSeconds: 3,
+    equipmentActionSeconds: 0.34,
+    consumeActionSeconds: 0.58,
+    bountyActionSeconds: 0.34,
+    verbSwitchSeconds: 0.18,
+    spatialTravelSecondsPer100Px: 0.055,
+    actionErrorChance: 0.04,
+    bountyAcceptChance: 0.62,
+    rescueDistance: 120,
+    rescueDecisionIntervalSeconds: 2,
+  },
+  stressed: {
+    permanentMissChance: 0.14,
+    pickupReactionSeconds: 0.72,
+    pickupReactionJitterSeconds: 0.3,
+    equipmentDecisionIntervalSeconds: 0.55,
+    pickupActionIntervalSeconds: 0.32,
+    perkDecisionSeconds: 4.5,
+    equipmentActionSeconds: 0.58,
+    consumeActionSeconds: 0.9,
+    bountyActionSeconds: 0.58,
+    verbSwitchSeconds: 0.34,
+    spatialTravelSecondsPer100Px: 0.1,
+    actionErrorChance: 0.11,
+    bountyAcceptChance: 0.38,
+    rescueDistance: 145,
+    rescueDecisionIntervalSeconds: 2.8,
+  },
 };
 
 const DEFAULT_OPTIONS: Required<Omit<HeadlessBatchOptions, 'bot'>> = {
@@ -227,6 +463,7 @@ const DEFAULT_OPTIONS: Required<Omit<HeadlessBatchOptions, 'bot'>> = {
   variantNames: [],
   metaPowerMultiplier: 1,
   maxActiveSeconds: 20 * 60,
+  attentionProfile: 'target',
 };
 
 const UINT32_MAX_PLUS_ONE = 4294967296;
@@ -271,8 +508,12 @@ function resolveOptions(options: HeadlessBatchOptions): HeadlessBatchResult['opt
   if (!Number.isFinite(maxActiveSeconds) || maxActiveSeconds <= 0) {
     throw new Error('maxActiveSeconds 必须是大于 0 的有限数');
   }
+  const attentionProfile = options.attentionProfile ?? DEFAULT_OPTIONS.attentionProfile;
+  if (!(attentionProfile in ATTENTION_PROFILES)) {
+    throw new Error(`未知 attentionProfile：${String(attentionProfile)}`);
+  }
   const bot: HeadlessBotOptions = {
-    ...DEFAULT_BOT,
+    ...ATTENTION_PROFILES[attentionProfile],
     ...options.bot,
   };
   bot.permanentMissChance = clampProbability(bot.permanentMissChance);
@@ -281,12 +522,22 @@ function resolveOptions(options: HeadlessBatchOptions): HeadlessBatchResult['opt
   bot.equipmentDecisionIntervalSeconds = Math.max(HEADLESS_DT, bot.equipmentDecisionIntervalSeconds);
   bot.pickupActionIntervalSeconds = Math.max(HEADLESS_DT, bot.pickupActionIntervalSeconds);
   bot.perkDecisionSeconds = Math.max(0, bot.perkDecisionSeconds);
+  bot.equipmentActionSeconds = Math.max(HEADLESS_DT, bot.equipmentActionSeconds);
+  bot.consumeActionSeconds = Math.max(HEADLESS_DT, bot.consumeActionSeconds);
+  bot.bountyActionSeconds = Math.max(HEADLESS_DT, bot.bountyActionSeconds);
+  bot.verbSwitchSeconds = Math.max(0, bot.verbSwitchSeconds);
+  bot.spatialTravelSecondsPer100Px = Math.max(0, bot.spatialTravelSecondsPer100Px);
+  bot.actionErrorChance = clampProbability(bot.actionErrorChance);
+  bot.bountyAcceptChance = clampProbability(bot.bountyAcceptChance);
+  bot.rescueDistance = Math.max(0, bot.rescueDistance);
+  bot.rescueDecisionIntervalSeconds = Math.max(HEADLESS_DT, bot.rescueDecisionIntervalSeconds);
   return {
     runs,
     seed: (options.seed ?? DEFAULT_OPTIONS.seed) >>> 0,
     variantNames: [...(options.variantNames ?? DEFAULT_OPTIONS.variantNames)],
     metaPowerMultiplier,
     maxActiveSeconds,
+    attentionProfile,
     bot,
   };
 }
@@ -301,6 +552,18 @@ function recordEvents(events: GameEvent[], metrics: MutableRunMetrics): void {
       metrics.formed3Star++;
     }
     if (event.type === 'cardsFull') metrics.cardsFull++;
+    if (event.type === 'bountyOffered') metrics.attention.bountyOffered++;
+    if (event.type === 'bountyAccepted') metrics.attention.bountyAccepted++;
+    if (event.type === 'bountyCompleted') {
+      metrics.attention.bountyCompleted++;
+      metrics.attention.bountyRewardDrops += event.dropCount;
+    }
+    if (event.type === 'bountyExpired') metrics.attention.bountyExpired++;
+    if (event.type === 'bountyFailed') {
+      metrics.attention.bountyFailed++;
+      if (event.reason === 'breach') metrics.attention.bountyAcceptedBreaches++;
+    }
+    if (event.type === 'bountyRewardCollected') metrics.attention.bountyRewardCollected++;
   }
 }
 
@@ -514,34 +777,27 @@ function consumePoint(state: GameState, botRng: Rng): { x: number; y: number } {
   return { x: cfg.combat.turret.x, y: cfg.combat.turret.y };
 }
 
-function feedOneEquippedCard(state: GameState, config: Config, gameplayRng: Rng): GameEvent[] | null {
-  if (!cfg.economy.feedEquipped) return null;
-  if (cfg.economy.equipMode === 'lock') {
-    for (let targetIndex = 0; targetIndex < state.cards.length; targetIndex++) {
-      const target = state.cards[targetIndex];
-      if (!target?.locked || target.star >= cfg.economy.maxStar) continue;
-      const sourceIndex = state.cards.findIndex((card, index) =>
-        index !== targetIndex && !!card && !card.locked
-        && card.type === target.type && card.star === target.star);
-      if (sourceIndex >= 0) {
-        return moveOrSwap(state, config, gameplayRng, 'cards', sourceIndex, 'cards', targetIndex);
+function planEquipment(state: GameState): EquipmentPlan | null {
+  if (cfg.economy.feedEquipped) {
+    if (cfg.economy.equipMode === 'lock') {
+      for (let targetIndex = 0; targetIndex < state.cards.length; targetIndex++) {
+        const target = state.cards[targetIndex];
+        if (!target?.locked || target.star >= cfg.economy.maxStar) continue;
+        const source = state.cards.find((card, index) =>
+          index !== targetIndex && !!card && !card.locked
+          && card.type === target.type && card.star === target.star);
+        if (source) return { operation: 'feedLock', sourceCardId: source.id, targetCardId: target.id };
+      }
+    } else {
+      for (const target of state.equipment) {
+        if (!target || target.star >= cfg.economy.maxStar) continue;
+        const source = state.cards.find(card =>
+          !!card && card.type === target.type && card.star === target.star);
+        if (source) return { operation: 'feedSlot', sourceCardId: source.id, targetCardId: target.id };
       }
     }
-    return null;
   }
-  for (let targetIndex = 0; targetIndex < state.equipment.length; targetIndex++) {
-    const target = state.equipment[targetIndex];
-    if (!target || target.star >= cfg.economy.maxStar) continue;
-    const sourceIndex = state.cards.findIndex(card =>
-      !!card && card.type === target.type && card.star === target.star);
-    if (sourceIndex >= 0) {
-      return moveOrSwap(state, config, gameplayRng, 'cards', sourceIndex, 'equipment', targetIndex);
-    }
-  }
-  return null;
-}
 
-function equipOneCard(state: GameState, config: Config, gameplayRng: Rng): GameEvent[] | null {
   const threshold = cfg.economy.equipThreshold;
   const equippedTypes = new Set(
     (cfg.economy.equipMode === 'lock'
@@ -559,26 +815,45 @@ function equipOneCard(state: GameState, config: Config, gameplayRng: Rng): GameE
   if (cfg.economy.equipMode === 'lock') {
     const lockedCount = state.cards.filter(card => card?.locked).length;
     if (lockedCount >= cfg.economy.maxLocked) return null;
-    return toggleLock(state, candidates[0].index);
+    return { operation: 'lock', cardId: candidates[0].card.id };
   }
   if (!state.equipment.some(card => card === null)) return null;
-  return quickEquip(state, config, gameplayRng, candidates[0].index);
+  return { operation: 'quickEquip', cardId: candidates[0].card.id };
 }
 
-/** 先喂养已有 2★ 装备，再锁定/装备新的达标类型，直到无合法动作。 */
-function manageEquipment(
+function executeEquipmentPlan(
   state: GameState,
   config: Config,
   gameplayRng: Rng,
-  metrics: MutableRunMetrics,
-): void {
-  const actionLimit = state.cards.length + state.equipment.length + 4;
-  for (let action = 0; action < actionLimit; action++) {
-    const events = feedOneEquippedCard(state, config, gameplayRng)
-      ?? equipOneCard(state, config, gameplayRng);
-    if (!events || events.length === 0) return;
-    recordEvents(events, metrics);
+  plan: EquipmentPlan,
+): GameEvent[] {
+  const cardIndex = (cardId: number): number => state.cards.findIndex(card => card?.id === cardId);
+  const equipIndex = (cardId: number): number => state.equipment.findIndex(card => card?.id === cardId);
+  if (plan.operation === 'feedLock') {
+    const sourceIndex = cardIndex(plan.sourceCardId);
+    const targetIndex = cardIndex(plan.targetCardId);
+    if (sourceIndex < 0 || targetIndex < 0) return [];
+    const source = state.cards[sourceIndex];
+    const target = state.cards[targetIndex];
+    if (!source || !target?.locked || source.locked || source.type !== target.type
+      || source.star !== target.star || target.star >= cfg.economy.maxStar) return [];
+    return moveOrSwap(state, config, gameplayRng, 'cards', sourceIndex, 'cards', targetIndex);
   }
+  if (plan.operation === 'feedSlot') {
+    const sourceIndex = cardIndex(plan.sourceCardId);
+    const targetIndex = equipIndex(plan.targetCardId);
+    if (sourceIndex < 0 || targetIndex < 0) return [];
+    const source = state.cards[sourceIndex];
+    const target = state.equipment[targetIndex];
+    if (!source || !target || source.locked || source.type !== target.type
+      || source.star !== target.star || target.star >= cfg.economy.maxStar) return [];
+    return moveOrSwap(state, config, gameplayRng, 'cards', sourceIndex, 'equipment', targetIndex);
+  }
+  const sourceIndex = cardIndex(plan.cardId);
+  if (sourceIndex < 0) return [];
+  return plan.operation === 'lock'
+    ? toggleLock(state, sourceIndex)
+    : quickEquip(state, config, gameplayRng, sourceIndex);
 }
 
 function choosePerkId(state: GameState, botRng: Rng): string | null {
@@ -596,66 +871,504 @@ function observeDrops(
   bot: HeadlessBotOptions,
   botRng: Rng,
   metrics: MutableRunMetrics,
+  wallTime: number,
 ): void {
-  const liveIds = new Set<number>();
   for (const drop of state.groundDrops) {
-    liveIds.add(drop.id);
     if (decisions.has(drop.id)) continue;
     const missed = botRng() < bot.permanentMissChance;
     const jitter = (botRng() * 2 - 1) * bot.pickupReactionJitterSeconds;
     decisions.set(drop.id, {
       missed,
-      readyAt: state.time + Math.max(0, bot.pickupReactionSeconds + jitter),
+      seenAtWall: wallTime,
+      readyAtWall: wallTime + Math.max(0, bot.pickupReactionSeconds + jitter),
+      collected: false,
     });
-    if (missed) metrics.permanentlyMissedDrops++;
+    if (missed) {
+      metrics.permanentlyMissedDrops++;
+      metrics.attention.abandoned.permanentMiss++;
+    }
   }
-  for (const id of decisions.keys()) if (!liveIds.has(id)) decisions.delete(id);
 }
 
-function attemptPickup(
+function hasQueuedKey(attention: MutableAttentionMetrics, key: string): boolean {
+  return attention.current?.action.key === key || attention.queue.some(action => action.key === key);
+}
+
+function hasQueuedKind(attention: MutableAttentionMetrics, kind: AttentionActionKind): boolean {
+  return attention.current?.action.kind === kind || attention.queue.some(action => action.kind === kind);
+}
+
+function enqueueAction(attention: MutableAttentionMetrics, action: AttentionAction): void {
+  if (!hasQueuedKey(attention, action.key)) attention.queue.push(action);
+}
+
+function enqueuePickupActions(
   state: GameState,
-  config: Config,
-  gameplayRng: Rng,
-  botRng: Rng,
-  drop: GroundDrop,
-  metrics: MutableRunMetrics,
+  decisions: Map<number, DropDecision>,
+  attention: MutableAttentionMetrics,
 ): void {
-  const events = collectDrop(state, config, gameplayRng, drop);
-  recordEvents(events, metrics);
-  if (!events.some(event => event.type === 'cardsFull')) return;
-
-  const sourceIndex = chooseConsumableIndex(state);
-  if (sourceIndex < 0) return;
-  const point = consumePoint(state, botRng);
-  recordEvents(consumeCard(state, config, gameplayRng, sourceIndex, point.x, point.y), metrics);
-  const liveDrop = state.groundDrops.find(candidate => candidate.id === drop.id);
-  if (liveDrop) recordEvents(collectDrop(state, config, gameplayRng, liveDrop), metrics);
+  for (const drop of state.groundDrops) {
+    const decision = decisions.get(drop.id);
+    if (!decision || decision.missed || decision.collected) continue;
+    enqueueAction(attention, {
+      key: `pickup:${drop.id}`,
+      kind: 'pickup',
+      region: 'field',
+      x: drop.x,
+      y: drop.y,
+      createdAtWall: decision.seenAtWall,
+      readyAtWall: decision.readyAtWall,
+      priority: 74 + (1 - drop.life / Math.max(HEADLESS_DT, drop.maxLife)) * 22,
+      dropId: drop.id,
+    });
+  }
 }
 
-function processReadyDrops(
+function enqueueEquipmentAction(
+  state: GameState,
+  bot: HeadlessBotOptions,
+  botRng: Rng,
+  attention: MutableAttentionMetrics,
+  wallTime: number,
+): void {
+  if (hasQueuedKind(attention, 'equipment')) return;
+  const plan = planEquipment(state);
+  if (!plan) return;
+  const jitter = (botRng() * 2 - 1) * bot.pickupReactionJitterSeconds;
+  enqueueAction(attention, {
+    key: `equipment:${JSON.stringify(plan)}`,
+    kind: 'equipment',
+    region: 'inventory',
+    x: cfg.combat.canvas.width / 2,
+    y: cfg.combat.canvas.height - 32,
+    createdAtWall: wallTime,
+    readyAtWall: wallTime + Math.max(0, bot.pickupReactionSeconds * 0.55 + jitter),
+    priority: 43,
+    plan,
+  });
+}
+
+function enqueueSpaceConsume(
+  state: GameState,
+  bot: HeadlessBotOptions,
+  botRng: Rng,
+  attention: MutableAttentionMetrics,
+  wallTime: number,
+  reason: 'space' | 'rescue',
+): void {
+  if (hasQueuedKind(attention, 'consume')) return;
+  const sourceIndex = chooseConsumableIndex(state);
+  const card = state.cards[sourceIndex];
+  if (!card) return;
+  const point = consumePoint(state, botRng);
+  const jitter = (botRng() * 2 - 1) * bot.pickupReactionJitterSeconds;
+  enqueueAction(attention, {
+    key: `consume:${card.id}`,
+    kind: 'consume',
+    region: 'field',
+    x: point.x,
+    y: point.y,
+    createdAtWall: wallTime,
+    readyAtWall: wallTime + Math.max(0, bot.pickupReactionSeconds * 0.6 + jitter),
+    priority: reason === 'space' ? 98 : 88,
+    cardId: card.id,
+    reason,
+  });
+}
+
+function enqueueRescueAction(
+  state: GameState,
+  bot: HeadlessBotOptions,
+  botRng: Rng,
+  attention: MutableAttentionMetrics,
+  wallTime: number,
+): void {
+  if (wallTime < attention.nextRescueDecisionAtWall || state.enemies.length === 0) return;
+  attention.nextRescueDecisionAtWall = wallTime + bot.rescueDecisionIntervalSeconds;
+  const tx = cfg.combat.turret.x;
+  const ty = cfg.combat.turret.y;
+  const nearest = state.enemies.reduce((best, enemy) => {
+    const distance = Math.hypot(enemy.x - tx, enemy.y - ty);
+    return !best || distance < best.distance ? { enemy, distance } : best;
+  }, null as { enemy: GameState['enemies'][number]; distance: number } | null);
+  if (nearest && nearest.distance <= bot.rescueDistance) {
+    enqueueSpaceConsume(state, bot, botRng, attention, wallTime, 'rescue');
+  }
+}
+
+function enqueuePerkAction(
+  state: GameState,
+  bot: HeadlessBotOptions,
+  botRng: Rng,
+  attention: MutableAttentionMetrics,
+  wallTime: number,
+): void {
+  if (!state.paused || hasQueuedKind(attention, 'perk')) return;
+  const perkId = choosePerkId(state, botRng);
+  if (!perkId) return;
+  enqueueAction(attention, {
+    key: `perk:${state.level}`,
+    kind: 'perk',
+    region: 'perk',
+    x: cfg.combat.canvas.width / 2,
+    y: cfg.combat.canvas.height / 2,
+    createdAtWall: wallTime,
+    readyAtWall: wallTime + bot.pickupReactionSeconds * 0.25,
+    priority: 100,
+    perkId,
+  });
+}
+
+function observeBounties(
+  state: GameState,
+  bot: HeadlessBotOptions,
+  botRng: Rng,
+  attention: MutableAttentionMetrics,
+  decisions: Map<number, 'accept' | 'reject'>,
+  wallTime: number,
+): void {
+  for (const enemy of state.enemies) {
+    if (enemy.bounty?.phase !== 'offered' || decisions.has(enemy.id)) continue;
+    const distance = Math.hypot(enemy.x - cfg.combat.turret.x, enemy.y - cfg.combat.turret.y);
+    const dangerMul = distance <= bot.rescueDistance ? 0.55 : 1;
+    const hpMul = 0.7 + 0.3 * (enemy.hp / Math.max(1, enemy.maxHp));
+    const accept = botRng() < clampProbability(bot.bountyAcceptChance * dangerMul * hpMul);
+    decisions.set(enemy.id, accept ? 'accept' : 'reject');
+    if (!accept) {
+      attention.abandoned.bountyRiskRejected++;
+      continue;
+    }
+    const jitter = (botRng() * 2 - 1) * bot.pickupReactionJitterSeconds;
+    enqueueAction(attention, {
+      key: `bounty:${enemy.id}`,
+      kind: 'bountyAccept',
+      region: 'bounty',
+      x: enemy.x,
+      y: enemy.y,
+      createdAtWall: wallTime,
+      readyAtWall: wallTime + Math.max(0, bot.pickupReactionSeconds + jitter),
+      priority: 70 + Math.min(12, enemy.bounty.remaining),
+      enemyId: enemy.id,
+    });
+  }
+}
+
+function dropActionKey(dropId: number): string {
+  return `pickup:${dropId}`;
+}
+
+function removeQueuedKey(attention: MutableAttentionMetrics, key: string): void {
+  attention.queue = attention.queue.filter(action => action.key !== key);
+}
+
+function reconcileExpiredDrops(
+  dropsBeforeUpdate: GroundDrop[],
+  state: GameState,
+  decisions: Map<number, DropDecision>,
+  attention: MutableAttentionMetrics,
+  wallTime: number,
+): void {
+  const liveIds = new Set(state.groundDrops.map(drop => drop.id));
+  for (const drop of dropsBeforeUpdate) {
+    if (liveIds.has(drop.id)) continue;
+    const decision = decisions.get(drop.id);
+    if (!decision) continue;
+    if (!decision.collected && !decision.missed) {
+      if (wallTime < decision.readyAtWall) {
+        attention.reactionExpired++;
+        attention.abandoned.expiredBeforeReady++;
+      } else {
+        attention.attentionExtraExpired++;
+        attention.abandoned.expiredInQueue++;
+      }
+    }
+    decisions.delete(drop.id);
+    removeQueuedKey(attention, dropActionKey(drop.id));
+  }
+}
+
+function actionIsValid(action: AttentionAction, state: GameState): boolean {
+  if (action.kind === 'pickup') {
+    return state.groundDrops.some(drop => drop.id === action.dropId);
+  }
+  if (action.kind === 'bountyAccept') {
+    return state.enemies.some(enemy =>
+      enemy.id === action.enemyId && enemy.bounty?.phase === 'offered');
+  }
+  if (action.kind === 'equipment') return true;
+  if (action.kind === 'consume') {
+    return state.cards.some(card => card?.id === action.cardId && !card.locked);
+  }
+  return state.paused;
+}
+
+function purgeInvalidQueuedActions(
+  state: GameState,
+  attention: MutableAttentionMetrics,
+): void {
+  const kept: AttentionAction[] = [];
+  for (const action of attention.queue) {
+    if (actionIsValid(action, state)) {
+      kept.push(action);
+      continue;
+    }
+    if (action.kind === 'bountyAccept') attention.abandoned.bountyWindowExpired++;
+    else if (action.kind !== 'pickup') attention.abandoned.invalidated++;
+  }
+  attention.queue = kept;
+}
+
+function actionDurationSeconds(kind: AttentionActionKind, bot: HeadlessBotOptions): number {
+  if (kind === 'pickup') return bot.pickupActionIntervalSeconds;
+  if (kind === 'bountyAccept') return bot.bountyActionSeconds;
+  if (kind === 'equipment') return bot.equipmentActionSeconds;
+  if (kind === 'consume') return bot.consumeActionSeconds;
+  return bot.perkDecisionSeconds;
+}
+
+function startNextAttentionAction(
+  state: GameState,
+  attention: MutableAttentionMetrics,
+  bot: HeadlessBotOptions,
+  wallTime: number,
+): void {
+  if (attention.current) return;
+  purgeInvalidQueuedActions(state, attention);
+  let bestIndex = -1;
+  for (let index = 0; index < attention.queue.length; index++) {
+    const action = attention.queue[index];
+    if (state.paused && action.kind !== 'perk') continue;
+    if (action.readyAtWall > wallTime) continue;
+    if (bestIndex < 0
+      || action.priority > attention.queue[bestIndex].priority
+      || (action.priority === attention.queue[bestIndex].priority
+        && action.readyAtWall < attention.queue[bestIndex].readyAtWall)) {
+      bestIndex = index;
+    }
+  }
+  if (bestIndex < 0) return;
+  const [action] = attention.queue.splice(bestIndex, 1);
+  const distance = attention.lastRegion === null
+    ? 0
+    : Math.hypot(action.x - attention.lastX, action.y - attention.lastY);
+  const regionChanged = attention.lastRegion !== null && attention.lastRegion !== action.region;
+  const verbChanged = attention.lastVerb !== null && attention.lastVerb !== action.kind;
+  if (regionChanged || distance >= 120) attention.positionSwitches++;
+  if (verbChanged) attention.verbSwitches++;
+  const travelSeconds = distance / 100 * bot.spatialTravelSecondsPer100Px;
+  const switchSeconds = verbChanged ? bot.verbSwitchSeconds : 0;
+  attention.delays.push(Math.max(0, wallTime - action.readyAtWall));
+  attention.current = {
+    action,
+    startedAtWall: wallTime,
+    completeAtWall: wallTime + actionDurationSeconds(action.kind, bot) + travelSeconds + switchSeconds,
+  };
+  attention.lastRegion = action.region;
+  attention.lastVerb = action.kind;
+  attention.lastX = action.x;
+  attention.lastY = action.y;
+}
+
+type ActionOutcome = 'success' | 'blocked' | 'invalid';
+
+function executeAttentionAction(
+  active: ActiveAttentionAction,
   state: GameState,
   config: Config,
   gameplayRng: Rng,
   botRng: Rng,
+  bot: HeadlessBotOptions,
   decisions: Map<number, DropDecision>,
   metrics: MutableRunMetrics,
-): boolean {
-  const ready = state.groundDrops
-    .filter(drop => {
+  wallTime: number,
+): ActionOutcome {
+  const action = active.action;
+  if (state.paused && action.kind !== 'perk') return 'blocked';
+  if (action.kind === 'pickup') {
+    const drop = state.groundDrops.find(candidate => candidate.id === action.dropId);
+    if (!drop) return 'invalid';
+    const events = collectDrop(state, config, gameplayRng, drop);
+    recordEvents(events, metrics);
+    if (events.some(event => event.type === 'cardsFull')) {
       const decision = decisions.get(drop.id);
-      return decision && !decision.missed && decision.readyAt <= state.time;
-    })
-    .sort((a, b) => a.life - b.life || a.id - b.id);
-  const drop = ready[0];
-  if (!drop) return false;
-  attemptPickup(state, config, gameplayRng, botRng, drop, metrics);
-  if (state.groundDrops.some(candidate => candidate.id === drop.id)) {
+      if (decision) decision.readyAtWall = wallTime + HEADLESS_DT;
+      enqueueSpaceConsume(state, bot, botRng, metrics.attention, wallTime, 'space');
+      return 'blocked';
+    }
+    if (!events.some(event => event.type === 'collected')) return 'invalid';
     const decision = decisions.get(drop.id);
-    if (decision) decision.readyAt = state.time + HEADLESS_DT;
-  } else {
+    if (decision) decision.collected = true;
     decisions.delete(drop.id);
+    return 'success';
   }
-  return true;
+  if (action.kind === 'bountyAccept') {
+    const enemy = state.enemies.find(candidate => candidate.id === action.enemyId);
+    if (!enemy || enemy.bounty?.phase !== 'offered') return 'invalid';
+    const events = acceptBountyAt(state, config, enemy.x, enemy.y);
+    recordEvents(events, metrics);
+    return events.some(event => event.type === 'bountyAccepted') ? 'success' : 'invalid';
+  }
+  if (action.kind === 'equipment') {
+    const events = executeEquipmentPlan(state, config, gameplayRng, action.plan);
+    recordEvents(events, metrics);
+    return events.some(event => event.type === 'fed' || event.type === 'locked'
+      || event.type === 'moved' || event.type === 'swapped') ? 'success' : 'invalid';
+  }
+  if (action.kind === 'consume') {
+    const sourceIndex = state.cards.findIndex(card => card?.id === action.cardId && !card.locked);
+    if (sourceIndex < 0) return 'invalid';
+    const events = consumeCard(state, config, gameplayRng, sourceIndex, action.x, action.y);
+    recordEvents(events, metrics);
+    return events.some(event => event.type === 'skillConsumed') ? 'success' : 'invalid';
+  }
+  if (!state.paused) return 'invalid';
+  const events = applyPerk(state, config, action.perkId);
+  recordEvents(events, metrics);
+  if (!events.some(event => event.type === 'perkApplied')) return 'invalid';
+  metrics.perkDecisions++;
+  return 'success';
+}
+
+function retryErroredAction(
+  action: AttentionAction,
+  state: GameState,
+  attention: MutableAttentionMetrics,
+  bot: HeadlessBotOptions,
+  botRng: Rng,
+  wallTime: number,
+  decisions: Map<number, DropDecision>,
+): void {
+  if (!actionIsValid(action, state)) return;
+  const jitter = (botRng() * 2 - 1) * bot.pickupReactionJitterSeconds;
+  const readyAtWall = wallTime + Math.max(HEADLESS_DT, bot.pickupReactionSeconds * 0.5 + jitter);
+  if (action.kind === 'pickup') {
+    const decision = decisions.get(action.dropId);
+    if (decision) decision.readyAtWall = readyAtWall;
+  }
+  enqueueAction(attention, { ...action, createdAtWall: wallTime, readyAtWall });
+}
+
+function completeCurrentAttentionAction(
+  state: GameState,
+  config: Config,
+  gameplayRng: Rng,
+  botRng: Rng,
+  bot: HeadlessBotOptions,
+  decisions: Map<number, DropDecision>,
+  metrics: MutableRunMetrics,
+  wallTime: number,
+): void {
+  const active = metrics.attention.current;
+  if (!active || active.completeAtWall > wallTime) return;
+  metrics.attention.current = null;
+  metrics.attention.completedAtWall.push(wallTime);
+  metrics.attention.actionCounts[active.action.kind]++;
+  if (botRng() < bot.actionErrorChance) {
+    metrics.attention.errorActions++;
+    retryErroredAction(active.action, state, metrics.attention, bot, botRng, wallTime, decisions);
+    return;
+  }
+  const outcome = executeAttentionAction(
+    active,
+    state,
+    config,
+    gameplayRng,
+    botRng,
+    bot,
+    decisions,
+    metrics,
+    wallTime,
+  );
+  if (outcome === 'success') metrics.attention.successfulActions++;
+  else if (outcome === 'invalid') metrics.attention.abandoned.invalidated++;
+  else retryErroredAction(active.action, state, metrics.attention, bot, botRng, wallTime, decisions);
+}
+
+function updateAttentionWindows(attention: MutableAttentionMetrics, dt: number): void {
+  const concurrent = attention.queue.length + (attention.current ? 1 : 0);
+  attention.maxConcurrentWindows = Math.max(attention.maxConcurrentWindows, concurrent);
+  if (concurrent > 0) attention.attentionWindowSeconds += dt;
+  if (concurrent >= 2) {
+    attention.overlappingWindowSeconds += dt;
+    if (!attention.overlapActive) attention.overlapEpisodes++;
+    attention.overlapActive = true;
+  } else {
+    attention.overlapActive = false;
+  }
+}
+
+function rollingActionCounts(
+  actionTimes: number[],
+  durationSeconds: number,
+  windowSeconds: number,
+): number[] {
+  if (durationSeconds <= 0) return [0];
+  const values: number[] = [];
+  let left = 0;
+  let right = 0;
+  for (let sample = 0.5; sample <= durationSeconds + 0.001; sample += 0.5) {
+    while (right < actionTimes.length && actionTimes[right] <= sample) right++;
+    while (left < right && actionTimes[left] <= sample - windowSeconds) left++;
+    values.push(right - left);
+  }
+  return values.length > 0 ? values : [0];
+}
+
+function finalizeAttentionMetrics(
+  attention: MutableAttentionMetrics,
+  profile: AttentionProfileName,
+  wallTime: number,
+  win: boolean,
+  hp: number,
+): AttentionRunMetrics {
+  const actions = attention.completedAtWall.length;
+  const minutes = Math.max(HEADLESS_DT, wallTime) / 60;
+  const delays = summarize(attention.delays);
+  const rolling3 = summarize(rollingActionCounts(attention.completedAtWall, wallTime, 3));
+  const rolling10 = summarize(rollingActionCounts(attention.completedAtWall, wallTime, 10));
+  return {
+    profile,
+    actions,
+    actionsPerMinute: actions / minutes,
+    successfulActions: attention.successfulActions,
+    pickupActions: attention.actionCounts.pickup,
+    bountyAcceptActions: attention.actionCounts.bountyAccept,
+    equipmentActions: attention.actionCounts.equipment,
+    consumeActions: attention.actionCounts.consume,
+    perkActions: attention.actionCounts.perk,
+    consumeActionsPerMinute: attention.actionCounts.consume / minutes,
+    rolling3sP50: rolling3.p50,
+    rolling3sP95: rolling3.p95,
+    rolling10sP50: rolling10.p50,
+    rolling10sP95: rolling10.p95,
+    queueDelayMeanSeconds: delays.mean,
+    queueDelayP50Seconds: delays.p50,
+    queueDelayP95Seconds: delays.p95,
+    queueDelayMaxSeconds: delays.max,
+    attentionWindowSeconds: attention.attentionWindowSeconds,
+    overlappingWindowSeconds: attention.overlappingWindowSeconds,
+    overlappingWindowShare: attention.attentionWindowSeconds > 0
+      ? attention.overlappingWindowSeconds / attention.attentionWindowSeconds
+      : 0,
+    overlapEpisodes: attention.overlapEpisodes,
+    maxConcurrentWindows: attention.maxConcurrentWindows,
+    attentionExtraExpired: attention.attentionExtraExpired,
+    reactionExpired: attention.reactionExpired,
+    errorActions: attention.errorActions,
+    errorRate: actions > 0 ? attention.errorActions / actions : 0,
+    positionSwitches: attention.positionSwitches,
+    verbSwitches: attention.verbSwitches,
+    bountyOffered: attention.bountyOffered,
+    bountyAccepted: attention.bountyAccepted,
+    bountyCompleted: attention.bountyCompleted,
+    bountyExpired: attention.bountyExpired,
+    bountyFailed: attention.bountyFailed,
+    bountyRewardDrops: attention.bountyRewardDrops,
+    bountyRewardCollected: attention.bountyRewardCollected,
+    bountyAcceptedBreaches: attention.bountyAcceptedBreaches,
+    bountyAcceptedRunDeaths: attention.bountyAccepted > 0 && !win && hp <= 0 ? 1 : 0,
+    abandoned: { ...attention.abandoned },
+  };
 }
 
 function countLockedThreeStar(state: GameState): number {
@@ -663,6 +1376,49 @@ function countLockedThreeStar(state: GameState): number {
     ? state.cards.filter(card => card?.locked)
     : state.equipment.filter(Boolean);
   return effective.filter(card => card!.star >= 3).length;
+}
+
+function createMutableAttentionMetrics(): MutableAttentionMetrics {
+  return {
+    queue: [],
+    current: null,
+    completedAtWall: [],
+    delays: [],
+    successfulActions: 0,
+    actionCounts: { pickup: 0, bountyAccept: 0, equipment: 0, consume: 0, perk: 0 },
+    errorActions: 0,
+    positionSwitches: 0,
+    verbSwitches: 0,
+    lastRegion: null,
+    lastVerb: null,
+    lastX: cfg.combat.turret.x,
+    lastY: cfg.combat.turret.y,
+    attentionWindowSeconds: 0,
+    overlappingWindowSeconds: 0,
+    overlapEpisodes: 0,
+    overlapActive: false,
+    maxConcurrentWindows: 0,
+    attentionExtraExpired: 0,
+    reactionExpired: 0,
+    bountyRewardCollected: 0,
+    bountyAcceptedBreaches: 0,
+    bountyOffered: 0,
+    bountyAccepted: 0,
+    bountyCompleted: 0,
+    bountyExpired: 0,
+    bountyFailed: 0,
+    bountyRewardDrops: 0,
+    nextRescueDecisionAtWall: 0,
+    abandoned: {
+      permanentMiss: 0,
+      expiredBeforeReady: 0,
+      expiredInQueue: 0,
+      bountyRiskRejected: 0,
+      bountyWindowExpired: 0,
+      invalidated: 0,
+      gameEnded: 0,
+    },
+  };
 }
 
 function runOne(
@@ -692,11 +1448,13 @@ function runOne(
     mergesBeforeBoss: null,
     breatherSeconds: 0,
     peak: { enemies: 0, bullets: 0, drops: 0, particles: 0 },
+    attention: createMutableAttentionMetrics(),
   };
   const decisions = new Map<number, DropDecision>();
+  const bountyDecisions = new Map<number, 'accept' | 'reject'>();
   const waveTracker = createWaveTracker();
-  let nextEquipmentDecisionAt = 0;
-  let nextPickupAt = 0;
+  let nextEquipmentDecisionAtWall = 0;
+  let wallTime = 0;
   const initialEvents = startNextWave(state, config, gameplayRng);
   recordEvents(initialEvents, metrics);
   trackWaveEvents(initialEvents, state, metrics, waveTracker);
@@ -704,20 +1462,26 @@ function runOne(
   captureBossSpawn(state, metrics);
   updatePeak(state, metrics);
 
-  const maxFrames = Math.ceil(options.maxActiveSeconds * HEADLESS_HZ);
-  for (let frame = 0; frame < maxFrames && state.mode === 'playing'; frame++) {
+  const maxWallFrames = Math.ceil((options.maxActiveSeconds + 10 * 60) * HEADLESS_HZ);
+  for (let frame = 0;
+    frame < maxWallFrames && state.mode === 'playing' && state.time < options.maxActiveSeconds;
+    frame++) {
+    wallTime += HEADLESS_DT;
+    const pausedBeforeUpdate = state.paused;
     const betweenBeforeUpdate = state.between;
-    if (betweenBeforeUpdate > 0 && betweenBeforeUpdate <= HEADLESS_DT) {
+    if (!pausedBeforeUpdate && betweenBeforeUpdate > 0 && betweenBeforeUpdate <= HEADLESS_DT) {
       // 在下一波 onWaveStart 效果执行前封存上一波经济，避免空投等被归到旧波。
       finalizeWaveCounters(state.wave, state, metrics, waveTracker);
     }
+    const dropsBeforeUpdate = [...state.groundDrops];
     const bossBeforeUpdate = isFinalBossPresent(state);
     const killsBeforeUpdate = state.kills;
     const economyBeforeUpdate = economySnapshot(state, metrics);
     const updateEvents = updateGame(state, config, gameplayRng, HEADLESS_DT);
     recordEvents(updateEvents, metrics);
+    reconcileExpiredDrops(dropsBeforeUpdate, state, decisions, metrics.attention, wallTime);
     trackWaveEvents(updateEvents, state, metrics, waveTracker);
-    if (betweenBeforeUpdate > 0) {
+    if (!pausedBeforeUpdate && betweenBeforeUpdate > 0) {
       metrics.breatherSeconds += Math.min(HEADLESS_DT, betweenBeforeUpdate);
     }
     captureBossResolution(state, metrics, bossBeforeUpdate, killsBeforeUpdate, economyBeforeUpdate);
@@ -728,32 +1492,41 @@ function runOne(
     updateWaveTracking(state, waveTracker);
     if (state.mode !== 'playing') break;
 
-    if (state.paused) {
-      const perkId = choosePerkId(state, botRng);
-      if (perkId) {
-        recordEvents(applyPerk(state, config, perkId), metrics);
-        metrics.perkDecisions++;
+    observeDrops(state, decisions, options.bot, botRng, metrics, wallTime);
+    enqueuePickupActions(state, decisions, metrics.attention);
+    observeBounties(
+      state,
+      options.bot,
+      botRng,
+      metrics.attention,
+      bountyDecisions,
+      wallTime,
+    );
+    enqueuePerkAction(state, options.bot, botRng, metrics.attention, wallTime);
+    if (!state.paused) {
+      enqueueRescueAction(state, options.bot, botRng, metrics.attention, wallTime);
+      if (wallTime >= nextEquipmentDecisionAtWall) {
+        enqueueEquipmentAction(state, options.bot, botRng, metrics.attention, wallTime);
+        nextEquipmentDecisionAtWall = wallTime + options.bot.equipmentDecisionIntervalSeconds;
       }
-      if (state.paused) break;
     }
 
-    observeDrops(state, decisions, options.bot, botRng, metrics);
-    const bossBeforePickup = isFinalBossPresent(state);
-    const killsBeforePickup = state.kills;
-    const economyBeforePickup = economySnapshot(state, metrics);
-    if (state.time >= nextPickupAt
-      && processReadyDrops(state, config, gameplayRng, botRng, decisions, metrics)) {
-      nextPickupAt = state.time + options.bot.pickupActionIntervalSeconds;
-    }
-    captureBossResolution(state, metrics, bossBeforePickup, killsBeforePickup, economyBeforePickup);
-    if (state.time >= nextEquipmentDecisionAt) {
-      const bossBeforeEquipment = isFinalBossPresent(state);
-      const killsBeforeEquipment = state.kills;
-      const economyBeforeEquipment = economySnapshot(state, metrics);
-      manageEquipment(state, config, gameplayRng, metrics);
-      captureBossResolution(state, metrics, bossBeforeEquipment, killsBeforeEquipment, economyBeforeEquipment);
-      nextEquipmentDecisionAt = state.time + options.bot.equipmentDecisionIntervalSeconds;
-    }
+    const bossBeforeAction = isFinalBossPresent(state);
+    const killsBeforeAction = state.kills;
+    const economyBeforeAction = economySnapshot(state, metrics);
+    completeCurrentAttentionAction(
+      state,
+      config,
+      gameplayRng,
+      botRng,
+      options.bot,
+      decisions,
+      metrics,
+      wallTime,
+    );
+    captureBossResolution(state, metrics, bossBeforeAction, killsBeforeAction, economyBeforeAction);
+    startNextAttentionAction(state, metrics.attention, options.bot, wallTime);
+    updateAttentionWindows(metrics.attention, HEADLESS_DT);
     state.particles.length = 0;
     updatePeak(state, metrics);
     updateWaveTracking(state, waveTracker);
@@ -761,6 +1534,8 @@ function runOne(
 
   const timedOut = state.mode === 'playing' && !metrics.gameEnded;
   if (timedOut) finishWaveTracking(state.wave, state, metrics, waveTracker);
+  metrics.attention.abandoned.gameEnded += metrics.attention.queue.length
+    + (metrics.attention.current ? 1 : 0);
   const dropsGenerated = state.nextDropId - 1;
   const settlementEconomy = economySnapshot(state, metrics);
   const activeDurationSeconds = state.time;
@@ -769,6 +1544,13 @@ function runOne(
     ? metrics.bossKillActiveSeconds - metrics.bossSpawnActiveSeconds
     : null;
   const mergesBeforeBoss = metrics.mergesBeforeBoss ?? state.merges;
+  const attention = finalizeAttentionMetrics(
+    metrics.attention,
+    options.attentionProfile,
+    wallTime,
+    metrics.win,
+    state.hp,
+  );
   return {
     runIndex,
     gameplaySeed,
@@ -776,8 +1558,7 @@ function runOne(
     win: metrics.win,
     timedOut,
     activeDurationSeconds,
-    estimatedWallDurationSeconds:
-      state.time + metrics.perkDecisions * options.bot.perkDecisionSeconds,
+    estimatedWallDurationSeconds: wallTime,
     waveReached: state.wave,
     level: state.level,
     perkDecisions: metrics.perkDecisions,
@@ -811,6 +1592,7 @@ function runOne(
       : 0,
     waveStats: waveTracker.stats,
     peak: metrics.peak,
+    attention,
   };
 }
 
@@ -883,6 +1665,48 @@ const METRICS: { name: string; read(run: HeadlessRunResult): number }[] = [
   { name: 'peakBullets', read: run => run.peak.bullets },
   { name: 'peakDrops', read: run => run.peak.drops },
   { name: 'peakParticles', read: run => run.peak.particles },
+  { name: 'attentionActions', read: run => run.attention.actions },
+  { name: 'attentionActionsPerMinute', read: run => run.attention.actionsPerMinute },
+  { name: 'attentionSuccessfulActions', read: run => run.attention.successfulActions },
+  { name: 'attentionPickupActions', read: run => run.attention.pickupActions },
+  { name: 'attentionBountyAcceptActions', read: run => run.attention.bountyAcceptActions },
+  { name: 'attentionEquipmentActions', read: run => run.attention.equipmentActions },
+  { name: 'attentionConsumeActions', read: run => run.attention.consumeActions },
+  { name: 'attentionPerkActions', read: run => run.attention.perkActions },
+  { name: 'attentionRolling3sP50', read: run => run.attention.rolling3sP50 },
+  { name: 'attentionRolling3sP95', read: run => run.attention.rolling3sP95 },
+  { name: 'attentionRolling10sP50', read: run => run.attention.rolling10sP50 },
+  { name: 'attentionRolling10sP95', read: run => run.attention.rolling10sP95 },
+  { name: 'attentionQueueDelayMeanSeconds', read: run => run.attention.queueDelayMeanSeconds },
+  { name: 'attentionQueueDelayP50Seconds', read: run => run.attention.queueDelayP50Seconds },
+  { name: 'attentionQueueDelayP95Seconds', read: run => run.attention.queueDelayP95Seconds },
+  { name: 'attentionQueueDelayMaxSeconds', read: run => run.attention.queueDelayMaxSeconds },
+  { name: 'attentionOverlappingWindowShare', read: run => run.attention.overlappingWindowShare },
+  { name: 'attentionOverlapEpisodes', read: run => run.attention.overlapEpisodes },
+  { name: 'attentionMaxConcurrentWindows', read: run => run.attention.maxConcurrentWindows },
+  { name: 'attentionExtraExpired', read: run => run.attention.attentionExtraExpired },
+  { name: 'attentionReactionExpired', read: run => run.attention.reactionExpired },
+  { name: 'attentionConsumeActionsPerMinute', read: run => run.attention.consumeActionsPerMinute },
+  { name: 'attentionErrorActions', read: run => run.attention.errorActions },
+  { name: 'attentionErrorRate', read: run => run.attention.errorRate },
+  { name: 'attentionPositionSwitches', read: run => run.attention.positionSwitches },
+  { name: 'attentionVerbSwitches', read: run => run.attention.verbSwitches },
+  { name: 'bountyOffered', read: run => run.attention.bountyOffered },
+  { name: 'bountyAccepted', read: run => run.attention.bountyAccepted },
+  { name: 'bountyCompleted', read: run => run.attention.bountyCompleted },
+  { name: 'bountyExpired', read: run => run.attention.bountyExpired },
+  { name: 'bountyFailed', read: run => run.attention.bountyFailed },
+  { name: 'bountyRewardDrops', read: run => run.attention.bountyRewardDrops },
+  { name: 'bountyRewardCollected', read: run => run.attention.bountyRewardCollected },
+  { name: 'bountyAcceptedBreaches', read: run => run.attention.bountyAcceptedBreaches },
+  { name: 'bountyAcceptedRunDeaths', read: run => run.attention.bountyAcceptedRunDeaths },
+  { name: 'abandonedPermanentMiss', read: run => run.attention.abandoned.permanentMiss },
+  { name: 'abandonedExpiredBeforeReady', read: run => run.attention.abandoned.expiredBeforeReady },
+  { name: 'abandonedExpiredInQueue', read: run => run.attention.abandoned.expiredInQueue },
+  { name: 'abandonedBountyRiskRejected', read: run => run.attention.abandoned.bountyRiskRejected },
+  { name: 'abandonedBountyWindowExpired', read: run => run.attention.abandoned.bountyWindowExpired },
+  { name: 'abandonedInvalidated', read: run => run.attention.abandoned.invalidated },
+  { name: 'abandonedGameEnded', read: run => run.attention.abandoned.gameEnded },
 ];
 
 function summarizeRuns(runs: HeadlessRunResult[]): HeadlessBatchSummary {
@@ -896,6 +1720,16 @@ function summarizeRuns(runs: HeadlessRunResult[]): HeadlessBatchSummary {
   const mean = (read: (run: HeadlessRunResult) => number): number => runs.length > 0
     ? runs.reduce((sum, run) => sum + read(run), 0) / runs.length
     : 0;
+  const attentionDistribution = (
+    read: (attention: AttentionRunMetrics) => number,
+  ): DistributionSummary => summarize(runs.map(run => read(run.attention)));
+  const attentionTotal = (read: (attention: AttentionRunMetrics) => number): number =>
+    runs.reduce((sum, run) => sum + read(run.attention), 0);
+  const bountyOffered = attentionTotal(value => value.bountyOffered);
+  const bountyAccepted = attentionTotal(value => value.bountyAccepted);
+  const bountyCompleted = attentionTotal(value => value.bountyCompleted);
+  const bountyRewardDrops = attentionTotal(value => value.bountyRewardDrops);
+  const bountyRewardCollected = attentionTotal(value => value.bountyRewardCollected);
   return {
     runs: runs.length,
     wins,
@@ -918,6 +1752,32 @@ function summarizeRuns(runs: HeadlessRunResult[]): HeadlessBatchSummary {
     mergesPerRegularWave: mean(run => run.mergesPerRegularWave),
     breatherShare: mean(run => run.breatherShare),
     bossShare: mean(run => run.bossShare),
+    attention: {
+      profile: runs[0]?.attention.profile ?? 'target',
+      actionsPerMinute: attentionDistribution(value => value.actionsPerMinute),
+      rolling3sP50: attentionDistribution(value => value.rolling3sP50),
+      rolling3sP95: attentionDistribution(value => value.rolling3sP95),
+      rolling10sP50: attentionDistribution(value => value.rolling10sP50),
+      rolling10sP95: attentionDistribution(value => value.rolling10sP95),
+      queueDelayP50Seconds: attentionDistribution(value => value.queueDelayP50Seconds),
+      queueDelayP95Seconds: attentionDistribution(value => value.queueDelayP95Seconds),
+      overlappingWindowShare: attentionDistribution(value => value.overlappingWindowShare),
+      attentionExtraExpired: attentionDistribution(value => value.attentionExtraExpired),
+      consumeActionsPerMinute: attentionDistribution(value => value.consumeActionsPerMinute),
+      errorRate: attentionDistribution(value => value.errorRate),
+      positionSwitches: attentionDistribution(value => value.positionSwitches),
+      bountyOffered,
+      bountyAccepted,
+      bountyCompleted,
+      bountyFailed: attentionTotal(value => value.bountyFailed),
+      bountyRewardDrops,
+      bountyRewardCollected,
+      bountyAcceptanceRate: bountyOffered > 0 ? bountyAccepted / bountyOffered : 0,
+      bountyCompletionRate: bountyAccepted > 0 ? bountyCompleted / bountyAccepted : 0,
+      bountyRewardCollectionRate: bountyRewardDrops > 0
+        ? bountyRewardCollected / bountyRewardDrops
+        : 0,
+    },
     metrics: Object.fromEntries(
       METRICS.map(metric => [metric.name, summarize(runs.map(metric.read))]),
     ),
@@ -1004,11 +1864,19 @@ export function headlessBatchToCsv(result: HeadlessBatchResult): string {
     ['variants', result.options.variantNames.join('+') || 'base'],
     ['batchSeed', result.options.seed],
     ['metaPowerMultiplier', result.options.metaPowerMultiplier],
+    ['attentionProfile', result.options.attentionProfile],
     ['permanentMissChance', result.options.bot.permanentMissChance],
     ['pickupReactionSeconds', result.options.bot.pickupReactionSeconds],
     ['pickupReactionJitterSeconds', result.options.bot.pickupReactionJitterSeconds],
     ['pickupActionIntervalSeconds', result.options.bot.pickupActionIntervalSeconds],
     ['perkDecisionSeconds', result.options.bot.perkDecisionSeconds],
+    ['equipmentActionSeconds', result.options.bot.equipmentActionSeconds],
+    ['consumeActionSeconds', result.options.bot.consumeActionSeconds],
+    ['bountyActionSeconds', result.options.bot.bountyActionSeconds],
+    ['verbSwitchSeconds', result.options.bot.verbSwitchSeconds],
+    ['spatialTravelSecondsPer100Px', result.options.bot.spatialTravelSecondsPer100Px],
+    ['actionErrorChance', result.options.bot.actionErrorChance],
+    ['bountyAcceptChance', result.options.bot.bountyAcceptChance],
     ['simulationHz', result.simulation.hz],
     ['totalWaves', result.config.totalWaves],
   ];

@@ -1,5 +1,5 @@
 {
-  "version": "0.3.0",
+  "version": "0.4.0",
   "legacy": {
     "starScale": [0, 1, 2.25, 4],
     "types": {
@@ -101,11 +101,12 @@
   ],
   "mechanisms": {
     "bounty": {
-      "enabled": false,
+      "enabled": true,
       "enabledFromWave": 3,
-      "spawnChancePerWave": 0.6,
+      "spawnChancePerWave": 0.55,
       "markWindowSeconds": 8,
-      "acceptEffects": { "focusFire": true, "enrage": { "speedMul": 1.3, "hpMul": 1.5 } },
+      "hitRadiusPadding": 12,
+      "acceptEffects": { "focusFire": true, "enrage": { "speedMul": 1.35, "hpMul": 10 } },
       "rewards": { "dropCount": 2, "starWeightShift": 3, "dropLifetimeMul": 0.6 }
     }
   }

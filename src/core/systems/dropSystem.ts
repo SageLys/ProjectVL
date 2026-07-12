@@ -1,9 +1,10 @@
 import { cfg } from '../../config';
-import type { CardType, Config, Enemy, GameEvent, GameState, GroundDrop, Rng } from '../types';
+import type { CardType, Config, DropSource, Enemy, GameEvent, GameState, GroundDrop, Rng } from '../types';
 import { totalDropChance, totalDropLifetime } from '../stats';
 import { autoMergeCards } from './cardSystem';
 import { addXp } from './progressionSystem';
 import { fireTrigger, getModifiers } from '../effects/interpreter';
+import { canIssueGameplayCommand } from '../gameplayCommand';
 
 const TAU = Math.PI * 2;
 export const CARD_KEYS: CardType[] = ['damage', 'rate', 'multi', 'range', 'luck'];
@@ -44,9 +45,19 @@ function randomDropType(state: GameState, rng: Rng): CardType {
 }
 
 /** 在 (x,y) 生成一枚限时地面掉落。type 缺省随机；star 缺省按掉落星级策略（普通=1★）。 */
-export function spawnGroundDrop(state: GameState, config: Config, rng: Rng, x: number, y: number, forcedType: CardType | null = null, star?: number): void {
+export function spawnGroundDrop(
+  state: GameState,
+  config: Config,
+  rng: Rng,
+  x: number,
+  y: number,
+  forcedType: CardType | null = null,
+  star?: number,
+  lifetimeMultiplier = 1,
+  source: DropSource = 'normal',
+): void {
   const type = forcedType ?? randomDropType(state, rng);
-  const life = totalDropLifetime(state, config);
+  const life = totalDropLifetime(state, config) * Math.max(0, lifetimeMultiplier);
   state.groundDrops.push({
     id: state.nextDropId++,
     x, y, type,
@@ -54,7 +65,32 @@ export function spawnGroundDrop(state: GameState, config: Config, rng: Rng, x: n
     life,
     maxLife: life,
     pulse: rng() * TAU,
+    source,
   });
+}
+
+/**
+ * 接单 bounty 的“肥而急”保障奖励：固定生成 dropCount 张；2★ 基础权重按
+ * starWeightShift 相乘，最终星级仍受 bountyBossMax 硬上限约束，寿命单独缩短。
+ */
+export function spawnBountyRewards(
+  state: GameState,
+  config: Config,
+  rng: Rng,
+  enemy: Enemy,
+): number {
+  const rewards = cfg.skills.mechanisms.bounty.rewards;
+  const count = Math.max(0, Math.floor(rewards.dropCount));
+  const policy = cfg.economy.dropStarPolicy;
+  const star2Chance = Math.min(1, Math.max(0, policy.star2Share * rewards.starWeightShift));
+  for (let i = 0; i < count; i++) {
+    const rolledStar = rng() < star2Chance ? 2 : policy.normal;
+    const star = Math.min(policy.bountyBossMax, rolledStar);
+    const x = enemy.x + (rng() - 0.5) * 50;
+    const y = enemy.y + (rng() - 0.5) * 50;
+    spawnGroundDrop(state, config, rng, x, y, null, star, rewards.dropLifetimeMul, 'bounty');
+  }
+  return count;
 }
 
 /** 击杀掉落判定：概率命中或 boss 必掉，则在敌人位置生成掉落。 */
@@ -63,7 +99,7 @@ export function rollDropOnKill(state: GameState, config: Config, rng: Rng, enemy
     const star = rng() < cfg.economy.dropStarPolicy.bossStar2Chance
       ? 2
       : cfg.economy.dropStarPolicy.normal;
-    spawnGroundDrop(state, config, rng, enemy.x, enemy.y, null, star);
+    spawnGroundDrop(state, config, rng, enemy.x, enemy.y, null, star, 1, 'boss');
     return;
   }
   if (rng() < totalDropChance(state, config)) spawnGroundDrop(state, config, rng, enemy.x, enemy.y);
@@ -83,6 +119,10 @@ export function tickDrops(state: GameState, _config: Config, rng: Rng, dt: numbe
     if (drop.life <= 0) {
       state.groundDrops.splice(i, 1);
       state.expired++;
+      if (drop.source === 'bounty') {
+        state.bountyRewardExpired++;
+        events.push({ type: 'bountyRewardExpired', dropId: drop.id, cardType: drop.type });
+      }
       if (convert && rng() < convert.ratio) {
         state.expiredConverted++;
         events.push(...addXp(state, 1));
@@ -97,13 +137,18 @@ export function tickDrops(state: GameState, _config: Config, rng: Rng, dt: numbe
  * 卡槽已满则拒绝（掉落保留）。返回语义事件。
  */
 export function collectDrop(state: GameState, config: Config, rng: Rng, drop: GroundDrop): GameEvent[] {
+  if (!canIssueGameplayCommand(state)) return [];
   const empty = state.cards.findIndex(card => card === null);
   if (empty < 0) return [{ type: 'cardsFull' }];
   state.groundDrops = state.groundDrops.filter(d => d.id !== drop.id);
   state.cards[empty] = { id: state.nextCardId++, type: drop.type, star: drop.star };
   state.collected++;
+  if (drop.source === 'bounty') state.bountyRewardCollected++;
   const { merged, events: mergeEvents } = autoMergeCards(state, config, rng);
   const events: GameEvent[] = [{ type: 'collected', cardType: drop.type, merges: merged }];
+  if (drop.source === 'bounty') {
+    events.push({ type: 'bountyRewardCollected', dropId: drop.id, cardType: drop.type });
+  }
   events.push(...mergeEvents);
   events.push(...fireTrigger(state, config, rng, 'onPickup', { drop, point: { x: drop.x, y: drop.y } }));
   return events;
@@ -111,6 +156,7 @@ export function collectDrop(state: GameState, config: Config, rng: Rng, drop: Gr
 
 /** 拾取画布上离 (x,y) 最近且在半径内的掉落；无则不动作。 */
 export function collectNearest(state: GameState, config: Config, rng: Rng, x: number, y: number, radius: number): GameEvent[] {
+  if (!canIssueGameplayCommand(state)) return [];
   let nearest: GroundDrop | null = null;
   let best = Infinity;
   for (const drop of state.groundDrops) {

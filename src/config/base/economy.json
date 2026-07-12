@@ -13,5 +13,5 @@
   "dropTargeting": { "enabled": true, "nearCompletionWeight": 2.25 },
   "dropStarPolicy": { "normal": 1, "bossStar2Chance": 1, "bountyBossMax": 2, "star2Share": 0.05 },
   "drops": { "pickupRadius": 34, "chanceCap": 0.95 },
-  "defaults": { "dropChance": 0.2, "dropLifetime": 7.5 }
+  "defaults": { "dropChance": 0.18, "dropLifetime": 7.5 }
 }

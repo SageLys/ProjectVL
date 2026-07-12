@@ -5,6 +5,7 @@ import { cfg } from '../../config';
 import type { Card, Config, GameEvent, GameState, Rng, SlotKind } from '../types';
 import { autoMergeCards } from './cardSystem';
 import { getSkillDef, releaseConsumable, fireTrigger } from '../effects/interpreter';
+import { canIssueGameplayCommand } from '../gameplayCommand';
 
 function collectionFor(state: GameState, kind: SlotKind): (Card | null)[] {
   return kind === 'cards' ? state.cards : state.equipment;
@@ -38,6 +39,7 @@ function duplicateEquippedType(cards: (Card | null)[], moving: Card, skipIndex: 
  * 涉及卡槽的操作后触发自动合成；每次成功计入 equipOps。锁定卡不可被移动。
  */
 export function moveOrSwap(state: GameState, config: Config, rng: Rng, sourceKind: SlotKind, sourceIndex: number, targetKind: SlotKind, targetIndex: number): GameEvent[] {
+  if (!canIssueGameplayCommand(state)) return [];
   if (sourceKind === targetKind && sourceIndex === targetIndex) return [];
   const source = collectionFor(state, sourceKind);
   const target = collectionFor(state, targetKind);
@@ -81,6 +83,7 @@ export function moveOrSwap(state: GameState, config: Config, rng: Rng, sourceKin
  * 锁定卡 = 生效装备；不参与自动合成、不可移动、不可直接消耗。
  */
 export function toggleLock(state: GameState, index: number): GameEvent[] {
+  if (!canIssueGameplayCommand(state)) return [];
   if (cfg.economy.equipMode !== 'lock') return [];
   const card = state.cards[index];
   if (!card) return [];
@@ -102,6 +105,7 @@ export function toggleLock(state: GameState, index: number): GameEvent[] {
 
 /** 双击/快捷装备：lock 模式 = 切换锁定；slots 模式 = 移到装备栏空位。 */
 export function quickEquip(state: GameState, config: Config, rng: Rng, cardIndex: number): GameEvent[] {
+  if (!canIssueGameplayCommand(state)) return [];
   if (cfg.economy.equipMode === 'lock') return toggleLock(state, cardIndex);
   const target = state.equipment.findIndex(card => card === null);
   if (target < 0) return [{ type: 'equipFull' }];
@@ -110,6 +114,7 @@ export function quickEquip(state: GameState, config: Config, rng: Rng, cardIndex
 
 /** 快速卸下（slots 模式）：装备卡 → 卡槽空位（满则失败且不改状态）。 */
 export function quickUnequip(state: GameState, config: Config, rng: Rng, equipIndex: number): GameEvent[] {
+  if (!canIssueGameplayCommand(state)) return [];
   const target = state.cards.findIndex(card => card === null);
   if (target < 0) return [{ type: 'unequipFull' }];
   return moveOrSwap(state, config, rng, 'equipment', equipIndex, 'cards', target);
@@ -121,6 +126,7 @@ export function quickUnequip(state: GameState, config: Config, rng: Rng, equipIn
  * 效果结算走解释器 releaseConsumable；无定义的卡类型仅移除并计数（不应出现）。
  */
 export function consumeCard(state: GameState, config: Config, rng: Rng, sourceIndex: number, x: number, y: number): GameEvent[] {
+  if (!canIssueGameplayCommand(state)) return [];
   const card = state.cards[sourceIndex];
   if (!card) return [];
   if (card.locked) return [{ type: 'lockRejected', reason: 'locked' }];

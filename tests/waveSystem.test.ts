@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { enemyCountFor, startNextWave, checkWaveClear } from '../src/core/systems/waveSystem';
 import { determineType, spawnEnemy, moveEnemies } from '../src/core/systems/enemySystem';
 import { enemy, freshState, createDefaultConfig, constRng, seqRng, resetTestEnv, applyVariants } from './helpers';
+import { cfg } from '../src/config';
 
 beforeEach(resetTestEnv);
 const rng = constRng(0.5);
@@ -40,7 +41,7 @@ describe('waveSystem · boss 与胜负', () => {
     s.spawnLeft = 1;
     spawnEnemy(s, seqRng(0.99, 0.0));
     expect(s.enemies[0].type).toBe('boss');
-    expect(s.enemies[0].hp).toBe(56000);
+    expect(s.enemies[0].hp).toBe(cfg.enemies.types.boss.hpBase);
   });
 
   it('非最后一只按 roll 判定类型', () => {

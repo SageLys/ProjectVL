@@ -24,6 +24,7 @@ describe('config · variant 加载器（A/B 测试基建）', () => {
     expect(c.economy.mergeCopies).toBe(2);
     expect(c.economy.maxStar).toBe(3);
     expect(c.economy.dropPool).toEqual({ catalogSize: 12, activePoolSize: 5, selection: 'run-loadout' });
+    expect(c.input).toEqual({ tapMaxPx: 8, tapMaxMs: 250, reticleOffsetY: 60, minTargetCssPx: 44, strictPause: true });
   });
 
   it('equip-slots variant：方案A 手牌7+装备3，其余域不受影响', () => {

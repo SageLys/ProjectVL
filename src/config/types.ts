@@ -13,6 +13,17 @@ export interface CombatConfig {
   vfx: { shootParticles: number; killParticles: number; breakthroughParticles: number };
 }
 
+/** Pointer 点击/拖拽仲裁；reticleOffsetY 为 CSS 像素、正值表示落点在手指上方。 */
+export interface InputConfig {
+  tapMaxPx: number;
+  tapMaxMs: number;
+  reticleOffsetY: number;
+  /** 点击目标最小 CSS 直径；main 据此扩张掉落/Bounty 逻辑命中半径。 */
+  minTargetCssPx: number;
+  /** true：暂停时所有游戏动作一律拒绝，由 main 注入 pointerRouter.isEnabled。 */
+  strictPause: boolean;
+}
+
 export interface WavesConfig {
   totalWaves: number;
   enemyCountBase: number;
@@ -115,6 +126,7 @@ export type TunerConfig = Record<'damage' | 'fireRate' | 'range' | 'dropChance' 
 
 export interface GameConfig {
   combat: CombatConfig;
+  input: InputConfig;
   waves: WavesConfig;
   enemies: EnemiesConfig;
   skills: SkillsConfig;
