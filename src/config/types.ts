@@ -1,4 +1,4 @@
-// 配置层类型：六个域（combat/waves/enemies/skills/progression/economy）+ tuner（调参面板元数据）。
+// 配置层类型：游戏域 + input（T1 输入校准值）+ tuner（调参面板元数据）。
 // P3 配置重组：所有可调数值经此处；variant = 对 base 的深覆盖（见 loader.ts）。
 import type { CardDef, BountyConfig } from '../core/effects/defs';
 
@@ -108,6 +108,17 @@ export interface TunerRange {
 
 export type TunerConfig = Record<'damage' | 'fireRate' | 'range' | 'dropChance' | 'dropLifetime' | 'enemySpeed', TunerRange>;
 
+export type ConfirmStyle = 'bubble' | 'hold-ring';
+export type HoldOrDbl = 'double-tap' | 'long-press';
+
+export interface InputConfig {
+  tapMaxPx: number;
+  tapMaxMs: number;
+  reticleOffsetY: number;
+  confirmStyle: ConfirmStyle;
+  holdOrDbl: HoldOrDbl;
+}
+
 export interface GameConfig {
   combat: CombatConfig;
   waves: WavesConfig;
@@ -115,6 +126,7 @@ export interface GameConfig {
   skills: SkillsConfig;
   progression: ProgressionConfig;
   economy: EconomyConfig;
+  input: InputConfig;
   tuner: TunerConfig;
 }
 

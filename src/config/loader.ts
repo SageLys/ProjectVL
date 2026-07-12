@@ -7,6 +7,7 @@ import skills from './base/skills.json';
 import progression from './base/progression.json';
 import economy from './base/economy.json';
 import tuner from './base/tuner.json';
+import input from './base/input.json';
 import equipSlots from '../config/variants/equip-slots.json';
 import devShort from '../config/variants/dev-short.json';
 import type { DeepPartial, GameConfig } from './types';
@@ -42,6 +43,7 @@ function assembleBase(): GameConfig {
     skills,
     progression,
     economy,
+    input,
     tuner,
   }) as unknown as GameConfig;
 }

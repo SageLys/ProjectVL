@@ -1,0 +1,31 @@
+:root { color-scheme: dark; font-family: system-ui, sans-serif; background:#100d19; color:#f6f1ff; }
+@property --fill { syntax:'<percentage>'; inherits:false; initial-value:0%; }
+* { box-sizing:border-box; }
+body { margin:0; overscroll-behavior:none; }
+button, input { font:inherit; touch-action:manipulation; }
+button { border:1px solid #8c72bb; border-radius:10px; padding:.65rem .9rem; color:#fff; background:#35264e; }
+.calibrate { width:min(760px, 100%); margin:auto; padding:16px; }
+.calibrate header { display:flex; justify-content:space-between; gap:12px; align-items:start; }
+.calibrate header h1 { margin:.15rem 0; }
+.calibrate header p, section p { color:#c9bddb; }
+.calibrate header a { color:#dcb9ff; white-space:nowrap; }
+.calibrate section { margin:18px 0; padding:18px; border:1px solid #413454; border-radius:16px; background:#1b1527; }
+.calibrate h2 { margin-top:0; font-size:1.15rem; }
+.tap-target { min-height:38vh; display:grid; place-items:center; border-radius:18px; border:2px dashed #7b63a4; background:radial-gradient(circle, #6d3aa0 0 36px, #281b3b 37px); touch-action:none; user-select:none; }
+.tap-target.active { filter:brightness(1.5); }
+.hist { height:110px; display:flex; align-items:end; gap:3px; margin:8px 0 22px; }
+.hist-bin { flex:1; height:100%; display:flex; flex-direction:column; justify-content:end; text-align:center; min-width:0; }
+.hist-bin i { display:block; min-height:2px; background:#b16dff; }
+.hist-bin small { font-size:9px; overflow:hidden; }.hist-bin b { font-size:10px; }
+label { display:flex; gap:10px; align-items:center; } label input { flex:1; }
+.reticle-pad { position:relative; height:340px; margin:14px 0; display:grid; place-items:center; overflow:hidden; border-radius:14px; background:#25203a; touch-action:none; user-select:none; }
+.reticle { position:absolute; left:0; top:0; width:54px; height:54px; border:3px solid #f5c94e; border-radius:50%; box-shadow:0 0 18px #f5c94e; pointer-events:none; }
+.mode-row { display:flex; gap:8px; }.mode-row button { flex:1; }.mode-row .selected { background:#7d3cc4; border-color:#dcb9ff; }
+.prototype { position:relative; width:max-content; max-width:100%; }
+.mock-card { position:relative; width:220px; height:105px; margin:10px 0; display:flex; flex-direction:column; justify-content:center; gap:8px; overflow:hidden; touch-action:none; }
+.mock-card::after { content:''; position:absolute; inset:0; background:conic-gradient(#f6cd52 0, #f6cd52 var(--fill, 0%), transparent var(--fill, 0%)); opacity:.35; pointer-events:none; }
+.mock-card.holding::after { animation:fill .8s linear forwards; }.mock-card.success { outline:3px solid #62e6a7; }
+@keyframes fill { to { --fill:100%; } }
+.confirm-bubble { position:absolute; z-index:2; left:0; top:105px; width:260px; padding:10px; border:1px solid #e2b83e; border-radius:12px; background:#332a16; }.confirm-bubble button { margin:8px 4px 0 0; }
+footer { position:sticky; bottom:8px; padding:10px 14px; border-radius:12px; background:#342650; box-shadow:0 4px 24px #000; }
+@media (max-width:520px) { .calibrate { padding:10px; }.calibrate section { padding:14px; }.tap-target { min-height:45vh; } }
