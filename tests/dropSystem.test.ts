@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { spawnGroundDrop, tickDrops, collectDrop, rollDropOnKill } from '../src/core/systems/dropSystem';
 import { totalDropChance } from '../src/core/stats';
-import { card, enemy, freshState, createDefaultConfig, constRng, resetTestEnv } from './helpers';
+import { cfg } from '../src/config';
+import { card, enemy, freshState, createDefaultConfig, constRng, resetTestEnv, applyVariants } from './helpers';
 
 beforeEach(resetTestEnv);
 
@@ -68,6 +69,8 @@ describe('dropSystem · 概率与 boss', () => {
     config.dropChance = 0;
     rollDropOnKill(s, config, constRng(0.99), enemy({ type: 'boss', x: 10, y: 10 }));
     expect(s.groundDrops).toHaveLength(1);
+    expect(s.groundDrops[0].star).toBe(2);
+    expect(s.groundDrops[0].source).toBe('boss');
   });
 
   it('非 boss 且 rng 高于概率则不掉', () => {
@@ -76,5 +79,97 @@ describe('dropSystem · 概率与 boss', () => {
     config.dropChance = 0.5;
     rollDropOnKill(s, config, constRng(0.99), enemy({ type: 'normal', x: 10, y: 10 }));
     expect(s.groundDrops).toHaveLength(0);
+  });
+});
+
+describe('dropSystem · 定向掉落保底', () => {
+  it('没有候选时维持单局五类正式池等权，类型选择仅消费一次 RNG', () => {
+    const s = freshState();
+    const config = createDefaultConfig();
+    const values = [0.3, 0];
+    let calls = 0;
+    const rng = () => values[calls++] ?? 0;
+    spawnGroundDrop(s, config, rng, 10, 20);
+    expect(s.groundDrops[0].type).toBe('chainLightning');
+    expect(calls).toBe(2); // 类型一次 + pulse 一次
+  });
+
+  it('首张 3★ 恰缺一份时按配置权重稳定抽样', () => {
+    const s = freshState();
+    const config = createDefaultConfig();
+    s.cards[0] = card('pierce', 2);
+    s.cards[1] = card('pierce', 1);
+    spawnGroundDrop(s, config, constRng(0.3), 10, 20);
+    expect(s.groundDrops[0].type).toBe('pierce');
+  });
+
+  it('定向关闭时即使恰缺一份也保持等权', () => {
+    const s = freshState();
+    const config = createDefaultConfig();
+    s.cards[0] = card('pierce', 2);
+    s.cards[1] = card('pierce', 1);
+    cfg.economy.dropTargeting.enabled = false;
+    spawnGroundDrop(s, config, constRng(0.3), 10, 20);
+    expect(s.groundDrops[0].type).toBe('chainLightning');
+  });
+
+  it('锁定模式把锁卡计入 1★ 等价值', () => {
+    const s = freshState();
+    const config = createDefaultConfig();
+    s.cards[0] = card('frost', 2, true);
+    s.cards[1] = card('frost', 1);
+    spawnGroundDrop(s, config, constRng(0.82), 10, 20);
+    expect(s.groundDrops[0].type).toBe('frost');
+  });
+
+  it('独立装备格模式把 equipment 计入 1★ 等价值', () => {
+    applyVariants(['equip-slots']);
+    const s = freshState();
+    const config = createDefaultConfig();
+    s.equipment[0] = card('pierce', 2);
+    s.cards[0] = card('pierce', 1);
+    spawnGroundDrop(s, config, constRng(0.3), 10, 20);
+    expect(s.groundDrops[0].type).toBe('pierce');
+  });
+
+  it('已有同型 3★ 时不再为重复 3★ 定向', () => {
+    const s = freshState();
+    const config = createDefaultConfig();
+    s.cards[0] = card('pierce', 3);
+    s.cards[1] = card('pierce', 2);
+    s.cards[2] = card('pierce', 1);
+    spawnGroundDrop(s, config, constRng(0.3), 10, 20);
+    expect(s.groundDrops[0].type).toBe('chainLightning');
+  });
+
+  it('forcedType 与 forced star 不参与随机选择且原样保留', () => {
+    const s = freshState();
+    const config = createDefaultConfig();
+    let calls = 0;
+    spawnGroundDrop(s, config, () => { calls++; return 0.5; }, 10, 20, 'luck', 3);
+    expect(s.groundDrops[0]).toMatchObject({ type: 'luck', star: 3 });
+    expect(calls).toBe(1); // 仅 pulse
+  });
+});
+
+describe('dropSystem · Boss 星级策略', () => {
+  it('普通敌人掉落仍为 1★', () => {
+    const s = freshState();
+    const config = createDefaultConfig();
+    config.dropChance = 1;
+    rollDropOnKill(s, config, constRng(0), enemy({ type: 'normal', x: 10, y: 10 }));
+    expect(s.groundDrops).toHaveLength(1);
+    expect(s.groundDrops[0].star).toBe(1);
+    expect(s.groundDrops[0].source).toBe('normal');
+  });
+
+  it('Boss 的 2★ 概率未命中时仍必掉 1★', () => {
+    const s = freshState();
+    const config = createDefaultConfig();
+    config.dropChance = 0;
+    cfg.economy.dropStarPolicy.bossStar2Chance = 0;
+    rollDropOnKill(s, config, constRng(0.99), enemy({ type: 'boss', x: 10, y: 10 }));
+    expect(s.groundDrops).toHaveLength(1);
+    expect(s.groundDrops[0].star).toBe(1);
   });
 });

@@ -7,13 +7,16 @@ import { spawnParticle } from './particleSystem';
 import { rollDropOnKill } from './dropSystem';
 import { addXp } from './progressionSystem';
 import { fireTrigger, getModifiers } from '../effects/interpreter';
+import { settleKilledBounty } from './bountySystem';
 
 /** 击杀结算：计分、粒子、掉落判定、经验（×xpMul）、onKill 触发。调用前敌人须已移出数组。 */
 export function killEnemy(state: GameState, config: Config, rng: Rng, enemy: Enemy): GameEvent[] {
   const events: GameEvent[] = [];
   state.kills++;
   for (let i = 0; i < cfg.combat.vfx.killParticles; i++) spawnParticle(state, rng, enemy.x, enemy.y, enemy.color, 150);
-  rollDropOnKill(state, config, rng, enemy);
+  const bounty = settleKilledBounty(state, config, rng, enemy);
+  events.push(...bounty.events);
+  if (!bounty.handledDrops) rollDropOnKill(state, config, rng, enemy);
   events.push(...addXp(state, enemy.xp * getModifiers(state).xpMul));
   events.push(...fireTrigger(state, config, rng, 'onKill', { enemy, point: { x: enemy.x, y: enemy.y } }));
   return events;

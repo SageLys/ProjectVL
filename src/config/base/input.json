@@ -1,0 +1,7 @@
+{
+  "tapMaxPx": 8,
+  "tapMaxMs": 250,
+  "reticleOffsetY": 60,
+  "minTargetCssPx": 44,
+  "strictPause": true
+}

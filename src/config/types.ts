@@ -13,6 +13,17 @@ export interface CombatConfig {
   vfx: { shootParticles: number; killParticles: number; breakthroughParticles: number };
 }
 
+/** Pointer 点击/拖拽仲裁；reticleOffsetY 为 CSS 像素、正值表示落点在手指上方。 */
+export interface InputConfig {
+  tapMaxPx: number;
+  tapMaxMs: number;
+  reticleOffsetY: number;
+  /** 点击目标最小 CSS 直径；main 据此扩张掉落/Bounty 逻辑命中半径。 */
+  minTargetCssPx: number;
+  /** true：暂停时所有游戏动作一律拒绝，由 main 注入 pointerRouter.isEnabled。 */
+  strictPause: boolean;
+}
+
 export interface WavesConfig {
   totalWaves: number;
   enemyCountBase: number;
@@ -78,6 +89,8 @@ export interface PerkDef {
 export interface ProgressionConfig {
   xpNeedBase: number;
   xpGrowth: number;
+  /** 局外成长唯一旋钮：线性乘全部玩家输出伤害；首局/无成长为 1。 */
+  metaPowerMultiplier: number;
   perks: PerkDef[];
 }
 
@@ -95,7 +108,10 @@ export interface EconomyConfig {
   inRunSlotExpansion: boolean;
   equipDistinctTypes: boolean;
   feedEquipped: boolean;
-  dropStarPolicy: { normal: number; bountyBossMax: number; star2Share: number };
+  /** P5 全目录可有 12 张，但每局只把 activePoolSize 张放入等权基础池，避免目录规模稀释构筑。 */
+  dropPool: { catalogSize: number; activePoolSize: number; selection: 'run-loadout' };
+  dropTargeting: { enabled: boolean; nearCompletionWeight: number };
+  dropStarPolicy: { normal: number; bossStar2Chance: number; bountyBossMax: number; star2Share: number };
   drops: { pickupRadius: number; chanceCap: number };
   defaults: { dropChance: number; dropLifetime: number };
 }
@@ -110,6 +126,7 @@ export type TunerConfig = Record<'damage' | 'fireRate' | 'range' | 'dropChance' 
 
 export interface GameConfig {
   combat: CombatConfig;
+  input: InputConfig;
   waves: WavesConfig;
   enemies: EnemiesConfig;
   skills: SkillsConfig;

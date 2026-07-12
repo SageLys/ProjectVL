@@ -4,17 +4,16 @@ import type { Card } from '../core/types';
 export type SlotSource = 'cards' | 'equipment';
 
 export interface SlotHandlers {
-  /** 双击：slots 模式快速装备/卸下。 */
-  quickAction(source: SlotSource, index: number): void;
-  /** 单击：lock 模式切换锁定（锁定即装备，方案B）。 */
-  cardClick(source: SlotSource, index: number): void;
-  /** 指针按下：开始拖拽。 */
-  dragStart(e: PointerEvent, source: SlotSource, index: number, el: HTMLElement): void;
+  /** 所有卡牌轻点/拖拽统一交给 pointerRouter 仲裁。 */
+  pointerDown(e: PointerEvent, source: SlotSource, index: number, el: HTMLElement): void;
+  /** 键盘 Enter/Space 产生 detail=0 的 click，复用同一轻点语义。 */
+  activate?(source: SlotSource, index: number): void;
 }
 
 /** 构造一张卡牌按钮。锁定卡三重视觉冗余（金框/🔒角标/底色）由 .locked class 承担。 */
 export function createCardElement(card: Card, source: SlotSource, index: number, handlers: SlotHandlers): HTMLButtonElement {
-  const meta = cfg.skills.legacy.types[card.type];
+  const def = cfg.skills.cards.find(value => value.id === card.type);
+  const meta = cfg.skills.legacy.types[card.type] ?? { name: def?.textKey.split('.').pop() ?? card.type, color: '#8cecff', icon: '✦', desc: def?.designNotes ?? '' };
   const el = document.createElement('button');
   el.type = 'button';
   el.className = card.locked ? 'card locked' : 'card';
@@ -25,9 +24,10 @@ export function createCardElement(card: Card, source: SlotSource, index: number,
   el.setAttribute('aria-label', `${card.locked ? '已锁定' : source === 'equipment' ? '已装备' : ''}${card.star}星${meta.name}卡`);
   el.style.setProperty('--card', meta.color);
   el.innerHTML = `<b>${card.locked ? '🔒 ' : ''}${meta.icon} ${meta.name}</b><em>${'★'.repeat(card.star)}</em><small>${meta.desc}强化</small>`;
-  el.addEventListener('click', () => handlers.cardClick(source, index));
-  el.addEventListener('dblclick', e => { e.preventDefault(); handlers.quickAction(source, index); });
-  el.addEventListener('pointerdown', e => handlers.dragStart(e, source, index, el));
+  el.addEventListener('pointerdown', e => handlers.pointerDown(e, source, index, el));
+  el.addEventListener('click', e => {
+    if (e.detail === 0) handlers.activate?.(source, index);
+  });
   return el;
 }
 

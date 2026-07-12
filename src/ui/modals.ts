@@ -2,9 +2,11 @@ import { texts } from '../data';
 import type { GameState } from '../core/types';
 import type { DomRefs } from './domRefs';
 import { fmt } from './format';
+import { cfg } from '../config';
 
 /** 升级三选一 / 结算 / 中心引导文案的显隐控制。 */
 export function createModals(refs: DomRefs, hooks: { onPerk(id: string): void; onRestart(): void }) {
+  let offerIndex = 0;
   refs.perkButtons.forEach(btn => btn.addEventListener('click', () => {
     const id = btn.dataset.perk;
     if (id) hooks.onPerk(id);
@@ -17,7 +19,17 @@ export function createModals(refs: DomRefs, hooks: { onPerk(id: string): void; o
       refs.centerMsg.innerHTML = `<h2>${title}</h2><p>${body}</p>`;
       refs.centerMsg.style.display = show ? 'block' : 'none';
     },
-    showLevel(): void { refs.levelModal.classList.add('show'); },
+    showLevel(): void {
+      const perks = cfg.progression.perks;
+      refs.perkButtons.forEach((btn, i) => {
+        const perk = perks[(offerIndex * 3 + i) % perks.length];
+        if (!perk) return;
+        btn.dataset.perk = perk.id;
+        btn.innerHTML = `<b>${perk.title}</b>${perk.desc}`;
+      });
+      offerIndex++;
+      refs.levelModal.classList.add('show');
+    },
     hideLevel(): void { refs.levelModal.classList.remove('show'); },
     hideResult(): void { refs.resultModal.classList.remove('show'); },
     showResult(win: boolean, state: GameState): void {

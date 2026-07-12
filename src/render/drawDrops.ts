@@ -6,7 +6,8 @@ const TAU = Math.PI * 2;
 /** 地面掉落：发光圆牌 + 图标 + 倒计时圆环 + 剩余秒数。 */
 export function drawDrops(ctx: CanvasRenderingContext2D, state: GameState): void {
   for (const drop of state.groundDrops) {
-    const meta = cfg.skills.legacy.types[drop.type];
+    const def = cfg.skills.cards.find(value => value.id === drop.type);
+    const meta = cfg.skills.legacy.types[drop.type] ?? { color: '#8cecff', icon: '✦', name: def?.textKey ?? drop.type };
     const ratio = Math.max(0, drop.life / drop.maxLife);
     const bob = Math.sin(drop.pulse) * 3;
     ctx.save();

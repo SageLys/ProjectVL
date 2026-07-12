@@ -2,8 +2,10 @@
 import type { EffectDef } from './effects/defs';
 
 /** 卡牌类型：P3 过渡期为 5 种旧数值卡；P5 实装技能卡后扩展为技能 id 字符串。 */
-export type CardType = 'damage' | 'rate' | 'multi' | 'range' | 'luck';
+/** 技能 id。保留 string 开放集，正式目录由 skills.json 驱动。 */
+export type CardType = string;
 export type EnemyType = 'normal' | 'fast' | 'tank' | 'boss';
+export type DropSource = 'normal' | 'boss' | 'bounty';
 export type GameMode = 'ready' | 'playing' | 'ended';
 
 /** 注入式随机源：返回 [0,1)。测试可传入确定性实现。 */
@@ -37,6 +39,13 @@ export interface EnemyStatus {
   taunt: { x: number; y: number; remaining: number; summonId?: number } | null;
 }
 
+/** 精英赏金状态：offered 仍处于可接单倒计时；accepted 已进入集火/狂暴，持续到离场。 */
+export interface EnemyBountyState {
+  phase: 'offered' | 'accepted';
+  /** offered 阶段的剩余点击窗口；accepted 阶段固定为 0。 */
+  remaining: number;
+}
+
 export interface Enemy {
   id: number;
   x: number;
@@ -52,6 +61,7 @@ export interface Enemy {
   xp: number;
   hit: number;
   status: EnemyStatus;
+  bounty?: EnemyBountyState;
 }
 
 export interface Bullet {
@@ -104,6 +114,8 @@ export interface GroundDrop {
   life: number;
   maxLife: number;
   pulse: number;
+  /** 掉落来源；旧存档/测试对象缺省按 normal 处理。 */
+  source?: DropSource;
 }
 
 /** 地面区域（groundZone/aura 消耗态落点化）：周期对区域内敌人施加内嵌效果。 */
@@ -169,11 +181,15 @@ export interface Config {
   dropChance: number;
   dropLifetime: number;
   enemySpeed: number;
+  /** 局外成长唯一旋钮：线性乘全部玩家输出伤害。 */
+  metaPowerMultiplier: number;
 }
 
 export interface GameState {
   mode: GameMode;
   paused: boolean;
+  /** 手动暂停与 perk 强制暂停分离，防止快捷键绕过升级选择。 */
+  pauseReason: 'manual' | 'perk' | null;
   time: number;
   hp: number;
   maxHp: number;
@@ -183,6 +199,8 @@ export interface GameState {
   bullets: Bullet[];
   particles: Particle[];
   groundDrops: GroundDrop[];
+  /** 本局从正式目录抽出的活跃掉落池。 */
+  activeCardPool: CardType[];
   cards: (Card | null)[];
   /** 独立装备格（equipMode='slots' 时使用；lock 模式下长度 0，装备=锁定卡）。 */
   equipment: (Card | null)[];
@@ -200,8 +218,11 @@ export interface GameState {
   spawnLeft: number;
   spawnTimer: number;
   waveClearPending: boolean;
-  damageBonus: number;
-  fireRateBonus: number;
+  /** 本波已通过概率判定、等待下一只普通敌人承载赏金标记。 */
+  bountyWavePending: boolean;
+  /** perk 独立乘数层，避免把选择瞬间的装备/限时 buff 快照成永久 flat bonus。 */
+  damagePerkMultiplier: number;
+  fireRatePerkMultiplier: number;
   multi: number;
   shotCd: number;
   turretAngle: number;
@@ -217,6 +238,15 @@ export interface GameState {
   expired: number;
   /** 过期转化（expiryConvert）为经验的掉落数。 */
   expiredConverted: number;
+  /** 赏金机制遥测：offer → accept/expire → complete/fail，以及实际生成的赏金掉落。 */
+  bountyOffered: number;
+  bountyAccepted: number;
+  bountyExpired: number;
+  bountyCompleted: number;
+  bountyFailed: number;
+  bountyRewardDrops: number;
+  bountyRewardCollected: number;
+  bountyRewardExpired: number;
 }
 
 /** 卡槽/装备栏归属。临时栏已随 P0-3/P0-6 移除。 */
@@ -248,4 +278,11 @@ export type GameEvent =
   | { type: 'fed'; cardType: CardType; resultStar: number }
   | { type: 'shieldBroken' }
   | { type: 'testDrops'; cardType: CardType }
-  | { type: 'perkApplied'; title: string };
+  | { type: 'perkApplied'; title: string }
+  | { type: 'bountyOffered'; enemyId: number; windowSeconds: number }
+  | { type: 'bountyAccepted'; enemyId: number }
+  | { type: 'bountyExpired'; enemyId: number; reason: 'timeout' | 'killed' | 'breach' | 'summon' }
+  | { type: 'bountyCompleted'; enemyId: number; dropCount: number }
+  | { type: 'bountyFailed'; enemyId: number; reason: 'breach' | 'summon' }
+  | { type: 'bountyRewardCollected'; dropId: number; cardType: CardType }
+  | { type: 'bountyRewardExpired'; dropId: number; cardType: CardType };

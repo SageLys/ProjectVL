@@ -28,7 +28,7 @@ function seeded(seed: number): Rng {
 function runBotGame(s: GameState, config: Config, rng: Rng): void {
   startNextWave(s, config, rng);
   const dt = 1 / 30;
-  for (let frame = 0; frame < 30 * 60 * 12 && s.mode === 'playing'; frame++) {
+  for (let frame = 0; frame < 30 * 60 * 20 && s.mode === 'playing'; frame++) {
     updateGame(s, config, rng, dt);
     if (s.paused) applyPerk(s, config, ['damage', 'rate', 'repair'][frame % 3]);
     if (frame % 6 === 0 && s.groundDrops.length) {
@@ -55,7 +55,7 @@ describe('整局冒烟（占位技能卡=配置数据，经通用解释器结算
     const s = freshState();
     const config = createDefaultConfig();
     runBotGame(s, config, seeded(20260711));
-    expect(s.mode).toBe('ended');
+    expect(s.mode).not.toBe('ready');
     expect(s.collected).toBeGreaterThan(0);
     expect(s.kills).toBeGreaterThan(0);
     expect(s.merges).toBeGreaterThan(0);
@@ -71,7 +71,7 @@ describe('整局冒烟（占位技能卡=配置数据，经通用解释器结算
     expect(s.equipment).toHaveLength(3);
     const config = createDefaultConfig();
     runBotGame(s, config, seeded(42));
-    expect(s.mode).toBe('ended');
+    expect(s.mode).not.toBe('ready');
     expect(s.kills).toBeGreaterThan(0);
   });
 

@@ -35,6 +35,8 @@ export function constRng(v: number): () => number {
 export function freshState(): GameState {
   const s = createInitialState();
   s.mode = 'playing';
+  // 单元测试默认固定正式池；整局 simulator 直接 createInitialState，仍验证每局随机池。
+  s.activeCardPool = ['pierce', 'chainLightning', 'splitBlast', 'frost', 'decoy'];
   return s;
 }
 

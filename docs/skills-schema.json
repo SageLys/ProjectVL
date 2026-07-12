@@ -2,9 +2,9 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "urn:projectvl:skills-schema",
   "title": "ProjectVL 技能卡数据模型",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "date": "2026-07-12",
-  "description": "P2 交付：功能型技能卡的数据模型。技能 = 数据(本模型的实例 JSON) + 通用解释器(触发器→效果原子)，P3 实现解释器时禁止每张卡硬编码 if。设计说明与首批 12 张卡见 docs/P2_技能体系框架与首批卡牌设计表.md。v0.2.0：按 docs/P4前置_星级合成与卡槽_结论.md（D1–D6）修订——3★ 上限/二合/入装门槛 2★（1★ 无装备态）/手牌 7+装备 3/喂养合成，新增 mechanisms.economy。所有数值均为占位，P4 统一标定。v0.3.0（P3 实施时修订）：触发器新增 passive——承载常驻修饰类装备态（掉率/时限/经验乘数、反伤、突破减免、处决线、破盾新星、换形 beamMorph/mortarMorph、常驻光环 aura、mergeRule），此前设计表中「掉率+25%」类无事件语义的装备态在 schema 中无处安放；解释器对 passive 绑定做聚合读取（getModifiers）而非事件触发。",
+  "description": "功能型技能卡与框架机制的概念聚合模型。技能 = 数据 + 通用解释器，禁止每卡硬编码。v0.3.0 新增 passive 常驻修饰；v0.4.0 同步 P4.1 已实现的 Bounty 字段与模型基座数值。economy 在运行时已拆到 src/config/base/economy.json，本 schema 仅保留跨文档概念契约。Bounty/输入数值仍须由 T1/T2/T3 真人与真机校准。",
 
   "type": "object",
   "required": ["version", "cards", "mechanisms"],
@@ -216,7 +216,7 @@
         "implementationBatch": {
           "type": "integer",
           "enum": [1, 2],
-          "description": "1 = P5 首批实装子集；2 = 已完成设计的二批储备。"
+          "description": "P5 全量 12 张范围内的实现顺序标签；不表示交付范围边界。"
         },
         "designNotes": { "type": "string" }
       },
@@ -224,25 +224,49 @@
     },
 
     "economyConfig": {
-      "description": "合成经济骨架（定案值，依据 docs/P4前置_星级合成与卡槽_结论.md 的仿真推导；标 [P4] 的为待标定项）。",
+      "description": "合成经济骨架（P4 v2；基座采用方案B锁定即装备，共享10格锁3；方案A 7+3 仅作variant对照）。",
       "type": "object",
-      "required": ["maxStar", "mergeCopies", "equipThreshold", "handSlots", "equipSlots"],
+      "required": ["maxStar", "mergeCopies", "equipThreshold", "equipMode", "handSlots", "equipSlots", "maxLocked", "dropPool", "dropTargeting"],
       "properties": {
         "maxStar": { "type": "integer", "const": 3, "description": "D1：最高星级 3★（4★ 仿真否决：首件@31 拾取；N=60 上限与定向权重×2 下复检维持；若 P4 定向保底比 ×2 更激进须回检）" },
         "mergeCopies": { "type": "integer", "const": 2, "description": "D2：二合（2 张同型同星→+1 星；3★=4 张同型。三合否决：合成 8.8 次/局击穿 KPI ≥16）" },
         "equipThreshold": { "type": "integer", "const": 2, "description": "D3：2★ 起可装备；1★=素材/即时消耗（经济上门槛无差异，体验+内容效率定案）" },
-        "handSlots": { "type": "integer", "const": 7, "description": "D4：手牌 7 格。**默认值级别，非推导最优**——平衡点随拾取锚点漂移，P4 全局仿真复检（真实波次+真人囤卡偏差）" },
-        "equipSlots": { "type": "integer", "const": 3, "description": "D4：独立装备 3 格。若 P0-3 A/B 改为锁定即装备（占手牌槽），共享槽须 ~10 格才等效" },
+        "equipMode": { "type": "string", "const": "lock", "description": "2026-07-12 暂定方案B：锁定即装备" },
+        "handSlots": { "type": "integer", "const": 10, "description": "P4复检基座：装备与库存共享10格；与方案A手牌7+装备3的容量近似等效" },
+        "equipSlots": { "type": "integer", "const": 0, "description": "方案B无独立装备栏；方案A由equip-slots variant覆盖为3" },
+        "maxLocked": { "type": "integer", "const": 3, "description": "最多3张锁定卡同时作为装备生效" },
         "inRunSlotExpansion": { "type": "boolean", "const": false, "description": "D4：局内不可扩容（+1 格即显著改变成型率，会成必选强度）；配置保留，P5 后可作 perk 实验" },
         "equipDistinctTypes": { "type": "boolean", "const": true, "description": "D6：装备栏同类型唯一" },
         "feedEquipped": { "type": "boolean", "const": true, "description": "D6：喂养合成——手牌卡与已装备同型同星直接合成升星（免卸装；砍掉≈手牌 −1 格）" },
+        "dropPool": {
+          "type": "object",
+          "description": "P4 v2：目录规模与单局有效池解耦。P5目录12张，但每局基础掉落池仅5张，避免12类等权使指定3★期望升至48掉落。",
+          "required": ["catalogSize", "activePoolSize", "selection"],
+          "properties": {
+            "catalogSize": { "type": "integer", "const": 12 },
+            "activePoolSize": { "type": "integer", "const": 5 },
+            "selection": { "type": "string", "const": "run-loadout" }
+          },
+          "additionalProperties": false
+        },
+        "dropTargeting": {
+          "type": "object",
+          "description": "差一张保底：某类型首张3★恰缺1份时提高该类型权重；已有同型3★后停止定向。",
+          "required": ["enabled", "nearCompletionWeight"],
+          "properties": {
+            "enabled": { "type": "boolean", "const": true },
+            "nearCompletionWeight": { "type": "number", "const": 2.25 }
+          },
+          "additionalProperties": false
+        },
         "dropStarPolicy": {
           "type": "object",
           "description": "D5：普通掉落一律 1★；2★ 仅经 bounty/Boss/经济卡（占总量 ~5% [P4]）；3★ 永不直掉",
           "properties": {
             "normal": { "type": "integer", "const": 1 },
+            "bossStar2Chance": { "type": "number", "const": 1 },
             "bountyBossMax": { "type": "integer", "const": 2 },
-            "star2Share": { "type": "number", "description": "[P4] 占位 0.05" }
+            "star2Share": { "type": "number", "const": 0.05, "description": "P4/P4.1 基座 0.05；Bounty 奖励再乘 starWeightShift" }
           }
         },
         "pickupBudgetTarget": { "type": "object", "description": "[P4] 选定的设计锚（非推导结果）：有效拾取 38–45 次/局（依据=点击物理上限×单局时长×注意力预算）→ 掉落生成 48–56（过期≤20%）→ 反推 dropChance（占位 0.25–0.33）。T2 实测出窗则连带复核 D4 与溢出3★结论", "properties": { "min": { "type": "integer" }, "max": { "type": "integer" } } }
@@ -253,25 +277,40 @@
     "bountyConfig": {
       "description": "精英 Bounty：主动风险选择机制（框架级，非卡牌）。险区掉落原则内置：赏金掉落『肥而急』。点击精英=接单，与点掉落/拖卡释放争夺同一注意力。接单是可选项：不接单无惩罚（精英按普通强敌行为），接单后精英狂暴但死后掉肥赏金——风险为 opt-in，避免伪选择。",
       "type": "object",
-      "required": ["enabledFromWave", "spawnChancePerWave", "markWindowSeconds", "acceptEffects", "rewards"],
+      "required": ["enabled", "enabledFromWave", "spawnChancePerWave", "markWindowSeconds", "hitRadiusPadding", "acceptEffects", "rewards"],
       "properties": {
-        "enabledFromWave": { "type": "integer", "description": "占位 3" },
-        "spawnChancePerWave": { "type": "number", "description": "每波生成 1 名 bounty 精英的概率，占位 0.6" },
-        "markWindowSeconds": { "type": "number", "description": "出现后可接单的窗口，占位 8；窗口以倒计时环呈现（H3 可读性）" },
+        "enabled": { "type": "boolean", "description": "机制总开关；P4.1 基座 true" },
+        "enabledFromWave": { "type": "integer", "description": "P4.1 基座 3" },
+        "spawnChancePerWave": { "type": "number", "description": "每波至多一名；P4.1 基座 0.55" },
+        "markWindowSeconds": { "type": "number", "description": "可接单窗口；P4.1 基座 8 秒，以倒计时环呈现" },
+        "hitRadiusPadding": { "type": "number", "description": "敌人视觉半径外附加命中热区；P4.1 基座 12px，仍待 T1 真机校准" },
         "acceptEffects": {
           "type": "object",
+          "required": ["focusFire", "enrage"],
           "properties": {
             "focusFire": { "type": "boolean", "description": "接单后炮台索敌优先级：bounty > 烙印(vulnerable标记) > 最近敌人" },
-            "enrage": { "type": "object", "description": "接单后精英狂暴：{ speedMul, hpMul } 或召唤护卫 { guards }，占位待 P4" }
-          }
+            "enrage": {
+              "type": "object",
+              "description": "接单后精英狂暴；标准档 P4.1 基座 speedMul=1.35 / hpMul=10，可由难度 variant 覆盖。",
+              "required": ["speedMul", "hpMul"],
+              "properties": {
+                "speedMul": { "type": "number", "exclusiveMinimum": 0 },
+                "hpMul": { "type": "number", "exclusiveMinimum": 0 }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
         },
         "rewards": {
           "type": "object",
+          "required": ["dropCount", "starWeightShift", "dropLifetimeMul"],
           "properties": {
-            "dropCount": { "type": "integer", "description": "击杀必掉张数，占位 2" },
-            "starWeightShift": { "type": "number", "description": "高星权重乘数，占位 3（2★ 概率 ×3；掉落星级上限受 economy.dropStarPolicy 约束）" },
-            "dropLifetimeMul": { "type": "number", "description": "险区原则：赏金掉落时限乘数 <1，占位 0.6（肥而急）" }
-          }
+            "dropCount": { "type": "integer", "description": "P4.1 基座 2 张" },
+            "starWeightShift": { "type": "number", "description": "P4.1 基座 3（2★ 概率 ×3；仍受星级上限约束）" },
+            "dropLifetimeMul": { "type": "number", "description": "P4.1 基座 0.6，形成『肥而急』" }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false

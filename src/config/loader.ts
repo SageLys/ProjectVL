@@ -1,6 +1,7 @@
-// variant 加载器：base（六域）+ 若干覆盖文件深合并 → 运行配置。
+// variant 加载器：base（战斗、输入等八域）+ 若干覆盖文件深合并 → 运行配置。
 // A/B 测试基建：URL 参数 ?variant=a,b 或调参面板切换（切换=带参重载，保证一局内配置不漂移）。
 import combat from './base/combat.json';
+import input from './base/input.json';
 import waves from './base/waves.json';
 import enemies from './base/enemies.json';
 import skills from './base/skills.json';
@@ -9,12 +10,16 @@ import economy from './base/economy.json';
 import tuner from './base/tuner.json';
 import equipSlots from '../config/variants/equip-slots.json';
 import devShort from '../config/variants/dev-short.json';
+import difficultyEasy from '../config/variants/difficulty-easy.json';
+import difficultyHard from '../config/variants/difficulty-hard.json';
 import type { DeepPartial, GameConfig } from './types';
 
 /** 已注册 variant。新增覆盖文件后在此登记（key = URL 参数名）。 */
 export const VARIANTS: Record<string, DeepPartial<GameConfig>> = {
   'equip-slots': equipSlots as DeepPartial<GameConfig>,
   'dev-short': devShort as DeepPartial<GameConfig>,
+  'difficulty-easy': difficultyEasy as DeepPartial<GameConfig>,
+  'difficulty-hard': difficultyHard as DeepPartial<GameConfig>,
 };
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
@@ -37,6 +42,7 @@ export function deepMerge<T>(base: T, patch: DeepPartial<T>): T {
 function assembleBase(): GameConfig {
   return structuredClone({
     combat,
+    input,
     waves,
     enemies,
     skills,

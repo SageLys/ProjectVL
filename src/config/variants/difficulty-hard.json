@@ -1,0 +1,23 @@
+{
+  "$comment": "P4 v2 挑战档：熟练构筑用。提高 EHP/突破伤害、压缩窗口，并减少资源冗余。",
+  "combat": { "hp": { "max": 90 } },
+  "waves": {
+    "spawnInterval": { "base": 5.4, "perWave": 0.46, "min": 1.25 },
+    "betweenWaves": 20
+  },
+  "enemies": {
+    "types": {
+      "normal": { "hpBase": 43, "hpPerWave": 8, "damage": 9 },
+      "fast":   { "hpBase": 27, "hpPerWave": 6, "damage": 7 },
+      "tank":   { "hpBase": 102, "hpPerWave": 15, "damage": 16 },
+      "boss":   { "hpBase": 75000, "speedBase": 3.2, "damage": 999 }
+    }
+  },
+  "skills": {
+    "mechanisms": {
+      "bounty": { "acceptEffects": { "enrage": { "speedMul": 1.4, "hpMul": 12 } } }
+    }
+  },
+  "economy": { "defaults": { "dropChance": 0.17, "dropLifetime": 6.5 } },
+  "progression": { "xpNeedBase": 14, "xpGrowth": 1.42 }
+}

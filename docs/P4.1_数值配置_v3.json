@@ -1,0 +1,821 @@
+{
+  "$comment": "P4.1 点击注意力压力标定快照。运行时真值仍位于 src/config；本文件用于审阅、移交与复现。P4 v2 的解析/经济模型继续有效。",
+  "schemaVersion": 3,
+  "id": "projectvl-p4.1-attention-balance-v3",
+  "calibratedAt": "2026-07-12",
+  "status": "attention-calibrated-performance-and-human-factors-provisional",
+  "supersedes": "docs/P4_数值配置_v2.json（仅覆盖发生变化的点击压力/Bounty/Boss截止线；其余P4模型沿用）",
+  "calibration": {
+    "seed": 20260719,
+    "runsPerScenario": 2000,
+    "scenarioCount": 9,
+    "totalRuns": 18000,
+    "fixedStepHz": 30,
+    "vfxEnabled": false,
+    "primaryScenario": "base/target",
+    "profiles": [
+      {
+        "name": "fast",
+        "bot": {
+          "permanentMissChance": 0.04,
+          "pickupReactionSeconds": 0.28,
+          "pickupReactionJitterSeconds": 0.1,
+          "equipmentDecisionIntervalSeconds": 0.25,
+          "pickupActionIntervalSeconds": 0.14,
+          "perkDecisionSeconds": 1.6,
+          "equipmentActionSeconds": 0.24,
+          "consumeActionSeconds": 0.42,
+          "bountyActionSeconds": 0.24,
+          "verbSwitchSeconds": 0.08,
+          "spatialTravelSecondsPer100Px": 0.025,
+          "actionErrorChance": 0.01,
+          "bountyAcceptChance": 0.82,
+          "rescueDistance": 105,
+          "rescueDecisionIntervalSeconds": 1.5
+        }
+      },
+      {
+        "name": "target",
+        "bot": {
+          "permanentMissChance": 0.08,
+          "pickupReactionSeconds": 0.45,
+          "pickupReactionJitterSeconds": 0.2,
+          "equipmentDecisionIntervalSeconds": 0.35,
+          "pickupActionIntervalSeconds": 0.2,
+          "perkDecisionSeconds": 3,
+          "equipmentActionSeconds": 0.34,
+          "consumeActionSeconds": 0.58,
+          "bountyActionSeconds": 0.34,
+          "verbSwitchSeconds": 0.18,
+          "spatialTravelSecondsPer100Px": 0.055,
+          "actionErrorChance": 0.04,
+          "bountyAcceptChance": 0.62,
+          "rescueDistance": 120,
+          "rescueDecisionIntervalSeconds": 2
+        }
+      },
+      {
+        "name": "stressed",
+        "bot": {
+          "permanentMissChance": 0.14,
+          "pickupReactionSeconds": 0.72,
+          "pickupReactionJitterSeconds": 0.3,
+          "equipmentDecisionIntervalSeconds": 0.55,
+          "pickupActionIntervalSeconds": 0.32,
+          "perkDecisionSeconds": 4.5,
+          "equipmentActionSeconds": 0.58,
+          "consumeActionSeconds": 0.9,
+          "bountyActionSeconds": 0.58,
+          "verbSwitchSeconds": 0.34,
+          "spatialTravelSecondsPer100Px": 0.1,
+          "actionErrorChance": 0.11,
+          "bountyAcceptChance": 0.38,
+          "rescueDistance": 145,
+          "rescueDecisionIntervalSeconds": 2.8
+        }
+      }
+    ],
+    "kpiEvaluation": {
+      "allPass": true,
+      "scope": "P1/P4 战斗经济回归 + P4.1 注意力工程门槛；不包含真机性能或真人可读性。",
+      "checks": {
+        "firstRunWinRate": {
+          "value": 0.189,
+          "min": 0.15,
+          "max": 0.25,
+          "pass": true
+        },
+        "wallMinutesP50": {
+          "value": 13.616944444443016,
+          "min": 10,
+          "max": 14,
+          "pass": true
+        },
+        "winningBossSecondsP50": {
+          "value": 117.649999999893,
+          "min": 100,
+          "max": 120,
+          "pass": true
+        },
+        "winningBossShareP50": {
+          "value": 0.14761607146007605,
+          "min": 0.12,
+          "max": 0.18,
+          "pass": true
+        },
+        "effectivePickupsP50": {
+          "value": 43,
+          "min": 38,
+          "max": 45,
+          "pass": true
+        },
+        "mergesPerRegularWave": {
+          "value": 2.357625,
+          "min": 2,
+          "pass": true
+        },
+        "breatherShare": {
+          "value": 0.211556522486221,
+          "min": 0.2,
+          "max": 0.3,
+          "pass": true
+        },
+        "expiredRate": {
+          "value": 0.08910901578557051,
+          "max": 0.2,
+          "pass": true
+        },
+        "consumeActionsPerMinuteP50": {
+          "value": 1.1063767470231771,
+          "min": 1,
+          "max": 2,
+          "pass": true
+        },
+        "rolling3sCountP95": {
+          "value": 2,
+          "max": 3,
+          "pass": true
+        },
+        "rolling10sCountP95": {
+          "value": 5,
+          "max": 7,
+          "pass": true
+        },
+        "queueDelayP95Seconds": {
+          "value": 1.1300173038006818,
+          "max": 1.5,
+          "pass": true
+        },
+        "overlappingWindowShareP50": {
+          "value": 0.2531548467534981,
+          "min": 0.2,
+          "max": 0.4,
+          "pass": true
+        },
+        "attentionExtraExpiredP50": {
+          "value": 0,
+          "max": 0,
+          "pass": true
+        },
+        "bountyAcceptanceRate": {
+          "value": 0.4474986972381449,
+          "min": 0.3,
+          "max": 0.7,
+          "pass": true
+        },
+        "bountyCompletionRate": {
+          "value": 0.8972343522561863,
+          "min": 0.75,
+          "max": 0.95,
+          "pass": true
+        },
+        "bountyHasRealFailure": {
+          "value": 353,
+          "min": 1,
+          "pass": true
+        },
+        "easyBountyCompletionRate": {
+          "value": 0.9106699751861043,
+          "min": 0.85,
+          "max": 0.98,
+          "pass": true
+        },
+        "difficultyWinOrder": {
+          "value": 0.587,
+          "min": 0,
+          "pass": true
+        },
+        "stressedExpiredRate": {
+          "value": 0.17644464548230238,
+          "max": 0.2,
+          "pass": true
+        },
+        "stressedSensitivityDetected": {
+          "value": 1,
+          "min": 1,
+          "pass": true
+        }
+      },
+      "physicalDeviceStatus": "pending",
+      "physicalDeviceNote": "尚无 T1 真机帧率、触达与误触数据；30Hz、反应时与误触率为 provisional 建模假设。"
+    },
+    "metricSemantics": {
+      "rollingBurst": "rolling Ns Count P95 = 单局滚动窗口P95，再取跨局中位；不是最大值。",
+      "queueDelay": "共享动作队列中从意图出现到动作执行的延迟；拾取/接赏金/装备/消耗/perk竞争同一资源。",
+      "attentionExtraExpired": "因动作尚未轮到执行而额外过期的掉落；不含永久漏点和纯反应慢导致的过期。"
+    },
+    "performanceAssumption": {
+      "status": "T1_PHYSICAL_DEVICE_MISSING",
+      "targetDisplayFps": 60,
+      "simulationFloorHz": 30,
+      "browserDtCapSeconds": 0.033,
+      "warning": "尚无真实T1手机型号、帧时间分位、拇指触达和误触数据；headless关闭VFX，因此不能作为物理设备或真人体验证据。"
+    }
+  },
+  "decisions": {
+    "interaction": "lock-is-equip",
+    "input": {
+      "tapMaxPx": 8,
+      "tapMaxMs": 250,
+      "reticleOffsetY": 60,
+      "minTargetCssPx": 44,
+      "strictPause": true
+    },
+    "actionQueue": [
+      "pickup",
+      "bountyAccept",
+      "equipment",
+      "consume",
+      "perk"
+    ],
+    "bounty": {
+      "enabled": true,
+      "enabledFromWave": 3,
+      "spawnChancePerWave": 0.55,
+      "markWindowSeconds": 8,
+      "hitRadiusPadding": 12,
+      "acceptEffects": {
+        "focusFire": true,
+        "enrage": {
+          "speedMul": 1.35,
+          "hpMul": 10
+        }
+      },
+      "rewards": {
+        "dropCount": 2,
+        "starWeightShift": 3,
+        "dropLifetimeMul": 0.6
+      }
+    },
+    "bountyIntent": "可不接；接单后集火并狂暴，成功掉2张肥而急奖励。标准目标画像接受率30–70%、完成率75–95%，确保既非伪选择也非免费奖励。",
+    "tuning": {
+      "boss": {
+        "hpBase": 55000,
+        "speedBase": 8
+      },
+      "reason": "速度作为截止线旋钮，同时约束通关率与胜利Boss时长；不改前8波注意力节奏。"
+    }
+  },
+  "runtimeSnapshot": {
+    "base": {
+      "input": {
+        "tapMaxPx": 8,
+        "tapMaxMs": 250,
+        "reticleOffsetY": 60,
+        "minTargetCssPx": 44,
+        "strictPause": true
+      },
+      "combat": {
+        "canvas": {
+          "width": 960,
+          "height": 600
+        },
+        "turret": {
+          "x": 480,
+          "y": 300
+        },
+        "hp": {
+          "max": 100
+        },
+        "defaults": {
+          "damage": 16,
+          "fireRate": 3.3,
+          "range": 430
+        },
+        "bullet": {
+          "speed": 620,
+          "life": 1.25,
+          "radius": 4,
+          "spread": 0.12,
+          "muzzleOffset": 24
+        },
+        "breakthroughDist": 55,
+        "dtCap": 0.033,
+        "vfx": {
+          "shootParticles": 4,
+          "killParticles": 12,
+          "breakthroughParticles": 10
+        }
+      },
+      "waves": {
+        "totalWaves": 9,
+        "enemyCountBase": 5,
+        "enemyCountPerWave": 3,
+        "firstSpawnDelay": 0.6,
+        "spawnInterval": {
+          "base": 5.6,
+          "perWave": 0.48,
+          "min": 1.35
+        },
+        "betweenWaves": 21,
+        "spawnMargin": 45,
+        "typeRoll": {
+          "tankBase": 0.2,
+          "tankPerWave": 0.025,
+          "fastThreshold": 0.47
+        },
+        "bossWave": 9
+      },
+      "enemies": {
+        "defaults": {
+          "enemySpeed": 1
+        },
+        "types": {
+          "normal": {
+            "label": "热情追求者",
+            "hpBase": 38,
+            "hpPerWave": 7,
+            "speedBase": 24,
+            "speedPerWave": 1.5,
+            "r": 16,
+            "color": "#f3b95f",
+            "damage": 8,
+            "xp": 1,
+            "sides": 4
+          },
+          "fast": {
+            "label": "急切追求者",
+            "hpBase": 23,
+            "hpPerWave": 5,
+            "speedBase": 42,
+            "speedPerWave": 2,
+            "r": 12,
+            "color": "#62d8ff",
+            "damage": 6,
+            "xp": 1,
+            "sides": 3
+          },
+          "tank": {
+            "label": "执着追求者",
+            "hpBase": 90,
+            "hpPerWave": 13,
+            "speedBase": 15,
+            "speedPerWave": 0.8,
+            "r": 22,
+            "color": "#ff7b86",
+            "damage": 14,
+            "xp": 2,
+            "sides": 6
+          },
+          "boss": {
+            "label": "命定追求者",
+            "hpBase": 55000,
+            "hpPerWave": 0,
+            "speedBase": 8,
+            "speedPerWave": 0,
+            "r": 35,
+            "color": "#c58aff",
+            "damage": 999,
+            "xp": 10,
+            "sides": 8
+          }
+        }
+      },
+      "progression": {
+        "xpNeedBase": 12,
+        "xpGrowth": 1.38,
+        "metaPowerMultiplier": 1,
+        "perks": [
+          {
+            "id": "damage",
+            "title": "高能弹芯",
+            "desc": "伤害 +15%",
+            "kind": "damagePct",
+            "value": 0.15
+          },
+          {
+            "id": "rate",
+            "title": "过载供能",
+            "desc": "射速 +12%",
+            "kind": "fireRatePct",
+            "value": 0.12
+          },
+          {
+            "id": "repair",
+            "title": "重整心防",
+            "desc": "私人空间恢复 20 点",
+            "kind": "heal",
+            "value": 20
+          },
+          {
+            "id": "damage2",
+            "title": "锐化弹头",
+            "desc": "伤害 +10%",
+            "kind": "damagePct",
+            "value": 0.1
+          },
+          {
+            "id": "rate2",
+            "title": "冷却回路",
+            "desc": "射速 +8%",
+            "kind": "fireRatePct",
+            "value": 0.08
+          },
+          {
+            "id": "repair2",
+            "title": "紧急修补",
+            "desc": "私人空间恢复 12 点",
+            "kind": "heal",
+            "value": 12
+          },
+          {
+            "id": "damage3",
+            "title": "聚焦校准",
+            "desc": "伤害 +20%",
+            "kind": "damagePct",
+            "value": 0.2
+          },
+          {
+            "id": "rate3",
+            "title": "超频协议",
+            "desc": "射速 +16%",
+            "kind": "fireRatePct",
+            "value": 0.16
+          },
+          {
+            "id": "repair3",
+            "title": "完整整备",
+            "desc": "私人空间恢复 30 点",
+            "kind": "heal",
+            "value": 30
+          }
+        ]
+      },
+      "economy": {
+        "maxStar": 3,
+        "mergeCopies": 2,
+        "equipThreshold": 2,
+        "equipMode": "lock",
+        "handSlots": 10,
+        "equipSlots": 0,
+        "maxLocked": 3,
+        "inRunSlotExpansion": false,
+        "equipDistinctTypes": true,
+        "feedEquipped": true,
+        "dropPool": {
+          "catalogSize": 12,
+          "activePoolSize": 5,
+          "selection": "run-loadout"
+        },
+        "dropTargeting": {
+          "enabled": true,
+          "nearCompletionWeight": 2.25
+        },
+        "dropStarPolicy": {
+          "normal": 1,
+          "bossStar2Chance": 1,
+          "bountyBossMax": 2,
+          "star2Share": 0.05
+        },
+        "drops": {
+          "pickupRadius": 34,
+          "chanceCap": 0.95
+        },
+        "defaults": {
+          "dropChance": 0.18,
+          "dropLifetime": 7.5
+        }
+      },
+      "bounty": {
+        "enabled": true,
+        "enabledFromWave": 3,
+        "spawnChancePerWave": 0.55,
+        "markWindowSeconds": 8,
+        "hitRadiusPadding": 12,
+        "acceptEffects": {
+          "focusFire": true,
+          "enrage": {
+            "speedMul": 1.35,
+            "hpMul": 10
+          }
+        },
+        "rewards": {
+          "dropCount": 2,
+          "starWeightShift": 3,
+          "dropLifetimeMul": 0.6
+        }
+      }
+    },
+    "variants": {
+      "easy": {
+        "runtimeId": "difficulty-easy",
+        "boss": {
+          "label": "命定追求者",
+          "hpBase": 42000,
+          "hpPerWave": 0,
+          "speedBase": 3,
+          "speedPerWave": 0,
+          "r": 35,
+          "color": "#c58aff",
+          "damage": 999,
+          "xp": 10,
+          "sides": 8
+        },
+        "bounty": {
+          "enabled": true,
+          "enabledFromWave": 3,
+          "spawnChancePerWave": 0.55,
+          "markWindowSeconds": 8,
+          "hitRadiusPadding": 12,
+          "acceptEffects": {
+            "focusFire": true,
+            "enrage": {
+              "speedMul": 1.4,
+              "hpMul": 12
+            }
+          },
+          "rewards": {
+            "dropCount": 2,
+            "starWeightShift": 3,
+            "dropLifetimeMul": 0.6
+          }
+        }
+      },
+      "hard": {
+        "runtimeId": "difficulty-hard",
+        "boss": {
+          "label": "命定追求者",
+          "hpBase": 75000,
+          "hpPerWave": 0,
+          "speedBase": 3.2,
+          "speedPerWave": 0,
+          "r": 35,
+          "color": "#c58aff",
+          "damage": 999,
+          "xp": 10,
+          "sides": 8
+        },
+        "bounty": {
+          "enabled": true,
+          "enabledFromWave": 3,
+          "spawnChancePerWave": 0.55,
+          "markWindowSeconds": 8,
+          "hitRadiusPadding": 12,
+          "acceptEffects": {
+            "focusFire": true,
+            "enrage": {
+              "speedMul": 1.4,
+              "hpMul": 12
+            }
+          },
+          "rewards": {
+            "dropCount": 2,
+            "starWeightShift": 3,
+            "dropLifetimeMul": 0.6
+          }
+        }
+      }
+    }
+  },
+  "results": [
+    {
+      "difficulty": "easy",
+      "profile": "fast",
+      "runs": 2000,
+      "winRate": 0.6935,
+      "wallDurationSecondsP50": 822.6499999999091,
+      "winningBossFightSecondsP50": 112.86666666656402,
+      "winningBossShareP50": 0.14186017002906579,
+      "expiredRate": 0.041069194699980424,
+      "dropsGeneratedP50": 59,
+      "effectivePickupsP50": 56,
+      "mergesPerRegularWave": 2.895,
+      "formed3StarAtBossEntryP50": 7,
+      "breatherShare": 0.207314706503822,
+      "actionsPerMinuteP50": 9.182261032800708,
+      "rolling3sCountP95": 3,
+      "rolling10sCountP95": 7,
+      "queueDelayP95Seconds": 0.7225016844943354,
+      "overlappingWindowShareP50": 0.34345751324418944,
+      "attentionExtraExpiredP50": 0,
+      "consumeActionsPerMinuteP50": 1.593727755680424,
+      "errorRateP50": 0.00847457627118644,
+      "bountyAcceptanceRate": 0.7325134511913912,
+      "bountyCompletionRate": 0.9366911507520111,
+      "bountyRewardCollectionRate": 0.957244212098581,
+      "bountyAcceptedBreaches": 0.181
+    },
+    {
+      "difficulty": "easy",
+      "profile": "target",
+      "runs": 2000,
+      "winRate": 0.6605,
+      "wallDurationSecondsP50": 833.3666666665661,
+      "winningBossFightSecondsP50": 111.39999999989868,
+      "winningBossShareP50": 0.1399736365133152,
+      "expiredRate": 0.08984867591424968,
+      "dropsGeneratedP50": 55,
+      "effectivePickupsP50": 51,
+      "mergesPerRegularWave": 2.706,
+      "formed3StarAtBossEntryP50": 6,
+      "breatherShare": 0.20766289626670245,
+      "actionsPerMinuteP50": 8.005987563105649,
+      "rolling3sCountP95": 2,
+      "rolling10sCountP95": 6,
+      "queueDelayP95Seconds": 1.3998711885869737,
+      "overlappingWindowShareP50": 0.3317787087936013,
+      "attentionExtraExpiredP50": 0,
+      "consumeActionsPerMinuteP50": 1.2995351650198328,
+      "errorRateP50": 0.0390625,
+      "bountyAcceptanceRate": 0.4188644926594777,
+      "bountyCompletionRate": 0.9106699751861043,
+      "bountyRewardCollectionRate": 0.8869209809264306,
+      "bountyAcceptedBreaches": 0.144
+    },
+    {
+      "difficulty": "easy",
+      "profile": "stressed",
+      "runs": 2000,
+      "winRate": 0.6335,
+      "wallDurationSecondsP50": 848.1333333332193,
+      "winningBossFightSecondsP50": 111.39999999989868,
+      "winningBossShareP50": 0.1390491100855825,
+      "expiredRate": 0.1852511137341507,
+      "dropsGeneratedP50": 52.5,
+      "effectivePickupsP50": 43,
+      "mergesPerRegularWave": 2.455,
+      "formed3StarAtBossEntryP50": 6,
+      "breatherShare": 0.20816573963092372,
+      "actionsPerMinuteP50": 6.807604357266321,
+      "rolling3sCountP95": 2,
+      "rolling10sCountP95": 5,
+      "queueDelayP95Seconds": 2.7181226736765254,
+      "overlappingWindowShareP50": 0.3169295169099281,
+      "attentionExtraExpiredP50": 2,
+      "consumeActionsPerMinuteP50": 0.9793199859294993,
+      "errorRateP50": 0.10975609756097561,
+      "bountyAcceptanceRate": 0.21637729981860584,
+      "bountyCompletionRate": 0.8904191616766467,
+      "bountyRewardCollectionRate": 0.7767316745124412,
+      "bountyAcceptedBreaches": 0.0915
+    },
+    {
+      "difficulty": "base",
+      "profile": "fast",
+      "runs": 2000,
+      "winRate": 0.2205,
+      "wallDurationSecondsP50": 809.649999999921,
+      "winningBossFightSecondsP50": 119.23333333322489,
+      "winningBossShareP50": 0.1494059863144727,
+      "expiredRate": 0.04091335010109977,
+      "dropsGeneratedP50": 50,
+      "effectivePickupsP50": 48,
+      "mergesPerRegularWave": 2.5548125,
+      "formed3StarAtBossEntryP50": 6,
+      "breatherShare": 0.21036925185649596,
+      "actionsPerMinuteP50": 7.526310866285373,
+      "rolling3sCountP95": 2,
+      "rolling10sCountP95": 5,
+      "queueDelayP95Seconds": 0.655314846335679,
+      "overlappingWindowShareP50": 0.2762135116615291,
+      "attentionExtraExpiredP50": 0,
+      "consumeActionsPerMinuteP50": 1.369973191639267,
+      "errorRateP50": 0.008620689655172414,
+      "bountyAcceptanceRate": 0.7619665326242054,
+      "bountyCompletionRate": 0.912836227442969,
+      "bountyRewardCollectionRate": 0.9580380455054084,
+      "bountyAcceptedBreaches": 0.256
+    },
+    {
+      "difficulty": "base",
+      "profile": "target",
+      "runs": 2000,
+      "winRate": 0.189,
+      "wallDurationSecondsP50": 817.0166666665809,
+      "winningBossFightSecondsP50": 117.649999999893,
+      "winningBossShareP50": 0.14761607146007605,
+      "expiredRate": 0.08910901578557051,
+      "dropsGeneratedP50": 47,
+      "effectivePickupsP50": 43,
+      "mergesPerRegularWave": 2.357625,
+      "formed3StarAtBossEntryP50": 6,
+      "breatherShare": 0.211556522486221,
+      "actionsPerMinuteP50": 6.529672575402224,
+      "rolling3sCountP95": 2,
+      "rolling10sCountP95": 5,
+      "queueDelayP95Seconds": 1.1300173038006818,
+      "overlappingWindowShareP50": 0.2531548467534981,
+      "attentionExtraExpiredP50": 0,
+      "consumeActionsPerMinuteP50": 1.1063767470231771,
+      "errorRateP50": 0.037855266300453785,
+      "bountyAcceptanceRate": 0.4474986972381449,
+      "bountyCompletionRate": 0.8972343522561863,
+      "bountyRewardCollectionRate": 0.8890330953926022,
+      "bountyAcceptedBreaches": 0.1765
+    },
+    {
+      "difficulty": "base",
+      "profile": "stressed",
+      "runs": 2000,
+      "winRate": 0.1525,
+      "wallDurationSecondsP50": 827.6833333332379,
+      "winningBossFightSecondsP50": 117.29999999989332,
+      "winningBossShareP50": 0.14657994125040325,
+      "expiredRate": 0.17644464548230238,
+      "dropsGeneratedP50": 44,
+      "effectivePickupsP50": 36,
+      "mergesPerRegularWave": 2.103625,
+      "formed3StarAtBossEntryP50": 5,
+      "breatherShare": 0.2128210124919847,
+      "actionsPerMinuteP50": 5.576788459369522,
+      "rolling3sCountP95": 2,
+      "rolling10sCountP95": 4,
+      "queueDelayP95Seconds": 1.8853359885234617,
+      "overlappingWindowShareP50": 0.22306010589010095,
+      "attentionExtraExpiredP50": 1,
+      "consumeActionsPerMinuteP50": 0.8320012699358467,
+      "errorRateP50": 0.1076923076923077,
+      "bountyAcceptanceRate": 0.2199582027168234,
+      "bountyCompletionRate": 0.8586698337292161,
+      "bountyRewardCollectionRate": 0.7614107883817427,
+      "bountyAcceptedBreaches": 0.119
+    },
+    {
+      "difficulty": "hard",
+      "profile": "fast",
+      "runs": 2000,
+      "winRate": 0.083,
+      "wallDurationSecondsP50": 809.983333333254,
+      "winningBossFightSecondsP50": 153.6999999998602,
+      "winningBossShareP50": 0.19055911857370547,
+      "expiredRate": 0.04057039780550545,
+      "dropsGeneratedP50": 47,
+      "effectivePickupsP50": 45,
+      "mergesPerRegularWave": 2.3644375,
+      "formed3StarAtBossEntryP50": 6,
+      "breatherShare": 0.2005426491485291,
+      "actionsPerMinuteP50": 6.727778864973546,
+      "rolling3sCountP95": 2,
+      "rolling10sCountP95": 5,
+      "queueDelayP95Seconds": 0.6235032019003084,
+      "overlappingWindowShareP50": 0.23496216070706738,
+      "attentionExtraExpiredP50": 0,
+      "consumeActionsPerMinuteP50": 1.258016773557105,
+      "errorRateP50": 0.009523809523809525,
+      "bountyAcceptanceRate": 0.7982910409114449,
+      "bountyCompletionRate": 0.6715861174180993,
+      "bountyRewardCollectionRate": 0.9590678580053127,
+      "bountyAcceptedBreaches": 1.0125
+    },
+    {
+      "difficulty": "hard",
+      "profile": "target",
+      "runs": 2000,
+      "winRate": 0.0735,
+      "wallDurationSecondsP50": 815.4666666665823,
+      "winningBossFightSecondsP50": 151.03333333319597,
+      "winningBossShareP50": 0.18523342423364186,
+      "expiredRate": 0.08990922572237452,
+      "dropsGeneratedP50": 44,
+      "effectivePickupsP50": 40,
+      "mergesPerRegularWave": 2.2084375,
+      "formed3StarAtBossEntryP50": 5,
+      "breatherShare": 0.20152782541032344,
+      "actionsPerMinuteP50": 6.0423336517992965,
+      "rolling3sCountP95": 2,
+      "rolling10sCountP95": 4,
+      "queueDelayP95Seconds": 1.0565856494385026,
+      "overlappingWindowShareP50": 0.2245519370011588,
+      "attentionExtraExpiredP50": 0,
+      "consumeActionsPerMinuteP50": 1.0554016127333634,
+      "errorRateP50": 0.03908836261777438,
+      "bountyAcceptanceRate": 0.48920395421436,
+      "bountyCompletionRate": 0.7022068598776922,
+      "bountyRewardCollectionRate": 0.882809541840212,
+      "bountyAcceptedBreaches": 0.56
+    },
+    {
+      "difficulty": "hard",
+      "profile": "stressed",
+      "runs": 2000,
+      "winRate": 0.0455,
+      "wallDurationSecondsP50": 820.7333333332442,
+      "winningBossFightSecondsP50": 149.0333333331978,
+      "winningBossShareP50": 0.18426603796982116,
+      "expiredRate": 0.17851971519176688,
+      "dropsGeneratedP50": 42,
+      "effectivePickupsP50": 34,
+      "mergesPerRegularWave": 1.969125,
+      "formed3StarAtBossEntryP50": 4,
+      "breatherShare": 0.2040390380332087,
+      "actionsPerMinuteP50": 5.206805861973169,
+      "rolling3sCountP95": 2,
+      "rolling10sCountP95": 4,
+      "queueDelayP95Seconds": 1.689999640551815,
+      "overlappingWindowShareP50": 0.20000000000000961,
+      "attentionExtraExpiredP50": 1,
+      "consumeActionsPerMinuteP50": 0.8173543400640664,
+      "errorRateP50": 0.10810810810810811,
+      "bountyAcceptanceRate": 0.2315032679738562,
+      "bountyCompletionRate": 0.6216826651609261,
+      "bountyRewardCollectionRate": 0.7615803814713896,
+      "bountyAcceptedBreaches": 0.335
+    }
+  ],
+  "evidence": {
+    "workbook": "outputs/p4_1_20260712/ProjectVL_P4.1_注意力压力工作簿_v3.xlsx",
+    "formalSummary": "outputs/p4_1_20260712/P4.1_attention_formal_18000.json",
+    "formalCsv": "outputs/p4_1_20260712/P4.1_attention_formal_18000.csv",
+    "priorP4Workbook": "outputs/p4_20260712/ProjectVL_P4_数值设计工作簿_v2.xlsx"
+  }
+}
