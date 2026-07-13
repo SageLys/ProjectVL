@@ -9,6 +9,8 @@ export interface CombatConfig {
   defaults: { damage: number; fireRate: number; range: number };
   bullet: { speed: number; life: number; radius: number; spread: number; muzzleOffset: number };
   breakthroughDist: number;
+  /** 遥测危险区在突破线外额外延伸的宽度（像素）；不参与战斗判定。 */
+  dangerZoneWidth: number;
   dtCap: number;
   vfx: { shootParticles: number; killParticles: number; breakthroughParticles: number };
 }
@@ -110,7 +112,8 @@ export interface TunerRange {
   step: number;
 }
 
-export type TunerConfig = Record<'damage' | 'fireRate' | 'range' | 'dropChance' | 'dropLifetime' | 'enemySpeed', TunerRange>;
+/** key 为面板参数的完整配置路径（例如 `combat.defaults.damage`）。 */
+export type TunerConfig = Record<string, TunerRange>;
 
 export type ConfirmStyle = 'bubble' | 'hold-ring';
 export type HoldOrDbl = 'double-tap' | 'long-press';

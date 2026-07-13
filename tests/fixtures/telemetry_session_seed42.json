@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "startedAt": "2026-07-13T00:00:00.000Z",
+    "exportedAt": "2026-07-13T00:01:40.000Z",
+    "config": {},
+    "presetName": "seed42_acceptance",
+    "seed": 42,
+    "gitCommit": "fixture"
+  },
+  "events": [
+    { "type": "waveStart", "at": 0, "wave": 1 },
+    { "type": "spawn", "at": 5, "wave": 1, "enemyId": 1 },
+    { "type": "dangerEnter", "at": 18, "wave": 1, "enemyId": 1, "visibleSeconds": 2 },
+    { "type": "kill", "at": 20, "wave": 1, "enemyId": 1, "distance": 50, "range": 100 },
+    { "type": "dropLanded", "at": 25, "wave": 1, "dropId": 1 },
+    { "type": "pickup", "at": 26, "wave": 1, "dropId": 1 },
+    { "type": "mergeOpportunity", "at": 26, "wave": 1 },
+    { "type": "perkPopup", "at": 28, "wave": 1 },
+    { "type": "waveCleared", "at": 30, "wave": 1 }
+  ],
+  "samples": [
+    { "at": 0, "wave": 1, "enemies": 0 },
+    { "at": 5, "wave": 1, "enemies": 2 },
+    { "at": 10, "wave": 1, "enemies": 4 },
+    { "at": 15, "wave": 1, "enemies": 6 },
+    { "at": 20, "wave": 1, "enemies": 8 },
+    { "at": 25, "wave": 1, "enemies": 4 },
+    { "at": 30, "wave": 1, "enemies": 0 }
+  ],
+  "inputs": [
+    { "type": "pickupClick", "at": 26, "wave": 1 },
+    { "type": "dragDrop", "at": 27, "wave": 1 },
+    { "type": "perkSelect", "at": 29, "wave": 1 }
+  ]
+}

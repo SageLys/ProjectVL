@@ -45,25 +45,6 @@
     </section>
   </main>
 
-  <details class="dev-tools">
-    <summary>开发调参</summary>
-    <div class="dev-tools-body">
-      <div class="stats">
-        <span>伤害 <b id="damageStat">16</b></span><span>射速 <b id="rateStat">3.3/s</b></span><span>弹丸 <b id="multiStat">1</b></span>
-      </div>
-      <div class="tuner">
-        <label>基础伤害 <output id="damageCtlVal">16</output><input id="damageCtl" data-testid="damage-control" type="range" min="6" max="40" value="16" step="1"></label>
-        <label>每秒攻击 <output id="rateCtlVal">3.3</output><input id="rateCtl" data-testid="rate-control" type="range" min="1" max="10" value="3.3" step="0.1"></label>
-        <label>攻击射程 <output id="rangeCtlVal">320</output><input id="rangeCtl" data-testid="range-control" type="range" min="100" max="420" value="320" step="10"></label>
-        <label>掉落概率 <output id="dropCtlVal">50%</output><input id="dropCtl" data-testid="drop-control" type="range" min="0" max="100" value="50" step="5"></label>
-        <label>存在时间 <output id="lifeCtlVal">6.0秒</output><input id="lifeCtl" data-testid="life-control" type="range" min="2" max="15" value="6" step="0.5"></label>
-        <label>追求者速度 <output id="speedCtlVal">100%</output><input id="speedCtl" data-testid="speed-control" type="range" min="40" max="180" value="100" step="10"></label>
-        <label>配置 Variant <select id="variantSel" data-testid="variant-select"></select></label>
-      </div>
-      <button class="btn" id="resetTunerBtn">恢复默认参数</button>
-    </div>
-  </details>
-
   <div class="modal" id="levelModal"><div class="modal-card"><h2>经验升级</h2><p>选择一个即时强化，然后继续战斗。</p><div class="choices">
     <button class="choice" data-perk="damage"><b>高能弹芯</b>基础伤害 +20%</button><button class="choice" data-perk="rate"><b>过载供能</b>射速 +15%</button><button class="choice" data-perk="repair"><b>重整心防</b>私人空间恢复 20 点</button>
   </div></div></div>

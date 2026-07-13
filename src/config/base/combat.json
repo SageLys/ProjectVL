@@ -5,6 +5,7 @@
   "defaults": { "damage": 16, "fireRate": 3.3, "range": 285 },
   "bullet": { "speed": 465, "life": 1.6, "radius": 4, "spread": 0.12, "muzzleOffset": 24 },
   "breakthroughDist": 48,
+  "dangerZoneWidth": 72,
   "dtCap": 0.033,
   "vfx": { "shootParticles": 4, "killParticles": 12, "breakthroughParticles": 10 }
 }

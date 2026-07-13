@@ -6,6 +6,10 @@ function el<T extends Element>(sel: string): T {
   return node as unknown as T;
 }
 
+function maybeEl<T extends Element>(sel: string): T | null {
+  return document.querySelector<T>(sel);
+}
+
 export function getDomRefs() {
   return {
     canvas: el<HTMLCanvasElement>('#game'),
@@ -21,9 +25,9 @@ export function getDomRefs() {
     levelText: el<HTMLElement>('#levelText'),
     waveText: el<HTMLElement>('#waveText'),
     totalWavesText: el<HTMLElement>('#totalWavesText'),
-    damageStat: el<HTMLElement>('#damageStat'),
-    rateStat: el<HTMLElement>('#rateStat'),
-    multiStat: el<HTMLElement>('#multiStat'),
+    damageStat: maybeEl<HTMLElement>('#damageStat'),
+    rateStat: maybeEl<HTMLElement>('#rateStat'),
+    multiStat: maybeEl<HTMLElement>('#multiStat'),
     cards: el<HTMLElement>('#cards'),
     equipmentBar: el<HTMLElement>('#equipmentBar'),
     equipmentHint: el<HTMLElement>('#equipmentHint'),
@@ -43,20 +47,6 @@ export function getDomRefs() {
     resultMerges: el<HTMLElement>('#resultMerges'),
     resultUses: el<HTMLElement>('#resultUses'),
     dropTelemetry: el<HTMLElement>('#dropTelemetry'),
-    damageCtl: el<HTMLInputElement>('#damageCtl'),
-    damageCtlVal: el<HTMLElement>('#damageCtlVal'),
-    rateCtl: el<HTMLInputElement>('#rateCtl'),
-    rateCtlVal: el<HTMLElement>('#rateCtlVal'),
-    rangeCtl: el<HTMLInputElement>('#rangeCtl'),
-    rangeCtlVal: el<HTMLElement>('#rangeCtlVal'),
-    dropCtl: el<HTMLInputElement>('#dropCtl'),
-    dropCtlVal: el<HTMLElement>('#dropCtlVal'),
-    lifeCtl: el<HTMLInputElement>('#lifeCtl'),
-    lifeCtlVal: el<HTMLElement>('#lifeCtlVal'),
-    speedCtl: el<HTMLInputElement>('#speedCtl'),
-    speedCtlVal: el<HTMLElement>('#speedCtlVal'),
-    variantSel: el<HTMLSelectElement>('#variantSel'),
-    resetTunerBtn: el<HTMLButtonElement>('#resetTunerBtn'),
     perkButtons: Array.from(document.querySelectorAll<HTMLButtonElement>('[data-perk]')),
   };
 }

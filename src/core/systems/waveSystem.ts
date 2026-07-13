@@ -57,3 +57,29 @@ export function tickBetween(state: GameState, config: Config, rng: Rng, dt: numb
   }
   return [];
 }
+
+/** 调试入口：清理战场瞬态并直接开启指定波；不改变卡牌、成长、HP 与经济状态。 */
+export function jumpToWave(state: GameState, config: Config, rng: Rng, targetWave: number): GameEvent[] {
+  const wave = Math.max(1, Math.min(cfg.waves.totalWaves, Math.trunc(targetWave)));
+  state.enemies.length = 0;
+  state.bullets.length = 0;
+  state.particles.length = 0;
+  state.groundDrops.length = 0;
+  state.zones.length = 0;
+  state.summons.length = 0;
+  state.intervalClocks = {};
+  state.spawnLeft = 0;
+  state.spawnTimer = 0;
+  state.between = 0;
+  state.waveClearPending = false;
+  state.shotCd = 0;
+  state.mode = 'playing';
+  state.paused = false;
+  state.wave = wave - 1;
+  return startNextWave(state, config, rng);
+}
+
+/** 调试入口：按当前波号重新清场开波。尚未开局时等价于开启第 1 波。 */
+export function restartWave(state: GameState, config: Config, rng: Rng): GameEvent[] {
+  return jumpToWave(state, config, rng, Math.max(1, state.wave));
+}

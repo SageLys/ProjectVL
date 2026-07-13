@@ -1,0 +1,75 @@
+export type TunerGroup = 'waves' | 'combat' | 'enemies' | 'drops' | 'p2';
+
+export interface TunerParam {
+  path: string;
+  label: string;
+  group: TunerGroup;
+  waveDeferred?: boolean;
+}
+
+function enemyParams(type: 'normal' | 'fast' | 'tank' | 'boss', label: string): TunerParam[] {
+  const prefix = `enemies.types.${type}`;
+  return [
+    ['hpBase', '基础 HP'], ['hpPerWave', '每波 HP'], ['speedBase', '基础速度'],
+    ['speedPerWave', '每波速度'], ['damage', '突破伤害'], ['r', '半径'], ['xp', '经验'],
+  ].map(([key, suffix]) => ({ path: `${prefix}.${key}`, label: `${label} · ${suffix}`, group: 'enemies' }));
+}
+
+/** §2 A/B/C/D：主区为 P0/P1，P2 统一收入折叠区。 */
+export const TUNER_PARAMS: TunerParam[] = [
+  { path: 'waves.enemyCountBase', label: '基础出怪数', group: 'waves', waveDeferred: true },
+  { path: 'waves.enemyCountPerWave', label: '每波追加数', group: 'waves', waveDeferred: true },
+  { path: 'waves.spawnInterval.base', label: '出怪间隔 · 基础', group: 'waves', waveDeferred: true },
+  { path: 'waves.spawnInterval.perWave', label: '出怪间隔 · 每波缩短', group: 'waves', waveDeferred: true },
+  { path: 'waves.spawnInterval.min', label: '出怪间隔 · 下限', group: 'waves', waveDeferred: true },
+  { path: 'waves.firstSpawnDelay', label: '首怪延迟', group: 'waves', waveDeferred: true },
+  { path: 'waves.betweenWaves', label: '波间休息', group: 'waves', waveDeferred: true },
+  { path: 'waves.totalWaves', label: '总波数', group: 'waves', waveDeferred: true },
+  { path: 'waves.bossWave', label: 'Boss 波', group: 'waves', waveDeferred: true },
+  { path: 'waves.spawnMargin', label: '出生边距', group: 'waves', waveDeferred: true },
+  { path: 'waves.typeRoll.tankBase', label: '重装概率 · 基础', group: 'waves', waveDeferred: true },
+  { path: 'waves.typeRoll.tankPerWave', label: '重装概率 · 每波', group: 'waves', waveDeferred: true },
+  { path: 'waves.typeRoll.fastThreshold', label: '高速阈值', group: 'waves', waveDeferred: true },
+
+  { path: 'combat.defaults.damage', label: '基础伤害', group: 'combat' },
+  { path: 'combat.defaults.fireRate', label: '每秒攻击', group: 'combat' },
+  { path: 'combat.defaults.range', label: '攻击射程', group: 'combat' },
+  { path: 'combat.bullet.speed', label: '弹速', group: 'combat' },
+  { path: 'combat.bullet.life', label: '弹丸寿命', group: 'combat' },
+  { path: 'combat.bullet.spread', label: '散布（弧度）', group: 'combat' },
+  { path: 'combat.hp.max', label: '心防上限', group: 'combat' },
+  { path: 'combat.breakthroughDist', label: '突破线距离', group: 'combat' },
+  { path: 'combat.dangerZoneWidth', label: '危险区宽度', group: 'combat' },
+
+  { path: 'enemies.defaults.enemySpeed', label: '全局敌人速度倍率', group: 'enemies' },
+  ...enemyParams('normal', '普通'),
+  ...enemyParams('fast', '高速'),
+  ...enemyParams('tank', '重装'),
+  ...enemyParams('boss', 'Boss'),
+
+  { path: 'economy.defaults.dropChance', label: '基础掉落率', group: 'drops' },
+  { path: 'economy.defaults.dropLifetime', label: '掉落存在时间', group: 'drops' },
+
+  { path: 'combat.bullet.radius', label: 'P2 · 弹丸半径', group: 'p2' },
+  { path: 'combat.bullet.muzzleOffset', label: 'P2 · 炮口偏移', group: 'p2' },
+  { path: 'combat.vfx.shootParticles', label: 'P2 · 开火粒子数', group: 'p2' },
+  { path: 'combat.vfx.killParticles', label: 'P2 · 击杀粒子数', group: 'p2' },
+  { path: 'combat.vfx.breakthroughParticles', label: 'P2 · 突破粒子数', group: 'p2' },
+  { path: 'economy.drops.pickupRadius', label: 'P2 · 拾取半径', group: 'p2' },
+  { path: 'economy.drops.chanceCap', label: 'P2 · 掉率上限', group: 'p2' },
+  { path: 'economy.dropStarPolicy.star2Share', label: 'P2 · 二星掉落占比', group: 'p2' },
+];
+
+export function getNumberAt(root: unknown, path: string): number {
+  let value: unknown = root;
+  for (const key of path.split('.')) value = (value as Record<string, unknown>)[key];
+  if (typeof value !== 'number') throw new Error(`调参路径不是数值: ${path}`);
+  return value;
+}
+
+export function setNumberAt(root: unknown, path: string, value: number): void {
+  const keys = path.split('.');
+  let target = root as Record<string, unknown>;
+  for (const key of keys.slice(0, -1)) target = target[key] as Record<string, unknown>;
+  target[keys[keys.length - 1]] = value;
+}

@@ -16,6 +16,12 @@ export interface DebugApi {
   setConfig(patch: Partial<Config>): void;
   /** 当前生效的 variant 名单。 */
   getVariants(): string[];
+  jumpToWave(wave: number): void;
+  restartWave(): void;
+  setInvincible(value: boolean): void;
+  setTimeScale(scale: number): void;
+  setSeed(seed: number): void;
+  getDebugSettings(): { seed: number; timeScale: number; invincible: boolean };
 }
 
 declare global {
@@ -28,4 +34,16 @@ declare global {
 export function exposeDebugApi(api: DebugApi): void {
   if (!import.meta.env.DEV) return;
   window.__game = api;
+}
+
+/** mulberry32：32 位整数 seed 对应稳定的 [0,1) 序列。 */
+export function createSeededRng(seed: number): () => number {
+  let value = Math.trunc(seed) >>> 0;
+  return () => {
+    value = (value + 0x6d2b79f5) >>> 0;
+    let t = value;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 }
