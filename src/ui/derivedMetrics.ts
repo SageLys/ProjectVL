@@ -59,7 +59,8 @@ export function deriveMetrics(game: GameConfig, runtime: Config): DerivedMetrics
     const wave = index + 1;
     const interval = Math.max(game.waves.spawnInterval.min, game.waves.spawnInterval.base - wave * game.waves.spawnInterval.perWave);
     const count = game.waves.enemyCountBase + wave * game.waves.enemyCountPerWave;
-    const tail = Math.max(...TYPES.map(type => {
+    const tailTypes = game.waves.bossWaves.includes(wave) ? TYPES : TYPES.filter(type => type !== 'boss');
+    const tail = Math.max(...tailTypes.map(type => {
       const def = game.enemies.types[type];
       const hp = def.hpBase + wave * def.hpPerWave;
       const speed = (def.speedBase + wave * def.speedPerWave) * runtime.enemySpeed;

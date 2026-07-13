@@ -1,8 +1,8 @@
-import { activeVariants, cfg, VARIANTS } from '../config';
+import { activeVariants, cfg, normalizeBossWaves, parseBossWavesInput, VARIANTS } from '../config';
 import './tunerPanel.css';
 import type { Config } from '../core/types';
 import { deriveMetrics } from './derivedMetrics';
-import { ALL_TUNER_PARAMS, getNumberAt, setNumberAt, type TunerGroup } from './tunerSchema';
+import { ALL_TUNER_PARAMS, formatBossWaves, getNumberAt, migratePresetValues, setNumberAt, type TunerGroup } from './tunerSchema';
 
 const PRESET_KEY = 'projectvl.tuner.presets.v2';
 
@@ -55,7 +55,10 @@ const GROUPS: { key: TunerGroup; title: string; note?: string }[] = [
 function readPresets(): Preset[] {
   try {
     const parsed = JSON.parse(localStorage.getItem(PRESET_KEY) ?? '[]') as unknown;
-    return Array.isArray(parsed) ? parsed.filter((item): item is Preset => typeof item === 'object' && item !== null && 'values' in item) : [];
+    return Array.isArray(parsed)
+      ? parsed.filter((item): item is Preset => typeof item === 'object' && item !== null && 'values' in item)
+        .map(preset => ({ ...preset, values: migratePresetValues(preset.values) }))
+      : [];
   } catch { return []; }
 }
 
@@ -75,6 +78,10 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
   const baseline = Object.fromEntries(ALL_TUNER_PARAMS.map(param => [param.path, getNumberAt(cfg, param.path)]));
   const baselineSpawnMode = cfg.waves.spawnMode;
   const pendingWaves = new Map<string, number>();
+  const baselineBossWaves = [...cfg.waves.bossWaves];
+  let pendingBossWaves: number[] | null = null;
+  let bossWavesDraft = formatBossWaves(cfg.waves.bossWaves);
+  let bossWavesError = '';
   let pendingSpawnMode: typeof cfg.waves.spawnMode | null = null;
   let diffPaths = new Set<string>();
   let presets = readPresets();
@@ -84,7 +91,8 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
     const controls = ALL_TUNER_PARAMS.filter(param => param.group === group.key)
       .map(param => controlHtml(param.path, param.label, ALL_TUNER_PARAMS.indexOf(param))).join('');
     const mode = group.key === 'waves' ? '<label class="tuner-control" data-path="waves.spawnMode"><span>出怪模式</span><select id="spawnModeInput"><option value="interval">interval</option><option value="budget">budget</option></select></label>' : '';
-    return `<section class="tuner-group"><h3>${group.title}${group.note ? `<small>${group.note}</small>` : ''}</h3><div class="tuner-grid">${mode}${controls}</div></section>`;
+    const bossControl = group.key === 'waves' ? '<label class="tuner-control boss-waves-control" data-path="waves.bossWaves"><span>Boss 波次</span><output id="bossWavesError"></output><input id="bossWavesInput" type="text" placeholder="3, 5, 8"><small>多个波次使用逗号分隔；留空表示无 Boss</small></label>' : '';
+    return `<section class="tuner-group"><h3>${group.title}${group.note ? `<small>${group.note}</small>` : ''}</h3><div class="tuner-grid">${mode}${bossControl}${controls}</div></section>`;
   }).join('');
   const p2 = ALL_TUNER_PARAMS.filter(param => param.group === 'p2')
     .map(param => controlHtml(param.path, param.label, ALL_TUNER_PARAMS.indexOf(param))).join('');
@@ -111,9 +119,12 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
 
   function displayedValue(path: string): number { return pendingWaves.get(path) ?? getNumberAt(cfg, path); }
 
+  function displayedBossWaves(): number[] { return pendingBossWaves ? [...pendingBossWaves] : [...cfg.waves.bossWaves]; }
+
   function metricConfig() {
     const draft = structuredClone(cfg);
     for (const [path, value] of pendingWaves) setNumberAt(draft, path, value);
+    draft.waves.bossWaves = displayedBossWaves();
     if (pendingSpawnMode !== null) draft.waves.spawnMode = pendingSpawnMode;
     return draft;
   }
@@ -149,13 +160,25 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
       setImmediate(path, value);
       if (path.startsWith('waves.')) hooks.onWaveConfigApplied([path]);
     }
+    if (path === 'waves.totalWaves') reconcileBossWaves(value);
   }
 
   function snapshot(): Record<string, number | string> {
     return Object.fromEntries([
       ['waves.spawnMode', pendingSpawnMode ?? cfg.waves.spawnMode],
       ...ALL_TUNER_PARAMS.map(param => [param.path, displayedValue(param.path)] as const),
+      ['waves.bossWaves', formatBossWaves(displayedBossWaves())],
     ]);
+  }
+
+  function reconcileBossWaves(totalWaves: number): void {
+    const current = displayedBossWaves();
+    const next = normalizeBossWaves(current, totalWaves);
+    if (next.length === current.length && next.every((wave, index) => wave === current[index])) return;
+    bossWavesDraft = formatBossWaves(next);
+    bossWavesError = `${current.filter(wave => wave > totalWaves).join(', ')} 已移除（超出新的总波数）`;
+    if (hooks.isWaveActive()) pendingBossWaves = next;
+    else cfg.waves.bossWaves = [...next];
   }
 
   function updatePresetOptions(): void {
@@ -177,6 +200,12 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
     mode.value = pendingSpawnMode ?? cfg.waves.spawnMode;
     mode.closest<HTMLElement>('.tuner-control')!.classList.toggle('pending', pendingSpawnMode !== null);
     mode.closest<HTMLElement>('.tuner-control')!.classList.toggle('diff', diffPaths.has('waves.spawnMode'));
+    const bossInput = root.querySelector<HTMLInputElement>('#bossWavesInput')!;
+    bossInput.value = bossWavesDraft;
+    const bossControl = bossInput.closest<HTMLElement>('.tuner-control')!;
+    bossControl.querySelector<HTMLOutputElement>('#bossWavesError')!.textContent = bossWavesError;
+    bossControl.classList.toggle('pending', pendingBossWaves !== null);
+    bossControl.classList.toggle('diff', diffPaths.has('waves.bossWaves'));
     root.querySelector<HTMLInputElement>('#seedInput')!.value = String(hooks.debug.getSeed());
     const scale = hooks.debug.getTimeScale();
     root.querySelector<HTMLInputElement>('#timeScaleInput')!.value = String(scale);
@@ -186,10 +215,15 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
   }
 
   function applyPendingWaveChanges(): void {
-    if (!pendingWaves.size && pendingSpawnMode === null) return;
+    if (!pendingWaves.size && pendingSpawnMode === null && pendingBossWaves === null) return;
     const paths = [...pendingWaves.keys()];
     for (const [path, value] of pendingWaves) setNumberAt(cfg, path, value);
     pendingWaves.clear();
+    if (pendingBossWaves !== null) {
+      cfg.waves.bossWaves = [...pendingBossWaves];
+      pendingBossWaves = null;
+      paths.push('waves.bossWaves');
+    }
     if (pendingSpawnMode !== null) {
       cfg.waves.spawnMode = pendingSpawnMode;
       pendingSpawnMode = null;
@@ -216,6 +250,26 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
     diffPaths.delete('waves.spawnMode');
     syncInputs();
   });
+  root.querySelector<HTMLInputElement>('#bossWavesInput')!.addEventListener('input', event => {
+    const input = event.currentTarget as HTMLInputElement;
+    bossWavesDraft = input.value;
+    const result = parseBossWavesInput(input.value, getNumberAt(cfg, 'waves.totalWaves'));
+    if (result.invalid.length) {
+      bossWavesError = `无效波次：${result.invalid.join(', ')}`;
+      syncInputs();
+      return;
+    }
+    bossWavesError = '';
+    if (hooks.isWaveActive()) pendingBossWaves = [...result.values];
+    else {
+      pendingBossWaves = null;
+      cfg.waves.bossWaves = [...result.values];
+      hooks.onWaveConfigApplied(['waves.bossWaves']);
+    }
+    bossWavesDraft = formatBossWaves(result.values);
+    diffPaths.delete('waves.bossWaves');
+    syncInputs();
+  });
 
   const variantSel = root.querySelector<HTMLSelectElement>('#variantSel')!;
   variantSel.innerHTML = ['', ...Object.keys(VARIANTS)].map(name => `<option value="${name}"${(name === '' ? activeVariants.length === 0 : activeVariants.includes(name)) ? ' selected' : ''}>${name || 'base（默认）'}</option>`).join('');
@@ -230,6 +284,10 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
     diffPaths.clear();
     if (hooks.isWaveActive()) pendingSpawnMode = baselineSpawnMode;
     else cfg.waves.spawnMode = baselineSpawnMode;
+    bossWavesDraft = formatBossWaves(baselineBossWaves);
+    bossWavesError = '';
+    if (hooks.isWaveActive()) pendingBossWaves = [...baselineBossWaves];
+    else cfg.waves.bossWaves = [...baselineBossWaves];
     for (const param of ALL_TUNER_PARAMS) setParam(param.path, baseline[param.path]);
     syncInputs(); hooks.onReset();
   });
@@ -262,15 +320,26 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
   root.querySelector('#loadPresetBtn')!.addEventListener('click', () => {
     const preset = presets[Number(presetSel.value)]; if (!preset) return;
     activePresetName = preset.name;
+    const values = migratePresetValues(preset.values);
     const before = snapshot();
-    diffPaths = new Set(Object.keys(preset.values).filter(path => before[path] !== preset.values[path]));
-    const mode = preset.values['waves.spawnMode'];
+    diffPaths = new Set(Object.keys(values).filter(path => before[path] !== values[path]));
+    const mode = values['waves.spawnMode'];
     if (mode === 'interval' || mode === 'budget') {
       if (hooks.isWaveActive()) pendingSpawnMode = mode; else cfg.waves.spawnMode = mode;
     }
     for (const param of ALL_TUNER_PARAMS) {
-      const value = preset.values[param.path];
+      const value = values[param.path];
       if (typeof value === 'number') setParam(param.path, value);
+    }
+    const bossValue = values['waves.bossWaves'];
+    if (typeof bossValue === 'string') {
+      const result = parseBossWavesInput(bossValue, cfg.waves.totalWaves);
+      if (result.invalid.length) bossWavesError = `Preset 中包含无效 Boss 波次：${result.invalid.join(', ')}`;
+      else {
+        bossWavesDraft = formatBossWaves(result.values);
+        if (hooks.isWaveActive()) pendingBossWaves = [...result.values];
+        else cfg.waves.bossWaves = [...result.values];
+      }
     }
     syncInputs();
   });

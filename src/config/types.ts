@@ -34,7 +34,7 @@ export interface WavesConfig {
   betweenWaves: number;
   spawnMargin: number;
   typeRoll: { tankBase: number; tankPerWave: number; fastThreshold: number };
-  bossWave: number;
+  bossWaves: number[];
 }
 
 export interface EnemyDef {

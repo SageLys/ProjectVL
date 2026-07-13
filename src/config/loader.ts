@@ -12,6 +12,34 @@ import devShort from '../config/variants/dev-short.json';
 import type { DeepPartial, GameConfig } from './types';
 import { validateSkillsConfig } from './skillValidator';
 
+/** 将配置中的 Boss 波次限制为可达、唯一且升序的整数列表。 */
+export function normalizeBossWaves(values: readonly number[], totalWaves: number): number[] {
+  return [...new Set(values)]
+    .filter(value => Number.isInteger(value) && value >= 1 && value <= totalWaves)
+    .sort((a, b) => a - b);
+}
+
+export interface BossWavesParseResult {
+  values: number[];
+  invalid: string[];
+}
+
+/** 解析调参面板的逗号分隔输入；空输入表示本局没有 Boss。 */
+export function parseBossWavesInput(input: string, totalWaves: number): BossWavesParseResult {
+  const text = input.trim();
+  if (!text) return { values: [], invalid: [] };
+  const tokens = text.replace(/，/g, ',').split(',').map((token: string) => token.trim());
+  const invalid: string[] = [];
+  const values: number[] = [];
+  for (const token of tokens) {
+    const value = Number(token);
+    if (!token || !Number.isFinite(value) || !Number.isInteger(value) || value < 1 || value > totalWaves) {
+      invalid.push(token || '空值');
+    } else values.push(value);
+  }
+  return { values: normalizeBossWaves(values, totalWaves), invalid };
+}
+
 /** 已注册 variant。新增覆盖文件后在此登记（key = URL 参数名）。 */
 export const VARIANTS: Record<string, DeepPartial<GameConfig>> = {
   'dev-short': devShort as DeepPartial<GameConfig>,
@@ -60,6 +88,7 @@ export function buildConfig(variantNames: string[] = []): GameConfig {
     }
     cfg = deepMerge<GameConfig>(cfg, patch);
   }
+  cfg.waves.bossWaves = normalizeBossWaves(cfg.waves.bossWaves, cfg.waves.totalWaves);
   return cfg;
 }
 

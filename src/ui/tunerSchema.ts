@@ -35,7 +35,6 @@ export const TUNER_PARAMS: TunerParam[] = [
   { path: 'waves.firstSpawnDelay', label: '首怪延迟', group: 'waves', waveDeferred: true },
   { path: 'waves.betweenWaves', label: '波间休息', group: 'waves', waveDeferred: true },
   { path: 'waves.totalWaves', label: '总波数', group: 'waves', waveDeferred: true },
-  { path: 'waves.bossWave', label: 'Boss 波', group: 'waves', waveDeferred: true },
   { path: 'waves.spawnMargin', label: '出生边距', group: 'waves', waveDeferred: true },
   { path: 'waves.typeRoll.tankBase', label: '重装概率 · 基础', group: 'waves', waveDeferred: true },
   { path: 'waves.typeRoll.tankPerWave', label: '重装概率 · 每波', group: 'waves', waveDeferred: true },
@@ -85,4 +84,19 @@ export function setNumberAt(root: unknown, path: string, value: number): void {
   let target = root as Record<string, unknown>;
   for (const key of keys.slice(0, -1)) target = target[key] as Record<string, unknown>;
   target[keys[keys.length - 1]] = value;
+}
+
+/** Preset 中的 Boss 波次统一保存为规范字符串，避免数组引用造成错误 diff。 */
+export function formatBossWaves(values: readonly number[]): string {
+  return [...new Set(values)].sort((a, b) => a - b).join(', ');
+}
+
+/** 兼容旧 Preset；新字段存在时优先使用新字段。 */
+export function migratePresetValues(values: Record<string, number | string>): Record<string, number | string> {
+  const migrated = { ...values };
+  if (migrated['waves.bossWaves'] === undefined && migrated['waves.bossWave'] !== undefined) {
+    migrated['waves.bossWaves'] = String(migrated['waves.bossWave']);
+  }
+  delete migrated['waves.bossWave'];
+  return migrated;
 }

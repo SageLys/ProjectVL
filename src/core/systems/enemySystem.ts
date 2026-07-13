@@ -9,12 +9,12 @@ import { fireTrigger, getModifiers } from '../effects/interpreter';
 
 /**
  * 敌人类型判定：roll < tankBase + wave*tankPerWave → 重装；
- * roll < fastThreshold → 高速；否则普通。第 bossWave 波最后一只强制 boss。
+ * roll < fastThreshold → 高速；否则普通。每个指定 Boss 波的最后一个出怪名额强制生成 Boss。
  */
 export function determineType(wave: number, roll: number, spawnLeft: number): EnemyType {
   const tr = cfg.waves.typeRoll;
   let type: EnemyType = roll < tr.tankBase + wave * tr.tankPerWave ? 'tank' : roll < tr.fastThreshold ? 'fast' : 'normal';
-  if (wave === cfg.waves.bossWave && spawnLeft === 1) type = 'boss';
+  if (cfg.waves.bossWaves.includes(wave) && spawnLeft === 1) type = 'boss';
   return type;
 }
 

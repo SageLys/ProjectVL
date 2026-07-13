@@ -19,5 +19,5 @@
     "tankPerWave": 0.025,
     "fastThreshold": 0.47
   },
-  "bossWave": 5
+  "bossWaves": [5]
 }

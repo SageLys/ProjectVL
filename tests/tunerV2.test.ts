@@ -11,7 +11,7 @@ beforeEach(resetTestEnv);
 
 describe('调参面板 v2 · 参数与派生指标', () => {
   it('§2 A/B/C/D 每个暴露参数都在 tuner.json 有 min/max/step', () => {
-    expect(TUNER_PARAMS.length).toBe(61);
+    expect(TUNER_PARAMS.length).toBe(60);
     for (const param of TUNER_PARAMS) {
       const range = cfg.tuner[param.path];
       expect(range, param.path).toBeDefined();
