@@ -54,11 +54,11 @@ describe('dropSystem · 拾取', () => {
 });
 
 describe('dropSystem · 概率与 boss', () => {
-  it('掉落概率上限 0.95（生效装备=锁定卡）', () => {
+  it('掉落概率上限 0.95（生效装备=独立装备格）', () => {
     const s = freshState();
     const config = createDefaultConfig();
     config.dropChance = 0.9;
-    s.cards[0] = card('luck', 3, true); // 锁定即装备：+0.05*4 = 0.2 → 1.1，应被封顶
+    s.equipment[0] = card('luck', 3); // 装备：+0.05*4 = 0.2 → 1.1，应被封顶
     expect(totalDropChance(s, config)).toBe(0.95);
   });
 

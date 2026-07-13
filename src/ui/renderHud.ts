@@ -2,7 +2,7 @@ import type { Config, GameState } from '../core/types';
 import { totalDamage, totalFireRate, totalMulti } from '../core/stats';
 import type { DomRefs } from './domRefs';
 
-/** 刷新 HUD：血/经验/等级/波次/实时数值 + 调参回显 + 掉落遥测。 */
+/** 刷新 HUD：血/经验/等级/波次/实时数值 + 调参回显 + 当前可执行操作提示。 */
 export function renderHud(refs: DomRefs, state: GameState, config: Config): void {
   refs.hpText.textContent = String(Math.max(0, Math.round(state.hp)));
   refs.hpBar.style.width = `${Math.max(0, (state.hp / state.maxHp) * 100)}%`;
@@ -20,5 +20,8 @@ export function renderHud(refs: DomRefs, state: GameState, config: Config): void
   refs.dropCtlVal.textContent = `${Math.round(config.dropChance * 100)}%`;
   refs.lifeCtlVal.textContent = `${config.dropLifetime.toFixed(1)}秒`;
   refs.speedCtlVal.textContent = `${Math.round(config.enemySpeed * 100)}%`;
-  refs.dropTelemetry.textContent = `地面 ${state.groundDrops.length} · 已拾取 ${state.collected} · 超时 ${state.expired}`;
+  const hasEquipment = state.equipment.some(Boolean);
+  refs.equipmentHint.textContent = hasEquipment ? '长按装备卡可销毁' : '拖入 3★+ 卡装备';
+  refs.dropTelemetry.textContent = hasEquipment ? '同型同星拖入可升星' : '装备永久 · 仅销毁腾位';
+  refs.cardsHint.textContent = '拖到战场释放 · 同型同星自动合成';
 }

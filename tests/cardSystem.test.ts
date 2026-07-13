@@ -7,7 +7,7 @@ const rng = constRng(0.5);
 
 beforeEach(resetTestEnv);
 
-describe('cardSystem · 自动合成（mergeCopies=2 二合，maxStar=3，均为配置变量）', () => {
+describe('cardSystem · 自动合成（mergeCopies=2 二合，maxStar=6，均为配置变量）', () => {
   it('两张同类1星 → 一张2星，并产出 merged 事件', () => {
     const s = freshState();
     s.cards[0] = card('damage', 1);
@@ -30,10 +30,10 @@ describe('cardSystem · 自动合成（mergeCopies=2 二合，maxStar=3，均为
     expect(nonNull[0]!.star).toBe(3);
   });
 
-  it('3星封顶不再合成（maxStar 配置）', () => {
+  it('6星封顶不再合成（maxStar 配置）', () => {
     const s = freshState();
-    s.cards[0] = card('damage', 3);
-    s.cards[1] = card('damage', 3);
+    s.cards[0] = card('damage', 6);
+    s.cards[1] = card('damage', 6);
     expect(autoMergeCards(s, config, rng).merged).toBe(0);
     expect(s.cards.filter(Boolean)).toHaveLength(2);
   });
@@ -52,14 +52,6 @@ describe('cardSystem · 自动合成（mergeCopies=2 二合，maxStar=3，均为
     expect(autoMergeCards(s, config, rng).merged).toBe(1);
   });
 
-  it('锁定卡不参与自动合成（方案B：锁定=装备）', () => {
-    const s = freshState();
-    s.cards[0] = card('damage', 2, true);
-    s.cards[1] = card('damage', 2);
-    expect(autoMergeCards(s, config, rng).merged).toBe(0);
-    expect(s.cards[0]!.star).toBe(2);
-    expect(s.cards[1]!.star).toBe(2);
-  });
 });
 
 describe('cardSystem · multi 卡特殊规则', () => {

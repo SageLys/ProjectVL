@@ -58,7 +58,7 @@ export function createPointerRouter(options: RouterOptions) {
   function hidePreview(): void {
     options.aimPreview.classList.remove('show');
     options.screenPreview.classList.remove('show');
-    hot?.classList.remove('hot');
+    hot?.classList.remove('hot', 'equip-warning');
     hot = null;
   }
 
@@ -67,7 +67,8 @@ export function createPointerRouter(options: RouterOptions) {
     const preview = options.previewFor(active.source, active.index);
     const target = targetAt(options.canvas, clientX, clientY);
     const slot = document.elementFromPoint(clientX, clientY)?.closest?.('[data-testid="card-slot"], [data-testid="equipment-slot"]') ?? null;
-    if (hot !== slot) { hot?.classList.remove('hot'); hot = slot; hot?.classList.add('hot'); }
+    if (hot !== slot) { hot?.classList.remove('hot', 'equip-warning'); hot = slot; hot?.classList.add('hot'); }
+    if (slot && active.source === 'cards' && (slot as HTMLElement).dataset.testid === 'equipment-slot') slot.classList.add('equip-warning');
     options.aimPreview.classList.remove('show');
     options.screenPreview.classList.remove('show');
     if (target.kind !== 'arena') return;

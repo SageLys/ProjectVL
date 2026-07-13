@@ -13,8 +13,6 @@ export interface Card {
   id: number;
   type: CardType;
   star: number;
-  /** 锁定即装备（方案B）：锁定卡=生效装备，不参与自动合成、不可直接消耗。 */
-  locked?: boolean;
 }
 
 /** 敌人身上的状态效果（效果解释器写入，各系统读取；冲突仲裁见 effects/statusSystem）。 */
@@ -184,7 +182,7 @@ export interface GameState {
   particles: Particle[];
   groundDrops: GroundDrop[];
   cards: (Card | null)[];
-  /** 独立装备格（equipMode='slots' 时使用；lock 模式下长度 0，装备=锁定卡）。 */
+  /** 独立装备格；装备后只可销毁，不可回到手牌。 */
   equipment: (Card | null)[];
   zones: Zone[];
   summons: Summon[];
@@ -213,6 +211,8 @@ export interface GameState {
   /** 遥测拆分（原 uses）：consumes=消耗释放次数；equipOps=装备操作次数。 */
   consumes: number;
   equipOps: number;
+  /** H6 观察项：装备尝试耗时与取消/拒绝（误触代理）次数。 */
+  equipTelemetry: { durationsMs: number[]; cancels: number; rejects: number };
   collected: number;
   expired: number;
   /** 过期转化（expiryConvert）为经验的掉落数。 */
@@ -236,15 +236,13 @@ export type GameEvent =
   | { type: 'cardsFull' }
   | { type: 'collected'; cardType: CardType; merges: number }
   | { type: 'equipFull' }
-  | { type: 'unequipFull' }
   | { type: 'equipRejected'; reason: 'star' | 'duplicate' }
   | { type: 'moved'; cardType: CardType; merges: number }
   | { type: 'swapped'; a: CardType; b: CardType }
   | { type: 'merged'; cardType: CardType; resultStar: number }
   | { type: 'skillConsumed'; cardType: CardType; star: number; x: number; y: number }
-  | { type: 'locked'; cardType: CardType }
-  | { type: 'unlocked'; cardType: CardType }
-  | { type: 'lockRejected'; reason: 'star' | 'limit' | 'duplicate' | 'locked' }
+  | { type: 'equipped'; cardType: CardType; star: number; slotIndex: number }
+  | { type: 'equipmentDestroyed'; cardType: CardType; star: number; slotIndex: number }
   | { type: 'fed'; cardType: CardType; resultStar: number }
   | { type: 'shieldBroken' }
   | { type: 'testDrops'; cardType: CardType }

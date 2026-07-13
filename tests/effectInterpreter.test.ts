@@ -35,15 +35,15 @@ function def(id: CardType, equip: BindingDef[], consumeEffects: BindingDef['effe
   };
 }
 
-/** 在手牌锁定一张卡（lock 模式=装备生效）。 */
-function equipLocked(s: GameState, type: CardType, star = 2): void {
-  s.cards[s.cards.findIndex(c => c === null)] = card(type, star, true);
+/** 放入独立装备格。 */
+function equipCard(s: GameState, type: CardType, star = 2): void {
+  s.equipment[s.equipment.findIndex(c => c === null)] = card(type, star);
 }
 
 describe('解释器 · 装备态触发绑定', () => {
-  it('effectiveEquipment：lock 模式=锁定卡；未注册定义的卡走 legacy 不炸', () => {
+  it('effectiveEquipment：只读取独立装备格；未注册定义的卡走 legacy 不炸', () => {
     const s = freshState();
-    s.cards[0] = card('damage', 2, true);
+    s.equipment[0] = card('damage', 2);
     s.cards[1] = card('rate', 2);
     expect(effectiveEquipment(s).map(c => c.type)).toEqual(['damage']);
     expect(fireTrigger(s, config, rng, 'onWaveStart', { wave: 1 })).toEqual([]);
@@ -52,7 +52,7 @@ describe('解释器 · 装备态触发绑定', () => {
   it('onFire：装备 pierce 卡后子弹带穿透参数', () => {
     registerSkillDefs([def('damage', [{ trigger: 'onFire', effects: [{ atom: 'pierce', params: { count: 2, damageRetention: 0.8 } }] }])]);
     const s = freshState();
-    equipLocked(s, 'damage', 2);
+    equipCard(s, 'damage', 2);
     shoot(s, config, rng, enemy({ x: 600, y: 300 }));
     expect(s.bullets[0].pierceLeft).toBe(2);
   });
@@ -60,7 +60,7 @@ describe('解释器 · 装备态触发绑定', () => {
   it('onHit：装备连锁卡后命中弹跳到第二个敌人', () => {
     registerSkillDefs([def('rate', [{ trigger: 'onHit', effects: [{ atom: 'chain', params: { bounces: 1, damageRetention: 0.5, searchRange: 150 } }] }])]);
     const s = freshState();
-    equipLocked(s, 'rate', 2);
+    equipCard(s, 'rate', 2);
     const a = enemy({ x: 500, y: 300, hp: 100, maxHp: 100 });
     const b = enemy({ x: 560, y: 300, hp: 100, maxHp: 100 });
     s.enemies = [a, b];
@@ -73,7 +73,7 @@ describe('解释器 · 装备态触发绑定', () => {
   it('onKill：击杀触发 extraDrop', () => {
     registerSkillDefs([def('range', [{ trigger: 'onKill', effects: [{ atom: 'extraDrop', params: { count: 1, at: 'point' } }] }])]);
     const s = freshState();
-    equipLocked(s, 'range', 2);
+    equipCard(s, 'range', 2);
     const e = enemy({ x: 300, y: 300, hp: 5, maxHp: 5 });
     s.enemies = [e];
     dealDamage(s, config, rng, e, 10);
@@ -83,7 +83,7 @@ describe('解释器 · 装备态触发绑定', () => {
   it('onWaveStart：护盾回填', () => {
     registerSkillDefs([def('luck', [{ trigger: 'onWaveStart', effects: [{ atom: 'shield', params: { absorbHits: 2, regenSeconds: 10 } }] }])]);
     const s = freshState();
-    equipLocked(s, 'luck', 2);
+    equipCard(s, 'luck', 2);
     startNextWave(s, config, rng);
     expect(s.shield).toMatchObject({ hits: 2 });
   });
@@ -91,7 +91,7 @@ describe('解释器 · 装备态触发绑定', () => {
   it('onMerge：合成脉冲对全场造成 结果星级×N 伤害', () => {
     registerSkillDefs([def('luck', [{ trigger: 'onMerge', effects: [{ atom: 'mergePulse', params: { damagePerMergeCount: 5, radius: 'all' } }] }])]);
     const s = freshState();
-    equipLocked(s, 'luck', 2);
+    equipCard(s, 'luck', 2);
     const e = enemy({ x: 100, y: 100, hp: 100, maxHp: 100 });
     s.enemies = [e];
     s.cards[1] = card('damage', 1);
@@ -103,7 +103,7 @@ describe('解释器 · 装备态触发绑定', () => {
   it('interval：独立时钟按 triggerParams.seconds 周期触发', () => {
     registerSkillDefs([def('multi', [{ trigger: 'interval', triggerParams: { seconds: 1 }, effects: [{ atom: 'burstDamage', params: { damageMul: 1, radius: 300 } }] }])]);
     const s = freshState();
-    equipLocked(s, 'multi', 3);
+    equipCard(s, 'multi', 3);
     const e = enemy({ x: 270, y: 365, hp: 1000, maxHp: 1000 });
     s.enemies = [e];
     tickIntervalBindings(s, config, rng, 0.5);
@@ -125,10 +125,10 @@ describe('解释器 · 装备态触发绑定', () => {
       consumable: { placement: 'point', byStar: { '1': { effects: [] }, '2': { effects: [] }, '3': { effects: [] } } },
     }]);
     const s = freshState();
-    equipLocked(s, 'damage', 2);
+    equipCard(s, 'damage', 2);
     expect(getModifiers(s).morph).toBe('none');
     s.cards = s.cards.map(() => null);
-    equipLocked(s, 'damage', 3);
+    equipCard(s, 'damage', 3);
     expect(getModifiers(s).morph).toBe('beam');
   });
 });
@@ -146,7 +146,7 @@ describe('解释器 · passive 修饰聚合', () => {
       { atom: 'xpMul', params: { mul: 2 } },
     ]))]);
     const s = freshState();
-    equipLocked(s, 'range', 2);
+    equipCard(s, 'range', 2);
     expect(totalDropChance(s, config)).toBeCloseTo(Math.min(0.95, config.dropChance * 1.5));
     expect(totalDropLifetime(s, config)).toBeCloseTo(config.dropLifetime * 1.25);
     const e = enemy({ x: 300, y: 300, hp: 1, maxHp: 1, xp: 2 });
@@ -158,14 +158,14 @@ describe('解释器 · passive 修饰聚合', () => {
   it('防御修饰：breachReduction 减伤 / thorns 反噬击杀 / novaOnBreak', () => {
     registerSkillDefs([def('range', passive([{ atom: 'breachReduction', params: { ratio: 0.5 } }]))]);
     const s = freshState();
-    equipLocked(s, 'range', 2);
+    equipCard(s, 'range', 2);
     s.enemies = [enemy({ x: 271, y: 365, hp: 999, maxHp: 999, damage: 28 })];
     moveEnemies(s, config, rng, 0.016);
     expect(s.hp).toBe(100 - 14); // 28 × (1-0.5)
 
     registerSkillDefs([def('range', passive([{ atom: 'thorns', params: { ratio: 2 } }]))]);
     const s2 = freshState();
-    equipLocked(s2, 'range', 2);
+    equipCard(s2, 'range', 2);
     s2.enemies = [enemy({ x: 271, y: 365, hp: 10, maxHp: 10, damage: 8, xp: 1 })];
     moveEnemies(s2, config, rng, 0.016);
     expect(s2.hp).toBe(100);  // 反噬致死 → 无突破伤害
@@ -175,7 +175,7 @@ describe('解释器 · passive 修饰聚合', () => {
   it('expiryConvert：过期掉落转化为经验', () => {
     registerSkillDefs([def('luck', passive([{ atom: 'expiryConvert', params: { ratio: 1 } }]))]);
     const s = freshState();
-    equipLocked(s, 'luck', 2);
+    equipCard(s, 'luck', 2);
     spawnGroundDrop(s, config, constRng(0), 100, 100, 'damage');
     tickDrops(s, config, constRng(0.5), config.dropLifetime + 0.01);
     expect(s.expired).toBe(1);
@@ -189,7 +189,7 @@ describe('解释器 · passive 修饰聚合', () => {
       { atom: 'execute', params: { hpThresholdRatio: 0.2 } },
     ]))]);
     const s = freshState();
-    equipLocked(s, 'luck', 2);
+    equipCard(s, 'luck', 2);
     const mods = getModifiers(s);
     expect(mods.mergeRules).toEqual([{ rule: 'wildcardDrop', value: 1 }]);
     expect(mods.executeThreshold).toBe(0.2);
@@ -198,7 +198,7 @@ describe('解释器 · passive 修饰聚合', () => {
   it('mortarMorph passive：主炮改射榴弹并在落点爆炸', () => {
     registerSkillDefs([def('damage', passive([{ atom: 'mortarMorph', params: { radius: 90, damageRatio: 1, falloff: 0.5 } }]))]);
     const s = freshState();
-    equipLocked(s, 'damage', 3);
+    equipCard(s, 'damage', 3);
     expect(getModifiers(s).morph).toBe('mortar');
     shoot(s, config, rng, enemy({ x: 350, y: 365 }));
     expect(s.bullets[0].kind).toBe('mortar');
@@ -211,7 +211,7 @@ describe('解释器 · passive 修饰聚合', () => {
   it('beamMorph passive：updateTurret 以 interval 发射贯穿光束（不出普通弹）', () => {
     registerSkillDefs([def('damage', passive([{ atom: 'beamMorph', params: { interval: 0.5, width: 30, damageRatio: 1 } }]))]);
     const s = freshState();
-    equipLocked(s, 'damage', 3);
+    equipCard(s, 'damage', 3);
     const e = enemy({ x: 390, y: 365, hp: 1000, maxHp: 1000 });
     s.enemies = [e];
     updateTurret(s, config, rng, 0.3);
@@ -255,7 +255,7 @@ describe('运行时 · 区域/光环/召唤物/护盾', () => {
   it('aura passive：光环周期对射程比例半径内敌人施加内嵌效果', () => {
     registerSkillDefs([def('rate', [{ trigger: 'passive', effects: [{ atom: 'aura', params: { radiusRatioOfRange: 0.6, tickInterval: 0.4, effects: [{ atom: 'slow', params: { ratio: 0.35, duration: 0.9 } }] } }] }])]);
     const s = freshState();
-    equipLocked(s, 'rate', 3);
+    equipCard(s, 'rate', 3);
     const near = enemy({ x: 350, y: 365, hp: 100, maxHp: 100 });
     const far = enemy({ x: 270 + 900, y: 365, hp: 100, maxHp: 100 });
     s.enemies = [near, far];
@@ -303,7 +303,7 @@ describe('运行时 · 区域/光环/召唤物/护盾', () => {
   it('护盾：吸收突破（不扣血）、破裂事件、novaOnBreak、再生', () => {
     registerSkillDefs([def('range', [{ trigger: 'passive', effects: [{ atom: 'novaOnBreak', params: { damage: 10, knockbackDistance: 50 } }] }])]);
     const s = freshState();
-    equipLocked(s, 'range', 2);
+    equipCard(s, 'range', 2);
     s.shield = { hits: 1, maxHits: 1, regenRemaining: null, regenSeconds: 2 };
     const bystander = enemy({ x: 350, y: 365, hp: 100, maxHp: 100 });
     s.enemies = [bystander];

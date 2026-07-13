@@ -7,10 +7,8 @@ import type { Card, CardType, Enemy, EnemyType, GameState } from '../src/core/ty
 let idSeed = 1000;
 
 /** 构造一张卡牌。id 自增，避免测试间碰撞。 */
-export function card(type: CardType, star: number, locked = false): Card {
-  const c: Card = { id: idSeed++, type, star };
-  if (locked) c.locked = true;
-  return c;
+export function card(type: CardType, star: number): Card {
+  return { id: idSeed++, type, star };
 }
 
 /** 构造一只敌人（仅填测试关心的字段，其余给合理默认）。 */

@@ -8,7 +8,7 @@ import { createInitialState, createDefaultConfig } from './core/createInitialSta
 import { updateGame } from './core/updateGame';
 import { registerSkillDefs } from './core/effects/interpreter';
 import { startNextWave } from './core/systems/waveSystem';
-import { moveOrSwap, quickEquip, quickUnequip, toggleLock, consumeCard } from './core/systems/equipmentSystem';
+import { moveOrSwap, unequipDestroy, consumeCard } from './core/systems/equipmentSystem';
 import { collectNearest, spawnTestDrops, spawnGroundDrop } from './core/systems/dropSystem';
 import { applyPerk } from './core/systems/progressionSystem';
 import { createRenderer } from './render/canvasRenderer';
@@ -38,9 +38,29 @@ const config = createDefaultConfig();
 let state: GameState = createInitialState();
 
 refs.totalWavesText.textContent = String(cfg.waves.totalWaves);
-refs.equipmentHint.textContent = `${cfg.economy.equipSlots}栏 · ${cfg.economy.equipThreshold}星起可装备`;
-if (cfg.economy.equipMode === 'lock') {
-  refs.cardsHint.textContent = `自动合成 · 单击锁定=装备（上限${cfg.economy.maxLocked}）· 拖入战场=消耗释放`;
+refs.equipmentHint.textContent = `拖入 ${cfg.economy.equipThreshold}★+ 卡装备`;
+refs.cardsHint.textContent = '拖到战场释放 · 同型同星自动合成';
+
+const destroyLayer = document.createElement('div');
+destroyLayer.className = 'destroy-hud';
+destroyLayer.hidden = true;
+document.body.append(destroyLayer);
+
+function closeDestroyConfirm(): void { destroyLayer.hidden = true; }
+
+function openDestroyConfirm(index: number): void {
+  const card=state.equipment[index]; if(!card)return; const meta=cfg.skills.legacy.types[card.type];
+  const slot = refs.equipmentSlots.querySelector<HTMLElement>(`[data-index="${index}"]`);
+  if (slot) {
+    const rect = slot.getBoundingClientRect();
+    destroyLayer.style.left = `${Math.min(innerWidth - 12, Math.max(12, rect.left + rect.width / 2))}px`;
+    destroyLayer.style.top = `${Math.max(8, rect.top - 8)}px`;
+  }
+  destroyLayer.dataset.testid='destroy-confirm';
+  destroyLayer.innerHTML=`<span><b>永久销毁 ${card.star}★ ${meta.name}</b><small>失去「${meta.desc}强化」· 无返还</small></span><button class="destroy-confirm-btn" data-testid="destroy-confirm-button">销毁</button><button class="confirm-cancel" aria-label="取消销毁">取消</button>`;
+  destroyLayer.hidden=false;
+  destroyLayer.querySelector('.destroy-confirm-btn')!.addEventListener('click',()=>{dispatch(unequipDestroy(state,index));closeDestroyConfirm();});
+  destroyLayer.querySelector('.confirm-cancel')!.addEventListener('click',closeDestroyConfirm);
 }
 
 // —— 表现副作用统一由事件驱动 ——
@@ -62,14 +82,7 @@ function refreshSlots(): void {
 }
 
 const slotHandlers: SlotHandlers = {
-  quickAction(source, index) {
-    if (cfg.economy.equipMode === 'lock') return; // lock 模式：单击已承担装备动词
-    dispatch(source === 'cards' ? quickEquip(state, config, rng, index) : quickUnequip(state, config, rng, index));
-  },
-  cardClick(source, index) {
-    if (cfg.economy.equipMode !== 'lock' || source !== 'cards') return;
-    dispatch(toggleLock(state, index));
-  },
+  destroyRequest: openDestroyConfirm,
   dragStart(e, source, index, el) {
     pointerRouter.begin(e, source, index, el);
   },
@@ -106,7 +119,11 @@ const pointerRouter = createPointerRouter({
   onArenaTap: (x, y) => dispatch(collectNearest(state, config, rng, x, y, cfg.economy.drops.pickupRadius)),
   onDrop: (source, index, target) => {
     if (target.kind === 'arena' && source === 'cards') dispatch(consumeCard(state, config, rng, index, target.x, target.y));
-    else if (target.kind === 'slot') dispatch(moveOrSwap(state, config, rng, source, index, target.slotKind, target.index));
+    else if (target.kind === 'slot' && target.slotKind === 'equipment' && source === 'cards') {
+      const events = moveOrSwap(state, config, rng, source, index, 'equipment', target.index);
+      if (events.some(event => event.type === 'equipRejected' || event.type === 'equipFull')) state.equipTelemetry.rejects++;
+      dispatch(events);
+    } else if (target.kind === 'slot') dispatch(moveOrSwap(state, config, rng, source, index, target.slotKind, target.index));
   },
   previewFor,
 });
@@ -118,6 +135,9 @@ refs.testCardBtn.addEventListener('click', () => dispatch(spawnTestDrops(state, 
 
 function reset(): void {
   state = createInitialState();
+  if (import.meta.env.DEV && new URLSearchParams(location.search).get('evidence') === 'equip') {
+    state.cards[0] = { id: state.nextCardId++, type: 'damage', star: 4 };
+  }
   modals.hideResult();
   modals.hideLevel();
   refs.startBtn.textContent = texts.buttons.start;
@@ -159,7 +179,7 @@ if (import.meta.env.DEV) void import('./debug/exposeDebugApi').then(({ exposeDeb
   addTestPair: () => dispatch(spawnTestDrops(state, config, rng)),
   moveOrSwap: (source, index, targetKind, targetIndex) => dispatch(moveOrSwap(state, config, rng, source, index, targetKind, targetIndex)),
   consumeAt: (index, x, y) => dispatch(consumeCard(state, config, rng, index, x, y)),
-  toggleLock: index => dispatch(toggleLock(state, index)),
+  destroyEquipment: index => dispatch(unequipDestroy(state, index)),
   setConfig: patch => { Object.assign(config, patch); tuner.syncInputs(); renderHud(refs, state, config); },
   getVariants: () => activeVariants,
 }));

@@ -37,7 +37,6 @@ export function addBonus(a: Bonus, b: Bonus): Bonus {
 
 /**
  * 卡槽自动合成：同类型同星级凑满 mergeCopies 张合并升 1 星，循环至无法合成；maxStar 封顶。
- * 锁定卡不参与（方案B：锁定=装备，喂养须显式拖拽）。
  * 就地修改 state.cards，累加 state.merges，产出 merged 事件并触发 onMerge。
  */
 export function autoMergeCards(state: GameState, config: Config, rng: Rng): { merged: number; events: GameEvent[] } {
@@ -49,12 +48,12 @@ export function autoMergeCards(state: GameState, config: Config, rng: Rng): { me
     changed = false;
     outer: for (let i = 0; i < state.cards.length; i++) {
       const a = state.cards[i];
-      if (!a || a.locked) continue;
+      if (!a) continue;
       if (a.star >= maxStar) continue;
       const partners: number[] = [];
       for (let j = i + 1; j < state.cards.length && partners.length < mergeCopies - 1; j++) {
         const b = state.cards[j];
-        if (!b || b.locked) continue;
+        if (!b) continue;
         if (a.type === b.type && a.star === b.star) partners.push(j);
       }
       if (partners.length === mergeCopies - 1) {

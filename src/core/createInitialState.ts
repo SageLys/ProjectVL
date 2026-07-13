@@ -51,6 +51,7 @@ export function createInitialState(): GameState {
     merges: 0,
     consumes: 0,
     equipOps: 0,
+    equipTelemetry: { durationsMs: [], cancels: 0, rejects: 0 },
     collected: 0,
     expired: 0,
     expiredConverted: 0,

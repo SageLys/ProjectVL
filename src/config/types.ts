@@ -81,17 +81,14 @@ export interface ProgressionConfig {
   perks: PerkDef[];
 }
 
-/** 装备操作模式：lock=锁定即装备（方案B，基座默认）；slots=独立装备格（方案A，variant）。 */
-export type EquipMode = 'lock' | 'slots';
-
 export interface EconomyConfig {
   maxStar: number;
   mergeCopies: number;
   equipThreshold: number;
-  equipMode: EquipMode;
   handSlots: number;
   equipSlots: number;
-  maxLocked: number;
+  equipIrreversible: true;
+  unequipPolicy: 'destroy';
   inRunSlotExpansion: boolean;
   equipDistinctTypes: boolean;
   feedEquipped: boolean;

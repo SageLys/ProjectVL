@@ -8,13 +8,11 @@ import progression from './base/progression.json';
 import economy from './base/economy.json';
 import tuner from './base/tuner.json';
 import input from './base/input.json';
-import equipSlots from '../config/variants/equip-slots.json';
 import devShort from '../config/variants/dev-short.json';
 import type { DeepPartial, GameConfig } from './types';
 
 /** 已注册 variant。新增覆盖文件后在此登记（key = URL 参数名）。 */
 export const VARIANTS: Record<string, DeepPartial<GameConfig>> = {
-  'equip-slots': equipSlots as DeepPartial<GameConfig>,
   'dev-short': devShort as DeepPartial<GameConfig>,
 };
 

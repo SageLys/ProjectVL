@@ -18,11 +18,8 @@ export function getSkillDef(type: string): CardDef | undefined {
   return DEFS.get(type);
 }
 
-/** 生效装备集：lock 模式 = 手牌中的锁定卡；slots 模式 = 独立装备栏。 */
+/** 生效装备集：方案 A 独立装备栏。 */
 export function effectiveEquipment(state: GameState): Card[] {
-  if (cfg.economy.equipMode === 'lock') {
-    return state.cards.filter((c): c is Card => !!c && !!c.locked);
-  }
   return state.equipment.filter((c): c is Card => !!c);
 }
 
