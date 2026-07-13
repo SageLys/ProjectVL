@@ -4,7 +4,7 @@ import { endGame } from '../endGame';
 import { spawnEnemy } from './enemySystem';
 import { fireTrigger } from '../effects/interpreter';
 
-/** 第 wave 波的敌人数量：base + wave*perWave。 */
+/** 第 wave 波的总出怪配额：base + wave*perWave。 */
 export function enemyCountFor(wave: number): number {
   return cfg.waves.enemyCountBase + wave * cfg.waves.enemyCountPerWave;
 }
@@ -24,7 +24,12 @@ export function startNextWave(state: GameState, config: Config, rng: Rng): GameE
 }
 
 /** 按节奏生成敌人：间隔 max(min, base - wave*perWave)。 */
-export function tickSpawns(state: GameState, rng: Rng, dt: number): void {
+export interface SpawnStrategy {
+  tick(state: GameState, rng: Rng, dt: number): void;
+}
+
+/** Fixed-interval strategy. Its operations intentionally match the former tickSpawns body. */
+const intervalSpawnStrategy: SpawnStrategy = { tick(state, rng, dt) {
   if (state.spawnLeft <= 0) return;
   state.spawnTimer -= dt;
   if (state.spawnTimer <= 0) {
@@ -33,6 +38,41 @@ export function tickSpawns(state: GameState, rng: Rng, dt: number): void {
     const si = cfg.waves.spawnInterval;
     state.spawnTimer = Math.max(si.min, si.base - state.wave * si.perWave);
   }
+} };
+
+/** Budget target for the current wave, including the quota-based end sprint. */
+export function budgetTargetFor(state: GameState): number {
+  const budget = cfg.waves.budget;
+  const normalTarget = budget.targetOnScreen.base + state.wave * budget.targetOnScreen.perWave;
+  const checksToQuotaEnd = Math.ceil(state.spawnLeft / Math.max(1, budget.batchMax));
+  const inEndSprint = checksToQuotaEnd * budget.checkInterval <= budget.waveEndSprint.window;
+  return Math.ceil(normalTarget * (inEndSprint ? budget.waveEndSprint.multiplier : 1));
+}
+
+const budgetSpawnStrategy: SpawnStrategy = { tick(state, rng, dt) {
+  if (state.spawnLeft <= 0) return;
+  state.spawnTimer -= dt;
+  if (state.spawnTimer > 0) return;
+
+  const budget = cfg.waves.budget;
+  const capacity = Math.max(0, budget.maxAlive - state.enemies.length);
+  const deficit = Math.max(0, budgetTargetFor(state) - state.enemies.length);
+  const count = Math.min(state.spawnLeft, budget.batchMax, capacity, deficit);
+  for (let i = 0; i < count; i++) {
+    spawnEnemy(state, rng);
+    state.spawnLeft--;
+  }
+  state.spawnTimer = budget.checkInterval;
+} };
+
+const SPAWN_STRATEGIES: Record<typeof cfg.waves.spawnMode, SpawnStrategy> = {
+  interval: intervalSpawnStrategy,
+  budget: budgetSpawnStrategy,
+};
+
+/** Advance spawning through the configured strategy. */
+export function tickSpawns(state: GameState, rng: Rng, dt: number): void {
+  SPAWN_STRATEGIES[cfg.waves.spawnMode].tick(state, rng, dt);
 }
 
 /**

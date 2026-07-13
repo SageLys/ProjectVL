@@ -1,9 +1,17 @@
 {
   "totalWaves": 5,
+  "spawnMode": "interval",
   "enemyCountBase": 5,
   "enemyCountPerWave": 3,
   "firstSpawnDelay": 0.4,
   "spawnInterval": { "base": 0.72, "perWave": 0.05, "min": 0.28 },
+  "budget": {
+    "targetOnScreen": { "base": 4, "perWave": 1 },
+    "checkInterval": 0.75,
+    "batchMax": 2,
+    "waveEndSprint": { "window": 15, "multiplier": 1.5 },
+    "maxAlive": 20
+  },
   "betweenWaves": 2.4,
   "spawnMargin": 45,
   "typeRoll": {

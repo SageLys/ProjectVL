@@ -2,7 +2,7 @@ import { activeVariants, cfg, VARIANTS } from '../config';
 import './tunerPanel.css';
 import type { Config } from '../core/types';
 import { deriveMetrics } from './derivedMetrics';
-import { getNumberAt, setNumberAt, TUNER_PARAMS, type TunerGroup } from './tunerSchema';
+import { ALL_TUNER_PARAMS, getNumberAt, setNumberAt, type TunerGroup } from './tunerSchema';
 
 const PRESET_KEY = 'projectvl.tuner.presets.v2';
 
@@ -10,7 +10,7 @@ interface Preset {
   version: 2;
   name: string;
   savedAt: string;
-  values: Record<string, number>;
+  values: Record<string, number | string>;
 }
 
 export interface TunerPanel {
@@ -72,19 +72,22 @@ function controlHtml(path: string, label: string, index: number): string {
 
 export function createTunerPanel(root: HTMLElement, config: Config, hooks: TunerHooks): TunerPanel {
   root.hidden = false;
-  const baseline = Object.fromEntries(TUNER_PARAMS.map(param => [param.path, getNumberAt(cfg, param.path)]));
+  const baseline = Object.fromEntries(ALL_TUNER_PARAMS.map(param => [param.path, getNumberAt(cfg, param.path)]));
+  const baselineSpawnMode = cfg.waves.spawnMode;
   const pendingWaves = new Map<string, number>();
+  let pendingSpawnMode: typeof cfg.waves.spawnMode | null = null;
   let diffPaths = new Set<string>();
   let presets = readPresets();
   let activePresetName = '';
 
   const groupsHtml = GROUPS.map(group => {
-    const controls = TUNER_PARAMS.filter(param => param.group === group.key)
-      .map(param => controlHtml(param.path, param.label, TUNER_PARAMS.indexOf(param))).join('');
-    return `<section class="tuner-group"><h3>${group.title}${group.note ? `<small>${group.note}</small>` : ''}</h3><div class="tuner-grid">${controls}</div></section>`;
+    const controls = ALL_TUNER_PARAMS.filter(param => param.group === group.key)
+      .map(param => controlHtml(param.path, param.label, ALL_TUNER_PARAMS.indexOf(param))).join('');
+    const mode = group.key === 'waves' ? '<label class="tuner-control" data-path="waves.spawnMode"><span>出怪模式</span><select id="spawnModeInput"><option value="interval">interval</option><option value="budget">budget</option></select></label>' : '';
+    return `<section class="tuner-group"><h3>${group.title}${group.note ? `<small>${group.note}</small>` : ''}</h3><div class="tuner-grid">${mode}${controls}</div></section>`;
   }).join('');
-  const p2 = TUNER_PARAMS.filter(param => param.group === 'p2')
-    .map(param => controlHtml(param.path, param.label, TUNER_PARAMS.indexOf(param))).join('');
+  const p2 = ALL_TUNER_PARAMS.filter(param => param.group === 'p2')
+    .map(param => controlHtml(param.path, param.label, ALL_TUNER_PARAMS.indexOf(param))).join('');
 
   root.innerHTML = `<summary>开发调参 v2</summary><div class="dev-tools-body">
     <div class="tuner-toolbar"><label>配置 Variant <select id="variantSel"></select></label><button class="btn" id="resetTunerBtn">恢复默认参数</button></div>
@@ -111,6 +114,7 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
   function metricConfig() {
     const draft = structuredClone(cfg);
     for (const [path, value] of pendingWaves) setNumberAt(draft, path, value);
+    if (pendingSpawnMode !== null) draft.waves.spawnMode = pendingSpawnMode;
     return draft;
   }
 
@@ -138,7 +142,7 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
   }
 
   function setParam(path: string, value: number): void {
-    const param = TUNER_PARAMS.find(item => item.path === path)!;
+    const param = ALL_TUNER_PARAMS.find(item => item.path === path)!;
     if (param.waveDeferred && hooks.isWaveActive()) pendingWaves.set(path, value);
     else {
       pendingWaves.delete(path);
@@ -147,8 +151,11 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
     }
   }
 
-  function snapshot(): Record<string, number> {
-    return Object.fromEntries(TUNER_PARAMS.map(param => [param.path, displayedValue(param.path)]));
+  function snapshot(): Record<string, number | string> {
+    return Object.fromEntries([
+      ['waves.spawnMode', pendingSpawnMode ?? cfg.waves.spawnMode],
+      ...ALL_TUNER_PARAMS.map(param => [param.path, displayedValue(param.path)] as const),
+    ]);
   }
 
   function updatePresetOptions(): void {
@@ -159,13 +166,17 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
 
   function syncInputs(): void {
     for (const input of inputs) {
-      const param = TUNER_PARAMS[Number(input.dataset.tunerIndex)];
+      const param = ALL_TUNER_PARAMS[Number(input.dataset.tunerIndex)];
       const value = displayedValue(param.path);
       input.value = String(value);
       input.closest<HTMLElement>('.tuner-control')!.querySelector('output')!.textContent = format(value);
       input.closest<HTMLElement>('.tuner-control')!.classList.toggle('diff', diffPaths.has(param.path));
       input.closest<HTMLElement>('.tuner-control')!.classList.toggle('pending', pendingWaves.has(param.path));
     }
+    const mode = root.querySelector<HTMLSelectElement>('#spawnModeInput')!;
+    mode.value = pendingSpawnMode ?? cfg.waves.spawnMode;
+    mode.closest<HTMLElement>('.tuner-control')!.classList.toggle('pending', pendingSpawnMode !== null);
+    mode.closest<HTMLElement>('.tuner-control')!.classList.toggle('diff', diffPaths.has('waves.spawnMode'));
     root.querySelector<HTMLInputElement>('#seedInput')!.value = String(hooks.debug.getSeed());
     const scale = hooks.debug.getTimeScale();
     root.querySelector<HTMLInputElement>('#timeScaleInput')!.value = String(scale);
@@ -175,18 +186,34 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
   }
 
   function applyPendingWaveChanges(): void {
-    if (!pendingWaves.size) return;
+    if (!pendingWaves.size && pendingSpawnMode === null) return;
     const paths = [...pendingWaves.keys()];
     for (const [path, value] of pendingWaves) setNumberAt(cfg, path, value);
     pendingWaves.clear();
+    if (pendingSpawnMode !== null) {
+      cfg.waves.spawnMode = pendingSpawnMode;
+      pendingSpawnMode = null;
+      paths.push('waves.spawnMode');
+    }
     hooks.onWaveConfigApplied(paths);
     syncInputs();
   }
 
   for (const input of inputs) input.addEventListener('input', () => {
-    const param = TUNER_PARAMS[Number(input.dataset.tunerIndex)];
+    const param = ALL_TUNER_PARAMS[Number(input.dataset.tunerIndex)];
     setParam(param.path, Number(input.value));
     diffPaths.delete(param.path);
+    syncInputs();
+  });
+  root.querySelector<HTMLSelectElement>('#spawnModeInput')!.addEventListener('change', event => {
+    const value = (event.currentTarget as HTMLSelectElement).value as typeof cfg.waves.spawnMode;
+    if (hooks.isWaveActive()) pendingSpawnMode = value;
+    else {
+      pendingSpawnMode = null;
+      cfg.waves.spawnMode = value;
+      hooks.onWaveConfigApplied(['waves.spawnMode']);
+    }
+    diffPaths.delete('waves.spawnMode');
     syncInputs();
   });
 
@@ -201,7 +228,9 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
   root.querySelector('#resetTunerBtn')!.addEventListener('click', () => {
     activePresetName = '';
     diffPaths.clear();
-    for (const param of TUNER_PARAMS) setParam(param.path, baseline[param.path]);
+    if (hooks.isWaveActive()) pendingSpawnMode = baselineSpawnMode;
+    else cfg.waves.spawnMode = baselineSpawnMode;
+    for (const param of ALL_TUNER_PARAMS) setParam(param.path, baseline[param.path]);
     syncInputs(); hooks.onReset();
   });
   root.querySelector('#savePresetBtn')!.addEventListener('click', () => {
@@ -234,8 +263,15 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
     const preset = presets[Number(presetSel.value)]; if (!preset) return;
     activePresetName = preset.name;
     const before = snapshot();
-    diffPaths = new Set(TUNER_PARAMS.filter(param => before[param.path] !== preset.values[param.path]).map(param => param.path));
-    for (const param of TUNER_PARAMS) if (typeof preset.values[param.path] === 'number') setParam(param.path, preset.values[param.path]);
+    diffPaths = new Set(Object.keys(preset.values).filter(path => before[path] !== preset.values[path]));
+    const mode = preset.values['waves.spawnMode'];
+    if (mode === 'interval' || mode === 'budget') {
+      if (hooks.isWaveActive()) pendingSpawnMode = mode; else cfg.waves.spawnMode = mode;
+    }
+    for (const param of ALL_TUNER_PARAMS) {
+      const value = preset.values[param.path];
+      if (typeof value === 'number') setParam(param.path, value);
+    }
     syncInputs();
   });
   root.querySelector('#deletePresetBtn')!.addEventListener('click', () => {

@@ -47,7 +47,10 @@ export function deriveMetrics(game: GameConfig, runtime: Config): DerivedMetrics
       const insideWalk = Math.min(ttk, breachWalk);
       const killDepth = runtime.range - speed * ttk;
       const interval = Math.max(game.waves.spawnInterval.min, game.waves.spawnInterval.base - wave * game.waves.spawnInterval.perWave);
-      const onScreen = (entryWalk + ttk) / Math.max(0.0001, interval);
+      const budgetTarget = game.waves.budget.targetOnScreen.base + wave * game.waves.budget.targetOnScreen.perWave;
+      const onScreen = game.waves.spawnMode === 'budget'
+        ? Math.min(game.waves.budget.maxAlive, budgetTarget)
+        : (entryWalk + ttk) / Math.max(0.0001, interval);
       return { hitRate, ttk, entryWalk, insideWalk, killDepth, onScreen };
     });
   }
@@ -64,7 +67,10 @@ export function deriveMetrics(game: GameConfig, runtime: Config): DerivedMetrics
       const hit = spreadWidth <= 0 ? 1 : Math.min(1, def.r / spreadWidth);
       return Math.max(0, distance - runtime.range) / speed + hp / (runtime.damage * runtime.fireRate * hit);
     }));
-    return game.waves.firstSpawnDelay + Math.max(0, count - 1) * interval + tail;
+    const spawnDuration = game.waves.spawnMode === 'budget'
+      ? Math.max(0, Math.ceil(count / Math.max(1, game.waves.budget.batchMax)) - 1) * game.waves.budget.checkInterval
+      : Math.max(0, count - 1) * interval;
+    return game.waves.firstSpawnDelay + spawnDuration + tail;
   });
   const totalDuration = waveDurations.reduce((sum, seconds) => sum + seconds, 0)
     + Math.max(0, game.waves.totalWaves - 1) * game.waves.betweenWaves;

@@ -4,7 +4,7 @@ import { createDefaultConfig } from '../src/core/createInitialState';
 import { jumpToWave, tickSpawns } from '../src/core/systems/waveSystem';
 import { createSeededRng } from '../src/debug/exposeDebugApi';
 import { deriveMetrics } from '../src/ui/derivedMetrics';
-import { TUNER_PARAMS } from '../src/ui/tunerSchema';
+import { BUDGET_TUNER_PARAMS, TUNER_PARAMS } from '../src/ui/tunerSchema';
 import { freshState, resetTestEnv } from './helpers';
 
 beforeEach(resetTestEnv);
@@ -21,6 +21,14 @@ describe('调参面板 v2 · 参数与派生指标', () => {
   });
 
   it('TTK、击杀深度与同屏数和手算一致，damage 联动方向正确', () => {
+    expect(BUDGET_TUNER_PARAMS).toHaveLength(7);
+    for (const param of BUDGET_TUNER_PARAMS) {
+      const range = cfg.tuner[param.path];
+      expect(range, param.path).toBeDefined();
+      expect(range.min).toBeLessThan(range.max);
+      expect(range.step).toBeGreaterThan(0);
+    }
+
     const runtime = createDefaultConfig();
     const metrics = deriveMetrics(cfg, runtime);
     const hp = cfg.enemies.types.normal.hpBase + cfg.enemies.types.normal.hpPerWave;

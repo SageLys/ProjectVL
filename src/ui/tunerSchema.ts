@@ -7,6 +7,16 @@ export interface TunerParam {
   waveDeferred?: boolean;
 }
 
+export const BUDGET_TUNER_PARAMS: TunerParam[] = [
+  { path: 'waves.budget.targetOnScreen.base', label: 'Budget · 目标同屏基础', group: 'waves', waveDeferred: true },
+  { path: 'waves.budget.targetOnScreen.perWave', label: 'Budget · 目标同屏每波', group: 'waves', waveDeferred: true },
+  { path: 'waves.budget.checkInterval', label: 'Budget · 检查间隔', group: 'waves', waveDeferred: true },
+  { path: 'waves.budget.batchMax', label: 'Budget · 单次补怪上限', group: 'waves', waveDeferred: true },
+  { path: 'waves.budget.waveEndSprint.window', label: 'Budget · 波末窗口', group: 'waves', waveDeferred: true },
+  { path: 'waves.budget.waveEndSprint.multiplier', label: 'Budget · 波末目标倍率', group: 'waves', waveDeferred: true },
+  { path: 'waves.budget.maxAlive', label: 'Budget · 同屏硬上限', group: 'waves', waveDeferred: true },
+];
+
 function enemyParams(type: 'normal' | 'fast' | 'tank' | 'boss', label: string): TunerParam[] {
   const prefix = `enemies.types.${type}`;
   return [
@@ -59,6 +69,9 @@ export const TUNER_PARAMS: TunerParam[] = [
   { path: 'economy.drops.chanceCap', label: 'P2 · 掉率上限', group: 'p2' },
   { path: 'economy.dropStarPolicy.star2Share', label: 'P2 · 二星掉落占比', group: 'p2' },
 ];
+
+/** A3 additions stay separate so A1's original 61-field contract remains stable. */
+export const ALL_TUNER_PARAMS: TunerParam[] = [...TUNER_PARAMS, ...BUDGET_TUNER_PARAMS];
 
 export function getNumberAt(root: unknown, path: string): number {
   let value: unknown = root;

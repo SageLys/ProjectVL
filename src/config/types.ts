@@ -17,10 +17,18 @@ export interface CombatConfig {
 
 export interface WavesConfig {
   totalWaves: number;
+  spawnMode: 'interval' | 'budget';
   enemyCountBase: number;
   enemyCountPerWave: number;
   firstSpawnDelay: number;
   spawnInterval: { base: number; perWave: number; min: number };
+  budget: {
+    targetOnScreen: { base: number; perWave: number };
+    checkInterval: number;
+    batchMax: number;
+    waveEndSprint: { window: number; multiplier: number };
+    maxAlive: number;
+  };
   betweenWaves: number;
   spawnMargin: number;
   typeRoll: { tankBase: number; tankPerWave: number; fastThreshold: number };
