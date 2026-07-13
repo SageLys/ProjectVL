@@ -10,6 +10,7 @@ import tuner from './base/tuner.json';
 import input from './base/input.json';
 import devShort from '../config/variants/dev-short.json';
 import type { DeepPartial, GameConfig } from './types';
+import { validateSkillsConfig } from './skillValidator';
 
 /** 已注册 variant。新增覆盖文件后在此登记（key = URL 参数名）。 */
 export const VARIANTS: Record<string, DeepPartial<GameConfig>> = {
@@ -34,6 +35,7 @@ export function deepMerge<T>(base: T, patch: DeepPartial<T>): T {
 }
 
 function assembleBase(): GameConfig {
+  validateSkillsConfig(skills);
   return structuredClone({
     combat,
     waves,

@@ -39,13 +39,13 @@ export function moveOrSwap(state: GameState, config: Config, rng: Rng, sourceKin
   if (!moving) return [];
   const replaced = target[targetIndex];
 
-  if (replaced && targetKind === 'equipment' && replaced.type === moving.type && replaced.star === moving.star && replaced.star < cfg.economy.maxStar) {
+  if (cfg.economy.placeholderAssumptions.feedEquipped && cfg.economy.feedEquipped && replaced && targetKind === 'equipment' && replaced.type === moving.type && replaced.star === moving.star && replaced.star < cfg.economy.maxStar) {
     return feed(state, config, rng, source, sourceIndex, replaced);
   }
 
   if (targetKind === 'equipment') {
     if (moving.star < cfg.economy.equipThreshold) return [{ type: 'equipRejected', reason: 'star' }];
-    if (cfg.economy.equipDistinctTypes && duplicateEquippedType(state.equipment, moving, targetIndex)) {
+    if (cfg.economy.placeholderAssumptions.distinctEquippedTypes && cfg.economy.equipDistinctTypes && duplicateEquippedType(state.equipment, moving, targetIndex)) {
       return [{ type: 'equipRejected', reason: 'duplicate' }];
     }
     if (sourceKind === 'cards' && replaced) return [{ type: 'equipFull' }];

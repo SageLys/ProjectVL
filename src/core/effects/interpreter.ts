@@ -23,11 +23,27 @@ export function effectiveEquipment(state: GameState): Card[] {
   return state.equipment.filter((c): c is Card => !!c);
 }
 
-/** 卡的当前装备态星层（入装门槛 2★，3★ 封顶）。 */
-function starTierOf(def: CardDef, star: number): BindingDef[] {
-  if (!def.stars) return [];
-  const key = star >= 3 ? '3' : star >= 2 ? '2' : null;
-  return key ? def.stars[key].equip : [];
+function clone<T>(value: T): T { return structuredClone(value); }
+
+function applyAmplify(value: unknown, axes: Record<string, string>, key = ''): unknown {
+  if (typeof value === 'number' && axes[key]) {
+    const expr = axes[key].trim();
+    const n = Number(expr.replace(/^\+/, '').replace(/%$/, ''));
+    if (!Number.isFinite(n)) throw new Error(`[skills] 非法 amplifyAxis: ${key}=${expr}`);
+    return expr.endsWith('%') ? value * (1 + n / 100) : value + n;
+  }
+  if (Array.isArray(value)) return value.map(v => applyAmplify(v, axes, key));
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, applyAmplify(v, axes, k)]));
+  }
+  return value;
+}
+
+/** 解析装备态：3/5/6 为锚点；4★ 只能对 3★ 作同构数值放大。 */
+export function resolveEquipBindings(def: CardDef, star: number): BindingDef[] {
+  if (star < 3) return [];
+  if (star === 4) return applyAmplify(clone(def.stars['3'].equip), def.amplifyAxis.params) as BindingDef[];
+  return clone(def.stars[star >= 6 ? '6' : star >= 5 ? '5' : '3'].equip);
 }
 
 /** 遍历生效装备的全部绑定。 */
@@ -35,7 +51,7 @@ function* equippedBindings(state: GameState): Generator<{ card: Card; def: CardD
   for (const card of effectiveEquipment(state)) {
     const def = DEFS.get(card.type);
     if (!def) continue; // 旧数值卡：装备加成走 legacy 路径（stats/bonusFromCards）
-    const bindings = starTierOf(def, card.star);
+    const bindings = resolveEquipBindings(def, card.star);
     for (let i = 0; i < bindings.length; i++) yield { card, def, binding: bindings[i], bindingIndex: i };
   }
 }
@@ -183,8 +199,7 @@ export function getModifiers(state: GameState): Modifiers {
 export function releaseConsumable(state: GameState, config: Config, rng: Rng, cardType: string, star: number, x: number, y: number): GameEvent[] {
   const def = DEFS.get(cardType);
   if (!def) return [];
-  const key = String(Math.min(Math.max(star, 1), 3)) as '1' | '2' | '3';
-  const tier = def.consumable.byStar[key];
+  const tier = resolveConsumableTier(def, star);
   const ctx: EffectCtx = {
     state, config, rng,
     events: [],
@@ -197,6 +212,24 @@ export function releaseConsumable(state: GameState, config: Config, rng: Rng, ca
   };
   runEffects(ctx, tier.effects);
   return ctx.events;
+}
+
+function interpolate(lower: unknown, upper: unknown, t: number): unknown {
+  if (typeof lower === 'number' && typeof upper === 'number') return lower + (upper - lower) * t;
+  if (Array.isArray(lower)) return lower.map((v, i) => interpolate(v, Array.isArray(upper) ? upper[i] : undefined, t));
+  if (lower && typeof lower === 'object') {
+    return Object.fromEntries(Object.entries(lower).map(([k, v]) => [k, interpolate(v, upper && typeof upper === 'object' ? (upper as Record<string, unknown>)[k] : undefined, t)]));
+  }
+  return lower;
+}
+
+/** 1/3/6 为消耗态锚点；2/4/5 在相邻锚点间线性插值。 */
+export function resolveConsumableTier(def: CardDef, star: number) {
+  const s = Math.min(6, Math.max(1, Math.trunc(star)));
+  const anchors = def.consumable.anchors;
+  if (s === 1 || s === 3 || s === 6) return clone(anchors[String(s) as '1' | '3' | '6']);
+  const [lo, hi] = s < 3 ? [1, 3] : [3, 6];
+  return interpolate(anchors[String(lo) as '1' | '3'], anchors[String(hi) as '3' | '6'], (s - lo) / (hi - lo)) as typeof anchors['1'];
 }
 
 /** 直接运行一组效果（zone tick 等内部复用；导出供测试）。 */

@@ -40,7 +40,8 @@ export function addBonus(a: Bonus, b: Bonus): Bonus {
  * 就地修改 state.cards，累加 state.merges，产出 merged 事件并触发 onMerge。
  */
 export function autoMergeCards(state: GameState, config: Config, rng: Rng): { merged: number; events: GameEvent[] } {
-  const { maxStar, mergeCopies } = cfg.economy;
+  const { maxStar } = cfg.economy;
+  const mergeCopies = cfg.economy.placeholderAssumptions.twoCopyMerge ? 2 : cfg.economy.mergeCopiesWhenTwoCopyDisabled;
   const events: GameEvent[] = [];
   let merged = 0;
   let changed = true;

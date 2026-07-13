@@ -6,7 +6,7 @@ import { texts } from './data';
 import type { GameEvent, GameState } from './core/types';
 import { createInitialState, createDefaultConfig } from './core/createInitialState';
 import { updateGame } from './core/updateGame';
-import { registerSkillDefs } from './core/effects/interpreter';
+import { registerSkillDefs, resolveConsumableTier } from './core/effects/interpreter';
 import { startNextWave } from './core/systems/waveSystem';
 import { moveOrSwap, unequipDestroy, consumeCard } from './core/systems/equipmentSystem';
 import { collectNearest, spawnTestDrops, spawnGroundDrop } from './core/systems/dropSystem';
@@ -108,7 +108,7 @@ const tuner = createTunerPanel(refs, config, {
 function previewFor(source: 'cards' | 'equipment', index: number): PreviewSpec {
   const card = source === 'cards' ? state.cards[index] : state.equipment[index];
   const def = card && cfg.skills.cards.find(item => item.id === card.type);
-  const tier = card && def?.consumable?.byStar[String(card.star) as '1' | '2' | '3'];
+  const tier = card && def ? resolveConsumableTier(def, card.star) : undefined;
   return tier?.radius == null ? { placement: 'screen' } : { placement: 'point', radius: tier.radius };
 }
 

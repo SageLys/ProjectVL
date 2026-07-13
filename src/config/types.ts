@@ -84,6 +84,7 @@ export interface ProgressionConfig {
 export interface EconomyConfig {
   maxStar: number;
   mergeCopies: number;
+  mergeCopiesWhenTwoCopyDisabled: number;
   equipThreshold: number;
   handSlots: number;
   equipSlots: number;
@@ -92,6 +93,12 @@ export interface EconomyConfig {
   inRunSlotExpansion: boolean;
   equipDistinctTypes: boolean;
   feedEquipped: boolean;
+  placeholderAssumptions: {
+    twoCopyMerge: boolean;
+    normalDropsOnlyOneStar: boolean;
+    feedEquipped: boolean;
+    distinctEquippedTypes: boolean;
+  };
   dropStarPolicy: { normal: number; bountyBossMax: number; star2Share: number };
   drops: { pickupRadius: number; chanceCap: number };
   defaults: { dropChance: number; dropLifetime: number };

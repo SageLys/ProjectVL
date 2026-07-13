@@ -574,11 +574,13 @@
       "required": [
         "maxStar",
         "mergeCopies",
+        "mergeCopiesWhenTwoCopyDisabled",
         "equipThreshold",
         "handSlots",
         "equipSlots",
         "equipIrreversible",
-        "unequipPolicy"
+        "unequipPolicy",
+        "placeholderAssumptions"
       ],
       "properties": {
         "maxStar": {
@@ -590,6 +592,11 @@
           "type": "integer",
           "const": 2,
           "description": "【占位】二合（2 张同型同星→+1 星）。成本链：2★=2 / 3★=4（入装）/ 4★=8 / 5★=16 / 6★=32 张同型 1★ 等价。原三合否决论据已失效，若重标定中二合导致 6★ 不可达且不接受长线定位，可回开三合讨论。"
+        },
+        "mergeCopiesWhenTwoCopyDisabled": {
+          "type": "integer",
+          "minimum": 2,
+          "description": "关闭二合占位假设时采用的备选合成份数。"
         },
         "equipThreshold": {
           "type": "integer",
@@ -620,6 +627,18 @@
           "type": "boolean",
           "const": true,
           "description": "【占位→地位升级】喂养合成：手牌卡与已装备同型同星直接合成升星。永久装备定案后，这是唯一能提升已装备卡星级的途径。"
+        },
+        "placeholderAssumptions": {
+          "type": "object",
+          "description": "四项可翻转的占位假设开关；默认均为 true 以维持当前行为。",
+          "required": ["twoCopyMerge", "normalDropsOnlyOneStar", "feedEquipped", "distinctEquippedTypes"],
+          "properties": {
+            "twoCopyMerge": { "type": "boolean" },
+            "normalDropsOnlyOneStar": { "type": "boolean" },
+            "feedEquipped": { "type": "boolean" },
+            "distinctEquippedTypes": { "type": "boolean" }
+          },
+          "additionalProperties": false
         },
         "dropStarPolicy": {
           "type": "object",

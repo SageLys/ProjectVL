@@ -15,11 +15,16 @@ export function spawnGroundDrop(state: GameState, config: Config, rng: Rng, x: n
   state.groundDrops.push({
     id: state.nextDropId++,
     x, y, type,
-    star: star ?? cfg.economy.dropStarPolicy.normal,
+    star: star ?? normalDropStar(rng),
     life,
     maxLife: life,
     pulse: rng() * TAU,
   });
+}
+
+function normalDropStar(rng: Rng): number {
+  if (cfg.economy.placeholderAssumptions.normalDropsOnlyOneStar) return 1;
+  return rng() < cfg.economy.dropStarPolicy.star2Share ? 2 : cfg.economy.dropStarPolicy.normal;
 }
 
 /** 击杀掉落判定：概率命中或 boss 必掉，则在敌人位置生成掉落。 */
