@@ -10,8 +10,8 @@ describe('combatSystem · 锁定', () => {
   it('锁定射程内最近的敌人', () => {
     const s = freshState();
     const config = createDefaultConfig();
-    const near = enemy({ x: 500, y: 300 });
-    const far = enemy({ x: 600, y: 300 });
+    const near = enemy({ x: 290, y: 480 });
+    const far = enemy({ x: 390, y: 480 });
     s.enemies = [far, near];
     expect(findTarget(s, config)).toBe(near);
   });
@@ -20,15 +20,15 @@ describe('combatSystem · 锁定', () => {
     const s = freshState();
     const config = createDefaultConfig();
     config.range = 430;
-    s.enemies = [enemy({ x: 980, y: 300 })];
+    s.enemies = [enemy({ x: 701, y: 480 })];
     expect(findTarget(s, config)).toBeNull();
   });
 
   it('烙印（focusPriority）权重优先于最近（仲裁规则5）', () => {
     const s = freshState();
     const config = createDefaultConfig();
-    const near = enemy({ x: 500, y: 300 });
-    const branded = enemy({ x: 620, y: 300 });
+    const near = enemy({ x: 290, y: 480 });
+    const branded = enemy({ x: 410, y: 480 });
     applyBrand(branded, 2, 4);
     s.enemies = [near, branded];
     expect(findTarget(s, config)).toBe(branded);

@@ -104,7 +104,7 @@ describe('解释器 · 装备态触发绑定', () => {
     registerSkillDefs([def('multi', [{ trigger: 'interval', triggerParams: { seconds: 1 }, effects: [{ atom: 'burstDamage', params: { damageMul: 1, radius: 300 } }] }])]);
     const s = freshState();
     equipLocked(s, 'multi', 3);
-    const e = enemy({ x: 480, y: 300, hp: 1000, maxHp: 1000 });
+    const e = enemy({ x: 270, y: 480, hp: 1000, maxHp: 1000 });
     s.enemies = [e];
     tickIntervalBindings(s, config, rng, 0.5);
     expect(e.hp).toBe(1000);              // 未到期
@@ -159,14 +159,14 @@ describe('解释器 · passive 修饰聚合', () => {
     registerSkillDefs([def('range', passive([{ atom: 'breachReduction', params: { ratio: 0.5 } }]))]);
     const s = freshState();
     equipLocked(s, 'range', 2);
-    s.enemies = [enemy({ x: 481, y: 300, hp: 999, maxHp: 999, damage: 28 })];
+    s.enemies = [enemy({ x: 271, y: 480, hp: 999, maxHp: 999, damage: 28 })];
     moveEnemies(s, config, rng, 0.016);
     expect(s.hp).toBe(100 - 14); // 28 × (1-0.5)
 
     registerSkillDefs([def('range', passive([{ atom: 'thorns', params: { ratio: 2 } }]))]);
     const s2 = freshState();
     equipLocked(s2, 'range', 2);
-    s2.enemies = [enemy({ x: 481, y: 300, hp: 10, maxHp: 10, damage: 8, xp: 1 })];
+    s2.enemies = [enemy({ x: 271, y: 480, hp: 10, maxHp: 10, damage: 8, xp: 1 })];
     moveEnemies(s2, config, rng, 0.016);
     expect(s2.hp).toBe(100);  // 反噬致死 → 无突破伤害
     expect(s2.kills).toBe(1); // 按击杀结算
@@ -200,9 +200,9 @@ describe('解释器 · passive 修饰聚合', () => {
     const s = freshState();
     equipLocked(s, 'damage', 3);
     expect(getModifiers(s).morph).toBe('mortar');
-    shoot(s, config, rng, enemy({ x: 560, y: 300 }));
+    shoot(s, config, rng, enemy({ x: 350, y: 480 }));
     expect(s.bullets[0].kind).toBe('mortar');
-    const e = enemy({ x: 560, y: 300, hp: 1000, maxHp: 1000 });
+    const e = enemy({ x: 350, y: 480, hp: 1000, maxHp: 1000 });
     s.enemies = [e];
     for (let i = 0; i < 30 && s.bullets.length; i++) updateBullets(s, config, rng, 0.033);
     expect(e.hp).toBeLessThan(1000);
@@ -212,7 +212,7 @@ describe('解释器 · passive 修饰聚合', () => {
     registerSkillDefs([def('damage', passive([{ atom: 'beamMorph', params: { interval: 0.5, width: 30, damageRatio: 1 } }]))]);
     const s = freshState();
     equipLocked(s, 'damage', 3);
-    const e = enemy({ x: 600, y: 300, hp: 1000, maxHp: 1000 });
+    const e = enemy({ x: 390, y: 480, hp: 1000, maxHp: 1000 });
     s.enemies = [e];
     updateTurret(s, config, rng, 0.3);
     expect(s.bullets).toHaveLength(0);
@@ -256,8 +256,8 @@ describe('运行时 · 区域/光环/召唤物/护盾', () => {
     registerSkillDefs([def('rate', [{ trigger: 'passive', effects: [{ atom: 'aura', params: { radiusRatioOfRange: 0.6, tickInterval: 0.4, effects: [{ atom: 'slow', params: { ratio: 0.35, duration: 0.9 } }] } }] }])]);
     const s = freshState();
     equipLocked(s, 'rate', 3);
-    const near = enemy({ x: 560, y: 300, hp: 100, maxHp: 100 });
-    const far = enemy({ x: 480 + 900, y: 300, hp: 100, maxHp: 100 });
+    const near = enemy({ x: 350, y: 480, hp: 100, maxHp: 100 });
+    const far = enemy({ x: 270 + 900, y: 480, hp: 100, maxHp: 100 });
     s.enemies = [near, far];
     tickEffects(s, config, rng, 0.2);
     tickEffects(s, config, rng, 0.3); // 累计超过 tickInterval → 脉冲
@@ -305,14 +305,14 @@ describe('运行时 · 区域/光环/召唤物/护盾', () => {
     const s = freshState();
     equipLocked(s, 'range', 2);
     s.shield = { hits: 1, maxHits: 1, regenRemaining: null, regenSeconds: 2 };
-    const bystander = enemy({ x: 560, y: 300, hp: 100, maxHp: 100 });
+    const bystander = enemy({ x: 350, y: 480, hp: 100, maxHp: 100 });
     s.enemies = [bystander];
     const events: ReturnType<typeof fireTrigger> = [];
     const dmg = absorbBreach(s, config, rng, 28, events);
     expect(dmg).toBeNull();                                    // 吸收，不扣血
     expect(events).toContainEqual({ type: 'shieldBroken' });
     expect(bystander.hp).toBe(90);                             // 破盾新星
-    expect(bystander.x).toBeGreaterThan(560);                  // 新星击退
+    expect(bystander.x).toBeGreaterThan(350);                  // 新星击退
     expect(s.shield!.regenRemaining).toBe(2);
     tickEffects(s, config, rng, 2.1);
     expect(s.shield!.hits).toBe(1);                            // 再生完成

@@ -9,6 +9,10 @@ function el<T extends Element>(sel: string): T {
 export function getDomRefs() {
   return {
     canvas: el<HTMLCanvasElement>('#game'),
+    arena: el<HTMLElement>('#arena'),
+    dock: el<HTMLElement>('#dock'),
+    aimPreview: el<HTMLElement>('#aimPreview'),
+    screenPreview: el<HTMLElement>('#screenPreview'),
     hpText: el<HTMLElement>('#hpText'),
     hpBar: el<HTMLElement>('#hpBar'),
     xpText: el<HTMLElement>('#xpText'),

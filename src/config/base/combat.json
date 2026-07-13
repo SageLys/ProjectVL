@@ -1,10 +1,10 @@
 {
-  "canvas": { "width": 960, "height": 600 },
-  "turret": { "x": 480, "y": 300 },
+  "canvas": { "width": 540, "height": 960 },
+  "turret": { "x": 270, "y": 480 },
   "hp": { "max": 100 },
-  "defaults": { "damage": 16, "fireRate": 3.3, "range": 430 },
-  "bullet": { "speed": 620, "life": 1.25, "radius": 4, "spread": 0.12, "muzzleOffset": 24 },
-  "breakthroughDist": 55,
+  "defaults": { "damage": 16, "fireRate": 3.3, "range": 320 },
+  "bullet": { "speed": 465, "life": 1.6, "radius": 4, "spread": 0.12, "muzzleOffset": 24 },
+  "breakthroughDist": 48,
   "dtCap": 0.033,
   "vfx": { "shootParticles": 4, "killParticles": 12, "breakthroughParticles": 10 }
 }
