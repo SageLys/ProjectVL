@@ -8,7 +8,7 @@
   "budget": {
     "targetOnScreen": { "base": 4, "perWave": 1 },
     "checkInterval": 0.75,
-    "batchMax": 2,
+    "batchMax": 3,
     "waveEndSprint": { "window": 15, "multiplier": 1.5 },
     "maxAlive": 20
   },

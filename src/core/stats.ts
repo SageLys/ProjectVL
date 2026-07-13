@@ -26,8 +26,19 @@ export function totalMulti(state: GameState): number {
   return state.multi + equipmentBonus(state).multi;
 }
 
+/**
+ * Largest circular attack range that still leaves a visible anticipation band
+ * between the range boundary and every edge of the arena.
+ */
+export function maxAttackRange(): number {
+  const { width, height } = cfg.combat.canvas;
+  const { x, y } = cfg.combat.turret;
+  const nearestEdge = Math.min(x, width - x, y, height - y);
+  return Math.max(0, nearestEdge - cfg.combat.attackPreviewMargin);
+}
+
 export function totalRange(state: GameState, config: Config): number {
-  return config.range + equipmentBonus(state).range;
+  return Math.min(config.range + equipmentBonus(state).range, maxAttackRange());
 }
 
 /** 掉落概率：（基础 + 眷恋加成）× 装备态掉率乘数，封顶 chanceCap。 */

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { findTarget, shoot, updateBullets } from '../src/core/systems/combatSystem';
-import { totalMulti } from '../src/core/stats';
+import { maxAttackRange, totalMulti, totalRange } from '../src/core/stats';
 import { applyBrand } from '../src/core/effects/statusSystem';
 import { enemy, freshState, createDefaultConfig, constRng, resetTestEnv } from './helpers';
 
@@ -21,6 +21,18 @@ describe('combatSystem · 锁定', () => {
     const config = createDefaultConfig();
     config.range = 430;
     s.enemies = [enemy({ x: 701, y: 365 })];
+    expect(findTarget(s, config)).toBeNull();
+  });
+
+  it('攻击范围在屏幕边缘保留预判区域', () => {
+    const s = freshState();
+    const config = createDefaultConfig();
+    config.range = 600;
+    s.equipment[0] = { id: 1, type: 'range', star: 6 };
+
+    expect(maxAttackRange()).toBe(210);
+    expect(totalRange(s, config)).toBe(210);
+    s.enemies = [enemy({ x: 490, y: 365 })]; // 距中心 220，仍在屏幕内的预判带
     expect(findTarget(s, config)).toBeNull();
   });
 

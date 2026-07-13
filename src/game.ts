@@ -11,6 +11,7 @@ import { jumpToWave, restartWave, startNextWave } from './core/systems/waveSyste
 import { moveOrSwap, unequipDestroy, consumeCard } from './core/systems/equipmentSystem';
 import { collectNearest, spawnTestDrops, spawnGroundDrop } from './core/systems/dropSystem';
 import { applyPerk } from './core/systems/progressionSystem';
+import { totalRange } from './core/stats';
 import { createRenderer } from './render/canvasRenderer';
 import { getDomRefs } from './ui/domRefs';
 import { createToast } from './ui/toast';
@@ -254,7 +255,7 @@ if (import.meta.env.DEV) void Promise.all([import('./debug/exposeDebugApi'), imp
     getConfig: () => cfg,
     getSeed: () => devSeed,
     getPresetName: () => tuner?.getActivePresetName() ?? '',
-    getRange: () => config.range,
+    getRange: () => totalRange(state, config),
   });
 
   debugModule.exposeDebugApi({

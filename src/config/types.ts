@@ -7,6 +7,8 @@ export interface CombatConfig {
   turret: { x: number; y: number };
   hp: { max: number };
   defaults: { damage: number; fireRate: number; range: number };
+  /** Minimum visible space between the attack circle and every canvas edge. */
+  attackPreviewMargin: number;
   bullet: { speed: number; life: number; radius: number; spread: number; muzzleOffset: number };
   breakthroughDist: number;
   /** 遥测危险区在突破线外额外延伸的宽度（像素）；不参与战斗判定。 */
