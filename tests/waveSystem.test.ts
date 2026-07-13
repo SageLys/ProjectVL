@@ -63,7 +63,7 @@ describe('waveSystem · boss 与胜负', () => {
     const s = freshState();
     const config = createDefaultConfig();
     s.hp = 10;
-    s.enemies = [enemy({ x: 270, y: 480, type: 'boss', hp: 100, maxHp: 100, speed: 12, r: 35, damage: 28, xp: 5 })];
+    s.enemies = [enemy({ x: 270, y: 365, type: 'boss', hp: 100, maxHp: 100, speed: 12, r: 35, damage: 28, xp: 5 })];
     const ev = moveEnemies(s, config, constRng(0), 0.016);
     expect(ev).toContainEqual({ type: 'gameEnd', win: false });
     expect(s.hp).toBeLessThanOrEqual(0);

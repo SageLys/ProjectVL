@@ -1,8 +1,8 @@
 {
-  "canvas": { "width": 540, "height": 960 },
-  "turret": { "x": 270, "y": 480 },
+  "canvas": { "width": 540, "height": 730 },
+  "turret": { "x": 270, "y": 365 },
   "hp": { "max": 100 },
-  "defaults": { "damage": 16, "fireRate": 3.3, "range": 320 },
+  "defaults": { "damage": 16, "fireRate": 3.3, "range": 285 },
   "bullet": { "speed": 465, "life": 1.6, "radius": 4, "spread": 0.12, "muzzleOffset": 24 },
   "breakthroughDist": 48,
   "dtCap": 0.033,

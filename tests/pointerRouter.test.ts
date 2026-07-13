@@ -12,8 +12,8 @@ describe('pointerRouter · 阈值', () => {
 });
 
 describe('pointerRouter · 坐标与取消', () => {
-  it('把 CSS 显示坐标等比换算到 540×960 画布', () => {
-    expect(canvasPoint({ width: 540, height: 960 }, { left: 10, top: 20, width: 270, height: 480 } as DOMRect, 145, 260)).toEqual({ x: 270, y: 480 });
+  it('把 CSS 显示坐标等比换算到 540×730 画布', () => {
+    expect(canvasPoint({ width: 540, height: 730 }, { left: 10, top: 20, width: 270, height: 365 } as DOMRect, 145, 202.5)).toEqual({ x: 270, y: 365 });
   });
   it('计算 pointerdown 后的欧氏位移', () => expect(distanceFrom(start, 16, 28)).toBe(10));
   it('出屏/非画布/非卡格落点走取消路径', () => {
