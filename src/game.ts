@@ -21,10 +21,8 @@ import { createTunerPanel } from './ui/tunerPanel';
 import { createModals } from './ui/modals';
 import { formatToast, SLOT_CHANGING } from './ui/eventText';
 import type { SlotHandlers } from './ui/slotFactory';
-import { createPointerDrag } from './input/pointerDrag';
-import { createDropClick } from './input/dropClick';
+import { createPointerRouter, type PreviewSpec } from './input/pointerRouter';
 import { createKeyboard } from './input/keyboard';
-import { exposeDebugApi } from './debug/exposeDebugApi';
 
 // 技能 = 数据 + 解释器：把配置里的卡定义注入解释器（P5 实装 12 张正式卡后自动生效）。
 registerSkillDefs(cfg.skills.cards);
@@ -73,7 +71,7 @@ const slotHandlers: SlotHandlers = {
     dispatch(toggleLock(state, index));
   },
   dragStart(e, source, index, el) {
-    pointerDrag.begin(e, source, index, el);
+    pointerRouter.begin(e, source, index, el);
   },
 };
 
@@ -94,16 +92,23 @@ const tuner = createTunerPanel(refs, config, {
   onReset() { toast(texts.toast.tunerReset); },
 });
 
-const pointerDrag = createPointerDrag(refs.canvas, (source, index, target) => {
-  if (target.kind === 'arena') {
-    dispatch(consumeCard(state, config, rng, index, target.x, target.y));
-  } else {
-    dispatch(moveOrSwap(state, config, rng, source, index, target.slotKind, target.index));
-  }
-});
+function previewFor(source: 'cards' | 'equipment', index: number): PreviewSpec {
+  const card = source === 'cards' ? state.cards[index] : state.equipment[index];
+  const def = card && cfg.skills.cards.find(item => item.id === card.type);
+  const tier = card && def?.consumable?.byStar[String(card.star) as '1' | '2' | '3'];
+  return tier?.radius == null ? { placement: 'screen' } : { placement: 'point', radius: tier.radius };
+}
 
-createDropClick(refs.canvas, (x, y) => {
-  dispatch(collectNearest(state, config, rng, x, y, cfg.economy.drops.pickupRadius));
+const pointerRouter = createPointerRouter({
+  canvas: refs.canvas, dock: refs.dock, aimPreview: refs.aimPreview, screenPreview: refs.screenPreview,
+  input: cfg.input, bountyEnabled: cfg.skills.mechanisms.bounty.enabled,
+  onBountyTap: (_x, _y) => false, // S5 启用 bounty 后在此命中并接单。
+  onArenaTap: (x, y) => dispatch(collectNearest(state, config, rng, x, y, cfg.economy.drops.pickupRadius)),
+  onDrop: (source, index, target) => {
+    if (target.kind === 'arena' && source === 'cards') dispatch(consumeCard(state, config, rng, index, target.x, target.y));
+    else if (target.kind === 'slot') dispatch(moveOrSwap(state, config, rng, source, index, target.slotKind, target.index));
+  },
+  previewFor,
 });
 createKeyboard(togglePause);
 
@@ -148,10 +153,8 @@ function loop(now: number): void {
 }
 
 // 调试接口（仅 DEV 注入）：供控制台与浏览器自动化驱动。
-exposeDebugApi({
-  getState: () => ({ ...state, enemies: state.enemies.length, bullets: state.bullets.length, config: { ...config } }),
-  start,
-  reset,
+if (import.meta.env.DEV) void import('./debug/exposeDebugApi').then(({ exposeDebugApi }) => exposeDebugApi({
+  getState: () => ({ ...state, enemies: state.enemies.length, bullets: state.bullets.length, config: { ...config } }), start, reset,
   spawnGroundDrop: (x, y, type = null, star) => spawnGroundDrop(state, config, rng, x, y, type, star),
   addTestPair: () => dispatch(spawnTestDrops(state, config, rng)),
   moveOrSwap: (source, index, targetKind, targetIndex) => dispatch(moveOrSwap(state, config, rng, source, index, targetKind, targetIndex)),
@@ -159,7 +162,7 @@ exposeDebugApi({
   toggleLock: index => dispatch(toggleLock(state, index)),
   setConfig: patch => { Object.assign(config, patch); tuner.syncInputs(); renderHud(refs, state, config); },
   getVariants: () => activeVariants,
-});
+}));
 
 tuner.syncInputs();
 reset();
