@@ -25,6 +25,7 @@ export interface WavesConfig {
   firstSpawnDelay: number;
   spawnInterval: { base: number; perWave: number; min: number };
   budget: {
+    waveQuota: { base: number; perWave: number };
     targetOnScreen: { base: number; perWave: number };
     checkInterval: number;
     batchMax: number;

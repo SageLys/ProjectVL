@@ -17,6 +17,11 @@ export interface BudgetAdmission {
   spawnCount: number;
 }
 
+/** Budget has its own wave quota so interval's tuned enemy counts remain untouched. */
+export function budgetWaveQuotaFor(wave: number, budget: WavesConfig['budget']): number {
+  return Math.max(0, Math.trunc(budget.waveQuota.base + wave * budget.waveQuota.perWave));
+}
+
 export function budgetAdmission(wave: number, spawnLeft: number, alive: number, budget: WavesConfig['budget']): BudgetAdmission {
   const normalTarget = Math.max(0, budget.targetOnScreen.base + wave * budget.targetOnScreen.perWave);
   const batchMax = Math.max(1, budget.batchMax);

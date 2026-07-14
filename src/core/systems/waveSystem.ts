@@ -3,7 +3,7 @@ import type { Config, GameEvent, GameState, Rng } from '../types';
 import { endGame } from '../endGame';
 import { spawnEnemy } from './enemySystem';
 import { fireTrigger } from '../effects/interpreter';
-import { budgetAdmission } from './budgetRules';
+import { budgetAdmission, budgetWaveQuotaFor } from './budgetRules';
 export { budgetAdmission } from './budgetRules';
 
 /** 第 wave 波的总出怪配额：base + wave*perWave。 */
@@ -16,7 +16,9 @@ export function enemyCountFor(wave: number): number {
  */
 export function startNextWave(state: GameState, config: Config, rng: Rng): GameEvent[] {
   state.wave++;
-  state.spawnLeft = enemyCountFor(state.wave);
+  state.spawnLeft = cfg.waves.spawnMode === 'budget'
+    ? budgetWaveQuotaFor(state.wave, cfg.waves.budget)
+    : enemyCountFor(state.wave);
   state.spawnTimer = cfg.waves.firstSpawnDelay;
   state.lastSpawnCheckCount = 0;
   state.waveClearPending = false;

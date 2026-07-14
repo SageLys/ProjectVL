@@ -140,12 +140,16 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
     const types = [['normal', '普通'], ['fast', '高速'], ['tank', '重装'], ['boss', 'Boss']] as const;
     const table = types.map(([type, label]) => `<tr><th>${label}</th>${metrics.cells[type].map(cell => `<td title="命中率 ${format(cell.hitRate * 100)}%">${cell.ttk.toFixed(2)}s</td>`).join('')}</tr>`).join('');
     const n = metrics.cells.normal[0];
+    const budgetDurationProjection = metrics.budget
+      ? `<span><b>${metrics.budget.waveDurations.slice(0, 3).map(value => `${value.toFixed(1)}s`).join(' / ')}</b>Budget 每波理论时长（前 3 波）</span>
+        <span><b>${(metrics.budget.totalDuration / 60).toFixed(2)}min</b>Budget 全局理论局长</span>`
+      : '';
     const budgetProjection = metrics.budget
       ? `<span><b>${metrics.budget.normalOnScreen.map((value, index) => `${value}→${metrics.budget!.sprintOnScreen[index]}`).join(' / ')}</b>Budget 理论同屏（常规→波末冲刺，前 3 波）</span>
         <span><b>${metrics.budget.sprintQuotaThreshold.map(value => `≤${value}`).join(' / ')}</b>Budget 冲刺触发剩余配额（前 3 波）</span>`
       : '';
     derived.innerHTML = `<div class="metric-block"><b>TTK 矩阵</b><table><thead><tr><th>类型</th><th>波 1</th><th>波 2</th><th>波 3</th></tr></thead><tbody>${table}</tbody></table></div>
-      <div class="metric-cards">${budgetProjection}
+      <div class="metric-cards">${budgetDurationProjection}${budgetProjection}
         <span><b>${n.entryWalk.toFixed(2)}s / ${n.insideWalk.toFixed(2)}s</b>入场走行 / 圈内存活走行（普通·波1）</span>
         <span><b>${n.killDepth.toFixed(1)}px</b>理论击杀深度（普通·波1）</span>
         <span><b>${n.onScreen.toFixed(2)}</b>理论同屏数（普通·波1）</span>
@@ -222,7 +226,10 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
     root.querySelector<HTMLOutputElement>('#timeScaleVal')!.value = `${scale}×`;
     root.querySelector<HTMLInputElement>('#invincibleInput')!.checked = hooks.debug.getInvincible();
     const spawn = hooks.debug.getSpawnTelemetry();
-    spawnModeStatus.textContent = `Current effective mode: ${cfg.waves.spawnMode}; pending mode: ${pendingSpawnMode ?? 'none'}; effective: ${pendingSpawnMode ? 'next wave (restart/jump applies first)' : 'now'}. Wave ${spawn.wave}; spawnLeft ${spawn.spawnLeft}; alive ${spawn.alive}; normal/actual target ${spawn.normalTarget}/${spawn.effectiveTarget}; end sprint ${spawn.inEndSprint ? 'yes' : 'no'}; spawnTimer ${spawn.spawnTimer.toFixed(2)}; last admission ${spawn.lastSpawnCheckCount}.`;
+    const pendingHint = pendingSpawnMode
+      ? ` ${pendingSpawnMode} 将于下一波生效；点“重开本波”可立即应用。`
+      : '';
+    spawnModeStatus.textContent = `Current effective mode: ${cfg.waves.spawnMode}; pending mode: ${pendingSpawnMode ?? 'none'}.${pendingHint} Wave ${spawn.wave}; spawnLeft ${spawn.spawnLeft}; alive ${spawn.alive}; normal/actual target ${spawn.normalTarget}/${spawn.effectiveTarget}; end sprint ${spawn.inEndSprint ? 'yes' : 'no'}; spawnTimer ${spawn.spawnTimer.toFixed(2)}; last admission ${spawn.lastSpawnCheckCount}.`;
     renderMetrics();
     const projection = deriveMetrics(metricConfig(), config).budget?.projections.slice(0, 3);
     if (projection) {

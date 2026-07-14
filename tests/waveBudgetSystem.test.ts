@@ -84,11 +84,30 @@ describe('waveSystem · budget spawn strategy', () => {
     };
     const wave = computeExperienceMetrics(session).waves[0];
     const target = cfg.waves.budget.targetOnScreen.base + cfg.waves.budget.targetOnScreen.perWave;
-    // Default sprint is disabled; the first admission is batch-limited rather than inflated.
-    expect(wave.e1.p50).toBeGreaterThanOrEqual(1);
-    expect(wave.e1.p50).toBeLessThanOrEqual(8);
-    expect(wave.e1.p50).toBeLessThanOrEqual(target);
+    expect(wave.e1.p50).not.toBeNull();
+    expect(Math.abs(wave.e1.p50! - target)).toBeLessThanOrEqual(1);
     expect(Math.max(...samples.map(sample => sample.enemies))).toBeLessThanOrEqual(cfg.waves.budget.maxAlive);
+  });
+
+  it('default Budget quota sustains concurrency and differs measurably from interval with the same seed', () => {
+    resetTestEnv();
+    const runtime = createDefaultConfig();
+    const budgetState = freshState();
+    cfg.waves.spawnMode = 'budget';
+    startNextWave(budgetState, runtime, createSeededRng(42));
+    const budgetQuota = budgetState.spawnLeft;
+    tickSpawns(budgetState, createSeededRng(42), cfg.waves.firstSpawnDelay);
+
+    const intervalState = freshState();
+    cfg.waves.spawnMode = 'interval';
+    startNextWave(intervalState, runtime, createSeededRng(42));
+    const intervalQuota = intervalState.spawnLeft;
+    tickSpawns(intervalState, createSeededRng(42), cfg.waves.firstSpawnDelay);
+
+    expect(budgetQuota).toBe(48);
+    expect(intervalQuota).toBe(8);
+    expect(budgetState.enemies.length).toBe(5);
+    expect(intervalState.enemies.length).toBe(1);
   });
 
   it('剩余配额进入波末窗口时按 multiplier 提高目标', () => {
@@ -105,6 +124,16 @@ describe('waveSystem · budget spawn strategy', () => {
 
     expect(state.enemies).toHaveLength(4);
     expect(state.spawnLeft).toBe(0);
+  });
+
+  it('waveEndSprint uses the ceiling of target times multiplier', () => {
+    cfg.waves.budget.targetOnScreen = { base: 3, perWave: 0 };
+    cfg.waves.budget.batchMax = 5;
+    cfg.waves.budget.waveEndSprint = { window: 1, multiplier: 1.5 };
+    const state = freshState();
+    state.wave = 1;
+    state.spawnLeft = 1;
+    expect(budgetTargetFor(state)).toBe(5);
   });
 
   it('波末冲刺形成的末 15s 事件密度高于波中（A2 E7 > 1）', () => {

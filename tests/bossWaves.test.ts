@@ -43,7 +43,7 @@ describe('multiple boss waves', () => {
   });
 
   it('generates the final Boss slot in interval and budget modes', () => {
-    expect(BUDGET_TUNER_PARAMS).toHaveLength(7);
+    expect(BUDGET_TUNER_PARAMS).toHaveLength(9);
     for (const mode of ['interval', 'budget'] as const) {
       cfg.waves.spawnMode = mode;
       cfg.waves.bossWaves = [5];

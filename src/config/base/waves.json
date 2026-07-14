@@ -6,10 +6,11 @@
   "firstSpawnDelay": 0.4,
   "spawnInterval": { "base": 0.72, "perWave": 0.05, "min": 0.28 },
   "budget": {
+    "waveQuota": { "base": 36, "perWave": 12 },
     "targetOnScreen": { "base": 4, "perWave": 1 },
-    "checkInterval": 0.75,
-    "batchMax": 3,
-    "waveEndSprint": { "window": 0, "multiplier": 1.5 },
+    "checkInterval": 0.5,
+    "batchMax": 5,
+    "waveEndSprint": { "window": 2, "multiplier": 1.5 },
     "maxAlive": 20
   },
   "betweenWaves": 2.4,

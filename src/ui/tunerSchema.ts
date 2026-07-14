@@ -8,6 +8,8 @@ export interface TunerParam {
 }
 
 export const BUDGET_TUNER_PARAMS: TunerParam[] = [
+  { path: 'waves.budget.waveQuota.base', label: 'Budget · 总配额基础', group: 'waves', waveDeferred: true },
+  { path: 'waves.budget.waveQuota.perWave', label: 'Budget · 总配额每波', group: 'waves', waveDeferred: true },
   { path: 'waves.budget.targetOnScreen.base', label: 'Budget · 目标同屏基础', group: 'waves', waveDeferred: true },
   { path: 'waves.budget.targetOnScreen.perWave', label: 'Budget · 目标同屏每波', group: 'waves', waveDeferred: true },
   { path: 'waves.budget.checkInterval', label: 'Budget · 检查间隔', group: 'waves', waveDeferred: true },

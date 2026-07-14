@@ -21,7 +21,7 @@ describe('调参面板 v2 · 参数与派生指标', () => {
   });
 
   it('TTK、击杀深度与同屏数和手算一致，damage 联动方向正确', () => {
-    expect(BUDGET_TUNER_PARAMS).toHaveLength(7);
+    expect(BUDGET_TUNER_PARAMS).toHaveLength(9);
     for (const param of BUDGET_TUNER_PARAMS) {
       const range = cfg.tuner[param.path];
       expect(range, param.path).toBeDefined();

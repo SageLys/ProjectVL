@@ -1,5 +1,5 @@
 import type { GameConfig } from '../config';
-import { budgetAdmission } from '../core/systems/budgetRules';
+import { budgetAdmission, budgetWaveQuotaFor } from '../core/systems/budgetRules';
 import type { Config, EnemyType } from '../core/types';
 
 const TYPES: EnemyType[] = ['normal', 'fast', 'tank', 'boss'];
@@ -12,6 +12,8 @@ export interface DerivedMetrics {
   dropsPerMinute: number;
   expectedDrops: number;
   budget?: {
+    waveDurations: number[];
+    totalDuration: number;
     normalOnScreen: number[];
     sprintOnScreen: number[];
     sprintQuotaThreshold: number[];
@@ -38,7 +40,7 @@ function cell(game: GameConfig, runtime: Config, type: EnemyType, wave: number, 
 
 /** Deterministic, side-effect-free event estimate.  Enemies leave after entry walk + expected DPS TTK; this intentionally excludes skills, drops and player input. */
 function simulateBudgetWave(game: GameConfig, runtime: Config, wave: number, distance: number): { duration: number; projection: BudgetProjection } {
-  let now = game.waves.firstSpawnDelay; let left = game.waves.enemyCountBase + wave * game.waves.enemyCountPerWave;
+  let now = game.waves.firstSpawnDelay; let left = budgetWaveQuotaFor(wave, game.waves.budget);
   const leaveAt: number[] = []; let area = 0; let peak = 0; let sprintTriggered = false;
   const lifetime = (type: EnemyType) => { const c = cell(game, runtime, type, wave, distance); return c.entryWalk + c.ttk; };
   const checkInterval = Math.max(.0001, game.waves.budget.checkInterval);
@@ -57,7 +59,7 @@ function simulateBudgetWave(game: GameConfig, runtime: Config, wave: number, dis
     now += checkInterval;
   }
   const duration = Math.max(now - checkInterval, ...leaveAt);
-  const normal = budgetAdmission(wave, game.waves.enemyCountBase + wave * game.waves.enemyCountPerWave, 0, game.waves.budget).normalTarget;
+  const normal = budgetAdmission(wave, budgetWaveQuotaFor(wave, game.waves.budget), 0, game.waves.budget).normalTarget;
   const sprint = Math.ceil(normal * game.waves.budget.waveEndSprint.multiplier);
   return { duration, projection: { normalTarget: Math.min(game.waves.budget.maxAlive, normal), sprintTarget: Math.min(game.waves.budget.maxAlive, sprint), averageOnScreen: duration ? area / duration : 0, peakOnScreen: peak, sprintTriggered } };
 }
@@ -70,23 +72,32 @@ export function deriveMetrics(game: GameConfig, runtime: Config): DerivedMetrics
     result.onScreen = game.waves.spawnMode === 'budget' ? Math.min(game.waves.budget.maxAlive, game.waves.budget.targetOnScreen.base + wave * game.waves.budget.targetOnScreen.perWave) : (result.entryWalk + result.ttk) / Math.max(.0001, interval);
     return result;
   });
-  const projections = game.waves.spawnMode === 'budget' ? Array.from({ length: game.waves.totalWaves }, (_, i) => simulateBudgetWave(game, runtime, i + 1, distance)) : [];
-  const waveDurations = game.waves.spawnMode === 'budget' ? projections.map(item => item.duration) : Array.from({ length: game.waves.totalWaves }, (_, i) => {
+  // Always compute both models. The active mode still selects the legacy top-level
+  // metrics, while the tuner can show a live Budget projection before switching.
+  const projections = Array.from({ length: game.waves.totalWaves }, (_, i) => simulateBudgetWave(game, runtime, i + 1, distance));
+  const intervalWaveDurations = Array.from({ length: game.waves.totalWaves }, (_, i) => {
     const wave = i + 1; const count = game.waves.enemyCountBase + wave * game.waves.enemyCountPerWave;
     const interval = Math.max(game.waves.spawnInterval.min, game.waves.spawnInterval.base - wave * game.waves.spawnInterval.perWave);
     const tailTypes = game.waves.bossWaves.includes(wave) ? TYPES : TYPES.filter(type => type !== 'boss');
     return game.waves.firstSpawnDelay + Math.max(0, count - 1) * interval + Math.max(...tailTypes.map(type => { const c = cell(game, runtime, type, wave, distance); return c.entryWalk + c.ttk; }));
   });
+  const budgetWaveDurations = projections.map(item => item.duration);
+  const waveDurations = game.waves.spawnMode === 'budget' ? budgetWaveDurations : intervalWaveDurations;
   const totalDuration = waveDurations.reduce((sum, seconds) => sum + seconds, 0) + Math.max(0, game.waves.totalWaves - 1) * game.waves.betweenWaves;
-  const totalEnemies = waveDurations.reduce((sum, _, i) => sum + game.waves.enemyCountBase + (i + 1) * game.waves.enemyCountPerWave, 0);
+  const budgetTotalDuration = budgetWaveDurations.reduce((sum, seconds) => sum + seconds, 0) + Math.max(0, game.waves.totalWaves - 1) * game.waves.betweenWaves;
+  const totalEnemies = waveDurations.reduce((sum, _, i) => sum + (game.waves.spawnMode === 'budget'
+    ? budgetWaveQuotaFor(i + 1, game.waves.budget)
+    : game.waves.enemyCountBase + (i + 1) * game.waves.enemyCountPerWave), 0);
   const bosses = game.waves.bossWaves.filter(wave => wave >= 1 && wave <= game.waves.totalWaves).length;
   const expectedDrops = (totalEnemies - bosses) * runtime.dropChance + bosses; // bosses always drop in rollDropOnKill
   const budget = projections.map(item => item.projection);
   return { cells, waveDurations, totalDuration, expectedDrops, dropsPerMinute: totalDuration ? expectedDrops / totalDuration * 60 : 0,
-    budget: game.waves.spawnMode === 'budget' ? {
+    budget: {
+      waveDurations: budgetWaveDurations,
+      totalDuration: budgetTotalDuration,
       normalOnScreen: budget.slice(0, 3).map(item => item.normalTarget),
       sprintOnScreen: budget.slice(0, 3).map(item => item.sprintTarget),
-      sprintQuotaThreshold: [1, 2, 3].map(wave => Math.min(game.waves.enemyCountBase + wave * game.waves.enemyCountPerWave, Math.floor(game.waves.budget.waveEndSprint.window / Math.max(.0001, game.waves.budget.checkInterval)) * Math.max(1, game.waves.budget.batchMax))),
+      sprintQuotaThreshold: [1, 2, 3].map(wave => Math.min(budgetWaveQuotaFor(wave, game.waves.budget), Math.floor(game.waves.budget.waveEndSprint.window / Math.max(.0001, game.waves.budget.checkInterval)) * Math.max(1, game.waves.budget.batchMax))),
       projections: budget,
-    } : undefined };
+    } };
 }
