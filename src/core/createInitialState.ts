@@ -48,6 +48,11 @@ export function createInitialState(): GameState {
     xp: 0,
     xpNeed: cfg.progression.xpNeedBase,
     level: 1,
+    pendingLevelUps: 0,
+    offeredPerks: [],
+    perkStacks: {},
+    xpGainBonus: 0,
+    rangeBonus: 0,
     kills: 0,
     merges: 0,
     consumes: 0,
@@ -55,6 +60,5 @@ export function createInitialState(): GameState {
     equipTelemetry: { durationsMs: [], cancels: 0, rejects: 0 },
     collected: 0,
     expired: 0,
-    expiredConverted: 0,
   };
 }

@@ -4,19 +4,33 @@ import { createDefaultConfig } from '../src/core/createInitialState';
 import { jumpToWave, tickSpawns } from '../src/core/systems/waveSystem';
 import { createSeededRng } from '../src/debug/exposeDebugApi';
 import { deriveMetrics } from '../src/ui/derivedMetrics';
-import { BUDGET_TUNER_PARAMS, TUNER_PARAMS } from '../src/ui/tunerSchema';
+import { BUDGET_TUNER_PARAMS, TUNER_PARAMS, getNumberAt, setNumberAt } from '../src/ui/tunerSchema';
 import { freshState, resetTestEnv } from './helpers';
 
 beforeEach(resetTestEnv);
 
 describe('调参面板 v2 · 参数与派生指标', () => {
   it('§2 A/B/C/D 每个暴露参数都在 tuner.json 有 min/max/step', () => {
-    expect(TUNER_PARAMS.length).toBe(60);
+    expect(TUNER_PARAMS.length).toBe(64);
     for (const param of TUNER_PARAMS) {
       const range = cfg.tuner[param.path];
       expect(range, param.path).toBeDefined();
       expect(range.min).toBeLessThan(range.max);
       expect(range.step).toBeGreaterThan(0);
+    }
+  });
+
+  it('round-trips all progression controls through numeric path accessors', () => {
+    const paths = [
+      'progression.xpNeedBase',
+      'progression.xpGrowth',
+      'progression.killXpMul',
+      'progression.perkChoices',
+    ];
+    for (const [index, path] of paths.entries()) {
+      const value = index + 2.25;
+      setNumberAt(cfg, path, value);
+      expect(getNumberAt(cfg, path)).toBe(value);
     }
   });
 

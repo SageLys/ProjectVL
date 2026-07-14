@@ -84,13 +84,17 @@ export interface PerkDef {
   id: string;
   title: string;
   desc: string;
-  kind: 'damagePct' | 'fireRatePct' | 'heal';
+  kind: 'damagePct' | 'fireRatePct' | 'heal' | 'maxHp' | 'rangePct' | 'xpGainPct';
   value: number;
+  weight: number;
+  maxStacks: number;
 }
 
 export interface ProgressionConfig {
   xpNeedBase: number;
   xpGrowth: number;
+  killXpMul: number;
+  perkChoices: number;
   perks: PerkDef[];
 }
 

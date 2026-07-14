@@ -208,6 +208,11 @@ export interface GameState {
   xp: number;
   xpNeed: number;
   level: number;
+  pendingLevelUps: number;
+  offeredPerks: string[];
+  perkStacks: Record<string, number>;
+  xpGainBonus: number;
+  rangeBonus: number;
   kills: number;
   merges: number;
   /** 遥测拆分（原 uses）：consumes=消耗释放次数；equipOps=装备操作次数。 */
@@ -217,8 +222,6 @@ export interface GameState {
   equipTelemetry: { durationsMs: number[]; cancels: number; rejects: number };
   collected: number;
   expired: number;
-  /** 过期转化（expiryConvert）为经验的掉落数。 */
-  expiredConverted: number;
 }
 
 /** 卡槽/装备栏归属。临时栏已随 P0-3/P0-6 移除。 */

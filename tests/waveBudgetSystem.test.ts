@@ -65,7 +65,7 @@ describe('waveSystem · budget spawn strategy', () => {
       }
       if (gameEvents.some(event => event.type === 'levelUp')) {
         events.push({ type: 'perkPopup', at: state.time, wave: 1 });
-        applyPerk(state, runtime, cfg.progression.perks[0].id);
+        applyPerk(state, runtime, state.offeredPerks[0], rng);
       }
       if (gameEvents.some(event => event.type === 'waveCleared' || event.type === 'gameEnd')) {
         events.push({ type: 'waveCleared', at: state.time, wave: 1 });

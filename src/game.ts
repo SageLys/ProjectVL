@@ -26,6 +26,7 @@ import type { SlotHandlers } from './ui/slotFactory';
 import { createPointerRouter, type PreviewSpec } from './input/pointerRouter';
 import { createKeyboard } from './input/keyboard';
 import type { DevTelemetry } from './telemetry/devTelemetry';
+import type { PerkDef } from './config/types';
 
 // 技能 = 数据 + 解释器：把配置里的卡定义注入解释器（P5 实装 12 张正式卡后自动生效）。
 registerSkillDefs(cfg.skills.cards);
@@ -79,11 +80,17 @@ function dispatch(events: GameEvent[]): void {
   for (const ev of events) {
     const text = formatToast(ev);
     if (text) toast(text);
-    if (ev.type === 'levelUp') modals.showLevel();
+    if (ev.type === 'levelUp') modals.showLevel(resolveOfferedPerks(state));
     if (ev.type === 'gameEnd') modals.showResult(ev.win, state);
     if (SLOT_CHANGING.has(ev.type)) slotsChanged = true;
   }
   if (slotsChanged) refreshSlots();
+}
+
+function resolveOfferedPerks(currentState: GameState): PerkDef[] {
+  return currentState.offeredPerks
+    .map(id => cfg.progression.perks.find(perk => perk.id === id))
+    .filter((perk): perk is PerkDef => perk !== undefined);
 }
 
 function refreshSlots(): void {
@@ -100,10 +107,10 @@ const slotHandlers: SlotHandlers = {
 
 const modals = createModals(refs, {
   onPerk(id) {
-    const events = applyPerk(state, config, id);
+    const events = applyPerk(state, config, id, rng);
     dispatch(events);
     if (import.meta.env.DEV && events.some(event => event.type === 'perkApplied')) telemetry?.recordInput('perkSelect', id);
-    modals.hideLevel();
+    if (!events.some(event => event.type === 'levelUp')) modals.hideLevel();
     renderHud(refs, state, config);
   },
   onRestart() {

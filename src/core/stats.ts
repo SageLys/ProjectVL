@@ -38,7 +38,7 @@ export function maxAttackRange(): number {
 }
 
 export function totalRange(state: GameState, config: Config): number {
-  return Math.min(config.range + equipmentBonus(state).range, maxAttackRange());
+  return Math.min(config.range + equipmentBonus(state).range + config.range * state.rangeBonus, maxAttackRange());
 }
 
 /** 掉落概率：（基础 + 眷恋加成）× 装备态掉率乘数，封顶 chanceCap。 */

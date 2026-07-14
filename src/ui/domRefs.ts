@@ -40,6 +40,7 @@ export function getDomRefs() {
     testCardBtn: el<HTMLButtonElement>('#testCardBtn'),
     restartBtn: el<HTMLButtonElement>('#restartBtn'),
     levelModal: el<HTMLElement>('#levelModal'),
+    perkChoices: el<HTMLElement>('#perkChoices'),
     resultModal: el<HTMLElement>('#resultModal'),
     resultTitle: el<HTMLElement>('#resultTitle'),
     resultDesc: el<HTMLElement>('#resultDesc'),
@@ -47,7 +48,6 @@ export function getDomRefs() {
     resultMerges: el<HTMLElement>('#resultMerges'),
     resultUses: el<HTMLElement>('#resultUses'),
     dropTelemetry: el<HTMLElement>('#dropTelemetry'),
-    perkButtons: Array.from(document.querySelectorAll<HTMLButtonElement>('[data-perk]')),
   };
 }
 

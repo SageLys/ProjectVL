@@ -1,6 +1,7 @@
 // 效果解释器与运行时：触发器总线、装备态绑定、passive 修饰聚合、消耗释放、
 // 区域/光环/召唤物/护盾 tick。技能全部以 fixture JSON 定义——验证「卡=数据+解释器」。
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { cfg } from '../src/config';
 import type { CardDef, BindingDef } from '../src/core/effects/defs';
 import {
   effectiveEquipment, fireTrigger, getModifiers, registerSkillDefs, tickIntervalBindings,
@@ -12,7 +13,6 @@ import { moveEnemies } from '../src/core/systems/enemySystem';
 import { startNextWave } from '../src/core/systems/waveSystem';
 import { autoMergeCards } from '../src/core/systems/cardSystem';
 import { consumeCard } from '../src/core/systems/equipmentSystem';
-import { tickDrops, spawnGroundDrop } from '../src/core/systems/dropSystem';
 import { dealDamage } from '../src/core/systems/damageSystem';
 import { totalDropChance, totalDropLifetime, totalFireRate } from '../src/core/stats';
 import { speedMultiplier } from '../src/core/effects/statusSystem';
@@ -149,13 +149,15 @@ describe('解释器 · passive 修饰聚合', () => {
       { atom: 'xpMul', params: { mul: 2 } },
     ]))]);
     const s = freshState();
+    cfg.progression.killXpMul = 1.5;
+    s.xpGainBonus = 0.25;
     equipCard(s, 'range', 3);
     expect(totalDropChance(s, config)).toBeCloseTo(Math.min(0.95, config.dropChance * 1.5));
     expect(totalDropLifetime(s, config)).toBeCloseTo(config.dropLifetime * 1.25);
     const e = enemy({ x: 300, y: 300, hp: 1, maxHp: 1, xp: 2 });
     s.enemies = [e];
     dealDamage(s, config, rng, e, 10);
-    expect(s.xp).toBe(4); // 2 × xpMul 2
+    expect(s.xp).toBe(7.5); // 2 × killXpMul 1.5 × personal 1.25 × effect xpMul 2
   });
 
   it('防御修饰：breachReduction 减伤 / thorns 反噬击杀 / novaOnBreak', () => {
@@ -173,17 +175,6 @@ describe('解释器 · passive 修饰聚合', () => {
     moveEnemies(s2, config, rng, 0.016);
     expect(s2.hp).toBe(100);  // 反噬致死 → 无突破伤害
     expect(s2.kills).toBe(1); // 按击杀结算
-  });
-
-  it('expiryConvert：过期掉落转化为经验', () => {
-    registerSkillDefs([def('luck', passive([{ atom: 'expiryConvert', params: { ratio: 1 } }]))]);
-    const s = freshState();
-    equipCard(s, 'luck', 3);
-    spawnGroundDrop(s, config, constRng(0), 100, 100, 'damage');
-    tickDrops(s, config, constRng(0.5), config.dropLifetime + 0.01);
-    expect(s.expired).toBe(1);
-    expect(s.expiredConverted).toBe(1);
-    expect(s.xp).toBe(1);
   });
 
   it('mergeRule 暴露给上层（P5 万能卡建模前置）；execute 取最高阈值', () => {

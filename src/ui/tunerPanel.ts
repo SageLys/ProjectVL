@@ -52,6 +52,7 @@ const GROUPS: { key: TunerGroup; title: string; note?: string }[] = [
   { key: 'combat', title: 'B · 炮台与弹道' },
   { key: 'enemies', title: 'C · 敌人数值' },
   { key: 'drops', title: 'D · 掉落与拾取' },
+  { key: 'progression', title: '经验与升级' },
 ];
 
 function readPresets(): Preset[] {

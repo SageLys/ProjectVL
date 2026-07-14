@@ -2,8 +2,7 @@ import { cfg } from '../../config';
 import type { CardType, Config, Enemy, GameEvent, GameState, GroundDrop, Rng } from '../types';
 import { totalDropChance, totalDropLifetime } from '../stats';
 import { autoMergeCards } from './cardSystem';
-import { addXp } from './progressionSystem';
-import { fireTrigger, getModifiers } from '../effects/interpreter';
+import { fireTrigger } from '../effects/interpreter';
 
 const TAU = Math.PI * 2;
 export const CARD_KEYS: CardType[] = ['damage', 'rate', 'multi', 'range', 'luck'];
@@ -36,11 +35,8 @@ export function rollDropOnKill(state: GameState, config: Config, rng: Rng, enemy
 
 /**
  * 推进掉落寿命与浮动相位；超时移除并计入 expired。
- * expiryConvert 修饰（丰收 3★）：过期掉落按 ratio 概率转化为经验（破「过期即损失」）。
  */
-export function tickDrops(state: GameState, _config: Config, rng: Rng, dt: number): GameEvent[] {
-  const events: GameEvent[] = [];
-  const convert = getModifiers(state).expiryConvert;
+export function tickDrops(state: GameState, _config: Config, _rng: Rng, dt: number): GameEvent[] {
   for (let i = state.groundDrops.length - 1; i >= 0; i--) {
     const drop = state.groundDrops[i];
     drop.life -= dt;
@@ -48,13 +44,9 @@ export function tickDrops(state: GameState, _config: Config, rng: Rng, dt: numbe
     if (drop.life <= 0) {
       state.groundDrops.splice(i, 1);
       state.expired++;
-      if (convert && rng() < convert.ratio) {
-        state.expiredConverted++;
-        events.push(...addXp(state, 1));
-      }
     }
   }
-  return events;
+  return [];
 }
 
 /**

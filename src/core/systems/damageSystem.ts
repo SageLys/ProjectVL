@@ -14,7 +14,8 @@ export function killEnemy(state: GameState, config: Config, rng: Rng, enemy: Ene
   state.kills++;
   for (let i = 0; i < cfg.combat.vfx.killParticles; i++) spawnParticle(state, rng, enemy.x, enemy.y, enemy.color, 150);
   rollDropOnKill(state, config, rng, enemy);
-  events.push(...addXp(state, enemy.xp * getModifiers(state).xpMul));
+  const xpGain = enemy.xp * cfg.progression.killXpMul * (1 + state.xpGainBonus) * getModifiers(state).xpMul;
+  events.push(...addXp(state, xpGain, rng));
   events.push(...fireTrigger(state, config, rng, 'onKill', { enemy, point: { x: enemy.x, y: enemy.y } }));
   return events;
 }
