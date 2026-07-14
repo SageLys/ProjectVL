@@ -9,7 +9,7 @@
     "targetOnScreen": { "base": 4, "perWave": 1 },
     "checkInterval": 0.75,
     "batchMax": 3,
-    "waveEndSprint": { "window": 15, "multiplier": 1.5 },
+    "waveEndSprint": { "window": 0, "multiplier": 1.5 },
     "maxAlive": 20
   },
   "betweenWaves": 2.4,

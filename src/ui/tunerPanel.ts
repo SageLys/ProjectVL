@@ -16,6 +16,7 @@ interface Preset {
 export interface TunerPanel {
   syncInputs(): void;
   applyPendingWaveChanges(): void;
+  getPendingSpawnMode(): typeof cfg.waves.spawnMode | null;
   getActivePresetName(): string;
 }
 
@@ -33,6 +34,7 @@ export interface TunerHooks {
     setInvincible(value: boolean): void;
     jumpToWave(wave: number): void;
     restartWave(): void;
+    getSpawnTelemetry(): { wave: number; spawnLeft: number; alive: number; spawnTimer: number; lastSpawnCheckCount: number; normalTarget: number; effectiveTarget: number; inEndSprint: boolean };
   };
 }
 
@@ -111,6 +113,10 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
     </div></section>
   </div>`;
 
+  const spawnModeStatus = document.createElement('p');
+  spawnModeStatus.id = 'spawnModeStatus';
+  spawnModeStatus.className = 'tuner-note';
+  root.querySelector('.dev-tools-body')!.prepend(spawnModeStatus);
   const inputs = Array.from(root.querySelectorAll<HTMLInputElement>('[data-tuner-index]'));
   const derived = root.querySelector<HTMLElement>('#derivedMetrics')!;
   const presetName = root.querySelector<HTMLInputElement>('#presetName')!;
@@ -134,8 +140,12 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
     const types = [['normal', '普通'], ['fast', '高速'], ['tank', '重装'], ['boss', 'Boss']] as const;
     const table = types.map(([type, label]) => `<tr><th>${label}</th>${metrics.cells[type].map(cell => `<td title="命中率 ${format(cell.hitRate * 100)}%">${cell.ttk.toFixed(2)}s</td>`).join('')}</tr>`).join('');
     const n = metrics.cells.normal[0];
+    const budgetProjection = metrics.budget
+      ? `<span><b>${metrics.budget.normalOnScreen.map((value, index) => `${value}→${metrics.budget!.sprintOnScreen[index]}`).join(' / ')}</b>Budget 理论同屏（常规→波末冲刺，前 3 波）</span>
+        <span><b>${metrics.budget.sprintQuotaThreshold.map(value => `≤${value}`).join(' / ')}</b>Budget 冲刺触发剩余配额（前 3 波）</span>`
+      : '';
     derived.innerHTML = `<div class="metric-block"><b>TTK 矩阵</b><table><thead><tr><th>类型</th><th>波 1</th><th>波 2</th><th>波 3</th></tr></thead><tbody>${table}</tbody></table></div>
-      <div class="metric-cards">
+      <div class="metric-cards">${budgetProjection}
         <span><b>${n.entryWalk.toFixed(2)}s / ${n.insideWalk.toFixed(2)}s</b>入场走行 / 圈内存活走行（普通·波1）</span>
         <span><b>${n.killDepth.toFixed(1)}px</b>理论击杀深度（普通·波1）</span>
         <span><b>${n.onScreen.toFixed(2)}</b>理论同屏数（普通·波1）</span>
@@ -211,7 +221,16 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
     root.querySelector<HTMLInputElement>('#timeScaleInput')!.value = String(scale);
     root.querySelector<HTMLOutputElement>('#timeScaleVal')!.value = `${scale}×`;
     root.querySelector<HTMLInputElement>('#invincibleInput')!.checked = hooks.debug.getInvincible();
+    const spawn = hooks.debug.getSpawnTelemetry();
+    spawnModeStatus.textContent = `Current effective mode: ${cfg.waves.spawnMode}; pending mode: ${pendingSpawnMode ?? 'none'}; effective: ${pendingSpawnMode ? 'next wave (restart/jump applies first)' : 'now'}. Wave ${spawn.wave}; spawnLeft ${spawn.spawnLeft}; alive ${spawn.alive}; normal/actual target ${spawn.normalTarget}/${spawn.effectiveTarget}; end sprint ${spawn.inEndSprint ? 'yes' : 'no'}; spawnTimer ${spawn.spawnTimer.toFixed(2)}; last admission ${spawn.lastSpawnCheckCount}.`;
     renderMetrics();
+    const projection = deriveMetrics(metricConfig(), config).budget?.projections.slice(0, 3);
+    if (projection) {
+      const note = document.createElement('p');
+      note.className = 'tuner-note';
+      note.textContent = `Budget estimate (W1–3 normal/sprint/average/peak): ${projection.map(item => `${item.normalTarget}/${item.sprintTarget}/${item.averageOnScreen.toFixed(1)}/${item.peakOnScreen}${item.sprintTriggered ? ' sprint' : ''}`).join(' · ')}. Interval uses fixed cadence; Budget uses discrete admission checks and expected DPS cleanup. Wave time includes first delay and final cleanup; total includes between-wave rest.`;
+      derived.append(note);
+    }
   }
 
   function applyPendingWaveChanges(): void {
@@ -355,5 +374,5 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
   root.querySelector<HTMLInputElement>('#invincibleInput')!.addEventListener('change', event => hooks.debug.setInvincible((event.currentTarget as HTMLInputElement).checked));
 
   updatePresetOptions(); syncInputs();
-  return { syncInputs, applyPendingWaveChanges, getActivePresetName: () => activePresetName };
+  return { syncInputs, applyPendingWaveChanges, getPendingSpawnMode: () => pendingSpawnMode, getActivePresetName: () => activePresetName };
 }

@@ -1,82 +1,92 @@
 import type { GameConfig } from '../config';
+import { budgetAdmission } from '../core/systems/budgetRules';
 import type { Config, EnemyType } from '../core/types';
 
 const TYPES: EnemyType[] = ['normal', 'fast', 'tank', 'boss'];
-
-export interface DerivedCell {
-  hitRate: number;
-  ttk: number;
-  entryWalk: number;
-  insideWalk: number;
-  killDepth: number;
-  onScreen: number;
-}
-
+export interface DerivedCell { hitRate: number; ttk: number; entryWalk: number; insideWalk: number; killDepth: number; onScreen: number; }
+export interface BudgetProjection { normalTarget: number; sprintTarget: number; averageOnScreen: number; peakOnScreen: number; sprintTriggered: boolean; }
 export interface DerivedMetrics {
   cells: Record<EnemyType, DerivedCell[]>;
   waveDurations: number[];
   totalDuration: number;
   dropsPerMinute: number;
+  expectedDrops: number;
+  budget?: {
+    normalOnScreen: number[];
+    sprintOnScreen: number[];
+    sprintQuotaThreshold: number[];
+    projections: BudgetProjection[];
+  };
 }
 
-function spawnDistance(config: GameConfig): number {
-  const { width, height } = config.combat.canvas;
-  const { x, y } = config.combat.turret;
-  const m = config.waves.spawnMargin;
-  const points = [[width / 2, -m], [width + m, height / 2], [width / 2, height + m], [-m, height / 2]];
-  return points.reduce((sum, [px, py]) => sum + Math.hypot(px - x, py - y), 0) / points.length;
+function spawnDistance(game: GameConfig): number {
+  const { width, height } = game.combat.canvas; const { x, y } = game.combat.turret; const m = game.waves.spawnMargin;
+  return [[width / 2, -m], [width + m, height / 2], [width / 2, height + m], [-m, height / 2]]
+    .reduce((sum, [px, py]) => sum + Math.hypot(px - x, py - y), 0) / 4;
 }
 
-/**
- * §2-H 的透明估算模型。散布视为 [-spread,+spread] 均匀角误差，命中率为
- * min(1, 敌半径 / (射程 × tan(spread)))；spread=0 时命中率为 1。
- */
-export function deriveMetrics(game: GameConfig, runtime: Config): DerivedMetrics {
-  const distance = spawnDistance(game);
-  const cells = {} as Record<EnemyType, DerivedCell[]>;
-  for (const type of TYPES) {
-    const def = game.enemies.types[type];
-    cells[type] = [1, 2, 3].map(wave => {
-      const hp = def.hpBase + wave * def.hpPerWave;
-      const speed = (def.speedBase + wave * def.speedPerWave) * runtime.enemySpeed;
-      const spreadWidth = runtime.range * Math.tan(game.combat.bullet.spread);
-      const hitRate = spreadWidth <= 0 ? 1 : Math.min(1, def.r / spreadWidth);
-      const ttk = hp / Math.max(0.0001, runtime.damage * runtime.fireRate * hitRate);
-      const entryWalk = Math.max(0, distance - runtime.range) / Math.max(0.0001, speed);
-      const breachWalk = Math.max(0, runtime.range - game.combat.breakthroughDist) / Math.max(0.0001, speed);
-      const insideWalk = Math.min(ttk, breachWalk);
-      const killDepth = runtime.range - speed * ttk;
-      const interval = Math.max(game.waves.spawnInterval.min, game.waves.spawnInterval.base - wave * game.waves.spawnInterval.perWave);
-      const budgetTarget = game.waves.budget.targetOnScreen.base + wave * game.waves.budget.targetOnScreen.perWave;
-      const onScreen = game.waves.spawnMode === 'budget'
-        ? Math.min(game.waves.budget.maxAlive, budgetTarget)
-        : (entryWalk + ttk) / Math.max(0.0001, interval);
-      return { hitRate, ttk, entryWalk, insideWalk, killDepth, onScreen };
-    });
+function cell(game: GameConfig, runtime: Config, type: EnemyType, wave: number, distance: number): DerivedCell {
+  const def = game.enemies.types[type]; const hp = def.hpBase + wave * def.hpPerWave;
+  const speed = (def.speedBase + wave * def.speedPerWave) * runtime.enemySpeed;
+  const spreadWidth = runtime.range * Math.tan(game.combat.bullet.spread);
+  const hitRate = spreadWidth <= 0 ? 1 : Math.min(1, def.r / spreadWidth);
+  const ttk = hp / Math.max(.0001, runtime.damage * runtime.fireRate * hitRate);
+  const entryWalk = Math.max(0, distance - runtime.range) / Math.max(.0001, speed);
+  const breachWalk = Math.max(0, runtime.range - game.combat.breakthroughDist) / Math.max(.0001, speed);
+  return { hitRate, ttk, entryWalk, insideWalk: Math.min(ttk, breachWalk), killDepth: runtime.range - speed * ttk, onScreen: 0 };
+}
+
+/** Deterministic, side-effect-free event estimate.  Enemies leave after entry walk + expected DPS TTK; this intentionally excludes skills, drops and player input. */
+function simulateBudgetWave(game: GameConfig, runtime: Config, wave: number, distance: number): { duration: number; projection: BudgetProjection } {
+  let now = game.waves.firstSpawnDelay; let left = game.waves.enemyCountBase + wave * game.waves.enemyCountPerWave;
+  const leaveAt: number[] = []; let area = 0; let peak = 0; let sprintTriggered = false;
+  const lifetime = (type: EnemyType) => { const c = cell(game, runtime, type, wave, distance); return c.entryWalk + c.ttk; };
+  const checkInterval = Math.max(.0001, game.waves.budget.checkInterval);
+  // Checks are discrete, exactly like runtime; deaths between checks only create a deficit at the next check.
+  while (left > 0) {
+    leaveAt.sort((a, b) => a - b);
+    while (leaveAt.length && leaveAt[0] <= now + 1e-9) leaveAt.shift();
+    const admission = budgetAdmission(wave, left, leaveAt.length, game.waves.budget);
+    sprintTriggered ||= admission.inEndSprint;
+    for (let i = 0; i < admission.spawnCount; i++) {
+      const type: EnemyType = game.waves.bossWaves.includes(wave) && left === 1 ? 'boss' : 'normal';
+      leaveAt.push(now + lifetime(type)); left--;
+    }
+    peak = Math.max(peak, leaveAt.length);
+    area += leaveAt.length * checkInterval;
+    now += checkInterval;
   }
+  const duration = Math.max(now - checkInterval, ...leaveAt);
+  const normal = budgetAdmission(wave, game.waves.enemyCountBase + wave * game.waves.enemyCountPerWave, 0, game.waves.budget).normalTarget;
+  const sprint = Math.ceil(normal * game.waves.budget.waveEndSprint.multiplier);
+  return { duration, projection: { normalTarget: Math.min(game.waves.budget.maxAlive, normal), sprintTarget: Math.min(game.waves.budget.maxAlive, sprint), averageOnScreen: duration ? area / duration : 0, peakOnScreen: peak, sprintTriggered } };
+}
 
-  const waveDurations = Array.from({ length: game.waves.totalWaves }, (_, index) => {
-    const wave = index + 1;
+export function deriveMetrics(game: GameConfig, runtime: Config): DerivedMetrics {
+  const distance = spawnDistance(game); const cells = {} as Record<EnemyType, DerivedCell[]>;
+  for (const type of TYPES) cells[type] = [1, 2, 3].map(wave => {
+    const result = cell(game, runtime, type, wave, distance);
     const interval = Math.max(game.waves.spawnInterval.min, game.waves.spawnInterval.base - wave * game.waves.spawnInterval.perWave);
-    const count = game.waves.enemyCountBase + wave * game.waves.enemyCountPerWave;
-    const tailTypes = game.waves.bossWaves.includes(wave) ? TYPES : TYPES.filter(type => type !== 'boss');
-    const tail = Math.max(...tailTypes.map(type => {
-      const def = game.enemies.types[type];
-      const hp = def.hpBase + wave * def.hpPerWave;
-      const speed = (def.speedBase + wave * def.speedPerWave) * runtime.enemySpeed;
-      const spreadWidth = runtime.range * Math.tan(game.combat.bullet.spread);
-      const hit = spreadWidth <= 0 ? 1 : Math.min(1, def.r / spreadWidth);
-      return Math.max(0, distance - runtime.range) / speed + hp / (runtime.damage * runtime.fireRate * hit);
-    }));
-    const spawnDuration = game.waves.spawnMode === 'budget'
-      ? Math.max(0, Math.ceil(count / Math.max(1, game.waves.budget.batchMax)) - 1) * game.waves.budget.checkInterval
-      : Math.max(0, count - 1) * interval;
-    return game.waves.firstSpawnDelay + spawnDuration + tail;
+    result.onScreen = game.waves.spawnMode === 'budget' ? Math.min(game.waves.budget.maxAlive, game.waves.budget.targetOnScreen.base + wave * game.waves.budget.targetOnScreen.perWave) : (result.entryWalk + result.ttk) / Math.max(.0001, interval);
+    return result;
   });
-  const totalDuration = waveDurations.reduce((sum, seconds) => sum + seconds, 0)
-    + Math.max(0, game.waves.totalWaves - 1) * game.waves.betweenWaves;
-
-  const normalWave1 = cells.normal[0];
-  const dropsPerMinute = 60 * runtime.dropChance / Math.max(0.0001, normalWave1.ttk);
-  return { cells, waveDurations, totalDuration, dropsPerMinute };
+  const projections = game.waves.spawnMode === 'budget' ? Array.from({ length: game.waves.totalWaves }, (_, i) => simulateBudgetWave(game, runtime, i + 1, distance)) : [];
+  const waveDurations = game.waves.spawnMode === 'budget' ? projections.map(item => item.duration) : Array.from({ length: game.waves.totalWaves }, (_, i) => {
+    const wave = i + 1; const count = game.waves.enemyCountBase + wave * game.waves.enemyCountPerWave;
+    const interval = Math.max(game.waves.spawnInterval.min, game.waves.spawnInterval.base - wave * game.waves.spawnInterval.perWave);
+    const tailTypes = game.waves.bossWaves.includes(wave) ? TYPES : TYPES.filter(type => type !== 'boss');
+    return game.waves.firstSpawnDelay + Math.max(0, count - 1) * interval + Math.max(...tailTypes.map(type => { const c = cell(game, runtime, type, wave, distance); return c.entryWalk + c.ttk; }));
+  });
+  const totalDuration = waveDurations.reduce((sum, seconds) => sum + seconds, 0) + Math.max(0, game.waves.totalWaves - 1) * game.waves.betweenWaves;
+  const totalEnemies = waveDurations.reduce((sum, _, i) => sum + game.waves.enemyCountBase + (i + 1) * game.waves.enemyCountPerWave, 0);
+  const bosses = game.waves.bossWaves.filter(wave => wave >= 1 && wave <= game.waves.totalWaves).length;
+  const expectedDrops = (totalEnemies - bosses) * runtime.dropChance + bosses; // bosses always drop in rollDropOnKill
+  const budget = projections.map(item => item.projection);
+  return { cells, waveDurations, totalDuration, expectedDrops, dropsPerMinute: totalDuration ? expectedDrops / totalDuration * 60 : 0,
+    budget: game.waves.spawnMode === 'budget' ? {
+      normalOnScreen: budget.slice(0, 3).map(item => item.normalTarget),
+      sprintOnScreen: budget.slice(0, 3).map(item => item.sprintTarget),
+      sprintQuotaThreshold: [1, 2, 3].map(wave => Math.min(game.waves.enemyCountBase + wave * game.waves.enemyCountPerWave, Math.floor(game.waves.budget.waveEndSprint.window / Math.max(.0001, game.waves.budget.checkInterval)) * Math.max(1, game.waves.budget.batchMax))),
+      projections: budget,
+    } : undefined };
 }

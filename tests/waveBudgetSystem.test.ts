@@ -84,9 +84,10 @@ describe('waveSystem · budget spawn strategy', () => {
     };
     const wave = computeExperienceMetrics(session).waves[0];
     const target = cfg.waves.budget.targetOnScreen.base + cfg.waves.budget.targetOnScreen.perWave;
-    expect(wave.e1.p50).toBeGreaterThanOrEqual(4);
+    // Default sprint is disabled; the first admission is batch-limited rather than inflated.
+    expect(wave.e1.p50).toBeGreaterThanOrEqual(1);
     expect(wave.e1.p50).toBeLessThanOrEqual(8);
-    expect(Math.abs(wave.e1.p50! - target)).toBeLessThanOrEqual(1);
+    expect(wave.e1.p50).toBeLessThanOrEqual(target);
     expect(Math.max(...samples.map(sample => sample.enemies))).toBeLessThanOrEqual(cfg.waves.budget.maxAlive);
   });
 

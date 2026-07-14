@@ -38,6 +38,7 @@ export function createInitialState(): GameState {
     nextSummonId: 1,
     spawnLeft: 0,
     spawnTimer: 0,
+    lastSpawnCheckCount: 0,
     waveClearPending: false,
     damageBonus: 0,
     fireRateBonus: 0,

@@ -8,6 +8,7 @@ import { createInitialState, createDefaultConfig } from './core/createInitialSta
 import { updateGame } from './core/updateGame';
 import { registerSkillDefs, resolveConsumableTier } from './core/effects/interpreter';
 import { jumpToWave, restartWave, startNextWave } from './core/systems/waveSystem';
+import { budgetAdmission } from './core/systems/budgetRules';
 import { moveOrSwap, unequipDestroy, consumeCard } from './core/systems/equipmentSystem';
 import { collectNearest, spawnTestDrops, spawnGroundDrop } from './core/systems/dropSystem';
 import { applyPerk } from './core/systems/progressionSystem';
@@ -179,13 +180,12 @@ function togglePause(): void {
 
 let last = performance.now();
 function loop(now: number): void {
-  if (import.meta.env.DEV && state.mode === 'playing' && state.spawnLeft === 0) tuner?.applyPendingWaveChanges();
   const scale = import.meta.env.DEV ? devTimeScale : 1;
   const dt = Math.min(cfg.combat.dtCap, ((now - last) / 1000) * scale);
   last = now;
   const lockedHp = state.hp;
   if (import.meta.env.DEV) telemetry?.beforeUpdate();
-  let events = updateGame(state, config, rng, dt);
+  let events = updateGame(state, config, rng, dt, () => tuner?.applyPendingWaveChanges());
   if (import.meta.env.DEV) telemetry?.afterUpdate();
   if (import.meta.env.DEV && devInvincible && state.hp < lockedHp) {
     state.hp = Math.max(1, lockedHp);
@@ -247,6 +247,7 @@ if (import.meta.env.DEV) void Promise.all([import('./debug/exposeDebugApi'), imp
       setInvincible(value) { devInvincible = value; },
       jumpToWave(wave) { dispatch(jumpToWave(state, config, rng, wave)); modals.hideResult(); modals.hideLevel(); modals.message('', '', false); },
       restartWave() { dispatch(restartWave(state, config, rng)); modals.hideResult(); modals.hideLevel(); modals.message('', '', false); },
+      getSpawnTelemetry() { const admission = budgetAdmission(state.wave, state.spawnLeft, state.enemies.length, cfg.waves.budget); return { wave: state.wave, spawnLeft: state.spawnLeft, alive: state.enemies.length, spawnTimer: state.spawnTimer, lastSpawnCheckCount: state.lastSpawnCheckCount, normalTarget: admission.normalTarget, effectiveTarget: admission.effectiveTarget, inEndSprint: admission.inEndSprint }; },
     },
   });
 
@@ -259,7 +260,7 @@ if (import.meta.env.DEV) void Promise.all([import('./debug/exposeDebugApi'), imp
   });
 
   debugModule.exposeDebugApi({
-    getState: () => ({ ...state, enemyTypes: state.enemies.map(enemy => enemy.type), enemies: state.enemies.length, bullets: state.bullets.length, config: { ...config } }), start, reset,
+      getState: () => ({ ...state, enemyTypes: state.enemies.map(enemy => enemy.type), enemies: state.enemies.length, bullets: state.bullets.length, config: { ...config }, waves: { spawnMode: cfg.waves.spawnMode, pendingSpawnMode: tuner?.getPendingSpawnMode() ?? null, budget: cfg.waves.budget } }), start, reset,
     spawnGroundDrop: (x, y, type = null, star) => spawnGroundDrop(state, config, rng, x, y, type, star),
     addTestPair: () => dispatch(spawnTestDrops(state, config, rng)),
     moveOrSwap: (source, index, targetKind, targetIndex) => dispatch(moveOrSwap(state, config, rng, source, index, targetKind, targetIndex)),

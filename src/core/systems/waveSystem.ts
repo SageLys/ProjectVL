@@ -3,6 +3,8 @@ import type { Config, GameEvent, GameState, Rng } from '../types';
 import { endGame } from '../endGame';
 import { spawnEnemy } from './enemySystem';
 import { fireTrigger } from '../effects/interpreter';
+import { budgetAdmission } from './budgetRules';
+export { budgetAdmission } from './budgetRules';
 
 /** 第 wave 波的总出怪配额：base + wave*perWave。 */
 export function enemyCountFor(wave: number): number {
@@ -16,6 +18,7 @@ export function startNextWave(state: GameState, config: Config, rng: Rng): GameE
   state.wave++;
   state.spawnLeft = enemyCountFor(state.wave);
   state.spawnTimer = cfg.waves.firstSpawnDelay;
+  state.lastSpawnCheckCount = 0;
   state.waveClearPending = false;
   state.between = 0;
   const events: GameEvent[] = [{ type: 'waveStart', wave: state.wave }];
@@ -42,11 +45,7 @@ const intervalSpawnStrategy: SpawnStrategy = { tick(state, rng, dt) {
 
 /** Budget target for the current wave, including the quota-based end sprint. */
 export function budgetTargetFor(state: GameState): number {
-  const budget = cfg.waves.budget;
-  const normalTarget = budget.targetOnScreen.base + state.wave * budget.targetOnScreen.perWave;
-  const checksToQuotaEnd = Math.ceil(state.spawnLeft / Math.max(1, budget.batchMax));
-  const inEndSprint = checksToQuotaEnd * budget.checkInterval <= budget.waveEndSprint.window;
-  return Math.ceil(normalTarget * (inEndSprint ? budget.waveEndSprint.multiplier : 1));
+  return budgetAdmission(state.wave, state.spawnLeft, state.enemies.length, cfg.waves.budget).effectiveTarget;
 }
 
 const budgetSpawnStrategy: SpawnStrategy = { tick(state, rng, dt) {
@@ -55,13 +54,12 @@ const budgetSpawnStrategy: SpawnStrategy = { tick(state, rng, dt) {
   if (state.spawnTimer > 0) return;
 
   const budget = cfg.waves.budget;
-  const capacity = Math.max(0, budget.maxAlive - state.enemies.length);
-  const deficit = Math.max(0, budgetTargetFor(state) - state.enemies.length);
-  const count = Math.min(state.spawnLeft, budget.batchMax, capacity, deficit);
+  const count = budgetAdmission(state.wave, state.spawnLeft, state.enemies.length, budget).spawnCount;
   for (let i = 0; i < count; i++) {
     spawnEnemy(state, rng);
     state.spawnLeft--;
   }
+  state.lastSpawnCheckCount = count;
   state.spawnTimer = budget.checkInterval;
 } };
 
@@ -90,10 +88,10 @@ export function checkWaveClear(state: GameState): GameEvent[] {
 }
 
 /** 波间隔倒计时；归零则开启下一波。 */
-export function tickBetween(state: GameState, config: Config, rng: Rng, dt: number): GameEvent[] {
+export function tickBetween(state: GameState, config: Config, rng: Rng, dt: number, beforeWaveStart?: () => void): GameEvent[] {
   if (state.between > 0) {
     state.between -= dt;
-    if (state.between <= 0) return startNextWave(state, config, rng);
+    if (state.between <= 0) { beforeWaveStart?.(); return startNextWave(state, config, rng); }
   }
   return [];
 }

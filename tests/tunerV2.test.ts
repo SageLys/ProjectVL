@@ -49,6 +49,40 @@ describe('调参面板 v2 · 参数与派生指标', () => {
     expect(doubled.cells.normal[0].killDepth).toBeGreaterThan(metrics.cells.normal[0].killDepth);
     expect(doubled.cells.normal[0].onScreen).toBeLessThan(metrics.cells.normal[0].onScreen);
   });
+
+  it('projects every Budget control into a visible derived value', () => {
+    const runtime = createDefaultConfig();
+    cfg.waves.spawnMode = 'budget';
+    cfg.waves.enemyCountBase = 20;
+    cfg.waves.enemyCountPerWave = 0;
+    cfg.waves.budget.targetOnScreen = { base: 4, perWave: 1 };
+    cfg.waves.budget.checkInterval = 2;
+    cfg.waves.budget.batchMax = 3;
+    cfg.waves.budget.waveEndSprint = { window: 4, multiplier: 1.5 };
+    cfg.waves.budget.maxAlive = 20;
+    const baseline = deriveMetrics(cfg, runtime);
+
+    cfg.waves.budget.targetOnScreen.base = 6;
+    expect(deriveMetrics(cfg, runtime).budget!.normalOnScreen).not.toEqual(baseline.budget!.normalOnScreen);
+    cfg.waves.budget.targetOnScreen.base = 4;
+    cfg.waves.budget.targetOnScreen.perWave = 2;
+    expect(deriveMetrics(cfg, runtime).budget!.normalOnScreen).not.toEqual(baseline.budget!.normalOnScreen);
+    cfg.waves.budget.targetOnScreen.perWave = 1;
+    cfg.waves.budget.maxAlive = 4;
+    expect(deriveMetrics(cfg, runtime).budget!.sprintOnScreen).not.toEqual(baseline.budget!.sprintOnScreen);
+    cfg.waves.budget.maxAlive = 20;
+    cfg.waves.budget.waveEndSprint.multiplier = 2;
+    expect(deriveMetrics(cfg, runtime).budget!.sprintOnScreen).not.toEqual(baseline.budget!.sprintOnScreen);
+    cfg.waves.budget.waveEndSprint.multiplier = 1.5;
+    cfg.waves.budget.waveEndSprint.window = 2;
+    expect(deriveMetrics(cfg, runtime).budget!.sprintQuotaThreshold).not.toEqual(baseline.budget!.sprintQuotaThreshold);
+    cfg.waves.budget.waveEndSprint.window = 4;
+    cfg.waves.budget.checkInterval = 1;
+    expect(deriveMetrics(cfg, runtime).budget!.sprintQuotaThreshold).not.toEqual(baseline.budget!.sprintQuotaThreshold);
+    cfg.waves.budget.checkInterval = 2;
+    cfg.waves.budget.batchMax = 4;
+    expect(deriveMetrics(cfg, runtime).waveDurations).not.toEqual(baseline.waveDurations);
+  });
 });
 
 describe('调试模式 · seed 与跳波', () => {

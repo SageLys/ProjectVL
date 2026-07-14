@@ -197,6 +197,8 @@ export interface GameState {
   nextSummonId: number;
   spawnLeft: number;
   spawnTimer: number;
+  /** DEV-visible result of the latest Budget admission check (not configuration). */
+  lastSpawnCheckCount: number;
   waveClearPending: boolean;
   damageBonus: number;
   fireRateBonus: number;
