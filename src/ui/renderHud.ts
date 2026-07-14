@@ -15,7 +15,7 @@ export function renderHud(refs: DomRefs, state: GameState, config: Config): void
   if (refs.rateStat) refs.rateStat.textContent = `${totalFireRate(state, config).toFixed(1)}/s`;
   if (refs.multiStat) refs.multiStat.textContent = String(totalMulti(state));
   const hasEquipment = state.equipment.some(Boolean);
-  refs.equipmentHint.textContent = hasEquipment ? '长按装备卡可销毁' : '拖入 3★+ 卡装备';
-  refs.dropTelemetry.textContent = hasEquipment ? '同型同星拖入可升星' : '装备永久 · 仅销毁腾位';
+  refs.equipmentHint.textContent = hasEquipment ? '拖到战场可一次性释放' : '拖入 3★+ 卡装备';
+  refs.dropTelemetry.textContent = hasEquipment ? '同型同星拖入可升星 · 装备卡可释放' : '装备卡也可拖到战场释放';
   refs.cardsHint.textContent = '拖到战场释放 · 同型同星自动合成';
 }

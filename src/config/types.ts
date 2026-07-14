@@ -105,8 +105,8 @@ export interface EconomyConfig {
   equipThreshold: number;
   handSlots: number;
   equipSlots: number;
-  equipIrreversible: true;
-  unequipPolicy: 'destroy';
+  equipIrreversible: false;
+  unequipPolicy: 'consume';
   inRunSlotExpansion: boolean;
   equipDistinctTypes: boolean;
   feedEquipped: boolean;

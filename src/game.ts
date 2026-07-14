@@ -9,7 +9,7 @@ import { updateGame } from './core/updateGame';
 import { registerSkillDefs, resolveConsumableTier } from './core/effects/interpreter';
 import { jumpToWave, restartWave, startNextWave } from './core/systems/waveSystem';
 import { budgetAdmission } from './core/systems/budgetRules';
-import { moveOrSwap, unequipDestroy, consumeCard } from './core/systems/equipmentSystem';
+import { moveOrSwap, consumeCard } from './core/systems/equipmentSystem';
 import { collectNearest, spawnTestDrops, spawnGroundDrop } from './core/systems/dropSystem';
 import { applyPerk } from './core/systems/progressionSystem';
 import { totalRange } from './core/stats';
@@ -51,28 +51,6 @@ refs.totalWavesText.textContent = String(cfg.waves.totalWaves);
 refs.equipmentHint.textContent = `拖入 ${cfg.economy.equipThreshold}★+ 卡装备`;
 refs.cardsHint.textContent = '拖到战场释放 · 同型同星自动合成';
 
-const destroyLayer = document.createElement('div');
-destroyLayer.className = 'destroy-hud';
-destroyLayer.hidden = true;
-document.body.append(destroyLayer);
-
-function closeDestroyConfirm(): void { destroyLayer.hidden = true; }
-
-function openDestroyConfirm(index: number): void {
-  const card=state.equipment[index]; if(!card)return; const meta=cfg.skills.legacy.types[card.type];
-  const slot = refs.equipmentSlots.querySelector<HTMLElement>(`[data-index="${index}"]`);
-  if (slot) {
-    const rect = slot.getBoundingClientRect();
-    destroyLayer.style.left = `${Math.min(innerWidth - 12, Math.max(12, rect.left + rect.width / 2))}px`;
-    destroyLayer.style.top = `${Math.max(8, rect.top - 8)}px`;
-  }
-  destroyLayer.dataset.testid='destroy-confirm';
-  destroyLayer.innerHTML=`<span><b>永久销毁 ${card.star}★ ${meta.name}</b><small>失去「${meta.desc}强化」· 无返还</small></span><button class="destroy-confirm-btn" data-testid="destroy-confirm-button">销毁</button><button class="confirm-cancel" aria-label="取消销毁">取消</button>`;
-  destroyLayer.hidden=false;
-  destroyLayer.querySelector('.destroy-confirm-btn')!.addEventListener('click',()=>{dispatch(unequipDestroy(state,index));closeDestroyConfirm();});
-  destroyLayer.querySelector('.confirm-cancel')!.addEventListener('click',closeDestroyConfirm);
-}
-
 // —— 表现副作用统一由事件驱动 ——
 function dispatch(events: GameEvent[]): void {
   if (import.meta.env.DEV) telemetry?.recordGameEvents(events);
@@ -99,7 +77,6 @@ function refreshSlots(): void {
 }
 
 const slotHandlers: SlotHandlers = {
-  destroyRequest: openDestroyConfirm,
   dragStart(e, source, index, el) {
     pointerRouter.begin(e, source, index, el);
   },
@@ -137,7 +114,7 @@ const pointerRouter = createPointerRouter({
   },
   onDrop: (source, index, target) => {
     let events: GameEvent[] = [];
-    if (target.kind === 'arena' && source === 'cards') events = consumeCard(state, config, rng, index, target.x, target.y);
+    if (target.kind === 'arena') events = consumeCard(state, config, rng, index, target.x, target.y, source);
     else if (target.kind === 'slot' && target.slotKind === 'equipment' && source === 'cards') {
       events = moveOrSwap(state, config, rng, source, index, 'equipment', target.index);
       if (events.some(event => event.type === 'equipRejected' || event.type === 'equipFull')) state.equipTelemetry.rejects++;
@@ -272,7 +249,6 @@ if (import.meta.env.DEV) void Promise.all([import('./debug/exposeDebugApi'), imp
     addTestPair: () => dispatch(spawnTestDrops(state, config, rng)),
     moveOrSwap: (source, index, targetKind, targetIndex) => dispatch(moveOrSwap(state, config, rng, source, index, targetKind, targetIndex)),
     consumeAt: (index, x, y) => dispatch(consumeCard(state, config, rng, index, x, y)),
-    destroyEquipment: index => dispatch(unequipDestroy(state, index)),
     setConfig: patch => {
       Object.assign(config, patch);
       if (patch.damage != null) cfg.combat.defaults.damage = patch.damage;

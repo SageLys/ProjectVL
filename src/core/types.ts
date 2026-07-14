@@ -182,7 +182,7 @@ export interface GameState {
   particles: Particle[];
   groundDrops: GroundDrop[];
   cards: (Card | null)[];
-  /** 独立装备格；装备后只可销毁，不可回到手牌。 */
+  /** 独立装备格；装备卡可拖到战场消耗释放，不可回到手牌。 */
   equipment: (Card | null)[];
   zones: Zone[];
   summons: Summon[];
@@ -247,7 +247,6 @@ export type GameEvent =
   | { type: 'merged'; cardType: CardType; resultStar: number }
   | { type: 'skillConsumed'; cardType: CardType; star: number; x: number; y: number }
   | { type: 'equipped'; cardType: CardType; star: number; slotIndex: number }
-  | { type: 'equipmentDestroyed'; cardType: CardType; star: number; slotIndex: number }
   | { type: 'fed'; cardType: CardType; resultStar: number }
   | { type: 'shieldBroken' }
   | { type: 'testDrops'; cardType: CardType }

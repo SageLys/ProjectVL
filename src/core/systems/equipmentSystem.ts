@@ -27,7 +27,7 @@ function duplicateEquippedType(cards: (Card | null)[], moving: Card, skipIndex: 
 }
 
 /**
- * 手牌内部可移动/交换；手牌拖入装备格后永久生效。
+ * 手牌内部可移动/交换；手牌拖入装备格后持续生效。
  * 装备卡不能通过本函数返回手牌；同型同星拖到已装备卡只执行喂养。
  */
 export function moveOrSwap(state: GameState, config: Config, rng: Rng, sourceKind: SlotKind, sourceIndex: number, targetKind: SlotKind, targetIndex: number): GameEvent[] {
@@ -65,20 +65,12 @@ export function moveOrSwap(state: GameState, config: Config, rng: Rng, sourceKin
   return events;
 }
 
-/** 清空装备格并永久销毁卡；无效果、无返还。 */
-export function unequipDestroy(state: GameState, slotIndex: number): GameEvent[] {
-  const card = state.equipment[slotIndex];
+/** 从手牌或装备栏消耗卡牌，并在指定落点释放。 */
+export function consumeCard(state: GameState, config: Config, rng: Rng, sourceIndex: number, x: number, y: number, sourceKind: SlotKind = 'cards'): GameEvent[] {
+  const source = collectionFor(state, sourceKind);
+  const card = source[sourceIndex];
   if (!card) return [];
-  state.equipment[slotIndex] = null;
-  state.equipOps++;
-  return [{ type: 'equipmentDestroyed', cardType: card.type, star: card.star, slotIndex }];
-}
-
-/** 消耗手牌并在指定落点释放。 */
-export function consumeCard(state: GameState, config: Config, rng: Rng, sourceIndex: number, x: number, y: number): GameEvent[] {
-  const card = state.cards[sourceIndex];
-  if (!card) return [];
-  state.cards[sourceIndex] = null;
+  source[sourceIndex] = null;
   state.consumes++;
   const events: GameEvent[] = [{ type: 'skillConsumed', cardType: card.type, star: card.star, x, y }];
   if (getSkillDef(card.type)) events.push(...releaseConsumable(state, config, rng, card.type, card.star, x, y));

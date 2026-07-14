@@ -11,8 +11,6 @@ export interface DebugApi {
   moveOrSwap(source: SlotSource, index: number, targetKind: SlotKind, targetIndex: number): void;
   /** 消耗释放：手牌 index 卡在画布坐标 (x,y) 落点释放。 */
   consumeAt(index: number, x: number, y: number): void;
-  /** 永久销毁指定装备格。 */
-  destroyEquipment(index: number): void;
   setConfig(patch: Partial<Config>): void;
   /** 当前生效的 variant 名单。 */
   getVariants(): string[];
