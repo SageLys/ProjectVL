@@ -1,9 +1,9 @@
 import { cfg } from '../config';
 import { texts } from '../data';
-import type { CardType, GameEvent } from '../core/types';
+import type { GameEvent } from '../core/types';
 import { fmt } from './format';
+import { cardDisplayName as name } from './cardMeta';
 
-const name = (t: CardType) => cfg.skills.legacy.types[t]?.name ?? t;
 const T = texts.toast;
 
 /** 事件类型中会改变卡槽/装备内容、需要重绘槽位的集合。 */

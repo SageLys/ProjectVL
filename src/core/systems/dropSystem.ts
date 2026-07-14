@@ -2,10 +2,14 @@ import { cfg } from '../../config';
 import type { CardType, Config, Enemy, GameEvent, GameState, GroundDrop, Rng } from '../types';
 import { totalDropChance, totalDropLifetime } from '../stats';
 import { autoMergeCards } from './cardSystem';
-import { fireTrigger } from '../effects/interpreter';
+import { fireTrigger, getModifiers } from '../effects/interpreter';
+import { addXp } from './progressionSystem';
 
 const TAU = Math.PI * 2;
-export const CARD_KEYS: CardType[] = ['damage', 'rate', 'multi', 'range', 'luck'];
+/** 批次1 正式卡池（P5 替换 P3 占位卡）。 */
+export const CARD_KEYS: CardType[] = ['pierce', 'chainLightning', 'frost', 'decoy', 'scorch', 'harvest', 'aegis'];
+/** 过期折算经验的基准值（丰收 5★ 落穗：expiryConvert.ratio × 星级 × 本常数）。 */
+const EXPIRY_CONVERT_XP_PER_STAR = 4;
 
 /** 在 (x,y) 生成一枚限时地面掉落。type 缺省随机；star 缺省按掉落星级策略（普通=1★）。 */
 export function spawnGroundDrop(state: GameState, config: Config, rng: Rng, x: number, y: number, forcedType: CardType | null = null, star?: number): void {
@@ -34,9 +38,29 @@ export function rollDropOnKill(state: GameState, config: Config, rng: Rng, enemy
 }
 
 /**
- * 推进掉落寿命与浮动相位；超时移除并计入 expired。
+ * Bounty 精英击杀掉落：肥而急——dropCount 份、2★ 权重按 starWeightShift 放大、寿命 ×dropLifetimeMul。
+ * 星级仍受 economy.dropStarPolicy.bountyBossMax 封顶（R8）。
  */
-export function tickDrops(state: GameState, _config: Config, _rng: Rng, dt: number): GameEvent[] {
+export function rollBountyDrops(state: GameState, config: Config, rng: Rng, enemy: Enemy): void {
+  const { rewards } = cfg.skills.mechanisms.bounty;
+  const star2Weight = cfg.economy.dropStarPolicy.star2Share * rewards.starWeightShift;
+  for (let i = 0; i < rewards.dropCount; i++) {
+    const star = rng() < star2Weight ? Math.min(2, cfg.economy.dropStarPolicy.bountyBossMax) : cfg.economy.dropStarPolicy.normal;
+    const x = enemy.x + (rng() - 0.5) * 40;
+    const y = enemy.y + (rng() - 0.5) * 40;
+    spawnGroundDrop(state, config, rng, x, y, null, star);
+    const drop = state.groundDrops[state.groundDrops.length - 1];
+    drop.life *= rewards.dropLifetimeMul;
+    drop.maxLife = drop.life;
+  }
+}
+
+/**
+ * 推进掉落寿命与浮动相位；超时移除并计入 expired。
+ * 丰收 5★ 落穗（expiryConvert）：命中时按 ratio 把过期掉落折算经验，而非纯损失。
+ */
+export function tickDrops(state: GameState, config: Config, rng: Rng, dt: number): GameEvent[] {
+  const events: GameEvent[] = [];
   for (let i = state.groundDrops.length - 1; i >= 0; i--) {
     const drop = state.groundDrops[i];
     drop.life -= dt;
@@ -44,9 +68,13 @@ export function tickDrops(state: GameState, _config: Config, _rng: Rng, dt: numb
     if (drop.life <= 0) {
       state.groundDrops.splice(i, 1);
       state.expired++;
+      const convert = getModifiers(state).expiryConvert;
+      if (convert && rng() < convert.ratio) {
+        events.push(...addXp(state, drop.star * EXPIRY_CONVERT_XP_PER_STAR, rng));
+      }
     }
   }
-  return [];
+  return events;
 }
 
 /**

@@ -29,7 +29,7 @@ export interface TelemetrySample {
   enemies: number;
 }
 
-export type TelemetryInputType = 'pickupClick' | 'consumeRelease' | 'dragDrop' | 'lockToggle' | 'perkSelect';
+export type TelemetryInputType = 'pickupClick' | 'consumeRelease' | 'dragDrop' | 'lockToggle' | 'perkSelect' | 'bountyAccept';
 
 export interface TelemetryInput {
   type: TelemetryInputType;

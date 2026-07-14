@@ -4,19 +4,24 @@ import { cfg } from '../../config';
 import type { Config, Enemy, GameEvent, GameState, Rng } from '../types';
 import { damageTakenMultiplier } from '../effects/statusSystem';
 import { spawnParticle } from './particleSystem';
-import { rollDropOnKill } from './dropSystem';
+import { rollDropOnKill, rollBountyDrops } from './dropSystem';
 import { addXp } from './progressionSystem';
 import { fireTrigger, getModifiers } from '../effects/interpreter';
 
-/** 击杀结算：计分、粒子、掉落判定、经验（×xpMul）、onKill 触发。调用前敌人须已移出数组。 */
-export function killEnemy(state: GameState, config: Config, rng: Rng, enemy: Enemy): GameEvent[] {
+/**
+ * 击杀结算：计分、粒子、掉落判定、经验（×xpMul）、onKill 触发。调用前敌人须已移出数组。
+ * source：击杀来源标签（如 'chain'），供 onKill 绑定的 triggerParams.requiresSource 过滤用；
+ * 死亡时刻的 enemy.status（frozen/dots 等）原样保留，供 triggerParams.requiresStatus 过滤用。
+ */
+export function killEnemy(state: GameState, config: Config, rng: Rng, enemy: Enemy, source?: string): GameEvent[] {
   const events: GameEvent[] = [];
   state.kills++;
   for (let i = 0; i < cfg.combat.vfx.killParticles; i++) spawnParticle(state, rng, enemy.x, enemy.y, enemy.color, 150);
-  rollDropOnKill(state, config, rng, enemy);
+  if (enemy.bounty?.accepted) rollBountyDrops(state, config, rng, enemy);
+  else rollDropOnKill(state, config, rng, enemy);
   const xpGain = enemy.xp * cfg.progression.killXpMul * (1 + state.xpGainBonus) * getModifiers(state).xpMul;
   events.push(...addXp(state, xpGain, rng));
-  events.push(...fireTrigger(state, config, rng, 'onKill', { enemy, point: { x: enemy.x, y: enemy.y } }));
+  events.push(...fireTrigger(state, config, rng, 'onKill', { enemy, point: { x: enemy.x, y: enemy.y }, source }));
   return events;
 }
 
@@ -24,14 +29,14 @@ export function killEnemy(state: GameState, config: Config, rng: Rng, enemy: Ene
  * 对敌人造成伤害（应用易伤乘数），死亡则移出数组并走击杀结算。
  * 返回衍生事件；敌人若已不在 state.enemies 中则不动作。
  */
-export function dealDamage(state: GameState, config: Config, rng: Rng, enemy: Enemy, rawDamage: number): GameEvent[] {
+export function dealDamage(state: GameState, config: Config, rng: Rng, enemy: Enemy, rawDamage: number, source?: string): GameEvent[] {
   const idx = state.enemies.indexOf(enemy);
   if (idx < 0) return [];
   enemy.hp -= rawDamage * damageTakenMultiplier(enemy);
   enemy.hit = 0.08;
   if (enemy.hp <= 0) {
     state.enemies.splice(idx, 1);
-    return killEnemy(state, config, rng, enemy);
+    return killEnemy(state, config, rng, enemy, source);
   }
   return [];
 }

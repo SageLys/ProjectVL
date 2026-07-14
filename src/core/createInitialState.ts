@@ -60,5 +60,6 @@ export function createInitialState(): GameState {
     equipTelemetry: { durationsMs: [], cancels: 0, rejects: 0 },
     collected: 0,
     expired: 0,
+    bountyPending: false,
   };
 }

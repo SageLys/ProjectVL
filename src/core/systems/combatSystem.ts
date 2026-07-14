@@ -8,18 +8,21 @@ import { damageTakenMultiplier } from '../effects/statusSystem';
 import { ATOMS, type EffectCtx } from '../effects/registry';
 
 /**
- * 索敌：仲裁规则 5——烙印（focusPriority）权重降序优先，其余取射程内最近。
- * （bounty 接单集火在 P5 实装后插到烙印之前。）
+ * 索敌：仲裁规则 5——bounty 接单集火 > 烙印（focusPriority）权重降序 > 射程内最近。
  */
 export function findTarget(state: GameState, config: Config): Enemy | null {
   const range = totalRange(state, config);
   const t = cfg.combat.turret;
+  const focusFire = cfg.skills.mechanisms.bounty.acceptEffects.focusFire;
+  let bountyBest: Enemy | null = null;
+  let bountyDist = Infinity;
   let best: Enemy | null = null;
   let bestWeight = -Infinity;
   let bestDist = Infinity;
   for (const enemy of state.enemies) {
     const dist = Math.hypot(enemy.x - t.x, enemy.y - t.y);
     if (dist > range) continue;
+    if (focusFire && enemy.bounty?.accepted && dist < bountyDist) { bountyBest = enemy; bountyDist = dist; }
     const weight = enemy.status.brand?.weight ?? 0;
     if (weight > bestWeight || (weight === bestWeight && dist < bestDist)) {
       best = enemy;
@@ -27,7 +30,7 @@ export function findTarget(state: GameState, config: Config): Enemy | null {
       bestDist = dist;
     }
   }
-  return best;
+  return bountyBest ?? best;
 }
 
 /** 朝目标开火：多弹丸扇形散布；每发触发 onFire（装备态修饰弹道/附着状态）。 */

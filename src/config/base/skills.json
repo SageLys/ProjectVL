@@ -13,77 +13,171 @@
   },
   "cards": [
     {
-      "id": "damage", "category": "projectile", "textKey": "cards.legacy.damage", "teaching": true,
+      "id": "pierce", "category": "projectile", "textKey": "cards.pierce", "teaching": true, "implementationBatch": 1,
       "stars": {
-        "3": { "tier": "core", "equip": [{ "trigger": "onFire", "effects": [{ "atom": "pierce", "params": { "count": 1, "damageRetention": 0.8 } }] }] },
-        "5": { "tier": "dual", "equip": [{ "trigger": "onFire", "effects": [{ "atom": "pierce", "params": { "count": 2, "damageRetention": 0.85 } }, { "atom": "knockback", "params": { "distance": 20 } }] }] },
-        "6": { "tier": "transform", "equip": [{ "trigger": "passive", "effects": [{ "atom": "beamMorph", "params": { "interval": 0.9, "width": 28, "damageRatio": 1.2 } }] }] }
+        "3": { "tier": "core", "equip": [{ "trigger": "onFire", "effects": [{ "atom": "pierce", "params": { "count": 2, "damageRetention": 0.8, "rampPerPierce": 0.1 } }] }] },
+        "5": { "tier": "dual", "equip": [{ "trigger": "onFire", "effects": [{ "atom": "pierce", "params": { "count": 2, "damageRetention": 0.8, "rampPerPierce": 0.1 } }, { "atom": "ricochet", "params": { "bounces": 1 } }] }] },
+        "6": { "tier": "transform", "equip": [{ "trigger": "passive", "effects": [{ "atom": "beamMorph", "params": { "interval": 0.9, "width": 32, "damageRatio": 1.3 } }] }] }
       },
-      "amplifyAxis": { "description": "穿透数 +1", "params": { "count": "+1" } },
+      "amplifyAxis": { "description": "穿透数 +1、伤害保留 +10pt", "params": { "count": "+1", "damageRetention": "+0.1" } },
       "consumable": { "placement": "point", "interpolation": "linear", "anchors": {
-        "1": { "radius": 90, "effects": [{ "atom": "burstDamage", "params": { "damageMul": 3, "radius": 90 } }] },
-        "3": { "radius": 150, "effects": [{ "atom": "burstDamage", "params": { "damageMul": 8, "radius": 150 } }] },
-        "6": { "radius": 210, "effects": [{ "atom": "burstDamage", "params": { "damageMul": 14, "radius": 210 } }] }
-      } }, "designNotes": "占位语义：落点爆发；S5 替换为正式卡。"
+        "1": { "radius": 40, "effects": [{ "atom": "pierce", "params": { "damageMul": 3, "width": 10, "damageRetention": 1 } }] },
+        "3": { "radius": 70, "effects": [{ "atom": "pierce", "params": { "damageMul": 5, "width": 16, "damageRetention": 1 } }] },
+        "6": { "radius": 110, "effects": [{ "atom": "pierce", "params": { "damageMul": 8, "width": 24, "damageRetention": 1 } }, { "atom": "knockback", "params": { "distance": 40 } }] }
+      } }, "designNotes": "教学卡：一击洞穿一列敌人。3★装备态单核心原子（rampPerPierce 为同原子参数，非独立修饰）。"
     },
     {
-      "id": "rate", "category": "control", "textKey": "cards.legacy.rate", "teaching": true,
+      "id": "chainLightning", "category": "projectile", "textKey": "cards.chainLightning", "teaching": false, "implementationBatch": 1,
       "stars": {
-        "3": { "tier": "core", "equip": [{ "trigger": "onHit", "effects": [{ "atom": "slow", "params": { "ratio": 0.25, "duration": 0.6 } }] }] },
-        "5": { "tier": "dual", "equip": [{ "trigger": "onHit", "effects": [{ "atom": "slow", "params": { "ratio": 0.35, "duration": 0.8 } }, { "atom": "vulnerable", "params": { "ratio": 0.1, "duration": 1 } }] }] },
-        "6": { "tier": "transform", "equip": [{ "trigger": "passive", "effects": [{ "atom": "aura", "params": { "radiusRatioOfRange": 0.6, "tickInterval": 1, "effects": [{ "atom": "slow", "params": { "ratio": 0.4, "duration": 1.1 } }] } }] }] }
+        "3": { "tier": "core", "equip": [
+          { "trigger": "onHit", "effects": [
+            { "atom": "chain", "params": { "bounces": 2, "damageRetention": 0.7, "searchRange": 120 } },
+            { "atom": "slow", "params": { "ratio": 0.2, "duration": 1.2 } }
+          ] }
+        ] },
+        "5": { "tier": "dual", "equip": [
+          { "trigger": "onHit", "effects": [
+            { "atom": "chain", "params": { "bounces": 3, "damageRetention": 0.7, "searchRange": 140 } },
+            { "atom": "slow", "params": { "ratio": 0.2, "duration": 1.2 } }
+          ] },
+          { "trigger": "onKill", "triggerParams": { "requiresSource": "chain" }, "effects": [
+            { "atom": "chain", "params": { "bounces": 2, "damageRetention": 0.5, "searchRange": 140 } }
+          ] }
+        ] },
+        "6": { "tier": "transform", "equip": [
+          { "trigger": "interval", "triggerParams": { "seconds": 1.2 }, "effects": [
+            { "atom": "chain", "params": { "bounces": 2, "damageRetention": 0.8, "searchRange": 160, "targets": 3 } }
+          ] }
+        ] }
       },
-      "amplifyAxis": { "description": "减速率 +20%", "params": { "ratio": "+20%" } },
+      "amplifyAxis": { "description": "弹跳 +1、搜索半径 +20", "params": { "bounces": "+1", "searchRange": "+20" } },
       "consumable": { "placement": "point", "interpolation": "linear", "anchors": {
-        "1": { "radius": 100, "duration": 3, "effects": [{ "atom": "groundZone", "params": { "radius": 100, "duration": 3, "tickInterval": 0.5, "effects": [{ "atom": "slow", "params": { "ratio": 0.3, "duration": 0.6 } }] } }] },
-        "3": { "radius": 160, "duration": 4, "effects": [{ "atom": "groundZone", "params": { "radius": 160, "duration": 4, "tickInterval": 0.5, "effects": [{ "atom": "slow", "params": { "ratio": 0.5, "duration": 0.8 } }] } }] },
-        "6": { "radius": 210, "duration": 5, "effects": [{ "atom": "groundZone", "params": { "radius": 210, "duration": 5, "tickInterval": 0.5, "effects": [{ "atom": "slow", "params": { "ratio": 0.7, "duration": 1 } }] } }, { "atom": "freeze", "params": { "duration": 2 } }] }
-      } }, "designNotes": "占位语义：落点减速区；S5 替换为正式卡。"
+        "1": { "radius": 120, "effects": [{ "atom": "chain", "params": { "bounces": 4, "damageRetention": 0.8, "searchRange": 140 } }] },
+        "3": { "radius": 140, "effects": [
+          { "atom": "chain", "params": { "bounces": 7, "damageRetention": 0.8, "searchRange": 140 } },
+          { "atom": "slow", "params": { "ratio": 0.25, "duration": 1.5 } }
+        ] },
+        "6": { "radius": 160, "effects": [
+          { "atom": "chain", "params": { "bounces": 12, "damageRetention": 0.85, "searchRange": 160 } },
+          { "atom": "stun", "params": { "duration": 0.5 } }
+        ] }
+      } }, "designNotes": "电弧在敌群中跳跃。5★ 断链重引：击杀来源为 chain 的敌人从死亡点重新起链。"
     },
     {
-      "id": "multi", "category": "projectile", "textKey": "cards.legacy.multi", "teaching": true,
+      "id": "frost", "category": "control", "textKey": "cards.frost", "teaching": false, "implementationBatch": 1,
       "stars": {
-        "3": { "tier": "core", "equip": [{ "trigger": "onHit", "effects": [{ "atom": "chain", "params": { "bounces": 2, "damageRetention": 0.75, "searchRange": 140 } }] }] },
-        "5": { "tier": "dual", "equip": [{ "trigger": "onHit", "effects": [{ "atom": "chain", "params": { "bounces": 4, "damageRetention": 0.8, "searchRange": 160 } }, { "atom": "stun", "params": { "duration": 0.25 } }] }] },
-        "6": { "tier": "transform", "equip": [{ "trigger": "interval", "triggerParams": { "seconds": 1.2 }, "effects": [{ "atom": "chain", "params": { "bounces": 6, "damageRetention": 0.85, "searchRange": 220, "damageMul": 1.5 } }] }] }
+        "3": { "tier": "core", "equip": [
+          { "trigger": "onFire", "effects": [
+            { "atom": "slow", "params": { "ratio": 0.3, "duration": 1.5 } },
+            { "atom": "freeze", "params": { "duration": 0.8, "stacksToTrigger": 3 } }
+          ] }
+        ] },
+        "5": { "tier": "dual", "equip": [
+          { "trigger": "onFire", "effects": [
+            { "atom": "slow", "params": { "ratio": 0.3, "duration": 1.5 } },
+            { "atom": "freeze", "params": { "duration": 0.8, "stacksToTrigger": 3 } }
+          ] },
+          { "trigger": "onKill", "triggerParams": { "requiresStatus": "frozen" }, "effects": [
+            { "atom": "aoeOnHit", "params": { "radius": 80, "damageRatio": 0.5, "falloff": 0.5 } },
+            { "atom": "groundZone", "params": { "radius": 80, "duration": 0.1, "tickInterval": 0.05, "effects": [{ "atom": "slow", "params": { "ratio": 0.3, "duration": 1.5 } }] } }
+          ] }
+        ] },
+        "6": { "tier": "transform", "equip": [
+          { "trigger": "passive", "effects": [{ "atom": "aura", "params": { "radiusRatioOfRange": 0.6, "tickInterval": 1, "effects": [{ "atom": "slow", "params": { "ratio": 0.35, "duration": 1.2 } }] } }] },
+          { "trigger": "interval", "triggerParams": { "seconds": 4 }, "effects": [{ "atom": "freeze", "params": { "duration": 0.6, "radius": 150 } }] }
+        ] }
       },
-      "amplifyAxis": { "description": "弹跳 +1", "params": { "bounces": "+1" } },
+      "amplifyAxis": { "description": "减速比 +10pt、触发层数 -1", "params": { "ratio": "+0.1", "stacksToTrigger": "-1" } },
       "consumable": { "placement": "point", "interpolation": "linear", "anchors": {
-        "1": { "radius": 120, "effects": [{ "atom": "chain", "params": { "bounces": 3, "damageRetention": 0.8, "searchRange": 140, "damageMul": 1.5 } }] },
-        "3": { "radius": 160, "effects": [{ "atom": "chain", "params": { "bounces": 10, "damageRetention": 0.85, "searchRange": 160, "damageMul": 3 } }] },
-        "6": { "radius": 220, "effects": [{ "atom": "chain", "params": { "bounces": 16, "damageRetention": 0.9, "searchRange": 220, "damageMul": 5 } }, { "atom": "stun", "params": { "duration": 0.5 } }] }
-      } }, "designNotes": "占位语义：落点连锁放电；S5 替换为正式卡。"
+        "1": { "radius": 90, "duration": 3, "effects": [{ "atom": "freeze", "params": { "duration": 3 } }] },
+        "3": { "radius": 130, "duration": 3, "effects": [{ "atom": "freeze", "params": { "duration": 3 } }, { "atom": "slow", "params": { "ratio": 0.4, "duration": 2 } }] },
+        "6": { "radius": 170, "duration": 3.5, "effects": [{ "atom": "freeze", "params": { "duration": 3.5 } }, { "atom": "vulnerable", "params": { "ratio": 0.3, "duration": 3.5 } }] }
+      } }, "designNotes": "让世界慢下来。5★ 碎冰：冻结中被击杀的敌人碎裂造成 AoE 并减速周围敌人。"
     },
     {
-      "id": "range", "category": "control", "textKey": "cards.legacy.range", "teaching": true,
+      "id": "decoy", "category": "control", "textKey": "cards.decoy", "teaching": false, "implementationBatch": 1,
       "stars": {
-        "3": { "tier": "core", "equip": [{ "trigger": "onHit", "effects": [{ "atom": "knockback", "params": { "distance": 35 } }] }] },
-        "5": { "tier": "dual", "equip": [{ "trigger": "onHit", "effects": [{ "atom": "knockback", "params": { "distance": 55 } }, { "atom": "stun", "params": { "duration": 0.2 } }] }] },
-        "6": { "tier": "transform", "equip": [{ "trigger": "interval", "triggerParams": { "seconds": 3 }, "effects": [{ "atom": "burstDamage", "params": { "damageMul": 1, "radius": 220 } }, { "atom": "knockback", "params": { "distance": 120 } }] }] }
+        "3": { "tier": "core", "equip": [
+          { "trigger": "onWaveStart", "effects": [{ "atom": "summon", "params": { "kind": "decoy", "count": 1, "hp": 60, "tauntRadius": 140, "duration": 999, "explode": true, "explodeDamageMul": 1.2, "knockbackDistance": 70 } }] }
+        ] },
+        "5": { "tier": "dual", "equip": [
+          { "trigger": "onWaveStart", "effects": [{ "atom": "summon", "params": { "kind": "decoy", "count": 1, "hp": 60, "tauntRadius": 140, "duration": 999, "explode": true, "explodeDamageMul": 1.2, "knockbackDistance": 70, "respawnOnce": true } }] }
+        ] },
+        "6": { "tier": "transform", "equip": [
+          { "trigger": "onWaveStart", "effects": [{ "atom": "summon", "params": { "kind": "mirrorTurret", "count": 1, "hp": 80, "damageRatio": 0.3, "priorityWeight": 5, "tauntRadius": 2000, "duration": 999 } }] }
+        ] }
       },
-      "amplifyAxis": { "description": "击退距离 +25%", "params": { "distance": "+25%" } },
+      "amplifyAxis": { "description": "图腾 HP +50%、嘲讽半径 +20", "params": { "hp": "+50%", "tauntRadius": "+20" } },
       "consumable": { "placement": "point", "interpolation": "linear", "anchors": {
-        "1": { "radius": 100, "effects": [{ "atom": "knockback", "params": { "distance": 70 } }] },
-        "3": { "radius": 180, "effects": [{ "atom": "knockback", "params": { "distance": 140 } }] },
-        "6": { "radius": 240, "effects": [{ "atom": "knockback", "params": { "distance": 220 } }, { "atom": "stun", "params": { "duration": 1 } }] }
-      } }, "designNotes": "占位语义：落点冲击击退；S5 替换为正式卡。"
+        "1": { "radius": 120, "duration": 4, "effects": [{ "atom": "summon", "params": { "kind": "decoy", "count": 1, "hp": 30, "tauntRadius": 120, "duration": 4 } }] },
+        "3": { "radius": 160, "duration": 5, "effects": [{ "atom": "summon", "params": { "kind": "decoy", "count": 1, "hp": 50, "tauntRadius": 160, "duration": 5, "explode": true, "explodeDamageMul": 1.5, "knockbackDistance": 90 } }] },
+        "6": { "radius": 160, "duration": 5, "effects": [{ "atom": "summon", "params": { "kind": "mirrorTurret", "count": 1, "hp": 9999, "damageRatio": 0.6, "duration": 5 } }] }
+      } }, "designNotes": "让它们打错目标。5★ 重生：图腾被摧毁时在新位置重生一次（每实例限一次）。"
     },
     {
-      "id": "luck", "category": "economy", "textKey": "cards.legacy.luck", "teaching": true,
+      "id": "scorch", "category": "domain", "textKey": "cards.scorch", "teaching": false, "implementationBatch": 1,
       "stars": {
-        "3": { "tier": "core", "equip": [{ "trigger": "passive", "effects": [{ "atom": "dropRateMul", "params": { "mul": 1.1 } }] }] },
-        "5": { "tier": "dual", "equip": [{ "trigger": "passive", "effects": [{ "atom": "dropRateMul", "params": { "mul": 1.2 } }, { "atom": "dropLifetimeMul", "params": { "mul": 1.2 } }] }] },
-        "6": { "tier": "transform", "equip": [{ "trigger": "onWaveStart", "effects": [{ "atom": "extraDrop", "params": { "count": 2, "at": "turret", "starWeights": { "1": 1 } } }] }] }
+        "3": { "tier": "core", "equip": [
+          { "trigger": "onHit", "effects": [{ "atom": "groundZone", "params": { "radius": 40, "duration": 2.5, "tickInterval": 0.5, "effects": [{ "atom": "dot", "params": { "damageRatio": 0.15 } }] } }] },
+          { "trigger": "onKill", "triggerParams": { "requiresStatus": "dot" }, "effects": [{ "atom": "groundZone", "params": { "radius": 40, "duration": 2.5, "tickInterval": 0.5, "effects": [{ "atom": "dot", "params": { "damageRatio": 0.15 } }] } }] }
+        ] },
+        "5": { "tier": "dual", "equip": [
+          { "trigger": "onHit", "effects": [{ "atom": "groundZone", "params": { "radius": 40, "duration": 2.5, "tickInterval": 0.5, "effects": [{ "atom": "dot", "params": { "damageRatio": 0.15 } }, { "atom": "vulnerable", "params": { "ratio": 0.15, "duration": 0.6 } }] } }] },
+          { "trigger": "onKill", "triggerParams": { "requiresStatus": "dot" }, "effects": [{ "atom": "groundZone", "params": { "radius": 40, "duration": 2.5, "tickInterval": 0.5, "effects": [{ "atom": "dot", "params": { "damageRatio": 0.15 } }, { "atom": "vulnerable", "params": { "ratio": 0.15, "duration": 0.6 } }] } }] }
+        ] },
+        "6": { "tier": "transform", "equip": [
+          { "trigger": "passive", "effects": [{ "atom": "aura", "params": { "radius": 200, "tickInterval": 0.5, "effects": [{ "atom": "dot", "params": { "damageRatio": 0.1 } }, { "atom": "slow", "params": { "ratio": 0.15, "duration": 0.6 } }] } }] }
+        ] }
       },
-      "amplifyAxis": { "description": "掉率倍率 +10%", "params": { "mul": "+10%" } },
+      "amplifyAxis": { "description": "灼烧区半径 +25%、DoT +30%", "params": { "radius": "+25%", "damageRatio": "+30%" } },
       "consumable": { "placement": "point", "interpolation": "linear", "anchors": {
-        "1": { "radius": 90, "effects": [{ "atom": "extraDrop", "params": { "count": 1, "at": "point" } }] },
-        "3": { "radius": 130, "effects": [{ "atom": "extraDrop", "params": { "count": 3, "at": "point" } }] },
-        "6": { "radius": 180, "effects": [{ "atom": "extraDrop", "params": { "count": 6, "at": "point" } }] }
-      } }, "designNotes": "占位语义：落点掉落雨；S5 替换为正式卡。"
+        "1": { "radius": 110, "duration": 3, "effects": [{ "atom": "groundZone", "params": { "radius": 110, "duration": 3, "tickInterval": 0.5, "effects": [{ "atom": "dot", "params": { "damageRatio": 0.2 } }] } }] },
+        "3": { "radius": 140, "duration": 4, "effects": [{ "atom": "groundZone", "params": { "radius": 140, "duration": 4, "tickInterval": 0.5, "effects": [{ "atom": "dot", "params": { "damageRatio": 0.2 } }, { "atom": "vulnerable", "params": { "ratio": 0.15, "duration": 0.6 } }] } }] },
+        "6": { "radius": 180, "duration": 5, "effects": [{ "atom": "groundZone", "params": { "radius": 180, "duration": 5, "tickInterval": 0.5, "effects": [{ "atom": "dot", "params": { "damageRatio": 0.25 } }, { "atom": "vulnerable", "params": { "ratio": 0.15, "duration": 0.6 } }] } }] }
+      } }, "designNotes": "所过之处皆成火海。5★ 干柴：灼烧区内叠加易伤，令灼痕成为全构筑的伤害乘法底座。"
+    },
+    {
+      "id": "harvest", "category": "economy", "textKey": "cards.harvest", "teaching": true, "implementationBatch": 1,
+      "stars": {
+        "3": { "tier": "core", "equip": [{ "trigger": "passive", "effects": [{ "atom": "dropRateMul", "params": { "mul": 1.25 } }, { "atom": "dropLifetimeMul", "params": { "mul": 1.25 } }] }] },
+        "5": { "tier": "dual", "equip": [{ "trigger": "passive", "effects": [{ "atom": "dropRateMul", "params": { "mul": 1.25 } }, { "atom": "dropLifetimeMul", "params": { "mul": 1.25 } }, { "atom": "expiryConvert", "params": { "ratio": 0.5 } }] }] },
+        "6": { "tier": "transform", "equip": [
+          { "trigger": "onWaveStart", "effects": [{ "atom": "extraDrop", "params": { "count": 2, "at": "turret", "starWeights": { "1": 1 } } }] },
+          { "trigger": "passive", "effects": [{ "atom": "expiryConvert", "params": { "ratio": 1 } }] }
+        ] }
+      },
+      "amplifyAxis": { "description": "掉率倍率 +10%、时限倍率 +10%", "params": { "mul": "+10%" } },
+      "consumable": { "placement": "point", "interpolation": "linear", "anchors": {
+        "1": { "radius": 90, "effects": [{ "atom": "extraDrop", "params": { "count": 2, "at": "point", "starWeights": { "1": 1 } } }] },
+        "3": { "radius": 130, "effects": [{ "atom": "extraDrop", "params": { "count": 3, "at": "point", "starWeights": { "1": 4, "2": 1 } } }] },
+        "6": { "radius": 180, "effects": [{ "atom": "extraDrop", "params": { "count": 1, "at": "point", "starWeights": { "2": 1 } } }, { "atom": "extraDrop", "params": { "count": 3, "at": "point", "starWeights": { "1": 1 } } }] }
+      } }, "designNotes": "教学卡：更多、更久、不浪费。刻意不做自动拾取——拾取仍是核心注意力动词。"
+    },
+    {
+      "id": "aegis", "category": "defense", "textKey": "cards.aegis", "teaching": false, "implementationBatch": 1,
+      "stars": {
+        "3": { "tier": "core", "equip": [
+          { "trigger": "onWaveStart", "effects": [{ "atom": "shield", "params": { "absorbHits": 2, "regenSeconds": 10 } }] },
+          { "trigger": "passive", "effects": [{ "atom": "breachReduction", "params": { "ratio": 0.2 } }] }
+        ] },
+        "5": { "tier": "dual", "equip": [
+          { "trigger": "onWaveStart", "effects": [{ "atom": "shield", "params": { "absorbHits": 2, "regenSeconds": 10 } }] },
+          { "trigger": "passive", "effects": [{ "atom": "breachReduction", "params": { "ratio": 0.2 } }, { "atom": "novaOnBreak", "params": { "damage": 30, "knockbackDistance": 100 } }] }
+        ] },
+        "6": { "tier": "transform", "equip": [
+          { "trigger": "onWaveStart", "effects": [{ "atom": "shield", "params": { "absorbHits": 3, "regenSeconds": 6 } }] },
+          { "trigger": "passive", "effects": [{ "atom": "novaOnBreak", "params": { "damage": 50, "knockbackDistance": 130 } }] }
+        ] }
+      },
+      "amplifyAxis": { "description": "吸收次数 +1、再生 -2s", "params": { "absorbHits": "+1", "regenSeconds": "-2" } },
+      "consumable": { "placement": "point", "interpolation": "linear", "anchors": {
+        "1": { "radius": 90, "effects": [{ "atom": "shield", "params": { "absorbHits": 4 } }, { "atom": "knockback", "params": { "distance": 70 } }] },
+        "3": { "radius": 120, "effects": [{ "atom": "shield", "params": { "absorbHits": 6 } }, { "atom": "knockback", "params": { "distance": 100 } }] },
+        "6": { "radius": 150, "effects": [{ "atom": "shield", "params": { "absorbHits": 8 } }, { "atom": "burstDamage", "params": { "damageMul": 5, "radius": 150 } }, { "atom": "knockback", "params": { "distance": 140 } }] }
+      } }, "designNotes": "撑住这一波。5★ 碎盾新星：护盾破裂时对周围敌人造成击退+伤害。"
     }
   ],
   "mechanisms": {
-    "bounty": { "enabled": false, "enabledFromWave": 3, "spawnChancePerWave": 0.6, "markWindowSeconds": 8, "acceptEffects": { "focusFire": true, "enrage": { "speedMul": 1.3, "hpMul": 1.5 } }, "rewards": { "dropCount": 2, "starWeightShift": 3, "dropLifetimeMul": 0.6 } }
+    "bounty": { "enabled": true, "enabledFromWave": 3, "spawnChancePerWave": 0.6, "markWindowSeconds": 8, "acceptEffects": { "focusFire": true, "enrage": { "speedMul": 1.3, "hpMul": 1.5 } }, "rewards": { "dropCount": 2, "starWeightShift": 3, "dropLifetimeMul": 0.6 } }
   }
 }

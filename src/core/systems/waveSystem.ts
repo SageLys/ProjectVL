@@ -23,6 +23,8 @@ export function startNextWave(state: GameState, config: Config, rng: Rng): GameE
   state.lastSpawnCheckCount = 0;
   state.waveClearPending = false;
   state.between = 0;
+  const bounty = cfg.skills.mechanisms.bounty;
+  state.bountyPending = bounty.enabled && state.wave >= bounty.enabledFromWave && rng() < bounty.spawnChancePerWave;
   const events: GameEvent[] = [{ type: 'waveStart', wave: state.wave }];
   events.push(...fireTrigger(state, config, rng, 'onWaveStart', { wave: state.wave }));
   return events;

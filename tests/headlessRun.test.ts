@@ -28,7 +28,7 @@ function seeded(seed: number): Rng {
 function runBotGame(s: GameState, config: Config, rng: Rng): void {
   startNextWave(s, config, rng);
   const dt = 1 / 30;
-  for (let frame = 0; frame < 30 * 60 * 12 && s.mode === 'playing'; frame++) {
+  for (let frame = 0; frame < 30 * 60 * 25 && s.mode === 'playing'; frame++) {
     updateGame(s, config, rng, dt);
     if (s.paused && s.offeredPerks.length) applyPerk(s, config, s.offeredPerks[frame % s.offeredPerks.length], rng);
     if (frame % 6 === 0 && s.groundDrops.length) {

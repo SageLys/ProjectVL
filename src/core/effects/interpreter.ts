@@ -65,6 +65,25 @@ export interface TriggerPayload {
   merge?: { cardType: CardType; resultStar: number };
   /** 空间锚点（命中点/击杀点）；缺省 = 炮台。 */
   point?: { x: number; y: number };
+  /** 击杀来源标签（如 'chain'），供 onKill 绑定的 triggerParams.requiresSource 过滤。 */
+  source?: string;
+}
+
+/** 敌人身上是否处于某个状态（用于 triggerParams.requiresStatus 过滤，值域先开放这两种）。 */
+function enemyHasStatus(enemy: Enemy | undefined, status: string): boolean {
+  if (!enemy) return false;
+  if (status === 'frozen') return enemy.status.frozen > 0;
+  if (status === 'dot') return enemy.status.dots.length > 0;
+  return false;
+}
+
+/** 绑定的 triggerParams 条件是否满足（requiresSource / requiresStatus）；两者都是通用过滤，非任何卡专属。 */
+function bindingConditionMet(binding: BindingDef, payload: TriggerPayload): boolean {
+  const tp = binding.triggerParams as { requiresSource?: string; requiresStatus?: string } | undefined;
+  if (!tp) return true;
+  if (tp.requiresSource && tp.requiresSource !== payload.source) return false;
+  if (tp.requiresStatus && !enemyHasStatus(payload.enemy, tp.requiresStatus)) return false;
+  return true;
 }
 
 function baseCtx(state: GameState, config: Config, rng: Rng, star: number, payload: TriggerPayload = {}): EffectCtx {
@@ -82,13 +101,35 @@ function baseCtx(state: GameState, config: Config, rng: Rng, star: number, paylo
 }
 
 /**
+ * onKill 递归深度守卫（P2 §11 开放问题）：onKill 绑定的效果（如连锁再引/灼烧扩散）可能同步
+ * 击杀另一个敌人并再次触发 onKill，理论上可深至"场上敌人数"层。加一个硬顶防止极端密集场景
+ * 下的超深同步递归；绝大多数正常战斗（<4 层链式击杀）不受影响。
+ */
+const ON_KILL_MAX_DEPTH = 4;
+let onKillDepth = 0;
+
+/**
  * 触发器总线入口：各系统在结算点调用（onFire/onHit/onKill/onWaveStart/onBreach/onPickup/onMerge）。
  * interval 与 passive 不经此处（分别走 tick 与 getModifiers）。
  */
 export function fireTrigger(state: GameState, config: Config, rng: Rng, trigger: Trigger, payload: TriggerPayload = {}): GameEvent[] {
+  if (trigger === 'onKill') {
+    if (onKillDepth >= ON_KILL_MAX_DEPTH) return [];
+    onKillDepth++;
+    try {
+      return fireTriggerBindings(state, config, rng, trigger, payload);
+    } finally {
+      onKillDepth--;
+    }
+  }
+  return fireTriggerBindings(state, config, rng, trigger, payload);
+}
+
+function fireTriggerBindings(state: GameState, config: Config, rng: Rng, trigger: Trigger, payload: TriggerPayload): GameEvent[] {
   const events: GameEvent[] = [];
   for (const { card, binding } of equippedBindings(state)) {
     if (binding.trigger !== trigger) continue;
+    if (!bindingConditionMet(binding, payload)) continue;
     const ctx = baseCtx(state, config, rng, card.star, payload);
     runEffects(ctx, binding.effects);
     events.push(...ctx.events);

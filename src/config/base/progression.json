@@ -1,14 +1,62 @@
 {
-  "xpNeedBase": 8,
-  "xpGrowth": 1.35,
+  "xpNeedBase": 10,
+  "xpGrowth": 2,
   "killXpMul": 1,
   "perkChoices": 3,
   "perks": [
-    { "id": "damage", "title": "高能弹芯", "desc": "基础伤害 +20%", "kind": "damagePct", "value": 0.2, "weight": 1, "maxStacks": 99 },
-    { "id": "rate", "title": "过载供能", "desc": "射速 +15%", "kind": "fireRatePct", "value": 0.15, "weight": 1, "maxStacks": 99 },
-    { "id": "repair", "title": "重整心防", "desc": "私人空间恢复 20 点", "kind": "heal", "value": 20, "weight": 0.8, "maxStacks": 99 },
-    { "id": "maxhp", "title": "扩容心防", "desc": "心防上限 +15", "kind": "maxHp", "value": 15, "weight": 0.8, "maxStacks": 99 },
-    { "id": "range", "title": "延伸射界", "desc": "射程 +8%", "kind": "rangePct", "value": 0.08, "weight": 0.7, "maxStacks": 6 },
-    { "id": "xpgain", "title": "洞悉弱点", "desc": "击破经验 +12%", "kind": "xpGainPct", "value": 0.12, "weight": 0.6, "maxStacks": 6 }
+    {
+      "id": "damage",
+      "title": "高能弹芯",
+      "desc": "基础伤害 +20%",
+      "kind": "damagePct",
+      "value": 0.2,
+      "weight": 1,
+      "maxStacks": 99
+    },
+    {
+      "id": "rate",
+      "title": "过载供能",
+      "desc": "射速 +15%",
+      "kind": "fireRatePct",
+      "value": 0.15,
+      "weight": 1,
+      "maxStacks": 99
+    },
+    {
+      "id": "repair",
+      "title": "重整心防",
+      "desc": "私人空间恢复 20 点",
+      "kind": "heal",
+      "value": 20,
+      "weight": 0.8,
+      "maxStacks": 99
+    },
+    {
+      "id": "maxhp",
+      "title": "扩容心防",
+      "desc": "心防上限 +15",
+      "kind": "maxHp",
+      "value": 15,
+      "weight": 0.8,
+      "maxStacks": 99
+    },
+    {
+      "id": "range",
+      "title": "延伸射界",
+      "desc": "射程 +8%",
+      "kind": "rangePct",
+      "value": 0.08,
+      "weight": 0.7,
+      "maxStacks": 6
+    },
+    {
+      "id": "xpgain",
+      "title": "洞悉弱点",
+      "desc": "击破经验 +12%",
+      "kind": "xpGainPct",
+      "value": 0.12,
+      "weight": 0.6,
+      "maxStacks": 6
+    }
   ]
 }

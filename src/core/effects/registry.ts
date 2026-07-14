@@ -99,14 +99,14 @@ function chainFrom(ctx: EffectCtx, p: Record<string, unknown>, start: Enemy, ini
   let dmg = ctx.bullet ? ctx.bullet.damage : ctx.baseDamage * num(p, 'damageMul', 1);
   const visited = new Set<number>([start.id]);
   let current = start;
-  if (initialHit) ctx.events.push(...dealDamage(ctx.state, ctx.config, ctx.rng, start, dmg));
+  if (initialHit) ctx.events.push(...dealDamage(ctx.state, ctx.config, ctx.rng, start, dmg, 'chain'));
   for (let i = 0; i < num(p, 'bounces', 2); i++) {
     const next = nearestEnemy(ctx.state, current.x, current.y, searchRange, visited);
     if (!next) break;
     dmg *= retention;
     spawnParticle(ctx.state, ctx.rng, (current.x + next.x) / 2, (current.y + next.y) / 2, '#8cecff', 90);
     visited.add(next.id);
-    ctx.events.push(...dealDamage(ctx.state, ctx.config, ctx.rng, next, dmg));
+    ctx.events.push(...dealDamage(ctx.state, ctx.config, ctx.rng, next, dmg, 'chain'));
     current = next;
   }
 }
@@ -313,6 +313,8 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
         explodeOnDeath: p.explode
           ? { damage: ctx.baseDamage * num(p, 'explodeDamageMul', 1.5), knockbackDistance: num(p, 'knockbackDistance', 80) }
           : null,
+        respawnOnce: p.respawnOnce === true,
+        respawned: false,
       });
     }
   },

@@ -4,3 +4,6 @@ dist/
 presets/
 *.local
 .DS_Store
+
+scripts/_s4a_calc.ts
+vitest.config.ts.timestamp-*.mjs

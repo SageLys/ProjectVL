@@ -9,6 +9,7 @@ beforeEach(resetTestEnv);
 
 describe('progressionSystem · experience and level-up queue', () => {
   it('rounds the geometric XP curve each level', () => {
+    cfg.progression.xpNeedBase = 8; cfg.progression.xpGrowth = 1.35; // 本用例专测几何取整曲线（base 焙入后为 10/2）
     const state = freshState();
     levelUp(state, constRng(0));
     expect(state.xpNeed).toBe(Math.round(8 * 1.35));
@@ -17,6 +18,7 @@ describe('progressionSystem · experience and level-up queue', () => {
   });
 
   it('settles every crossed level and queues every perk selection', () => {
+    cfg.progression.xpNeedBase = 8; cfg.progression.xpGrowth = 1.35; // 同上，固定曲线以校验跨级结算
     const state = freshState();
     const events = addXp(state, 34, createSeededRng(42));
 

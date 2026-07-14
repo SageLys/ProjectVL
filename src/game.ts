@@ -11,6 +11,7 @@ import { jumpToWave, restartWave, startNextWave } from './core/systems/waveSyste
 import { budgetAdmission } from './core/systems/budgetRules';
 import { moveOrSwap, consumeCard } from './core/systems/equipmentSystem';
 import { collectNearest, spawnTestDrops, spawnGroundDrop } from './core/systems/dropSystem';
+import { acceptBountyTap } from './core/systems/enemySystem';
 import { applyPerk } from './core/systems/progressionSystem';
 import { totalRange } from './core/stats';
 import { createRenderer } from './render/canvasRenderer';
@@ -110,7 +111,11 @@ const pointerRouter = createPointerRouter({
   canvas: refs.canvas, dock: refs.dock, aimPreview: refs.aimPreview, screenPreview: refs.screenPreview,
   input: cfg.input, bountyEnabled: cfg.skills.mechanisms.bounty.enabled,
   isPaused: () => state.paused,
-  onBountyTap: (_x, _y) => false, // S5 启用 bounty 后在此命中并接单。
+  onBountyTap: (x, y) => {
+    const accepted = acceptBountyTap(state, x, y);
+    if (accepted && import.meta.env.DEV) telemetry?.recordInput('bountyAccept');
+    return accepted;
+  },
   onArenaTap: (x, y) => {
     const events = collectNearest(state, config, rng, x, y, cfg.economy.drops.pickupRadius);
     dispatch(events);
@@ -139,7 +144,7 @@ function reset(): void {
   state = createInitialState();
   if (import.meta.env.DEV) telemetry?.reset();
   if (import.meta.env.DEV && new URLSearchParams(location.search).get('evidence') === 'equip') {
-    state.cards[0] = { id: state.nextCardId++, type: 'damage', star: 4 };
+    state.cards[0] = { id: state.nextCardId++, type: 'pierce', star: 4 };
   }
   modals.hideResult();
   modals.hideLevel();

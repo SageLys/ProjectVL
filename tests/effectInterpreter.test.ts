@@ -13,7 +13,8 @@ import { moveEnemies } from '../src/core/systems/enemySystem';
 import { startNextWave } from '../src/core/systems/waveSystem';
 import { autoMergeCards } from '../src/core/systems/cardSystem';
 import { consumeCard } from '../src/core/systems/equipmentSystem';
-import { dealDamage } from '../src/core/systems/damageSystem';
+import { dealDamage, killEnemy } from '../src/core/systems/damageSystem';
+import { tickDrops, spawnGroundDrop } from '../src/core/systems/dropSystem';
 import { totalDropChance, totalDropLifetime, totalFireRate } from '../src/core/stats';
 import { speedMultiplier } from '../src/core/effects/statusSystem';
 import type { CardType, GameState } from '../src/core/types';
@@ -331,5 +332,99 @@ describe('运行时 · 区域/光环/召唤物/护盾', () => {
     tickEffects(s, config, rng, 0.5);
     expect(s.enemies).toHaveLength(0);
     expect(s.kills).toBe(1);
+  });
+});
+
+describe('解释器 · onKill 条件过滤（requiresSource / requiresStatus，批次1新增，通用机制非卡专属）', () => {
+  it('requiresSource：只有匹配来源的击杀才触发绑定', () => {
+    // aoeOnHit：命中点用 ctx.enemy 的坐标定圆心，但影响目标走半径搜索（enemiesInRadius），
+    // 不像 burstDamage 那样把 ctx.enemy 本身当唯一目标——适合验证"死亡点范围效果是否触发"。
+    registerSkillDefs([def('range', [
+      { trigger: 'onKill', triggerParams: { requiresSource: 'chain' }, effects: [{ atom: 'aoeOnHit', params: { radius: 50, damageRatio: 1 } }] },
+    ])]);
+    const s = freshState();
+    equipCard(s, 'range', 3);
+    const bystander = enemy({ x: 10, y: 0, hp: 100, maxHp: 100 });
+    s.enemies = [bystander];
+    const victimNoSource = enemy({ x: 0, y: 0, hp: 5, maxHp: 5 });
+    killEnemy(s, config, rng, victimNoSource); // 无 source：不应触发
+    expect(bystander.hp).toBe(100);
+    const victimChain = enemy({ x: 0, y: 0, hp: 5, maxHp: 5 });
+    killEnemy(s, config, rng, victimChain, 'chain'); // source='chain'：应触发
+    expect(bystander.hp).toBeLessThan(100);
+  });
+
+  it('requiresStatus：只有死亡时刻处于该状态的敌人才触发绑定', () => {
+    registerSkillDefs([def('range', [
+      { trigger: 'onKill', triggerParams: { requiresStatus: 'frozen' }, effects: [{ atom: 'aoeOnHit', params: { radius: 50, damageRatio: 1 } }] },
+    ])]);
+    const s = freshState();
+    equipCard(s, 'range', 3);
+    const bystander = enemy({ x: 10, y: 0, hp: 100, maxHp: 100 });
+    s.enemies = [bystander];
+    const warm = enemy({ x: 0, y: 0, hp: 5, maxHp: 5 });
+    killEnemy(s, config, rng, warm); // 未冻结：不应触发
+    expect(bystander.hp).toBe(100);
+    const frozen = enemy({ x: 0, y: 0, hp: 5, maxHp: 5 });
+    frozen.status.frozen = 1.5;
+    killEnemy(s, config, rng, frozen); // 冻结中：应触发
+    expect(bystander.hp).toBeLessThan(100);
+  });
+});
+
+describe('解释器 · expiryConvert 落地（丰收 5★ 落穗，批次1修复的死修饰）', () => {
+  it('过期掉落按 ratio 折算经验，而非纯计入 expired', () => {
+    registerSkillDefs([def('luck', [{ trigger: 'passive', effects: [{ atom: 'expiryConvert', params: { ratio: 1 } }] }])]);
+    const s = freshState();
+    equipCard(s, 'luck', 3);
+    spawnGroundDrop(s, config, constRng(0), 100, 100, 'pierce', 2);
+    expect(s.xp).toBe(0);
+    tickDrops(s, config, constRng(0), config.dropLifetime + 0.01);
+    expect(s.groundDrops).toHaveLength(0);
+    expect(s.expired).toBe(1);
+    expect(s.xp).toBeCloseTo(2 * 4); // drop.star(2) × EXPIRY_CONVERT_XP_PER_STAR(4)
+  });
+
+  it('无 expiryConvert 装备时过期纯损失，经验不变', () => {
+    const s = freshState();
+    spawnGroundDrop(s, config, constRng(0), 100, 100, 'pierce', 2);
+    tickDrops(s, config, constRng(0), config.dropLifetime + 0.01);
+    expect(s.expired).toBe(1);
+    expect(s.xp).toBe(0);
+  });
+});
+
+describe('解释器 · onKill 递归深度守卫（P2 §11 开放问题，批次1修复）', () => {
+  it('每次击杀都通过 chain+requiresSource 同步再触发下一次 onKill：深度上限截断，不会打穿整条连通链', () => {
+    registerSkillDefs([def('range', [
+      { trigger: 'onKill', triggerParams: { requiresSource: 'chain' }, effects: [{ atom: 'chain', params: { bounces: 1, damageRetention: 1, searchRange: 60 } }] },
+    ])]);
+    const s = freshState();
+    equipCard(s, 'range', 3);
+    const N = 20;
+    const line = Array.from({ length: N }, (_, i) => enemy({ x: i * 25, y: 0, hp: 1, maxHp: 1 }));
+    s.enemies = line;
+    s.enemies.shift(); // 播种敌人先移出数组（与 dealDamage 的击杀约定一致），避免自我重选
+    killEnemy(s, config, rng, line[0], 'chain'); // 播种：source='chain' 的击杀会同步引发下一环
+    expect(s.kills).toBeGreaterThan(0);
+    expect(s.kills).toBeLessThan(N); // 深度上限截断，未能沿整条连通链打穿全部 20 个
+  });
+});
+
+describe('解释器 · 召唤物 respawnOnce（诱饵 5★ 重生，批次1新增运行时语义）', () => {
+  it('被摧毁时在新位置重生一次；重生后再次摧毁则正常移除', () => {
+    const s = freshState();
+    const ctx: EffectCtx = { state: s, config, rng, events: [], origin: { x: 300, y: 300 }, star: 5, baseDamage: 10 };
+    ATOMS.summon(ctx, { kind: 'decoy', hp: 10, duration: 999, respawnOnce: true });
+    expect(s.summons).toHaveLength(1);
+    const summon = s.summons[0];
+    summon.hp = 0;
+    tickEffects(s, config, rng, 0.05);
+    expect(s.summons).toHaveLength(1); // 重生，未移除
+    expect(s.summons[0].hp).toBe(s.summons[0].maxHp);
+    expect(s.summons[0].respawned).toBe(true);
+    s.summons[0].hp = 0;
+    tickEffects(s, config, rng, 0.05);
+    expect(s.summons).toHaveLength(0); // 第二次摧毁：重生已用掉，正常移除
   });
 });

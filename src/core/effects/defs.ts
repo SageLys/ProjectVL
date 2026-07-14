@@ -42,7 +42,8 @@ export interface EffectDef {
 /** 装备态绑定：触发器 + 效果原子列表。 */
 export interface BindingDef {
   trigger: Trigger;
-  triggerParams?: { seconds?: number };
+  /** interval 用 seconds；onKill 可选 requiresSource（击杀来源标签）/requiresStatus（死亡时刻状态，'frozen'|'dot'）过滤。 */
+  triggerParams?: { seconds?: number; requiresSource?: string; requiresStatus?: string };
   effects: EffectDef[];
 }
 

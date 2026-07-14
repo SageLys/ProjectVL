@@ -17,8 +17,8 @@ beforeEach(() => { resetTestEnv(); registerSkillDefs(cfg.skills.cards); });
 afterEach(resetTestEnv);
 
 describe('schema v0.4.0 · 解释器星级规则', () => {
-  it('3/5/6 装备锚点：damage 与 rate 均按 core/dual/transform 取整组定义', () => {
-    for (const id of ['damage', 'rate']) {
+  it('3/5/6 装备锚点：pierce 与 frost 均按 core/dual/transform 取整组定义', () => {
+    for (const id of ['pierce', 'frost']) {
       const d = get(id);
       expect(resolveEquipBindings(d, 3)).toEqual(d.stars['3'].equip);
       expect(resolveEquipBindings(d, 5)).toEqual(d.stars['5'].equip);
@@ -27,31 +27,32 @@ describe('schema v0.4.0 · 解释器星级规则', () => {
   });
 
   it('4★ amplify：整数增量与百分比增量均只放大 3★ 参数且结构不变', () => {
-    const damage = get('damage');
-    expect(param(resolveEquipBindings(damage, 4), 'count')).toBe(param(resolveEquipBindings(damage, 3), 'count') + 1);
-    expect(resolveEquipBindings(damage, 4).map(b => b.trigger)).toEqual(resolveEquipBindings(damage, 3).map(b => b.trigger));
-    const rate = get('rate');
-    expect(param(resolveEquipBindings(rate, 4), 'ratio')).toBeCloseTo(param(resolveEquipBindings(rate, 3), 'ratio') * 1.2);
+    const pierce = get('pierce');
+    expect(param(resolveEquipBindings(pierce, 4), 'count')).toBe(param(resolveEquipBindings(pierce, 3), 'count') + 1);
+    expect(resolveEquipBindings(pierce, 4).map(b => b.trigger)).toEqual(resolveEquipBindings(pierce, 3).map(b => b.trigger));
+    const harvest = get('harvest');
+    expect(param(resolveEquipBindings(harvest, 4), 'mul')).toBeCloseTo(param(resolveEquipBindings(harvest, 3), 'mul') * 1.1);
   });
 
-  it('消耗态内插：2★ 位于 1/3 中点，5★ 位于 3/6 的 2/3 且不提前引入 6★ 新原子', () => {
-    const damage = get('damage');
-    expect(resolveConsumableTier(damage, 2).radius).toBe(120);
-    expect((resolveConsumableTier(damage, 2).effects[0].params!.damageMul as number)).toBeCloseTo(5.5);
-    const rate = get('rate');
-    expect(resolveConsumableTier(rate, 5).radius).toBeCloseTo(160 + (210 - 160) * 2 / 3);
-    expect(resolveConsumableTier(rate, 5).effects.map(e => e.atom)).not.toContain('freeze');
+  it('消耗态内插：2★ 位于 1/3 中点，5★ 位于 3/6 的加权中点且不提前引入 6★-only 新原子', () => {
+    const pierce = get('pierce');
+    expect(resolveConsumableTier(pierce, 2).radius).toBeCloseTo((40 + 70) / 2);
+    expect((resolveConsumableTier(pierce, 2).effects[0].params!.damageMul as number)).toBeCloseTo((3 + 5) / 2);
+    const aegis = get('aegis');
+    expect(resolveConsumableTier(aegis, 5).radius).toBeCloseTo(120 + (150 - 120) * 2 / 3);
+    // 6★ anchor 比 3★ 多一个 burstDamage（第 3 个效果）；interpolate 按 3★（更短）的效果数展开，该原子不会提前出现在 5★。
+    expect(resolveConsumableTier(aegis, 5).effects.map(e => e.atom)).not.toContain('burstDamage');
   });
 
-  it('6★ transform：damage 与 luck 可替换整个效果集，不继承 core 触发/原子', () => {
-    expect(resolveEquipBindings(get('damage'), 6)[0]).toMatchObject({ trigger: 'passive', effects: [{ atom: 'beamMorph' }] });
-    expect(resolveEquipBindings(get('damage'), 6)[0].effects.map(e => e.atom)).not.toContain('pierce');
-    expect(resolveEquipBindings(get('luck'), 6)[0]).toMatchObject({ trigger: 'onWaveStart', effects: [{ atom: 'extraDrop' }] });
-    expect(resolveEquipBindings(get('luck'), 6)[0].effects.map(e => e.atom)).not.toContain('dropRateMul');
+  it('6★ transform：pierce 与 harvest 可替换整个效果集，不继承 core 触发/原子', () => {
+    expect(resolveEquipBindings(get('pierce'), 6)[0]).toMatchObject({ trigger: 'passive', effects: [{ atom: 'beamMorph' }] });
+    expect(resolveEquipBindings(get('pierce'), 6)[0].effects.map(e => e.atom)).not.toContain('pierce');
+    expect(resolveEquipBindings(get('harvest'), 6)[0]).toMatchObject({ trigger: 'onWaveStart', effects: [{ atom: 'extraDrop' }] });
+    expect(resolveEquipBindings(get('harvest'), 6)[0].effects.map(e => e.atom)).not.toContain('dropRateMul');
   });
 });
 
-describe('五张占位卡 · 1–6★ 无头冒烟', () => {
+describe('批次1·七张正式卡 · 1–6★ 无头冒烟', () => {
   it('≥3★ 全可装备、1–6★ 全可消耗，并输出六档效果表', () => {
     const table: Record<string, string | number>[] = [];
     for (const def of cfg.skills.cards) for (let star = 1; star <= 6; star++) {
@@ -65,7 +66,7 @@ describe('五张占位卡 · 1–6★ 无头冒烟', () => {
       table.push({ card: def.id, star, radius: tier.radius ?? 0, effects: tier.effects.map(e => e.atom).join('+') });
     }
     console.table(table);
-    expect(table).toHaveLength(30);
+    expect(table).toHaveLength(42);
   });
 });
 
@@ -78,28 +79,28 @@ describe('四项占位假设 · 开关可翻转', () => {
 
   it('二合开关关闭后改用备选三合规则', () => {
     patchEconomy({ twoCopyMerge: false });
-    const s = freshState(); s.cards[0] = card('damage', 1); s.cards[1] = card('damage', 1);
+    const s = freshState(); s.cards[0] = card('pierce', 1); s.cards[1] = card('pierce', 1);
     expect(autoMergeCards(s, config, rng).merged).toBe(0);
-    s.cards[2] = card('damage', 1); expect(autoMergeCards(s, config, rng).merged).toBe(1);
+    s.cards[2] = card('pierce', 1); expect(autoMergeCards(s, config, rng).merged).toBe(1);
   });
 
   it('普通掉落一律 1★ 开关关闭后启用 star2Share', () => {
     patchEconomy({ normalDropsOnlyOneStar: false });
-    const s = freshState(); spawnGroundDrop(s, config, constRng(0), 0, 0, 'damage');
+    const s = freshState(); spawnGroundDrop(s, config, constRng(0), 0, 0, 'pierce');
     expect(s.groundDrops[0].star).toBe(2);
   });
 
   it('喂养开关关闭后同型同星不再升级装备', () => {
     patchEconomy({ feedEquipped: false });
-    const s = freshState(); s.equipment[0] = card('damage', 3); s.cards[0] = card('damage', 3);
+    const s = freshState(); s.equipment[0] = card('pierce', 3); s.cards[0] = card('pierce', 3);
     expect(moveOrSwap(s, config, rng, 'cards', 0, 'equipment', 0)).toEqual([{ type: 'equipFull' }]);
     expect(s.equipment[0]!.star).toBe(3);
   });
 
   it('同类型唯一开关关闭后允许装备第二张同型卡', () => {
     patchEconomy({ distinctEquippedTypes: false });
-    const s = freshState(); s.equipment[0] = card('damage', 3); s.cards[0] = card('damage', 4);
-    expect(moveOrSwap(s, config, rng, 'cards', 0, 'equipment', 1)).toContainEqual({ type: 'equipped', cardType: 'damage', star: 4, slotIndex: 1 });
+    const s = freshState(); s.equipment[0] = card('pierce', 3); s.cards[0] = card('pierce', 4);
+    expect(moveOrSwap(s, config, rng, 'cards', 0, 'equipment', 1)).toContainEqual({ type: 'equipped', cardType: 'pierce', star: 4, slotIndex: 1 });
   });
 });
 

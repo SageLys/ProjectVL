@@ -1,12 +1,12 @@
-import { cfg } from '../config';
 import type { GameState } from '../core/types';
+import { resolveCardMeta } from '../ui/cardMeta';
 
 const TAU = Math.PI * 2;
 
 /** 地面掉落：发光圆牌 + 图标 + 倒计时圆环 + 剩余秒数。 */
 export function drawDrops(ctx: CanvasRenderingContext2D, state: GameState): void {
   for (const drop of state.groundDrops) {
-    const meta = cfg.skills.legacy.types[drop.type];
+    const meta = resolveCardMeta(drop.type, drop.star);
     const ratio = Math.max(0, drop.life / drop.maxLife);
     const bob = Math.sin(drop.pulse) * 3;
     ctx.save();

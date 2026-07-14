@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { enemyCountFor, startNextWave, checkWaveClear } from '../src/core/systems/waveSystem';
 import { determineType, spawnEnemy, moveEnemies } from '../src/core/systems/enemySystem';
 import { enemy, freshState, createDefaultConfig, constRng, seqRng, resetTestEnv, applyVariants } from './helpers';
+import { cfg } from '../src/config';
 
 beforeEach(resetTestEnv);
 const rng = constRng(0.5);
@@ -14,6 +15,7 @@ describe('waveSystem · 波次数量与推进', () => {
   });
 
   it('startNextWave 推进波数并排定生成数', () => {
+    cfg.waves.spawnMode = 'interval'; // base 现默认 budget（budget模式初版已焙入）；本用例专测 interval 排定
     const s = freshState();
     const ev = startNextWave(s, createDefaultConfig(), rng);
     expect(s.wave).toBe(1);
@@ -40,7 +42,7 @@ describe('waveSystem · boss 与胜负', () => {
     s.spawnLeft = 1;
     spawnEnemy(s, seqRng(0.99, 0.0));
     expect(s.enemies[0].type).toBe('boss');
-    expect(s.enemies[0].hp).toBe(420);
+    expect(s.enemies[0].hp).toBe(cfg.enemies.types.boss.hpBase + 5 * cfg.enemies.types.boss.hpPerWave);
   });
 
   it('非最后一只按 roll 判定类型', () => {
@@ -49,9 +51,9 @@ describe('waveSystem · boss 与胜负', () => {
     expect(determineType(1, 0.8, 8)).toBe('normal');
   });
 
-  it('5 波全清 → 胜利', () => {
+  it('末波全清 → 胜利', () => {
     const s = freshState();
-    s.wave = 5;
+    s.wave = cfg.waves.totalWaves; // 末波（base 焙入后为 8）
     s.spawnLeft = 0;
     s.enemies = [];
     const ev = checkWaveClear(s);

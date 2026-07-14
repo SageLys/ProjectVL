@@ -1,5 +1,5 @@
-import { cfg } from '../config';
 import type { Card } from '../core/types';
+import { resolveCardMeta } from './cardMeta';
 
 export type SlotSource = 'cards' | 'equipment';
 
@@ -10,7 +10,7 @@ export interface SlotHandlers {
 
 /** 构造一张卡牌按钮；手牌和装备卡都可拖到战场消耗释放。 */
 export function createCardElement(card: Card, source: SlotSource, index: number, handlers: SlotHandlers): HTMLButtonElement {
-  const meta = cfg.skills.legacy.types[card.type];
+  const meta = resolveCardMeta(card.type, card.star);
   const el = document.createElement('button');
   el.type = 'button';
   el.className = source === 'equipment' ? 'card equipped' : 'card';
@@ -19,7 +19,7 @@ export function createCardElement(card: Card, source: SlotSource, index: number,
   el.dataset.testid = source === 'cards' ? 'upgrade-card' : 'equipped-card';
   el.setAttribute('aria-label', `${source === 'equipment' ? '已装备' : ''}${card.star}星${meta.name}卡`);
   el.style.setProperty('--card', meta.color);
-  el.innerHTML = `<b>${meta.icon} ${meta.name}</b><em>${'★'.repeat(card.star)}</em><small>${meta.desc}强化</small>`;
+  el.innerHTML = `<b>${meta.icon} ${meta.name}</b><em>${'★'.repeat(card.star)}</em><small>${meta.desc}</small>`;
   el.addEventListener('pointerdown', e => handlers.dragStart(e, source, index, el));
   return el;
 }

@@ -132,6 +132,15 @@ function tickSummons(state: GameState, config: Config, rng: Rng, dt: number, eve
     const expired = s.remaining != null && s.remaining <= 0;
     if (dead || expired) {
       explodeSummon(state, config, rng, s, events);
+      // 重生一次（decoy 5★）：只对"被摧毁"（非到期）生效，每个召唤物实例限一次。
+      if (dead && s.respawnOnce && !s.respawned) {
+        const { width, height } = cfg.combat.canvas;
+        s.x = 40 + rng() * (width - 80);
+        s.y = 40 + rng() * (height - 80);
+        s.hp = s.maxHp;
+        s.respawned = true;
+        continue;
+      }
       state.summons.splice(i, 1);
     }
   }

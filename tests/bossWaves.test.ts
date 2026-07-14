@@ -10,6 +10,7 @@ beforeEach(resetTestEnv);
 
 describe('multiple boss waves', () => {
   it('uses the final slot only for configured boss waves', () => {
+    cfg.waves.bossWaves = [5]; // base 焙入后默认 [3,5,8]；本用例专测单一 boss 波语义
     expect(cfg.waves.bossWaves).toEqual([5]);
     expect(determineType(5, 0.8, 1)).toBe('boss');
     for (const wave of [1, 2, 3, 4]) expect(determineType(wave, 0.8, 1)).not.toBe('boss');

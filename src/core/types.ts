@@ -1,8 +1,8 @@
 // 纯规则层类型定义。core/ 内禁止出现 DOM / Canvas / 浏览器 API。（P3 重构版）
 import type { EffectDef } from './effects/defs';
 
-/** 卡牌类型：P3 过渡期为 5 种旧数值卡；P5 实装技能卡后扩展为技能 id 字符串。 */
-export type CardType = 'damage' | 'rate' | 'multi' | 'range' | 'luck';
+/** 卡牌类型 = 技能 id 字符串（schema: ^[a-z][a-zA-Z0-9]*$），由 skills.json 的 cards[].id 决定。 */
+export type CardType = string;
 export type EnemyType = 'normal' | 'fast' | 'tank' | 'boss';
 export type GameMode = 'ready' | 'playing' | 'ended';
 
@@ -50,6 +50,8 @@ export interface Enemy {
   xp: number;
   hit: number;
   status: EnemyStatus;
+  /** Bounty 精英标记（框架级机制）：存在=本敌人是本波生成的精英。 */
+  bounty?: { accepted: boolean; markRemaining: number };
 }
 
 export interface Bullet {
@@ -141,6 +143,9 @@ export interface Summon {
   angle?: number;
   /** 被摧毁/到期时爆炸（decoy 2★ 修饰）。 */
   explodeOnDeath?: { damage: number; knockbackDistance: number } | null;
+  /** 被摧毁时在新位置重生一次（decoy 5★ 修饰）；respawned 标记该次重生已用掉。 */
+  respawnOnce?: boolean;
+  respawned?: boolean;
 }
 
 /** 炮台护盾：按可吸收突破次数计。 */
@@ -222,6 +227,8 @@ export interface GameState {
   equipTelemetry: { durationsMs: number[]; cancels: number; rejects: number };
   collected: number;
   expired: number;
+  /** 本波是否还有一次待生成的 Bounty 精英名额（onWaveStart 掷骰命中后置真，生成后清空）。 */
+  bountyPending: boolean;
 }
 
 /** 卡槽/装备栏归属。临时栏已随 P0-3/P0-6 移除。 */

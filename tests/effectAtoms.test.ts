@@ -121,7 +121,7 @@ describe('弹道原子', () => {
   it('beamMorph：触发式=沿轴线打穿带宽内全部敌人', () => {
     const s = freshState();
     const onLine1 = enemy({ x: 600, y: 300, hp: 100, maxHp: 100 });
-    const onLine2 = enemy({ x: 680, y: 305, hp: 100, maxHp: 100 });
+    const onLine2 = enemy({ x: 620, y: 305, hp: 100, maxHp: 100 }); // 距 origin(480) 140 < range 150（基线已把 range 焙进 base）
     const off = enemy({ x: 600, y: 420, hp: 100, maxHp: 100 });
     s.enemies = [onLine1, onLine2, off];
     ATOMS.beamMorph(ctxFor(s, { enemy: onLine1 }), { width: 26, damageRatio: 1 });

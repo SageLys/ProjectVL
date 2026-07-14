@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { cfg } from '../src/config';
 import { createDefaultConfig } from '../src/core/createInitialState';
 import { jumpToWave, tickSpawns } from '../src/core/systems/waveSystem';
+import { budgetWaveQuotaFor } from '../src/core/systems/budgetRules';
 import { createSeededRng } from '../src/debug/exposeDebugApi';
 import { deriveMetrics } from '../src/ui/derivedMetrics';
 import { BUDGET_TUNER_PARAMS, TUNER_PARAMS, getNumberAt, setNumberAt } from '../src/ui/tunerSchema';
@@ -56,12 +57,21 @@ describe('调参面板 v2 · 参数与派生指标', () => {
 
     expect(metrics.cells.normal[0].ttk).toBeCloseTo(ttk, 10);
     expect(metrics.cells.normal[0].killDepth).toBeCloseTo(runtime.range - speed * ttk, 10);
-    expect(metrics.cells.normal[0].onScreen).toBeCloseTo((entry + ttk) / interval, 10);
+    // budget 模式下 onScreen 是供给目标（同屏配额），不再是 interval 模式的 (entry+ttk)/间隔 手算式。
+    const expectedOnScreen = cfg.waves.spawnMode === 'budget'
+      ? Math.min(cfg.waves.budget.maxAlive, cfg.waves.budget.targetOnScreen.base + cfg.waves.budget.targetOnScreen.perWave)
+      : (entry + ttk) / interval;
+    expect(metrics.cells.normal[0].onScreen).toBeCloseTo(expectedOnScreen, 10);
 
     const doubled = deriveMetrics(cfg, { ...runtime, damage: runtime.damage * 2 });
     expect(doubled.cells.normal[0].ttk).toBeCloseTo(ttk / 2, 10);
     expect(doubled.cells.normal[0].killDepth).toBeGreaterThan(metrics.cells.normal[0].killDepth);
-    expect(doubled.cells.normal[0].onScreen).toBeLessThan(metrics.cells.normal[0].onScreen);
+    if (cfg.waves.spawnMode === 'budget') {
+      // budget 模式的同屏数是配置驱动的供给目标，不随伤害变化。
+      expect(doubled.cells.normal[0].onScreen).toBe(metrics.cells.normal[0].onScreen);
+    } else {
+      expect(doubled.cells.normal[0].onScreen).toBeLessThan(metrics.cells.normal[0].onScreen);
+    }
   });
 
   it('projects every Budget control into a visible derived value', () => {
@@ -108,12 +118,18 @@ describe('调试模式 · seed 与跳波', () => {
     const sequence: { at: number; type: string }[] = [];
     let elapsed = 0;
     let count = 0;
+    // budget 模式按同屏目标节流生成、且单次 check 可能一批生成多个（batchMax>1）：
+    // 不模拟击杀会导致 spawnLeft 永远卡在同屏上限，故每次 tick 后立即清空本批（等价"秒杀"），
+    // 并把本批新增的每一个敌人都计入序列（不能只记最后一个），只为采样出怪时序/类型。
     while (state.spawnLeft > 0) {
       tickSpawns(state, rng, 0.01);
       elapsed += 0.01;
       if (state.enemies.length > count) {
-        sequence.push({ at: Number(elapsed.toFixed(2)), type: state.enemies[state.enemies.length - 1].type });
-        count = state.enemies.length;
+        for (let i = count; i < state.enemies.length; i++) {
+          sequence.push({ at: Number(elapsed.toFixed(2)), type: state.enemies[i].type });
+        }
+        state.enemies.length = 0;
+        count = 0;
       }
     }
     return sequence;
@@ -123,6 +139,10 @@ describe('调试模式 · seed 与跳波', () => {
     const first = wave3Sequence(42);
     const second = wave3Sequence(42);
     expect(first).toEqual(second);
-    expect(first).toHaveLength(14);
+    // 总出怪数 = 第 3 波配额（budget/interval 两种模式配额公式不同，动态取当前生效值）。
+    const expectedCount = cfg.waves.spawnMode === 'budget'
+      ? budgetWaveQuotaFor(3, cfg.waves.budget)
+      : cfg.waves.enemyCountBase + 3 * cfg.waves.enemyCountPerWave;
+    expect(first).toHaveLength(expectedCount);
   });
 });

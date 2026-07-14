@@ -104,9 +104,9 @@ describe('waveSystem · budget spawn strategy', () => {
     const intervalQuota = intervalState.spawnLeft;
     tickSpawns(intervalState, createSeededRng(42), cfg.waves.firstSpawnDelay);
 
-    expect(budgetQuota).toBe(48);
+    expect(budgetQuota).toBe(103); // base 已焙入 budget模式初版：waveQuota 51+52*1
     expect(intervalQuota).toBe(8);
-    expect(budgetState.enemies.length).toBe(5);
+    expect(budgetState.enemies.length).toBe(10); // 首检补 min(quota,batchMax10,deficit=target15)=10
     expect(intervalState.enemies.length).toBe(1);
   });
 
