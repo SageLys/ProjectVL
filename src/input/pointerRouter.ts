@@ -44,6 +44,7 @@ type RouterOptions = {
   screenPreview: HTMLElement;
   input: InputConfig;
   bountyEnabled: boolean;
+  isPaused?: () => boolean;
   onArenaTap(x: number, y: number): void;
   onBountyTap?: (x: number, y: number) => boolean;
   onDrop(source: SlotSource, index: number, target: Exclude<DropTarget, { kind: 'cancel' }>): void;
@@ -97,7 +98,7 @@ export function createPointerRouter(options: RouterOptions) {
     active = null;
     current.el?.classList.remove('dragging');
     hidePreview();
-    if (cancelled) return;
+    if (cancelled || options.isPaused?.()) return;
     const end = { x: event.clientX, y: event.clientY, at: performance.now() };
     if (!current.source && isTap(current.start, end, current.maxDistance, options.input)) {
       const point = canvasPoint(options.canvas, options.canvas.getBoundingClientRect(), event.clientX, event.clientY);
@@ -122,14 +123,14 @@ export function createPointerRouter(options: RouterOptions) {
   }, true);
 
   options.canvas.addEventListener('pointerdown', event => {
-    if (event.button !== 0) return;
+    if (event.button !== 0 || options.isPaused?.()) return;
     active = { pointerId: event.pointerId, start: { x: event.clientX, y: event.clientY, at: performance.now() }, maxDistance: 0, dragging: false };
     options.canvas.setPointerCapture(event.pointerId);
   });
 
   return {
     begin(event: PointerEvent, source: SlotSource, index: number, el: HTMLElement): void {
-      if (event.button !== 0) return;
+      if (event.button !== 0 || options.isPaused?.()) return;
       active = { pointerId: event.pointerId, start: { x: event.clientX, y: event.clientY, at: performance.now() }, maxDistance: 0, source, index, el, dragging: false };
       el.setPointerCapture(event.pointerId);
     },

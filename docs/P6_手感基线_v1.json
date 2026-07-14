@@ -1,10 +1,10 @@
 {
   "meta": {
-    "date": "2026-07-13",
-    "gitCommit": "a6592ae3ad06e79749e7ddb97caa423e3ff0fcbb",
+    "date": "2026-07-14",
+    "gitCommit": "b5c7c2379f7cd92805e00969be036cc26b529f45",
     "spawnMode": "budget",
-    "presetName": "初始参数",
-    "player": "1108"
+    "presetName": "budget模式初版",
+    "player": "wlh"
   },
   "config": {
     "combat": {
@@ -20,16 +20,16 @@
         "max": 100
       },
       "defaults": {
-        "damage": 16,
-        "fireRate": 3.3,
-        "range": 285
+        "damage": 18,
+        "fireRate": 5,
+        "range": 150
       },
       "attackPreviewMargin": 60,
       "bullet": {
         "speed": 465,
         "life": 1.6,
         "radius": 4,
-        "spread": 0.12,
+        "spread": 0.05,
         "muzzleOffset": 24
       },
       "breakthroughDist": 48,
@@ -42,7 +42,7 @@
       }
     },
     "waves": {
-      "totalWaves": 5,
+      "totalWaves": 8,
       "spawnMode": "budget",
       "enemyCountBase": 5,
       "enemyCountPerWave": 3,
@@ -53,26 +53,34 @@
         "min": 0.28
       },
       "budget": {
+        "waveQuota": {
+          "base": 51,
+          "perWave": 52
+        },
         "targetOnScreen": {
-          "base": 4,
-          "perWave": 1
+          "base": 5,
+          "perWave": 10
         },
-        "checkInterval": 0.75,
-        "batchMax": 2,
+        "checkInterval": 1.95,
+        "batchMax": 10,
         "waveEndSprint": {
-          "window": 15,
-          "multiplier": 1.5
+          "window": 7,
+          "multiplier": 3
         },
-        "maxAlive": 20
+        "maxAlive": 100
       },
       "betweenWaves": 2.4,
-      "spawnMargin": 45,
+      "spawnMargin": 25,
       "typeRoll": {
         "tankBase": 0.2,
         "tankPerWave": 0.025,
         "fastThreshold": 0.47
       },
-      "bossWaves": [5]
+      "bossWaves": [
+        3,
+        5,
+        8
+      ]
     },
     "enemies": {
       "defaults": {
@@ -82,9 +90,9 @@
         "normal": {
           "label": "热情追求者",
           "hpBase": 38,
-          "hpPerWave": 7,
+          "hpPerWave": 12,
           "speedBase": 24,
-          "speedPerWave": 1.5,
+          "speedPerWave": 2,
           "r": 16,
           "color": "#f3b95f",
           "damage": 8,
@@ -94,9 +102,9 @@
         "fast": {
           "label": "急切追求者",
           "hpBase": 23,
-          "hpPerWave": 5,
+          "hpPerWave": 10,
           "speedBase": 42,
-          "speedPerWave": 2,
+          "speedPerWave": 3,
           "r": 12,
           "color": "#62d8ff",
           "damage": 6,
@@ -106,9 +114,9 @@
         "tank": {
           "label": "执着追求者",
           "hpBase": 90,
-          "hpPerWave": 13,
+          "hpPerWave": 45,
           "speedBase": 15,
-          "speedPerWave": 0.8,
+          "speedPerWave": 1.5,
           "r": 22,
           "color": "#ff7b86",
           "damage": 14,
@@ -118,8 +126,8 @@
         "boss": {
           "label": "命定追求者",
           "hpBase": 420,
-          "hpPerWave": 0,
-          "speedBase": 12,
+          "hpPerWave": 500,
+          "speedBase": 20,
           "speedPerWave": 0,
           "r": 35,
           "color": "#c58aff",
@@ -855,29 +863,64 @@
       }
     },
     "progression": {
-      "xpNeedBase": 8,
-      "xpGrowth": 1.35,
+      "xpNeedBase": 10,
+      "xpGrowth": 2,
+      "killXpMul": 1,
+      "perkChoices": 3,
       "perks": [
         {
           "id": "damage",
           "title": "高能弹芯",
           "desc": "基础伤害 +20%",
           "kind": "damagePct",
-          "value": 0.2
+          "value": 0.2,
+          "weight": 1,
+          "maxStacks": 99
         },
         {
           "id": "rate",
           "title": "过载供能",
           "desc": "射速 +15%",
           "kind": "fireRatePct",
-          "value": 0.15
+          "value": 0.15,
+          "weight": 1,
+          "maxStacks": 99
         },
         {
           "id": "repair",
           "title": "重整心防",
           "desc": "私人空间恢复 20 点",
           "kind": "heal",
-          "value": 20
+          "value": 20,
+          "weight": 0.8,
+          "maxStacks": 99
+        },
+        {
+          "id": "maxhp",
+          "title": "扩容心防",
+          "desc": "心防上限 +15",
+          "kind": "maxHp",
+          "value": 15,
+          "weight": 0.8,
+          "maxStacks": 99
+        },
+        {
+          "id": "range",
+          "title": "延伸射界",
+          "desc": "射程 +8%",
+          "kind": "rangePct",
+          "value": 0.08,
+          "weight": 0.7,
+          "maxStacks": 6
+        },
+        {
+          "id": "xpgain",
+          "title": "洞悉弱点",
+          "desc": "击破经验 +12%",
+          "kind": "xpGainPct",
+          "value": 0.12,
+          "weight": 0.6,
+          "maxStacks": 6
         }
       ]
     },
@@ -909,8 +952,8 @@
         "chanceCap": 0.95
       },
       "defaults": {
-        "dropChance": 0.5,
-        "dropLifetime": 6
+        "dropChance": 0.27,
+        "dropLifetime": 5
       }
     },
     "input": {
@@ -944,6 +987,77 @@
       ],
       "overall": 2,
       "telemetryFile": "telemetry/session_2026-07-13T07-35-36.413Z_1.json"
+    },
+    {
+      "id": "session_2026-07-14T06-26-50.042Z_1",
+      "seed": 1,
+      "ratingPerWave": [
+        {
+          "busy": 5,
+          "watch": 5,
+          "tension": 5
+        },
+        {
+          "busy": 5,
+          "watch": 5,
+          "tension": 5
+        },
+        {
+          "busy": 5,
+          "watch": 5,
+          "tension": 5
+        },
+        {
+          "busy": 5,
+          "watch": 5,
+          "tension": 5
+        }
+      ],
+      "overall": 5,
+      "telemetryFile": "telemetry/session_2026-07-14T06-26-50.042Z_1.json"
+    },
+    {
+      "id": "session_2026-07-14T07-11-01.185Z_1",
+      "seed": 1,
+      "ratingPerWave": [
+        {
+          "busy": 5,
+          "watch": 4,
+          "tension": 5
+        },
+        {
+          "busy": 5,
+          "watch": 5,
+          "tension": 5
+        },
+        {
+          "busy": 5,
+          "watch": 5,
+          "tension": 5
+        },
+        {
+          "busy": 5,
+          "watch": 5,
+          "tension": 5
+        },
+        {
+          "busy": 5,
+          "watch": 5,
+          "tension": 5
+        },
+        {
+          "busy": 5,
+          "watch": 4,
+          "tension": 5
+        },
+        {
+          "busy": 5,
+          "watch": 4,
+          "tension": 4
+        }
+      ],
+      "overall": 5,
+      "telemetryFile": "telemetry/session_2026-07-14T07-11-01.185Z_1.json"
     }
   ]
 }

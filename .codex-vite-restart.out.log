@@ -1,0 +1,70 @@
+
+> projectvl@0.2.0 dev
+> vite --host --host 0.0.0.0 --port 5173
+
+
+[calibrate] 手机与电脑连接同一局域网后打开：
+  http://10.12.28.112:5173/calibrate
+  http://172.25.224.1:5173/calibrate
+[calibrate] 扫码打开首个地址：
+▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+█ ▄▄▄▄▄ █▄▀ ▀  ▄▄▀█▀▄██ ▄▄▄▄▄ █
+█ █   █ █   █▀█▀▀▄▀ ▄▀█ █   █ █
+█ █▄▄▄█ █▄█▀ ▄▀▄▀  ▄  █ █▄▄▄█ █
+█▄▄▄▄▄▄▄█▄█ █ █▄▀ ▀ █▄█▄▄▄▄▄▄▄█
+█ ▄  █▀▄▀ █ ▄  ▀ ▄ ▀ ▄ ▀█ ▄▄█ █
+█▄▀▀▄▄▀▄▄█  ▄▄▄██▄█ █▄▄▄▄▄▀▄▄▀█
+█ ▄▀▄▀ ▄█▄▄▄▀ █  ▀ █   ▀ █▄▄▀▀█
+█ ▀▀█▀▄▄▄ ▀  █▄▀▀ ▄█ █▀ ▄▀▄▄ ▄█
+██▀█  █▄▄ ▀▄█▄█ ▀▄█▄██▀██▄█▀ ██
+█▄█▄█▄▀▄▄▀█ ▀█  ▄▄▀ █ ▄▄█▀▄ ███
+██▄█▄▄█▄█ ▄███▄▄█     ▄▄▄   ▀▀█
+█ ▄▄▄▄▄ ██ ▄▀▀▀ ▀▀▄▄  █▄█  █▄██
+█ █   █ █▀▀▀ █▀█  ▄█▀ ▄▄  ▄ ▄▀█
+█ █▄▄▄█ █ ███ ▀▄█▄██ ▀█▀█▀██▀▄█
+█▄▄▄▄▄▄▄█▄▄█▄██████▄█▄█▄▄█▄█▄██
+
+
+  [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m439[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://198.18.0.1:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://10.12.28.112:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://172.25.224.1:[1m5173[22m/[39m
+[2m11:20:40[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/config/base/waves.json[22m
+[2m11:20:40[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/core/systems/budgetRules.ts[22m
+[2m11:20:40[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/config/base/tuner.json[22m
+[2m11:20:40[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/ui/tunerSchema.ts[22m
+[2m11:20:40[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/core/systems/waveSystem.ts[22m
+[2m11:21:06[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/ui/derivedMetrics.ts[22m
+[2m11:21:36[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/ui/tunerPanel.ts[22m
+[2m11:49:55[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/input/keyboard.ts[22m
+[2m11:49:55[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/input/pointerRouter.ts[22m
+[2m11:49:55[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/game.ts[22m
+[2m11:50:05[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/input/pointerRouter.ts[22m
+[2m11:50:05[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/game.ts[22m
+[2m11:50:10[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/game.ts[22m
+[2m11:50:29[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/game.ts[22m
+[2m13:18:32[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/config/base/progression.json[22m
+[2m13:18:32[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/core/systems/progressionSystem.ts[22m
+[2m13:18:32[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/core/createInitialState.ts[22m
+[2m13:18:32[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/core/stats.ts[22m
+[2m13:18:32[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/core/systems/damageSystem.ts[22m
+[2m13:18:32[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/core/systems/dropSystem.ts[22m
+[2m13:19:00[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mindex.html[22m
+[2m13:19:00[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/ui/domRefs.ts[22m
+[2m13:19:00[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/game.ts[22m
+[2m13:19:00[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/ui/modals.ts[22m
+[2m13:19:00[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/ui/tunerSchema.ts[22m
+[2m13:19:00[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/config/base/tuner.json[22m
+[2m13:19:00[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/ui/tunerPanel.ts[22m
+[2m15:40:23[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/core/systems/equipmentSystem.ts[22m
+[2m15:40:23[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/ui/slotFactory.ts[22m
+[2m15:40:23[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/game.ts[22m
+[2m15:40:23[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/debug/exposeDebugApi.ts[22m
+[2m15:40:23[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/data/texts.json[22m
+[2m15:40:23[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/ui/eventText.ts[22m
+[2m15:40:23[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/config/base/economy.json[22m
+[2m15:40:23[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mindex.html[22m
+[2m15:40:23[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/ui/renderHud.ts[22m
+[2m15:41:04[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/styles/app.css[22m

@@ -59,7 +59,10 @@ function dispatch(events: GameEvent[]): void {
     const text = formatToast(ev);
     if (text) toast(text);
     if (ev.type === 'levelUp') modals.showLevel(resolveOfferedPerks(state));
-    if (ev.type === 'gameEnd') modals.showResult(ev.win, state);
+    if (ev.type === 'gameEnd') {
+      refs.pauseBtn.disabled = true;
+      modals.showResult(ev.win, state);
+    }
     if (SLOT_CHANGING.has(ev.type)) slotsChanged = true;
   }
   if (slotsChanged) refreshSlots();
@@ -106,6 +109,7 @@ function previewFor(source: 'cards' | 'equipment', index: number): PreviewSpec {
 const pointerRouter = createPointerRouter({
   canvas: refs.canvas, dock: refs.dock, aimPreview: refs.aimPreview, screenPreview: refs.screenPreview,
   input: cfg.input, bountyEnabled: cfg.skills.mechanisms.bounty.enabled,
+  isPaused: () => state.paused,
   onBountyTap: (_x, _y) => false, // S5 启用 bounty 后在此命中并接单。
   onArenaTap: (x, y) => {
     const events = collectNearest(state, config, rng, x, y, cfg.economy.drops.pickupRadius);
@@ -141,6 +145,9 @@ function reset(): void {
   modals.hideLevel();
   refs.startBtn.textContent = texts.buttons.start;
   refs.pauseBtn.textContent = texts.buttons.pause;
+  refs.pauseBtn.setAttribute('aria-pressed', 'false');
+  refs.pauseBtn.title = texts.buttons.pause;
+  refs.pauseBtn.disabled = true;
   modals.message(texts.center.readyTitle, texts.center.readyBody, true);
   refreshSlots();
   renderHud(refs, state, config);
@@ -150,6 +157,8 @@ function start(): void {
   if (state.mode !== 'ready') reset();
   tuner?.applyPendingWaveChanges();
   state.mode = 'playing';
+  state.paused = false;
+  refs.pauseBtn.disabled = false;
   dispatch(startNextWave(state, config, rng));
   refs.startBtn.textContent = texts.buttons.restart;
   modals.message('', '', false);
@@ -159,6 +168,8 @@ function togglePause(): void {
   if (state.mode !== 'playing') return;
   state.paused = !state.paused;
   refs.pauseBtn.textContent = state.paused ? texts.buttons.resume : texts.buttons.pause;
+  refs.pauseBtn.setAttribute('aria-pressed', String(state.paused));
+  refs.pauseBtn.title = state.paused ? texts.buttons.resume : texts.buttons.pause;
   modals.message(state.paused ? texts.center.pausedTitle : '', texts.center.pausedBody, state.paused);
 }
 
