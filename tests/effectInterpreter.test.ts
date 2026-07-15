@@ -428,3 +428,76 @@ describe('解释器 · 召唤物 respawnOnce（诱饵 5★ 重生，批次1新�
     expect(s.summons).toHaveLength(0); // 第二次摧毁：重生已用掉，正常移除
   });
 });
+
+describe('解释器 · split 分裂代数上限（分裂爆破，批次2新增，防止子弹片再命中时指数级增殖）', () => {
+  it('原弹（depth0）命中可以分裂；子弹片（depth1）命中默认 maxDepth=1 不再分裂', () => {
+    const s = freshState();
+    const original = { x: 0, y: 0, vx: 0, vy: 0, r: 4, life: 1, damage: 20, hitIds: [] };
+    const ctx1: EffectCtx = { state: s, config, rng, events: [], origin: { x: 0, y: 0 }, star: 3, baseDamage: 20, bullet: original as never, enemy: enemy({ x: 0, y: 0 }) };
+    ATOMS.split(ctx1, { count: 2, damageRatio: 0.5 });
+    expect(s.bullets).toHaveLength(2);
+    expect(s.bullets.every(b => b.splitDepth === 1)).toBe(true);
+
+    const fragment = s.bullets[0];
+    const ctx2: EffectCtx = { state: s, config, rng, events: [], origin: { x: 10, y: 0 }, star: 3, baseDamage: 20, bullet: fragment as never, enemy: enemy({ x: 10, y: 0 }) };
+    ATOMS.split(ctx2, { count: 2, damageRatio: 0.5 });
+    expect(s.bullets).toHaveLength(2); // 未新增：depth1 达到默认 maxDepth，拒绝再分裂
+  });
+
+  it('maxDepth=2 时子弹片可以再分裂一次（连环裂变），第二代子弹片不再分裂', () => {
+    const s = freshState();
+    const original = { x: 0, y: 0, vx: 0, vy: 0, r: 4, life: 1, damage: 20, hitIds: [] };
+    const ctx1: EffectCtx = { state: s, config, rng, events: [], origin: { x: 0, y: 0 }, star: 5, baseDamage: 20, bullet: original as never, enemy: enemy({ x: 0, y: 0 }) };
+    ATOMS.split(ctx1, { count: 2, damageRatio: 0.5, maxDepth: 2 });
+    const gen1 = s.bullets[0];
+    const ctx2: EffectCtx = { state: s, config, rng, events: [], origin: { x: 10, y: 0 }, star: 5, baseDamage: 20, bullet: gen1 as never, enemy: enemy({ x: 10, y: 0 }) };
+    ATOMS.split(ctx2, { count: 2, damageRatio: 0.5, maxDepth: 2 });
+    expect(s.bullets).toHaveLength(4); // 原 2 片 + 第二代 2 片
+    const gen2 = s.bullets[2];
+    const ctx3: EffectCtx = { state: s, config, rng, events: [], origin: { x: 20, y: 0 }, star: 5, baseDamage: 20, bullet: gen2 as never, enemy: enemy({ x: 20, y: 0 }) };
+    ATOMS.split(ctx3, { count: 2, damageRatio: 0.5, maxDepth: 2 });
+    expect(s.bullets).toHaveLength(4); // 第二代（depth2）达到 maxDepth，不再分裂
+  });
+});
+
+describe('解释器 · focusPriority hpThresholdRatio（圣域 5★ 处刑印记，批次2新增，通用参数非专属硬编码）', () => {
+  it('未设阈值时对任意血量目标都烙印；设阈值后只烙印血量比例低于阈值的目标', () => {
+    const healthy = enemy({ hp: 90, maxHp: 100 });
+    const dying = enemy({ hp: 20, maxHp: 100 });
+    const s = freshState();
+    const ctxNoThreshold: EffectCtx = { state: s, config, rng, events: [], origin: { x: 0, y: 0 }, star: 5, baseDamage: 10, enemy: healthy };
+    ATOMS.focusPriority(ctxNoThreshold, { priorityWeight: 3, duration: 2 });
+    expect(healthy.status.brand).not.toBeNull();
+
+    const ctxHealthy: EffectCtx = { state: s, config, rng, events: [], origin: { x: 0, y: 0 }, star: 5, baseDamage: 10, enemy: healthy };
+    healthy.status.brand = null;
+    ATOMS.focusPriority(ctxHealthy, { priorityWeight: 3, duration: 2, hpThresholdRatio: 0.3 });
+    expect(healthy.status.brand).toBeNull(); // 90/100 高于阈值，不烙印
+
+    const ctxDying: EffectCtx = { state: s, config, rng, events: [], origin: { x: 0, y: 0 }, star: 5, baseDamage: 10, enemy: dying };
+    ATOMS.focusPriority(ctxDying, { priorityWeight: 3, duration: 2, hpThresholdRatio: 0.3 });
+    expect(dying.status.brand).not.toBeNull(); // 20/100 低于阈值，烙印
+  });
+});
+
+describe('解释器 · triggerParams.cooldownSeconds（冲击 5★ 破门反制，批次2新增，通用机制非卡专属）', () => {
+  it('冷却窗口内重复触发被跳过；state.time 推进过冷却后可再次触发', () => {
+    registerSkillDefs([def('range', [
+      { trigger: 'onBreach', triggerParams: { cooldownSeconds: 6 }, effects: [{ atom: 'burstDamage', params: { damageMul: 1, radius: 200 } }] },
+    ])]);
+    const s = freshState();
+    equipCard(s, 'range', 3);
+    const bystander = enemy({ x: 300, y: 300, hp: 100, maxHp: 100 });
+    s.enemies = [bystander];
+    // 不带 payload.enemy：burstDamage 走半径搜索命中 bystander（onBreach 真实场景里 payload.enemy 是突破者本身，
+    // 这里只关心冷却闸门本身是否生效，用半径搜索更方便断言"谁挨打了"）。
+    fireTrigger(s, config, rng, 'onBreach', { damage: 5, point: { x: 300, y: 300 } });
+    expect(bystander.hp).toBeLessThan(100);
+    const hpAfterFirst = bystander.hp;
+    fireTrigger(s, config, rng, 'onBreach', { damage: 5, point: { x: 300, y: 300 } });
+    expect(bystander.hp).toBe(hpAfterFirst); // 冷却中：第二次未生效
+    s.time += 6.1;
+    fireTrigger(s, config, rng, 'onBreach', { damage: 5, point: { x: 300, y: 300 } });
+    expect(bystander.hp).toBeLessThan(hpAfterFirst); // 冷却已过：第三次生效
+  });
+});

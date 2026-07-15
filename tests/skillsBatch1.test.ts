@@ -1,6 +1,6 @@
-// 批次1交付四件套之一：无头冒烟矩阵，跑真实 src/config/base/skills.json 的 7 张正式卡
-// （非 fixture）。每张卡至少 2 条具体行为断言（不是"跑过不报错"），并输出锚点效果证据表，
-// 对照 docs/P5_批次1_验收证据表.md。
+// 冒烟矩阵：跑真实 src/config/base/skills.json 的全部正式卡（非 fixture）。
+// 逐卡具体行为断言（不是"跑过不报错"）见本文件（批次1）与 skillsBatch2.test.ts（批次2）。
+// 对照 docs/P5_批次1_验收证据表.md / docs/P5_批次2_验收证据表.md。
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { cfg } from '../src/config';
 import { registerSkillDefs, resolveConsumableTier, fireTrigger, getModifiers } from '../src/core/effects/interpreter';
@@ -25,8 +25,8 @@ function equip(type: string, star: number) {
 beforeEach(() => { resetTestEnv(); registerSkillDefs(cfg.skills.cards); });
 afterEach(resetTestEnv);
 
-describe('批次1 · 冒烟矩阵（真实 skills.json，装备 3/4/5/6★ + 消耗 1–6★）', () => {
-  it('7 卡 × 6 星级消耗 + 5 星级装备锚点全部可执行，输出证据表', () => {
+describe('冒烟矩阵（真实 skills.json，装备 3/4/5/6★ + 消耗 1–6★）', () => {
+  it('全部正式卡 × 6 星级消耗 + 4 星级装备锚点全部可执行，输出证据表', () => {
     const table: Record<string, string | number>[] = [];
     for (const def of cfg.skills.cards) {
       for (let star = 1; star <= 6; star++) {
@@ -43,8 +43,8 @@ describe('批次1 · 冒烟矩阵（真实 skills.json，装备 3/4/5/6★ + 消
       }
     }
     console.table(table);
-    expect(table.filter(r => r.mode === 'consume')).toHaveLength(42);
-    expect(table.filter(r => r.mode === 'equip')).toHaveLength(28);
+    expect(table.filter(r => r.mode === 'consume')).toHaveLength(cfg.skills.cards.length * 6);
+    expect(table.filter(r => r.mode === 'equip')).toHaveLength(cfg.skills.cards.length * 4);
   });
 });
 

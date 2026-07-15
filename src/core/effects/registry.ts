@@ -190,6 +190,9 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
   },
   split(ctx, p) {
     if (ctx.bullet && !ctx.enemy) { (ctx.bullet.riders ??= []).push({ atom: 'split', params: p }); return; }
+    // 命中即触发 onHit（含子弹片自身命中），maxDepth 防止子弹片再分裂形成指数级增殖（默认 1=只裂一代）。
+    const depth = ctx.bullet?.splitDepth ?? 0;
+    if (depth >= num(p, 'maxDepth', 1)) return;
     const origin = ctx.enemy ? { x: ctx.enemy.x, y: ctx.enemy.y } : ctx.origin;
     const count = num(p, 'count', 2);
     const dmg = (ctx.bullet ? ctx.bullet.damage : ctx.baseDamage) * num(p, 'damageRatio', 0.5);
@@ -204,6 +207,7 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
         damage: dmg,
         kind: 'fragment',
         hitIds: ctx.enemy ? [ctx.enemy.id] : [],
+        splitDepth: depth + 1,
       });
     }
   },
@@ -381,7 +385,12 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
   focusPriority(ctx, p) {
     const weight = num(p, 'priorityWeight', 1);
     const duration = cappedDuration(ctx, num(p, 'duration', ctx.duration ?? 4));
-    for (const e of targets(ctx, p)) applyBrand(e, weight, duration);
+    // hpThresholdRatio 可选：只标记血量比例低于该阈值的目标（如圣域 5★ 处刑印记：只烙印濒死敌人）。
+    const hpThreshold = typeof p.hpThresholdRatio === 'number' ? (p.hpThresholdRatio as number) : null;
+    for (const e of targets(ctx, p)) {
+      if (hpThreshold != null && e.hp / e.maxHp > hpThreshold) continue;
+      applyBrand(e, weight, duration);
+    }
   },
 };
 

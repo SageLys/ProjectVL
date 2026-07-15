@@ -125,11 +125,22 @@ export function fireTrigger(state: GameState, config: Config, rng: Rng, trigger:
   return fireTriggerBindings(state, config, rng, trigger, payload);
 }
 
+/** 冷却闸门：triggerParams.cooldownSeconds 通用于任意触发器，限制该绑定的最短再触发间隔（state.time 基准）。 */
+function cooldownReady(state: GameState, cardId: number, bindingIndex: number, binding: BindingDef): boolean {
+  const seconds = binding.triggerParams?.cooldownSeconds;
+  if (!seconds) return true;
+  const key = `cd:${cardId}:${bindingIndex}`;
+  if ((state.cooldowns[key] ?? 0) > state.time) return false;
+  state.cooldowns[key] = state.time + seconds;
+  return true;
+}
+
 function fireTriggerBindings(state: GameState, config: Config, rng: Rng, trigger: Trigger, payload: TriggerPayload): GameEvent[] {
   const events: GameEvent[] = [];
-  for (const { card, binding } of equippedBindings(state)) {
+  for (const { card, binding, bindingIndex } of equippedBindings(state)) {
     if (binding.trigger !== trigger) continue;
     if (!bindingConditionMet(binding, payload)) continue;
+    if (!cooldownReady(state, card.id, bindingIndex, binding)) continue;
     const ctx = baseCtx(state, config, rng, card.star, payload);
     runEffects(ctx, binding.effects);
     events.push(...ctx.events);

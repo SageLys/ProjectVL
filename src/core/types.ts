@@ -82,6 +82,8 @@ export interface Bullet {
   aoeFalloff?: number;
   /** 剩余场边反弹次数（ricochet）。 */
   ricochetLeft?: number;
+  /** 分裂代数（split 原子用，0=原弹）；配合 split 的 maxDepth 参数防止子弹片再分裂形成指数级增殖。 */
+  splitDepth?: number;
 }
 
 export interface Particle {
@@ -195,6 +197,8 @@ export interface GameState {
   buffs: Buff[];
   /** interval 装备态绑定的计时器（key = 卡id:绑定序号）。 */
   intervalClocks: Record<string, number>;
+  /** 任意触发器绑定的冷却截止时刻（state.time 基准；key = cd:卡id:绑定序号），供 triggerParams.cooldownSeconds 使用。 */
+  cooldowns: Record<string, number>;
   nextCardId: number;
   nextDropId: number;
   nextEnemyId: number;

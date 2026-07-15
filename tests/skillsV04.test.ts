@@ -52,7 +52,7 @@ describe('schema v0.4.0 · 解释器星级规则', () => {
   });
 });
 
-describe('批次1·七张正式卡 · 1–6★ 无头冒烟', () => {
+describe('全部正式卡 · 1–6★ 无头冒烟', () => {
   it('≥3★ 全可装备、1–6★ 全可消耗，并输出六档效果表', () => {
     const table: Record<string, string | number>[] = [];
     for (const def of cfg.skills.cards) for (let star = 1; star <= 6; star++) {
@@ -66,7 +66,7 @@ describe('批次1·七张正式卡 · 1–6★ 无头冒烟', () => {
       table.push({ card: def.id, star, radius: tier.radius ?? 0, effects: tier.effects.map(e => e.atom).join('+') });
     }
     console.table(table);
-    expect(table).toHaveLength(42);
+    expect(table).toHaveLength(cfg.skills.cards.length * 6);
   });
 });
 

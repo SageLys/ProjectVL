@@ -31,6 +31,7 @@ export function createInitialState(): GameState {
     shield: null,
     buffs: [],
     intervalClocks: {},
+    cooldowns: {},
     nextCardId: 1,
     nextDropId: 1,
     nextEnemyId: 1,

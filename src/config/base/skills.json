@@ -175,6 +175,133 @@
         "3": { "radius": 120, "effects": [{ "atom": "shield", "params": { "absorbHits": 6 } }, { "atom": "knockback", "params": { "distance": 100 } }] },
         "6": { "radius": 150, "effects": [{ "atom": "shield", "params": { "absorbHits": 8 } }, { "atom": "burstDamage", "params": { "damageMul": 5, "radius": 150 } }, { "atom": "knockback", "params": { "distance": 140 } }] }
       } }, "designNotes": "撑住这一波。5★ 碎盾新星：护盾破裂时对周围敌人造成击退+伤害。"
+    },
+    {
+      "id": "splitBlast", "category": "projectile", "textKey": "cards.splitBlast", "teaching": false, "implementationBatch": 2,
+      "stars": {
+        "3": { "tier": "core", "equip": [
+          { "trigger": "onHit", "effects": [
+            { "atom": "split", "params": { "count": 2, "damageRatio": 0.5, "maxDepth": 1 } },
+            { "atom": "aoeOnHit", "params": { "radius": 40, "damageRatio": 0.6, "falloff": 0.5 } }
+          ] }
+        ] },
+        "5": { "tier": "dual", "equip": [
+          { "trigger": "onHit", "effects": [
+            { "atom": "split", "params": { "count": 2, "damageRatio": 0.5, "maxDepth": 2 } },
+            { "atom": "aoeOnHit", "params": { "radius": 40, "damageRatio": 0.6, "falloff": 0.5 } }
+          ] }
+        ] },
+        "6": { "tier": "transform", "equip": [
+          { "trigger": "passive", "effects": [{ "atom": "mortarMorph", "params": { "radius": 90, "damageRatio": 1.3, "falloff": 0.5 } }] }
+        ] }
+      },
+      "amplifyAxis": { "description": "子弹片 +1、AoE 半径 +25%", "params": { "count": "+1", "radius": "+25%" } },
+      "consumable": { "placement": "point", "interpolation": "linear", "anchors": {
+        "1": { "radius": 110, "effects": [{ "atom": "burstDamage", "params": { "damageMul": 4, "radius": 110 } }] },
+        "3": { "radius": 140, "effects": [{ "atom": "burstDamage", "params": { "damageMul": 6, "radius": 140 } }, { "atom": "split", "params": { "count": 4, "damageRatio": 0.5, "maxDepth": 1 } }] },
+        "6": { "radius": 180, "effects": [{ "atom": "burstDamage", "params": { "damageMul": 9, "radius": 180 } }, { "atom": "split", "params": { "count": 4, "damageRatio": 0.5, "maxDepth": 2 } }] }
+      } }, "designNotes": "一发变一片。5★ 连环裂变：子弹片命中后再分裂一次（maxDepth 封顶，防止指数级增殖）。6★ 换形为榴弹主炮；「命中炸出子弹片」的联动未实装（简化，记入 S6）。"
+    },
+    {
+      "id": "impact", "category": "control", "textKey": "cards.impact", "teaching": true, "implementationBatch": 2,
+      "stars": {
+        "3": { "tier": "core", "equip": [
+          { "trigger": "onFire", "effects": [{ "atom": "knockback", "params": { "distance": 22, "collisionDamage": 0.3 } }] }
+        ] },
+        "5": { "tier": "dual", "equip": [
+          { "trigger": "onFire", "effects": [{ "atom": "knockback", "params": { "distance": 22, "collisionDamage": 0.3 } }] },
+          { "trigger": "onBreach", "triggerParams": { "cooldownSeconds": 6 }, "effects": [
+            { "atom": "groundZone", "params": { "radius": 150, "duration": 0.1, "tickInterval": 0.05, "effects": [
+              { "atom": "knockback", "params": { "distance": 80 } },
+              { "atom": "stun", "params": { "duration": 0.4 } }
+            ] } }
+          ] }
+        ] },
+        "6": { "tier": "transform", "equip": [
+          { "trigger": "interval", "triggerParams": { "seconds": 4 }, "effects": [
+            { "atom": "knockback", "params": { "distance": 100, "radius": 150 } },
+            { "atom": "stun", "params": { "duration": 0.4, "radius": 150 } }
+          ] }
+        ] }
+      },
+      "amplifyAxis": { "description": "击退距离 +30%、碰撞伤 +50%", "params": { "distance": "+30%", "collisionDamage": "+50%" } },
+      "consumable": { "placement": "point", "interpolation": "linear", "anchors": {
+        "1": { "radius": 100, "effects": [{ "atom": "knockback", "params": { "distance": 80 } }] },
+        "3": { "radius": 140, "effects": [{ "atom": "knockback", "params": { "distance": 120 } }, { "atom": "stun", "params": { "duration": 0.5 } }] },
+        "6": { "radius": 180, "effects": [{ "atom": "knockback", "params": { "distance": 180, "collisionDamage": 0.5 } }, { "atom": "stun", "params": { "duration": 1 } }] }
+      } }, "designNotes": "教学卡：把它们轰开。5★ 破门反制：突破瞬间自动全向冲击波，冷却 6s 内置保命（不叠加触发）。"
+    },
+    {
+      "id": "sanctum", "category": "domain", "textKey": "cards.sanctum", "teaching": false, "implementationBatch": 2,
+      "stars": {
+        "3": { "tier": "core", "equip": [
+          { "trigger": "passive", "effects": [{ "atom": "aura", "params": { "radiusRatioOfRange": 0.5, "tickInterval": 0.5, "effects": [
+            { "atom": "vulnerable", "params": { "ratio": 0.2, "duration": 0.6 } },
+            { "atom": "slow", "params": { "ratio": 0.1, "duration": 0.6 } }
+          ] } }] }
+        ] },
+        "5": { "tier": "dual", "equip": [
+          { "trigger": "passive", "effects": [{ "atom": "aura", "params": { "radiusRatioOfRange": 0.5, "tickInterval": 0.5, "effects": [
+            { "atom": "vulnerable", "params": { "ratio": 0.2, "duration": 0.6 } },
+            { "atom": "slow", "params": { "ratio": 0.1, "duration": 0.6 } },
+            { "atom": "focusPriority", "params": { "priorityWeight": 3, "duration": 0.6, "hpThresholdRatio": 0.3 } }
+          ] } }] }
+        ] },
+        "6": { "tier": "transform", "equip": [
+          { "trigger": "interval", "triggerParams": { "seconds": 3 }, "effects": [{ "atom": "vulnerable", "params": { "ratio": 0.4, "duration": 2, "radius": 170 } }] }
+        ] }
+      },
+      "amplifyAxis": { "description": "易伤 +10pt、光环半径 +15%", "params": { "ratio": "+0.1", "radiusRatioOfRange": "+15%" } },
+      "consumable": { "placement": "point", "interpolation": "linear", "anchors": {
+        "1": { "radius": 110, "duration": 4, "effects": [{ "atom": "vulnerable", "params": { "ratio": 0.3, "duration": 4 } }] },
+        "3": { "radius": 140, "duration": 5, "effects": [{ "atom": "vulnerable", "params": { "ratio": 0.4, "duration": 5 } }] },
+        "6": { "radius": 170, "duration": 5, "effects": [{ "atom": "vulnerable", "params": { "ratio": 0.5, "duration": 5 } }] }
+      } }, "designNotes": "进入领域者皆被审判。5★ 处刑印记：环内濒死敌人（hpThresholdRatio）被烙印优先索敌。amplifyAxis 的 ratio 键同时略微放大环内减速（易伤/减速共用参数名，接受此耦合）。「被烙印者死亡掉落时限+50%」未实装（简化，记入 S6）。"
+    },
+    {
+      "id": "thorns", "category": "defense", "textKey": "cards.thorns", "teaching": false, "implementationBatch": 2,
+      "stars": {
+        "3": { "tier": "core", "equip": [
+          { "trigger": "passive", "effects": [{ "atom": "breachReduction", "params": { "ratio": 0.35 } }] },
+          { "trigger": "onBreach", "effects": [
+            { "atom": "groundZone", "params": { "radius": 100, "duration": 0.1, "tickInterval": 0.05, "effects": [
+              { "atom": "burstDamage", "params": { "damageMul": 1.5, "radius": 100 } },
+              { "atom": "knockback", "params": { "distance": 90 } }
+            ] } }
+          ] }
+        ] },
+        "5": { "tier": "dual", "equip": [
+          { "trigger": "passive", "effects": [{ "atom": "breachReduction", "params": { "ratio": 0.35 } }] },
+          { "trigger": "onBreach", "effects": [
+            { "atom": "groundZone", "params": { "radius": 100, "duration": 0.1, "tickInterval": 0.05, "effects": [
+              { "atom": "burstDamage", "params": { "damageMul": 1.5, "radius": 100 } },
+              { "atom": "knockback", "params": { "distance": 90 } }
+            ] } }
+          ] },
+          { "trigger": "passive", "effects": [{ "atom": "aura", "params": { "radius": 90, "tickInterval": 0.5, "effects": [{ "atom": "dot", "params": { "damageRatio": 0.1 } }] } }] }
+        ] },
+        "6": { "tier": "transform", "equip": [
+          { "trigger": "passive", "effects": [{ "atom": "aura", "params": { "radius": 130, "tickInterval": 0.4, "effects": [
+            { "atom": "dot", "params": { "damageRatio": 0.15 } },
+            { "atom": "execute", "params": { "hpThresholdRatio": 0.2 } }
+          ] } }] }
+        ] }
+      },
+      "amplifyAxis": { "description": "反噬 +50pt、减免 +10pt", "params": { "damageMul": "+0.5", "ratio": "+0.1" } },
+      "consumable": { "placement": "point", "interpolation": "linear", "anchors": {
+        "1": { "radius": 90, "duration": 4, "effects": [{ "atom": "groundZone", "params": { "radius": 90, "duration": 4, "tickInterval": 0.5, "effects": [
+          { "atom": "dot", "params": { "damageRatio": 0.15 } },
+          { "atom": "slow", "params": { "ratio": 0.3, "duration": 0.6 } }
+        ] } }] },
+        "3": { "radius": 120, "duration": 4, "effects": [
+          { "atom": "groundZone", "params": { "radius": 120, "duration": 4, "tickInterval": 0.5, "effects": [{ "atom": "dot", "params": { "damageRatio": 0.2 } }] } },
+          { "atom": "focusPriority", "params": { "priorityWeight": 2, "duration": 4 } }
+        ] },
+        "6": { "radius": 150, "duration": 5, "effects": [{ "atom": "groundZone", "params": { "radius": 150, "duration": 5, "tickInterval": 0.5, "effects": [
+          { "atom": "dot", "params": { "damageRatio": 0.25 } },
+          { "atom": "execute", "params": { "hpThresholdRatio": 0.15 } }
+        ] } }] }
+      } }, "designNotes": "碰我者死。突破反噬用近瞬时 groundZone 包裹 burstDamage/knockback，命中突破点附近的存活敌人（突破的敌人本身已在结算前移出场，直接反噬它没有意义）。6★ 处决不计入突破惩罚（execute 走击杀结算，非突破结算，天然满足）。"
     }
   ],
   "mechanisms": {

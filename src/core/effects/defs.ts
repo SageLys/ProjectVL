@@ -42,8 +42,11 @@ export interface EffectDef {
 /** 装备态绑定：触发器 + 效果原子列表。 */
 export interface BindingDef {
   trigger: Trigger;
-  /** interval 用 seconds；onKill 可选 requiresSource（击杀来源标签）/requiresStatus（死亡时刻状态，'frozen'|'dot'）过滤。 */
-  triggerParams?: { seconds?: number; requiresSource?: string; requiresStatus?: string };
+  /**
+   * interval 用 seconds；onKill 可选 requiresSource（击杀来源标签）/requiresStatus（死亡时刻状态，'frozen'|'dot'）过滤；
+   * cooldownSeconds 通用于任意触发器：限制该绑定的最短再触发间隔（如冲击 5★ 破门反制每 6s 至多一次）。
+   */
+  triggerParams?: { seconds?: number; requiresSource?: string; requiresStatus?: string; cooldownSeconds?: number };
   effects: EffectDef[];
 }
 

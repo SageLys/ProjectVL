@@ -6,8 +6,11 @@ import { fireTrigger, getModifiers } from '../effects/interpreter';
 import { addXp } from './progressionSystem';
 
 const TAU = Math.PI * 2;
-/** 批次1 正式卡池（P5 替换 P3 占位卡）。 */
-export const CARD_KEYS: CardType[] = ['pierce', 'chainLightning', 'frost', 'decoy', 'scorch', 'harvest', 'aegis'];
+/** 正式卡池（P5 批次1+批次2；同调 resonance 待 S4b 建模，暂不入池）。 */
+export const CARD_KEYS: CardType[] = [
+  'pierce', 'chainLightning', 'frost', 'decoy', 'scorch', 'harvest', 'aegis',
+  'splitBlast', 'impact', 'sanctum', 'thorns',
+];
 /** 过期折算经验的基准值（丰收 5★ 落穗：expiryConvert.ratio × 星级 × 本常数）。 */
 const EXPIRY_CONVERT_XP_PER_STAR = 4;
 
