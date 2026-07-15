@@ -16,7 +16,7 @@ import { fireTrigger, getModifiers } from '../effects/interpreter';
 export function killEnemy(state: GameState, config: Config, rng: Rng, enemy: Enemy, source?: string): GameEvent[] {
   const events: GameEvent[] = [];
   state.kills++;
-  for (let i = 0; i < cfg.combat.vfx.killParticles; i++) spawnParticle(state, rng, enemy.x, enemy.y, enemy.color, 150);
+  for (let i = 0; i < cfg.combat.vfx.killParticles; i++) spawnParticle(state, rng, enemy.x, enemy.y, '#8793a3', 150);
   if (enemy.bounty?.accepted) rollBountyDrops(state, config, rng, enemy);
   else rollDropOnKill(state, config, rng, enemy);
   const xpGain = enemy.xp * cfg.progression.killXpMul * (1 + state.xpGainBonus) * getModifiers(state).xpMul;

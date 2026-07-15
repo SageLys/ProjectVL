@@ -11,6 +11,10 @@
 Vite + TypeScript + Canvas 2D + 原生 DOM UI + JSON 配置 + Vitest。
 不引入任何游戏/UI/状态管理/CSS 框架，不使用 localStorage 等持久化。
 
+## 视觉识别
+
+敌人以中性灰、体型和规则多边形轮廓区分类型，冻结、减速、烙印与 Bounty 仍使用独立状态环。11 张技能卡的颜色、外轮廓和内部几何符号集中定义在 `src/presentation/cardVisuals.json`，地面掉落与手牌/装备共享 `skillGeometry.ts`，确保彩色与灰度环境下都能辨认技能身份。
+
 ## 运行 / 构建 / 测试
 
 ```bash
@@ -49,6 +53,7 @@ ProjectVL/
 │  │  └─ systems/          # waveSystem/enemySystem/combatSystem/dropSystem/damageSystem/
 │  │                       # cardSystem/equipmentSystem/progressionSystem/particleSystem
 │  ├─ render/              # canvasRenderer + drawArena/Enemies/Bullets/Drops/Particles/Turret/Effects
+│  ├─ presentation/        # 技能视觉注册表 + Canvas/SVG 共用几何
 │  ├─ ui/                  # domRefs/renderHud/renderCards/renderEquipment/
 │  │                       # tunerPanel/modals/toast/slotFactory/eventText/format
 │  ├─ input/               # pointerDrag（含拖入主画面=消耗释放）/ dropClick / keyboard

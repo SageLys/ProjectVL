@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { cfg } from '../src/config';
 import { cardVisualRegistry, resolveCardVisual } from '../src/presentation/cardVisual';
 import { drawDrops } from '../src/render/drawDrops';
-import { freshState } from './helpers';
+import { drawEnemies } from '../src/render/drawEnemies';
+import { enemy, freshState } from './helpers';
 
 function fakeCtx(): CanvasRenderingContext2D {
   const target: Record<string, unknown> = {};
@@ -58,6 +59,20 @@ describe('card visual registry', () => {
       id: index, x: 100 + index, y: 100, type: card.id, star: 1, life: 8, maxLife: 10, pulse: 0,
     }));
     expect(() => drawDrops(fakeCtx(), state)).not.toThrow();
+  });
+
+  it('gives normal enemies one shared neutral body color', () => {
+    expect(cfg.enemies.types.normal.color).toBe(cfg.enemies.types.fast.color);
+    expect(cfg.enemies.types.fast.color).toBe(cfg.enemies.types.tank.color);
+  });
+
+  it('draws all four enemy types without throwing', () => {
+    const state = freshState();
+    state.enemies = (['normal', 'fast', 'tank', 'boss'] as const).map((type, index) => {
+      const visual = cfg.enemies.types[type];
+      return enemy({ id: index, type, r: visual.r, color: visual.color });
+    });
+    expect(() => drawEnemies(fakeCtx(), state)).not.toThrow();
   });
 
 });

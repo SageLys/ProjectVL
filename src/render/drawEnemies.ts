@@ -9,14 +9,14 @@ export function drawEnemies(ctx: CanvasRenderingContext2D, state: GameState): vo
     ctx.save();
     ctx.translate(e.x, e.y);
     if (e.hit > 0) ctx.globalAlpha = 0.55;
-    ctx.shadowBlur = 18;
-    ctx.shadowColor = e.color;
+    ctx.shadowBlur = e.type === 'boss' ? 5 : 0;
+    ctx.shadowColor = 'rgba(135,147,163,.35)';
     ctx.fillStyle = e.color;
     ctx.beginPath();
     const sides = cfg.enemies.types[e.type].sides;
     for (let i = 0; i < sides; i++) {
       const a = -Math.PI / 2 + (i * TAU) / sides;
-      const r = e.r * (i % 2 ? 0.82 : 1);
+      const r = e.r;
       const x = Math.cos(a) * r;
       const y = Math.sin(a) * r;
       i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
@@ -24,6 +24,15 @@ export function drawEnemies(ctx: CanvasRenderingContext2D, state: GameState): vo
     ctx.closePath();
     ctx.fill();
     ctx.shadowBlur = 0;
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = e.type === 'boss' ? 4 : e.type === 'tank' ? 3 : 2;
+    ctx.strokeStyle = e.type === 'boss' ? 'rgba(239,220,164,.82)' : 'rgba(225,232,240,.48)';
+    ctx.stroke();
+    if (e.type === 'boss') {
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(248,250,252,.92)';
+      ctx.stroke();
+    }
     ctx.fillStyle = 'rgba(2,8,17,.86)';
     ctx.beginPath();
     ctx.arc(0, 0, e.r * 0.38, 0, TAU);
@@ -72,7 +81,7 @@ export function drawEnemies(ctx: CanvasRenderingContext2D, state: GameState): vo
     }
     ctx.fillStyle = 'rgba(255,255,255,.12)';
     ctx.fillRect(e.x - e.r, e.y - e.r - 9, e.r * 2, 4);
-    ctx.fillStyle = e.color;
+    ctx.fillStyle = '#b8c2cf';
     ctx.fillRect(e.x - e.r, e.y - e.r - 9, e.r * 2 * Math.max(0, e.hp / e.maxHp), 4);
   }
 }

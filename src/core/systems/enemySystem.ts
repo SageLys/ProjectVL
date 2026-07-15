@@ -114,7 +114,7 @@ export function moveEnemies(state: GameState, config: Config, rng: Rng, dt: numb
     // 撞上嘲讽召唤物：召唤物掉血，敌人消散（不给击杀奖励）。
     if (target.summon && Math.hypot(target.x - e.x, target.y - e.y) < 16 + e.r) {
       target.summon.hp -= e.damage;
-      for (let k = 0; k < 6; k++) spawnParticle(state, rng, e.x, e.y, e.color, 120);
+      for (let k = 0; k < 6; k++) spawnParticle(state, rng, e.x, e.y, '#8793a3', 120);
       state.enemies.splice(i, 1);
       continue;
     }
