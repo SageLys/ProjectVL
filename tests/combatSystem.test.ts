@@ -28,7 +28,6 @@ describe('combatSystem · 锁定', () => {
     const s = freshState();
     const config = createDefaultConfig();
     config.range = 600;
-    s.equipment[0] = { id: 1, type: 'range', star: 6 };
 
     expect(maxAttackRange()).toBe(210);
     expect(totalRange(s, config)).toBe(210);

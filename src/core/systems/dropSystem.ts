@@ -62,7 +62,7 @@ export function rollBountyDrops(state: GameState, config: Config, rng: Rng, enem
  * 推进掉落寿命与浮动相位；超时移除并计入 expired。
  * 丰收 5★ 落穗（expiryConvert）：命中时按 ratio 把过期掉落折算经验，而非纯损失。
  */
-export function tickDrops(state: GameState, config: Config, rng: Rng, dt: number): GameEvent[] {
+export function tickDrops(state: GameState, _config: Config, rng: Rng, dt: number): GameEvent[] {
   const events: GameEvent[] = [];
   for (let i = state.groundDrops.length - 1; i >= 0; i--) {
     const drop = state.groundDrops[i];

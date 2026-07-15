@@ -50,7 +50,7 @@ export function resolveEquipBindings(def: CardDef, star: number): BindingDef[] {
 function* equippedBindings(state: GameState): Generator<{ card: Card; def: CardDef; binding: BindingDef; bindingIndex: number }> {
   for (const card of effectiveEquipment(state)) {
     const def = DEFS.get(card.type);
-    if (!def) continue; // 旧数值卡：装备加成走 legacy 路径（stats/bonusFromCards）
+    if (!def) continue;
     const bindings = resolveEquipBindings(def, card.star);
     for (let i = 0; i < bindings.length; i++) yield { card, def, binding: bindings[i], bindingIndex: i };
   }

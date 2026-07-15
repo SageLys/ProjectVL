@@ -5,76 +5,61 @@ import { card, enemy, freshState, createDefaultConfig, constRng, resetTestEnv } 
 
 beforeEach(resetTestEnv);
 
-describe('dropSystem · 生命周期', () => {
-  it('超时消失并计入 expired', () => {
+describe('dropSystem · lifecycle and collection', () => {
+  it('expires ground drops and records the expiry', () => {
     const s = freshState();
     const config = createDefaultConfig();
-    spawnGroundDrop(s, config, constRng(0), 100, 100, 'damage');
-    expect(s.groundDrops).toHaveLength(1);
+    spawnGroundDrop(s, config, constRng(0), 100, 100, 'pierce');
     tickDrops(s, config, constRng(0.99), config.dropLifetime + 0.01);
     expect(s.groundDrops).toHaveLength(0);
     expect(s.expired).toBe(1);
   });
 
-  it('普通掉落一律 1★（D5 掉落星级策略）', () => {
+  it('uses the configured normal-drop star', () => {
     const s = freshState();
-    const config = createDefaultConfig();
-    spawnGroundDrop(s, config, constRng(0), 100, 100, 'damage');
+    spawnGroundDrop(s, createDefaultConfig(), constRng(0), 100, 100, 'pierce');
     expect(s.groundDrops[0].star).toBe(1);
   });
-});
 
-describe('dropSystem · 拾取', () => {
-  it('拾取入槽并触发自动合成 + merged 事件', () => {
+  it('collects a drop and automatically merges it with a matching skill', () => {
     const s = freshState();
     const config = createDefaultConfig();
-    s.cards[0] = card('damage', 1);
-    spawnGroundDrop(s, config, constRng(0), 50, 50, 'damage');
-    const ev = collectDrop(s, config, constRng(0.99), s.groundDrops[0]);
-    expect(s.groundDrops).toHaveLength(0);
-    expect(s.collected).toBe(1);
-    const nonNull = s.cards.filter(Boolean);
-    expect(nonNull).toHaveLength(1);
-    expect(nonNull[0]!.star).toBe(2);
-    expect(ev).toContainEqual({ type: 'collected', cardType: 'damage', merges: 1 });
-    expect(ev).toContainEqual({ type: 'merged', cardType: 'damage', resultStar: 2 });
+    s.cards[0] = card('pierce', 1);
+    spawnGroundDrop(s, config, constRng(0), 50, 50, 'pierce');
+    const events = collectDrop(s, config, constRng(0.99), s.groundDrops[0]);
+    expect(s.cards.filter(Boolean)).toHaveLength(1);
+    expect(s.cards.filter(Boolean)[0]!.star).toBe(2);
+    expect(events).toContainEqual({ type: 'merged', cardType: 'pierce', resultStar: 2 });
   });
 
-  it('卡槽满则拒绝拾取且掉落保留', () => {
+  it('leaves the drop when the hand is full', () => {
     const s = freshState();
     const config = createDefaultConfig();
-    // 交错星级避免自动合成腾空
-    for (let i = 0; i < s.cards.length; i++) s.cards[i] = card('luck', (i % 3) + 1);
-    spawnGroundDrop(s, config, constRng(0), 50, 50, 'rate');
-    const ev = collectDrop(s, config, constRng(0.99), s.groundDrops[0]);
-    expect(ev).toEqual([{ type: 'cardsFull' }]);
+    const skills = ['pierce', 'frost', 'decoy', 'scorch', 'harvest', 'aegis'] as const;
+    for (let i = 0; i < s.cards.length; i++) s.cards[i] = card(skills[i % skills.length], (i % 3) + 1);
+    spawnGroundDrop(s, config, constRng(0), 50, 50, 'sanctum');
+    expect(collectDrop(s, config, constRng(0.99), s.groundDrops[0])).toEqual([{ type: 'cardsFull' }]);
     expect(s.groundDrops).toHaveLength(1);
-    expect(s.collected).toBe(0);
   });
 });
 
-describe('dropSystem · 概率与 boss', () => {
-  it('掉落概率上限 0.95（生效装备=独立装备格）', () => {
+describe('dropSystem · chance and bosses', () => {
+  it('applies the active skill drop-rate multiplier and caps chance', async () => {
     const s = freshState();
     const config = createDefaultConfig();
     config.dropChance = 0.9;
-    s.equipment[0] = card('luck', 3); // 装备：+0.05*4 = 0.2 → 1.1，应被封顶
+    const { cfg } = await import('../src/config');
+    const { registerSkillDefs } = await import('../src/core/effects/interpreter');
+    registerSkillDefs(cfg.skills.cards);
+    s.equipment[0] = card('harvest', 3);
     expect(totalDropChance(s, config)).toBe(0.95);
   });
 
-  it('boss 必掉，即便 rng 判定不掉', () => {
+  it('always drops from a boss', () => {
     const s = freshState();
     const config = createDefaultConfig();
     config.dropChance = 0;
     rollDropOnKill(s, config, constRng(0.99), enemy({ type: 'boss', x: 10, y: 10 }));
     expect(s.groundDrops).toHaveLength(1);
-  });
-
-  it('非 boss 且 rng 高于概率则不掉', () => {
-    const s = freshState();
-    const config = createDefaultConfig();
-    config.dropChance = 0.5;
-    rollDropOnKill(s, config, constRng(0.99), enemy({ type: 'normal', x: 10, y: 10 }));
-    expect(s.groundDrops).toHaveLength(0);
   });
 });

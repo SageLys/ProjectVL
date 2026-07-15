@@ -45,24 +45,24 @@ function equipCard(s: GameState, type: CardType, star = 3): void {
 describe('解释器 · 装备态触发绑定', () => {
   it('effectiveEquipment：只读取独立装备格；未注册定义的卡走 legacy 不炸', () => {
     const s = freshState();
-    s.equipment[0] = card('damage', 2);
-    s.cards[1] = card('rate', 2);
-    expect(effectiveEquipment(s).map(c => c.type)).toEqual(['damage']);
+    s.equipment[0] = card('pierce', 2);
+    s.cards[1] = card('frost', 2);
+    expect(effectiveEquipment(s).map(c => c.type)).toEqual(['pierce']);
     expect(fireTrigger(s, config, rng, 'onWaveStart', { wave: 1 })).toEqual([]);
   });
 
   it('onFire：装备 pierce 卡后子弹带穿透参数', () => {
-    registerSkillDefs([def('damage', [{ trigger: 'onFire', effects: [{ atom: 'pierce', params: { count: 2, damageRetention: 0.8 } }] }])]);
+    registerSkillDefs([def('pierce', [{ trigger: 'onFire', effects: [{ atom: 'pierce', params: { count: 2, damageRetention: 0.8 } }] }])]);
     const s = freshState();
-    equipCard(s, 'damage', 3);
+    equipCard(s, 'pierce', 3);
     shoot(s, config, rng, enemy({ x: 600, y: 300 }));
     expect(s.bullets[0].pierceLeft).toBe(2);
   });
 
   it('onHit：装备连锁卡后命中弹跳到第二个敌人', () => {
-    registerSkillDefs([def('rate', [{ trigger: 'onHit', effects: [{ atom: 'chain', params: { bounces: 1, damageRetention: 0.5, searchRange: 150 } }] }])]);
+    registerSkillDefs([def('frost', [{ trigger: 'onHit', effects: [{ atom: 'chain', params: { bounces: 1, damageRetention: 0.5, searchRange: 150 } }] }])]);
     const s = freshState();
-    equipCard(s, 'rate', 3);
+    equipCard(s, 'frost', 3);
     const a = enemy({ x: 500, y: 300, hp: 100, maxHp: 100 });
     const b = enemy({ x: 560, y: 300, hp: 100, maxHp: 100 });
     s.enemies = [a, b];
@@ -73,9 +73,9 @@ describe('解释器 · 装备态触发绑定', () => {
   });
 
   it('onKill：击杀触发 extraDrop', () => {
-    registerSkillDefs([def('range', [{ trigger: 'onKill', effects: [{ atom: 'extraDrop', params: { count: 1, at: 'point' } }] }])]);
+    registerSkillDefs([def('harvest', [{ trigger: 'onKill', effects: [{ atom: 'extraDrop', params: { count: 1, at: 'point' } }] }])]);
     const s = freshState();
-    equipCard(s, 'range', 3);
+    equipCard(s, 'harvest', 3);
     const e = enemy({ x: 300, y: 300, hp: 5, maxHp: 5 });
     s.enemies = [e];
     dealDamage(s, config, rng, e, 10);
@@ -83,29 +83,29 @@ describe('解释器 · 装备态触发绑定', () => {
   });
 
   it('onWaveStart：护盾回填', () => {
-    registerSkillDefs([def('luck', [{ trigger: 'onWaveStart', effects: [{ atom: 'shield', params: { absorbHits: 2, regenSeconds: 10 } }] }])]);
+    registerSkillDefs([def('aegis', [{ trigger: 'onWaveStart', effects: [{ atom: 'shield', params: { absorbHits: 2, regenSeconds: 10 } }] }])]);
     const s = freshState();
-    equipCard(s, 'luck', 3);
+    equipCard(s, 'aegis', 3);
     startNextWave(s, config, rng);
     expect(s.shield).toMatchObject({ hits: 2 });
   });
 
   it('onMerge：合成脉冲对全场造成 结果星级×N 伤害', () => {
-    registerSkillDefs([def('luck', [{ trigger: 'onMerge', effects: [{ atom: 'mergePulse', params: { damagePerMergeCount: 5, radius: 'all' } }] }])]);
+    registerSkillDefs([def('aegis', [{ trigger: 'onMerge', effects: [{ atom: 'mergePulse', params: { damagePerMergeCount: 5, radius: 'all' } }] }])]);
     const s = freshState();
-    equipCard(s, 'luck', 3);
+    equipCard(s, 'aegis', 3);
     const e = enemy({ x: 100, y: 100, hp: 100, maxHp: 100 });
     s.enemies = [e];
-    s.cards[1] = card('damage', 1);
-    s.cards[2] = card('damage', 1);
+    s.cards[1] = card('pierce', 1);
+    s.cards[2] = card('pierce', 1);
     autoMergeCards(s, config, rng);
     expect(e.hp).toBe(90); // resultStar 2 × 5
   });
 
   it('interval：独立时钟按 triggerParams.seconds 周期触发', () => {
-    registerSkillDefs([def('multi', [{ trigger: 'interval', triggerParams: { seconds: 1 }, effects: [{ atom: 'burstDamage', params: { damageMul: 1, radius: 300 } }] }])]);
+    registerSkillDefs([def('scorch', [{ trigger: 'interval', triggerParams: { seconds: 1 }, effects: [{ atom: 'burstDamage', params: { damageMul: 1, radius: 300 } }] }])]);
     const s = freshState();
-    equipCard(s, 'multi', 3);
+    equipCard(s, 'scorch', 3);
     const e = enemy({ x: 270, y: 365, hp: 1000, maxHp: 1000 });
     s.enemies = [e];
     tickIntervalBindings(s, config, rng, 0.5);
@@ -119,7 +119,7 @@ describe('解释器 · 装备态触发绑定', () => {
 
   it('星级分层：同一卡 2★/3★ 取不同绑定（入装门槛 2★）', () => {
     registerSkillDefs([{
-      id: 'damage', category: 'projectile', textKey: 't', teaching: false,
+      id: 'pierce', category: 'projectile', textKey: 't', teaching: false,
       stars: {
         '3': { tier: 'core', equip: [{ trigger: 'onFire', effects: [{ atom: 'pierce', params: { count: 1 } }] }] },
         '5': { tier: 'dual', equip: [{ trigger: 'onFire', effects: [{ atom: 'pierce', params: { count: 2 } }] }] },
@@ -129,10 +129,10 @@ describe('解释器 · 装备态触发绑定', () => {
       consumable: { placement: 'point', anchors: { '1': { effects: [{ atom: 'burstDamage' }] }, '3': { effects: [{ atom: 'burstDamage' }] }, '6': { effects: [{ atom: 'burstDamage' }] } } },
     }]);
     const s = freshState();
-    equipCard(s, 'damage', 3);
+    equipCard(s, 'pierce', 3);
     expect(getModifiers(s).morph).toBe('none');
     s.cards = s.cards.map(() => null);
-    equipCard(s, 'damage', 6);
+    equipCard(s, 'pierce', 6);
     expect(getModifiers(s).morph).toBe('beam');
   });
 });
@@ -144,7 +144,7 @@ describe('解释器 · passive 修饰聚合', () => {
 
   it('经济乘数：dropRateMul / dropLifetimeMul / xpMul', () => {
     // 用无旧数值掉率加成的类型（range）承载 fixture，隔离乘数断言
-    registerSkillDefs([def('range', passive([
+    registerSkillDefs([def('sanctum', passive([
       { atom: 'dropRateMul', params: { mul: 1.5 } },
       { atom: 'dropLifetimeMul', params: { mul: 1.25 } },
       { atom: 'xpMul', params: { mul: 2 } },
@@ -152,7 +152,7 @@ describe('解释器 · passive 修饰聚合', () => {
     const s = freshState();
     cfg.progression.killXpMul = 1.5;
     s.xpGainBonus = 0.25;
-    equipCard(s, 'range', 3);
+    equipCard(s, 'sanctum', 3);
     expect(totalDropChance(s, config)).toBeCloseTo(Math.min(0.95, config.dropChance * 1.5));
     expect(totalDropLifetime(s, config)).toBeCloseTo(config.dropLifetime * 1.25);
     const e = enemy({ x: 300, y: 300, hp: 1, maxHp: 1, xp: 2 });
@@ -162,16 +162,16 @@ describe('解释器 · passive 修饰聚合', () => {
   });
 
   it('防御修饰：breachReduction 减伤 / thorns 反噬击杀 / novaOnBreak', () => {
-    registerSkillDefs([def('range', passive([{ atom: 'breachReduction', params: { ratio: 0.5 } }]))]);
+    registerSkillDefs([def('thorns', passive([{ atom: 'breachReduction', params: { ratio: 0.5 } }]))]);
     const s = freshState();
-    equipCard(s, 'range', 3);
+    equipCard(s, 'thorns', 3);
     s.enemies = [enemy({ x: 271, y: 365, hp: 999, maxHp: 999, damage: 28 })];
     moveEnemies(s, config, rng, 0.016);
     expect(s.hp).toBe(100 - 14); // 28 × (1-0.5)
 
-    registerSkillDefs([def('range', passive([{ atom: 'thorns', params: { ratio: 2 } }]))]);
+    registerSkillDefs([def('thorns', passive([{ atom: 'thorns', params: { ratio: 2 } }]))]);
     const s2 = freshState();
-    equipCard(s2, 'range', 3);
+    equipCard(s2, 'thorns', 3);
     s2.enemies = [enemy({ x: 271, y: 365, hp: 10, maxHp: 10, damage: 8, xp: 1 })];
     moveEnemies(s2, config, rng, 0.016);
     expect(s2.hp).toBe(100);  // 反噬致死 → 无突破伤害
@@ -179,21 +179,21 @@ describe('解释器 · passive 修饰聚合', () => {
   });
 
   it('mergeRule 暴露给上层（P5 万能卡建模前置）；execute 取最高阈值', () => {
-    registerSkillDefs([def('luck', passive([
+    registerSkillDefs([def('harvest', passive([
       { atom: 'mergeRule', params: { rule: 'wildcardDrop', value: 1 } },
       { atom: 'execute', params: { hpThresholdRatio: 0.2 } },
     ]))]);
     const s = freshState();
-    equipCard(s, 'luck', 3);
+    equipCard(s, 'harvest', 3);
     const mods = getModifiers(s);
     expect(mods.mergeRules).toEqual([{ rule: 'wildcardDrop', value: 1 }]);
     expect(mods.executeThreshold).toBe(0.2);
   });
 
   it('mortarMorph passive：主炮改射榴弹并在落点爆炸', () => {
-    registerSkillDefs([def('damage', passive([{ atom: 'mortarMorph', params: { radius: 90, damageRatio: 1, falloff: 0.5 } }]))]);
+    registerSkillDefs([def('splitBlast', passive([{ atom: 'mortarMorph', params: { radius: 90, damageRatio: 1, falloff: 0.5 } }]))]);
     const s = freshState();
-    equipCard(s, 'damage', 3);
+    equipCard(s, 'splitBlast', 3);
     expect(getModifiers(s).morph).toBe('mortar');
     shoot(s, config, rng, enemy({ x: 350, y: 365 }));
     expect(s.bullets[0].kind).toBe('mortar');
@@ -204,9 +204,9 @@ describe('解释器 · passive 修饰聚合', () => {
   });
 
   it('beamMorph passive：updateTurret 以 interval 发射贯穿光束（不出普通弹）', () => {
-    registerSkillDefs([def('damage', passive([{ atom: 'beamMorph', params: { interval: 0.5, width: 30, damageRatio: 1 } }]))]);
+    registerSkillDefs([def('pierce', passive([{ atom: 'beamMorph', params: { interval: 0.5, width: 30, damageRatio: 1 } }]))]);
     const s = freshState();
-    equipCard(s, 'damage', 3);
+    equipCard(s, 'pierce', 3);
     const e = enemy({ x: 390, y: 365, hp: 1000, maxHp: 1000 });
     s.enemies = [e];
     updateTurret(s, config, rng, 0.3);
@@ -220,9 +220,9 @@ describe('解释器 · passive 修饰聚合', () => {
 
 describe('解释器 · 消耗释放（一卡两用）', () => {
   it('拖入主画面：按星级档位在落点结算效果并失去该卡', () => {
-    registerSkillDefs([def('damage', [], [{ atom: 'burstDamage', params: { damageMul: 2, radius: 100 } }])]);
+    registerSkillDefs([def('impact', [], [{ atom: 'burstDamage', params: { damageMul: 2, radius: 100 } }])]);
     const s = freshState();
-    s.cards[0] = card('damage', 1);
+    s.cards[0] = card('impact', 1);
     const e = enemy({ x: 200, y: 200, hp: 1000, maxHp: 1000 });
     const far = enemy({ x: 700, y: 500, hp: 1000, maxHp: 1000 });
     s.enemies = [e, far];
@@ -248,9 +248,9 @@ describe('运行时 · 区域/光环/召唤物/护盾', () => {
   });
 
   it('aura passive：光环周期对射程比例半径内敌人施加内嵌效果', () => {
-    registerSkillDefs([def('rate', [{ trigger: 'passive', effects: [{ atom: 'aura', params: { radiusRatioOfRange: 0.6, tickInterval: 0.4, effects: [{ atom: 'slow', params: { ratio: 0.35, duration: 0.9 } }] } }] }])]);
+    registerSkillDefs([def('frost', [{ trigger: 'passive', effects: [{ atom: 'aura', params: { radiusRatioOfRange: 0.6, tickInterval: 0.4, effects: [{ atom: 'slow', params: { ratio: 0.35, duration: 0.9 } }] } }] }])]);
     const s = freshState();
-    equipCard(s, 'rate', 3);
+    equipCard(s, 'frost', 3);
     const near = enemy({ x: 350, y: 365, hp: 100, maxHp: 100 });
     const far = enemy({ x: 270 + 900, y: 365, hp: 100, maxHp: 100 });
     s.enemies = [near, far];
@@ -296,9 +296,9 @@ describe('运行时 · 区域/光环/召唤物/护盾', () => {
   });
 
   it('护盾：吸收突破（不扣血）、破裂事件、novaOnBreak、再生', () => {
-    registerSkillDefs([def('range', [{ trigger: 'passive', effects: [{ atom: 'novaOnBreak', params: { damage: 10, knockbackDistance: 50 } }] }])]);
+    registerSkillDefs([def('aegis', [{ trigger: 'passive', effects: [{ atom: 'novaOnBreak', params: { damage: 10, knockbackDistance: 50 } }] }])]);
     const s = freshState();
-    equipCard(s, 'range', 3);
+    equipCard(s, 'aegis', 3);
     s.shield = { hits: 1, maxHits: 1, regenRemaining: null, regenSeconds: 2 };
     const bystander = enemy({ x: 350, y: 365, hp: 100, maxHp: 100 });
     s.enemies = [bystander];
@@ -339,11 +339,11 @@ describe('解释器 · onKill 条件过滤（requiresSource / requiresStatus，�
   it('requiresSource：只有匹配来源的击杀才触发绑定', () => {
     // aoeOnHit：命中点用 ctx.enemy 的坐标定圆心，但影响目标走半径搜索（enemiesInRadius），
     // 不像 burstDamage 那样把 ctx.enemy 本身当唯一目标——适合验证"死亡点范围效果是否触发"。
-    registerSkillDefs([def('range', [
+    registerSkillDefs([def('chainLightning', [
       { trigger: 'onKill', triggerParams: { requiresSource: 'chain' }, effects: [{ atom: 'aoeOnHit', params: { radius: 50, damageRatio: 1 } }] },
     ])]);
     const s = freshState();
-    equipCard(s, 'range', 3);
+    equipCard(s, 'chainLightning', 3);
     const bystander = enemy({ x: 10, y: 0, hp: 100, maxHp: 100 });
     s.enemies = [bystander];
     const victimNoSource = enemy({ x: 0, y: 0, hp: 5, maxHp: 5 });
@@ -355,11 +355,11 @@ describe('解释器 · onKill 条件过滤（requiresSource / requiresStatus，�
   });
 
   it('requiresStatus：只有死亡时刻处于该状态的敌人才触发绑定', () => {
-    registerSkillDefs([def('range', [
+    registerSkillDefs([def('chainLightning', [
       { trigger: 'onKill', triggerParams: { requiresStatus: 'frozen' }, effects: [{ atom: 'aoeOnHit', params: { radius: 50, damageRatio: 1 } }] },
     ])]);
     const s = freshState();
-    equipCard(s, 'range', 3);
+    equipCard(s, 'chainLightning', 3);
     const bystander = enemy({ x: 10, y: 0, hp: 100, maxHp: 100 });
     s.enemies = [bystander];
     const warm = enemy({ x: 0, y: 0, hp: 5, maxHp: 5 });
@@ -374,9 +374,9 @@ describe('解释器 · onKill 条件过滤（requiresSource / requiresStatus，�
 
 describe('解释器 · expiryConvert 落地（丰收 5★ 落穗，批次1修复的死修饰）', () => {
   it('过期掉落按 ratio 折算经验，而非纯计入 expired', () => {
-    registerSkillDefs([def('luck', [{ trigger: 'passive', effects: [{ atom: 'expiryConvert', params: { ratio: 1 } }] }])]);
+    registerSkillDefs([def('harvest', [{ trigger: 'passive', effects: [{ atom: 'expiryConvert', params: { ratio: 1 } }] }])]);
     const s = freshState();
-    equipCard(s, 'luck', 3);
+    equipCard(s, 'harvest', 3);
     spawnGroundDrop(s, config, constRng(0), 100, 100, 'pierce', 2);
     expect(s.xp).toBe(0);
     tickDrops(s, config, constRng(0), config.dropLifetime + 0.01);
@@ -396,11 +396,11 @@ describe('解释器 · expiryConvert 落地（丰收 5★ 落穗，批次1修复
 
 describe('解释器 · onKill 递归深度守卫（P2 §11 开放问题，批次1修复）', () => {
   it('每次击杀都通过 chain+requiresSource 同步再触发下一次 onKill：深度上限截断，不会打穿整条连通链', () => {
-    registerSkillDefs([def('range', [
+    registerSkillDefs([def('chainLightning', [
       { trigger: 'onKill', triggerParams: { requiresSource: 'chain' }, effects: [{ atom: 'chain', params: { bounces: 1, damageRetention: 1, searchRange: 60 } }] },
     ])]);
     const s = freshState();
-    equipCard(s, 'range', 3);
+    equipCard(s, 'chainLightning', 3);
     const N = 20;
     const line = Array.from({ length: N }, (_, i) => enemy({ x: i * 25, y: 0, hp: 1, maxHp: 1 }));
     s.enemies = line;
@@ -482,11 +482,11 @@ describe('解释器 · focusPriority hpThresholdRatio（圣域 5★ 处刑印记
 
 describe('解释器 · triggerParams.cooldownSeconds（冲击 5★ 破门反制，批次2新增，通用机制非卡专属）', () => {
   it('冷却窗口内重复触发被跳过；state.time 推进过冷却后可再次触发', () => {
-    registerSkillDefs([def('range', [
+    registerSkillDefs([def('chainLightning', [
       { trigger: 'onBreach', triggerParams: { cooldownSeconds: 6 }, effects: [{ atom: 'burstDamage', params: { damageMul: 1, radius: 200 } }] },
     ])]);
     const s = freshState();
-    equipCard(s, 'range', 3);
+    equipCard(s, 'chainLightning', 3);
     const bystander = enemy({ x: 300, y: 300, hp: 100, maxHp: 100 });
     s.enemies = [bystander];
     // 不带 payload.enemy：burstDamage 走半径搜索命中 bystander（onBreach 真实场景里 payload.enemy 是突破者本身，

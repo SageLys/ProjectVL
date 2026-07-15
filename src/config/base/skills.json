@@ -1,16 +1,5 @@
 {
   "version": "0.4.0",
-  "legacy": {
-    "starScale": [0, 1, 2.25, 4, 5, 6, 8],
-    "types": {
-      "damage": { "name": "清醒", "color": "#ff6577", "icon": "◆", "desc": "清醒弹伤害" },
-      "rate": { "name": "从容", "color": "#4de2ff", "icon": "⚡", "desc": "应对速度" },
-      "multi": { "name": "界限", "color": "#b784ff", "icon": "✦", "desc": "弹丸数量" },
-      "range": { "name": "余韵", "color": "#5cffb1", "icon": "●", "desc": "清醒射程" },
-      "luck": { "name": "眷恋", "color": "#ffd166", "icon": "♣", "desc": "心意掉落" }
-    },
-    "effects": { "damagePerScale": 5, "ratePerScale": 0.38, "rangePerScale": 32, "luckPerScale": 0.05, "multiStar1DamagePerScale": 2.5 }
-  },
   "cards": [
     {
       "id": "pierce", "category": "projectile", "textKey": "cards.pierce", "teaching": true, "implementationBatch": 1,

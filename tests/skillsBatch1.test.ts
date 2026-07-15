@@ -13,8 +13,6 @@ import type { GameEvent } from '../src/core/types';
 
 const config = createDefaultConfig();
 const rng = constRng(0.01);
-const get = (id: string) => cfg.skills.cards.find(c => c.id === id)!;
-
 function equip(type: string, star: number) {
   const s = freshState();
   s.cards[0] = card(type, star);

@@ -56,26 +56,8 @@ export interface EnemiesConfig {
   types: Record<'normal' | 'fast' | 'tank' | 'boss', EnemyDef>;
 }
 
-export interface LegacyCardMeta {
-  name: string;
-  color: string;
-  icon: string;
-  desc: string;
-}
-
 export interface SkillsConfig {
   version: string;
-  legacy: {
-    starScale: number[];
-    types: Record<string, LegacyCardMeta>;
-    effects: {
-      damagePerScale: number;
-      ratePerScale: number;
-      rangePerScale: number;
-      luckPerScale: number;
-      multiStar1DamagePerScale: number;
-    };
-  };
   cards: CardDef[];
   mechanisms: { bounty: BountyConfig };
 }
