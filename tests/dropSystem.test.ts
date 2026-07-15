@@ -41,6 +41,87 @@ describe('dropSystem · lifecycle and collection', () => {
     expect(collectDrop(s, config, constRng(0.99), s.groundDrops[0])).toEqual([{ type: 'cardsFull' }]);
     expect(s.groundDrops).toHaveLength(1);
   });
+
+  it('collects a matching drop from a full hand and merges it', () => {
+    const s = freshState();
+    const config = createDefaultConfig();
+    const skills = ['frost', 'decoy', 'scorch', 'harvest', 'aegis', 'sanctum'] as const;
+    s.cards[0] = card('pierce', 1);
+    for (let i = 0; i < skills.length; i++) s.cards[i + 1] = card(skills[i], 1);
+    spawnGroundDrop(s, config, constRng(0), 50, 50, 'pierce');
+
+    const events = collectDrop(s, config, constRng(0.99), s.groundDrops[0]);
+
+    expect(events).not.toContainEqual({ type: 'cardsFull' });
+    expect(s.groundDrops).toHaveLength(0);
+    expect(s.collected).toBe(1);
+    expect(s.cards).toHaveLength(7);
+    expect(s.cards).toContainEqual(expect.objectContaining({ type: 'pierce', star: 2 }));
+    expect(s.merges).toBe(1);
+    expect(events).toContainEqual({ type: 'merged', cardType: 'pierce', resultStar: 2 });
+    expect(events).toContainEqual({ type: 'collected', cardType: 'pierce', merges: 1 });
+  });
+
+  it('collects from a full hand and supports chain merges', () => {
+    const s = freshState();
+    const config = createDefaultConfig();
+    const skills = ['frost', 'decoy', 'scorch', 'harvest', 'aegis'] as const;
+    s.cards[0] = card('pierce', 1);
+    s.cards[1] = card('pierce', 2);
+    for (let i = 0; i < skills.length; i++) s.cards[i + 2] = card(skills[i], 1);
+    spawnGroundDrop(s, config, constRng(0), 50, 50, 'pierce');
+
+    const events = collectDrop(s, config, constRng(0.99), s.groundDrops[0]);
+
+    expect(s.groundDrops).toHaveLength(0);
+    expect(s.cards).toHaveLength(7);
+    expect(s.cards).toContainEqual(expect.objectContaining({ type: 'pierce', star: 3 }));
+    expect(s.cards.filter(card => card === null)).toHaveLength(1);
+    expect(s.merges).toBe(2);
+    expect(events.filter(event => event.type === 'merged')).toEqual([
+      { type: 'merged', cardType: 'pierce', resultStar: 2 },
+      { type: 'merged', cardType: 'pierce', resultStar: 3 },
+    ]);
+    expect(events).toContainEqual({ type: 'collected', cardType: 'pierce', merges: 2 });
+  });
+
+  it('rejects a full hand when only the card type matches at a different star', () => {
+    const s = freshState();
+    const config = createDefaultConfig();
+    const skills = ['pierce', 'frost', 'decoy', 'scorch', 'harvest', 'aegis', 'sanctum'] as const;
+    for (let i = 0; i < skills.length; i++) s.cards[i] = card(skills[i], i === 0 ? 2 : 1);
+    spawnGroundDrop(s, config, constRng(0), 50, 50, 'pierce');
+    const cardsBefore = structuredClone(s.cards);
+    const collectedBefore = s.collected;
+    const mergesBefore = s.merges;
+    const nextCardIdBefore = s.nextCardId;
+
+    expect(collectDrop(s, config, constRng(0.99), s.groundDrops[0])).toEqual([{ type: 'cardsFull' }]);
+    expect(s.groundDrops).toHaveLength(1);
+    expect(s.cards).toEqual(cardsBefore);
+    expect(s.collected).toBe(collectedBefore);
+    expect(s.merges).toBe(mergesBefore);
+    expect(s.nextCardId).toBe(nextCardIdBefore);
+  });
+
+  it('rejects a matching maximum-star drop from a full hand', () => {
+    const s = freshState();
+    const config = createDefaultConfig();
+    const skills = ['pierce', 'frost', 'decoy', 'scorch', 'harvest', 'aegis', 'sanctum'] as const;
+    for (let i = 0; i < skills.length; i++) s.cards[i] = card(skills[i], i === 0 ? 6 : 1);
+    spawnGroundDrop(s, config, constRng(0), 50, 50, 'pierce', 6);
+    const cardsBefore = structuredClone(s.cards);
+    const collectedBefore = s.collected;
+    const mergesBefore = s.merges;
+    const nextCardIdBefore = s.nextCardId;
+
+    expect(collectDrop(s, config, constRng(0.99), s.groundDrops[0])).toEqual([{ type: 'cardsFull' }]);
+    expect(s.groundDrops).toHaveLength(1);
+    expect(s.cards).toEqual(cardsBefore);
+    expect(s.collected).toBe(collectedBefore);
+    expect(s.merges).toBe(mergesBefore);
+    expect(s.nextCardId).toBe(nextCardIdBefore);
+  });
 });
 
 describe('dropSystem · chance and bosses', () => {

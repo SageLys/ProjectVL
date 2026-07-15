@@ -2,13 +2,17 @@ import { cfg } from '../../config';
 import type { Config, GameEvent, GameState, Rng } from '../types';
 import { fireTrigger } from '../effects/interpreter';
 
+export function getActiveMergeCopies(): number {
+  return cfg.economy.placeholderAssumptions.twoCopyMerge ? 2 : cfg.economy.mergeCopiesWhenTwoCopyDisabled;
+}
+
 /**
  * Hand cards merge automatically: matching type and star merge into the next star
  * once enough copies exist. The loop continues until no further merge is possible.
  */
 export function autoMergeCards(state: GameState, config: Config, rng: Rng): { merged: number; events: GameEvent[] } {
   const { maxStar } = cfg.economy;
-  const mergeCopies = cfg.economy.placeholderAssumptions.twoCopyMerge ? 2 : cfg.economy.mergeCopiesWhenTwoCopyDisabled;
+  const mergeCopies = getActiveMergeCopies();
   const events: GameEvent[] = [];
   let merged = 0;
   let changed = true;

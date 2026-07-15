@@ -1,7 +1,7 @@
 import { cfg } from '../../config';
 import type { CardType, Config, Enemy, GameEvent, GameState, GroundDrop, Rng } from '../types';
 import { totalDropChance, totalDropLifetime } from '../stats';
-import { autoMergeCards } from './cardSystem';
+import { autoMergeCards, getActiveMergeCopies } from './cardSystem';
 import { fireTrigger, getModifiers } from '../effects/interpreter';
 import { addXp } from './progressionSystem';
 
@@ -86,11 +86,23 @@ export function tickDrops(state: GameState, _config: Config, rng: Rng, dt: numbe
  */
 export function collectDrop(state: GameState, config: Config, rng: Rng, drop: GroundDrop): GameEvent[] {
   const empty = state.cards.findIndex(card => card === null);
-  if (empty < 0) return [{ type: 'cardsFull' }];
+  const originalLength = state.cards.length;
+  if (empty < 0) {
+    const canMergeImmediately = drop.star < cfg.economy.maxStar
+      && state.cards.filter(card => card?.type === drop.type && card.star === drop.star).length >= getActiveMergeCopies() - 1;
+    if (!canMergeImmediately) return [{ type: 'cardsFull' }];
+  }
   state.groundDrops = state.groundDrops.filter(d => d.id !== drop.id);
-  state.cards[empty] = { id: state.nextCardId++, type: drop.type, star: drop.star };
+  const collectedCard = { id: state.nextCardId++, type: drop.type, star: drop.star };
+  if (empty >= 0) state.cards[empty] = collectedCard;
+  else state.cards.push(collectedCard);
   state.collected++;
   const { merged, events: mergeEvents } = autoMergeCards(state, config, rng);
+  while (state.cards.length > originalLength) {
+    const removableNullIndex = state.cards.lastIndexOf(null);
+    if (removableNullIndex < 0) throw new Error('Full-hand merge did not free a temporary slot');
+    state.cards.splice(removableNullIndex, 1);
+  }
   const events: GameEvent[] = [{ type: 'collected', cardType: drop.type, merges: merged }];
   events.push(...mergeEvents);
   events.push(...fireTrigger(state, config, rng, 'onPickup', { drop, point: { x: drop.x, y: drop.y } }));
