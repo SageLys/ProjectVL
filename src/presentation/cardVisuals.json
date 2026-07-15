@@ -1,0 +1,23 @@
+{
+  "version": "1.0.0",
+  "families": {
+    "projectile": { "hue": 350, "saturation": 82, "lightness": 64 },
+    "control": { "hue": 210, "saturation": 78, "lightness": 66 },
+    "domain": { "hue": 36, "saturation": 86, "lightness": 63 },
+    "economy": { "hue": 82, "saturation": 65, "lightness": 60 },
+    "defense": { "hue": 148, "saturation": 60, "lightness": 58 }
+  },
+  "cards": {
+    "pierce": { "hueOffset": -12, "accent": "#ED5C86", "shape": "diamond", "glyph": "pierce" },
+    "chainLightning": { "hueOffset": 6, "accent": "#F06478", "shape": "hexagon", "glyph": "zigzag" },
+    "splitBlast": { "hueOffset": 18, "accent": "#F47759", "shape": "triangle", "glyph": "split" },
+    "frost": { "hueOffset": -8, "accent": "#58D8EA", "shape": "circle", "glyph": "snow" },
+    "decoy": { "hueOffset": 10, "accent": "#6A9DE8", "shape": "square", "glyph": "target" },
+    "impact": { "hueOffset": 24, "accent": "#8C8FE3", "shape": "octagon", "glyph": "impact" },
+    "scorch": { "hueOffset": -6, "accent": "#F28A47", "shape": "pentagon", "glyph": "ember" },
+    "sanctum": { "hueOffset": 14, "accent": "#EFCB59", "shape": "ring", "glyph": "crosshair" },
+    "harvest": { "hueOffset": 0, "accent": "#B4D75B", "shape": "capsule", "glyph": "harvest" },
+    "aegis": { "hueOffset": -10, "accent": "#60D3A8", "shape": "verticalHexagon", "glyph": "barrier" },
+    "thorns": { "hueOffset": 12, "accent": "#49B962", "shape": "star8", "glyph": "thorn" }
+  }
+}
