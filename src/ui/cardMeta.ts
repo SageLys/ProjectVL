@@ -1,22 +1,16 @@
 import { texts } from '../data';
 import type { CardType } from '../core/types';
-import type { Category } from '../core/effects/defs';
 import { getSkillDef } from '../core/effects/interpreter';
+import { resolveCardVisual } from '../presentation/cardVisual';
+import type { SkillGlyph, SkillShape } from '../presentation/skillGeometry';
 
 export interface CardMeta {
   name: string;
   desc: string;
-  icon: string;
-  color: string;
+  accent: string;
+  shape: SkillShape;
+  glyph: SkillGlyph;
 }
-
-const CATEGORY_META: Record<Category, { icon: string; color: string }> = {
-  projectile: { icon: '◆', color: '#ff6577' },
-  control: { icon: '❄', color: '#4de2ff' },
-  domain: { icon: '☀', color: '#ff9d4d' },
-  economy: { icon: '♣', color: '#ffd166' },
-  defense: { icon: '⛨', color: '#5cffb1' },
-};
 
 function nearestTier(star: number): '1' | '3' | '5' | '6' {
   if (star <= 2) return '1';
@@ -34,9 +28,9 @@ export function resolveCardMeta(cardType: CardType, star: number): CardMeta {
   const def = getSkillDef(cardType);
   const cardTexts = (texts as { cards?: Record<string, { name: string; descByTier: Record<string, string> }> }).cards;
   const entry = cardTexts?.[cardType];
+  const visual = resolveCardVisual(cardType);
   if (def && entry) {
-    const category = CATEGORY_META[def.category];
-    return { name: entry.name, desc: entry.descByTier[nearestTier(star)] ?? '', icon: category.icon, color: category.color };
+    return { name: entry.name, desc: entry.descByTier[nearestTier(star)] ?? '', ...visual };
   }
-  return { name: cardType, desc: '', icon: '?', color: '#999999' };
+  return { name: cardType, desc: '', ...visual };
 }

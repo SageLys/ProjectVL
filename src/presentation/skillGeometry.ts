@@ -39,9 +39,9 @@ export function shapeGeometry(shape: SkillShape): GeometryCommand[] {
     case 'ring': return [{ kind: 'circle', x: 8, y: 8, r: 7 }, { kind: 'circle', x: 8, y: 8, r: 5.2 }];
     case 'capsule':
       return [
-        { kind: 'move', x: 5, y: 1.5 }, point(11, 1.5),
-        { kind: 'circle', x: 11, y: 8, r: 3 },
-        point(5, 14.5), { kind: 'circle', x: 5, y: 8, r: 3 }, { kind: 'close' },
+        { kind: 'move', x: 5, y: 1.5 }, point(11, 1.5), point(13.5, 3), point(14.5, 5),
+        point(14.5, 11), point(13.5, 13), point(11, 14.5), point(5, 14.5),
+        point(2.5, 13), point(1.5, 11), point(1.5, 5), point(2.5, 3), { kind: 'close' },
       ];
     case 'verticalHexagon':
       return [{ kind: 'move', x: 8, y: 0.6 }, point(14, 4), point(14, 12), point(8, 15.4), point(2, 12), point(2, 4), { kind: 'close' }];
@@ -80,7 +80,7 @@ export function glyphGeometry(glyph: SkillGlyph): GeometryCommand[] {
       return commands;
     }
     case 'target': return [{ kind: 'move', x: 4.5, y: 4.5 }, point(11.5, 4.5), point(11.5, 11.5), point(4.5, 11.5), { kind: 'close' }, { kind: 'circle', x: 8, y: 8, r: 1 }];
-    case 'impact': return [...line(8, 6.2, 8, 2.3), ...line(8, 9.8, 8, 13.7), ...line(6.2, 8, 2.3, 8), ...line(9.8, 8, 13.7, 8), ...line(8, 2.3, 6.8, 4), ...line(8, 2.3, 9.2, 4), ...line(13.7, 8, 12, 6.8), ...line(13.7, 8, 12, 9.2)];
+    case 'impact': return [...line(8, 6.2, 8, 2.3), ...line(8, 9.8, 8, 13.7), ...line(6.2, 8, 2.3, 8), ...line(9.8, 8, 13.7, 8), ...line(8, 2.3, 6.8, 4), ...line(8, 2.3, 9.2, 4), ...line(8, 13.7, 6.8, 12), ...line(8, 13.7, 9.2, 12), ...line(2.3, 8, 4, 6.8), ...line(2.3, 8, 4, 9.2), ...line(13.7, 8, 12, 6.8), ...line(13.7, 8, 12, 9.2)];
     case 'ember': return [{ kind: 'move', x: 8, y: 2.2 }, point(13, 12.8), point(3, 12.8), { kind: 'close' }, { kind: 'move', x: 8, y: 5.7 }, point(10.5, 11), point(5.5, 11), { kind: 'close' }];
     case 'crosshair': return [...line(8, 2, 8, 14), ...line(2, 8, 14, 8), { kind: 'circle', x: 8, y: 8, r: 3 }];
     case 'harvest': return [{ kind: 'circle', x: 4, y: 10.5, r: 1.2 }, { kind: 'circle', x: 8, y: 8.5, r: 1.6 }, { kind: 'circle', x: 12, y: 6, r: 2 }];

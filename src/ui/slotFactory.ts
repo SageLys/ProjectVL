@@ -1,4 +1,5 @@
 import type { Card } from '../core/types';
+import { glyphToSvg } from '../presentation/skillGeometry';
 import { resolveCardMeta } from './cardMeta';
 
 export type SlotSource = 'cards' | 'equipment';
@@ -18,8 +19,8 @@ export function createCardElement(card: Card, source: SlotSource, index: number,
   el.dataset.id = String(card.id);
   el.dataset.testid = source === 'cards' ? 'upgrade-card' : 'equipped-card';
   el.setAttribute('aria-label', `${source === 'equipment' ? '已装备' : ''}${card.star}星${meta.name}卡`);
-  el.style.setProperty('--card', meta.color);
-  el.innerHTML = `<b>${meta.icon} ${meta.name}</b><em>${'★'.repeat(card.star)}</em><small>${meta.desc}</small>`;
+  el.style.setProperty('--card', meta.accent);
+  el.innerHTML = `<b><svg class="card-icon" viewBox="0 0 16 16" aria-hidden="true">${glyphToSvg(meta.shape, meta.glyph)}</svg><span>${meta.name}</span></b><em>${'★'.repeat(card.star)}</em><small>${meta.desc}</small>`;
   el.addEventListener('pointerdown', e => handlers.dragStart(e, source, index, el));
   return el;
 }

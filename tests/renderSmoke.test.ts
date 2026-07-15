@@ -54,8 +54,9 @@ describe('渲染冒烟 · 手牌/装备卡面', () => {
       for (let star = 1; star <= 6; star++) {
         const meta = resolveCardMeta(def.id, star);
         expect(meta.name, `${def.id}@${star}`).toBeTruthy();
-        expect(meta.icon, `${def.id}@${star}`).toBeTruthy();
-        expect(meta.color, `${def.id}@${star}`).toBeTruthy();
+        expect(meta.accent, `${def.id}@${star}`).toBeTruthy();
+        expect(meta.shape, `${def.id}@${star}`).toBeTruthy();
+        expect(meta.glyph, `${def.id}@${star}`).toBeTruthy();
       }
     }
   });
