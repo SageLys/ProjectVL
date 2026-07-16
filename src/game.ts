@@ -13,6 +13,7 @@ import { moveOrSwap, consumeCard } from './core/systems/equipmentSystem';
 import { collectNearest, spawnTestDrops, spawnGroundDrop } from './core/systems/dropSystem';
 import { acceptBountyTap } from './core/systems/enemySystem';
 import { applyPerk } from './core/systems/progressionSystem';
+import { checkWildcardTarget, grantWildcards, useWildcardOnSlot, type WildcardGrant } from './core/systems/wildcardSystem';
 import { totalRange } from './core/stats';
 import { createRenderer } from './render/canvasRenderer';
 import { getDomRefs } from './ui/domRefs';
@@ -24,7 +25,7 @@ import { renderEquipment } from './ui/renderEquipment';
 import type { TunerPanel } from './ui/tunerPanel';
 import { createModals } from './ui/modals';
 import { formatToast, SLOT_CHANGING } from './ui/eventText';
-import type { SlotHandlers } from './ui/slotFactory';
+import type { SlotHandlers, SlotSource } from './ui/slotFactory';
 import { createPointerRouter, type PreviewSpec } from './input/pointerRouter';
 import { createKeyboard } from './input/keyboard';
 import type { DevTelemetry } from './telemetry/devTelemetry';
@@ -44,6 +45,8 @@ const evidenceMode = import.meta.env.DEV ? new URLSearchParams(location.search).
 const refs = getDomRefs();
 if (import.meta.env.DEV) {
   refs.testCardBtn.removeAttribute('hidden');
+  refs.testWildcardBtn.removeAttribute('hidden');
+  refs.testWildcardBtn.textContent = texts.buttons.testWildcard;
   refs.dropTelemetry.removeAttribute('hidden');
 }
 const ctx = refs.canvas.getContext('2d');
@@ -108,7 +111,8 @@ const modals = createModals(refs, {
   },
 });
 
-function previewFor(source: 'cards' | 'equipment', index: number): PreviewSpec {
+function previewFor(source: SlotSource, index: number): PreviewSpec {
+  if (source === 'wildcard') return { placement: 'none' };
   const card = source === 'cards' ? state.cards[index] : state.equipment[index];
   const def = card && cfg.skills.cards.find(item => item.id === card.type);
   const tier = card && def ? resolveConsumableTier(def, card.star) : undefined;
@@ -131,7 +135,9 @@ const pointerRouter = createPointerRouter({
   },
   onDrop: (source, index, target) => {
     let events: GameEvent[] = [];
-    if (target.kind === 'arena') events = consumeCard(state, config, rng, index, target.x, target.y, source);
+    if (source === 'wildcard') {
+      if (target.kind === 'slot') events = useWildcardOnSlot(state, config, rng, target.slotKind, target.index);
+    } else if (target.kind === 'arena') events = consumeCard(state, config, rng, index, target.x, target.y, source);
     else if (target.kind === 'slot' && target.slotKind === 'equipment' && source === 'cards') {
       events = moveOrSwap(state, config, rng, source, index, 'equipment', target.index);
       if (events.some(event => event.type === 'equipRejected' || event.type === 'equipFull')) state.equipTelemetry.rejects++;
@@ -141,12 +147,18 @@ const pointerRouter = createPointerRouter({
     else if (import.meta.env.DEV && events.some(event => SLOT_CHANGING.has(event.type))) telemetry?.recordInput('dragDrop');
   },
   previewFor,
+  getDropValidity: (source, _index, target) => source !== 'wildcard' || checkWildcardTarget(state, target.slotKind, target.index).ok,
 });
 createKeyboard(togglePause);
 
 refs.startBtn.addEventListener('click', start);
 refs.pauseBtn.addEventListener('click', togglePause);
 refs.testCardBtn.addEventListener('click', () => dispatch(spawnTestDrops(state, config, rng)));
+refs.testWildcardBtn.addEventListener('click', () => {
+  const grants: WildcardGrant[] = [];
+  for (let star = 1; star < cfg.economy.maxStar; star++) grants.push({ star, count: 1 });
+  dispatch(grantWildcards(state, grants));
+});
 
 function reset(): void {
   state = createInitialState();
@@ -274,9 +286,15 @@ if (import.meta.env.DEV) void Promise.all([import('./debug/exposeDebugApi'), imp
     getPresetName: () => tuner?.getActivePresetName() ?? '',
     getRange: () => totalRange(state, config),
   });
+  const telemetryActions = document.querySelector<HTMLElement>('.telemetry-actions');
+  if (telemetryActions) {
+    const testActions = document.createElement('div');
+    testActions.className = 'telemetry-test-actions';
+    testActions.append(refs.testCardBtn, refs.testWildcardBtn);
+    telemetryActions.prepend(testActions);
+  }
   if (evidenceMode?.startsWith('upgrade')) {
     document.querySelector<HTMLElement>('.telemetry-hud')?.setAttribute('hidden', '');
-    const telemetryActions = document.querySelector<HTMLElement>('.telemetry-actions');
     if (telemetryActions) telemetryActions.style.display = 'none';
   }
 
@@ -284,7 +302,10 @@ if (import.meta.env.DEV) void Promise.all([import('./debug/exposeDebugApi'), imp
       getState: () => ({ ...state, enemyTypes: state.enemies.map(enemy => enemy.type), enemies: state.enemies.length, bullets: state.bullets.length, config: { ...config }, waves: { spawnMode: cfg.waves.spawnMode, pendingSpawnMode: tuner?.getPendingSpawnMode() ?? null, budget: cfg.waves.budget } }), start, reset,
     spawnGroundDrop: (x, y, type = null, star) => spawnGroundDrop(state, config, rng, x, y, type, star),
     addTestPair: () => dispatch(spawnTestDrops(state, config, rng)),
-    moveOrSwap: (source, index, targetKind, targetIndex) => dispatch(moveOrSwap(state, config, rng, source, index, targetKind, targetIndex)),
+    grantWildcard: (star, count = 1) => dispatch(grantWildcards(state, [{ star, count }])),
+    moveOrSwap: (source, index, targetKind, targetIndex) => {
+      if (source !== 'wildcard') dispatch(moveOrSwap(state, config, rng, source, index, targetKind, targetIndex));
+    },
     consumeAt: (index, x, y) => dispatch(consumeCard(state, config, rng, index, x, y)),
     setConfig: patch => {
       Object.assign(config, patch);

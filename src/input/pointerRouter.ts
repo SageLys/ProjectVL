@@ -7,7 +7,7 @@ export type DropTarget =
   | { kind: 'slot'; slotKind: SlotKind; index: number }
   | { kind: 'arena'; x: number; y: number }
   | { kind: 'cancel' };
-export type PreviewSpec = { placement: 'point'; radius: number } | { placement: 'screen' };
+export type PreviewSpec = { placement: 'point'; radius: number } | { placement: 'screen' } | { placement: 'none' };
 
 export function isTap(start: PointerSample, end: PointerSample, maxDistance: number, input: Pick<InputConfig, 'tapMaxPx' | 'tapMaxMs'>): boolean {
   return maxDistance < input.tapMaxPx && end.at - start.at < input.tapMaxMs;
@@ -49,6 +49,7 @@ type RouterOptions = {
   onBountyTap?: (x: number, y: number) => boolean;
   onDrop(source: SlotSource, index: number, target: Exclude<DropTarget, { kind: 'cancel' }>): void;
   previewFor(source: SlotSource, index: number): PreviewSpec;
+  getDropValidity?(source: SlotSource, index: number, target: Extract<DropTarget, { kind: 'slot' }>): boolean;
 };
 
 export function createPointerRouter(options: RouterOptions) {
@@ -59,7 +60,7 @@ export function createPointerRouter(options: RouterOptions) {
   function hidePreview(): void {
     options.aimPreview.classList.remove('show');
     options.screenPreview.classList.remove('show');
-    hot?.classList.remove('hot', 'equip-warning');
+    hot?.classList.remove('hot', 'equip-warning', 'wildcard-valid', 'wildcard-invalid');
     hot = null;
   }
 
@@ -68,10 +69,15 @@ export function createPointerRouter(options: RouterOptions) {
     const preview = options.previewFor(active.source, active.index);
     const target = targetAt(options.canvas, clientX, clientY);
     const slot = document.elementFromPoint(clientX, clientY)?.closest?.('[data-testid="card-slot"], [data-testid="equipment-slot"]') ?? null;
-    if (hot !== slot) { hot?.classList.remove('hot', 'equip-warning'); hot = slot; hot?.classList.add('hot'); }
+    if (hot !== slot) { hot?.classList.remove('hot', 'equip-warning', 'wildcard-valid', 'wildcard-invalid'); hot = slot; hot?.classList.add('hot'); }
     if (slot && active.source === 'cards' && (slot as HTMLElement).dataset.testid === 'equipment-slot') slot.classList.add('equip-warning');
+    if (slot && active.source === 'wildcard' && target.kind === 'slot') {
+      slot.classList.remove('wildcard-valid', 'wildcard-invalid');
+      slot.classList.add(options.getDropValidity?.(active.source, active.index, target) ? 'wildcard-valid' : 'wildcard-invalid');
+    }
     options.aimPreview.classList.remove('show');
     options.screenPreview.classList.remove('show');
+    if (preview.placement === 'none') return;
     if (target.kind !== 'arena') return;
     if (preview.placement === 'screen') { options.screenPreview.classList.add('show'); return; }
     const rect = options.canvas.getBoundingClientRect();

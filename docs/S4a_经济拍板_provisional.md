@@ -70,4 +70,4 @@ dropsPerMinute  = expectedDrops ÷ 全局理论局长 × 60
 - 复算脚本口径：`src/ui/derivedMetrics.ts`（面板同源）；55.42/min 可复现。
 - 测试：19/20 文件执行通过；`tunerV2` 断言全部从 cfg 动态重算（不含写死 base 值），经静态核对不受影响。
 - **装备语义（2026-07-14 已拍板＝选项B）**：装备可撤销/可消耗（`equipIrreversible=false`/`unequipPolicy=consume`）；P2 设计表 R11/§4、交互清单、总计划均已对齐（schema/代码本就是此语义）。
-- **遗留给 S4b**：merge_sim 6 档重写（按逐波掉落速率，不套平 55）、6★ 可达性、E3/E6 回填、同调卡。Boss TTK 21–49s 亦待 S4b/技能 DPS 缩放。
+- **遗留给 S4b**：merge_sim 6 档重写（按逐波掉落速率，不套平 55）、6★ 可达性、E3/E6 回填。`resonance` 卡已删除，万能卡改为独立资源机制。Boss TTK 21–49s 亦待 S4b/技能 DPS 缩放。

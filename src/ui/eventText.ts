@@ -9,6 +9,7 @@ const T = texts.toast;
 /** 事件类型中会改变卡槽/装备内容、需要重绘槽位的集合。 */
 export const SLOT_CHANGING = new Set<GameEvent['type']>([
   'collected', 'moved', 'swapped', 'merged', 'fed', 'skillConsumed', 'equipped',
+  'wildcardsGranted', 'wildcardMerged',
 ]);
 
 /** 把语义事件翻译成 toast 文案；无需 toast 的事件返回 null。 */
@@ -26,6 +27,10 @@ export function formatToast(ev: GameEvent): string | null {
     case 'swapped': return fmt(T.swapped, { a: name(ev.a), b: name(ev.b) });
     case 'merged': return null; // 合成提示已并入 collected/moved 的 mergeSuffix
     case 'fed': return fmt(T.fed, { name: name(ev.cardType), star: ev.resultStar });
+    case 'wildcardsGranted': return T.testWildcards;
+    case 'wildcardMerged': return fmt(T.wildcardMerged, { name: name(ev.cardType), star: ev.resultStar });
+    case 'wildcardMergeRejected':
+      return ev.reason === 'missingWildcard' ? fmt(T.wildcardMissing, { star: ev.requiredStar ?? '' }) : ev.reason === 'maxStar' ? T.wildcardMaxStar : null;
     case 'skillConsumed': return fmt(T.skillConsumed, { name: name(ev.cardType), star: ev.star });
     case 'equipped': return fmt(T.equipped, { name: name(ev.cardType), star: ev.star });
     case 'shieldBroken': return T.shieldBroken;

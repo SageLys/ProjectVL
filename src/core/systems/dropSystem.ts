@@ -6,7 +6,7 @@ import { fireTrigger, getModifiers } from '../effects/interpreter';
 import { addXp } from './progressionSystem';
 
 const TAU = Math.PI * 2;
-/** 正式卡池（P5 批次1+批次2；同调 resonance 待 S4b 建模，暂不入池）。 */
+/** 正式卡池（P5 批次1+批次2，共 11 张技能卡）。 */
 export const CARD_KEYS: CardType[] = [
   'pierce', 'chainLightning', 'frost', 'decoy', 'scorch', 'harvest', 'aegis',
   'splitBlast', 'impact', 'sanctum', 'thorns',

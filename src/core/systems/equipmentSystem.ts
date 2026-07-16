@@ -1,7 +1,7 @@
 import { cfg } from '../../config';
 import type { Card, Config, GameEvent, GameState, Rng, SlotKind } from '../types';
-import { autoMergeCards } from './cardSystem';
-import { getSkillDef, releaseConsumable, fireTrigger } from '../effects/interpreter';
+import { autoMergeCards, commitMerge } from './cardSystem';
+import { getSkillDef, releaseConsumable } from '../effects/interpreter';
 
 function collectionFor(state: GameState, kind: SlotKind): (Card | null)[] {
   return kind === 'cards' ? state.cards : state.equipment;
@@ -10,10 +10,9 @@ function collectionFor(state: GameState, kind: SlotKind): (Card | null)[] {
 function feed(state: GameState, config: Config, rng: Rng, source: (Card | null)[], sourceIndex: number, target: Card, targetIndex: number): GameEvent[] {
   target.star++;
   source[sourceIndex] = null;
-  state.merges++;
   state.equipOps++;
   const events: GameEvent[] = [{ type: 'fed', cardType: target.type, resultStar: target.star, slotIndex: targetIndex, targetCardId: target.id }];
-  events.push(...fireTrigger(state, config, rng, 'onMerge', { merge: { cardType: target.type, resultStar: target.star } }));
+  events.push(...commitMerge(state, config, rng, target.type, target.star));
   return events;
 }
 

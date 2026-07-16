@@ -15,6 +15,8 @@ export interface Card {
   star: number;
 }
 
+export type WildcardInventory = Record<number, number>;
+
 /** 敌人身上的状态效果（效果解释器写入，各系统读取；冲突仲裁见 effects/statusSystem）。 */
 export interface EnemyStatus {
   /** 减速：取最强 ratio，刷新剩余时长。 */
@@ -159,7 +161,7 @@ export interface ShieldState {
   regenSeconds: number | null;
 }
 
-/** 限时全局增益（如同调:合成后射速 buff）。 */
+/** 限时全局增益（如技能触发后的射速 buff）。 */
 export interface Buff {
   kind: 'fireRateMul' | 'damageMul';
   mul: number;
@@ -191,6 +193,8 @@ export interface GameState {
   cards: (Card | null)[];
   /** 独立装备格；装备卡可拖到战场消耗释放，不可回到手牌。 */
   equipment: (Card | null)[];
+  /** 按目标当前星级储存的万能卡数量；合法键 1..maxStar-1（当前 1..5）。独立于 cards/equipment。 */
+  wildcards: WildcardInventory;
   zones: Zone[];
   summons: Summon[];
   shield: ShieldState | null;
@@ -259,6 +263,17 @@ export type GameEvent =
   | { type: 'skillConsumed'; cardType: CardType; star: number; x: number; y: number }
   | { type: 'equipped'; cardType: CardType; star: number; slotIndex: number }
   | { type: 'fed'; cardType: CardType; resultStar: number; slotIndex?: number; targetCardId?: number }
+  | { type: 'wildcardsGranted'; grants: Array<{ star: number; count: number }> }
+  | {
+      type: 'wildcardMerged';
+      cardType: CardType;
+      consumedStar: number;
+      resultStar: number;
+      targetKind: SlotKind;
+      targetIndex: number;
+      targetCardId: number;
+    }
+  | { type: 'wildcardMergeRejected'; reason: 'emptyTarget' | 'maxStar' | 'missingWildcard'; requiredStar?: number }
   | { type: 'shieldBroken' }
   | { type: 'testDrops'; cardType: CardType }
   | { type: 'perkApplied'; title: string };

@@ -9,12 +9,17 @@
     "start": "开始游戏",
     "restart": "重新开始",
     "pause": "暂停",
-    "resume": "继续"
+    "resume": "继续",
+    "testWildcard": "生成万能卡"
   },
   "toast": {
     "waveStart": "第 {wave} 波追求者开始",
     "waveClear": "第 {wave} 波完成 · 整理卡槽",
     "testDrops": "地面生成四份{name}测试掉落，可合成3星",
+    "testWildcards": "获得 1–5★ 万能卡各 1 张",
+    "wildcardMerged": "万能合成：{name} 升至 {star}★",
+    "wildcardMissing": "没有 {star}★ 万能卡",
+    "wildcardMaxStar": "目标已是最高星级",
     "cardsFull": "卡槽已满：先消耗或腾出位置",
     "collectMerged": "拾取成功 · 自动合成 {count} 次",
     "collect": "拾取 {name}卡",
@@ -31,6 +36,10 @@
     "tunerReset": "已恢复默认参数",
     "perkApplied": "{title} 已生效",
     "mergeSuffix": "，自动合成 {count} 次"
+  },
+  "wildcard": {
+    "name": "万能",
+    "hint": "拖到同星卡/装备升星"
   },
   "result": {
     "winTitle": "守住了心防",

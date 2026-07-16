@@ -1,5 +1,11 @@
 import { cfg } from '../config';
-import type { Config, GameState } from './types';
+import type { Config, GameState, WildcardInventory } from './types';
+
+function createEmptyWildcardInventory(maxStar: number): WildcardInventory {
+  const inv: WildcardInventory = {};
+  for (let star = 1; star < maxStar; star++) inv[star] = 0;
+  return inv;
+}
 
 /** 从各域 defaults 组装一份可变的运行期参数副本（调参面板操作对象）。 */
 export function createDefaultConfig(): Config {
@@ -26,6 +32,7 @@ export function createInitialState(): GameState {
     groundDrops: [],
     cards: Array(cfg.economy.handSlots).fill(null),
     equipment: Array(cfg.economy.equipSlots).fill(null),
+    wildcards: createEmptyWildcardInventory(cfg.economy.maxStar),
     zones: [],
     summons: [],
     shield: null,

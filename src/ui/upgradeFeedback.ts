@@ -38,7 +38,7 @@ function milestoneAtOrBelow(section: CopySection, star: number): UpgradeMileston
 export function resolveUpgradeCandidates(events: GameEvent[]): UpgradeCandidate[] {
   const candidates: UpgradeCandidate[] = [];
   for (const event of events) {
-    const copy = cardCopy[event.type === 'merged' || event.type === 'fed' || event.type === 'equipped' ? event.cardType : ''];
+    const copy = cardCopy[event.type === 'merged' || event.type === 'fed' || event.type === 'equipped' || event.type === 'wildcardMerged' ? event.cardType : ''];
     if (!copy) continue;
     if (event.type === 'merged') {
       const milestone = exactMilestone(copy.hand, event.resultStar);
@@ -49,6 +49,16 @@ export function resolveUpgradeCandidates(events: GameEvent[]): UpgradeCandidate[
     } else if (event.type === 'equipped') {
       const milestone = milestoneAtOrBelow(copy.equip, event.star);
       if (milestone) candidates.push({ ...milestone, cardType: event.cardType, source: 'equipment', slotIndex: event.slotIndex });
+    } else if (event.type === 'wildcardMerged') {
+      const section = event.targetKind === 'equipment' ? copy.equip : copy.hand;
+      const milestone = exactMilestone(section, event.resultStar);
+      if (milestone) candidates.push({
+        ...milestone,
+        cardType: event.cardType,
+        source: event.targetKind === 'equipment' ? 'equipment' : 'hand',
+        targetCardId: event.targetCardId,
+        slotIndex: event.targetKind === 'equipment' ? event.targetIndex : undefined,
+      });
     }
   }
   return candidates.sort((a, b) => priority[b.fx] - priority[a.fx] || Number(b.source === 'equipment') - Number(a.source === 'equipment'));

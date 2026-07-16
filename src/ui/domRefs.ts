@@ -40,6 +40,7 @@ export function getDomRefs() {
     startBtn: el<HTMLButtonElement>('#startBtn'),
     pauseBtn: el<HTMLButtonElement>('#pauseBtn'),
     testCardBtn: el<HTMLButtonElement>('#testCardBtn'),
+    testWildcardBtn: el<HTMLButtonElement>('#testWildcardBtn'),
     restartBtn: el<HTMLButtonElement>('#restartBtn'),
     levelModal: el<HTMLElement>('#levelModal'),
     perkChoices: el<HTMLElement>('#perkChoices'),

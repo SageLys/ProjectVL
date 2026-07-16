@@ -1,9 +1,14 @@
 import { cfg } from '../../config';
-import type { Config, GameEvent, GameState, Rng } from '../types';
+import type { CardType, Config, GameEvent, GameState, Rng } from '../types';
 import { fireTrigger } from '../effects/interpreter';
 
 export function getActiveMergeCopies(): number {
   return cfg.economy.placeholderAssumptions.twoCopyMerge ? 2 : cfg.economy.mergeCopiesWhenTwoCopyDisabled;
+}
+
+export function commitMerge(state: GameState, config: Config, rng: Rng, cardType: CardType, resultStar: number): GameEvent[] {
+  state.merges++;
+  return fireTrigger(state, config, rng, 'onMerge', { merge: { cardType, resultStar } });
 }
 
 /**
@@ -31,10 +36,9 @@ export function autoMergeCards(state: GameState, config: Config, rng: Rng): { me
         const resultCard = { id: state.nextCardId++, type: a.type, star: resultStar };
         state.cards[i] = resultCard;
         for (const j of partners) state.cards[j] = null;
-        state.merges++;
         merged++;
         events.push({ type: 'merged', cardType: a.type, resultStar, resultCardId: resultCard.id });
-        events.push(...fireTrigger(state, config, rng, 'onMerge', { merge: { cardType: a.type, resultStar } }));
+        events.push(...commitMerge(state, config, rng, a.type, resultStar));
         changed = true;
         break outer;
       }

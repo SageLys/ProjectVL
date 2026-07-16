@@ -1,7 +1,7 @@
 // 批次2交付四件套之一：跑真实 src/config/base/skills.json 的 4 张批次2正式卡
 // （分裂爆破/冲击/圣域/荆棘），每张卡至少 2 条具体行为断言。冒烟矩阵已并入
 // skillsBatch1.test.ts（该矩阵按 cfg.skills.cards 动态遍历，自动覆盖本批次）。
-// 对照 docs/P5_批次2_验收证据表.md。同调 resonance 按指示搁置，不在本文件内。
+// 对照 docs/P5_批次2_验收证据表.md。resonance 卡已删除，不在卡池内。
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { cfg } from '../src/config';
 import { registerSkillDefs, fireTrigger, getModifiers } from '../src/core/effects/interpreter';

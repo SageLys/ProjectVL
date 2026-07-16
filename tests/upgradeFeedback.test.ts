@@ -34,4 +34,15 @@ describe('upgradeFeedback · milestone selection', () => {
   it('keeps sanctum hand milestones empty', () => {
     expect(resolveUpgradeCandidates([{ type: 'merged', cardType: 'sanctum', resultStar: 6, resultCardId: 50 }])).toEqual([]);
   });
+
+  it('reuses hand and equipment milestones for wildcard merges', () => {
+    expect(resolveUpgradeCandidates([{
+      type: 'wildcardMerged', cardType: 'pierce', consumedStar: 2, resultStar: 3,
+      targetKind: 'equipment', targetIndex: 1, targetCardId: 60,
+    }])).toMatchObject([{ fx: 'core', source: 'equipment', targetCardId: 60, slotIndex: 1 }]);
+    expect(resolveUpgradeCandidates([{
+      type: 'wildcardMerged', cardType: 'pierce', consumedStar: 5, resultStar: 6,
+      targetKind: 'cards', targetIndex: 0, targetCardId: 61,
+    }])).toMatchObject([{ fx: 'transform', source: 'hand', targetCardId: 61 }]);
+  });
 });

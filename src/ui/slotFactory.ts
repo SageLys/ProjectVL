@@ -2,7 +2,7 @@ import type { Card } from '../core/types';
 import { glyphToSvg } from '../presentation/skillGeometry';
 import { resolveCardMeta, type CardCopyContext } from './cardMeta';
 
-export type SlotSource = 'cards' | 'equipment';
+export type SlotSource = 'cards' | 'equipment' | 'wildcard';
 
 export interface SlotHandlers {
   /** 指针按下：开始拖拽。 */

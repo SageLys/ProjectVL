@@ -8,6 +8,7 @@ export interface DebugApi {
   reset(): void;
   spawnGroundDrop(x: number, y: number, type?: CardType | null, star?: number): void;
   addTestPair(): void;
+  grantWildcard(star: number, count?: number): void;
   moveOrSwap(source: SlotSource, index: number, targetKind: SlotKind, targetIndex: number): void;
   /** 消耗释放：手牌 index 卡在画布坐标 (x,y) 落点释放。 */
   consumeAt(index: number, x: number, y: number): void;
