@@ -38,8 +38,9 @@ describe('equipmentSystem · separate equipment slots', () => {
     const s = freshState();
     s.equipment[0] = card('pierce', 3);
     s.cards[0] = card('pierce', 3);
+    const targetId = s.equipment[0]!.id;
     const events = moveOrSwap(s, config, rng, 'cards', 0, 'equipment', 0);
-    expect(events).toContainEqual({ type: 'fed', cardType: 'pierce', resultStar: 4 });
+    expect(events).toContainEqual({ type: 'fed', cardType: 'pierce', resultStar: 4, slotIndex: 0, targetCardId: targetId });
     expect(s.cards[0]).toBeNull();
     expect(s.equipment[0]?.star).toBe(4);
   });

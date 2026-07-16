@@ -18,7 +18,7 @@ describe('cardSystem · automatic merging', () => {
     expect(nonNull).toHaveLength(1);
     expect(nonNull[0]!.star).toBe(2);
     expect(s.merges).toBe(1);
-    expect(events).toContainEqual({ type: 'merged', cardType: 'pierce', resultStar: 2 });
+    expect(events).toContainEqual({ type: 'merged', cardType: 'pierce', resultStar: 2, resultCardId: nonNull[0]!.id });
   });
 
   it('continues merging through the resulting stars', () => {

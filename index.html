@@ -23,7 +23,10 @@
     <section class="arena" id="arena">
       <canvas id="game" width="540" height="730" aria-label="主画面释放区"></canvas>
       <div class="center-msg" id="centerMsg"><h2>守住心防</h2><p>点击拾取心意，拖卡到画面释放</p></div>
+      <div class="start-overlay" id="startOverlay"><button class="btn primary" id="startBtn">开始游戏</button></div>
       <div class="toast" id="toast"></div>
+      <div id="upgradeBanner" class="upgrade-banner" aria-live="polite"><strong></strong><span></span></div>
+      <div id="celebrationFx" class="celebration-fx" aria-hidden="true"></div>
       <div class="aim-preview" id="aimPreview" aria-hidden="true"><i></i></div>
       <div class="screen-preview" id="screenPreview" aria-hidden="true"></div>
     </section>
@@ -32,15 +35,14 @@
       <div class="dock-row equipment-row" id="equipmentBar">
         <div class="dock-label"><strong>装备</strong><small id="equipmentHint">拖入 3★+ 卡装备</small></div>
         <div class="equipment-slots" id="equipmentSlots" aria-label="装备占位格"></div>
-        <div class="dock-telemetry" id="dropTelemetry">装备卡也可拖到战场释放</div>
+        <div class="dock-telemetry" id="dropTelemetry" hidden>装备卡也可拖到战场释放</div>
       </div>
       <div class="dock-row hand-row">
         <div class="dock-label"><strong>手牌</strong><small id="cardsHint">拖到战场释放 · 同型同星自动合成</small></div>
         <div class="cards" id="cards"></div>
       </div>
       <div class="dock-actions">
-        <button class="btn primary" id="startBtn">开始游戏</button>
-        <button class="btn" id="testCardBtn">生成测试掉落</button>
+        <button class="btn" id="testCardBtn" hidden>生成测试掉落</button>
       </div>
     </section>
   </main>

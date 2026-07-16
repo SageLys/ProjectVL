@@ -35,6 +35,8 @@ export function getDomRefs() {
     cardsHint: el<HTMLElement>('#cardsHint'),
     centerMsg: el<HTMLElement>('#centerMsg'),
     toast: el<HTMLElement>('#toast'),
+    upgradeBanner: el<HTMLElement>('#upgradeBanner'),
+    celebrationFx: el<HTMLElement>('#celebrationFx'),
     startBtn: el<HTMLButtonElement>('#startBtn'),
     pauseBtn: el<HTMLButtonElement>('#pauseBtn'),
     testCardBtn: el<HTMLButtonElement>('#testCardBtn'),

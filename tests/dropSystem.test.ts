@@ -29,7 +29,7 @@ describe('dropSystem · lifecycle and collection', () => {
     const events = collectDrop(s, config, constRng(0.99), s.groundDrops[0]);
     expect(s.cards.filter(Boolean)).toHaveLength(1);
     expect(s.cards.filter(Boolean)[0]!.star).toBe(2);
-    expect(events).toContainEqual({ type: 'merged', cardType: 'pierce', resultStar: 2 });
+    expect(events).toContainEqual(expect.objectContaining({ type: 'merged', cardType: 'pierce', resultStar: 2, resultCardId: expect.any(Number) }));
   });
 
   it('leaves the drop when the hand is full', () => {
@@ -58,7 +58,7 @@ describe('dropSystem · lifecycle and collection', () => {
     expect(s.cards).toHaveLength(7);
     expect(s.cards).toContainEqual(expect.objectContaining({ type: 'pierce', star: 2 }));
     expect(s.merges).toBe(1);
-    expect(events).toContainEqual({ type: 'merged', cardType: 'pierce', resultStar: 2 });
+    expect(events).toContainEqual(expect.objectContaining({ type: 'merged', cardType: 'pierce', resultStar: 2, resultCardId: expect.any(Number) }));
     expect(events).toContainEqual({ type: 'collected', cardType: 'pierce', merges: 1 });
   });
 
@@ -79,8 +79,8 @@ describe('dropSystem · lifecycle and collection', () => {
     expect(s.cards.filter(card => card === null)).toHaveLength(1);
     expect(s.merges).toBe(2);
     expect(events.filter(event => event.type === 'merged')).toEqual([
-      { type: 'merged', cardType: 'pierce', resultStar: 2 },
-      { type: 'merged', cardType: 'pierce', resultStar: 3 },
+      expect.objectContaining({ type: 'merged', cardType: 'pierce', resultStar: 2, resultCardId: expect.any(Number) }),
+      expect.objectContaining({ type: 'merged', cardType: 'pierce', resultStar: 3, resultCardId: expect.any(Number) }),
     ]);
     expect(events).toContainEqual({ type: 'collected', cardType: 'pierce', merges: 2 });
   });

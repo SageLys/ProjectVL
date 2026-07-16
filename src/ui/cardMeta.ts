@@ -12,11 +12,18 @@ export interface CardMeta {
   glyph: SkillGlyph;
 }
 
-function nearestTier(star: number): '1' | '3' | '5' | '6' {
-  if (star <= 2) return '1';
-  if (star <= 4) return '3';
-  if (star === 5) return '5';
-  return '6';
+export type CardCopyContext = 'hand' | 'equipment';
+
+type CardCopyEntry = { name: string; hand: { shortByTier: Record<string, string> }; equip: { shortByTier: Record<string, string> } };
+
+/** Returns the nearest defined tier at or below star, falling back to the lowest available tier. */
+export function resolveTierCopy(shortByTier: Record<string, string>, star: number): string {
+  const tiers = Object.keys(shortByTier)
+    .map(Number)
+    .filter(Number.isFinite)
+    .sort((a, b) => a - b);
+  const tier = [...tiers].reverse().find(value => value <= star) ?? tiers[0];
+  return (tier === undefined ? undefined : shortByTier[String(tier)]) || '效果说明';
 }
 
 export function cardDisplayName(cardType: CardType): string {
@@ -24,13 +31,14 @@ export function cardDisplayName(cardType: CardType): string {
   return cardTexts?.[cardType]?.name ?? cardType;
 }
 
-export function resolveCardMeta(cardType: CardType, star: number): CardMeta {
+export function resolveCardMeta(cardType: CardType, star: number, context: CardCopyContext): CardMeta {
   const def = getSkillDef(cardType);
-  const cardTexts = (texts as { cards?: Record<string, { name: string; descByTier: Record<string, string> }> }).cards;
+  const cardTexts = (texts as { cards?: Record<string, CardCopyEntry> }).cards;
   const entry = cardTexts?.[cardType];
   const visual = resolveCardVisual(cardType);
   if (def && entry) {
-    return { name: entry.name, desc: entry.descByTier[nearestTier(star)] ?? '', ...visual };
+    const shortByTier = context === 'hand' ? entry.hand.shortByTier : entry.equip.shortByTier;
+    return { name: entry.name, desc: resolveTierCopy(shortByTier, star), ...visual };
   }
-  return { name: cardType, desc: '', ...visual };
+  return { name: cardType, desc: '效果说明', ...visual };
 }

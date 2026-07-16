@@ -17,6 +17,7 @@ import { totalRange } from './core/stats';
 import { createRenderer } from './render/canvasRenderer';
 import { getDomRefs } from './ui/domRefs';
 import { createToast } from './ui/toast';
+import { createUpgradeFeedback } from './ui/upgradeFeedback';
 import { renderHud } from './ui/renderHud';
 import { renderCards } from './ui/renderCards';
 import { renderEquipment } from './ui/renderEquipment';
@@ -39,11 +40,17 @@ let telemetry: DevTelemetry | null = null;
 let devSeed = 1;
 let devTimeScale = 1;
 let devInvincible = false;
+const evidenceMode = import.meta.env.DEV ? new URLSearchParams(location.search).get('evidence') : null;
 const refs = getDomRefs();
+if (import.meta.env.DEV) {
+  refs.testCardBtn.removeAttribute('hidden');
+  refs.dropTelemetry.removeAttribute('hidden');
+}
 const ctx = refs.canvas.getContext('2d');
 if (!ctx) throw new Error('无法获取 canvas 2D 上下文');
 const render = createRenderer(ctx);
 const toast = createToast(refs);
+const upgradeFeedback = createUpgradeFeedback(refs);
 
 const config = createDefaultConfig();
 let state: GameState = createInitialState();
@@ -67,6 +74,7 @@ function dispatch(events: GameEvent[]): void {
     if (SLOT_CHANGING.has(ev.type)) slotsChanged = true;
   }
   if (slotsChanged) refreshSlots();
+  upgradeFeedback.handle(events);
 }
 
 function resolveOfferedPerks(currentState: GameState): PerkDef[] {
@@ -143,12 +151,18 @@ refs.testCardBtn.addEventListener('click', () => dispatch(spawnTestDrops(state, 
 function reset(): void {
   state = createInitialState();
   if (import.meta.env.DEV) telemetry?.reset();
-  if (import.meta.env.DEV && new URLSearchParams(location.search).get('evidence') === 'equip') {
+  if (evidenceMode === 'equip') {
     state.cards[0] = { id: state.nextCardId++, type: 'pierce', star: 4 };
+  } else if (evidenceMode === 'upgrade4' || evidenceMode === 'upgrade5' || evidenceMode === 'upgrade6') {
+    const sourceStar = Number(evidenceMode.charAt(evidenceMode.length - 1)) - 1;
+    state.equipment[0] = { id: state.nextCardId++, type: 'pierce', star: sourceStar };
+    state.cards[0] = { id: state.nextCardId++, type: 'pierce', star: sourceStar };
+    state.cards[1] = { id: state.nextCardId++, type: 'frost', star: 1 };
   }
   modals.hideResult();
   modals.hideLevel();
   refs.startBtn.textContent = texts.buttons.start;
+  refs.startBtn.parentElement?.removeAttribute('hidden');
   refs.pauseBtn.textContent = texts.buttons.pause;
   refs.pauseBtn.setAttribute('aria-pressed', 'false');
   refs.pauseBtn.title = texts.buttons.pause;
@@ -166,6 +180,7 @@ function start(): void {
   refs.pauseBtn.disabled = false;
   dispatch(startNextWave(state, config, rng));
   refs.startBtn.textContent = texts.buttons.restart;
+  refs.startBtn.parentElement?.setAttribute('hidden', '');
   modals.message('', '', false);
 }
 
@@ -250,6 +265,7 @@ if (import.meta.env.DEV) void Promise.all([import('./debug/exposeDebugApi'), imp
       getSpawnTelemetry() { const admission = budgetAdmission(state.wave, state.spawnLeft, state.enemies.length, cfg.waves.budget); return { wave: state.wave, spawnLeft: state.spawnLeft, alive: state.enemies.length, spawnTimer: state.spawnTimer, lastSpawnCheckCount: state.lastSpawnCheckCount, normalTarget: admission.normalTarget, effectiveTarget: admission.effectiveTarget, inEndSprint: admission.inEndSprint }; },
     },
   });
+  if (evidenceMode?.startsWith('upgrade')) devTools.hidden = true;
 
   telemetry = telemetryModule.createDevTelemetry({
     getState: () => state,
@@ -258,6 +274,11 @@ if (import.meta.env.DEV) void Promise.all([import('./debug/exposeDebugApi'), imp
     getPresetName: () => tuner?.getActivePresetName() ?? '',
     getRange: () => totalRange(state, config),
   });
+  if (evidenceMode?.startsWith('upgrade')) {
+    document.querySelector<HTMLElement>('.telemetry-hud')?.setAttribute('hidden', '');
+    const telemetryActions = document.querySelector<HTMLElement>('.telemetry-actions');
+    if (telemetryActions) telemetryActions.style.display = 'none';
+  }
 
   debugModule.exposeDebugApi({
       getState: () => ({ ...state, enemyTypes: state.enemies.map(enemy => enemy.type), enemies: state.enemies.length, bullets: state.bullets.length, config: { ...config }, waves: { spawnMode: cfg.waves.spawnMode, pendingSpawnMode: tuner?.getPendingSpawnMode() ?? null, budget: cfg.waves.budget } }), start, reset,

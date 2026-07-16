@@ -52,12 +52,23 @@ describe('渲染冒烟 · 手牌/装备卡面', () => {
     const { resolveCardMeta } = await import('../src/ui/cardMeta');
     for (const def of cfg.skills.cards) {
       for (let star = 1; star <= 6; star++) {
-        const meta = resolveCardMeta(def.id, star);
-        expect(meta.name, `${def.id}@${star}`).toBeTruthy();
-        expect(meta.accent, `${def.id}@${star}`).toBeTruthy();
-        expect(meta.shape, `${def.id}@${star}`).toBeTruthy();
-        expect(meta.glyph, `${def.id}@${star}`).toBeTruthy();
+        for (const context of ['hand', 'equipment'] as const) {
+          const meta = resolveCardMeta(def.id, star, context);
+          expect(meta.name, `${def.id}@${star}:${context}`).toBeTruthy();
+          expect(meta.desc, `${def.id}@${star}:${context}`).toBeTruthy();
+          expect(meta.accent, `${def.id}@${star}:${context}`).toBeTruthy();
+          expect(meta.shape, `${def.id}@${star}:${context}`).toBeTruthy();
+          expect(meta.glyph, `${def.id}@${star}:${context}`).toBeTruthy();
+        }
       }
     }
+  });
+
+  it('按上下文读取不同文案，并按已定义档位回退', async () => {
+    const { resolveCardMeta } = await import('../src/ui/cardMeta');
+    expect(resolveCardMeta('pierce', 3, 'hand').desc).not.toBe(resolveCardMeta('pierce', 3, 'equipment').desc);
+    expect(resolveCardMeta('pierce', 4, 'equipment').desc).toBe(resolveCardMeta('pierce', 3, 'equipment').desc);
+    expect(resolveCardMeta('pierce', 5, 'equipment').desc).toBe('贯穿弹碰边折返');
+    expect(resolveCardMeta('pierce', 6, 'equipment').desc).toBe('主炮化为持续光束');
   });
 });

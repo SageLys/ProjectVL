@@ -7,12 +7,12 @@ function collectionFor(state: GameState, kind: SlotKind): (Card | null)[] {
   return kind === 'cards' ? state.cards : state.equipment;
 }
 
-function feed(state: GameState, config: Config, rng: Rng, source: (Card | null)[], sourceIndex: number, target: Card): GameEvent[] {
+function feed(state: GameState, config: Config, rng: Rng, source: (Card | null)[], sourceIndex: number, target: Card, targetIndex: number): GameEvent[] {
   target.star++;
   source[sourceIndex] = null;
   state.merges++;
   state.equipOps++;
-  const events: GameEvent[] = [{ type: 'fed', cardType: target.type, resultStar: target.star }];
+  const events: GameEvent[] = [{ type: 'fed', cardType: target.type, resultStar: target.star, slotIndex: targetIndex, targetCardId: target.id }];
   events.push(...fireTrigger(state, config, rng, 'onMerge', { merge: { cardType: target.type, resultStar: target.star } }));
   return events;
 }
@@ -40,7 +40,7 @@ export function moveOrSwap(state: GameState, config: Config, rng: Rng, sourceKin
   const replaced = target[targetIndex];
 
   if (cfg.economy.placeholderAssumptions.feedEquipped && cfg.economy.feedEquipped && replaced && targetKind === 'equipment' && replaced.type === moving.type && replaced.star === moving.star && replaced.star < cfg.economy.maxStar) {
-    return feed(state, config, rng, source, sourceIndex, replaced);
+    return feed(state, config, rng, source, sourceIndex, replaced, targetIndex);
   }
 
   if (targetKind === 'equipment') {

@@ -255,10 +255,10 @@ export type GameEvent =
   | { type: 'equipRejected'; reason: 'star' | 'duplicate' }
   | { type: 'moved'; cardType: CardType; merges: number }
   | { type: 'swapped'; a: CardType; b: CardType }
-  | { type: 'merged'; cardType: CardType; resultStar: number }
+  | { type: 'merged'; cardType: CardType; resultStar: number; resultCardId?: number }
   | { type: 'skillConsumed'; cardType: CardType; star: number; x: number; y: number }
   | { type: 'equipped'; cardType: CardType; star: number; slotIndex: number }
-  | { type: 'fed'; cardType: CardType; resultStar: number }
+  | { type: 'fed'; cardType: CardType; resultStar: number; slotIndex?: number; targetCardId?: number }
   | { type: 'shieldBroken' }
   | { type: 'testDrops'; cardType: CardType }
   | { type: 'perkApplied'; title: string };

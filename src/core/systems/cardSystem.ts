@@ -28,11 +28,12 @@ export function autoMergeCards(state: GameState, config: Config, rng: Rng): { me
       }
       if (partners.length === mergeCopies - 1) {
         const resultStar = a.star + 1;
-        state.cards[i] = { id: state.nextCardId++, type: a.type, star: resultStar };
+        const resultCard = { id: state.nextCardId++, type: a.type, star: resultStar };
+        state.cards[i] = resultCard;
         for (const j of partners) state.cards[j] = null;
         state.merges++;
         merged++;
-        events.push({ type: 'merged', cardType: a.type, resultStar });
+        events.push({ type: 'merged', cardType: a.type, resultStar, resultCardId: resultCard.id });
         events.push(...fireTrigger(state, config, rng, 'onMerge', { merge: { cardType: a.type, resultStar } }));
         changed = true;
         break outer;
