@@ -36,12 +36,12 @@ export function formatToast(ev: GameEvent): string | null {
     case 'shieldBroken': return T.shieldBroken;
     case 'testDrops': return fmt(T.testDrops, { name: name(ev.cardType) });
     case 'perkApplied': return fmt(T.perkApplied, { title: ev.title });
+    case 'bountyAccepted': return fmt(T.bountyAccepted, { name: name(ev.rewardCardType) });
+    case 'bountyCompleted': return fmt(T.bountyCompleted, { name: name(ev.rewardCardType) });
+    case 'bountyFailed': return T.bountyFailed;
     case 'bountyOfferSpawned':
     case 'bountyOfferExpired':
-    case 'bountyAccepted':
     case 'bountyMemberSpawned':
-    case 'bountyCompleted':
-    case 'bountyFailed':
     case 'bountyRewardDropped':
     case 'levelUp':
     case 'gameEnd':

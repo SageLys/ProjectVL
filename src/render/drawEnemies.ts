@@ -1,5 +1,6 @@
 import { cfg } from '../config';
 import type { GameState } from '../core/types';
+import { resolveCardVisual } from '../presentation/cardVisual';
 
 const TAU = Math.PI * 2;
 
@@ -9,9 +10,10 @@ export function drawEnemies(ctx: CanvasRenderingContext2D, state: GameState): vo
     ctx.save();
     ctx.translate(e.x, e.y);
     if (e.hit > 0) ctx.globalAlpha = 0.55;
-    ctx.shadowBlur = e.type === 'boss' ? 5 : 0;
-    ctx.shadowColor = 'rgba(135,147,163,.35)';
-    ctx.fillStyle = e.color;
+    const bountyVisual = e.bountyRewardType ? resolveCardVisual(e.bountyRewardType) : null;
+    ctx.shadowBlur = bountyVisual ? 9 : e.type === 'boss' ? 5 : 0;
+    ctx.shadowColor = bountyVisual?.accent ?? 'rgba(135,147,163,.35)';
+    ctx.fillStyle = bountyVisual?.accent ?? e.color;
     ctx.beginPath();
     const sides = cfg.enemies.types[e.type].sides;
     for (let i = 0; i < sides; i++) {

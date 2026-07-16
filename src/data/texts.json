@@ -33,6 +33,9 @@
     "equipped": "已装备：{star}星{name}",
     "shieldBroken": "护盾破裂！",
     "breakthrough": "私人空间受压 -{damage}",
+    "bountyAccepted": "已接受赏金：迎战{name}敌群",
+    "bountyCompleted": "赏金完成：{name}奖励已落地",
+    "bountyFailed": "赏金失败：敌群已突破防线",
     "tunerReset": "已恢复默认参数",
     "perkApplied": "{title} 已生效",
     "mergeSuffix": "，自动合成 {count} 次"

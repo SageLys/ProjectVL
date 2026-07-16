@@ -5,7 +5,9 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { cfg } from '../src/config';
 import { drawDrops } from '../src/render/drawDrops';
 import { drawEnemies } from '../src/render/drawEnemies';
-import { spawnGroundDrop } from '../src/core/systems/dropSystem';
+import { drawBountyOffers } from '../src/render/drawBountyOffers';
+import { drawBountyEffects } from '../src/render/drawBountyEffects';
+import { spawnGroundDrop, spawnWildcardDrop } from '../src/core/systems/dropSystem';
 import { registerSkillDefs } from '../src/core/effects/interpreter';
 import { enemy, freshState, createDefaultConfig, constRng, resetTestEnv } from './helpers';
 
@@ -43,6 +45,45 @@ describe('渲染冒烟 · 敌人', () => {
       enemy({}),
     ];
     expect(() => drawEnemies(fakeCtx(), s)).not.toThrow();
+  });
+});
+
+describe('渲染冒烟 · Bounty 完整视觉', () => {
+  it('四边 Offer、11 种奖励敌群、万能卡与入场警示均不抛错', () => {
+    const s = freshState();
+    const sides = ['top', 'right', 'bottom', 'left'] as const;
+    s.bountyOffers = cfg.skills.cards.map((def, index) => ({
+      id: index + 1,
+      rewardCardType: def.id,
+      rewardCardStar: 1 + index % 2,
+      rewardCardCount: 1,
+      wildcardStar: 1,
+      wildcardCount: 1,
+      side: sides[index % sides.length],
+      x: index % 2 ? 508 : 32,
+      y: 32 + index * 45,
+      remaining: 4,
+      guaranteed: index === 0,
+      createdAt: 0,
+    }));
+    s.enemies = cfg.skills.cards.map((def, index) => enemy({
+      id: index + 1,
+      x: 70 + index * 35,
+      y: 300,
+      bountyEncounterId: 1,
+      bountyRewardType: def.id,
+    }));
+    s.bountyEncounters = [{
+      id: 1, offerId: 1, rewardCardType: 'frost', rewardCardStar: 1, rewardCardCount: 1,
+      wildcardStar: 1, wildcardCount: 1, side: 'top', status: 'spawning',
+      memberIds: s.enemies.map(member => member.id), pendingSpawnCount: 1, spawnTimer: 0,
+      guaranteed: false, acceptedAt: 0, hpAtAccept: 100, lastKillX: 270, lastKillY: 32,
+    }];
+    spawnWildcardDrop(s, 270, 400, 2, 2, 12);
+    expect(() => drawBountyOffers(fakeCtx(), s)).not.toThrow();
+    expect(() => drawEnemies(fakeCtx(), s)).not.toThrow();
+    expect(() => drawBountyEffects(fakeCtx(), s)).not.toThrow();
+    expect(() => drawDrops(fakeCtx(), s)).not.toThrow();
   });
 });
 
