@@ -1,6 +1,7 @@
 import { cfg } from '../../config';
-import type { BountyOffer, BountySide, CardType, Config, GameEvent, GameState, Rng } from '../types';
+import type { BountyEncounter, BountyOffer, BountySide, CardType, Config, Enemy, EnemyType, GameEvent, GameState, Rng } from '../types';
 import { CARD_KEYS } from './dropSystem';
+import { createEnemy } from './enemySystem';
 
 const SIDES: BountySide[] = ['top', 'right', 'bottom', 'left'];
 
@@ -112,9 +113,67 @@ function tickOffers(state: GameState, dt: number): GameEvent[] {
   return events;
 }
 
+function encounterEnemyType(rng: Rng): EnemyType {
+  const weights = cfg.bounty.encounter.composition;
+  const normal = Math.max(0, weights.normalWeight);
+  const fast = Math.max(0, weights.fastWeight);
+  const tank = Math.max(0, weights.tankWeight);
+  const total = normal + fast + tank;
+  if (total <= 0) return 'normal';
+  const roll = rng() * total;
+  return roll < normal ? 'normal' : roll < normal + fast ? 'fast' : 'tank';
+}
+
+function encounterSpawnPosition(encounter: BountyEncounter, rng: Rng): { x: number; y: number } {
+  const { width, height } = cfg.combat.canvas;
+  const margin = cfg.waves.spawnMargin;
+  const offset = (rng() - 0.5) * cfg.bounty.encounter.spawnSpread;
+  if (encounter.side === 'top' || encounter.side === 'bottom') {
+    return {
+      x: clamp(encounter.lastKillX + offset, 35, width - 35),
+      y: encounter.side === 'top' ? -margin : height + margin,
+    };
+  }
+  return {
+    x: encounter.side === 'left' ? -margin : width + margin,
+    y: clamp(encounter.lastKillY + offset, 35, height - 35),
+  };
+}
+
+function tickEncounterSpawns(state: GameState, rng: Rng, dt: number): GameEvent[] {
+  const events: GameEvent[] = [];
+  const interval = Math.max(Number.EPSILON, cfg.bounty.encounter.spawnIntervalSeconds);
+  for (const encounter of state.bountyEncounters) {
+    if (encounter.status !== 'spawning') continue;
+    encounter.spawnTimer -= dt;
+    while (encounter.pendingSpawnCount > 0 && encounter.spawnTimer <= 0) {
+      const enemy = createEnemy(
+        state,
+        encounterEnemyType(rng),
+        state.wave,
+        encounterSpawnPosition(encounter, rng),
+        {
+          hpMul: cfg.bounty.encounter.hpMul,
+          speedMul: cfg.bounty.encounter.speedMul,
+          damageMul: cfg.bounty.encounter.damageMul,
+          bountyEncounterId: encounter.id,
+          bountyRewardType: encounter.rewardCardType,
+        },
+      );
+      state.enemies.push(enemy);
+      encounter.memberIds.push(enemy.id);
+      encounter.pendingSpawnCount--;
+      encounter.spawnTimer += interval;
+      events.push({ type: 'bountyMemberSpawned', encounterId: encounter.id, enemyId: enemy.id });
+    }
+    if (encounter.pendingSpawnCount === 0) encounter.status = 'active';
+  }
+  return events;
+}
+
 /** Advance Offer expiry and run fixed-interval Director checks. */
 export function tickBountySystem(state: GameState, _config: Config, rng: Rng, dt: number): GameEvent[] {
-  const events = tickOffers(state, dt);
+  const events = [...tickOffers(state, dt), ...tickEncounterSpawns(state, rng, dt)];
   state.bountyDirector.cooldownRemaining = Math.max(0, state.bountyDirector.cooldownRemaining - dt);
   if (state.mode !== 'playing' || state.between > 0) return events;
 
@@ -131,6 +190,46 @@ export function tickBountySystem(state: GameState, _config: Config, rng: Rng, dt
     }
   }
   return events;
+}
+
+/** Register one encounter member death/disappearance. Duplicate notifications are ignored. */
+export function notifyBountyMemberKilled(state: GameState, enemy: Enemy): GameEvent[] {
+  if (enemy.bountyEncounterId === undefined) return [];
+  const encounter = state.bountyEncounters.find(item => item.id === enemy.bountyEncounterId);
+  if (!encounter || (encounter.status !== 'spawning' && encounter.status !== 'active')) return [];
+  const index = encounter.memberIds.indexOf(enemy.id);
+  if (index < 0) return [];
+  encounter.memberIds.splice(index, 1);
+  encounter.lastKillX = enemy.x;
+  encounter.lastKillY = enemy.y;
+  if (encounter.memberIds.length > 0 || encounter.pendingSpawnCount > 0) return [];
+  encounter.status = 'completed';
+  state.bountyDirector.completedThisWave++;
+  return [{
+    type: 'bountyCompleted',
+    encounterId: encounter.id,
+    rewardCardType: encounter.rewardCardType,
+    clearSeconds: Math.max(0, state.time - encounter.acceptedAt),
+  }];
+}
+
+/** Fail an encounter on the first breach and downgrade every surviving member to a normal enemy. */
+export function notifyBountyMemberBreached(state: GameState, enemy: Enemy): GameEvent[] {
+  if (enemy.bountyEncounterId === undefined) return [];
+  const encounterId = enemy.bountyEncounterId;
+  const encounter = state.bountyEncounters.find(item => item.id === encounterId);
+  if (!encounter || (encounter.status !== 'spawning' && encounter.status !== 'active')) return [];
+  encounter.status = 'failed';
+  encounter.pendingSpawnCount = 0;
+  encounter.memberIds.length = 0;
+  enemy.bountyEncounterId = undefined;
+  enemy.bountyRewardType = undefined;
+  for (const member of state.enemies) {
+    if (member.bountyEncounterId !== encounterId) continue;
+    member.bountyEncounterId = undefined;
+    member.bountyRewardType = undefined;
+  }
+  return [{ type: 'bountyFailed', encounterId }];
 }
 
 /** Accept the first Offer hit by the arena tap and freeze its promised encounter/reward data. */

@@ -1,11 +1,12 @@
 import { cfg } from '../../config';
-import type { Config, Enemy, EnemyType, GameEvent, GameState, Rng, Summon } from '../types';
+import type { CardType, Config, Enemy, EnemyType, GameEvent, GameState, Rng, Summon } from '../types';
 import { endGame } from '../endGame';
 import { spawnParticle } from './particleSystem';
 import { killEnemy } from './damageSystem';
 import { emptyStatus, speedMultiplier } from '../effects/statusSystem';
 import { absorbBreach } from '../effects/runtime';
 import { fireTrigger, getModifiers } from '../effects/interpreter';
+import { notifyBountyMemberBreached, notifyBountyMemberKilled } from './bountySystem';
 
 /**
  * 敌人类型判定：roll < tankBase + wave*tankPerWave → 重装；
@@ -18,27 +19,58 @@ export function determineType(wave: number, roll: number, spawnLeft: number): En
   return type;
 }
 
+export interface EnemyModifiers {
+  hpMul?: number;
+  speedMul?: number;
+  damageMul?: number;
+  bountyEncounterId?: number;
+  bountyRewardType?: CardType;
+}
+
+/** Shared enemy construction path for normal waves and independent Bounty encounters. */
+export function createEnemy(
+  state: GameState,
+  type: EnemyType,
+  wave: number,
+  position: { x: number; y: number },
+  modifiers: EnemyModifiers = {},
+): Enemy {
+  const def = cfg.enemies.types[type];
+  const hp = (def.hpBase + wave * def.hpPerWave) * (modifiers.hpMul ?? 1);
+  const speed = (def.speedBase + wave * def.speedPerWave) * (modifiers.speedMul ?? 1);
+  const enemy: Enemy = {
+    id: state.nextEnemyId++,
+    x: position.x,
+    y: position.y,
+    type,
+    label: def.label,
+    hp,
+    maxHp: hp,
+    speed,
+    r: def.r,
+    color: def.color,
+    damage: def.damage * (modifiers.damageMul ?? 1),
+    xp: def.xp,
+    hit: 0,
+    status: emptyStatus(),
+  };
+  if (modifiers.bountyEncounterId !== undefined) enemy.bountyEncounterId = modifiers.bountyEncounterId;
+  if (modifiers.bountyRewardType !== undefined) enemy.bountyRewardType = modifiers.bountyRewardType;
+  return enemy;
+}
+
 /** 生成一只敌人：类型判定 → 取基础值+每波成长 → 四边随机出生（边缘外 spawnMargin）。 */
 export function spawnEnemy(state: GameState, rng: Rng): void {
   const roll = rng();
   const type = determineType(state.wave, roll, state.spawnLeft);
-  const def = cfg.enemies.types[type];
   const { width, height } = cfg.combat.canvas;
-  const hp = def.hpBase + state.wave * def.hpPerWave;
-  const speed = def.speedBase + state.wave * def.speedPerWave;
   const side = Math.floor(rng() * 4);
   const margin = cfg.waves.spawnMargin;
   const spawn = side === 0 ? { x: 35 + rng() * (width - 70), y: -margin }
     : side === 1 ? { x: width + margin, y: 35 + rng() * (height - 70) }
     : side === 2 ? { x: 35 + rng() * (width - 70), y: height + margin }
     : { x: -margin, y: 35 + rng() * (height - 70) };
-  const enemy: Enemy = {
-    id: state.nextEnemyId++,
-    x: spawn.x, y: spawn.y, type, label: def.label,
-    hp, maxHp: hp, speed, r: def.r, color: def.color, damage: def.damage, xp: def.xp, hit: 0,
-    status: emptyStatus(),
-  };
-  state.enemies.push(enemy);
+  state.enemies.push(createEnemy(state, type, state.wave, spawn));
 }
 
 /** 移动目标解析（仲裁规则 6）：嘲讽（点/召唤物）> 嘲讽半径内的召唤物 > 炮台。 */
@@ -85,10 +117,12 @@ export function moveEnemies(state: GameState, config: Config, rng: Rng, dt: numb
       target.summon.hp -= e.damage;
       for (let k = 0; k < 6; k++) spawnParticle(state, rng, e.x, e.y, '#8793a3', 120);
       state.enemies.splice(i, 1);
+      if (e.bountyEncounterId !== undefined) events.push(...notifyBountyMemberKilled(state, e));
       continue;
     }
 
     if (Math.hypot(t.x - e.x, t.y - e.y) < cfg.combat.breakthroughDist) {
+      if (e.bountyEncounterId !== undefined) events.push(...notifyBountyMemberBreached(state, e));
       const mods = getModifiers(state);
       // 反伤（thorns）：反噬若致死，按击杀结算（有奖励）后不再造成突破。
       if (mods.thornsRatio > 0 && e.damage * mods.thornsRatio >= e.hp) {

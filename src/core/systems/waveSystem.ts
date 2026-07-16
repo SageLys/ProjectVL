@@ -86,7 +86,8 @@ export function tickSpawns(state: GameState, rng: Rng, dt: number): void {
  * 否则进入 betweenWaves 间隔并产出 waveCleared。
  */
 export function checkWaveClear(state: GameState): GameEvent[] {
-  if (state.spawnLeft === 0 && state.enemies.length === 0 && !state.waveClearPending && state.mode === 'playing') {
+  const bountyActive = state.bountyEncounters.some(encounter => encounter.status === 'spawning' || encounter.status === 'active');
+  if (state.spawnLeft === 0 && state.enemies.length === 0 && !bountyActive && !state.waveClearPending && state.mode === 'playing') {
     state.waveClearPending = true;
     const events: GameEvent[] = state.bountyOffers.map(offer => ({ type: 'bountyOfferExpired' as const, offerId: offer.id }));
     state.bountyOffers.length = 0;
@@ -115,6 +116,13 @@ export function jumpToWave(state: GameState, config: Config, rng: Rng, targetWav
   state.groundDrops.length = 0;
   state.zones.length = 0;
   state.summons.length = 0;
+  state.bountyOffers.length = 0;
+  state.bountyEncounters.length = 0;
+  state.bountyDirector.offersThisWave = 0;
+  state.bountyDirector.acceptedThisWave = 0;
+  state.bountyDirector.completedThisWave = 0;
+  state.bountyDirector.checkTimer = cfg.bounty.offer.checkIntervalSeconds;
+  state.bountyDirector.cooldownRemaining = 0;
   state.intervalClocks = {};
   state.spawnLeft = 0;
   state.spawnTimer = 0;

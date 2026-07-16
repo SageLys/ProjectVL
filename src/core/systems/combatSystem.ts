@@ -8,17 +8,32 @@ import { damageTakenMultiplier } from '../effects/statusSystem';
 import { ATOMS, type EffectCtx } from '../effects/registry';
 
 /**
- * 索敌：烙印（focusPriority）权重降序 > 射程内最近。
+ * 索敌：紧急距离内最近 > 活跃 Bounty 成员最近 > 烙印权重降序 > 射程内最近。
  */
 export function findTarget(state: GameState, config: Config): Enemy | null {
   const range = totalRange(state, config);
   const t = cfg.combat.turret;
+  const activeBountyIds = new Set(state.bountyEncounters
+    .filter(encounter => encounter.status === 'spawning' || encounter.status === 'active')
+    .map(encounter => encounter.id));
+  let emergencyBest: Enemy | null = null;
+  let emergencyDist = Infinity;
+  let bountyBest: Enemy | null = null;
+  let bountyDist = Infinity;
   let best: Enemy | null = null;
   let bestWeight = -Infinity;
   let bestDist = Infinity;
   for (const enemy of state.enemies) {
     const dist = Math.hypot(enemy.x - t.x, enemy.y - t.y);
     if (dist > range) continue;
+    if (dist <= cfg.bounty.encounter.emergencyOverrideDistance && dist < emergencyDist) {
+      emergencyBest = enemy;
+      emergencyDist = dist;
+    }
+    if (enemy.bountyEncounterId !== undefined && activeBountyIds.has(enemy.bountyEncounterId) && dist < bountyDist) {
+      bountyBest = enemy;
+      bountyDist = dist;
+    }
     const weight = enemy.status.brand?.weight ?? 0;
     if (weight > bestWeight || (weight === bestWeight && dist < bestDist)) {
       best = enemy;
@@ -26,7 +41,7 @@ export function findTarget(state: GameState, config: Config): Enemy | null {
       bestDist = dist;
     }
   }
-  return best;
+  return emergencyBest ?? bountyBest ?? best;
 }
 
 /** 朝目标开火：多弹丸扇形散布；每发触发 onFire（装备态修饰弹道/附着状态）。 */

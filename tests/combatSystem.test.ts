@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { findTarget, shoot, updateBullets } from '../src/core/systems/combatSystem';
 import { maxAttackRange, totalMulti, totalRange } from '../src/core/stats';
 import { applyBrand } from '../src/core/effects/statusSystem';
+import type { BountyEncounter } from '../src/core/types';
 import { enemy, freshState, createDefaultConfig, constRng, resetTestEnv } from './helpers';
 
 beforeEach(resetTestEnv);
@@ -10,7 +11,7 @@ describe('combatSystem · 锁定', () => {
   it('锁定射程内最近的敌人', () => {
     const s = freshState();
     const config = createDefaultConfig();
-    const near = enemy({ x: 290, y: 365 });
+    const near = enemy({ x: 380, y: 365 });
     const far = enemy({ x: 390, y: 365 });
     s.enemies = [far, near];
     expect(findTarget(s, config)).toBe(near);
@@ -38,10 +39,54 @@ describe('combatSystem · 锁定', () => {
   it('烙印（focusPriority）权重优先于最近（仲裁规则5）', () => {
     const s = freshState();
     const config = createDefaultConfig();
-    const near = enemy({ x: 290, y: 365 });
+    const near = enemy({ x: 380, y: 365 });
     const branded = enemy({ x: 410, y: 365 });
     applyBrand(branded, 2, 4);
     s.enemies = [near, branded];
+    expect(findTarget(s, config)).toBe(branded);
+  });
+
+  it('紧急普通敌人 > 活跃 Bounty > 烙印 > 最近', () => {
+    const s = freshState();
+    const config = createDefaultConfig();
+    const emergency = enemy({ x: 330, y: 365 });
+    const bounty = enemy({ x: 380, y: 365, bountyEncounterId: 1, bountyRewardType: 'frost' });
+    const branded = enemy({ x: 410, y: 365 });
+    const nearest = enemy({ x: 370, y: 365 });
+    applyBrand(branded, 10, 4);
+    s.bountyEncounters.push({ id: 1, offerId: 1, rewardCardType: 'frost', rewardCardStar: 1, rewardCardCount: 1, wildcardStar: 1, wildcardCount: 1, side: 'top', status: 'active', memberIds: [bounty.id], pendingSpawnCount: 0, spawnTimer: 0, guaranteed: false, acceptedAt: 0, hpAtAccept: 100, lastKillX: 0, lastKillY: 0 });
+    s.enemies = [nearest, branded, bounty, emergency];
+    expect(findTarget(s, config)).toBe(emergency);
+    s.enemies = [nearest, branded, bounty];
+    expect(findTarget(s, config)).toBe(bounty);
+    s.enemies = [nearest, branded];
+    expect(findTarget(s, config)).toBe(branded);
+    s.enemies = [nearest];
+    expect(findTarget(s, config)).toBe(nearest);
+  });
+
+  it('Bounty 成员仍须在射程内', () => {
+    const s = freshState();
+    const config = createDefaultConfig();
+    const bounty = enemy({ x: 510, y: 365, bountyEncounterId: 1 });
+    const regular = enemy({ x: 380, y: 365 });
+    s.bountyEncounters.push({ id: 1, offerId: 1, rewardCardType: 'frost', rewardCardStar: 1, rewardCardCount: 1, wildcardStar: 1, wildcardCount: 1, side: 'top', status: 'active', memberIds: [bounty.id], pendingSpawnCount: 0, spawnTimer: 0, guaranteed: false, acceptedAt: 0, hpAtAccept: 100, lastKillX: 0, lastKillY: 0 });
+    s.enemies = [bounty, regular];
+    expect(findTarget(s, config)).toBe(regular);
+  });
+
+  it('failed Encounter 标记不再获得优先级；多名活跃成员取最近', () => {
+    const s = freshState();
+    const config = createDefaultConfig();
+    const nearBounty = enemy({ x: 380, y: 365, bountyEncounterId: 1 });
+    const farBounty = enemy({ x: 410, y: 365, bountyEncounterId: 1 });
+    const branded = enemy({ x: 415, y: 365 });
+    applyBrand(branded, 4, 4);
+    const encounter: BountyEncounter = { id: 1, offerId: 1, rewardCardType: 'frost', rewardCardStar: 1, rewardCardCount: 1, wildcardStar: 1, wildcardCount: 1, side: 'top', status: 'active', memberIds: [nearBounty.id, farBounty.id], pendingSpawnCount: 0, spawnTimer: 0, guaranteed: false, acceptedAt: 0, hpAtAccept: 100, lastKillX: 0, lastKillY: 0 };
+    s.bountyEncounters.push(encounter);
+    s.enemies = [farBounty, branded, nearBounty];
+    expect(findTarget(s, config)).toBe(nearBounty);
+    encounter.status = 'failed';
     expect(findTarget(s, config)).toBe(branded);
   });
 });
