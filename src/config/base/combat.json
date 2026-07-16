@@ -26,6 +26,11 @@
   "breakthroughDist": 48,
   "dangerZoneWidth": 72,
   "dtCap": 0.033,
+  "knockbackFatigue": {
+    "decayFactor": 0.5,
+    "windowSeconds": 2,
+    "minMultiplier": 0.125
+  },
   "vfx": {
     "shootParticles": 4,
     "killParticles": 12,

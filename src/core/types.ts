@@ -84,6 +84,8 @@ export interface EnemyStatus {
   brand: { weight: number; remaining: number } | null;
   /** 嘲讽：移动目标改为坐标/召唤物。 */
   taunt: { x: number; y: number; remaining: number; summonId?: number } | null;
+  /** 击退疲劳:短窗口内连续击退按 multiplier 递减;窗口过期重置。 */
+  kbFatigue: { multiplier: number; remaining: number } | null;
 }
 
 export interface Enemy {

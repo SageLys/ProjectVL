@@ -6,7 +6,11 @@
 //   4. 易伤多来源 → 同减速：取最强。
 //   5. 索敌优先级（炮台）：紧急半径最近 > 活跃 bounty > 烙印 brand 权重降序 > 最近敌人。
 //   6. 移动目标（敌人）：嘲讽（点/召唤物）> 炮台；嘲讽召唤物死亡即失效。
+//   - 击退 × 类型抗性（boss/tank 减免）。
+//   - 连续击退短窗递减，窗口过期重置。
 export const CONFLICT_RULES = [
+  '击退 × 类型抗性(boss/tank 减免)',
+  '连续击退短窗递减,窗口过期重置',
   'freeze/stun → 不可移动，嘲讽暂停',
   'freeze → 击退无效',
   'slow 多来源取最强，不叠乘',
@@ -15,10 +19,11 @@ export const CONFLICT_RULES = [
   '移动: taunt > 炮台；嘲讽源死亡即失效',
 ] as const;
 
+import { cfg } from '../../config';
 import type { Enemy, EnemyStatus, GameState } from '../types';
 
 export function emptyStatus(): EnemyStatus {
-  return { slow: null, frozen: 0, freezeStacks: 0, stunned: 0, vulnerable: null, dots: [], brand: null, taunt: null };
+  return { slow: null, frozen: 0, freezeStacks: 0, stunned: 0, vulnerable: null, dots: [], brand: null, taunt: null, kbFatigue: null };
 }
 
 /** 冻结或眩晕 = 不可移动。 */
@@ -72,11 +77,21 @@ export function applyVulnerable(e: Enemy, ratio: number, duration: number): void
 /** 击退：冻结中无效（仲裁规则 2）。返回是否实际发生位移。 */
 export function applyKnockback(e: Enemy, fromX: number, fromY: number, distance: number): boolean {
   if (e.status.frozen > 0) return false;
+  const fatigueMultiplier = e.status.kbFatigue?.multiplier ?? 1;
+  const resistance = cfg.enemies.types[e.type].knockbackResist;
+  const effective = distance * (1 - resistance) * fatigueMultiplier;
+  if (!(effective > 0)) return false;
   const dx = e.x - fromX;
   const dy = e.y - fromY;
-  const len = Math.hypot(dx, dy) || 1;
-  e.x += (dx / len) * distance;
-  e.y += (dy / len) * distance;
+  const len = Math.hypot(dx, dy);
+  if (!(len > 0)) return false;
+  e.x += (dx / len) * effective;
+  e.y += (dy / len) * effective;
+  const fatigue = cfg.combat.knockbackFatigue;
+  e.status.kbFatigue = {
+    multiplier: Math.max(fatigue.minMultiplier, fatigueMultiplier * fatigue.decayFactor),
+    remaining: fatigue.windowSeconds,
+  };
   return true;
 }
 
@@ -108,6 +123,7 @@ export function tickStatusTimers(state: GameState, dt: number): void {
     if (s.stunned > 0) s.stunned -= dt;
     if (s.vulnerable && (s.vulnerable.remaining -= dt) <= 0) s.vulnerable = null;
     if (s.brand && (s.brand.remaining -= dt) <= 0) s.brand = null;
+    if (s.kbFatigue && (s.kbFatigue.remaining -= dt) <= 0) s.kbFatigue = null;
     if (s.taunt) {
       s.taunt.remaining -= dt;
       const sourceGone = s.taunt.summonId != null && !state.summons.some(sum => sum.id === s.taunt!.summonId);

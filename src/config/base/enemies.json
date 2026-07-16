@@ -13,7 +13,8 @@
       "color": "#8793a3",
       "damage": 8,
       "xp": 1,
-      "sides": 4
+      "sides": 4,
+      "knockbackResist": 0
     },
     "fast": {
       "label": "急切追求者",
@@ -25,7 +26,8 @@
       "color": "#8793a3",
       "damage": 6,
       "xp": 1,
-      "sides": 3
+      "sides": 3,
+      "knockbackResist": 0
     },
     "tank": {
       "label": "执着追求者",
@@ -37,7 +39,8 @@
       "color": "#8793a3",
       "damage": 14,
       "xp": 2,
-      "sides": 6
+      "sides": 6,
+      "knockbackResist": 0.4
     },
     "boss": {
       "label": "命定追求者",
@@ -49,7 +52,8 @@
       "color": "#596371",
       "damage": 28,
       "xp": 5,
-      "sides": 8
+      "sides": 8,
+      "knockbackResist": 0.85
     }
   }
 }

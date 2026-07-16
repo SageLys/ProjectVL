@@ -3,6 +3,17 @@ import { buildConfig, deepMerge, variantsFromSearch, cfg, applyVariants } from '
 import { resetTestEnv } from './helpers';
 afterEach(resetTestEnv);
 
+describe('击退配置', () => {
+  it('加载类型抗性与连续击退递减参数', () => {
+    const c = buildConfig([]);
+    expect(c.enemies.types.normal.knockbackResist).toBe(0);
+    expect(c.enemies.types.fast.knockbackResist).toBe(0);
+    expect(c.enemies.types.tank.knockbackResist).toBe(0.4);
+    expect(c.enemies.types.boss.knockbackResist).toBe(0.85);
+    expect(c.combat.knockbackFatigue).toEqual({ decayFactor: 0.5, windowSeconds: 2, minMultiplier: 0.125 });
+  });
+});
+
 describe('config · 深合并', () => {
   it('对象递归合并，标量与数组整体替换，不改入参', () => { const base={a:{b:1,c:[1,2]},d:'x'}; const out=deepMerge(base,{a:{c:[9]}} as never); expect(out).toEqual({a:{b:1,c:[9]},d:'x'}); expect(base.a.c).toEqual([1,2]); });
 });

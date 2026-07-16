@@ -69,6 +69,7 @@ export interface CombatConfig {
   /** 遥测危险区在突破线外额外延伸的宽度（像素）；不参与战斗判定。 */
   dangerZoneWidth: number;
   dtCap: number;
+  knockbackFatigue: { decayFactor: number; windowSeconds: number; minMultiplier: number };
   vfx: { shootParticles: number; killParticles: number; breakthroughParticles: number };
 }
 
@@ -104,6 +105,7 @@ export interface EnemyDef {
   damage: number;
   xp: number;
   sides: number;
+  knockbackResist: number;
 }
 
 export interface EnemiesConfig {

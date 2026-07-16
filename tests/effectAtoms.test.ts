@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { ATOMS, type EffectCtx } from '../src/core/effects/registry';
 import {
   CONFLICT_RULES, applyFreeze, applySlow, applyStun, applyVulnerable,
-  damageTakenMultiplier, isImmobile, speedMultiplier,
+  applyKnockback, damageTakenMultiplier, isImmobile, speedMultiplier, tickStatusTimers,
 } from '../src/core/effects/statusSystem';
 import { dealDamage } from '../src/core/systems/damageSystem';
 import type { GameState } from '../src/core/types';
@@ -162,6 +162,60 @@ describe('控制原子', () => {
     s.enemies = [e];
     ATOMS.knockback(ctxFor(s), { distance: 60, radius: 100 });
     expect(e.x).toBe(580);
+  });
+
+  it('knockback: boss 类型抗性将 60px 击退降为 9px', () => {
+    const e = enemy({ type: 'boss', x: 100, y: 0 });
+    expect(applyKnockback(e, 0, 0, 60)).toBe(true);
+    expect(e.x).toBeCloseTo(109);
+  });
+
+  it('knockback: 短窗口内连续递减，窗口过期后重置', () => {
+    const s = freshState();
+    const e = enemy({ x: 100, y: 0 });
+    s.enemies = [e];
+
+    const positions: number[] = [];
+    for (let i = 0; i < 3; i++) {
+      applyKnockback(e, 0, 0, 60);
+      positions.push(e.x);
+    }
+
+    expect(positions[0] - 100).toBeCloseTo(60);
+    expect(positions[1] - positions[0]).toBeCloseTo(30);
+    expect(positions[2] - positions[1]).toBeCloseTo(15);
+
+    tickStatusTimers(s, 2.01);
+    expect(e.status.kbFatigue).toBeNull();
+    const beforeResetHit = e.x;
+    applyKnockback(e, 0, 0, 60);
+    expect(e.x - beforeResetHit).toBeCloseTo(60);
+  });
+
+  it('knockback: 冻结中返回 false 且不产生疲劳', () => {
+    const e = enemy({ x: 100, y: 0 });
+    applyFreeze(e, 1);
+    expect(applyKnockback(e, 0, 0, 60)).toBe(false);
+    expect(e.x).toBe(100);
+    expect(e.status.kbFatigue).toBeNull();
+  });
+
+  it('impact 3★: Boss 在 5 发/秒下持续逼近，不再卡在射程边缘', () => {
+    const s = freshState();
+    const boss = enemy({ type: 'boss', x: 150, y: 0, speed: 20 });
+    s.enemies = [boss];
+    const shotInterval = 1 / 5;
+    let previousDistance = boss.x;
+
+    for (let shot = 0; shot < 12; shot++) {
+      boss.x -= boss.speed * shotInterval;
+      const beforeKnockback = boss.x;
+      expect(applyKnockback(boss, 0, 0, 22)).toBe(true);
+      expect(boss.x - beforeKnockback).toBeLessThan(boss.speed * shotInterval);
+      expect(boss.x).toBeLessThan(previousDistance);
+      previousDistance = boss.x;
+      tickStatusTimers(s, shotInterval);
+    }
   });
 
   it('taunt：半径内敌人移动目标改为落点', () => {
