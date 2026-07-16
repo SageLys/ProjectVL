@@ -7,7 +7,15 @@ export type TelemetryEventType =
   | 'waveStart'
   | 'waveCleared'
   | 'perkPopup'
-  | 'mergeOpportunity';
+  | 'mergeOpportunity'
+  | 'bountyOffer'
+  | 'bountyOfferExpired'
+  | 'bountyAccepted'
+  | 'bountyMemberSpawned'
+  | 'bountyCompleted'
+  | 'bountyFailed'
+  | 'bountyRewardLanded'
+  | 'bountyRewardPickup';
 
 export interface TelemetryEvent {
   type: TelemetryEventType;
@@ -21,6 +29,17 @@ export interface TelemetryEvent {
   range?: number;
   visibleSeconds?: number;
   cardType?: string;
+  offerId?: number;
+  encounterId?: number;
+  rewardCardType?: string;
+  rewardCardStar?: number;
+  wildcardStar?: number;
+  guaranteed?: boolean;
+  memberCount?: number;
+  decisionSeconds?: number;
+  clearSeconds?: number;
+  hpAtAccept?: number;
+  hpAtComplete?: number;
 }
 
 export interface TelemetrySample {

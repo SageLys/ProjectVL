@@ -10,7 +10,7 @@ interface Preset {
   version: 2;
   name: string;
   savedAt: string;
-  values: Record<string, number | string>;
+  values: Record<string, number | string | boolean>;
 }
 
 export interface TunerPanel {
@@ -35,6 +35,18 @@ export interface TunerHooks {
     jumpToWave(wave: number): void;
     restartWave(): void;
     getSpawnTelemetry(): { wave: number; spawnLeft: number; alive: number; spawnTimer: number; lastSpawnCheckCount: number; normalTarget: number; effectiveTarget: number; inEndSprint: boolean };
+    getBountyTelemetry(): {
+      chance: number;
+      noDamageSeconds: number;
+      offersThisWave: number;
+      maxOffersPerWave: number;
+      checkTimer: number;
+      cooldownRemaining: number;
+      currentRewardType: string | null;
+      encounterAlive: number;
+      encounterTotal: number;
+      guaranteedThisWave: boolean;
+    };
   };
 }
 
@@ -53,6 +65,7 @@ const GROUPS: { key: TunerGroup; title: string; note?: string }[] = [
   { key: 'enemies', title: 'C · 敌人数值' },
   { key: 'drops', title: 'D · 掉落与拾取' },
   { key: 'progression', title: '经验与升级' },
+  { key: 'bounty', title: 'E · 精英 Bounty' },
 ];
 
 function readPresets(): Preset[] {
@@ -80,6 +93,7 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
   root.hidden = false;
   const baseline = Object.fromEntries(ALL_TUNER_PARAMS.map(param => [param.path, getNumberAt(cfg, param.path)]));
   const baselineSpawnMode = cfg.waves.spawnMode;
+  const baselineBountyEnabled = cfg.bounty.enabled;
   const pendingWaves = new Map<string, number>();
   const baselineBossWaves = [...cfg.waves.bossWaves];
   let pendingBossWaves: number[] | null = null;
@@ -95,7 +109,9 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
       .map(param => controlHtml(param.path, param.label, ALL_TUNER_PARAMS.indexOf(param))).join('');
     const mode = group.key === 'waves' ? '<label class="tuner-control" data-path="waves.spawnMode"><span>出怪模式</span><select id="spawnModeInput"><option value="interval">interval</option><option value="budget">budget</option></select></label>' : '';
     const bossControl = group.key === 'waves' ? '<label class="tuner-control boss-waves-control" data-path="waves.bossWaves"><span>Boss 波次</span><output id="bossWavesError"></output><input id="bossWavesInput" type="text" placeholder="3, 5, 8"><small>多个波次使用逗号分隔；留空表示无 Boss</small></label>' : '';
-    return `<section class="tuner-group"><h3>${group.title}${group.note ? `<small>${group.note}</small>` : ''}</h3><div class="tuner-grid">${mode}${bossControl}${controls}</div></section>`;
+    const bountyEnabled = group.key === 'bounty' ? '<label class="tuner-control debug-check" data-path="bounty.enabled"><span>机制启用</span><input id="bountyEnabledInput" type="checkbox"></label>' : '';
+    const bountyStatus = group.key === 'bounty' ? '<p class="tuner-note" id="bountyStatus"></p>' : '';
+    return `<section class="tuner-group"><h3>${group.title}${group.note ? `<small>${group.note}</small>` : ''}</h3>${bountyStatus}<div class="tuner-grid">${mode}${bossControl}${bountyEnabled}${controls}</div></section>`;
   }).join('');
   const p2 = ALL_TUNER_PARAMS.filter(param => param.group === 'p2')
     .map(param => controlHtml(param.path, param.label, ALL_TUNER_PARAMS.indexOf(param))).join('');
@@ -178,9 +194,10 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
     if (path === 'waves.totalWaves') reconcileBossWaves(value);
   }
 
-  function snapshot(): Record<string, number | string> {
+  function snapshot(): Record<string, number | string | boolean> {
     return Object.fromEntries([
       ['waves.spawnMode', pendingSpawnMode ?? cfg.waves.spawnMode],
+      ['bounty.enabled', cfg.bounty.enabled],
       ...ALL_TUNER_PARAMS.map(param => [param.path, displayedValue(param.path)] as const),
       ['waves.bossWaves', formatBossWaves(displayedBossWaves())],
     ]);
@@ -215,6 +232,9 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
     mode.value = pendingSpawnMode ?? cfg.waves.spawnMode;
     mode.closest<HTMLElement>('.tuner-control')!.classList.toggle('pending', pendingSpawnMode !== null);
     mode.closest<HTMLElement>('.tuner-control')!.classList.toggle('diff', diffPaths.has('waves.spawnMode'));
+    const bountyEnabled = root.querySelector<HTMLInputElement>('#bountyEnabledInput')!;
+    bountyEnabled.checked = cfg.bounty.enabled;
+    bountyEnabled.closest<HTMLElement>('.tuner-control')!.classList.toggle('diff', diffPaths.has('bounty.enabled'));
     const bossInput = root.querySelector<HTMLInputElement>('#bossWavesInput')!;
     bossInput.value = bossWavesDraft;
     const bossControl = bossInput.closest<HTMLElement>('.tuner-control')!;
@@ -231,6 +251,7 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
       ? ` ${pendingSpawnMode} 将于下一波生效；点“重开本波”可立即应用。`
       : '';
     spawnModeStatus.textContent = `Current effective mode: ${cfg.waves.spawnMode}; pending mode: ${pendingSpawnMode ?? 'none'}.${pendingHint} Wave ${spawn.wave}; spawnLeft ${spawn.spawnLeft}; alive ${spawn.alive}; normal/actual target ${spawn.normalTarget}/${spawn.effectiveTarget}; end sprint ${spawn.inEndSprint ? 'yes' : 'no'}; spawnTimer ${spawn.spawnTimer.toFixed(2)}; last admission ${spawn.lastSpawnCheckCount}.`;
+    updateBountyStatus();
     renderMetrics();
     const projection = deriveMetrics(metricConfig(), config).budget?.projections.slice(0, 3);
     if (projection) {
@@ -239,6 +260,11 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
       note.textContent = `Budget estimate (W1–3 normal/sprint/average/peak): ${projection.map(item => `${item.normalTarget}/${item.sprintTarget}/${item.averageOnScreen.toFixed(1)}/${item.peakOnScreen}${item.sprintTriggered ? ' sprint' : ''}`).join(' · ')}. Interval uses fixed cadence; Budget uses discrete admission checks and expected DPS cleanup. Wave time includes first delay and final cleanup; total includes between-wave rest.`;
       derived.append(note);
     }
+  }
+
+  function updateBountyStatus(): void {
+    const bounty = hooks.debug.getBountyTelemetry();
+    root.querySelector<HTMLElement>('#bountyStatus')!.textContent = `当前有效概率 ${(bounty.chance * 100).toFixed(1)}% · 距上次受伤 ${bounty.noDamageSeconds.toFixed(1)}s · 本波报价 ${bounty.offersThisWave}/${bounty.maxOffersPerWave} · 下一次检查 ${bounty.checkTimer.toFixed(1)}s · 冷却 ${bounty.cooldownRemaining.toFixed(1)}s · 当前 Offer 奖励 ${bounty.currentRewardType ?? '无'} · 当前敌群存活 ${bounty.encounterAlive}/${bounty.encounterTotal} · 本波保底已触发：${bounty.guaranteedThisWave ? '是' : '否'}`;
   }
 
   function applyPendingWaveChanges(): void {
@@ -277,6 +303,12 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
     diffPaths.delete('waves.spawnMode');
     syncInputs();
   });
+  root.querySelector<HTMLInputElement>('#bountyEnabledInput')!.addEventListener('change', event => {
+    cfg.bounty.enabled = (event.currentTarget as HTMLInputElement).checked;
+    diffPaths.delete('bounty.enabled');
+    hooks.onImmediateChange('bounty.enabled');
+    syncInputs();
+  });
   root.querySelector<HTMLInputElement>('#bossWavesInput')!.addEventListener('input', event => {
     const input = event.currentTarget as HTMLInputElement;
     bossWavesDraft = input.value;
@@ -311,6 +343,7 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
     diffPaths.clear();
     if (hooks.isWaveActive()) pendingSpawnMode = baselineSpawnMode;
     else cfg.waves.spawnMode = baselineSpawnMode;
+    cfg.bounty.enabled = baselineBountyEnabled;
     bossWavesDraft = formatBossWaves(baselineBossWaves);
     bossWavesError = '';
     if (hooks.isWaveActive()) pendingBossWaves = [...baselineBossWaves];
@@ -354,6 +387,11 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
     if (mode === 'interval' || mode === 'budget') {
       if (hooks.isWaveActive()) pendingSpawnMode = mode; else cfg.waves.spawnMode = mode;
     }
+    const bountyEnabled = values['bounty.enabled'];
+    if (typeof bountyEnabled === 'boolean') {
+      cfg.bounty.enabled = bountyEnabled;
+      hooks.onImmediateChange('bounty.enabled');
+    }
     for (const param of ALL_TUNER_PARAMS) {
       const value = values[param.path];
       if (typeof value === 'number') setParam(param.path, value);
@@ -382,5 +420,6 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
   root.querySelector<HTMLInputElement>('#invincibleInput')!.addEventListener('change', event => hooks.debug.setInvincible((event.currentTarget as HTMLInputElement).checked));
 
   updatePresetOptions(); syncInputs();
+  window.setInterval(updateBountyStatus, 400);
   return { syncInputs, applyPendingWaveChanges, getPendingSpawnMode: () => pendingSpawnMode, getActivePresetName: () => activePresetName };
 }

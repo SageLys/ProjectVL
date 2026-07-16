@@ -61,6 +61,7 @@ describe('Bounty Director · 周期与概率', () => {
     cfg.bounty.offer.baseChancePerCheck = 0;
     const events = tickBountySystem(state, createDefaultConfig(), constRng(0.99), cfg.bounty.offer.checkIntervalSeconds);
     expect(events).toContainEqual(expect.objectContaining({ type: 'bountyOfferSpawned', guaranteed: true }));
+    expect(state.bountyDirector.guaranteedThisWave).toBe(true);
   });
 
   it('每波不超过 maxOffersPerWave，且普通报价受冷却限制', () => {

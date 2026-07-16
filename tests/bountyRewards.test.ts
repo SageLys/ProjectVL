@@ -87,6 +87,27 @@ describe('Bounty Rewards · 确定掉落', () => {
     expect(state.groundDrops).toHaveLength(1);
   });
 
+  it('拾取事件保留 Bounty 来源，供完整漏斗遥测归因', () => {
+    const state = freshState();
+    const config = createDefaultConfig();
+    spawnWildcardDrop(state, 10, 10, 1, 2, 12);
+    state.groundDrops[0].bountyEncounterId = 7;
+    expect(collectDrop(state, config, constRng(0), state.groundDrops[0])).toEqual([{
+      type: 'wildcardsGranted',
+      grants: [{ star: 1, count: 2 }],
+      bountyEncounterId: 7,
+    }]);
+
+    spawnGroundDrop(state, config, constRng(0), 10, 10, 'pierce', 1);
+    state.groundDrops[0].bountyEncounterId = 7;
+    expect(collectDrop(state, config, constRng(0), state.groundDrops[0])[0]).toEqual({
+      type: 'collected',
+      cardType: 'pierce',
+      merges: 0,
+      bountyEncounterId: 7,
+    });
+  });
+
   it('奖励洗牌袋重装时禁止与上一次类型相同', () => {
     cfg.bounty.offer.baseChancePerCheck = 1;
     cfg.bounty.offer.maxChancePerCheck = 1;

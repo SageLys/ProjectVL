@@ -51,6 +51,8 @@ export interface BountyDirectorState {
   lastHpLossAt: number;
   rewardBag: CardType[];
   lastRewardType: CardType | null;
+  /** Whether the deterministic minimum-offer guarantee fired this wave. */
+  guaranteedThisWave: boolean;
 }
 
 /** 注入式随机源：返回 [0,1)。测试可传入确定性实现。 */
@@ -308,7 +310,7 @@ export type GameEvent =
   | { type: 'gameEnd'; win: boolean }
   | { type: 'breakthrough'; damage: number }
   | { type: 'cardsFull' }
-  | { type: 'collected'; cardType: CardType; merges: number }
+  | { type: 'collected'; cardType: CardType; merges: number; bountyEncounterId?: number }
   | { type: 'equipFull' }
   | { type: 'equipRejected'; reason: 'star' | 'duplicate' }
   | { type: 'moved'; cardType: CardType; merges: number }
@@ -317,7 +319,7 @@ export type GameEvent =
   | { type: 'skillConsumed'; cardType: CardType; star: number; x: number; y: number }
   | { type: 'equipped'; cardType: CardType; star: number; slotIndex: number }
   | { type: 'fed'; cardType: CardType; resultStar: number; slotIndex?: number; targetCardId?: number }
-  | { type: 'wildcardsGranted'; grants: Array<{ star: number; count: number }> }
+  | { type: 'wildcardsGranted'; grants: Array<{ star: number; count: number }>; bountyEncounterId?: number }
   | {
       type: 'wildcardMerged';
       cardType: CardType;
@@ -330,7 +332,7 @@ export type GameEvent =
   | { type: 'wildcardMergeRejected'; reason: 'emptyTarget' | 'maxStar' | 'missingWildcard'; requiredStar?: number }
   | { type: 'bountyOfferSpawned'; offerId: number; rewardCardType: CardType; guaranteed: boolean }
   | { type: 'bountyOfferExpired'; offerId: number }
-  | { type: 'bountyAccepted'; offerId: number; encounterId: number; rewardCardType: CardType; side: BountySide }
+  | { type: 'bountyAccepted'; offerId: number; encounterId: number; rewardCardType: CardType; side: BountySide; decisionSeconds: number; memberCount: number }
   | { type: 'bountyMemberSpawned'; encounterId: number; enemyId: number }
   | { type: 'bountyCompleted'; encounterId: number; rewardCardType: CardType; clearSeconds: number }
   | { type: 'bountyFailed'; encounterId: number }

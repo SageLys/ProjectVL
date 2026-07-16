@@ -28,6 +28,7 @@ export function startNextWave(state: GameState, config: Config, rng: Rng): GameE
   state.bountyDirector.offersThisWave = 0;
   state.bountyDirector.acceptedThisWave = 0;
   state.bountyDirector.completedThisWave = 0;
+  state.bountyDirector.guaranteedThisWave = false;
   state.bountyDirector.checkTimer = cfg.bounty.offer.checkIntervalSeconds;
   const events: GameEvent[] = [{ type: 'waveStart', wave: state.wave }];
   events.push(...fireTrigger(state, config, rng, 'onWaveStart', { wave: state.wave }));
@@ -121,6 +122,7 @@ export function jumpToWave(state: GameState, config: Config, rng: Rng, targetWav
   state.bountyDirector.offersThisWave = 0;
   state.bountyDirector.acceptedThisWave = 0;
   state.bountyDirector.completedThisWave = 0;
+  state.bountyDirector.guaranteedThisWave = false;
   state.bountyDirector.checkTimer = cfg.bounty.offer.checkIntervalSeconds;
   state.bountyDirector.cooldownRemaining = 0;
   state.intervalClocks = {};

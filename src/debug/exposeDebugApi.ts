@@ -21,6 +21,18 @@ export interface DebugApi {
   setTimeScale(scale: number): void;
   setSeed(seed: number): void;
   getDebugSettings(): { seed: number; timeScale: number; invincible: boolean };
+  getBountyTelemetry(): {
+    chance: number;
+    noDamageSeconds: number;
+    offersThisWave: number;
+    maxOffersPerWave: number;
+    checkTimer: number;
+    cooldownRemaining: number;
+    currentRewardType: string | null;
+    encounterAlive: number;
+    encounterTotal: number;
+    guaranteedThisWave: boolean;
+  };
 }
 
 declare global {

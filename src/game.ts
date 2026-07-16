@@ -11,7 +11,7 @@ import { jumpToWave, restartWave, startNextWave } from './core/systems/waveSyste
 import { budgetAdmission } from './core/systems/budgetRules';
 import { moveOrSwap, consumeCard } from './core/systems/equipmentSystem';
 import { collectNearest, spawnTestDrops, spawnGroundDrop } from './core/systems/dropSystem';
-import { acceptBountyOfferAt } from './core/systems/bountySystem';
+import { acceptBountyOfferAt, calculateOfferChance } from './core/systems/bountySystem';
 import { applyPerk } from './core/systems/progressionSystem';
 import { checkWildcardTarget, grantWildcards, useWildcardOnSlot, type WildcardGrant } from './core/systems/wildcardSystem';
 import { totalRange } from './core/stats';
@@ -255,6 +255,24 @@ if (import.meta.env.DEV) void Promise.all([import('./debug/exposeDebugApi'), imp
   const devTools = document.createElement('details');
   devTools.className = 'dev-tools';
   document.body.append(devTools);
+  function getBountyTelemetry() {
+    const encounter = state.bountyEncounters.find(item => item.status === 'spawning' || item.status === 'active');
+    const encounterTotal = encounter
+      ? Math.min(cfg.bounty.encounter.enemyCountMax, cfg.bounty.encounter.enemyCountBase + Math.floor((state.wave - 1) * cfg.bounty.encounter.enemyCountPerWave))
+      : 0;
+    return {
+      chance: calculateOfferChance(state),
+      noDamageSeconds: Math.max(0, state.time - state.bountyDirector.lastHpLossAt),
+      offersThisWave: state.bountyDirector.offersThisWave,
+      maxOffersPerWave: cfg.bounty.offer.maxOffersPerWave,
+      checkTimer: Math.max(0, state.bountyDirector.checkTimer),
+      cooldownRemaining: Math.max(0, state.bountyDirector.cooldownRemaining),
+      currentRewardType: state.bountyOffers[0]?.rewardCardType ?? null,
+      encounterAlive: encounter?.memberIds.length ?? 0,
+      encounterTotal,
+      guaranteedThisWave: state.bountyDirector.guaranteedThisWave,
+    };
+  }
   tuner = tunerModule.createTunerPanel(devTools, config, {
     isWaveActive: () => state.mode === 'playing',
     onImmediateChange(path) {
@@ -278,6 +296,7 @@ if (import.meta.env.DEV) void Promise.all([import('./debug/exposeDebugApi'), imp
       jumpToWave(wave) { dispatch(jumpToWave(state, config, rng, wave)); modals.hideResult(); modals.hideLevel(); modals.message('', '', false); },
       restartWave() { dispatch(restartWave(state, config, rng)); modals.hideResult(); modals.hideLevel(); modals.message('', '', false); },
       getSpawnTelemetry() { const admission = budgetAdmission(state.wave, state.spawnLeft, state.enemies.length, cfg.waves.budget); return { wave: state.wave, spawnLeft: state.spawnLeft, alive: state.enemies.length, spawnTimer: state.spawnTimer, lastSpawnCheckCount: state.lastSpawnCheckCount, normalTarget: admission.normalTarget, effectiveTarget: admission.effectiveTarget, inEndSprint: admission.inEndSprint }; },
+      getBountyTelemetry,
     },
   });
   if (evidenceMode?.startsWith('upgrade')) devTools.hidden = true;
@@ -327,6 +346,7 @@ if (import.meta.env.DEV) void Promise.all([import('./debug/exposeDebugApi'), imp
     setTimeScale: scale => { devTimeScale = Math.max(0.25, Math.min(3, scale)); tuner?.syncInputs(); },
     setSeed: seed => { devSeed = Math.trunc(seed); rngSource = debugModule.createSeededRng(devSeed); tuner?.syncInputs(); },
     getDebugSettings: () => ({ seed: devSeed, timeScale: devTimeScale, invincible: devInvincible }),
+    getBountyTelemetry,
   });
 });
 

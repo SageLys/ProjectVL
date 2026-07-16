@@ -104,6 +104,18 @@ export function createDevTelemetry(options: Options): DevTelemetry {
     for (const drop of state().groundDrops) if (!knownDrops.has(drop.id)) {
       knownDrops.add(drop.id);
       add({ type: 'dropLanded', dropId: drop.id, x: drop.x, y: drop.y, cardType: drop.kind === 'card' ? drop.type : 'wildcard' });
+      if (drop.bountyEncounterId !== undefined) {
+        const encounter = state().bountyEncounters.find(item => item.id === drop.bountyEncounterId);
+        add({
+          type: 'bountyRewardLanded',
+          dropId: drop.id,
+          x: drop.x,
+          y: drop.y,
+          encounterId: drop.bountyEncounterId,
+          rewardCardType: encounter?.rewardCardType ?? (drop.kind === 'card' ? drop.type : undefined),
+          ...(drop.kind === 'card' ? { rewardCardStar: drop.star } : { wildcardStar: drop.star }),
+        });
+      }
     }
     const liveDrops = new Set(state().groundDrops.map(drop => drop.id));
     for (const id of knownDrops) if (!liveDrops.has(id)) knownDrops.delete(id);
@@ -217,6 +229,44 @@ export function createDevTelemetry(options: Options): DevTelemetry {
       if (event.type === 'collected') {
         add({ type: 'pickup', cardType: event.cardType });
         if (event.merges > 0) add({ type: 'mergeOpportunity', cardType: event.cardType });
+        if (event.bountyEncounterId !== undefined) {
+          const encounter = state().bountyEncounters.find(item => item.id === event.bountyEncounterId);
+          add({ type: 'bountyRewardPickup', encounterId: event.bountyEncounterId, rewardCardType: encounter?.rewardCardType ?? event.cardType, cardType: event.cardType });
+        }
+      }
+      if (event.type === 'wildcardsGranted' && event.bountyEncounterId !== undefined) {
+        const encounter = state().bountyEncounters.find(item => item.id === event.bountyEncounterId);
+        add({ type: 'pickup', cardType: 'wildcard' });
+        add({ type: 'bountyRewardPickup', encounterId: event.bountyEncounterId, rewardCardType: encounter?.rewardCardType, cardType: 'wildcard', wildcardStar: event.grants[0]?.star });
+      }
+      if (event.type === 'bountyOfferSpawned') {
+        const offer = state().bountyOffers.find(item => item.id === event.offerId);
+        add({ type: 'bountyOffer', offerId: event.offerId, rewardCardType: event.rewardCardType, rewardCardStar: offer?.rewardCardStar, wildcardStar: offer?.wildcardStar, guaranteed: event.guaranteed });
+      }
+      if (event.type === 'bountyOfferExpired') add({ type: 'bountyOfferExpired', offerId: event.offerId });
+      if (event.type === 'bountyAccepted') {
+        const encounter = state().bountyEncounters.find(item => item.id === event.encounterId);
+        add({
+          type: 'bountyAccepted',
+          offerId: event.offerId,
+          encounterId: event.encounterId,
+          rewardCardType: event.rewardCardType,
+          rewardCardStar: encounter?.rewardCardStar,
+          wildcardStar: encounter?.wildcardStar,
+          guaranteed: encounter?.guaranteed,
+          memberCount: event.memberCount,
+          decisionSeconds: event.decisionSeconds,
+          hpAtAccept: encounter?.hpAtAccept,
+        });
+      }
+      if (event.type === 'bountyMemberSpawned') add({ type: 'bountyMemberSpawned', encounterId: event.encounterId, enemyId: event.enemyId });
+      if (event.type === 'bountyCompleted') {
+        const encounter = state().bountyEncounters.find(item => item.id === event.encounterId);
+        add({ type: 'bountyCompleted', encounterId: event.encounterId, rewardCardType: event.rewardCardType, rewardCardStar: encounter?.rewardCardStar, wildcardStar: encounter?.wildcardStar, guaranteed: encounter?.guaranteed, clearSeconds: event.clearSeconds, hpAtAccept: encounter?.hpAtAccept, hpAtComplete: state().hp });
+      }
+      if (event.type === 'bountyFailed') {
+        const encounter = state().bountyEncounters.find(item => item.id === event.encounterId);
+        add({ type: 'bountyFailed', encounterId: event.encounterId, rewardCardType: encounter?.rewardCardType, rewardCardStar: encounter?.rewardCardStar, wildcardStar: encounter?.wildcardStar, guaranteed: encounter?.guaranteed, hpAtAccept: encounter?.hpAtAccept });
       }
     }
     syncAdditions();

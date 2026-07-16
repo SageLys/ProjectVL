@@ -97,6 +97,7 @@ function createOffer(state: GameState, rng: Rng, guaranteed: boolean): GameEvent
   };
   state.bountyOffers.push(offer);
   state.bountyDirector.offersThisWave++;
+  if (guaranteed) state.bountyDirector.guaranteedThisWave = true;
   state.bountyDirector.cooldownRemaining = cfg.bounty.offer.cooldownSeconds;
   return { type: 'bountyOfferSpawned', offerId: offer.id, rewardCardType: offer.rewardCardType, guaranteed };
 }
@@ -289,5 +290,13 @@ export function acceptBountyOfferAt(state: GameState, x: number, y: number): Gam
     lastKillY: offer.y,
   });
   state.bountyDirector.acceptedThisWave++;
-  return [{ type: 'bountyAccepted', offerId: offer.id, encounterId, rewardCardType: offer.rewardCardType, side: offer.side }];
+  return [{
+    type: 'bountyAccepted',
+    offerId: offer.id,
+    encounterId,
+    rewardCardType: offer.rewardCardType,
+    side: offer.side,
+    decisionSeconds: Math.max(0, state.time - offer.createdAt),
+    memberCount: encounterCount,
+  }];
 }

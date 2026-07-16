@@ -1,4 +1,4 @@
-export type TunerGroup = 'waves' | 'combat' | 'enemies' | 'drops' | 'progression' | 'p2';
+export type TunerGroup = 'waves' | 'combat' | 'enemies' | 'drops' | 'progression' | 'bounty' | 'p2';
 
 export interface TunerParam {
   path: string;
@@ -17,6 +17,56 @@ export const BUDGET_TUNER_PARAMS: TunerParam[] = [
   { path: 'waves.budget.waveEndSprint.window', label: 'Budget · 波末窗口', group: 'waves', waveDeferred: true },
   { path: 'waves.budget.waveEndSprint.multiplier', label: 'Budget · 波末目标倍率', group: 'waves', waveDeferred: true },
   { path: 'waves.budget.maxAlive', label: 'Budget · 同屏硬上限', group: 'waves', waveDeferred: true },
+];
+
+export const BOUNTY_TUNER_PARAMS: TunerParam[] = [
+  { path: 'bounty.offer.enabledFromWave', label: '报价 · 起始波次', group: 'bounty' },
+  { path: 'bounty.offer.checkIntervalSeconds', label: '报价 · 检查间隔（秒）', group: 'bounty' },
+  { path: 'bounty.offer.baseChancePerCheck', label: '报价 · 基础概率', group: 'bounty' },
+  { path: 'bounty.offer.minChancePerCheck', label: '报价 · 概率下限', group: 'bounty' },
+  { path: 'bounty.offer.maxChancePerCheck', label: '报价 · 概率上限', group: 'bounty' },
+  { path: 'bounty.offer.noDamageRampSeconds', label: '报价 · 无伤爬坡时长', group: 'bounty' },
+  { path: 'bounty.offer.noDamageBonusMax', label: '报价 · 无伤加成上限', group: 'bounty' },
+  { path: 'bounty.offer.healthyHpThreshold', label: '报价 · 健康血量阈值', group: 'bounty' },
+  { path: 'bounty.offer.healthyHpBonusMax', label: '报价 · 健康血量加成', group: 'bounty' },
+  { path: 'bounty.offer.recentDamagePenalty', label: '报价 · 近期受伤惩罚', group: 'bounty' },
+  { path: 'bounty.offer.recentDamagePenaltySeconds', label: '报价 · 近期受伤窗口', group: 'bounty' },
+  { path: 'bounty.offer.markWindowSeconds', label: '报价 · 接受窗口', group: 'bounty' },
+  { path: 'bounty.offer.cooldownSeconds', label: '报价 · 冷却时间', group: 'bounty' },
+  { path: 'bounty.offer.minOffersPerWave', label: '报价 · 每波保底次数', group: 'bounty' },
+  { path: 'bounty.offer.maxOffersPerWave', label: '报价 · 每波上限', group: 'bounty' },
+  { path: 'bounty.offer.guaranteeAtWaveProgress', label: '报价 · 保底进度阈值', group: 'bounty' },
+  { path: 'bounty.offer.maxConcurrentOffers', label: '报价 · 同时存在上限', group: 'bounty' },
+  { path: 'bounty.offer.maxConcurrentEncounters', label: '报价 · 未结算敌群上限', group: 'bounty' },
+
+  { path: 'bounty.encounter.enemyCountBase', label: '敌群 · 基础数量', group: 'bounty' },
+  { path: 'bounty.encounter.enemyCountPerWave', label: '敌群 · 每波追加数量', group: 'bounty' },
+  { path: 'bounty.encounter.enemyCountMax', label: '敌群 · 数量上限', group: 'bounty' },
+  { path: 'bounty.encounter.hpMul', label: '敌群 · 生命倍率', group: 'bounty' },
+  { path: 'bounty.encounter.speedMul', label: '敌群 · 速度倍率', group: 'bounty' },
+  { path: 'bounty.encounter.damageMul', label: '敌群 · 伤害倍率', group: 'bounty' },
+  { path: 'bounty.encounter.spawnIntervalSeconds', label: '敌群 · 分批生成间隔', group: 'bounty' },
+  { path: 'bounty.encounter.spawnSpread', label: '敌群 · 出生散布', group: 'bounty' },
+  { path: 'bounty.encounter.emergencyOverrideDistance', label: '敌群 · 紧急覆盖距离', group: 'bounty' },
+  { path: 'bounty.encounter.composition.normalWeight', label: '敌群 · 普通权重', group: 'bounty' },
+  { path: 'bounty.encounter.composition.fastWeight', label: '敌群 · 高速权重', group: 'bounty' },
+  { path: 'bounty.encounter.composition.tankWeight', label: '敌群 · 重装权重', group: 'bounty' },
+
+  { path: 'bounty.reward.cardCount', label: '奖励 · 指定卡数量', group: 'bounty' },
+  { path: 'bounty.reward.cardStarBase', label: '奖励 · 指定卡基础星级', group: 'bounty' },
+  { path: 'bounty.reward.cardStarUpgradeEveryWaves', label: '奖励 · 指定卡升星波数', group: 'bounty' },
+  { path: 'bounty.reward.cardStarMax', label: '奖励 · 指定卡星级上限', group: 'bounty' },
+  { path: 'bounty.reward.wildcardCount', label: '奖励 · 万能卡数量', group: 'bounty' },
+  { path: 'bounty.reward.wildcardStarBase', label: '奖励 · 万能卡基础星级', group: 'bounty' },
+  { path: 'bounty.reward.wildcardStarUpgradeEveryWaves', label: '奖励 · 万能卡升星波数', group: 'bounty' },
+  { path: 'bounty.reward.wildcardStarMax', label: '奖励 · 万能卡星级上限', group: 'bounty' },
+  { path: 'bounty.reward.dropLifetimeSeconds', label: '奖励 · 地面寿命', group: 'bounty' },
+  { path: 'bounty.reward.repeatProtection', label: '奖励 · 重复保护', group: 'bounty' },
+
+  { path: 'bounty.visual.offerRadius', label: '视觉 · 报价半径', group: 'bounty' },
+  { path: 'bounty.visual.offerEdgeInset', label: '视觉 · 边缘内缩', group: 'bounty' },
+  { path: 'bounty.visual.enemyGlowRadius', label: '视觉 · 敌群光晕半径', group: 'bounty' },
+  { path: 'bounty.visual.enemyPulseSpeed', label: '视觉 · 敌群脉冲速度', group: 'bounty' },
 ];
 
 function enemyParams(type: 'normal' | 'fast' | 'tank' | 'boss', label: string): TunerParam[] {
@@ -77,7 +127,7 @@ export const TUNER_PARAMS: TunerParam[] = [
 ];
 
 /** A3 additions stay separate so A1's original 61-field contract remains stable. */
-export const ALL_TUNER_PARAMS: TunerParam[] = [...TUNER_PARAMS, ...BUDGET_TUNER_PARAMS];
+export const ALL_TUNER_PARAMS: TunerParam[] = [...TUNER_PARAMS, ...BUDGET_TUNER_PARAMS, ...BOUNTY_TUNER_PARAMS];
 
 export function getNumberAt(root: unknown, path: string): number {
   let value: unknown = root;
@@ -99,7 +149,7 @@ export function formatBossWaves(values: readonly number[]): string {
 }
 
 /** 兼容旧 Preset；新字段存在时优先使用新字段。 */
-export function migratePresetValues(values: Record<string, number | string>): Record<string, number | string> {
+export function migratePresetValues(values: Record<string, number | string | boolean>): Record<string, number | string | boolean> {
   const migrated = { ...values };
   if (migrated['waves.bossWaves'] === undefined && migrated['waves.bossWave'] !== undefined) {
     migrated['waves.bossWaves'] = String(migrated['waves.bossWave']);

@@ -87,7 +87,11 @@ export function collectDrop(state: GameState, config: Config, rng: Rng, drop: Gr
   if (drop.kind === 'wildcard') {
     state.groundDrops = state.groundDrops.filter(item => item.id !== drop.id);
     state.collected++;
-    return grantWildcards(state, [{ star: drop.star, count: drop.count }]);
+    const events = grantWildcards(state, [{ star: drop.star, count: drop.count }]);
+    if (drop.bountyEncounterId !== undefined) {
+      for (const event of events) if (event.type === 'wildcardsGranted') event.bountyEncounterId = drop.bountyEncounterId;
+    }
+    return events;
   }
   const empty = state.cards.findIndex(card => card === null);
   const originalLength = state.cards.length;
@@ -107,7 +111,9 @@ export function collectDrop(state: GameState, config: Config, rng: Rng, drop: Gr
     if (removableNullIndex < 0) throw new Error('Full-hand merge did not free a temporary slot');
     state.cards.splice(removableNullIndex, 1);
   }
-  const events: GameEvent[] = [{ type: 'collected', cardType: drop.type, merges: merged }];
+  const collected: GameEvent = { type: 'collected', cardType: drop.type, merges: merged };
+  if (drop.bountyEncounterId !== undefined) collected.bountyEncounterId = drop.bountyEncounterId;
+  const events: GameEvent[] = [collected];
   events.push(...mergeEvents);
   events.push(...fireTrigger(state, config, rng, 'onPickup', { drop, point: { x: drop.x, y: drop.y } }));
   return events;

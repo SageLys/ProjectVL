@@ -80,6 +80,7 @@ export function createInitialState(): GameState {
       lastHpLossAt: 0,
       rewardBag: [],
       lastRewardType: null,
+      guaranteedThisWave: false,
     },
     nextBountyOfferId: 1,
     nextBountyEncounterId: 1,
