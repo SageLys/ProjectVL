@@ -43,7 +43,8 @@ function runBotGame(s: GameState, config: Config, rng: Rng): void {
       }
     }
     if (frame % 15 === 0 && s.cards.filter(c => c === null).length <= 1) {
-      const idx = s.cards.findIndex(Boolean);
+      const oneStarIndex = s.cards.findIndex(card => card?.star === 1);
+      const idx = oneStarIndex >= 0 ? oneStarIndex : s.cards.findIndex(Boolean);
       if (idx >= 0) consumeCard(s, config, rng, idx, 480 + (rng() - 0.5) * 200, 300 + (rng() - 0.5) * 150);
     }
   }

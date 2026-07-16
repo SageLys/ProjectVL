@@ -7,7 +7,7 @@ import {
 } from '../src/core/effects/statusSystem';
 import { dealDamage } from '../src/core/systems/damageSystem';
 import type { GameState } from '../src/core/types';
-import { enemy, freshState, createDefaultConfig, constRng, resetTestEnv } from './helpers';
+import { card, enemy, freshState, createDefaultConfig, constRng, resetTestEnv } from './helpers';
 
 const config = createDefaultConfig();
 const rng = constRng(0.5);
@@ -269,6 +269,14 @@ describe('领域/经济/防御/共用原子', () => {
     ATOMS.extraDrop(ctxFor(s, { origin: { x: 300, y: 300 } }), { count: 2, starWeights: { '3': 1 } });
     expect(s.groundDrops).toHaveLength(2);
     for (const d of s.groundDrops) expect(d.star).toBeLessThanOrEqual(2);
+  });
+
+  it('extraDrop keeps uniform card-type selection independent of build investment', () => {
+    const s = freshState();
+    s.equipment[0] = card('pierce', 6);
+    ATOMS.extraDrop(ctxFor(s, { rng: constRng(0.99) }), { count: 1, starWeights: { '1': 1 } });
+    expect(s.groundDrops[0]).toEqual(expect.objectContaining({ type: 'thorns', star: 1 }));
+    expect(s.normalDropDirector.ordinaryDropCount).toBe(0);
   });
 
   it('shield：写入护盾状态（取更强者）', () => {

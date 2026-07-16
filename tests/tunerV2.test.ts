@@ -5,7 +5,10 @@ import { jumpToWave, tickSpawns } from '../src/core/systems/waveSystem';
 import { budgetWaveQuotaFor } from '../src/core/systems/budgetRules';
 import { createSeededRng } from '../src/debug/exposeDebugApi';
 import { deriveMetrics } from '../src/ui/derivedMetrics';
-import { BOUNTY_TUNER_PARAMS, BUDGET_TUNER_PARAMS, TUNER_PARAMS, getNumberAt, setNumberAt } from '../src/ui/tunerSchema';
+import {
+  BOUNTY_TUNER_PARAMS, BUDGET_TUNER_PARAMS, DROP_DIRECTOR_TUNER_PARAMS, TUNER_PARAMS,
+  getNumberAt, setNumberAt,
+} from '../src/ui/tunerSchema';
 import { freshState, resetTestEnv } from './helpers';
 
 beforeEach(resetTestEnv);
@@ -18,6 +21,18 @@ describe('调参面板 v2 · 参数与派生指标', () => {
       expect(range, param.path).toBeDefined();
       expect(range.min).toBeLessThan(range.max);
       expect(range.step).toBeGreaterThan(0);
+    }
+  });
+
+  it('exposes every numeric drop-director control with a valid tuner range', () => {
+    expect(DROP_DIRECTOR_TUNER_PARAMS).toHaveLength(25);
+    expect(DROP_DIRECTOR_TUNER_PARAMS.every(param => param.group === 'drops')).toBe(true);
+    for (const param of DROP_DIRECTOR_TUNER_PARAMS) {
+      const range = cfg.tuner[param.path];
+      expect(range, param.path).toBeDefined();
+      expect(range.min).toBeLessThan(range.max);
+      expect(range.step).toBeGreaterThan(0);
+      expect(() => getNumberAt(cfg, param.path)).not.toThrow();
     }
   });
 

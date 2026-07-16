@@ -136,6 +136,34 @@ export interface ProgressionConfig {
   perks: PerkDef[];
 }
 
+export interface NormalDropTypePolicyConfig {
+  enabled: boolean;
+  roleBagSize: number;
+  earlyMix: { discovery: number; build: number; pivot: number };
+  lateMix: { discovery: number; build: number; pivot: number };
+  bootstrapMinDiscovery: number;
+  maturity: {
+    fullMergeOps: number;
+    fullHighestStar: number;
+    fullEquippedTypes: number;
+    mergeWeight: number;
+    starWeight: number;
+    equipWeight: number;
+  };
+  build: {
+    topK: number;
+    scorePower: number;
+    mergeReadyMultiplier: number;
+    equippedBaseBonus: number;
+    equippedStarBonus: number;
+    historicalMergeWeight: number;
+    historicalMergeCap: number;
+    maxWeightRatio: number;
+  };
+  pivot: { excludeTopK: number; candidateFraction: number };
+  maxSameTypeStreak: number;
+}
+
 export interface EconomyConfig {
   maxStar: number;
   mergeCopies: number;
@@ -157,6 +185,7 @@ export interface EconomyConfig {
   dropStarPolicy: { normal: number; bountyBossMax: number; star2Share: number };
   drops: { pickupRadius: number; chanceCap: number };
   defaults: { dropChance: number; dropLifetime: number };
+  normalDropTypePolicy: NormalDropTypePolicyConfig;
 }
 
 export interface TunerRange {

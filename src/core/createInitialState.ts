@@ -1,10 +1,21 @@
 import { cfg } from '../config';
-import type { Config, GameState, WildcardInventory } from './types';
+import type { CardTypeRunStats, Config, GameState, WildcardInventory } from './types';
 
 function createEmptyWildcardInventory(maxStar: number): WildcardInventory {
   const inv: WildcardInventory = {};
   for (let star = 1; star < maxStar; star++) inv[star] = 0;
   return inv;
+}
+
+function createEmptyCardTypeRunStats(): CardTypeRunStats {
+  return {
+    ordinaryShown: 0,
+    totalShown: 0,
+    collected: 0,
+    mergeOps: 0,
+    highestStarReached: 0,
+    lastOrdinaryShownAt: 0,
+  };
 }
 
 /** 从各域 defaults 组装一份可变的运行期参数副本（调参面板操作对象）。 */
@@ -81,6 +92,14 @@ export function createInitialState(): GameState {
       rewardBag: [],
       lastRewardType: null,
       guaranteedThisWave: false,
+    },
+    normalDropDirector: {
+      roleBag: [],
+      recentTypes: [],
+      ordinaryDropCount: 0,
+      typeStats: Object.fromEntries(
+        cfg.skills.cards.map(card => [card.id, createEmptyCardTypeRunStats()]),
+      ),
     },
     nextBountyOfferId: 1,
     nextBountyEncounterId: 1,

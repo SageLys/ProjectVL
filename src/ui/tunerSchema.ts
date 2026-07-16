@@ -69,6 +69,34 @@ export const BOUNTY_TUNER_PARAMS: TunerParam[] = [
   { path: 'bounty.visual.enemyPulseSpeed', label: '视觉 · 敌群脉冲速度', group: 'bounty' },
 ];
 
+export const DROP_DIRECTOR_TUNER_PARAMS: TunerParam[] = [
+  { path: 'economy.normalDropTypePolicy.roleBagSize', label: '掉落导演 · 角色袋长度', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.earlyMix.discovery', label: '掉落导演 · 前期探索位', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.earlyMix.build', label: '掉落导演 · 前期主线位', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.earlyMix.pivot', label: '掉落导演 · 前期调整位', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.lateMix.discovery', label: '掉落导演 · 后期探索位', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.lateMix.build', label: '掉落导演 · 后期主线位', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.lateMix.pivot', label: '掉落导演 · 后期调整位', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.bootstrapMinDiscovery', label: '掉落导演 · 启动探索保底', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.maturity.fullMergeOps', label: '掉落导演 · 满成熟合成数', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.maturity.fullHighestStar', label: '掉落导演 · 满成熟最高星', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.maturity.fullEquippedTypes', label: '掉落导演 · 满成熟装备数', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.maturity.mergeWeight', label: '掉落导演 · 合成成熟权重', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.maturity.starWeight', label: '掉落导演 · 星级成熟权重', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.maturity.equipWeight', label: '掉落导演 · 装备成熟权重', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.build.topK', label: '掉落导演 · 主线候选数', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.build.scorePower', label: '掉落导演 · 投入分指数', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.build.mergeReadyMultiplier', label: '掉落导演 · 可合成倍率', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.build.equippedBaseBonus', label: '掉落导演 · 装备基础加分', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.build.equippedStarBonus', label: '掉落导演 · 装备星级加分', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.build.historicalMergeWeight', label: '掉落导演 · 历史合成权重', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.build.historicalMergeCap', label: '掉落导演 · 历史合成封顶', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.build.maxWeightRatio', label: '掉落导演 · 最大权重比', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.pivot.excludeTopK', label: '掉落导演 · 调整排除头部', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.pivot.candidateFraction', label: '掉落导演 · 调整候选比例', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.maxSameTypeStreak', label: '掉落导演 · 同型连抽上限', group: 'drops' },
+];
+
 function enemyParams(type: 'normal' | 'fast' | 'tank' | 'boss', label: string): TunerParam[] {
   const prefix = `enemies.types.${type}`;
   return [
@@ -127,7 +155,12 @@ export const TUNER_PARAMS: TunerParam[] = [
 ];
 
 /** A3 additions stay separate so A1's original 61-field contract remains stable. */
-export const ALL_TUNER_PARAMS: TunerParam[] = [...TUNER_PARAMS, ...BUDGET_TUNER_PARAMS, ...BOUNTY_TUNER_PARAMS];
+export const ALL_TUNER_PARAMS: TunerParam[] = [
+  ...TUNER_PARAMS,
+  ...BUDGET_TUNER_PARAMS,
+  ...BOUNTY_TUNER_PARAMS,
+  ...DROP_DIRECTOR_TUNER_PARAMS,
+];
 
 export function getNumberAt(root: unknown, path: string): number {
   let value: unknown = root;

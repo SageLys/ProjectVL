@@ -5,19 +5,18 @@ import { autoMergeCards, getActiveMergeCopies } from './cardSystem';
 import { fireTrigger, getModifiers } from '../effects/interpreter';
 import { addXp } from './progressionSystem';
 import { grantWildcards } from './wildcardSystem';
+import {
+  getCardPool, getOrCreateCardTypeRunStats, recordCardDropShown, selectNormalEnemyDropType,
+  selectUniformCardType,
+} from './dropTypePolicy';
 
 const TAU = Math.PI * 2;
 /** 正式卡池（P5 批次1+批次2，共 11 张技能卡）。 */
-export const CARD_KEYS: CardType[] = [
-  'pierce', 'chainLightning', 'frost', 'decoy', 'scorch', 'harvest', 'aegis',
-  'splitBlast', 'impact', 'sanctum', 'thorns',
-];
 /** 过期折算经验的基准值（丰收 5★ 落穗：expiryConvert.ratio × 星级 × 本常数）。 */
 const EXPIRY_CONVERT_XP_PER_STAR = 4;
 
 /** 在 (x,y) 生成一枚限时地面掉落。type 缺省随机；star 缺省按掉落星级策略（普通=1★）。 */
-export function spawnGroundDrop(state: GameState, config: Config, rng: Rng, x: number, y: number, forcedType: CardType | null = null, star?: number): void {
-  const type = forcedType ?? CARD_KEYS[Math.floor(rng() * CARD_KEYS.length)];
+export function spawnGroundDrop(state: GameState, config: Config, rng: Rng, x: number, y: number, type: CardType, star?: number): void {
   const life = totalDropLifetime(state, config);
   state.groundDrops.push({
     id: state.nextDropId++,
@@ -53,7 +52,11 @@ function normalDropStar(rng: Rng): number {
 /** 击杀掉落判定：概率命中或 boss 必掉，则在敌人位置生成掉落。 */
 export function rollDropOnKill(state: GameState, config: Config, rng: Rng, enemy: Enemy): void {
   if (rng() < totalDropChance(state, config) || enemy.type === 'boss') {
-    spawnGroundDrop(state, config, rng, enemy.x, enemy.y);
+    const type = enemy.type === 'boss'
+      ? selectUniformCardType(rng)
+      : selectNormalEnemyDropType(state, rng);
+    if (enemy.type === 'boss') recordCardDropShown(state, type, 'bossKill');
+    spawnGroundDrop(state, config, rng, enemy.x, enemy.y, type);
   }
 }
 
@@ -105,6 +108,9 @@ export function collectDrop(state: GameState, config: Config, rng: Rng, drop: Gr
   if (empty >= 0) state.cards[empty] = collectedCard;
   else state.cards.push(collectedCard);
   state.collected++;
+  const stats = getOrCreateCardTypeRunStats(state, drop.type);
+  stats.collected++;
+  stats.highestStarReached = Math.max(stats.highestStarReached, drop.star);
   const { merged, events: mergeEvents } = autoMergeCards(state, config, rng);
   while (state.cards.length > originalLength) {
     const removableNullIndex = state.cards.lastIndexOf(null);
@@ -132,7 +138,11 @@ export function collectNearest(state: GameState, config: Config, rng: Rng, x: nu
 
 /** 调试用：在固定位置生成 4 份同类型 1 星掉落，类型按已合成次数轮换。 */
 export function spawnTestDrops(state: GameState, config: Config, rng: Rng): GameEvent[] {
-  const type = CARD_KEYS[state.merges % CARD_KEYS.length];
-  for (const x of [360, 440, 520, 600]) spawnGroundDrop(state, config, rng, x, 370, type);
+  const cardPool = getCardPool();
+  const type = cardPool[state.merges % cardPool.length];
+  for (const x of [360, 440, 520, 600]) {
+    spawnGroundDrop(state, config, rng, x, 370, type);
+    recordCardDropShown(state, type, 'debug');
+  }
   return [{ type: 'testDrops', cardType: type }];
 }

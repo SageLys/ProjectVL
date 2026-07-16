@@ -12,6 +12,7 @@ import {
 } from './statusSystem';
 import { dealDamage, tryExecute } from '../systems/damageSystem';
 import { spawnGroundDrop } from '../systems/dropSystem';
+import { recordCardDropShown, selectUniformCardType } from '../systems/dropTypePolicy';
 import { spawnParticle } from '../systems/particleSystem';
 import { totalRange } from '../stats';
 
@@ -340,8 +341,11 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
         if (roll <= 0) { star = Number(s); break; }
       }
       star = Math.min(star, cfg.economy.dropStarPolicy.bountyBossMax);
-      spawnGroundDrop(ctx.state, ctx.config, ctx.rng,
-        base.x + (ctx.rng() - 0.5) * 60, base.y + (ctx.rng() - 0.5) * 60, null, star);
+      const x = base.x + (ctx.rng() - 0.5) * 60;
+      const y = base.y + (ctx.rng() - 0.5) * 60;
+      const type = selectUniformCardType(ctx.rng);
+      spawnGroundDrop(ctx.state, ctx.config, ctx.rng, x, y, type, star);
+      recordCardDropShown(ctx.state, type, 'skillExtra');
     }
   },
   expiryConvert: noopModifier,

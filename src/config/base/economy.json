@@ -28,5 +28,32 @@
   "defaults": {
     "dropChance": 0.27,
     "dropLifetime": 5
+  },
+  "normalDropTypePolicy": {
+    "enabled": true,
+    "roleBagSize": 10,
+    "earlyMix": { "discovery": 6, "build": 3, "pivot": 1 },
+    "lateMix": { "discovery": 1, "build": 7, "pivot": 2 },
+    "bootstrapMinDiscovery": 6,
+    "maturity": {
+      "fullMergeOps": 10,
+      "fullHighestStar": 4,
+      "fullEquippedTypes": 2,
+      "mergeWeight": 0.25,
+      "starWeight": 0.35,
+      "equipWeight": 0.40
+    },
+    "build": {
+      "topK": 3,
+      "scorePower": 1.25,
+      "mergeReadyMultiplier": 1.5,
+      "equippedBaseBonus": 6,
+      "equippedStarBonus": 2,
+      "historicalMergeWeight": 0.5,
+      "historicalMergeCap": 8,
+      "maxWeightRatio": 6
+    },
+    "pivot": { "excludeTopK": 2, "candidateFraction": 0.5 },
+    "maxSameTypeStreak": 2
   }
 }

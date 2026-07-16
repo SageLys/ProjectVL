@@ -55,6 +55,28 @@ export interface BountyDirectorState {
   guaranteedThisWave: boolean;
 }
 
+export type NormalDropRole = 'discovery' | 'build' | 'pivot';
+
+export interface CardTypeRunStats {
+  /** Number of times this type appeared from a normal enemy kill. */
+  ordinaryShown: number;
+  /** Number of appearances across every tracked drop source. */
+  totalShown: number;
+  collected: number;
+  mergeOps: number;
+  /** Highest star reached historically during the current run. */
+  highestStarReached: number;
+  /** ordinaryDropCount value when this type last appeared from a normal kill. */
+  lastOrdinaryShownAt: number;
+}
+
+export interface NormalDropDirectorState {
+  roleBag: NormalDropRole[];
+  recentTypes: CardType[];
+  ordinaryDropCount: number;
+  typeStats: Record<CardType, CardTypeRunStats>;
+}
+
 /** 注入式随机源：返回 [0,1)。测试可传入确定性实现。 */
 export type Rng = () => number;
 
@@ -293,6 +315,7 @@ export interface GameState {
   bountyOffers: BountyOffer[];
   bountyEncounters: BountyEncounter[];
   bountyDirector: BountyDirectorState;
+  normalDropDirector: NormalDropDirectorState;
   nextBountyOfferId: number;
   nextBountyEncounterId: number;
 }

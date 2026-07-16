@@ -1,6 +1,7 @@
 import { cfg } from '../../config';
 import type { CardType, Config, GameEvent, GameState, Rng } from '../types';
 import { fireTrigger } from '../effects/interpreter';
+import { getOrCreateCardTypeRunStats } from './dropTypePolicy';
 
 export function getActiveMergeCopies(): number {
   return cfg.economy.placeholderAssumptions.twoCopyMerge ? 2 : cfg.economy.mergeCopiesWhenTwoCopyDisabled;
@@ -8,6 +9,9 @@ export function getActiveMergeCopies(): number {
 
 export function commitMerge(state: GameState, config: Config, rng: Rng, cardType: CardType, resultStar: number): GameEvent[] {
   state.merges++;
+  const stats = getOrCreateCardTypeRunStats(state, cardType);
+  stats.mergeOps++;
+  stats.highestStarReached = Math.max(stats.highestStarReached, resultStar);
   return fireTrigger(state, config, rng, 'onMerge', { merge: { cardType, resultStar } });
 }
 

@@ -11,6 +11,7 @@ import { jumpToWave, restartWave, startNextWave } from './core/systems/waveSyste
 import { budgetAdmission } from './core/systems/budgetRules';
 import { moveOrSwap, consumeCard } from './core/systems/equipmentSystem';
 import { collectNearest, spawnTestDrops, spawnGroundDrop } from './core/systems/dropSystem';
+import { recordCardDropShown, selectUniformCardType } from './core/systems/dropTypePolicy';
 import { acceptBountyOfferAt, calculateOfferChance } from './core/systems/bountySystem';
 import { applyPerk } from './core/systems/progressionSystem';
 import { checkWildcardTarget, grantWildcards, useWildcardOnSlot, type WildcardGrant } from './core/systems/wildcardSystem';
@@ -322,7 +323,11 @@ if (import.meta.env.DEV) void Promise.all([import('./debug/exposeDebugApi'), imp
 
   debugModule.exposeDebugApi({
       getState: () => ({ ...state, enemyTypes: state.enemies.map(enemy => enemy.type), enemies: state.enemies.length, bullets: state.bullets.length, config: { ...config }, waves: { spawnMode: cfg.waves.spawnMode, pendingSpawnMode: tuner?.getPendingSpawnMode() ?? null, budget: cfg.waves.budget } }), start, reset,
-    spawnGroundDrop: (x, y, type = null, star) => spawnGroundDrop(state, config, rng, x, y, type, star),
+    spawnGroundDrop: (x, y, type = null, star) => {
+      const selectedType = type ?? selectUniformCardType(rng);
+      spawnGroundDrop(state, config, rng, x, y, selectedType, star);
+      recordCardDropShown(state, selectedType, 'debug');
+    },
     addTestPair: () => dispatch(spawnTestDrops(state, config, rng)),
     grantWildcard: (star, count = 1) => dispatch(grantWildcards(state, [{ star, count }])),
     moveOrSwap: (source, index, targetKind, targetIndex) => {

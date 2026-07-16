@@ -1,6 +1,7 @@
 import { cfg } from '../../config';
 import type { BountyEncounter, BountyOffer, BountySide, CardType, Config, Enemy, EnemyType, GameEvent, GameState, Rng } from '../types';
-import { CARD_KEYS, spawnGroundDrop, spawnWildcardDrop } from './dropSystem';
+import { spawnGroundDrop, spawnWildcardDrop } from './dropSystem';
+import { getCardPool, recordCardDropShown } from './dropTypePolicy';
 import { createEnemy } from './enemySystem';
 
 const SIDES: BountySide[] = ['top', 'right', 'bottom', 'left'];
@@ -28,7 +29,7 @@ export function calculateOfferChance(state: GameState): number {
 }
 
 function shuffleRewardBag(rng: Rng, last: CardType | null): CardType[] {
-  const bag = [...CARD_KEYS];
+  const bag = getCardPool();
   for (let i = bag.length - 1; i > 0; i--) {
     const j = Math.floor(rng() * (i + 1));
     [bag[i], bag[j]] = [bag[j], bag[i]];
@@ -45,7 +46,7 @@ function drawRewardType(state: GameState, rng: Rng): CardType {
   if (!state.bountyDirector.rewardBag.length) {
     state.bountyDirector.rewardBag = shuffleRewardBag(rng, state.bountyDirector.lastRewardType);
   }
-  const type = state.bountyDirector.rewardBag.pop() ?? CARD_KEYS[0];
+  const type = state.bountyDirector.rewardBag.pop() ?? getCardPool()[0];
   state.bountyDirector.lastRewardType = type;
   return type;
 }
@@ -226,6 +227,7 @@ export function notifyBountyMemberKilled(state: GameState, enemy: Enemy, config?
   for (let i = 0; i < encounter.rewardCardCount; i++) {
     const point = rewardPoint();
     spawnGroundDrop(state, rewardConfig, rewardRng, point.x, point.y, encounter.rewardCardType, encounter.rewardCardStar);
+    recordCardDropShown(state, encounter.rewardCardType, 'bounty');
     const drop = state.groundDrops[state.groundDrops.length - 1];
     drop.life = lifetime;
     drop.maxLife = lifetime;

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { spawnGroundDrop, tickDrops, collectDrop, rollDropOnKill } from '../src/core/systems/dropSystem';
 import { totalDropChance } from '../src/core/stats';
-import { card, enemy, freshState, createDefaultConfig, constRng, resetTestEnv } from './helpers';
+import { card, enemy, freshState, createDefaultConfig, constRng, resetTestEnv, seqRng } from './helpers';
 
 beforeEach(resetTestEnv);
 
@@ -142,5 +142,20 @@ describe('dropSystem · chance and bosses', () => {
     config.dropChance = 0;
     rollDropOnKill(s, config, constRng(0.99), enemy({ type: 'boss', x: 10, y: 10 }));
     expect(s.groundDrops).toHaveLength(1);
+  });
+
+  it('preserves normal chance gating, one-star policy, and configured lifetime', () => {
+    const state = freshState();
+    const config = createDefaultConfig();
+    config.dropChance = 0;
+    rollDropOnKill(state, config, constRng(0.5), enemy());
+    expect(state.groundDrops).toHaveLength(0);
+    expect(state.normalDropDirector.ordinaryDropCount).toBe(0);
+
+    config.dropChance = 1;
+    config.dropLifetime = 9;
+    rollDropOnKill(state, config, seqRng(0, 0.2, 0.4, 0.6, 0.8), enemy());
+    expect(state.groundDrops).toHaveLength(1);
+    expect(state.groundDrops[0]).toEqual(expect.objectContaining({ star: 1, life: 9, maxLife: 9 }));
   });
 });
