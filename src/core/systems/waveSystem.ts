@@ -24,8 +24,11 @@ export function startNextWave(state: GameState, config: Config, rng: Rng): GameE
   state.lastSpawnCheckCount = 0;
   state.waveClearPending = false;
   state.between = 0;
-  // Preserve the legacy per-wave RNG draw while the new Director is still an empty phase-1 hook.
-  if (cfg.bounty.enabled && state.wave >= cfg.bounty.offer.enabledFromWave) rng();
+  state.bountyOffers.length = 0;
+  state.bountyDirector.offersThisWave = 0;
+  state.bountyDirector.acceptedThisWave = 0;
+  state.bountyDirector.completedThisWave = 0;
+  state.bountyDirector.checkTimer = cfg.bounty.offer.checkIntervalSeconds;
   const events: GameEvent[] = [{ type: 'waveStart', wave: state.wave }];
   events.push(...fireTrigger(state, config, rng, 'onWaveStart', { wave: state.wave }));
   return events;
@@ -85,9 +88,11 @@ export function tickSpawns(state: GameState, rng: Rng, dt: number): void {
 export function checkWaveClear(state: GameState): GameEvent[] {
   if (state.spawnLeft === 0 && state.enemies.length === 0 && !state.waveClearPending && state.mode === 'playing') {
     state.waveClearPending = true;
-    if (state.wave >= cfg.waves.totalWaves) return endGame(state, true);
+    const events: GameEvent[] = state.bountyOffers.map(offer => ({ type: 'bountyOfferExpired' as const, offerId: offer.id }));
+    state.bountyOffers.length = 0;
+    if (state.wave >= cfg.waves.totalWaves) return [...events, ...endGame(state, true)];
     state.between = cfg.waves.betweenWaves;
-    return [{ type: 'waveCleared', wave: state.wave }];
+    return [...events, { type: 'waveCleared', wave: state.wave }];
   }
   return [];
 }

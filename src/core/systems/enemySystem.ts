@@ -101,6 +101,7 @@ export function moveEnemies(state: GameState, config: Config, rng: Rng, dt: numb
       for (let k = 0; k < cfg.combat.vfx.breakthroughParticles; k++) spawnParticle(state, rng, t.x, t.y, '#ff6677', 170);
       if (damage != null) {
         state.hp -= damage;
+        state.bountyDirector.lastHpLossAt = state.time;
         events.push({ type: 'breakthrough', damage });
       }
       events.push(...fireTrigger(state, config, rng, 'onBreach', { enemy: e, damage: damage ?? 0, point: { x: e.x, y: e.y } }));

@@ -11,6 +11,7 @@ import { jumpToWave, restartWave, startNextWave } from './core/systems/waveSyste
 import { budgetAdmission } from './core/systems/budgetRules';
 import { moveOrSwap, consumeCard } from './core/systems/equipmentSystem';
 import { collectNearest, spawnTestDrops, spawnGroundDrop } from './core/systems/dropSystem';
+import { acceptBountyOfferAt } from './core/systems/bountySystem';
 import { applyPerk } from './core/systems/progressionSystem';
 import { checkWildcardTarget, grantWildcards, useWildcardOnSlot, type WildcardGrant } from './core/systems/wildcardSystem';
 import { totalRange } from './core/stats';
@@ -122,6 +123,14 @@ const pointerRouter = createPointerRouter({
   canvas: refs.canvas, dock: refs.dock, aimPreview: refs.aimPreview, screenPreview: refs.screenPreview,
   input: cfg.input,
   isPaused: () => state.paused,
+  onBountyOfferTap: (x, y) => {
+    if (!cfg.bounty.enabled) return false;
+    const events = acceptBountyOfferAt(state, x, y);
+    if (!events.length) return false;
+    dispatch(events);
+    if (import.meta.env.DEV) telemetry?.recordInput('bountyAccept');
+    return true;
+  },
   onArenaTap: (x, y) => {
     const events = collectNearest(state, config, rng, x, y, cfg.economy.drops.pickupRadius);
     dispatch(events);
