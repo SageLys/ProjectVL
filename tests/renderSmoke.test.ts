@@ -35,12 +35,11 @@ describe('渲染冒烟 · 地面掉落', () => {
   });
 });
 
-describe('渲染冒烟 · 敌人（含 Bounty 精英环）', () => {
-  it('未接单/已接单的 Bounty 精英状态都能画出倒计时环，不崩溃', () => {
+describe('渲染冒烟 · 敌人', () => {
+  it('普通敌人与新 Bounty 标记字段均不影响基础绘制', () => {
     const s = freshState();
     s.enemies = [
-      enemy({ bounty: { accepted: false, markRemaining: 4 } }),
-      enemy({ bounty: { accepted: true, markRemaining: 0 } }),
+      enemy({ bountyEncounterId: 1, bountyRewardType: 'pierce' }),
       enemy({}),
     ];
     expect(() => drawEnemies(fakeCtx(), s)).not.toThrow();

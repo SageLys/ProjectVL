@@ -5,6 +5,53 @@ import type { EffectDef } from './effects/defs';
 export type CardType = string;
 export type EnemyType = 'normal' | 'fast' | 'tank' | 'boss';
 export type GameMode = 'ready' | 'playing' | 'ended';
+export type BountySide = 'top' | 'right' | 'bottom' | 'left';
+
+export interface BountyOffer {
+  id: number;
+  rewardCardType: CardType;
+  rewardCardStar: number;
+  rewardCardCount: number;
+  wildcardStar: number;
+  wildcardCount: number;
+  side: BountySide;
+  x: number;
+  y: number;
+  remaining: number;
+  guaranteed: boolean;
+  createdAt: number;
+}
+
+export interface BountyEncounter {
+  id: number;
+  offerId: number;
+  rewardCardType: CardType;
+  rewardCardStar: number;
+  rewardCardCount: number;
+  wildcardStar: number;
+  wildcardCount: number;
+  side: BountySide;
+  status: 'spawning' | 'active' | 'completed' | 'failed';
+  memberIds: number[];
+  pendingSpawnCount: number;
+  spawnTimer: number;
+  guaranteed: boolean;
+  acceptedAt: number;
+  hpAtAccept: number;
+  lastKillX: number;
+  lastKillY: number;
+}
+
+export interface BountyDirectorState {
+  offersThisWave: number;
+  acceptedThisWave: number;
+  completedThisWave: number;
+  checkTimer: number;
+  cooldownRemaining: number;
+  lastHpLossAt: number;
+  rewardBag: CardType[];
+  lastRewardType: CardType | null;
+}
 
 /** 注入式随机源：返回 [0,1)。测试可传入确定性实现。 */
 export type Rng = () => number;
@@ -52,8 +99,8 @@ export interface Enemy {
   xp: number;
   hit: number;
   status: EnemyStatus;
-  /** Bounty 精英标记（框架级机制）：存在=本敌人是本波生成的精英。 */
-  bounty?: { accepted: boolean; markRemaining: number };
+  bountyEncounterId?: number;
+  bountyRewardType?: CardType;
 }
 
 export interface Bullet {
@@ -209,6 +256,7 @@ export interface GameState {
   nextZoneId: number;
   nextSummonId: number;
   spawnLeft: number;
+  waveSpawnQuota: number;
   spawnTimer: number;
   /** DEV-visible result of the latest Budget admission check (not configuration). */
   lastSpawnCheckCount: number;
@@ -235,8 +283,11 @@ export interface GameState {
   equipTelemetry: { durationsMs: number[]; cancels: number; rejects: number };
   collected: number;
   expired: number;
-  /** 本波是否还有一次待生成的 Bounty 精英名额（onWaveStart 掷骰命中后置真，生成后清空）。 */
-  bountyPending: boolean;
+  bountyOffers: BountyOffer[];
+  bountyEncounters: BountyEncounter[];
+  bountyDirector: BountyDirectorState;
+  nextBountyOfferId: number;
+  nextBountyEncounterId: number;
 }
 
 /** 卡槽/装备栏归属。临时栏已随 P0-3/P0-6 移除。 */
@@ -274,6 +325,13 @@ export type GameEvent =
       targetCardId: number;
     }
   | { type: 'wildcardMergeRejected'; reason: 'emptyTarget' | 'maxStar' | 'missingWildcard'; requiredStar?: number }
+  | { type: 'bountyOfferSpawned'; offerId: number; rewardCardType: CardType; guaranteed: boolean }
+  | { type: 'bountyOfferExpired'; offerId: number }
+  | { type: 'bountyAccepted'; offerId: number; encounterId: number; rewardCardType: CardType; side: BountySide }
+  | { type: 'bountyMemberSpawned'; encounterId: number; enemyId: number }
+  | { type: 'bountyCompleted'; encounterId: number; rewardCardType: CardType; clearSeconds: number }
+  | { type: 'bountyFailed'; encounterId: number }
+  | { type: 'bountyRewardDropped'; encounterId: number; rewardCardType: CardType }
   | { type: 'shieldBroken' }
   | { type: 'testDrops'; cardType: CardType }
   | { type: 'perkApplied'; title: string };

@@ -45,6 +45,7 @@ export function createInitialState(): GameState {
     nextZoneId: 1,
     nextSummonId: 1,
     spawnLeft: 0,
+    waveSpawnQuota: 0,
     spawnTimer: 0,
     lastSpawnCheckCount: 0,
     waveClearPending: false,
@@ -68,6 +69,19 @@ export function createInitialState(): GameState {
     equipTelemetry: { durationsMs: [], cancels: 0, rejects: 0 },
     collected: 0,
     expired: 0,
-    bountyPending: false,
+    bountyOffers: [],
+    bountyEncounters: [],
+    bountyDirector: {
+      offersThisWave: 0,
+      acceptedThisWave: 0,
+      completedThisWave: 0,
+      checkTimer: cfg.bounty.offer.checkIntervalSeconds,
+      cooldownRemaining: 0,
+      lastHpLossAt: 0,
+      rewardBag: [],
+      lastRewardType: null,
+    },
+    nextBountyOfferId: 1,
+    nextBountyEncounterId: 1,
   };
 }

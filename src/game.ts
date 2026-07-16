@@ -11,7 +11,6 @@ import { jumpToWave, restartWave, startNextWave } from './core/systems/waveSyste
 import { budgetAdmission } from './core/systems/budgetRules';
 import { moveOrSwap, consumeCard } from './core/systems/equipmentSystem';
 import { collectNearest, spawnTestDrops, spawnGroundDrop } from './core/systems/dropSystem';
-import { acceptBountyTap } from './core/systems/enemySystem';
 import { applyPerk } from './core/systems/progressionSystem';
 import { checkWildcardTarget, grantWildcards, useWildcardOnSlot, type WildcardGrant } from './core/systems/wildcardSystem';
 import { totalRange } from './core/stats';
@@ -121,13 +120,8 @@ function previewFor(source: SlotSource, index: number): PreviewSpec {
 
 const pointerRouter = createPointerRouter({
   canvas: refs.canvas, dock: refs.dock, aimPreview: refs.aimPreview, screenPreview: refs.screenPreview,
-  input: cfg.input, bountyEnabled: cfg.skills.mechanisms.bounty.enabled,
+  input: cfg.input,
   isPaused: () => state.paused,
-  onBountyTap: (x, y) => {
-    const accepted = acceptBountyTap(state, x, y);
-    if (accepted && import.meta.env.DEV) telemetry?.recordInput('bountyAccept');
-    return accepted;
-  },
   onArenaTap: (x, y) => {
     const events = collectNearest(state, config, rng, x, y, cfg.economy.drops.pickupRadius);
     dispatch(events);

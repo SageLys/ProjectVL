@@ -292,8 +292,5 @@
         ] } }] }
       } }, "designNotes": "碰我者死。突破反噬用近瞬时 groundZone 包裹 burstDamage/knockback，命中突破点附近的存活敌人（突破的敌人本身已在结算前移出场，直接反噬它没有意义）。6★ 处决不计入突破惩罚（execute 走击杀结算，非突破结算，天然满足）。"
     }
-  ],
-  "mechanisms": {
-    "bounty": { "enabled": true, "enabledFromWave": 1, "spawnChancePerWave": 0.6, "markWindowSeconds": 8, "acceptEffects": { "focusFire": true, "enrage": { "speedMul": 1.3, "hpMul": 1.5 } }, "rewards": { "dropCount": 2, "starWeightShift": 3, "dropLifetimeMul": 0.6 } }
-  }
+  ]
 }

@@ -4,7 +4,7 @@ import { cfg } from '../../config';
 import type { Config, Enemy, GameEvent, GameState, Rng } from '../types';
 import { damageTakenMultiplier } from '../effects/statusSystem';
 import { spawnParticle } from './particleSystem';
-import { rollDropOnKill, rollBountyDrops } from './dropSystem';
+import { rollDropOnKill } from './dropSystem';
 import { addXp } from './progressionSystem';
 import { fireTrigger, getModifiers } from '../effects/interpreter';
 
@@ -17,8 +17,7 @@ export function killEnemy(state: GameState, config: Config, rng: Rng, enemy: Ene
   const events: GameEvent[] = [];
   state.kills++;
   for (let i = 0; i < cfg.combat.vfx.killParticles; i++) spawnParticle(state, rng, enemy.x, enemy.y, '#8793a3', 150);
-  if (enemy.bounty?.accepted) rollBountyDrops(state, config, rng, enemy);
-  else rollDropOnKill(state, config, rng, enemy);
+  rollDropOnKill(state, config, rng, enemy);
   const xpGain = enemy.xp * cfg.progression.killXpMul * (1 + state.xpGainBonus) * getModifiers(state).xpMul;
   events.push(...addXp(state, xpGain, rng));
   events.push(...fireTrigger(state, config, rng, 'onKill', { enemy, point: { x: enemy.x, y: enemy.y }, source }));

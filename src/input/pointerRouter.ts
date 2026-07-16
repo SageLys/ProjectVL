@@ -43,10 +43,9 @@ type RouterOptions = {
   aimPreview: HTMLElement;
   screenPreview: HTMLElement;
   input: InputConfig;
-  bountyEnabled: boolean;
   isPaused?: () => boolean;
   onArenaTap(x: number, y: number): void;
-  onBountyTap?: (x: number, y: number) => boolean;
+  onBountyOfferTap?: (x: number, y: number) => boolean;
   onDrop(source: SlotSource, index: number, target: Exclude<DropTarget, { kind: 'cancel' }>): void;
   previewFor(source: SlotSource, index: number): PreviewSpec;
   getDropValidity?(source: SlotSource, index: number, target: Extract<DropTarget, { kind: 'slot' }>): boolean;
@@ -108,7 +107,7 @@ export function createPointerRouter(options: RouterOptions) {
     const end = { x: event.clientX, y: event.clientY, at: performance.now() };
     if (!current.source && isTap(current.start, end, current.maxDistance, options.input)) {
       const point = canvasPoint(options.canvas, options.canvas.getBoundingClientRect(), event.clientX, event.clientY);
-      if (options.bountyEnabled && options.onBountyTap?.(point.x, point.y)) return;
+      if (options.onBountyOfferTap?.(point.x, point.y)) return;
       options.onArenaTap(point.x, point.y);
       return;
     }

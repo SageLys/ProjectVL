@@ -41,24 +41,6 @@ export function rollDropOnKill(state: GameState, config: Config, rng: Rng, enemy
 }
 
 /**
- * Bounty 精英击杀掉落：肥而急——dropCount 份、2★ 权重按 starWeightShift 放大、寿命 ×dropLifetimeMul。
- * 星级仍受 economy.dropStarPolicy.bountyBossMax 封顶（R8）。
- */
-export function rollBountyDrops(state: GameState, config: Config, rng: Rng, enemy: Enemy): void {
-  const { rewards } = cfg.skills.mechanisms.bounty;
-  const star2Weight = cfg.economy.dropStarPolicy.star2Share * rewards.starWeightShift;
-  for (let i = 0; i < rewards.dropCount; i++) {
-    const star = rng() < star2Weight ? Math.min(2, cfg.economy.dropStarPolicy.bountyBossMax) : cfg.economy.dropStarPolicy.normal;
-    const x = enemy.x + (rng() - 0.5) * 40;
-    const y = enemy.y + (rng() - 0.5) * 40;
-    spawnGroundDrop(state, config, rng, x, y, null, star);
-    const drop = state.groundDrops[state.groundDrops.length - 1];
-    drop.life *= rewards.dropLifetimeMul;
-    drop.maxLife = drop.life;
-  }
-}
-
-/**
  * 推进掉落寿命与浮动相位；超时移除并计入 expired。
  * 丰收 5★ 落穗（expiryConvert）：命中时按 ratio 把过期掉落折算经验，而非纯损失。
  */

@@ -1,6 +1,61 @@
 // 配置层类型：游戏域 + input（T1 输入校准值）+ tuner（调参面板元数据）。
 // P3 配置重组：所有可调数值经此处；variant = 对 base 的深覆盖（见 loader.ts）。
-import type { CardDef, BountyConfig } from '../core/effects/defs';
+import type { CardDef } from '../core/effects/defs';
+
+export interface BountyConfig {
+  enabled: boolean;
+  offer: {
+    enabledFromWave: number;
+    checkIntervalSeconds: number;
+    baseChancePerCheck: number;
+    minChancePerCheck: number;
+    maxChancePerCheck: number;
+    noDamageRampSeconds: number;
+    noDamageBonusMax: number;
+    healthyHpThreshold: number;
+    healthyHpBonusMax: number;
+    recentDamagePenalty: number;
+    recentDamagePenaltySeconds: number;
+    markWindowSeconds: number;
+    cooldownSeconds: number;
+    minOffersPerWave: number;
+    maxOffersPerWave: number;
+    guaranteeAtWaveProgress: number;
+    maxConcurrentOffers: number;
+    maxConcurrentEncounters: number;
+  };
+  encounter: {
+    enemyCountBase: number;
+    enemyCountPerWave: number;
+    enemyCountMax: number;
+    hpMul: number;
+    speedMul: number;
+    damageMul: number;
+    spawnIntervalSeconds: number;
+    spawnSpread: number;
+    emergencyOverrideDistance: number;
+    composition: { normalWeight: number; fastWeight: number; tankWeight: number };
+  };
+  reward: {
+    cardCount: number;
+    cardStarBase: number;
+    cardStarUpgradeEveryWaves: number;
+    cardStarMax: number;
+    wildcardCount: number;
+    wildcardStarBase: number;
+    wildcardStarUpgradeEveryWaves: number;
+    wildcardStarMax: number;
+    dropLifetimeSeconds: number;
+    repeatProtection: number;
+  };
+  visual: {
+    offerRadius: number;
+    offerEdgeInset: number;
+    enemyGlowRadius: number;
+    enemyPulseSpeed: number;
+    showRewardName: boolean;
+  };
+}
 
 export interface CombatConfig {
   canvas: { width: number; height: number };
@@ -59,7 +114,6 @@ export interface EnemiesConfig {
 export interface SkillsConfig {
   version: string;
   cards: CardDef[];
-  mechanisms: { bounty: BountyConfig };
 }
 
 export interface PerkDef {
@@ -130,6 +184,7 @@ export interface GameConfig {
   skills: SkillsConfig;
   progression: ProgressionConfig;
   economy: EconomyConfig;
+  bounty: BountyConfig;
   input: InputConfig;
   tuner: TunerConfig;
 }

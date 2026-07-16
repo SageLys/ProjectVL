@@ -6,6 +6,7 @@ import enemies from './base/enemies.json';
 import skills from './base/skills.json';
 import progression from './base/progression.json';
 import economy from './base/economy.json';
+import bounty from './base/bounty.json';
 import tuner from './base/tuner.json';
 import input from './base/input.json';
 import devShort from '../config/variants/dev-short.json';
@@ -71,6 +72,7 @@ function assembleBase(): GameConfig {
     skills,
     progression,
     economy,
+    bounty,
     input,
     // 面板元数据仅供开发态调参；生产包保留空对象以维持配置形状。
     tuner: import.meta.env.DEV ? tuner : {},

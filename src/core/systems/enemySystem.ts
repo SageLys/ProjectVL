@@ -38,38 +38,7 @@ export function spawnEnemy(state: GameState, rng: Rng): void {
     hp, maxHp: hp, speed, r: def.r, color: def.color, damage: def.damage, xp: def.xp, hit: 0,
     status: emptyStatus(),
   };
-  if (state.bountyPending && type !== 'boss') {
-    enemy.bounty = { accepted: false, markRemaining: cfg.skills.mechanisms.bounty.markWindowSeconds };
-    state.bountyPending = false;
-  }
   state.enemies.push(enemy);
-}
-
-/** Bounty 精英倒计时推进：窗口内未接单则到期后清空标记（不接单无惩罚，敌人退化为普通强敌）。 */
-export function tickBounty(state: GameState, dt: number): void {
-  for (const e of state.enemies) {
-    if (!e.bounty || e.bounty.accepted) continue;
-    e.bounty.markRemaining -= dt;
-    if (e.bounty.markRemaining <= 0) e.bounty = undefined;
-  }
-}
-
-/**
- * 主画面单击接单：命中半径内查找未接单的精英，命中则接单+狂暴（enrage）。
- * 由 pointerRouter 在拾取判定之前调用（§7 冲突表：接单优先于拾取）。返回是否命中（消费本次点击）。
- */
-export function acceptBountyTap(state: GameState, x: number, y: number): boolean {
-  for (const e of state.enemies) {
-    if (!e.bounty || e.bounty.accepted || e.bounty.markRemaining <= 0) continue;
-    if (Math.hypot(e.x - x, e.y - y) > e.r + 24) continue;
-    e.bounty.accepted = true;
-    const enrage = cfg.skills.mechanisms.bounty.acceptEffects.enrage;
-    e.speed *= enrage.speedMul;
-    e.maxHp *= enrage.hpMul;
-    e.hp *= enrage.hpMul;
-    return true;
-  }
-  return false;
 }
 
 /** 移动目标解析（仲裁规则 6）：嘲讽（点/召唤物）> 嘲讽半径内的召唤物 > 炮台。 */

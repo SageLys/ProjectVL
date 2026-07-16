@@ -19,12 +19,13 @@ export function startNextWave(state: GameState, config: Config, rng: Rng): GameE
   state.spawnLeft = cfg.waves.spawnMode === 'budget'
     ? budgetWaveQuotaFor(state.wave, cfg.waves.budget)
     : enemyCountFor(state.wave);
+  state.waveSpawnQuota = state.spawnLeft;
   state.spawnTimer = cfg.waves.firstSpawnDelay;
   state.lastSpawnCheckCount = 0;
   state.waveClearPending = false;
   state.between = 0;
-  const bounty = cfg.skills.mechanisms.bounty;
-  state.bountyPending = bounty.enabled && state.wave >= bounty.enabledFromWave && rng() < bounty.spawnChancePerWave;
+  // Preserve the legacy per-wave RNG draw while the new Director is still an empty phase-1 hook.
+  if (cfg.bounty.enabled && state.wave >= cfg.bounty.offer.enabledFromWave) rng();
   const events: GameEvent[] = [{ type: 'waveStart', wave: state.wave }];
   events.push(...fireTrigger(state, config, rng, 'onWaveStart', { wave: state.wave }));
   return events;

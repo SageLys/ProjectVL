@@ -79,12 +79,3 @@ export interface CardDef {
   designNotes?: string;
 }
 
-/** 精英 Bounty 机制配置（框架级；P3 仅落配置与索敌优先级基建，流程 P5 实装）。 */
-export interface BountyConfig {
-  enabled: boolean;
-  enabledFromWave: number;
-  spawnChancePerWave: number;
-  markWindowSeconds: number;
-  acceptEffects: { focusFire: boolean; enrage: { speedMul: number; hpMul: number } };
-  rewards: { dropCount: number; starWeightShift: number; dropLifetimeMul: number };
-}

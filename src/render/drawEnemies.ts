@@ -62,23 +62,6 @@ export function drawEnemies(ctx: CanvasRenderingContext2D, state: GameState): vo
       }
       ctx.restore();
     }
-    // Bounty 精英：未接单=金色倒计时环（按剩余窗口画弧）；已接单=常驻金色描边高亮。
-    if (e.bounty) {
-      ctx.save();
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = e.bounty.accepted ? 'rgba(255,209,102,.95)' : 'rgba(255,209,102,.7)';
-      if (e.bounty.accepted) {
-        ctx.beginPath();
-        ctx.arc(e.x, e.y, e.r + 13, 0, TAU);
-        ctx.stroke();
-      } else {
-        const ratio = Math.max(0, e.bounty.markRemaining / cfg.skills.mechanisms.bounty.markWindowSeconds);
-        ctx.beginPath();
-        ctx.arc(e.x, e.y, e.r + 13, -Math.PI / 2, -Math.PI / 2 + TAU * ratio);
-        ctx.stroke();
-      }
-      ctx.restore();
-    }
     ctx.fillStyle = 'rgba(255,255,255,.12)';
     ctx.fillRect(e.x - e.r, e.y - e.r - 9, e.r * 2, 4);
     ctx.fillStyle = '#b8c2cf';
