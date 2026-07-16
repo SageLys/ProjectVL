@@ -4,9 +4,43 @@ import { glyphGeometry, shapeGeometry, traceGeometryToCanvas } from '../presenta
 
 const TAU = Math.PI * 2;
 
+function drawWildcardDrop(ctx: CanvasRenderingContext2D, drop: Extract<GameState['groundDrops'][number], { kind: 'wildcard' }>): void {
+  const ratio = Math.max(0, drop.life / drop.maxLife);
+  const bob = Math.sin(drop.pulse) * 3;
+  ctx.save();
+  ctx.translate(drop.x, drop.y + bob);
+  ctx.shadowBlur = 13;
+  ctx.shadowColor = '#c084fc';
+  ctx.fillStyle = 'rgba(12,8,28,.94)';
+  ctx.strokeStyle = '#c084fc';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  traceGeometryToCanvas(ctx, shapeGeometry('star8'), 40);
+  ctx.fill('evenodd');
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = '#f5e9ff';
+  ctx.font = 'bold 15px Microsoft YaHei';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('W', 0, 0);
+  ctx.font = 'bold 9px Microsoft YaHei';
+  ctx.fillText(`${drop.star}★×${drop.count}`, 0, 17);
+  ctx.strokeStyle = ratio > 0.35 ? '#c084fc' : '#ff6b6b';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.arc(0, 0, 27, -Math.PI / 2, -Math.PI / 2 + TAU * ratio);
+  ctx.stroke();
+  ctx.restore();
+}
+
 /** 地面掉落：发光圆牌 + 图标 + 倒计时圆环 + 剩余秒数。 */
 export function drawDrops(ctx: CanvasRenderingContext2D, state: GameState): void {
   for (const drop of state.groundDrops) {
+    if (drop.kind === 'wildcard') {
+      drawWildcardDrop(ctx, drop);
+      continue;
+    }
     const visual = resolveCardVisual(drop.type);
     const ratio = Math.max(0, drop.life / drop.maxLife);
     const bob = Math.sin(drop.pulse) * 3;

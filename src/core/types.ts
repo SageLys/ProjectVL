@@ -146,16 +146,19 @@ export interface Particle {
   size: number;
 }
 
-export interface GroundDrop {
+export interface GroundDropBase {
   id: number;
   x: number;
   y: number;
-  type: CardType;
-  star: number;
   life: number;
   maxLife: number;
   pulse: number;
+  bountyEncounterId?: number;
 }
+
+export interface GroundCardDrop extends GroundDropBase { kind: 'card'; type: CardType; star: number; }
+export interface GroundWildcardDrop extends GroundDropBase { kind: 'wildcard'; star: number; count: number; }
+export type GroundDrop = GroundCardDrop | GroundWildcardDrop;
 
 /** 地面区域（groundZone/aura 消耗态落点化）：周期对区域内敌人施加内嵌效果。 */
 export interface Zone {

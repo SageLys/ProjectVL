@@ -117,7 +117,7 @@ export function moveEnemies(state: GameState, config: Config, rng: Rng, dt: numb
       target.summon.hp -= e.damage;
       for (let k = 0; k < 6; k++) spawnParticle(state, rng, e.x, e.y, '#8793a3', 120);
       state.enemies.splice(i, 1);
-      if (e.bountyEncounterId !== undefined) events.push(...notifyBountyMemberKilled(state, e));
+      if (e.bountyEncounterId !== undefined) events.push(...notifyBountyMemberKilled(state, e, config, rng));
       continue;
     }
 

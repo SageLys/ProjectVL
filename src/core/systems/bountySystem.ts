@@ -1,6 +1,6 @@
 import { cfg } from '../../config';
 import type { BountyEncounter, BountyOffer, BountySide, CardType, Config, Enemy, EnemyType, GameEvent, GameState, Rng } from '../types';
-import { CARD_KEYS } from './dropSystem';
+import { CARD_KEYS, spawnGroundDrop, spawnWildcardDrop } from './dropSystem';
 import { createEnemy } from './enemySystem';
 
 const SIDES: BountySide[] = ['top', 'right', 'bottom', 'left'];
@@ -193,7 +193,7 @@ export function tickBountySystem(state: GameState, _config: Config, rng: Rng, dt
 }
 
 /** Register one encounter member death/disappearance. Duplicate notifications are ignored. */
-export function notifyBountyMemberKilled(state: GameState, enemy: Enemy): GameEvent[] {
+export function notifyBountyMemberKilled(state: GameState, enemy: Enemy, config?: Config, rng?: Rng): GameEvent[] {
   if (enemy.bountyEncounterId === undefined) return [];
   const encounter = state.bountyEncounters.find(item => item.id === enemy.bountyEncounterId);
   if (!encounter || (encounter.status !== 'spawning' && encounter.status !== 'active')) return [];
@@ -205,12 +205,38 @@ export function notifyBountyMemberKilled(state: GameState, enemy: Enemy): GameEv
   if (encounter.memberIds.length > 0 || encounter.pendingSpawnCount > 0) return [];
   encounter.status = 'completed';
   state.bountyDirector.completedThisWave++;
-  return [{
+  const events: GameEvent[] = [{
     type: 'bountyCompleted',
     encounterId: encounter.id,
     rewardCardType: encounter.rewardCardType,
     clearSeconds: Math.max(0, state.time - encounter.acceptedAt),
   }];
+  const lifetime = cfg.bounty.reward.dropLifetimeSeconds;
+  const rewardRng = rng ?? (() => 0.5);
+  const rewardConfig = config ?? ({ dropLifetime: lifetime } as Config);
+  const visualDropCount = encounter.rewardCardCount + (encounter.wildcardCount > 0 ? 1 : 0);
+  let visualIndex = 0;
+  const rewardPoint = (): { x: number; y: number } => {
+    const t = visualDropCount <= 1 ? 0.5 : visualIndex / (visualDropCount - 1);
+    visualIndex++;
+    const angle = -Math.PI / 2 + (t - 0.5) * 1.25;
+    return { x: encounter.lastKillX + Math.cos(angle) * 28, y: encounter.lastKillY + Math.sin(angle) * 28 };
+  };
+  for (let i = 0; i < encounter.rewardCardCount; i++) {
+    const point = rewardPoint();
+    spawnGroundDrop(state, rewardConfig, rewardRng, point.x, point.y, encounter.rewardCardType, encounter.rewardCardStar);
+    const drop = state.groundDrops[state.groundDrops.length - 1];
+    drop.life = lifetime;
+    drop.maxLife = lifetime;
+    drop.bountyEncounterId = encounter.id;
+  }
+  if (encounter.wildcardCount > 0) {
+    const point = rewardPoint();
+    spawnWildcardDrop(state, point.x, point.y, encounter.wildcardStar, encounter.wildcardCount, lifetime);
+    state.groundDrops[state.groundDrops.length - 1].bountyEncounterId = encounter.id;
+  }
+  events.push({ type: 'bountyRewardDropped', encounterId: encounter.id, rewardCardType: encounter.rewardCardType });
+  return events;
 }
 
 /** Fail an encounter on the first breach and downgrade every surviving member to a normal enemy. */

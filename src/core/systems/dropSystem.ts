@@ -4,6 +4,7 @@ import { totalDropChance, totalDropLifetime } from '../stats';
 import { autoMergeCards, getActiveMergeCopies } from './cardSystem';
 import { fireTrigger, getModifiers } from '../effects/interpreter';
 import { addXp } from './progressionSystem';
+import { grantWildcards } from './wildcardSystem';
 
 const TAU = Math.PI * 2;
 /** 正式卡池（P5 批次1+批次2，共 11 张技能卡）。 */
@@ -20,11 +21,27 @@ export function spawnGroundDrop(state: GameState, config: Config, rng: Rng, x: n
   const life = totalDropLifetime(state, config);
   state.groundDrops.push({
     id: state.nextDropId++,
+    kind: 'card',
     x, y, type,
     star: star ?? normalDropStar(rng),
     life,
     maxLife: life,
     pulse: rng() * TAU,
+  });
+}
+
+/** Spawn a ground wildcard bundle; it bypasses hand capacity when collected. */
+export function spawnWildcardDrop(state: GameState, x: number, y: number, star: number, count: number, lifetime: number): void {
+  state.groundDrops.push({
+    id: state.nextDropId++,
+    kind: 'wildcard',
+    x,
+    y,
+    star,
+    count,
+    life: lifetime,
+    maxLife: lifetime,
+    pulse: 0,
   });
 }
 
@@ -67,6 +84,11 @@ export function tickDrops(state: GameState, _config: Config, rng: Rng, dt: numbe
  * 卡槽已满则拒绝（掉落保留）。返回语义事件。
  */
 export function collectDrop(state: GameState, config: Config, rng: Rng, drop: GroundDrop): GameEvent[] {
+  if (drop.kind === 'wildcard') {
+    state.groundDrops = state.groundDrops.filter(item => item.id !== drop.id);
+    state.collected++;
+    return grantWildcards(state, [{ star: drop.star, count: drop.count }]);
+  }
   const empty = state.cards.findIndex(card => card === null);
   const originalLength = state.cards.length;
   if (empty < 0) {

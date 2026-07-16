@@ -18,7 +18,7 @@ export function killEnemy(state: GameState, config: Config, rng: Rng, enemy: Ene
   const events: GameEvent[] = [];
   state.kills++;
   for (let i = 0; i < cfg.combat.vfx.killParticles; i++) spawnParticle(state, rng, enemy.x, enemy.y, '#8793a3', 150);
-  if (enemy.bountyEncounterId !== undefined) events.push(...notifyBountyMemberKilled(state, enemy));
+  if (enemy.bountyEncounterId !== undefined) events.push(...notifyBountyMemberKilled(state, enemy, config, rng));
   else rollDropOnKill(state, config, rng, enemy);
   const xpGain = enemy.xp * cfg.progression.killXpMul * (1 + state.xpGainBonus) * getModifiers(state).xpMul;
   events.push(...addXp(state, xpGain, rng));

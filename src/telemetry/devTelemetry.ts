@@ -103,7 +103,7 @@ export function createDevTelemetry(options: Options): DevTelemetry {
     }
     for (const drop of state().groundDrops) if (!knownDrops.has(drop.id)) {
       knownDrops.add(drop.id);
-      add({ type: 'dropLanded', dropId: drop.id, x: drop.x, y: drop.y, cardType: drop.type });
+      add({ type: 'dropLanded', dropId: drop.id, x: drop.x, y: drop.y, cardType: drop.kind === 'card' ? drop.type : 'wildcard' });
     }
     const liveDrops = new Set(state().groundDrops.map(drop => drop.id));
     for (const id of knownDrops) if (!liveDrops.has(id)) knownDrops.delete(id);

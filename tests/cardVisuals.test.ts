@@ -56,7 +56,7 @@ describe('card visual registry', () => {
   it('draws all eleven skill drops without throwing', () => {
     const state = freshState();
     state.groundDrops = cfg.skills.cards.map((card, index) => ({
-      id: index, x: 100 + index, y: 100, type: card.id, star: 1, life: 8, maxLife: 10, pulse: 0,
+      id: index, kind: 'card' as const, x: 100 + index, y: 100, type: card.id, star: 1, life: 8, maxLife: 10, pulse: 0,
     }));
     expect(() => drawDrops(fakeCtx(), state)).not.toThrow();
   });
