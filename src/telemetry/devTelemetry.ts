@@ -1,9 +1,10 @@
 import './telemetryHud.css';
-import type { GameConfig } from '../config/types';
+import type { DifficultyId, GameConfig } from '../config/types';
 import type { BuildTag } from '../core/effects/defs';
 import type { Enemy, GameEvent, GameState } from '../core/types';
 import { EVENT_UNIVERSE, OPPORTUNITY_EVENTS, percentile } from './metrics';
 import type { TelemetryEvent, TelemetryInputType, TelemetrySession } from './types';
+import { difficultyMultipliersFor } from '../core/difficulty';
 
 declare const __GIT_COMMIT__: string;
 
@@ -13,6 +14,7 @@ interface Options {
   getSeed(): number;
   getPresetName(): string;
   getRange(): number;
+  getDifficultyId(): DifficultyId;
 }
 
 interface FrameEnemy { enemy: Enemy; x: number; y: number; hp: number }
@@ -139,6 +141,8 @@ export function createDevTelemetry(options: Options): DevTelemetry {
   }
 
   function getSession(): TelemetrySession {
+    const difficultyId = options.getDifficultyId();
+    const wave1 = difficultyMultipliersFor(difficultyId, 'normal', 1);
     return {
       meta: {
         startedAt,
@@ -146,6 +150,7 @@ export function createDevTelemetry(options: Options): DevTelemetry {
         config: fullConfig(options.getConfig()),
         presetName: options.getPresetName(),
         seed: options.getSeed(),
+        difficulty: { id: difficultyId, hpMultiplierAtWave1: wave1.hp, damageMultiplierAtWave1: wave1.damage },
         gitCommit: typeof __GIT_COMMIT__ === 'string' ? __GIT_COMMIT__ : 'unknown',
       },
       events: structuredClone(events), samples: structuredClone(samples), inputs: structuredClone(inputs),
@@ -239,7 +244,8 @@ export function createDevTelemetry(options: Options): DevTelemetry {
         for (const id of dangerEntries.keys()) closeDanger(id);
         dangerEntries.clear();
         knownEnemies.clear(); knownDrops.clear();
-        add({ type: 'waveStart', wave: event.wave });
+        const dm = difficultyMultipliersFor(options.getDifficultyId(), 'normal', event.wave);
+        add({ type: 'waveStart', wave: event.wave, difficultyHpMultiplier: Number(dm.hp.toFixed(2)), difficultyDamageMultiplier: Number(dm.damage.toFixed(2)) });
       }
       if (event.type === 'waveCleared') { add({ type: 'waveCleared', wave: event.wave }); shouldExport = true; }
       if (event.type === 'waveBossSpawned') {

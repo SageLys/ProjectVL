@@ -7,6 +7,7 @@ import { emptyStatus, speedMultiplier } from '../effects/statusSystem';
 import { absorbBreach } from '../effects/runtime';
 import { fireTrigger, getModifiers } from '../effects/interpreter';
 import { notifyBountyMemberBreached, notifyBountyMemberKilled } from './bountySystem';
+import { difficultyMultipliersFor } from '../difficulty';
 
 /**
  * 敌人类型判定：roll < tankBase + wave*tankPerWave → 重装；
@@ -35,8 +36,9 @@ export function createEnemy(
   modifiers: EnemyModifiers = {},
 ): Enemy {
   const def = cfg.enemies.types[type];
-  const hp = (def.hpBase + wave * def.hpPerWave) * (modifiers.hpMul ?? 1);
-  const speed = (def.speedBase + wave * def.speedPerWave) * (modifiers.speedMul ?? 1);
+  const dm = difficultyMultipliersFor(state.difficultyId, type, wave);
+  const hp = (def.hpBase + wave * def.hpPerWave) * dm.hp * (modifiers.hpMul ?? 1);
+  const speed = (def.speedBase + wave * def.speedPerWave) * dm.speed * (modifiers.speedMul ?? 1);
   const enemy: Enemy = {
     id: state.nextEnemyId++,
     x: position.x,
@@ -49,14 +51,38 @@ export function createEnemy(
     speed,
     r: def.r,
     color: def.color,
-    damage: def.damage * (modifiers.damageMul ?? 1),
+    damage: def.damage * dm.damage * (modifiers.damageMul ?? 1),
     xp: def.xp,
     hit: 0,
     status: emptyStatus(),
   };
+  const statMods = {
+    hpMul: modifiers.hpMul ?? 1,
+    speedMul: modifiers.speedMul ?? 1,
+    damageMul: modifiers.damageMul ?? 1,
+  };
+  if (statMods.hpMul !== 1 || statMods.speedMul !== 1 || statMods.damageMul !== 1) enemy.statMods = statMods;
   if (modifiers.bountyEncounterId !== undefined) enemy.bountyEncounterId = modifiers.bountyEncounterId;
   if (modifiers.bountyRewardType !== undefined) enemy.bountyRewardType = modifiers.bountyRewardType;
   return enemy;
+}
+
+export type EnemyStatConfigKey = 'hpBase' | 'hpPerWave' | 'speedBase' | 'speedPerWave' | 'damage' | 'r' | 'xp';
+
+/** Recompute a live enemy after DEV tuning while preserving difficulty, encounter modifiers and HP ratio. */
+export function resyncEnemyStats(enemy: Enemy, state: GameState, key: EnemyStatConfigKey): void {
+  const def = cfg.enemies.types[enemy.type];
+  const dm = difficultyMultipliersFor(state.difficultyId, enemy.type, state.wave);
+  const ext = enemy.statMods ?? { hpMul: 1, speedMul: 1, damageMul: 1 };
+  if (key === 'hpBase' || key === 'hpPerWave') {
+    const ratio = enemy.maxHp > 0 ? enemy.hp / enemy.maxHp : 1;
+    enemy.maxHp = (def.hpBase + state.wave * def.hpPerWave) * dm.hp * ext.hpMul;
+    enemy.hp = enemy.maxHp * ratio;
+  } else if (key === 'speedBase' || key === 'speedPerWave') {
+    enemy.speed = (def.speedBase + state.wave * def.speedPerWave) * dm.speed * ext.speedMul;
+  } else if (key === 'damage') enemy.damage = def.damage * dm.damage * ext.damageMul;
+  else if (key === 'r') enemy.r = def.r;
+  else if (key === 'xp') enemy.xp = def.xp;
 }
 
 /** 生成一只敌人：类型判定 → 取基础值+每波成长 → 四边随机出生（边缘外 spawnMargin）。 */

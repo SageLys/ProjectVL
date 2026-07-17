@@ -1,5 +1,6 @@
 import { cfg } from '../config';
 import type { CardTypeRunStats, Config, GameState, WildcardInventory } from './types';
+import type { DifficultyId } from '../config/types';
 
 function createEmptyWildcardInventory(maxStar: number): WildcardInventory {
   const inv: WildcardInventory = {};
@@ -28,8 +29,9 @@ export function createDefaultConfig(): Config {
 }
 
 /** 生成一局全新对局的初始状态。槽位数量为配置变量（handSlots/equipSlots）。 */
-export function createInitialState(): GameState {
+export function createInitialState(difficultyId: DifficultyId = 'hell'): GameState {
   return {
+    difficultyId,
     mode: 'ready',
     paused: false,
     time: 0,

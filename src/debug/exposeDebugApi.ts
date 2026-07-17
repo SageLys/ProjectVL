@@ -1,11 +1,13 @@
 import type { CardType, Config, SlotKind } from '../core/types';
 import type { SlotSource } from '../ui/slotFactory';
+import type { DifficultyId } from '../config/types';
 
 /** window.__game 调试接口，供人工控制台与 Playwright 浏览器测试使用。 */
 export interface DebugApi {
   getState(): unknown;
   start(): void;
   reset(): void;
+  setDifficulty(id: DifficultyId): void;
   spawnGroundDrop(x: number, y: number, type?: CardType | null, star?: number): void;
   addTestPair(): void;
   grantWildcard(star: number, count?: number): void;

@@ -23,7 +23,16 @@
     <section class="arena" id="arena">
       <canvas id="game" width="540" height="730" aria-label="主画面释放区"></canvas>
       <div class="center-msg" id="centerMsg"><h2>守住心防</h2><p>点击拾取心意，拖卡到画面释放</p></div>
-      <div class="start-overlay" id="startOverlay"><button class="btn primary" id="startBtn">开始游戏</button></div>
+      <div class="start-overlay" id="startOverlay">
+        <fieldset class="difficulty-select" aria-label="选择难度">
+          <legend>选择难度</legend>
+          <label><input type="radio" name="difficulty" value="relaxed"><span></span></label>
+          <label><input type="radio" name="difficulty" value="standard"><span></span></label>
+          <label><input type="radio" name="difficulty" value="hard"><span></span></label>
+          <label><input type="radio" name="difficulty" value="hell"><span></span></label>
+        </fieldset>
+        <button class="btn primary" id="startBtn">开始游戏</button>
+      </div>
       <div class="toast" id="toast"></div>
       <div id="upgradeBanner" class="upgrade-banner" aria-live="polite"><strong></strong><span></span></div>
       <div id="celebrationFx" class="celebration-fx" aria-hidden="true"></div>

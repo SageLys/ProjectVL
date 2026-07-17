@@ -46,6 +46,8 @@ export interface TelemetryEvent {
   hpAtComplete?: number;
   lane?: string;
   laneMatch?: boolean;
+  difficultyHpMultiplier?: number;
+  difficultyDamageMultiplier?: number;
 }
 
 export interface TelemetrySample {
@@ -69,6 +71,7 @@ export interface SessionMeta {
   config: Record<string, unknown>;
   presetName: string;
   seed: number;
+  difficulty?: { id: string; hpMultiplierAtWave1: number; damageMultiplierAtWave1: number };
   gitCommit: string;
 }
 

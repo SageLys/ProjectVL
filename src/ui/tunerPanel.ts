@@ -3,6 +3,8 @@ import './tunerPanel.css';
 import type { Config } from '../core/types';
 import { deriveMetrics } from './derivedMetrics';
 import { ALL_TUNER_PARAMS, formatBossWaves, getNumberAt, migratePresetValues, setNumberAt, type TunerGroup } from './tunerSchema';
+import type { DifficultyId } from '../config/types';
+import { difficultyMultipliersFor } from '../core/difficulty';
 
 const PRESET_KEY = 'projectvl.tuner.presets.v2';
 
@@ -47,6 +49,7 @@ export interface TunerHooks {
       encounterTotal: number;
       guaranteedThisWave: boolean;
     };
+    getDifficultyId(): DifficultyId;
   };
 }
 
@@ -120,7 +123,7 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
     <div class="tuner-toolbar"><label>配置 Variant <select id="variantSel"></select></label><button class="btn" id="resetTunerBtn">恢复默认参数</button></div>
     ${groupsHtml}
     <details class="tuner-group tuner-p2"><summary>P2 · 默认冻结</summary><div class="tuner-grid">${p2}</div></details>
-    <section class="tuner-group derived"><h3>H · 派生指标 <small>即时联动</small></h3><div id="derivedMetrics"></div></section>
+    <section class="tuner-group derived"><h3>H · 派生指标 <small>即时联动</small></h3><p class="tuner-note" id="difficultyStatus"></p><div id="derivedMetrics"></div></section>
     <section class="tuner-group"><h3>Preset</h3><div class="preset-row"><input id="presetName" placeholder="命名 preset"><button class="btn" id="savePresetBtn">保存并导出 JSON</button></div><div class="preset-row"><select id="presetSel"></select><button class="btn" id="loadPresetBtn">加载</button><button class="btn danger" id="deletePresetBtn">删除</button></div><p class="tuner-note" id="presetSaveStatus">保存时同时写入项目 presets/；加载后高亮与加载前当前配置不同的字段。</p></section>
     <section class="tuner-group"><h3>调试模式</h3><div class="debug-grid">
       <label>目标波次<input id="jumpWaveInput" type="number" min="1" step="1" value="1"></label><button class="btn" id="jumpWaveBtn">清场并跳波</button>
@@ -153,7 +156,10 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
   }
 
   function renderMetrics(): void {
-    const metrics = deriveMetrics(metricConfig(), config);
+    const difficultyId = hooks.debug.getDifficultyId();
+    const metrics = deriveMetrics(metricConfig(), config, difficultyId);
+    const dm = difficultyMultipliersFor(difficultyId, 'normal', Math.max(1, hooks.debug.getSpawnTelemetry().wave));
+    root.querySelector<HTMLElement>('#difficultyStatus')!.textContent = `当前难度 ${difficultyId} · 本波普通敌人倍率 HP ${dm.hp.toFixed(3)} / 伤害 ${dm.damage.toFixed(3)} / 速度 ${dm.speed.toFixed(3)}`;
     const types = [['normal', '普通'], ['fast', '高速'], ['tank', '重装'], ['boss', 'Boss']] as const;
     const table = types.map(([type, label]) => `<tr><th>${label}</th>${metrics.cells[type].map(cell => `<td title="命中率 ${format(cell.hitRate * 100)}%">${cell.ttk.toFixed(2)}s</td>`).join('')}</tr>`).join('');
     const n = metrics.cells.normal[0];
@@ -253,7 +259,7 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
     spawnModeStatus.textContent = `Current effective mode: ${cfg.waves.spawnMode}; pending mode: ${pendingSpawnMode ?? 'none'}.${pendingHint} Wave ${spawn.wave}; spawnLeft ${spawn.spawnLeft}; alive ${spawn.alive}; normal/actual target ${spawn.normalTarget}/${spawn.effectiveTarget}; end sprint ${spawn.inEndSprint ? 'yes' : 'no'}; spawnTimer ${spawn.spawnTimer.toFixed(2)}; last admission ${spawn.lastSpawnCheckCount}.`;
     updateBountyStatus();
     renderMetrics();
-    const projection = deriveMetrics(metricConfig(), config).budget?.projections.slice(0, 3);
+    const projection = deriveMetrics(metricConfig(), config, hooks.debug.getDifficultyId()).budget?.projections.slice(0, 3);
     if (projection) {
       const note = document.createElement('p');
       note.className = 'tuner-note';

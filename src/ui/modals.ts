@@ -65,7 +65,7 @@ export function createModals(refs: DomRefs, hooks: { onPerk(id: string): void; o
     hideResult(): void { refs.resultModal.classList.remove('show'); },
     showResult(win: boolean, state: GameState): void {
       refs.resultTitle.textContent = win ? texts.result.winTitle : texts.result.loseTitle;
-      refs.resultDesc.textContent = fmt(win ? texts.result.winDesc : texts.result.loseDesc, { collected: state.collected, expired: state.expired });
+      refs.resultDesc.textContent = `${fmt(win ? texts.result.winDesc : texts.result.loseDesc, { collected: state.collected, expired: state.expired })} · 难度：${cfg.difficulty.profiles[state.difficultyId].label}`;
       refs.resultKills.textContent = String(state.kills);
       refs.resultMerges.textContent = String(state.merges);
       refs.resultUses.textContent = String(state.consumes);

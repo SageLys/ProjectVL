@@ -134,6 +134,23 @@ export interface SkillsConfig {
   cards: CardDef[];
 }
 
+export type DifficultyId = 'relaxed' | 'standard' | 'hard' | 'hell';
+
+export interface DifficultyCurve { start: number; end: number; power: number; }
+
+export interface DifficultyProfile {
+  label: string;
+  description: string;
+  enemy: { hp: DifficultyCurve; damage: DifficultyCurve; speed: DifficultyCurve };
+  /** 可选覆盖：只作用于 type === 'boss'；缺省字段回落到 enemy 对应曲线。 */
+  boss?: Partial<{ hp: DifficultyCurve; damage: DifficultyCurve; speed: DifficultyCurve }>;
+}
+
+export interface DifficultyConfig {
+  defaultDifficulty: DifficultyId;
+  profiles: Record<DifficultyId, DifficultyProfile>;
+}
+
 export type PerkStatKind = 'damagePct' | 'fireRatePct' | 'heal' | 'maxHp' | 'xpGainPct' | 'rangePct';
 
 export interface PerkStatEffect { kind: 'stat'; stat: PerkStatKind; value: number; }
@@ -262,6 +279,7 @@ export interface GameConfig {
   combat: CombatConfig;
   waves: WavesConfig;
   enemies: EnemiesConfig;
+  difficulty: DifficultyConfig;
   skills: SkillsConfig;
   progression: ProgressionConfig;
   economy: EconomyConfig;

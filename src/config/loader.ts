@@ -3,6 +3,7 @@
 import combat from './base/combat.json';
 import waves from './base/waves.json';
 import enemies from './base/enemies.json';
+import difficulty from './base/difficulty.json';
 import skills from './base/skills.json';
 import progression from './base/progression.json';
 import economy from './base/economy.json';
@@ -13,6 +14,7 @@ import devShort from '../config/variants/dev-short.json';
 import type { DeepPartial, GameConfig } from './types';
 import { validateSkillsConfig } from './skillValidator';
 import { validateProgressionConfig } from './progressionValidator';
+import { validateDifficultyConfig } from './difficultyValidator';
 
 /** 将配置中的 Boss 波次限制为可达、唯一且升序的整数列表。 */
 export function normalizeBossWaves(values: readonly number[], totalWaves: number): number[] {
@@ -67,10 +69,12 @@ export function deepMerge<T>(base: T, patch: DeepPartial<T>): T {
 function assembleBase(): GameConfig {
   validateSkillsConfig(skills);
   validateProgressionConfig(progression);
+  validateDifficultyConfig(difficulty as GameConfig['difficulty']);
   return structuredClone({
     combat,
     waves,
     enemies,
+    difficulty,
     skills,
     progression,
     economy,
@@ -94,6 +98,7 @@ export function buildConfig(variantNames: string[] = []): GameConfig {
   }
   cfg.waves.bossWaves = normalizeBossWaves(cfg.waves.bossWaves, cfg.waves.totalWaves);
   validateProgressionConfig(cfg.progression);
+  validateDifficultyConfig(cfg.difficulty);
   return cfg;
 }
 

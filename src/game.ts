@@ -31,6 +31,8 @@ import { createPointerRouter, type PreviewSpec } from './input/pointerRouter';
 import { createKeyboard } from './input/keyboard';
 import type { DevTelemetry } from './telemetry/devTelemetry';
 import type { PerkDef } from './config/types';
+import type { DifficultyId } from './config/types';
+import { resyncEnemyStats, type EnemyStatConfigKey } from './core/systems/enemySystem';
 
 // 技能 = 数据 + 解释器：把配置里的卡定义注入解释器（P5 实装 12 张正式卡后自动生效）。
 registerSkillDefs(cfg.skills.cards);
@@ -44,6 +46,14 @@ let devTimeScale = 1;
 let devInvincible = false;
 const evidenceMode = import.meta.env.DEV ? new URLSearchParams(location.search).get('evidence') : null;
 const refs = getDomRefs();
+let selectedDifficulty: DifficultyId = cfg.difficulty.defaultDifficulty;
+const difficultyInputs = Array.from(document.querySelectorAll<HTMLInputElement>('input[name="difficulty"]'));
+for (const input of difficultyInputs) {
+  const id = input.value as DifficultyId;
+  input.nextElementSibling!.textContent = cfg.difficulty.profiles[id].label;
+  input.checked = id === selectedDifficulty;
+  input.addEventListener('change', () => { if (input.checked) selectedDifficulty = id; });
+}
 if (import.meta.env.DEV) {
   refs.testCardBtn.removeAttribute('hidden');
   refs.testWildcardBtn.removeAttribute('hidden');
@@ -166,7 +176,7 @@ refs.testWildcardBtn.addEventListener('click', () => {
 });
 
 function reset(): void {
-  state = createInitialState();
+  state = createInitialState(selectedDifficulty);
   if (import.meta.env.DEV) telemetry?.reset();
   if (evidenceMode === 'equip') {
     state.cards[0] = { id: state.nextCardId++, type: 'pierce', star: 4 };
@@ -191,6 +201,7 @@ function reset(): void {
 
 function start(): void {
   if (state.mode !== 'ready') reset();
+  else if (state.difficultyId !== selectedDifficulty) reset();
   tuner?.applyPendingWaveChanges();
   state.mode = 'playing';
   state.paused = false;
@@ -241,16 +252,10 @@ if (import.meta.env.DEV) void Promise.all([import('./debug/exposeDebugApi'), imp
     const match = /^enemies\.types\.(normal|fast|tank|boss)\.(.+)$/.exec(path);
     if (!match) return;
     const [type, key] = [match[1] as keyof typeof cfg.enemies.types, match[2]];
-    const def = cfg.enemies.types[type];
     for (const enemy of state.enemies.filter(item => item.type === type)) {
-      if (key === 'hpBase' || key === 'hpPerWave') {
-        const ratio = enemy.maxHp > 0 ? enemy.hp / enemy.maxHp : 1;
-        enemy.maxHp = def.hpBase + state.wave * def.hpPerWave;
-        enemy.hp = enemy.maxHp * ratio;
-      } else if (key === 'speedBase' || key === 'speedPerWave') enemy.speed = def.speedBase + state.wave * def.speedPerWave;
-      else if (key === 'damage') enemy.damage = def.damage;
-      else if (key === 'r') enemy.r = def.r;
-      else if (key === 'xp') enemy.xp = def.xp;
+      if (['hpBase', 'hpPerWave', 'speedBase', 'speedPerWave', 'damage', 'r', 'xp'].includes(key)) {
+        resyncEnemyStats(enemy, state, key as EnemyStatConfigKey);
+      }
     }
   }
 
@@ -299,6 +304,7 @@ if (import.meta.env.DEV) void Promise.all([import('./debug/exposeDebugApi'), imp
       restartWave() { dispatch(restartWave(state, config, rng)); modals.hideResult(); modals.hideLevel(); modals.message('', '', false); },
       getSpawnTelemetry() { const admission = budgetAdmission(state.wave, state.spawnLeft, state.enemies.length, cfg.waves.budget); return { wave: state.wave, spawnLeft: state.spawnLeft, alive: state.enemies.length, spawnTimer: state.spawnTimer, lastSpawnCheckCount: state.lastSpawnCheckCount, normalTarget: admission.normalTarget, effectiveTarget: admission.effectiveTarget, inEndSprint: admission.inEndSprint }; },
       getBountyTelemetry,
+      getDifficultyId: () => state.difficultyId,
     },
   });
   if (evidenceMode?.startsWith('upgrade')) devTools.hidden = true;
@@ -309,6 +315,7 @@ if (import.meta.env.DEV) void Promise.all([import('./debug/exposeDebugApi'), imp
     getSeed: () => devSeed,
     getPresetName: () => tuner?.getActivePresetName() ?? '',
     getRange: () => totalRange(state, config),
+    getDifficultyId: () => state.difficultyId,
   });
   const telemetryActions = document.querySelector<HTMLElement>('.telemetry-actions');
   if (telemetryActions) {
@@ -324,6 +331,12 @@ if (import.meta.env.DEV) void Promise.all([import('./debug/exposeDebugApi'), imp
 
   debugModule.exposeDebugApi({
       getState: () => ({ ...state, enemyTypes: state.enemies.map(enemy => enemy.type), enemies: state.enemies.length, bullets: state.bullets.length, config: { ...config }, waves: { spawnMode: cfg.waves.spawnMode, pendingSpawnMode: tuner?.getPendingSpawnMode() ?? null, budget: cfg.waves.budget } }), start, reset,
+    setDifficulty: id => {
+      if (!cfg.difficulty.profiles[id]) throw new Error(`未知难度: ${id}`);
+      selectedDifficulty = id;
+      for (const input of difficultyInputs) input.checked = input.value === id;
+      reset();
+    },
     spawnGroundDrop: (x, y, type = null, star) => {
       const selectedType = type ?? selectUniformCardType(rng);
       spawnGroundDrop(state, config, rng, x, y, selectedType, star);
