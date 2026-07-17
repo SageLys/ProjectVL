@@ -4,10 +4,12 @@ import type { DifficultyConfig, DifficultyId } from '../src/config/types';
 import { validateDifficultyConfig } from '../src/config/difficultyValidator';
 import { createInitialState, createDefaultConfig } from '../src/core/createInitialState';
 import { difficultyMultiplierAtWave, difficultyMultipliersFor } from '../src/core/difficulty';
-import { createEnemy, resyncEnemyStats } from '../src/core/systems/enemySystem';
+import { createEnemy, resyncEnemyStats, spawnEnemy } from '../src/core/systems/enemySystem';
 import { startNextWave } from '../src/core/systems/waveSystem';
 import type { EnemyType } from '../src/core/types';
 import { registerSkillDefs, resetTestEnv } from './helpers';
+import { createSeededRng } from '../src/debug/exposeDebugApi';
+import { deriveMetrics } from '../src/ui/derivedMetrics';
 
 const IDS: DifficultyId[] = ['relaxed', 'standard', 'hard', 'hell'];
 const TYPES: EnemyType[] = ['normal', 'fast', 'tank', 'boss'];
@@ -42,11 +44,34 @@ describe('difficulty curves and enemy stats', () => {
     expect(values[8] - values[7]).toBeGreaterThan(values[1] - values[0]);
   });
 
-  it('stage 1 keeps every selectable profile identical', () => {
+  it('orders relaxed ≤ standard ≤ hard ≤ hell throughout the run', () => {
     for (let wave = 1; wave <= cfg.waves.totalWaves; wave++) for (const type of TYPES) {
       const values = IDS.map(id => difficultyMultipliersFor(id, type, wave));
-      expect(values).toEqual(values.map(() => ({ hp: 1, damage: 1, speed: 1 })));
+      for (const stat of ['hp', 'damage', 'speed'] as const) {
+        for (let i = 1; i < values.length; i++) expect(values[i][stat]).toBeGreaterThanOrEqual(values[i - 1][stat]);
+      }
     }
+    const wave1 = IDS.map(id => difficultyMultipliersFor(id, 'normal', 1));
+    for (const stat of ['hp', 'damage'] as const) {
+      for (let i = 1; i < wave1.length; i++) expect(wave1[i][stat]).toBeGreaterThan(wave1[i - 1][stat]);
+    }
+  });
+
+  it('loads the specified wave-one values, final endpoints, and standard UI default', () => {
+    expect(cfg.difficulty.defaultDifficulty).toBe('standard');
+    expect(IDS.map(id => difficultyMultipliersFor(id, 'normal', 1).hp)).toEqual([0.45, 0.65, 0.82, 1]);
+    expect(IDS.map(id => difficultyMultipliersFor(id, 'normal', 1).damage)).toEqual([0.35, 0.55, 0.75, 1]);
+    expect(IDS.map(id => difficultyMultipliersFor(id, 'normal', cfg.waves.totalWaves).hp)).toEqual([0.85, 0.95, 1, 1]);
+    expect(IDS.map(id => difficultyMultipliersFor(id, 'normal', cfg.waves.totalWaves).damage)).toEqual([0.75, 0.9, 1, 1]);
+    expect(createInitialState().difficultyId).toBe('hell');
+  });
+
+  it('makes relaxed wave-one projected TTK 45% of hell and reaches configured final values', () => {
+    const runtime = createDefaultConfig();
+    const relaxedTtk = deriveMetrics(cfg, runtime, 'relaxed').cells.normal[0].ttk;
+    const hellTtk = deriveMetrics(cfg, runtime, 'hell').cells.normal[0].ttk;
+    expect(relaxedTtk / hellTtk).toBeCloseTo(0.45, 12);
+    expect(difficultyMultipliersFor('relaxed', 'normal', cfg.waves.totalWaves)).toEqual({ hp: 0.85, damage: 0.75, speed: 1 });
   });
 
   it('does not change xp or radius across difficulties', () => {
@@ -58,10 +83,11 @@ describe('difficulty curves and enemy stats', () => {
   });
 
   it('applies boss overrides only to boss enemies', () => {
+    const enemyHp = cfg.difficulty.profiles.relaxed.enemy.hp.start;
     cfg.difficulty.profiles.relaxed.boss!.hp = { start: 0.5, end: 0.5, power: 1 };
     expect(difficultyMultipliersFor('relaxed', 'boss', 1).hp).toBe(0.5);
     for (const type of ['normal', 'fast', 'tank'] as EnemyType[]) {
-      expect(difficultyMultipliersFor('relaxed', type, 1).hp).toBe(1);
+      expect(difficultyMultipliersFor('relaxed', type, 1).hp).toBe(enemyHp);
     }
   });
 
@@ -130,5 +156,17 @@ describe('difficulty RNG isolation', () => {
       return calls;
     };
     expect(callsFor('relaxed')).toBe(callsFor('hell'));
+  });
+
+  it('keeps fixed-seed type and position sequences identical in all four profiles', () => {
+    const sequences = IDS.map(id => {
+      const state = createInitialState(id);
+      state.wave = 1;
+      state.spawnLeft = 12;
+      const rng = createSeededRng(42);
+      for (let i = 0; i < 12; i++) spawnEnemy(state, rng);
+      return state.enemies.map(enemy => ({ type: enemy.type, x: enemy.x, y: enemy.y }));
+    });
+    for (const sequence of sequences.slice(1)) expect(sequence).toEqual(sequences[0]);
   });
 });
