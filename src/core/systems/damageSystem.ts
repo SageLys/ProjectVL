@@ -2,12 +2,14 @@
 // 保证易伤乘数、击杀结算（计分/掉落/经验/onKill 触发）语义唯一。
 import { cfg } from '../../config';
 import type { Config, Enemy, GameEvent, GameState, Rng } from '../types';
-import { damageTakenMultiplier } from '../effects/statusSystem';
+import { damageTakenMultiplier, isControlled } from '../effects/statusSystem';
 import { spawnParticle } from './particleSystem';
 import { rollDropOnKill } from './dropSystem';
 import { addXp } from './progressionSystem';
 import { fireTrigger, getModifiers } from '../effects/interpreter';
 import { notifyBountyMemberKilled } from './bountySystem';
+import { controlledDamageTakenBonus } from './buildModifierSystem';
+import { grantWaveBossReward } from './waveBossSystem';
 
 /**
  * 击杀结算：计分、粒子、掉落判定、经验（×xpMul）、onKill 触发。调用前敌人须已移出数组。
@@ -18,7 +20,10 @@ export function killEnemy(state: GameState, config: Config, rng: Rng, enemy: Ene
   const events: GameEvent[] = [];
   state.kills++;
   for (let i = 0; i < cfg.combat.vfx.killParticles; i++) spawnParticle(state, rng, enemy.x, enemy.y, '#8793a3', 150);
-  if (enemy.bountyEncounterId !== undefined) events.push(...notifyBountyMemberKilled(state, enemy, config, rng));
+  if (enemy.spawnKind === 'waveBoss') {
+    for (let i = 0; i < cfg.combat.vfx.killParticles * 2; i++) spawnParticle(state, rng, enemy.x, enemy.y, '#d6b06f', 220);
+    events.push(...grantWaveBossReward(state));
+  } else if (enemy.bountyEncounterId !== undefined) events.push(...notifyBountyMemberKilled(state, enemy, config, rng));
   else rollDropOnKill(state, config, rng, enemy);
   const xpGain = enemy.xp * cfg.progression.killXpMul * (1 + state.xpGainBonus) * getModifiers(state).xpMul;
   events.push(...addXp(state, xpGain, rng));
@@ -33,7 +38,8 @@ export function killEnemy(state: GameState, config: Config, rng: Rng, enemy: Ene
 export function dealDamage(state: GameState, config: Config, rng: Rng, enemy: Enemy, rawDamage: number, source?: string): GameEvent[] {
   const idx = state.enemies.indexOf(enemy);
   if (idx < 0) return [];
-  enemy.hp -= rawDamage * damageTakenMultiplier(enemy);
+  const controlledMul = isControlled(enemy) ? 1 + controlledDamageTakenBonus(state) : 1;
+  enemy.hp -= rawDamage * damageTakenMultiplier(enemy) * controlledMul;
   enemy.hit = 0.08;
   if (enemy.hp <= 0) {
     state.enemies.splice(idx, 1);

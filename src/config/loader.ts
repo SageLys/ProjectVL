@@ -12,6 +12,7 @@ import input from './base/input.json';
 import devShort from '../config/variants/dev-short.json';
 import type { DeepPartial, GameConfig } from './types';
 import { validateSkillsConfig } from './skillValidator';
+import { validateProgressionConfig } from './progressionValidator';
 
 /** 将配置中的 Boss 波次限制为可达、唯一且升序的整数列表。 */
 export function normalizeBossWaves(values: readonly number[], totalWaves: number): number[] {
@@ -65,6 +66,7 @@ export function deepMerge<T>(base: T, patch: DeepPartial<T>): T {
 
 function assembleBase(): GameConfig {
   validateSkillsConfig(skills);
+  validateProgressionConfig(progression);
   return structuredClone({
     combat,
     waves,
@@ -91,6 +93,7 @@ export function buildConfig(variantNames: string[] = []): GameConfig {
     cfg = deepMerge<GameConfig>(cfg, patch);
   }
   cfg.waves.bossWaves = normalizeBossWaves(cfg.waves.bossWaves, cfg.waves.totalWaves);
+  validateProgressionConfig(cfg.progression);
   return cfg;
 }
 

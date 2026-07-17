@@ -1,9 +1,17 @@
 // 配置层类型：游戏域 + input（T1 输入校准值）+ tuner（调参面板元数据）。
 // P3 配置重组：所有可调数值经此处；variant = 对 base 的深覆盖（见 loader.ts）。
-import type { CardDef } from '../core/effects/defs';
+import type { BuildTag, CardDef } from '../core/effects/defs';
 
 export interface BountyConfig {
   enabled: boolean;
+  rewardBias: {
+    enabled: boolean;
+    primaryShare: number;
+    secondaryShare: number;
+    nearMergeBonus: number;
+    investedBonus: number;
+    droughtBonus: number;
+  };
   offer: {
     enabledFromWave: number;
     checkIntervalSeconds: number;
@@ -92,6 +100,14 @@ export interface WavesConfig {
   spawnMargin: number;
   typeRoll: { tankBase: number; tankPerWave: number; fastThreshold: number };
   bossWaves: number[];
+  waveBoss: {
+    reward: {
+      starTierEveryWaves: number;
+      starMax: number;
+      bonusCountEveryWaves: number;
+      finalWaveBonusCount: number;
+    };
+  };
 }
 
 export interface EnemyDef {
@@ -118,12 +134,37 @@ export interface SkillsConfig {
   cards: CardDef[];
 }
 
+export type PerkStatKind = 'damagePct' | 'fireRatePct' | 'heal' | 'maxHp' | 'xpGainPct' | 'rangePct';
+
+export interface PerkStatEffect { kind: 'stat'; stat: PerkStatKind; value: number; }
+
+export type BuildScalingAxis =
+  | 'effectDamageMul'
+  | 'quantityAdd'
+  | 'controlPotencyMul'
+  | 'controlledDamageTakenMul'
+  | 'areaScaleMul'
+  | 'dotDamageMul'
+  | 'defenseDurabilityMul'
+  | 'retaliationMul';
+
+export interface PerkBuildEffect {
+  kind: 'buildScaling';
+  targetTags: BuildTag[];
+  axis: BuildScalingAxis;
+  value: number;
+}
+
+export type PerkEffect = PerkStatEffect | PerkBuildEffect;
+
 export interface PerkDef {
   id: string;
   title: string;
   desc: string;
-  kind: 'damagePct' | 'fireRatePct' | 'heal' | 'maxHp' | 'rangePct' | 'xpGainPct';
-  value: number;
+  lane: BuildTag;
+  affinityGain: number;
+  effects: PerkEffect[];
+  offerRole: 'route' | 'bridge' | 'utility';
   weight: number;
   maxStacks: number;
 }
@@ -134,6 +175,14 @@ export interface ProgressionConfig {
   killXpMul: number;
   perkChoices: number;
   perks: PerkDef[];
+  settlement: {
+    winBonus: number;
+    perWaveCleared: number;
+    perKill: number;
+    hpRatioBonusMax: number;
+    perEquippedStarSquared: number;
+    wildcardStarValue: Record<string, number>;
+  };
 }
 
 export interface NormalDropTypePolicyConfig {
@@ -142,6 +191,7 @@ export interface NormalDropTypePolicyConfig {
   earlyMix: { discovery: number; build: number; pivot: number };
   lateMix: { discovery: number; build: number; pivot: number };
   bootstrapMinDiscovery: number;
+  affinity: { scorePerStack: number; scoreCap: number; pityWindow: number };
   maturity: {
     fullMergeOps: number;
     fullHighestStar: number;

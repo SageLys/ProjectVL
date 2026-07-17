@@ -1,7 +1,9 @@
 import { cfg } from '../../config';
+import { getSkillDef } from '../effects/interpreter';
+import type { BuildTag } from '../effects/defs';
 import type { BountyEncounter, BountyOffer, BountySide, CardType, Config, Enemy, EnemyType, GameEvent, GameState, Rng } from '../types';
 import { spawnGroundDrop, spawnWildcardDrop } from './dropSystem';
-import { getCardPool, recordCardDropShown } from './dropTypePolicy';
+import { calculateCommitmentScore, getCardPool, getOrCreateCardTypeRunStats, recordCardDropShown } from './dropTypePolicy';
 import { createEnemy } from './enemySystem';
 
 const SIDES: BountySide[] = ['top', 'right', 'bottom', 'left'];
@@ -42,11 +44,67 @@ function shuffleRewardBag(rng: Rng, last: CardType | null): CardType[] {
   return bag;
 }
 
-function drawRewardType(state: GameState, rng: Rng): CardType {
+function drawUniformRewardType(state: GameState, rng: Rng): CardType {
   if (!state.bountyDirector.rewardBag.length) {
     state.bountyDirector.rewardBag = shuffleRewardBag(rng, state.bountyDirector.lastRewardType);
   }
   const type = state.bountyDirector.rewardBag.pop() ?? getCardPool()[0];
+  state.bountyDirector.lastRewardType = type;
+  return type;
+}
+
+const COMBAT_LANES: BuildTag[] = ['projectile', 'control', 'domain', 'defense'];
+
+function weightedRewardChoice(state: GameState, candidates: CardType[], rng: Rng): CardType {
+  const bias = cfg.bounty.rewardBias;
+  const weights = candidates.map(type => {
+    let weight = 1;
+    const oneStarCount = [...state.cards, ...state.equipment]
+      .filter(card => card?.type === type && card.star === 1).length;
+    if (oneStarCount === cfg.economy.mergeCopies - 1) weight *= bias.nearMergeBonus;
+    if (calculateCommitmentScore(state, type) > 0) weight *= bias.investedBonus;
+    if (getOrCreateCardTypeRunStats(state, type).totalShown === 0) weight *= bias.droughtBonus;
+    if (type === state.bountyDirector.lastRewardType
+      && cfg.bounty.reward.repeatProtection > 0
+      && candidates.length > 1) weight = 0;
+    return Math.max(0, weight);
+  });
+  const total = weights.reduce((sum, weight) => sum + weight, 0);
+  if (total <= 0) return candidates[Math.min(candidates.length - 1, Math.floor(rng() * candidates.length))];
+  let roll = rng() * total;
+  for (let index = 0; index < candidates.length; index++) {
+    roll -= weights[index];
+    if (roll < 0) return candidates[index];
+  }
+  return candidates[candidates.length - 1];
+}
+
+/** 按玩家流派倾向选择 Bounty 奖励；零倾向或关闭时保持旧均匀洗牌袋行为。 */
+export function selectBountyRewardType(state: GameState, rng: Rng): CardType {
+  const maxAffinity = Math.max(...COMBAT_LANES.map(lane => state.buildState.affinity[lane]));
+  if (!cfg.bounty.rewardBias.enabled || maxAffinity <= 0) return drawUniformRewardType(state, rng);
+
+  const tiedPrimary = COMBAT_LANES.filter(lane => state.buildState.affinity[lane] === maxAffinity);
+  const primaryLane = tiedPrimary.length === 1
+    ? tiedPrimary[0]
+    : tiedPrimary[Math.min(tiedPrimary.length - 1, Math.floor(rng() * tiedPrimary.length))];
+  const secondaryLanes = COMBAT_LANES.filter(
+    lane => lane !== primaryLane && state.buildState.affinity[lane] > 0,
+  );
+  const pool = getCardPool();
+  const tagged = (type: CardType, lanes: BuildTag[]) => (
+    getSkillDef(type)?.synergyTags.some(tag => lanes.includes(tag)) ?? false
+  );
+  const primary = pool.filter(type => tagged(type, [primaryLane]));
+  const secondary = pool.filter(type => tagged(type, secondaryLanes));
+  const segmentRoll = rng();
+  const primaryShare = clamp01(cfg.bounty.rewardBias.primaryShare);
+  const secondaryShare = clamp(cfg.bounty.rewardBias.secondaryShare, 0, 1 - primaryShare);
+  let candidates = pool;
+  if (segmentRoll < primaryShare && primary.length) candidates = primary;
+  else if (segmentRoll < primaryShare + secondaryShare && secondary.length) candidates = secondary;
+
+  const type = weightedRewardChoice(state, candidates, rng);
   state.bountyDirector.lastRewardType = type;
   return type;
 }
@@ -68,11 +126,12 @@ function unresolvedEncounterCount(state: GameState): number {
   return state.bountyEncounters.filter(encounter => encounter.status === 'spawning' || encounter.status === 'active').length;
 }
 
-function canCreateOffer(state: GameState): boolean {
+export function canCreateOffer(state: GameState): boolean {
   const o = cfg.bounty.offer;
   return cfg.bounty.enabled
     && state.wave >= o.enabledFromWave
     && state.mode === 'playing'
+    && state.wavePhase === 'regular'
     && state.between <= 0
     && state.bountyDirector.offersThisWave < o.maxOffersPerWave
     && state.bountyOffers.length < o.maxConcurrentOffers
@@ -85,7 +144,7 @@ function createOffer(state: GameState, rng: Rng, guaranteed: boolean): GameEvent
   const reward = cfg.bounty.reward;
   const offer: BountyOffer = {
     id: state.nextBountyOfferId++,
-    rewardCardType: drawRewardType(state, rng),
+    rewardCardType: selectBountyRewardType(state, rng),
     rewardCardStar: rewardStar(reward.cardStarBase, reward.cardStarUpgradeEveryWaves, reward.cardStarMax, state.wave),
     rewardCardCount: reward.cardCount,
     wildcardStar: rewardStar(reward.wildcardStarBase, reward.wildcardStarUpgradeEveryWaves, reward.wildcardStarMax, state.wave),
@@ -160,6 +219,7 @@ function tickEncounterSpawns(state: GameState, rng: Rng, dt: number): GameEvent[
           damageMul: cfg.bounty.encounter.damageMul,
           bountyEncounterId: encounter.id,
           bountyRewardType: encounter.rewardCardType,
+          spawnKind: 'bounty',
         },
       );
       state.enemies.push(enemy);
@@ -226,7 +286,7 @@ export function notifyBountyMemberKilled(state: GameState, enemy: Enemy, config?
   };
   for (let i = 0; i < encounter.rewardCardCount; i++) {
     const point = rewardPoint();
-    spawnGroundDrop(state, rewardConfig, rewardRng, point.x, point.y, encounter.rewardCardType, encounter.rewardCardStar);
+    spawnGroundDrop(state, rewardConfig, rewardRng, point.x, point.y, encounter.rewardCardType, encounter.rewardCardStar, 'bounty');
     recordCardDropShown(state, encounter.rewardCardType, 'bounty');
     const drop = state.groundDrops[state.groundDrops.length - 1];
     drop.life = lifetime;

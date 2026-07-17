@@ -8,7 +8,7 @@ import { constRng, freshState, resetTestEnv } from './helpers';
 beforeEach(resetTestEnv);
 describe('spawn-mode wave boundary lifecycle', () => {
   it('keeps active Interval unchanged and applies pending Budget before the next wave begins', () => {
-    const state = freshState(); const runtime = createDefaultConfig(); cfg.waves.spawnMode = 'interval'; cfg.waves.firstSpawnDelay = 0;
+    const state = freshState(); const runtime = createDefaultConfig(); cfg.waves.spawnMode = 'interval'; cfg.waves.firstSpawnDelay = 0; cfg.waves.bossWaves = [];
     cfg.waves.spawnInterval = { base: 5, perWave: 0, min: 5 }; cfg.waves.enemyCountBase = 4; cfg.waves.enemyCountPerWave = 0;
     startNextWave(state, runtime, constRng(.5)); updateGame(state, runtime, constRng(.5), 0);
     expect(state.enemies).toHaveLength(1); // actual active mode is interval

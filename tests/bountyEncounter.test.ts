@@ -3,7 +3,7 @@ import { cfg } from '../src/config';
 import type { BountyOffer, Enemy } from '../src/core/types';
 import { acceptBountyOfferAt, notifyBountyMemberKilled, tickBountySystem } from '../src/core/systems/bountySystem';
 import { moveEnemies } from '../src/core/systems/enemySystem';
-import { checkWaveClear, jumpToWave, restartWave } from '../src/core/systems/waveSystem';
+import { advanceWavePhase, jumpToWave, restartWave } from '../src/core/systems/waveSystem';
 import { constRng, createDefaultConfig, freshState, resetTestEnv } from './helpers';
 
 beforeEach(resetTestEnv);
@@ -64,7 +64,7 @@ describe('Bounty Encounter · 生成与生命周期', () => {
     state.bountyOffers.push(offer());
     acceptBountyOfferAt(state, 270, 32);
     expect(state.enemies).toHaveLength(0);
-    expect(checkWaveClear(state)).toEqual([]);
+    expect(advanceWavePhase(state, createDefaultConfig(), constRng(0))).toEqual([]);
   });
 
   it('最后一名成员解决时才 completed，重复通知幂等', () => {

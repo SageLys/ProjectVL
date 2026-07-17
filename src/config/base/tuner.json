@@ -20,6 +20,8 @@
   "waves.typeRoll.tankBase": { "min": 0, "max": 1, "step": 0.005 },
   "waves.typeRoll.tankPerWave": { "min": 0, "max": 0.2, "step": 0.005 },
   "waves.typeRoll.fastThreshold": { "min": 0, "max": 1, "step": 0.005 },
+  "waves.waveBoss.reward.starMax": { "min": 1, "max": 5, "step": 1 },
+  "waves.waveBoss.reward.starTierEveryWaves": { "min": 1, "max": 8, "step": 1 },
 
   "combat.defaults.damage": { "min": 1, "max": 200, "step": 1 },
   "combat.defaults.fireRate": { "min": 0.1, "max": 20, "step": 0.1 },
@@ -118,6 +120,8 @@
   "bounty.reward.wildcardStarMax": { "min": 1, "max": 4, "step": 1 },
   "bounty.reward.dropLifetimeSeconds": { "min": 0.5, "max": 60, "step": 0.5 },
   "bounty.reward.repeatProtection": { "min": 0, "max": 10, "step": 1 },
+  "bounty.rewardBias.primaryShare": { "min": 0, "max": 1, "step": 0.05 },
+  "bounty.rewardBias.secondaryShare": { "min": 0, "max": 0.3, "step": 0.05 },
 
   "bounty.visual.offerRadius": { "min": 8, "max": 80, "step": 1 },
   "bounty.visual.offerEdgeInset": { "min": 8, "max": 160, "step": 1 },
@@ -132,6 +136,8 @@
   "economy.normalDropTypePolicy.lateMix.build": { "min": 0, "max": 10, "step": 1 },
   "economy.normalDropTypePolicy.lateMix.pivot": { "min": 0, "max": 10, "step": 1 },
   "economy.normalDropTypePolicy.bootstrapMinDiscovery": { "min": 0, "max": 10, "step": 1 },
+  "economy.normalDropTypePolicy.affinity.scorePerStack": { "min": 0, "max": 6, "step": 0.5 },
+  "economy.normalDropTypePolicy.affinity.scoreCap": { "min": 0, "max": 12, "step": 1 },
   "economy.normalDropTypePolicy.maturity.fullMergeOps": { "min": 1, "max": 40, "step": 1 },
   "economy.normalDropTypePolicy.maturity.fullHighestStar": { "min": 2, "max": 6, "step": 1 },
   "economy.normalDropTypePolicy.maturity.fullEquippedTypes": { "min": 1, "max": 3, "step": 1 },

@@ -14,7 +14,7 @@ export function card(type: CardType, star: number): Card {
 /** 构造一只敌人（仅填测试关心的字段，其余给合理默认）。 */
 export function enemy(partial: Partial<Enemy> & { type?: EnemyType } = {}): Enemy {
   return {
-    id: idSeed++, x: 0, y: 0, type: 'normal', label: 't', hp: 10, maxHp: 10, speed: 20,
+    id: idSeed++, x: 0, y: 0, type: 'normal', spawnKind: 'regular', label: 't', hp: 10, maxHp: 10, speed: 20,
     r: 16, color: '#fff', damage: 8, xp: 1, hit: 0, status: emptyStatus(), ...partial,
   };
 }

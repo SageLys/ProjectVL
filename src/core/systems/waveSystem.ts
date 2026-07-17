@@ -1,7 +1,7 @@
 import { cfg } from '../../config';
 import type { Config, GameEvent, GameState, Rng } from '../types';
 import { endGame } from '../endGame';
-import { spawnEnemy } from './enemySystem';
+import { spawnEnemy, spawnWaveBoss } from './enemySystem';
 import { fireTrigger } from '../effects/interpreter';
 import { budgetAdmission, budgetWaveQuotaFor } from './budgetRules';
 export { budgetAdmission } from './budgetRules';
@@ -22,7 +22,9 @@ export function startNextWave(state: GameState, config: Config, rng: Rng): GameE
   state.waveSpawnQuota = state.spawnLeft;
   state.spawnTimer = cfg.waves.firstSpawnDelay;
   state.lastSpawnCheckCount = 0;
-  state.waveClearPending = false;
+  state.wavePhase = 'regular';
+  state.waveBossId = null;
+  state.waveBossSpawnedAt = null;
   state.between = 0;
   state.bountyOffers.length = 0;
   state.bountyDirector.offersThisWave = 0;
@@ -79,6 +81,7 @@ const SPAWN_STRATEGIES: Record<typeof cfg.waves.spawnMode, SpawnStrategy> = {
 
 /** Advance spawning through the configured strategy. */
 export function tickSpawns(state: GameState, rng: Rng, dt: number): void {
+  if (state.wavePhase !== 'regular') return;
   SPAWN_STRATEGIES[cfg.waves.spawnMode].tick(state, rng, dt);
 }
 
@@ -86,25 +89,43 @@ export function tickSpawns(state: GameState, rng: Rng, dt: number): void {
  * 波次清空判定：本波敌人生成完且场上清空时，最后一波→胜利结束，
  * 否则进入 betweenWaves 间隔并产出 waveCleared。
  */
-export function checkWaveClear(state: GameState): GameEvent[] {
+function finishWave(state: GameState): GameEvent[] {
+  state.wavePhase = 'between';
+  state.waveBossId = null;
+  state.waveBossSpawnedAt = null;
+  if (state.wave >= cfg.waves.totalWaves) return endGame(state, true);
+  state.between = cfg.waves.betweenWaves;
+  return [{ type: 'waveCleared', wave: state.wave }];
+}
+
+/** Advance the explicit regular -> Boss -> between wave phase machine. */
+export function advanceWavePhase(state: GameState, _config: Config, rng: Rng): GameEvent[] {
+  if (state.mode !== 'playing') return [];
   const bountyActive = state.bountyEncounters.some(encounter => encounter.status === 'spawning' || encounter.status === 'active');
-  if (state.spawnLeft === 0 && state.enemies.length === 0 && !bountyActive && !state.waveClearPending && state.mode === 'playing') {
-    state.waveClearPending = true;
+  if (state.wavePhase === 'regular') {
+    const blockingEnemy = state.enemies.some(enemy => enemy.spawnKind === 'regular' || enemy.spawnKind === 'bounty');
+    if (state.spawnLeft !== 0 || blockingEnemy || bountyActive) return [];
     const events: GameEvent[] = state.bountyOffers.map(offer => ({ type: 'bountyOfferExpired' as const, offerId: offer.id }));
     state.bountyOffers.length = 0;
-    if (state.wave >= cfg.waves.totalWaves) return [...events, ...endGame(state, true)];
-    state.between = cfg.waves.betweenWaves;
-    return [...events, { type: 'waveCleared', wave: state.wave }];
+    if (!cfg.waves.bossWaves.includes(state.wave)) return [...events, ...finishWave(state)];
+    const boss = spawnWaveBoss(state, rng);
+    state.wavePhase = 'boss';
+    state.waveBossId = boss.id;
+    state.waveBossSpawnedAt = state.time;
+    return [...events, { type: 'waveBossSpawned', wave: state.wave }];
   }
+  if (state.wavePhase === 'boss'
+    && state.waveBossId !== null
+    && !state.enemies.some(enemy => enemy.id === state.waveBossId)
+    && state.bossRewardClaimedWave >= state.wave) return finishWave(state);
   return [];
 }
 
 /** 波间隔倒计时；归零则开启下一波。 */
 export function tickBetween(state: GameState, config: Config, rng: Rng, dt: number, beforeWaveStart?: () => void): GameEvent[] {
-  if (state.between > 0) {
-    state.between -= dt;
-    if (state.between <= 0) { beforeWaveStart?.(); return startNextWave(state, config, rng); }
-  }
+  if (state.wavePhase !== 'between' || state.mode !== 'playing') return [];
+  state.between -= dt;
+  if (state.between <= 0) { beforeWaveStart?.(); return startNextWave(state, config, rng); }
   return [];
 }
 
@@ -129,7 +150,11 @@ export function jumpToWave(state: GameState, config: Config, rng: Rng, targetWav
   state.spawnLeft = 0;
   state.spawnTimer = 0;
   state.between = 0;
-  state.waveClearPending = false;
+  state.wavePhase = 'regular';
+  state.waveBossId = null;
+  state.waveBossSpawnedAt = null;
+  state.bossRewardClaimedWave = 0;
+  state.runSummary = null;
   state.shotCd = 0;
   state.mode = 'playing';
   state.paused = false;

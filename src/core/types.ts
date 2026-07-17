@@ -1,10 +1,13 @@
 // 纯规则层类型定义。core/ 内禁止出现 DOM / Canvas / 浏览器 API。（P3 重构版）
-import type { EffectDef } from './effects/defs';
+import type { BuildTag, EffectDef } from './effects/defs';
+import type { RunSummary } from './settlement';
 
 /** 卡牌类型 = 技能 id 字符串（schema: ^[a-z][a-zA-Z0-9]*$），由 skills.json 的 cards[].id 决定。 */
 export type CardType = string;
 export type EnemyType = 'normal' | 'fast' | 'tank' | 'boss';
 export type GameMode = 'ready' | 'playing' | 'ended';
+export type WavePhase = 'regular' | 'boss' | 'between';
+export type EnemySpawnKind = 'regular' | 'waveBoss' | 'bounty';
 export type BountySide = 'top' | 'right' | 'bottom' | 'left';
 
 export interface BountyOffer {
@@ -115,6 +118,7 @@ export interface Enemy {
   x: number;
   y: number;
   type: EnemyType;
+  spawnKind: EnemySpawnKind;
   label: string;
   hp: number;
   maxHp: number;
@@ -182,7 +186,13 @@ export interface GroundDropBase {
   bountyEncounterId?: number;
 }
 
-export interface GroundCardDrop extends GroundDropBase { kind: 'card'; type: CardType; star: number; }
+export type CardDropSource = 'normalKill' | 'bossKill' | 'bounty' | 'skillExtra' | 'debug';
+export interface GroundCardDrop extends GroundDropBase {
+  kind: 'card';
+  type: CardType;
+  star: number;
+  source?: CardDropSource;
+}
 export interface GroundWildcardDrop extends GroundDropBase { kind: 'wildcard'; star: number; count: number; }
 export type GroundDrop = GroundCardDrop | GroundWildcardDrop;
 
@@ -254,6 +264,17 @@ export interface Config {
   enemySpeed: number;
 }
 
+export interface BuildState {
+  /** 玩家通过升级主动表达的流派倾向；不锁流派，只表达意图。 */
+  affinity: Record<BuildTag, number>;
+  /** 依次记录已选 perk id。 */
+  perkHistory: string[];
+  /** Incremented whenever a perk is applied, invalidating cached build-scaling totals. */
+  scalingVersion: number;
+  /** 只由后续 build 位消费的流派命中保底。 */
+  dropPity?: { lane: BuildTag; remaining: number };
+}
+
 export interface GameState {
   mode: GameMode;
   paused: boolean;
@@ -289,7 +310,10 @@ export interface GameState {
   spawnTimer: number;
   /** DEV-visible result of the latest Budget admission check (not configuration). */
   lastSpawnCheckCount: number;
-  waveClearPending: boolean;
+  wavePhase: WavePhase;
+  waveBossId: number | null;
+  waveBossSpawnedAt: number | null;
+  bossRewardClaimedWave: number;
   damageBonus: number;
   fireRateBonus: number;
   multi: number;
@@ -301,6 +325,7 @@ export interface GameState {
   pendingLevelUps: number;
   offeredPerks: string[];
   perkStacks: Record<string, number>;
+  buildState: BuildState;
   xpGainBonus: number;
   rangeBonus: number;
   kills: number;
@@ -318,6 +343,7 @@ export interface GameState {
   normalDropDirector: NormalDropDirectorState;
   nextBountyOfferId: number;
   nextBountyEncounterId: number;
+  runSummary: RunSummary | null;
 }
 
 /** 卡槽/装备栏归属。临时栏已随 P0-3/P0-6 移除。 */
@@ -331,6 +357,8 @@ export type SlotKind = 'cards' | 'equipment';
 export type GameEvent =
   | { type: 'waveStart'; wave: number }
   | { type: 'waveCleared'; wave: number }
+  | { type: 'waveBossSpawned'; wave: number }
+  | { type: 'bossRewardGranted'; wave: number; grants: Array<{ star: number; count: number }> }
   | { type: 'levelUp' }
   | { type: 'gameEnd'; win: boolean }
   | { type: 'breakthrough'; damage: number }
@@ -364,4 +392,4 @@ export type GameEvent =
   | { type: 'bountyRewardDropped'; encounterId: number; rewardCardType: CardType }
   | { type: 'shieldBroken' }
   | { type: 'testDrops'; cardType: CardType }
-  | { type: 'perkApplied'; title: string };
+  | { type: 'perkApplied'; title: string; lane: BuildTag };

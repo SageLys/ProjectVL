@@ -15,7 +15,7 @@ beforeEach(resetTestEnv);
 
 describe('调参面板 v2 · 参数与派生指标', () => {
   it('§2 A/B/C/D 每个暴露参数都在 tuner.json 有 min/max/step', () => {
-    expect(TUNER_PARAMS.length).toBe(64);
+    expect(TUNER_PARAMS.length).toBe(66);
     for (const param of TUNER_PARAMS) {
       const range = cfg.tuner[param.path];
       expect(range, param.path).toBeDefined();
@@ -25,7 +25,7 @@ describe('调参面板 v2 · 参数与派生指标', () => {
   });
 
   it('exposes every numeric drop-director control with a valid tuner range', () => {
-    expect(DROP_DIRECTOR_TUNER_PARAMS).toHaveLength(25);
+    expect(DROP_DIRECTOR_TUNER_PARAMS).toHaveLength(27);
     expect(DROP_DIRECTOR_TUNER_PARAMS.every(param => param.group === 'drops')).toBe(true);
     for (const param of DROP_DIRECTOR_TUNER_PARAMS) {
       const range = cfg.tuner[param.path];
@@ -51,7 +51,7 @@ describe('调参面板 v2 · 参数与派生指标', () => {
   });
 
   it('Bounty 的全部数值参数都有合法范围且即时生效', () => {
-    expect(BOUNTY_TUNER_PARAMS).toHaveLength(44);
+    expect(BOUNTY_TUNER_PARAMS).toHaveLength(46);
     expect(BOUNTY_TUNER_PARAMS.every(param => param.group === 'bounty' && !param.waveDeferred)).toBe(true);
     for (const param of BOUNTY_TUNER_PARAMS) {
       const range = cfg.tuner[param.path];

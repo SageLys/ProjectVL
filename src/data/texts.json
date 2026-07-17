@@ -12,9 +12,22 @@
     "resume": "继续",
     "testWildcard": "生成万能卡"
   },
+  "lanes": {
+    "projectile": "弹道",
+    "control": "控制",
+    "domain": "领域",
+    "defense": "防御",
+    "utility": "辅助"
+  },
+  "levelup": {
+    "benefits": "生效中：{names}",
+    "dropHint": "后续掉落将更偏向此流派"
+  },
   "toast": {
     "waveStart": "第 {wave} 波追求者开始",
     "waveClear": "第 {wave} 波完成 · 整理卡槽",
+    "waveBoss": "命定追求者现身——击败它获取万能卡",
+    "bossReward": "击败 Boss：获得 {desc}",
     "testDrops": "地面生成四份{name}测试掉落，可合成3星",
     "testWildcards": "获得 1–5★ 万能卡各 1 张",
     "wildcardMerged": "万能合成：{name} 升至 {star}★",
@@ -48,7 +61,16 @@
     "winTitle": "守住了心防",
     "loseTitle": "被热情淹没",
     "winDesc": "魅魔主角温和而坚定地守住了私人空间。你拾取 {collected} 份心意，错过 {expired} 份。",
-    "loseDesc": "追求者突破了中心防线。你拾取 {collected} 份心意、错过 {expired} 份；下一局试着调整射程与拾取节奏。"
+    "loseDesc": "追求者突破了中心防线。你拾取 {collected} 份心意、错过 {expired} 份；下一局试着调整射程与拾取节奏。",
+    "scoreTotal": "总分",
+    "scoreWin": "通关",
+    "scoreWaves": "波数",
+    "scoreKills": "击杀",
+    "scoreHp": "心防",
+    "scoreBuild": "构筑",
+    "scoreWildcards": "万能卡结余",
+    "topLane": "主要流派：{lane}",
+    "highestCard": "最高成就：{star}★{name}"
   },
   "cards": {
     "pierce": {

@@ -31,6 +31,11 @@ export function isImmobile(e: Enemy): boolean {
   return e.status.frozen > 0 || e.status.stunned > 0;
 }
 
+/** Controlled means any active slow, freeze, stun, or taunt. */
+export function isControlled(e: Enemy): boolean {
+  return e.status.slow !== null || e.status.frozen > 0 || e.status.stunned > 0 || e.status.taunt !== null;
+}
+
 /** 移动速度乘数：不可动=0；减速取最强单一来源。 */
 export function speedMultiplier(e: Enemy): number {
   if (isImmobile(e)) return 0;

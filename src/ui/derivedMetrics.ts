@@ -51,8 +51,7 @@ function simulateBudgetWave(game: GameConfig, runtime: Config, wave: number, dis
     const admission = budgetAdmission(wave, left, leaveAt.length, game.waves.budget);
     sprintTriggered ||= admission.inEndSprint;
     for (let i = 0; i < admission.spawnCount; i++) {
-      const type: EnemyType = game.waves.bossWaves.includes(wave) && left === 1 ? 'boss' : 'normal';
-      leaveAt.push(now + lifetime(type)); left--;
+      leaveAt.push(now + lifetime('normal')); left--;
     }
     peak = Math.max(peak, leaveAt.length);
     area += leaveAt.length * checkInterval;
@@ -78,18 +77,24 @@ export function deriveMetrics(game: GameConfig, runtime: Config): DerivedMetrics
   const intervalWaveDurations = Array.from({ length: game.waves.totalWaves }, (_, i) => {
     const wave = i + 1; const count = game.waves.enemyCountBase + wave * game.waves.enemyCountPerWave;
     const interval = Math.max(game.waves.spawnInterval.min, game.waves.spawnInterval.base - wave * game.waves.spawnInterval.perWave);
-    const tailTypes = game.waves.bossWaves.includes(wave) ? TYPES : TYPES.filter(type => type !== 'boss');
-    return game.waves.firstSpawnDelay + Math.max(0, count - 1) * interval + Math.max(...tailTypes.map(type => { const c = cell(game, runtime, type, wave, distance); return c.entryWalk + c.ttk; }));
+    const regularTypes = TYPES.filter(type => type !== 'boss');
+    const regularDuration = game.waves.firstSpawnDelay + Math.max(0, count - 1) * interval + Math.max(...regularTypes.map(type => { const c = cell(game, runtime, type, wave, distance); return c.entryWalk + c.ttk; }));
+    const bossDuration = game.waves.bossWaves.includes(wave) ? (() => { const c = cell(game, runtime, 'boss', wave, distance); return c.entryWalk + c.ttk; })() : 0;
+    return regularDuration + bossDuration;
   });
-  const budgetWaveDurations = projections.map(item => item.duration);
+  const budgetWaveDurations = projections.map((item, index) => {
+    const wave = index + 1;
+    if (!game.waves.bossWaves.includes(wave)) return item.duration;
+    const boss = cell(game, runtime, 'boss', wave, distance);
+    return item.duration + boss.entryWalk + boss.ttk;
+  });
   const waveDurations = game.waves.spawnMode === 'budget' ? budgetWaveDurations : intervalWaveDurations;
   const totalDuration = waveDurations.reduce((sum, seconds) => sum + seconds, 0) + Math.max(0, game.waves.totalWaves - 1) * game.waves.betweenWaves;
   const budgetTotalDuration = budgetWaveDurations.reduce((sum, seconds) => sum + seconds, 0) + Math.max(0, game.waves.totalWaves - 1) * game.waves.betweenWaves;
   const totalEnemies = waveDurations.reduce((sum, _, i) => sum + (game.waves.spawnMode === 'budget'
     ? budgetWaveQuotaFor(i + 1, game.waves.budget)
     : game.waves.enemyCountBase + (i + 1) * game.waves.enemyCountPerWave), 0);
-  const bosses = game.waves.bossWaves.filter(wave => wave >= 1 && wave <= game.waves.totalWaves).length;
-  const expectedDrops = (totalEnemies - bosses) * runtime.dropChance + bosses; // bosses always drop in rollDropOnKill
+  const expectedDrops = totalEnemies * runtime.dropChance;
   const budget = projections.map(item => item.projection);
   return { cells, waveDurations, totalDuration, expectedDrops, dropsPerMinute: totalDuration ? expectedDrops / totalDuration * 60 : 0,
     budget: {

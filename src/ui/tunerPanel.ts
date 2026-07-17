@@ -108,7 +108,7 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
     const controls = ALL_TUNER_PARAMS.filter(param => param.group === group.key)
       .map(param => controlHtml(param.path, param.label, ALL_TUNER_PARAMS.indexOf(param))).join('');
     const mode = group.key === 'waves' ? '<label class="tuner-control" data-path="waves.spawnMode"><span>出怪模式</span><select id="spawnModeInput"><option value="interval">interval</option><option value="budget">budget</option></select></label>' : '';
-    const bossControl = group.key === 'waves' ? '<label class="tuner-control boss-waves-control" data-path="waves.bossWaves"><span>Boss 波次</span><output id="bossWavesError"></output><input id="bossWavesInput" type="text" placeholder="3, 5, 8"><small>多个波次使用逗号分隔；留空表示无 Boss</small></label>' : '';
+    const bossControl = group.key === 'waves' ? '<label class="tuner-control boss-waves-control" data-path="waves.bossWaves"><span>波末 Boss 波次</span><output id="bossWavesError"></output><input id="bossWavesInput" type="text" placeholder="1, 2, 3"><small>这些波的普通敌人清空后追加 Boss；留空表示无 Boss</small></label>' : '';
     const bountyEnabled = group.key === 'bounty' ? '<label class="tuner-control debug-check" data-path="bounty.enabled"><span>机制启用</span><input id="bountyEnabledInput" type="checkbox"></label>' : '';
     const bountyStatus = group.key === 'bounty' ? '<p class="tuner-note" id="bountyStatus"></p>' : '';
     return `<section class="tuner-group"><h3>${group.title}${group.note ? `<small>${group.note}</small>` : ''}</h3>${bountyStatus}<div class="tuner-grid">${mode}${bossControl}${bountyEnabled}${controls}</div></section>`;

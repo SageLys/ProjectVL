@@ -2,7 +2,7 @@
   "version": "0.4.0",
   "cards": [
     {
-      "id": "pierce", "category": "projectile", "textKey": "cards.pierce", "teaching": true, "implementationBatch": 1,
+      "id": "pierce", "category": "projectile", "synergyTags": ["projectile"], "textKey": "cards.pierce", "teaching": true, "implementationBatch": 1,
       "stars": {
         "3": { "tier": "core", "equip": [{ "trigger": "onFire", "effects": [{ "atom": "pierce", "params": { "count": 2, "damageRetention": 0.8, "rampPerPierce": 0.1 } }] }] },
         "5": { "tier": "dual", "equip": [{ "trigger": "onFire", "effects": [{ "atom": "pierce", "params": { "count": 2, "damageRetention": 0.8, "rampPerPierce": 0.1 } }, { "atom": "ricochet", "params": { "bounces": 1 } }] }] },
@@ -16,7 +16,7 @@
       } }, "designNotes": "教学卡：一击洞穿一列敌人。3★装备态单核心原子（rampPerPierce 为同原子参数，非独立修饰）。"
     },
     {
-      "id": "chainLightning", "category": "projectile", "textKey": "cards.chainLightning", "teaching": false, "implementationBatch": 1,
+      "id": "chainLightning", "category": "projectile", "synergyTags": ["projectile", "control"], "textKey": "cards.chainLightning", "teaching": false, "implementationBatch": 1,
       "stars": {
         "3": { "tier": "core", "equip": [
           { "trigger": "onHit", "effects": [
@@ -53,7 +53,7 @@
       } }, "designNotes": "电弧在敌群中跳跃。5★ 断链重引：击杀来源为 chain 的敌人从死亡点重新起链。"
     },
     {
-      "id": "frost", "category": "control", "textKey": "cards.frost", "teaching": false, "implementationBatch": 1,
+      "id": "frost", "category": "control", "synergyTags": ["control", "domain"], "textKey": "cards.frost", "teaching": false, "implementationBatch": 1,
       "stars": {
         "3": { "tier": "core", "equip": [
           { "trigger": "onFire", "effects": [
@@ -84,7 +84,7 @@
       } }, "designNotes": "让世界慢下来。5★ 碎冰：冻结中被击杀的敌人碎裂造成 AoE 并减速周围敌人。"
     },
     {
-      "id": "decoy", "category": "control", "textKey": "cards.decoy", "teaching": false, "implementationBatch": 1,
+      "id": "decoy", "category": "control", "synergyTags": ["control", "defense"], "textKey": "cards.decoy", "teaching": false, "implementationBatch": 1,
       "stars": {
         "3": { "tier": "core", "equip": [
           { "trigger": "onWaveStart", "effects": [{ "atom": "summon", "params": { "kind": "decoy", "count": 1, "hp": 60, "tauntRadius": 140, "duration": 999, "explode": true, "explodeDamageMul": 1.2, "knockbackDistance": 70 } }] }
@@ -104,7 +104,7 @@
       } }, "designNotes": "让它们打错目标。5★ 重生：图腾被摧毁时在新位置重生一次（每实例限一次）。"
     },
     {
-      "id": "scorch", "category": "domain", "textKey": "cards.scorch", "teaching": false, "implementationBatch": 1,
+      "id": "scorch", "category": "domain", "synergyTags": ["domain"], "textKey": "cards.scorch", "teaching": false, "implementationBatch": 1,
       "stars": {
         "3": { "tier": "core", "equip": [
           { "trigger": "onHit", "effects": [{ "atom": "groundZone", "params": { "radius": 40, "duration": 2.5, "tickInterval": 0.5, "effects": [{ "atom": "dot", "params": { "damageRatio": 0.15 } }] } }] },
@@ -126,7 +126,7 @@
       } }, "designNotes": "所过之处皆成火海。5★ 干柴：灼烧区内叠加易伤，令灼痕成为全构筑的伤害乘法底座。"
     },
     {
-      "id": "harvest", "category": "economy", "textKey": "cards.harvest", "teaching": true, "implementationBatch": 1,
+      "id": "harvest", "category": "economy", "synergyTags": ["utility"], "textKey": "cards.harvest", "teaching": true, "implementationBatch": 1,
       "stars": {
         "3": { "tier": "core", "equip": [{ "trigger": "passive", "effects": [{ "atom": "dropRateMul", "params": { "mul": 1.25 } }, { "atom": "dropLifetimeMul", "params": { "mul": 1.25 } }] }] },
         "5": { "tier": "dual", "equip": [{ "trigger": "passive", "effects": [{ "atom": "dropRateMul", "params": { "mul": 1.25 } }, { "atom": "dropLifetimeMul", "params": { "mul": 1.25 } }, { "atom": "expiryConvert", "params": { "ratio": 0.5 } }] }] },
@@ -143,7 +143,7 @@
       } }, "designNotes": "教学卡：更多、更久、不浪费。刻意不做自动拾取——拾取仍是核心注意力动词。"
     },
     {
-      "id": "aegis", "category": "defense", "textKey": "cards.aegis", "teaching": false, "implementationBatch": 1,
+      "id": "aegis", "category": "defense", "synergyTags": ["defense"], "textKey": "cards.aegis", "teaching": false, "implementationBatch": 1,
       "stars": {
         "3": { "tier": "core", "equip": [
           { "trigger": "onWaveStart", "effects": [{ "atom": "shield", "params": { "absorbHits": 2, "regenSeconds": 10 } }] },
@@ -166,7 +166,7 @@
       } }, "designNotes": "撑住这一波。5★ 碎盾新星：护盾破裂时对周围敌人造成击退+伤害。"
     },
     {
-      "id": "splitBlast", "category": "projectile", "textKey": "cards.splitBlast", "teaching": false, "implementationBatch": 2,
+      "id": "splitBlast", "category": "projectile", "synergyTags": ["projectile", "domain"], "textKey": "cards.splitBlast", "teaching": false, "implementationBatch": 2,
       "stars": {
         "3": { "tier": "core", "equip": [
           { "trigger": "onHit", "effects": [
@@ -192,7 +192,7 @@
       } }, "designNotes": "一发变一片。5★ 连环裂变：子弹片命中后再分裂一次（maxDepth 封顶，防止指数级增殖）。6★ 换形为榴弹主炮；「命中炸出子弹片」的联动未实装（简化，记入 S6）。"
     },
     {
-      "id": "impact", "category": "control", "textKey": "cards.impact", "teaching": true, "implementationBatch": 2,
+      "id": "impact", "category": "control", "synergyTags": ["control", "defense"], "textKey": "cards.impact", "teaching": true, "implementationBatch": 2,
       "stars": {
         "3": { "tier": "core", "equip": [
           { "trigger": "onFire", "effects": [{ "atom": "knockback", "params": { "distance": 22, "collisionDamage": 0.3 } }] }
@@ -221,7 +221,7 @@
       } }, "designNotes": "教学卡：把它们轰开。5★ 破门反制：突破瞬间自动全向冲击波，冷却 6s 内置保命（不叠加触发）。"
     },
     {
-      "id": "sanctum", "category": "domain", "textKey": "cards.sanctum", "teaching": false, "implementationBatch": 2,
+      "id": "sanctum", "category": "domain", "synergyTags": ["domain", "control"], "textKey": "cards.sanctum", "teaching": false, "implementationBatch": 2,
       "stars": {
         "3": { "tier": "core", "equip": [
           { "trigger": "passive", "effects": [{ "atom": "aura", "params": { "radiusRatioOfRange": 0.5, "tickInterval": 0.5, "effects": [
@@ -248,7 +248,7 @@
       } }, "designNotes": "进入领域者皆被审判。5★ 处刑印记：环内濒死敌人（hpThresholdRatio）被烙印优先索敌。amplifyAxis 的 ratio 键同时略微放大环内减速（易伤/减速共用参数名，接受此耦合）。「被烙印者死亡掉落时限+50%」未实装（简化，记入 S6）。"
     },
     {
-      "id": "thorns", "category": "defense", "textKey": "cards.thorns", "teaching": false, "implementationBatch": 2,
+      "id": "thorns", "category": "defense", "synergyTags": ["defense", "domain"], "textKey": "cards.thorns", "teaching": false, "implementationBatch": 2,
       "stars": {
         "3": { "tier": "core", "equip": [
           { "trigger": "passive", "effects": [{ "atom": "breachReduction", "params": { "ratio": 0.35 } }] },

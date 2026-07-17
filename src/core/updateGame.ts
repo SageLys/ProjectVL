@@ -2,7 +2,7 @@ import type { Config, GameEvent, GameState, Rng } from './types';
 import { updateTurret, updateBullets } from './systems/combatSystem';
 import { moveEnemies } from './systems/enemySystem';
 import { tickBountySystem } from './systems/bountySystem';
-import { tickSpawns, checkWaveClear, tickBetween } from './systems/waveSystem';
+import { tickSpawns, advanceWavePhase, tickBetween } from './systems/waveSystem';
 import { tickDrops } from './systems/dropSystem';
 import { updateParticles } from './systems/particleSystem';
 import { tickEffects } from './effects/runtime';
@@ -24,7 +24,7 @@ export function updateGame(state: GameState, config: Config, rng: Rng, dt: numbe
   events.push(...tickEffects(state, config, rng, dt));
   events.push(...tickDrops(state, config, rng, dt));
   updateParticles(state, dt);
-  events.push(...checkWaveClear(state));
+  events.push(...advanceWavePhase(state, config, rng));
   events.push(...tickBetween(state, config, rng, dt, beforeWaveStart));
 
   return events;

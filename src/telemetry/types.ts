@@ -6,6 +6,9 @@ export type TelemetryEventType =
   | 'dangerEnter'
   | 'waveStart'
   | 'waveCleared'
+  | 'waveBossSpawned'
+  | 'waveBossKilled'
+  | 'bossRewardGranted'
   | 'perkPopup'
   | 'mergeOpportunity'
   | 'bountyOffer'
@@ -34,12 +37,15 @@ export interface TelemetryEvent {
   rewardCardType?: string;
   rewardCardStar?: number;
   wildcardStar?: number;
+  wildcardCount?: number;
   guaranteed?: boolean;
   memberCount?: number;
   decisionSeconds?: number;
   clearSeconds?: number;
   hpAtAccept?: number;
   hpAtComplete?: number;
+  lane?: string;
+  laneMatch?: boolean;
 }
 
 export interface TelemetrySample {

@@ -49,7 +49,7 @@ describe('waveSystem · budget spawn strategy', () => {
     let nextSample = 0;
     startNextWave(state, runtime, rng);
 
-    for (let frame = 0; frame < 60 * 120 && !state.waveClearPending && state.mode === 'playing'; frame++) {
+      for (let frame = 0; frame < 60 * 120 && state.wavePhase !== 'between' && state.mode === 'playing'; frame++) {
       const gameEvents = updateGame(state, runtime, rng, 1 / 60);
       for (const enemy of state.enemies) if (!knownEnemies.has(enemy.id)) {
         knownEnemies.add(enemy.id);

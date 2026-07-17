@@ -10,13 +10,20 @@ const T = texts.toast;
 export const SLOT_CHANGING = new Set<GameEvent['type']>([
   'collected', 'moved', 'swapped', 'merged', 'fed', 'skillConsumed', 'equipped',
   'wildcardsGranted', 'wildcardMerged',
+  'bossRewardGranted',
 ]);
+
+function wildcardGrantDescription(grants: Array<{ star: number; count: number }>): string {
+  return grants.map(grant => `${grant.star}★万能卡×${grant.count}`).join('、');
+}
 
 /** 把语义事件翻译成 toast 文案；无需 toast 的事件返回 null。 */
 export function formatToast(ev: GameEvent): string | null {
   switch (ev.type) {
     case 'waveStart': return fmt(T.waveStart, { wave: ev.wave });
     case 'waveCleared': return fmt(T.waveClear, { wave: ev.wave });
+    case 'waveBossSpawned': return T.waveBoss;
+    case 'bossRewardGranted': return fmt(T.bossReward, { desc: wildcardGrantDescription(ev.grants) });
     case 'breakthrough': return fmt(T.breakthrough, { damage: Math.round(ev.damage) });
     case 'cardsFull': return T.cardsFull;
     case 'collected': return ev.merges ? fmt(T.collectMerged, { count: ev.merges }) : fmt(T.collect, { name: name(ev.cardType) });

@@ -15,7 +15,7 @@ afterEach(resetTestEnv);
 function def(id: CardType, equip: BindingDef[]): CardDef {
   const tier = { radius: 100, effects: [{ atom: 'burstDamage' as const, params: { damageMul: 1, radius: 100 } }] };
   return {
-    id, category: 'projectile', textKey: `t.${id}`, teaching: false,
+    id, category: 'projectile', synergyTags: ['projectile'], textKey: `t.${id}`, teaching: false,
     stars: { '3': { tier: 'core', equip }, '5': { tier: 'dual', equip }, '6': { tier: 'transform', equip } },
     amplifyAxis: { params: {} },
     consumable: { placement: 'point', anchors: { '1': tier, '3': tier, '6': tier } },

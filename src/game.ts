@@ -70,7 +70,7 @@ function dispatch(events: GameEvent[]): void {
   for (const ev of events) {
     const text = formatToast(ev);
     if (text) toast(text);
-    if (ev.type === 'levelUp') modals.showLevel(resolveOfferedPerks(state));
+    if (ev.type === 'levelUp') modals.showLevel(resolveOfferedPerks(state), state);
     if (ev.type === 'gameEnd') {
       refs.pauseBtn.disabled = true;
       modals.showResult(ev.win, state);
@@ -102,7 +102,8 @@ const modals = createModals(refs, {
   onPerk(id) {
     const events = applyPerk(state, config, id, rng);
     dispatch(events);
-    if (import.meta.env.DEV && events.some(event => event.type === 'perkApplied')) telemetry?.recordInput('perkSelect', id);
+    const applied = events.find(event => event.type === 'perkApplied');
+    if (import.meta.env.DEV && applied?.type === 'perkApplied') telemetry?.recordInput('perkSelect', `${id}:${applied.lane}`);
     if (!events.some(event => event.type === 'levelUp')) modals.hideLevel();
     renderHud(refs, state, config);
   },

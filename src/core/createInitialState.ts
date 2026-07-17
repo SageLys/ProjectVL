@@ -59,7 +59,10 @@ export function createInitialState(): GameState {
     waveSpawnQuota: 0,
     spawnTimer: 0,
     lastSpawnCheckCount: 0,
-    waveClearPending: false,
+    wavePhase: 'regular',
+    waveBossId: null,
+    waveBossSpawnedAt: null,
+    bossRewardClaimedWave: 0,
     damageBonus: 0,
     fireRateBonus: 0,
     multi: 1,
@@ -71,6 +74,12 @@ export function createInitialState(): GameState {
     pendingLevelUps: 0,
     offeredPerks: [],
     perkStacks: {},
+    buildState: {
+      affinity: { projectile: 0, control: 0, domain: 0, defense: 0, utility: 0 },
+      perkHistory: [],
+      scalingVersion: 0,
+      dropPity: undefined,
+    },
     xpGainBonus: 0,
     rangeBonus: 0,
     kills: 0,
@@ -103,5 +112,6 @@ export function createInitialState(): GameState {
     },
     nextBountyOfferId: 1,
     nextBountyEncounterId: 1,
+    runSummary: null,
   };
 }

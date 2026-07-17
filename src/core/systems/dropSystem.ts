@@ -1,5 +1,5 @@
 import { cfg } from '../../config';
-import type { CardType, Config, Enemy, GameEvent, GameState, GroundDrop, Rng } from '../types';
+import type { CardDropSource, CardType, Config, Enemy, GameEvent, GameState, GroundDrop, Rng } from '../types';
 import { totalDropChance, totalDropLifetime } from '../stats';
 import { autoMergeCards, getActiveMergeCopies } from './cardSystem';
 import { fireTrigger, getModifiers } from '../effects/interpreter';
@@ -7,7 +7,6 @@ import { addXp } from './progressionSystem';
 import { grantWildcards } from './wildcardSystem';
 import {
   getCardPool, getOrCreateCardTypeRunStats, recordCardDropShown, selectNormalEnemyDropType,
-  selectUniformCardType,
 } from './dropTypePolicy';
 
 const TAU = Math.PI * 2;
@@ -16,12 +15,21 @@ const TAU = Math.PI * 2;
 const EXPIRY_CONVERT_XP_PER_STAR = 4;
 
 /** 在 (x,y) 生成一枚限时地面掉落。type 缺省随机；star 缺省按掉落星级策略（普通=1★）。 */
-export function spawnGroundDrop(state: GameState, config: Config, rng: Rng, x: number, y: number, type: CardType, star?: number): void {
+export function spawnGroundDrop(
+  state: GameState,
+  config: Config,
+  rng: Rng,
+  x: number,
+  y: number,
+  type: CardType,
+  star?: number,
+  source?: CardDropSource,
+): void {
   const life = totalDropLifetime(state, config);
   state.groundDrops.push({
     id: state.nextDropId++,
     kind: 'card',
-    x, y, type,
+    x, y, type, source,
     star: star ?? normalDropStar(rng),
     life,
     maxLife: life,
@@ -51,12 +59,9 @@ function normalDropStar(rng: Rng): number {
 
 /** 击杀掉落判定：概率命中或 boss 必掉，则在敌人位置生成掉落。 */
 export function rollDropOnKill(state: GameState, config: Config, rng: Rng, enemy: Enemy): void {
-  if (rng() < totalDropChance(state, config) || enemy.type === 'boss') {
-    const type = enemy.type === 'boss'
-      ? selectUniformCardType(rng)
-      : selectNormalEnemyDropType(state, rng);
-    if (enemy.type === 'boss') recordCardDropShown(state, type, 'bossKill');
-    spawnGroundDrop(state, config, rng, enemy.x, enemy.y, type);
+  if (rng() < totalDropChance(state, config)) {
+    const type = selectNormalEnemyDropType(state, rng);
+    spawnGroundDrop(state, config, rng, enemy.x, enemy.y, type, undefined, 'normalKill');
   }
 }
 
@@ -141,7 +146,7 @@ export function spawnTestDrops(state: GameState, config: Config, rng: Rng): Game
   const cardPool = getCardPool();
   const type = cardPool[state.merges % cardPool.length];
   for (const x of [360, 440, 520, 600]) {
-    spawnGroundDrop(state, config, rng, x, 370, type);
+    spawnGroundDrop(state, config, rng, x, 370, type, undefined, 'debug');
     recordCardDropShown(state, type, 'debug');
   }
   return [{ type: 'testDrops', cardType: type }];

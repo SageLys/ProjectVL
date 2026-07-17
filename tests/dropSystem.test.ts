@@ -136,12 +136,12 @@ describe('dropSystem · chance and bosses', () => {
     expect(totalDropChance(s, config)).toBe(0.95);
   });
 
-  it('always drops from a boss', () => {
+  it('does not create a normal card drop from a wave Boss', () => {
     const s = freshState();
     const config = createDefaultConfig();
     config.dropChance = 0;
     rollDropOnKill(s, config, constRng(0.99), enemy({ type: 'boss', x: 10, y: 10 }));
-    expect(s.groundDrops).toHaveLength(1);
+    expect(s.groundDrops).toHaveLength(0);
   });
 
   it('preserves normal chance gating, one-star policy, and configured lifetime', () => {

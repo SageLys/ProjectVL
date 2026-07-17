@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { cfg } from '../src/config';
+import { registerSkillDefs } from '../src/core/effects/interpreter';
+import { createSeededRng } from '../src/debug/exposeDebugApi';
 import { rollDropOnKill } from '../src/core/systems/dropSystem';
 import { collectDrop, spawnGroundDrop } from '../src/core/systems/dropSystem';
 import { autoMergeCards } from '../src/core/systems/cardSystem';
@@ -7,6 +9,7 @@ import { moveOrSwap } from '../src/core/systems/equipmentSystem';
 import { grantWildcards, useWildcardOnSlot } from '../src/core/systems/wildcardSystem';
 import {
   calculateBuildMaturity,
+  calculateAffinityScore,
   calculateCommitmentScore,
   getCardPool,
   refillNormalDropRoleBag,
@@ -17,7 +20,7 @@ import {
 } from '../src/core/systems/dropTypePolicy';
 import { card, constRng, createDefaultConfig, enemy, freshState, resetTestEnv, seqRng } from './helpers';
 
-beforeEach(resetTestEnv);
+beforeEach(() => { resetTestEnv(); registerSkillDefs(cfg.skills.cards); });
 
 describe('NormalDropDirector · card pool and discovery', () => {
   it('reads the active configured pool and automatically includes a twelfth card', () => {
@@ -49,6 +52,41 @@ describe('NormalDropDirector · card pool and discovery', () => {
 });
 
 describe('NormalDropDirector · build and pivot choices', () => {
+  it('biases only build choices toward affinity and caps the added score', () => {
+    const baseline = freshState();
+    const focused = freshState();
+    focused.buildState.affinity.projectile = 3;
+    const sample = (state: typeof focused, seed: number) => {
+      const rng = createSeededRng(seed);
+      return Array.from({ length: 300 }, () => selectBuildType(state, rng));
+    };
+    const projectile = new Set(['pierce', 'chainLightning', 'splitBlast']);
+    const baselineHits = sample(baseline, 91).filter(type => projectile.has(type)).length;
+    const focusedHits = sample(focused, 91).filter(type => projectile.has(type)).length;
+    expect(focusedHits).toBeGreaterThan(baselineHits + 100);
+
+    const capped = freshState();
+    capped.buildState.affinity.projectile = cfg.economy.normalDropTypePolicy.affinity.scoreCap
+      / cfg.economy.normalDropTypePolicy.affinity.scorePerStack;
+    const excessive = freshState();
+    excessive.buildState.affinity.projectile = 99;
+    expect(calculateAffinityScore(capped, 'pierce')).toBe(cfg.economy.normalDropTypePolicy.affinity.scoreCap);
+    expect(sample(capped, 17)).toEqual(sample(excessive, 17));
+  });
+
+  it('does not let affinity affect discovery or pivot selection', () => {
+    const baseline = freshState();
+    baseline.equipment[0] = card('pierce', 6);
+    baseline.equipment[1] = card('frost', 5);
+    const focused = structuredClone(baseline);
+    focused.buildState.affinity.defense = 99;
+    const rolls = [0, 0.17, 0.41, 0.76, 0.99];
+    expect(rolls.map(roll => selectDiscoveryType(focused, constRng(roll))))
+      .toEqual(rolls.map(roll => selectDiscoveryType(baseline, constRng(roll))));
+    expect(rolls.map(roll => selectPivotType(focused, constRng(roll))))
+      .toEqual(rolls.map(roll => selectPivotType(baseline, constRng(roll))));
+  });
+
   it('uses opening build slots to match held one-star cards, then falls back to discovery when empty', () => {
     const withCard = freshState();
     withCard.cards[0] = card('pierce', 1);
@@ -117,17 +155,48 @@ describe('NormalDropDirector · build and pivot choices', () => {
     state.normalDropDirector.roleBag = ['build'];
     expect(selectNormalEnemyDropType(state, constRng(0))).not.toBe('pierce');
   });
+
+  it('pity forces the second missed build slot, clears on hit, and ignores discovery/pivot', () => {
+    cfg.economy.normalDropTypePolicy.affinity.scorePerStack = 0;
+    const state = freshState();
+    state.buildState.affinity.projectile = 1;
+    state.buildState.dropPity = { lane: 'projectile', remaining: 2 };
+    state.normalDropDirector.roleBag = ['build', 'build'];
+    const first = selectNormalEnemyDropType(state, constRng(0.4));
+    expect(getCardPool().find(type => type === first)).toBe(first);
+    expect(cfg.skills.cards.find(card => card.id === first)!.synergyTags).not.toContain('projectile');
+    expect(state.buildState.dropPity?.remaining).toBe(1);
+    const second = selectNormalEnemyDropType(state, constRng(0.4));
+    expect(cfg.skills.cards.find(card => card.id === second)!.synergyTags).toContain('projectile');
+    expect(state.buildState.dropPity).toBeUndefined();
+
+    const hit = freshState();
+    cfg.economy.normalDropTypePolicy.affinity.scorePerStack = 2.5;
+    hit.buildState.affinity.projectile = 1;
+    hit.buildState.dropPity = { lane: 'projectile', remaining: 2 };
+    hit.normalDropDirector.roleBag = ['build'];
+    const hitType = selectNormalEnemyDropType(hit, constRng(0));
+    expect(cfg.skills.cards.find(card => card.id === hitType)!.synergyTags).toContain('projectile');
+    expect(hit.buildState.dropPity).toBeUndefined();
+
+    const ignored = freshState();
+    ignored.buildState.dropPity = { lane: 'control', remaining: 2 };
+    ignored.normalDropDirector.roleBag = ['discovery', 'pivot'];
+    selectNormalEnemyDropType(ignored, constRng(0.5));
+    selectNormalEnemyDropType(ignored, constRng(0.5));
+    expect(ignored.buildState.dropPity).toEqual({ lane: 'control', remaining: 2 });
+  });
 });
 
 describe('NormalDropDirector · source isolation and reproducibility', () => {
-  it('keeps boss type selection uniform and independent of director investment', () => {
+  it('keeps wave Boss deaths isolated from the normal drop director', () => {
     const state = freshState();
     state.equipment[0] = card('pierce', 6);
     state.normalDropDirector.typeStats.pierce.mergeOps = 99;
     const config = createDefaultConfig();
     config.dropChance = 0;
     rollDropOnKill(state, config, constRng(0.99), enemy({ type: 'boss' }));
-    expect(state.groundDrops[0]).toEqual(expect.objectContaining({ type: getCardPool()[getCardPool().length - 1] }));
+    expect(state.groundDrops).toEqual([]);
     expect(state.normalDropDirector.ordinaryDropCount).toBe(0);
   });
 

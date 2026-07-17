@@ -1,8 +1,9 @@
 import type { SkillsConfig } from './types';
 
 const CATEGORIES = new Set(['projectile', 'control', 'domain', 'economy', 'defense']);
+const BUILD_TAGS = new Set(['projectile', 'control', 'domain', 'defense', 'utility']);
 const TIERS: Record<string, string> = { '3': 'core', '5': 'dual', '6': 'transform' };
-const CARD_KEYS = new Set(['id', 'category', 'textKey', 'teaching', 'stars', 'amplifyAxis', 'consumable', 'implementationBatch', 'designNotes']);
+const CARD_KEYS = new Set(['id', 'category', 'synergyTags', 'textKey', 'teaching', 'stars', 'amplifyAxis', 'consumable', 'implementationBatch', 'designNotes']);
 
 function fail(path: string, message: string): never { throw new Error(`[skills-schema v0.4.0] ${path}: ${message}`); }
 function object(value: unknown, path: string): Record<string, unknown> {
@@ -28,6 +29,11 @@ export function validateSkillsConfig(value: unknown): asserts value is SkillsCon
     for (const key of Object.keys(card)) if (!CARD_KEYS.has(key)) fail(`${path}.${key}`, 'v0.4.0 不允许的字段');
     if (typeof card.id !== 'string' || !/^[a-z][a-zA-Z0-9]*$/.test(card.id)) fail(`${path}.id`, '非法 id');
     if (!CATEGORIES.has(String(card.category))) fail(`${path}.category`, '非法类别');
+    if (!Array.isArray(card.synergyTags) || card.synergyTags.length < 1 || card.synergyTags.length > 2) {
+      fail(`${path}.synergyTags`, '必须是长度为 1~2 的非空数组');
+    }
+    if (card.synergyTags.some(tag => !BUILD_TAGS.has(String(tag)))) fail(`${path}.synergyTags`, '包含非法流派标签');
+    if (new Set(card.synergyTags).size !== card.synergyTags.length) fail(`${path}.synergyTags`, '流派标签不得重复');
     if (typeof card.textKey !== 'string' || typeof card.teaching !== 'boolean') fail(path, '缺少 textKey/teaching');
     const stars = object(card.stars, `${path}.stars`);
     if (Object.keys(stars).sort().join(',') !== '3,5,6') fail(`${path}.stars`, '必须且只能定义 3/5/6 锚点');

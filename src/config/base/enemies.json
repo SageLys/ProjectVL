@@ -44,9 +44,9 @@
     },
     "boss": {
       "label": "命定追求者",
-      "hpBase": 420,
-      "hpPerWave": 500,
-      "speedBase": 20,
+      "hpBase": 300,
+      "hpPerWave": 320,
+      "speedBase": 18,
       "speedPerWave": 0,
       "r": 35,
       "color": "#596371",

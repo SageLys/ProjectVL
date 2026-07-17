@@ -12,11 +12,9 @@ import { notifyBountyMemberBreached, notifyBountyMemberKilled } from './bountySy
  * 敌人类型判定：roll < tankBase + wave*tankPerWave → 重装；
  * roll < fastThreshold → 高速；否则普通。每个指定 Boss 波的最后一个出怪名额强制生成 Boss。
  */
-export function determineType(wave: number, roll: number, spawnLeft: number): EnemyType {
+export function determineType(wave: number, roll: number, _spawnLeft: number): EnemyType {
   const tr = cfg.waves.typeRoll;
-  let type: EnemyType = roll < tr.tankBase + wave * tr.tankPerWave ? 'tank' : roll < tr.fastThreshold ? 'fast' : 'normal';
-  if (cfg.waves.bossWaves.includes(wave) && spawnLeft === 1) type = 'boss';
-  return type;
+  return roll < tr.tankBase + wave * tr.tankPerWave ? 'tank' : roll < tr.fastThreshold ? 'fast' : 'normal';
 }
 
 export interface EnemyModifiers {
@@ -25,6 +23,7 @@ export interface EnemyModifiers {
   damageMul?: number;
   bountyEncounterId?: number;
   bountyRewardType?: CardType;
+  spawnKind?: Enemy['spawnKind'];
 }
 
 /** Shared enemy construction path for normal waves and independent Bounty encounters. */
@@ -43,6 +42,7 @@ export function createEnemy(
     x: position.x,
     y: position.y,
     type,
+    spawnKind: modifiers.spawnKind ?? 'regular',
     label: def.label,
     hp,
     maxHp: hp,
@@ -60,17 +60,29 @@ export function createEnemy(
 }
 
 /** 生成一只敌人：类型判定 → 取基础值+每波成长 → 四边随机出生（边缘外 spawnMargin）。 */
-export function spawnEnemy(state: GameState, rng: Rng): void {
-  const roll = rng();
-  const type = determineType(state.wave, roll, state.spawnLeft);
+export function randomEdgeSpawnPosition(rng: Rng): { x: number; y: number } {
   const { width, height } = cfg.combat.canvas;
   const side = Math.floor(rng() * 4);
   const margin = cfg.waves.spawnMargin;
-  const spawn = side === 0 ? { x: 35 + rng() * (width - 70), y: -margin }
+  return side === 0 ? { x: 35 + rng() * (width - 70), y: -margin }
     : side === 1 ? { x: width + margin, y: 35 + rng() * (height - 70) }
     : side === 2 ? { x: 35 + rng() * (width - 70), y: height + margin }
     : { x: -margin, y: 35 + rng() * (height - 70) };
+}
+
+export function spawnEnemy(state: GameState, rng: Rng): void {
+  const roll = rng();
+  const type = determineType(state.wave, roll, state.spawnLeft);
+  const spawn = randomEdgeSpawnPosition(rng);
   state.enemies.push(createEnemy(state, type, state.wave, spawn));
+}
+
+/** Spawn the explicit end-of-wave Boss without consuming the regular quota. */
+export function spawnWaveBoss(state: GameState, rng: Rng): Enemy {
+  const spawn = randomEdgeSpawnPosition(rng);
+  const boss = createEnemy(state, 'boss', state.wave, spawn, { spawnKind: 'waveBoss' });
+  state.enemies.push(boss);
+  return boss;
 }
 
 /** 移动目标解析（仲裁规则 6）：嘲讽（点/召唤物）> 嘲讽半径内的召唤物 > 炮台。 */
@@ -116,6 +128,10 @@ export function moveEnemies(state: GameState, config: Config, rng: Rng, dt: numb
     if (target.summon && Math.hypot(target.x - e.x, target.y - e.y) < 16 + e.r) {
       target.summon.hp -= e.damage;
       for (let k = 0; k < 6; k++) spawnParticle(state, rng, e.x, e.y, '#8793a3', 120);
+      if (e.spawnKind === 'waveBoss') {
+        e.status.taunt = null;
+        continue;
+      }
       state.enemies.splice(i, 1);
       if (e.bountyEncounterId !== undefined) events.push(...notifyBountyMemberKilled(state, e, config, rng));
       continue;
@@ -131,7 +147,7 @@ export function moveEnemies(state: GameState, config: Config, rng: Rng, dt: numb
         continue;
       }
       const damage = absorbBreach(state, config, rng, e.damage, events);
-      state.enemies.splice(i, 1);
+      if (e.spawnKind !== 'waveBoss') state.enemies.splice(i, 1);
       for (let k = 0; k < cfg.combat.vfx.breakthroughParticles; k++) spawnParticle(state, rng, t.x, t.y, '#ff6677', 170);
       if (damage != null) {
         state.hp -= damage;
@@ -140,6 +156,7 @@ export function moveEnemies(state: GameState, config: Config, rng: Rng, dt: numb
       }
       events.push(...fireTrigger(state, config, rng, 'onBreach', { enemy: e, damage: damage ?? 0, point: { x: e.x, y: e.y } }));
       if (state.hp <= 0) events.push(...endGame(state, false));
+      else if (e.spawnKind === 'waveBoss' && state.enemies.includes(e)) Object.assign(e, randomEdgeSpawnPosition(rng));
     }
   }
   return events;

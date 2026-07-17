@@ -344,7 +344,7 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
       const x = base.x + (ctx.rng() - 0.5) * 60;
       const y = base.y + (ctx.rng() - 0.5) * 60;
       const type = selectUniformCardType(ctx.rng);
-      spawnGroundDrop(ctx.state, ctx.config, ctx.rng, x, y, type, star);
+      spawnGroundDrop(ctx.state, ctx.config, ctx.rng, x, y, type, star, 'skillExtra');
       recordCardDropShown(ctx.state, type, 'skillExtra');
     }
   },

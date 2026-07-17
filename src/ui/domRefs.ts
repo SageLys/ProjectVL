@@ -50,6 +50,11 @@ export function getDomRefs() {
     resultKills: el<HTMLElement>('#resultKills'),
     resultMerges: el<HTMLElement>('#resultMerges'),
     resultUses: el<HTMLElement>('#resultUses'),
+    resultScore: el<HTMLElement>('#resultScore'),
+    resultScoreLabel: el<HTMLElement>('#resultScoreLabel'),
+    resultScoreTotal: el<HTMLElement>('#resultScoreTotal'),
+    resultBreakdown: el<HTMLElement>('#resultBreakdown'),
+    resultBuildMeta: el<HTMLElement>('#resultBuildMeta'),
     dropTelemetry: el<HTMLElement>('#dropTelemetry'),
   };
 }

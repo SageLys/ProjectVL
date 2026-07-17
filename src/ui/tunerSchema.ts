@@ -62,6 +62,8 @@ export const BOUNTY_TUNER_PARAMS: TunerParam[] = [
   { path: 'bounty.reward.wildcardStarMax', label: '奖励 · 万能卡星级上限', group: 'bounty' },
   { path: 'bounty.reward.dropLifetimeSeconds', label: '奖励 · 地面寿命', group: 'bounty' },
   { path: 'bounty.reward.repeatProtection', label: '奖励 · 重复保护', group: 'bounty' },
+  { path: 'bounty.rewardBias.primaryShare', label: '奖励倾向 · 主流派占比', group: 'bounty' },
+  { path: 'bounty.rewardBias.secondaryShare', label: '奖励倾向 · 次流派占比', group: 'bounty' },
 
   { path: 'bounty.visual.offerRadius', label: '视觉 · 报价半径', group: 'bounty' },
   { path: 'bounty.visual.offerEdgeInset', label: '视觉 · 边缘内缩', group: 'bounty' },
@@ -78,6 +80,8 @@ export const DROP_DIRECTOR_TUNER_PARAMS: TunerParam[] = [
   { path: 'economy.normalDropTypePolicy.lateMix.build', label: '掉落导演 · 后期主线位', group: 'drops' },
   { path: 'economy.normalDropTypePolicy.lateMix.pivot', label: '掉落导演 · 后期调整位', group: 'drops' },
   { path: 'economy.normalDropTypePolicy.bootstrapMinDiscovery', label: '掉落导演 · 启动探索保底', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.affinity.scorePerStack', label: '掉落导演 · 每层倾向分', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.affinity.scoreCap', label: '掉落导演 · 倾向分封顶', group: 'drops' },
   { path: 'economy.normalDropTypePolicy.maturity.fullMergeOps', label: '掉落导演 · 满成熟合成数', group: 'drops' },
   { path: 'economy.normalDropTypePolicy.maturity.fullHighestStar', label: '掉落导演 · 满成熟最高星', group: 'drops' },
   { path: 'economy.normalDropTypePolicy.maturity.fullEquippedTypes', label: '掉落导演 · 满成熟装备数', group: 'drops' },
@@ -119,6 +123,8 @@ export const TUNER_PARAMS: TunerParam[] = [
   { path: 'waves.typeRoll.tankBase', label: '重装概率 · 基础', group: 'waves', waveDeferred: true },
   { path: 'waves.typeRoll.tankPerWave', label: '重装概率 · 每波', group: 'waves', waveDeferred: true },
   { path: 'waves.typeRoll.fastThreshold', label: '高速阈值', group: 'waves', waveDeferred: true },
+  { path: 'waves.waveBoss.reward.starMax', label: '波末 Boss · 万能卡星级上限', group: 'waves', waveDeferred: true },
+  { path: 'waves.waveBoss.reward.starTierEveryWaves', label: '波末 Boss · 升星间隔波数', group: 'waves', waveDeferred: true },
 
   { path: 'combat.defaults.damage', label: '基础伤害', group: 'combat' },
   { path: 'combat.defaults.fireRate', label: '每秒攻击', group: 'combat' },

@@ -1,7 +1,7 @@
 import { cfg } from '../../config';
-import type { CardType, CardTypeRunStats, GameState, NormalDropRole, Rng } from '../types';
-
-export type CardDropSource = 'normalKill' | 'bossKill' | 'bounty' | 'skillExtra' | 'debug';
+import { getSkillDef } from '../effects/interpreter';
+import type { BuildTag } from '../effects/defs';
+import type { CardDropSource, CardType, CardTypeRunStats, GameState, NormalDropRole, Rng } from '../types';
 
 const clamp = (value: number, min: number, max: number): number => Math.max(min, Math.min(max, value));
 const clamp01 = (value: number): number => clamp(value, 0, 1);
@@ -85,6 +85,17 @@ export function calculateCommitmentScore(state: GameState, type: CardType): numb
       + policy.equippedStarBonus * (equipped.star - cfg.economy.equipThreshold);
   }
   return Math.max(0, score);
+}
+
+/** 流派倾向只叠加到 build 位；utility 不参与卡型导流。 */
+export function calculateAffinityScore(state: GameState, type: CardType): number {
+  const def = getSkillDef(type);
+  if (!def) return 0;
+  const affinity = cfg.economy.normalDropTypePolicy.affinity;
+  const raw = def.synergyTags
+    .filter(tag => tag !== 'utility')
+    .reduce((sum, tag) => sum + state.buildState.affinity[tag], 0);
+  return Math.min(affinity.scoreCap, raw * affinity.scorePerStack);
 }
 
 function shuffleInPlace<T>(values: T[], rng: Rng): void {
@@ -172,31 +183,24 @@ export function selectDiscoveryType(state: GameState, rng: Rng, excludedType?: C
   return randomChoice(withoutTypeIfPossible(candidates, excludedType), rng);
 }
 
-function buildCandidates(state: GameState): Array<{ type: CardType; score: number }> {
+function buildCandidatesByCommitment(state: GameState): Array<{ type: CardType; score: number }> {
   return getCardPool()
     .map(type => ({ type, score: calculateCommitmentScore(state, type) }))
     .sort((left, right) => right.score - left.score);
 }
 
-export function selectBuildType(state: GameState, rng: Rng, excludedType?: CardType): CardType {
-  const scored = buildCandidates(state);
-  const hasCommittedInvestment = state.equipment.some(card => card !== null)
-    || state.cards.some(card => card !== null && card.star > 1)
-    || Object.values(state.normalDropDirector.typeStats).some(stats => stats.mergeOps > 0);
-  if (!hasCommittedInvestment || scored.every(entry => entry.score === 0)) {
-    const mergeReadyTypes = [...new Set(
-      state.cards.filter(card => card?.star === 1).map(card => card!.type),
-    )];
-    if (mergeReadyTypes.length) {
-      return randomChoice(withoutTypeIfPossible(mergeReadyTypes, excludedType), rng);
-    }
-    return selectDiscoveryType(state, rng, excludedType);
-  }
+function buildCandidatesForBuildRole(state: GameState): Array<{ type: CardType; score: number }> {
+  return getCardPool()
+    .map(type => ({ type, score: calculateCommitmentScore(state, type) + calculateAffinityScore(state, type) }))
+    .sort((left, right) => right.score - left.score);
+}
 
+function weightedBuildChoice(
+  state: GameState,
+  candidates: Array<{ type: CardType; score: number }>,
+  rng: Rng,
+): CardType {
   const policy = cfg.economy.normalDropTypePolicy.build;
-  let candidates = scored.slice(0, Math.max(1, Math.round(policy.topK)));
-  const allowedTypes = new Set(withoutTypeIfPossible(candidates.map(entry => entry.type), excludedType));
-  candidates = candidates.filter(entry => allowedTypes.has(entry.type));
   const rawWeights = candidates.map(entry => (entry.score + 0.5) ** policy.scorePower);
   const minimumWeight = Math.min(...rawWeights);
   const cappedWeights = rawWeights.map(weight => Math.min(
@@ -211,9 +215,68 @@ export function selectBuildType(state: GameState, rng: Rng, excludedType?: CardT
   return weightedChoice(candidates.map(entry => entry.type), weights, rng);
 }
 
+function selectBuildTypeBase(state: GameState, rng: Rng, excludedType?: CardType): CardType {
+  const scored = buildCandidatesForBuildRole(state);
+  const hasCommittedInvestment = state.equipment.some(card => card !== null)
+    || state.cards.some(card => card !== null && card.star > 1)
+    || Object.values(state.normalDropDirector.typeStats).some(stats => stats.mergeOps > 0);
+  const hasAffinity = scored.some(entry => calculateAffinityScore(state, entry.type) > 0);
+  if ((!hasCommittedInvestment && !hasAffinity) || scored.every(entry => entry.score === 0)) {
+    const mergeReadyTypes = [...new Set(
+      state.cards.filter(card => card?.star === 1).map(card => card!.type),
+    )];
+    if (mergeReadyTypes.length) {
+      return randomChoice(withoutTypeIfPossible(mergeReadyTypes, excludedType), rng);
+    }
+    return selectDiscoveryType(state, rng, excludedType);
+  }
+
+  const policy = cfg.economy.normalDropTypePolicy.build;
+  let candidates = scored.slice(0, Math.max(1, Math.round(policy.topK)));
+  const allowedTypes = new Set(withoutTypeIfPossible(candidates.map(entry => entry.type), excludedType));
+  candidates = candidates.filter(entry => allowedTypes.has(entry.type));
+  return weightedBuildChoice(state, candidates, rng);
+}
+
+function hasSynergyTag(type: CardType, lane: BuildTag): boolean {
+  return getSkillDef(type)?.synergyTags.includes(lane) ?? false;
+}
+
+function applyBuildPity(
+  state: GameState,
+  selectedType: CardType,
+  rng: Rng,
+  streakExcludedType?: CardType,
+): CardType {
+  const pity = state.buildState.dropPity;
+  if (!pity) return selectedType;
+  if (hasSynergyTag(selectedType, pity.lane)) {
+    state.buildState.dropPity = undefined;
+    return selectedType;
+  }
+  pity.remaining--;
+  if (pity.remaining > 0) return selectedType;
+
+  const matching = buildCandidatesForBuildRole(state).filter(entry => hasSynergyTag(entry.type, pity.lane));
+  if (!matching.length) {
+    state.buildState.dropPity = undefined;
+    return selectedType;
+  }
+  const allowed = new Set(withoutTypeIfPossible(matching.map(entry => entry.type), streakExcludedType));
+  const candidates = matching.filter(entry => allowed.has(entry.type));
+  // 若该流派只有一个合法卡型，withoutTypeIfPossible 会允许它突破连发保护，保证 pity 可兑现。
+  const forced = weightedBuildChoice(state, candidates, rng);
+  state.buildState.dropPity = undefined;
+  return forced;
+}
+
+export function selectBuildType(state: GameState, rng: Rng, excludedType?: CardType): CardType {
+  return applyBuildPity(state, selectBuildTypeBase(state, rng, excludedType), rng, excludedType);
+}
+
 export function selectPivotType(state: GameState, rng: Rng, excludedType?: CardType): CardType {
   const policy = cfg.economy.normalDropTypePolicy.pivot;
-  const scored = buildCandidates(state);
+  const scored = buildCandidatesByCommitment(state);
   const excludedTopCount = clamp(Math.round(policy.excludeTopK), 0, scored.length);
   const excludedTop = new Set(scored.slice(0, excludedTopCount).map(entry => entry.type));
   const remaining = scored
@@ -250,7 +313,7 @@ export function selectNormalEnemyDropType(state: GameState, rng: Rng): CardType 
   if (!state.normalDropDirector.roleBag.length) refillNormalDropRoleBag(state, rng);
   const role = state.normalDropDirector.roleBag.pop() ?? 'discovery';
   const selectForRole = (excludedType?: CardType): CardType => {
-    if (role === 'build') return selectBuildType(state, rng, excludedType);
+    if (role === 'build') return selectBuildTypeBase(state, rng, excludedType);
     if (role === 'pivot') return selectPivotType(state, rng, excludedType);
     return selectDiscoveryType(state, rng, excludedType);
   };
@@ -260,6 +323,13 @@ export function selectNormalEnemyDropType(state: GameState, rng: Rng): CardType 
   if (recent.length >= streakLimit
     && recent.slice(-streakLimit).every(recentType => recentType === type)) {
     type = selectForRole(type);
+  }
+  if (role === 'build') {
+    const streakExcludedType = recent.length >= streakLimit
+      && recent.slice(-streakLimit).every(recentType => recentType === recent[recent.length - 1])
+      ? recent[recent.length - 1]
+      : undefined;
+    type = applyBuildPity(state, type, rng, streakExcludedType);
   }
   recordCardDropShown(state, type, 'normalKill');
   state.normalDropDirector.ordinaryDropCount++;

@@ -6,6 +6,7 @@ import type { Bullet, Card, CardType, Config, Enemy, GameEvent, GameState, Groun
 import type { BindingDef, CardDef, EffectDef, Trigger } from './defs';
 import { ATOMS, runEffects, type EffectCtx } from './registry';
 import { totalDamage } from '../stats';
+import { applyBuildScalingToBindings, applyBuildScalingToTier } from '../systems/buildModifierSystem';
 
 // —— 技能定义注册表（启动时由配置注入；测试可注入 fixture）——
 let DEFS = new Map<string, CardDef>();
@@ -51,7 +52,7 @@ function* equippedBindings(state: GameState): Generator<{ card: Card; def: CardD
   for (const card of effectiveEquipment(state)) {
     const def = DEFS.get(card.type);
     if (!def) continue;
-    const bindings = resolveEquipBindings(def, card.star);
+    const bindings = applyBuildScalingToBindings(state, def, resolveEquipBindings(def, card.star));
     for (let i = 0; i < bindings.length; i++) yield { card, def, binding: bindings[i], bindingIndex: i };
   }
 }
@@ -251,7 +252,7 @@ export function getModifiers(state: GameState): Modifiers {
 export function releaseConsumable(state: GameState, config: Config, rng: Rng, cardType: string, star: number, x: number, y: number): GameEvent[] {
   const def = DEFS.get(cardType);
   if (!def) return [];
-  const tier = resolveConsumableTier(def, star);
+  const tier = applyBuildScalingToTier(state, def, resolveConsumableTier(def, star));
   const ctx: EffectCtx = {
     state, config, rng,
     events: [],

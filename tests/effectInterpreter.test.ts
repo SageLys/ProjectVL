@@ -30,7 +30,7 @@ afterEach(resetTestEnv);
 function def(id: CardType, equip: BindingDef[], consumeEffects: BindingDef['effects'] = [{ atom: 'burstDamage', params: { damageMul: 2, radius: 100 } }]): CardDef {
   const tier = { radius: 100, effects: consumeEffects };
   return {
-    id, category: 'projectile', textKey: `t.${id}`, teaching: false,
+    id, category: 'projectile', synergyTags: ['projectile'], textKey: `t.${id}`, teaching: false,
     stars: { '3': { tier: 'core', equip }, '5': { tier: 'dual', equip }, '6': { tier: 'transform', equip } },
     amplifyAxis: { params: { damageMul: '+1' } },
     consumable: { placement: 'point', anchors: { '1': tier, '3': tier, '6': tier } },
@@ -119,7 +119,7 @@ describe('解释器 · 装备态触发绑定', () => {
 
   it('星级分层：同一卡 2★/3★ 取不同绑定（入装门槛 2★）', () => {
     registerSkillDefs([{
-      id: 'pierce', category: 'projectile', textKey: 't', teaching: false,
+      id: 'pierce', category: 'projectile', synergyTags: ['projectile'], textKey: 't', teaching: false,
       stars: {
         '3': { tier: 'core', equip: [{ trigger: 'onFire', effects: [{ atom: 'pierce', params: { count: 1 } }] }] },
         '5': { tier: 'dual', equip: [{ trigger: 'onFire', effects: [{ atom: 'pierce', params: { count: 2 } }] }] },

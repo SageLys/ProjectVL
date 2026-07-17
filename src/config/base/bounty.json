@@ -1,5 +1,13 @@
 {
   "enabled": true,
+  "rewardBias": {
+    "enabled": true,
+    "primaryShare": 0.70,
+    "secondaryShare": 0.15,
+    "nearMergeBonus": 2.0,
+    "investedBonus": 1.5,
+    "droughtBonus": 1.5
+  },
   "offer": {
     "enabledFromWave": 1,
     "checkIntervalSeconds": 4.0,

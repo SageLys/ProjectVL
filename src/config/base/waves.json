@@ -34,8 +34,14 @@
     "fastThreshold": 0.47
   },
   "bossWaves": [
-    3,
-    5,
-    8
-  ]
+    1, 2, 3, 4, 5, 6, 7, 8
+  ],
+  "waveBoss": {
+    "reward": {
+      "starTierEveryWaves": 3,
+      "starMax": 3,
+      "bonusCountEveryWaves": 3,
+      "finalWaveBonusCount": 1
+    }
+  }
 }

@@ -6,6 +6,9 @@
 /** 效果原子五大类别。 */
 export type Category = 'projectile' | 'control' | 'domain' | 'economy' | 'defense';
 
+/** 宽协同流派标签。utility 为通用辅助，暂不作为主推流派。 */
+export type BuildTag = 'projectile' | 'control' | 'domain' | 'defense' | 'utility';
+
 /** 触发器库。装备态效果绑定到其一；passive = 常驻修饰（无事件，聚合读取）。 */
 export type Trigger =
   | 'onFire'
@@ -66,6 +69,8 @@ export interface ConsumableTierDef {
 export interface CardDef {
   id: string;
   category: Category;
+  /** 宽协同标签（1~2 个，非空、去重）；与 category 独立，仅用于构筑协同。 */
+  synergyTags: BuildTag[];
   textKey: string;
   teaching: boolean;
   stars: { '3': StarTierDef; '5': StarTierDef; '6': StarTierDef };

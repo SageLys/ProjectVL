@@ -1,12 +1,14 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { cfg } from '../src/config';
+import { registerSkillDefs } from '../src/core/effects/interpreter';
 import type { BountyOffer } from '../src/core/types';
-import { acceptBountyOfferAt, notifyBountyMemberBreached, tickBountySystem } from '../src/core/systems/bountySystem';
+import { acceptBountyOfferAt, notifyBountyMemberBreached, selectBountyRewardType, tickBountySystem } from '../src/core/systems/bountySystem';
+import { createSeededRng } from '../src/debug/exposeDebugApi';
 import { killEnemy } from '../src/core/systems/damageSystem';
 import { collectDrop, spawnGroundDrop, spawnWildcardDrop } from '../src/core/systems/dropSystem';
 import { card, constRng, createDefaultConfig, freshState, resetTestEnv } from './helpers';
 
-beforeEach(resetTestEnv);
+beforeEach(() => { resetTestEnv(); registerSkillDefs(cfg.skills.cards); });
 
 function promisedOffer(overrides: Partial<BountyOffer> = {}): BountyOffer {
   return {
@@ -38,6 +40,30 @@ function spawnedEncounter() {
 }
 
 describe('Bounty Rewards · 确定掉落', () => {
+  it('biases rewards toward the primary lane and preserves repeat protection', () => {
+    const state = freshState();
+    state.buildState.affinity.control = 3;
+    const rng = createSeededRng(20260716);
+    const controlTypes = new Set(cfg.skills.cards.filter(card => card.synergyTags.includes('control')).map(card => card.id));
+    const results = Array.from({ length: 600 }, () => selectBountyRewardType(state, rng));
+    const share = results.filter(type => controlTypes.has(type)).length / results.length;
+    expect(share).toBeGreaterThanOrEqual(cfg.bounty.rewardBias.primaryShare - 0.1);
+    // 探索段仍从全卡池抽取，天然会额外命中双标签 control 卡，因此总命中率高于 primaryShare。
+    expect(share).toBeLessThanOrEqual(cfg.bounty.rewardBias.primaryShare + 0.2);
+    for (let index = 1; index < results.length; index++) expect(results[index]).not.toBe(results[index - 1]);
+  });
+
+  it('uses the exact legacy uniform bag sequence when affinity is zero', () => {
+    const enabled = freshState();
+    const disabled = freshState();
+    const enabledRng = createSeededRng(88);
+    const disabledRng = createSeededRng(88);
+    const enabledSequence = Array.from({ length: 25 }, () => selectBountyRewardType(enabled, enabledRng));
+    cfg.bounty.rewardBias.enabled = false;
+    const disabledSequence = Array.from({ length: 25 }, () => selectBountyRewardType(disabled, disabledRng));
+    expect(enabledSequence).toEqual(disabledSequence);
+  });
+
   it('中途成员死亡不走普通掉落，最后一名才统一发奖', () => {
     const state = spawnedEncounter();
     const config = createDefaultConfig();
@@ -128,5 +154,32 @@ describe('Bounty Rewards · 确定掉落', () => {
     const events = notifyBountyMemberBreached(state, member);
     expect(events).toEqual([{ type: 'bountyFailed', encounterId: 1 }]);
     expect(state.groundDrops).toHaveLength(0);
+  });
+
+  it('freezes the offered card type across later affinity changes and keeps the configured wildcard', () => {
+    const state = freshState();
+    state.wave = 1;
+    state.spawnLeft = 10;
+    state.waveSpawnQuota = 10;
+    state.buildState.affinity.control = 3;
+    state.bountyDirector.checkTimer = 0;
+    cfg.bounty.offer.baseChancePerCheck = 1;
+    cfg.bounty.offer.maxChancePerCheck = 1;
+    tickBountySystem(state, createDefaultConfig(), createSeededRng(5), 0);
+    const promised = state.bountyOffers[0].rewardCardType;
+    state.buildState.affinity.control = 0;
+    state.buildState.affinity.defense = 9;
+    acceptBountyOfferAt(state, state.bountyOffers[0].x, state.bountyOffers[0].y);
+    tickBountySystem(state, createDefaultConfig(), constRng(0), 10);
+    for (const member of [...state.enemies]) {
+      state.enemies.splice(state.enemies.indexOf(member), 1);
+      killEnemy(state, createDefaultConfig(), constRng(0.5), member);
+    }
+    const cardDrops = state.groundDrops.filter(drop => drop.kind === 'card');
+    const wildcardDrops = state.groundDrops.filter(drop => drop.kind === 'wildcard');
+    expect(cardDrops).toHaveLength(cfg.bounty.reward.cardCount);
+    expect(cardDrops.every(drop => drop.type === promised)).toBe(true);
+    expect(wildcardDrops).toHaveLength(1);
+    expect(wildcardDrops[0]).toEqual(expect.objectContaining({ count: cfg.bounty.reward.wildcardCount }));
   });
 });

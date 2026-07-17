@@ -1,5 +1,6 @@
 import './telemetryHud.css';
 import type { GameConfig } from '../config/types';
+import type { BuildTag } from '../core/effects/defs';
 import type { Enemy, GameEvent, GameState } from '../core/types';
 import { EVENT_UNIVERSE, OPPORTUNITY_EVENTS, percentile } from './metrics';
 import type { TelemetryEvent, TelemetryInputType, TelemetrySession } from './types';
@@ -53,6 +54,7 @@ export function createDevTelemetry(options: Options): DevTelemetry {
   let before = new Map<number, FrameEnemy>();
   let killsBefore = 0;
   let nextSample = 0;
+  const bossSpawnedAt = new Map<number, number>();
   let fps = 0;
   let lastHudUpdate = -Infinity;
   const frameTimes: number[] = [];
@@ -73,6 +75,14 @@ export function createDevTelemetry(options: Options): DevTelemetry {
 
   function state(): GameState { return options.getState(); }
   function at(): number { return Number(state().time.toFixed(6)); }
+  function affinityMatch(cardType: string): Pick<TelemetryEvent, 'lane' | 'laneMatch'> {
+    const lanes: BuildTag[] = ['projectile', 'control', 'domain', 'defense'];
+    const max = Math.max(...lanes.map(lane => state().buildState.affinity[lane]));
+    if (max <= 0) return { laneMatch: undefined };
+    const lane = lanes.find(item => state().buildState.affinity[item] === max)!;
+    const def = options.getConfig().skills.cards.find(card => card.id === cardType);
+    return { lane, laneMatch: def?.synergyTags.includes(lane) ?? false };
+  }
   function add(event: Omit<TelemetryEvent, 'at' | 'wave'> & Partial<Pick<TelemetryEvent, 'at' | 'wave'>>): TelemetryEvent {
     const item = { at: at(), wave: state().wave, ...event } as TelemetryEvent;
     events.push(item);
@@ -103,7 +113,14 @@ export function createDevTelemetry(options: Options): DevTelemetry {
     }
     for (const drop of state().groundDrops) if (!knownDrops.has(drop.id)) {
       knownDrops.add(drop.id);
-      add({ type: 'dropLanded', dropId: drop.id, x: drop.x, y: drop.y, cardType: drop.kind === 'card' ? drop.type : 'wildcard' });
+      add({
+        type: 'dropLanded',
+        dropId: drop.id,
+        x: drop.x,
+        y: drop.y,
+        cardType: drop.kind === 'card' ? drop.type : 'wildcard',
+        ...(drop.kind === 'card' && drop.source === 'normalKill' ? affinityMatch(drop.type) : {}),
+      });
       if (drop.bountyEncounterId !== undefined) {
         const encounter = state().bountyEncounters.find(item => item.id === drop.bountyEncounterId);
         add({
@@ -178,6 +195,7 @@ export function createDevTelemetry(options: Options): DevTelemetry {
     events.length = 0; samples.length = 0; inputs.length = 0;
     knownEnemies.clear(); knownDrops.clear(); dangerEntries.clear(); before.clear();
     killsBefore = 0; nextSample = 0;
+    bossSpawnedAt.clear();
     startedAt = new Date().toISOString();
     filename = `session_${safeIso(startedAt)}_${options.getSeed()}.json`;
   }
@@ -206,7 +224,7 @@ export function createDevTelemetry(options: Options): DevTelemetry {
     for (const item of removed) { knownEnemies.delete(item.enemy.id); closeDanger(item.enemy.id); }
     syncAdditions();
     const time = state().time;
-    const waveActive = state().wave > 0 && !state().waveClearPending && state().mode === 'playing';
+    const waveActive = state().wave > 0 && state().wavePhase !== 'between' && state().mode === 'playing';
     if (!waveActive) nextSample = Math.floor(time * 4 + 1) / 4;
     else while (nextSample <= time) {
       samples.push({ at: Number(nextSample.toFixed(6)), wave: state().wave, enemies: state().enemies.length });
@@ -224,6 +242,15 @@ export function createDevTelemetry(options: Options): DevTelemetry {
         add({ type: 'waveStart', wave: event.wave });
       }
       if (event.type === 'waveCleared') { add({ type: 'waveCleared', wave: event.wave }); shouldExport = true; }
+      if (event.type === 'waveBossSpawned') {
+        bossSpawnedAt.set(event.wave, at());
+        add({ type: 'waveBossSpawned', wave: event.wave });
+      }
+      if (event.type === 'bossRewardGranted') {
+        const clearSeconds = Math.max(0, at() - (bossSpawnedAt.get(event.wave) ?? at()));
+        add({ type: 'waveBossKilled', wave: event.wave, clearSeconds });
+        add({ type: 'bossRewardGranted', wave: event.wave, wildcardStar: event.grants[0]?.star, wildcardCount: event.grants[0]?.count });
+      }
       if (event.type === 'gameEnd' && event.win && !events.some(item => item.type === 'waveCleared' && item.wave === state().wave)) { add({ type: 'waveCleared' }); shouldExport = true; }
       if (event.type === 'levelUp') add({ type: 'perkPopup' });
       if (event.type === 'collected') {
@@ -241,7 +268,15 @@ export function createDevTelemetry(options: Options): DevTelemetry {
       }
       if (event.type === 'bountyOfferSpawned') {
         const offer = state().bountyOffers.find(item => item.id === event.offerId);
-        add({ type: 'bountyOffer', offerId: event.offerId, rewardCardType: event.rewardCardType, rewardCardStar: offer?.rewardCardStar, wildcardStar: offer?.wildcardStar, guaranteed: event.guaranteed });
+        add({
+          type: 'bountyOffer',
+          offerId: event.offerId,
+          rewardCardType: event.rewardCardType,
+          rewardCardStar: offer?.rewardCardStar,
+          wildcardStar: offer?.wildcardStar,
+          guaranteed: event.guaranteed,
+          ...affinityMatch(event.rewardCardType),
+        });
       }
       if (event.type === 'bountyOfferExpired') add({ type: 'bountyOfferExpired', offerId: event.offerId });
       if (event.type === 'bountyAccepted') {

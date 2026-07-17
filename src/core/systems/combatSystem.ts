@@ -4,8 +4,9 @@ import { totalDamage, totalFireRate, totalMulti, totalRange } from '../stats';
 import { spawnParticle } from './particleSystem';
 import { dealDamage, killEnemy, tryExecute } from './damageSystem';
 import { fireTrigger, getModifiers } from '../effects/interpreter';
-import { damageTakenMultiplier } from '../effects/statusSystem';
+import { damageTakenMultiplier, isControlled } from '../effects/statusSystem';
 import { ATOMS, type EffectCtx } from '../effects/registry';
+import { controlledDamageTakenBonus } from './buildModifierSystem';
 
 /**
  * 索敌：紧急距离内最近 > 活跃 Bounty 成员最近 > 烙印权重降序 > 射程内最近。
@@ -132,7 +133,8 @@ export function updateTurret(state: GameState, config: Config, rng: Rng, dt: num
 
 /** 命中结算：易伤乘数、附着效果（riders）、onHit 触发、处决、击杀。 */
 function hitEnemy(state: GameState, config: Config, rng: Rng, bullet: { x: number; y: number; damage: number; riders?: { atom: string; params?: Record<string, unknown> }[] }, enemy: Enemy, events: GameEvent[]): boolean {
-  enemy.hp -= bullet.damage * damageTakenMultiplier(enemy);
+  const controlledMul = isControlled(enemy) ? 1 + controlledDamageTakenBonus(state) : 1;
+  enemy.hp -= bullet.damage * damageTakenMultiplier(enemy) * controlledMul;
   enemy.hit = 0.08;
   spawnParticle(state, rng, bullet.x, bullet.y, '#d8fbff', 50);
 
