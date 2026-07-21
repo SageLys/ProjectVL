@@ -80,8 +80,8 @@ function assembleBase(): GameConfig {
     economy,
     bounty,
     input,
-    // 面板元数据仅供开发态调参；生产包保留空对象以维持配置形状。
-    tuner: import.meta.env.DEV ? tuner : {},
+    // 可玩原型的构建预览也保留调参面板；可在运行时用 ?devtools=0 隐藏。
+    tuner,
   }) as unknown as GameConfig;
 }
 

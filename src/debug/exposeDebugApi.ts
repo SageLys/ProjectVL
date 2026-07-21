@@ -43,9 +43,8 @@ declare global {
   }
 }
 
-/** 仅在 DEV 构建下把调试接口挂到 window.__game。生产构建不注入。 */
+/** 面板启用时把调试接口挂到 window.__game；是否挂载由调用方统一控制。 */
 export function exposeDebugApi(api: DebugApi): void {
-  if (!import.meta.env.DEV) return;
   window.__game = api;
 }
 

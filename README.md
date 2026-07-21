@@ -27,6 +27,7 @@ npm run test:watch
 ```
 
 > `dist/` 由 `npm run build` 生成，不再手工复制打包。
+> 可玩原型的开发调参面板与遥测 HUD 在开发服务器和构建预览中默认显示；需要纯玩家视图时在 URL 后添加 `?devtools=0`。
 
 ## 目录结构
 

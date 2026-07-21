@@ -33,18 +33,19 @@ import type { DevTelemetry } from './telemetry/devTelemetry';
 import type { PerkDef } from './config/types';
 import type { DifficultyId } from './config/types';
 import { resyncEnemyStats, type EnemyStatConfigKey } from './core/systems/enemySystem';
+import { DEV_TOOLS_ENABLED } from './debug/devToolsMode';
 
 // 技能 = 数据 + 解释器：把配置里的卡定义注入解释器（P5 实装 12 张正式卡后自动生效）。
 registerSkillDefs(cfg.skills.cards);
 
 let rngSource: Rng = Math.random;
-const rng: Rng = import.meta.env.DEV ? () => rngSource() : Math.random;
+const rng: Rng = DEV_TOOLS_ENABLED ? () => rngSource() : Math.random;
 let tuner: TunerPanel | null = null;
 let telemetry: DevTelemetry | null = null;
 let devSeed = 1;
 let devTimeScale = 1;
 let devInvincible = false;
-const evidenceMode = import.meta.env.DEV ? new URLSearchParams(location.search).get('evidence') : null;
+const evidenceMode = DEV_TOOLS_ENABLED ? new URLSearchParams(location.search).get('evidence') : null;
 const refs = getDomRefs();
 let selectedDifficulty: DifficultyId = cfg.difficulty.defaultDifficulty;
 const difficultyInputs = Array.from(document.querySelectorAll<HTMLInputElement>('input[name="difficulty"]'));
@@ -54,7 +55,7 @@ for (const input of difficultyInputs) {
   input.checked = id === selectedDifficulty;
   input.addEventListener('change', () => { if (input.checked) selectedDifficulty = id; });
 }
-if (import.meta.env.DEV) {
+if (DEV_TOOLS_ENABLED) {
   refs.testCardBtn.removeAttribute('hidden');
   refs.testWildcardBtn.removeAttribute('hidden');
   refs.testWildcardBtn.textContent = texts.buttons.testWildcard;
@@ -75,7 +76,7 @@ refs.cardsHint.textContent = '拖到战场释放 · 同型同星自动合成';
 
 // —— 表现副作用统一由事件驱动 ——
 function dispatch(events: GameEvent[]): void {
-  if (import.meta.env.DEV) telemetry?.recordGameEvents(events);
+  if (DEV_TOOLS_ENABLED) telemetry?.recordGameEvents(events);
   let slotsChanged = false;
   for (const ev of events) {
     const text = formatToast(ev);
@@ -113,7 +114,7 @@ const modals = createModals(refs, {
     const events = applyPerk(state, config, id, rng);
     dispatch(events);
     const applied = events.find(event => event.type === 'perkApplied');
-    if (import.meta.env.DEV && applied?.type === 'perkApplied') telemetry?.recordInput('perkSelect', `${id}:${applied.lane}`);
+    if (DEV_TOOLS_ENABLED && applied?.type === 'perkApplied') telemetry?.recordInput('perkSelect', `${id}:${applied.lane}`);
     if (!events.some(event => event.type === 'levelUp')) modals.hideLevel();
     renderHud(refs, state, config);
   },
@@ -140,13 +141,13 @@ const pointerRouter = createPointerRouter({
     const events = acceptBountyOfferAt(state, x, y);
     if (!events.length) return false;
     dispatch(events);
-    if (import.meta.env.DEV) telemetry?.recordInput('bountyAccept');
+    if (DEV_TOOLS_ENABLED) telemetry?.recordInput('bountyAccept');
     return true;
   },
   onArenaTap: (x, y) => {
     const events = collectNearest(state, config, rng, x, y, cfg.economy.drops.pickupRadius);
     dispatch(events);
-    if (import.meta.env.DEV && events.some(event => event.type === 'collected')) telemetry?.recordInput('pickupClick');
+    if (DEV_TOOLS_ENABLED && events.some(event => event.type === 'collected')) telemetry?.recordInput('pickupClick');
   },
   onDrop: (source, index, target) => {
     let events: GameEvent[] = [];
@@ -158,8 +159,8 @@ const pointerRouter = createPointerRouter({
       if (events.some(event => event.type === 'equipRejected' || event.type === 'equipFull')) state.equipTelemetry.rejects++;
     } else if (target.kind === 'slot') events = moveOrSwap(state, config, rng, source, index, target.slotKind, target.index);
     dispatch(events);
-    if (import.meta.env.DEV && events.some(event => event.type === 'skillConsumed')) telemetry?.recordInput('consumeRelease');
-    else if (import.meta.env.DEV && events.some(event => SLOT_CHANGING.has(event.type))) telemetry?.recordInput('dragDrop');
+    if (DEV_TOOLS_ENABLED && events.some(event => event.type === 'skillConsumed')) telemetry?.recordInput('consumeRelease');
+    else if (DEV_TOOLS_ENABLED && events.some(event => SLOT_CHANGING.has(event.type))) telemetry?.recordInput('dragDrop');
   },
   previewFor,
   getDropValidity: (source, _index, target) => source !== 'wildcard' || checkWildcardTarget(state, target.slotKind, target.index).ok,
@@ -177,7 +178,7 @@ refs.testWildcardBtn.addEventListener('click', () => {
 
 function reset(): void {
   state = createInitialState(selectedDifficulty);
-  if (import.meta.env.DEV) telemetry?.reset();
+  if (DEV_TOOLS_ENABLED) telemetry?.reset();
   if (evidenceMode === 'equip') {
     state.cards[0] = { id: state.nextCardId++, type: 'pierce', star: 4 };
   } else if (evidenceMode === 'upgrade4' || evidenceMode === 'upgrade5' || evidenceMode === 'upgrade6') {
@@ -223,14 +224,14 @@ function togglePause(): void {
 
 let last = performance.now();
 function loop(now: number): void {
-  const scale = import.meta.env.DEV ? devTimeScale : 1;
+  const scale = DEV_TOOLS_ENABLED ? devTimeScale : 1;
   const dt = Math.min(cfg.combat.dtCap, ((now - last) / 1000) * scale);
   last = now;
   const lockedHp = state.hp;
-  if (import.meta.env.DEV) telemetry?.beforeUpdate();
+  if (DEV_TOOLS_ENABLED) telemetry?.beforeUpdate();
   let events = updateGame(state, config, rng, dt, () => tuner?.applyPendingWaveChanges());
-  if (import.meta.env.DEV) telemetry?.afterUpdate();
-  if (import.meta.env.DEV && devInvincible && state.hp < lockedHp) {
+  if (DEV_TOOLS_ENABLED) telemetry?.afterUpdate();
+  if (DEV_TOOLS_ENABLED && devInvincible && state.hp < lockedHp) {
     state.hp = Math.max(1, lockedHp);
     if (events.some(event => event.type === 'gameEnd' && !event.win)) {
       state.mode = 'playing'; state.paused = false;
@@ -240,12 +241,12 @@ function loop(now: number): void {
   dispatch(events);
   renderHud(refs, state, config);
   render(state, config);
-  if (import.meta.env.DEV) telemetry?.updateFrame(now);
+  if (DEV_TOOLS_ENABLED) telemetry?.updateFrame(now);
   requestAnimationFrame(loop);
 }
 
-// 调试接口（仅 DEV 注入）：供控制台与浏览器自动化驱动。
-if (import.meta.env.DEV) void Promise.all([import('./debug/exposeDebugApi'), import('./ui/tunerPanel'), import('./telemetry/devTelemetry')]).then(([debugModule, tunerModule, telemetryModule]) => {
+// 调试面板启用时注入接口：供控制台与浏览器自动化驱动。
+if (DEV_TOOLS_ENABLED) void Promise.all([import('./debug/exposeDebugApi'), import('./ui/tunerPanel'), import('./telemetry/devTelemetry')]).then(([debugModule, tunerModule, telemetryModule]) => {
   rngSource = debugModule.createSeededRng(devSeed);
 
   function syncEnemyConfig(path: string): void {
