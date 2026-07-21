@@ -52,10 +52,6 @@ export function createModals(refs: DomRefs, hooks: { onPerk(id: string): void; o
             benefits.textContent = fmt(texts.levelup.benefits, { names: [...new Set(names)].join('、') });
             button.append(benefits);
           }
-          const hint = document.createElement('span');
-          hint.className = 'choice-hint';
-          hint.textContent = texts.levelup.dropHint;
-          button.append(hint);
         }
         return button;
       }));

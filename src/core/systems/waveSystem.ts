@@ -117,7 +117,8 @@ export function advanceWavePhase(state: GameState, _config: Config, rng: Rng): G
   if (state.wavePhase === 'boss'
     && state.waveBossId !== null
     && !state.enemies.some(enemy => enemy.id === state.waveBossId)
-    && state.bossRewardClaimedWave >= state.wave) return finishWave(state);
+    && state.bossRewardClaimedWave >= state.wave
+    && !state.groundDrops.some(drop => drop.kind === 'wildcard' && drop.bossRewardWave === state.wave)) return finishWave(state);
   return [];
 }
 

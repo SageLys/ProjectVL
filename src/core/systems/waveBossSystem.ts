@@ -1,7 +1,8 @@
 import { cfg } from '../../config';
 import type { GameConfig } from '../../config';
 import type { GameEvent, GameState } from '../types';
-import { grantWildcards, type WildcardGrant } from './wildcardSystem';
+import { spawnWildcardDrop } from './dropSystem';
+import type { WildcardGrant } from './wildcardSystem';
 
 export function computeWaveBossReward(wave: number, game: GameConfig = cfg): WildcardGrant[] {
   const reward = game.waves.waveBoss.reward;
@@ -16,11 +17,17 @@ export function computeWaveBossReward(wave: number, game: GameConfig = cfg): Wil
   return [{ star, count }];
 }
 
-/** Grants directly to inventory; the lower-level test-oriented grant event is replaced by a Boss event. */
-export function grantWaveBossReward(state: GameState): GameEvent[] {
+/** Drops the Boss reward for manual pickup, using the same wildcard drop presentation as elite rewards. */
+export function grantWaveBossReward(state: GameState, x: number, y: number): GameEvent[] {
   if (state.bossRewardClaimedWave >= state.wave) return [];
   const grants = computeWaveBossReward(state.wave);
-  grantWildcards(state, grants);
+  const lifetime = cfg.bounty.reward.dropLifetimeSeconds;
+  for (const grant of grants) {
+    spawnWildcardDrop(state, x, y, grant.star, grant.count, lifetime);
+    const drop = state.groundDrops[state.groundDrops.length - 1];
+    if (drop.kind !== 'wildcard') throw new Error('Boss reward must be a wildcard drop');
+    drop.bossRewardWave = state.wave;
+  }
   state.bossRewardClaimedWave = state.wave;
-  return [{ type: 'bossRewardGranted', wave: state.wave, grants }];
+  return [];
 }

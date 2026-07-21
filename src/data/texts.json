@@ -20,8 +20,7 @@
     "utility": "辅助"
   },
   "levelup": {
-    "benefits": "生效中：{names}",
-    "dropHint": "后续掉落将更偏向此流派"
+    "benefits": "生效中：{names}"
   },
   "toast": {
     "waveStart": "第 {wave} 波追求者开始",

@@ -22,7 +22,7 @@ export function killEnemy(state: GameState, config: Config, rng: Rng, enemy: Ene
   for (let i = 0; i < cfg.combat.vfx.killParticles; i++) spawnParticle(state, rng, enemy.x, enemy.y, '#8793a3', 150);
   if (enemy.spawnKind === 'waveBoss') {
     for (let i = 0; i < cfg.combat.vfx.killParticles * 2; i++) spawnParticle(state, rng, enemy.x, enemy.y, '#d6b06f', 220);
-    events.push(...grantWaveBossReward(state));
+    events.push(...grantWaveBossReward(state, enemy.x, enemy.y));
   } else if (enemy.bountyEncounterId !== undefined) events.push(...notifyBountyMemberKilled(state, enemy, config, rng));
   else rollDropOnKill(state, config, rng, enemy);
   const xpGain = enemy.xp * cfg.progression.killXpMul * (1 + state.xpGainBonus) * getModifiers(state).xpMul;

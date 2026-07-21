@@ -195,7 +195,13 @@ export interface GroundCardDrop extends GroundDropBase {
   star: number;
   source?: CardDropSource;
 }
-export interface GroundWildcardDrop extends GroundDropBase { kind: 'wildcard'; star: number; count: number; }
+export interface GroundWildcardDrop extends GroundDropBase {
+  kind: 'wildcard';
+  star: number;
+  count: number;
+  /** Set only for the wave Boss reward so phase progression can wait for this drop. */
+  bossRewardWave?: number;
+}
 export type GroundDrop = GroundCardDrop | GroundWildcardDrop;
 
 /** 地面区域（groundZone/aura 消耗态落点化）：周期对区域内敌人施加内嵌效果。 */

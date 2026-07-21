@@ -96,6 +96,9 @@ export function collectDrop(state: GameState, config: Config, rng: Rng, drop: Gr
     state.groundDrops = state.groundDrops.filter(item => item.id !== drop.id);
     state.collected++;
     const events = grantWildcards(state, [{ star: drop.star, count: drop.count }]);
+    if (drop.bossRewardWave !== undefined) {
+      events.push({ type: 'bossRewardGranted', wave: drop.bossRewardWave, grants: [{ star: drop.star, count: drop.count }] });
+    }
     if (drop.bountyEncounterId !== undefined) {
       for (const event of events) if (event.type === 'wildcardsGranted') event.bountyEncounterId = drop.bountyEncounterId;
     }
