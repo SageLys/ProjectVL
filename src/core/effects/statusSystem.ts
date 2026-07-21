@@ -8,9 +8,13 @@
 //   6. 移动目标（敌人）：嘲讽（点/召唤物）> 炮台；嘲讽召唤物死亡即失效。
 //   - 击退 × 类型抗性（boss/tank 减免）。
 //   - 连续击退短窗递减，窗口过期重置。
+//   - freeze/stun × 类型抗性（boss/tank 减免时长）。
+//   - 硬控结束 → 免疫窗内免疫再控且不累积冻结层。
 export const CONFLICT_RULES = [
   '击退 × 类型抗性(boss/tank 减免)',
   '连续击退短窗递减,窗口过期重置',
+  'freeze/stun × 类型抗性(boss/tank 减免时长)',
+  '硬控结束→免疫窗内免疫再控且不累积冻结层',
   'freeze/stun → 不可移动，嘲讽暂停',
   'freeze → 击退无效',
   'slow 多来源取最强，不叠乘',
@@ -23,7 +27,7 @@ import { cfg } from '../../config';
 import type { Enemy, EnemyStatus, GameState } from '../types';
 
 export function emptyStatus(): EnemyStatus {
-  return { slow: null, frozen: 0, freezeStacks: 0, stunned: 0, vulnerable: null, dots: [], brand: null, taunt: null, kbFatigue: null };
+  return { slow: null, frozen: 0, freezeStacks: 0, stunned: 0, ccImmune: 0, vulnerable: null, dots: [], brand: null, taunt: null, kbFatigue: null };
 }
 
 /** 冻结或眩晕 = 不可移动。 */
@@ -58,16 +62,20 @@ export function applySlow(e: Enemy, ratio: number, duration: number): void {
 
 /** 施加冻结；stacksToTrigger 模式下累计层数、叠满才冻结（frost 2★ 修饰）。 */
 export function applyFreeze(e: Enemy, duration: number, stacksToTrigger?: number): void {
+  if (e.status.ccImmune > 0) return;
   if (stacksToTrigger && stacksToTrigger > 1) {
     e.status.freezeStacks++;
     if (e.status.freezeStacks < stacksToTrigger) return;
     e.status.freezeStacks = 0;
   }
-  e.status.frozen = Math.max(e.status.frozen, duration);
+  const effective = duration * (1 - cfg.enemies.types[e.type].ccResist);
+  e.status.frozen = Math.max(e.status.frozen, effective);
 }
 
 export function applyStun(e: Enemy, duration: number): void {
-  e.status.stunned = Math.max(e.status.stunned, duration);
+  if (e.status.ccImmune > 0) return;
+  const effective = duration * (1 - cfg.enemies.types[e.type].ccResist);
+  e.status.stunned = Math.max(e.status.stunned, effective);
 }
 
 /** 施加易伤：取最强（仲裁规则 4）。 */
@@ -124,8 +132,16 @@ export function tickStatusTimers(state: GameState, dt: number): void {
   for (const e of state.enemies) {
     const s = e.status;
     if (s.slow && (s.slow.remaining -= dt) <= 0) s.slow = null;
-    if (s.frozen > 0) s.frozen -= dt;
-    if (s.stunned > 0) s.stunned -= dt;
+    if (s.ccImmune > 0) s.ccImmune = Math.max(0, s.ccImmune - dt);
+    if (s.frozen > 0 && (s.frozen -= dt) <= 0) {
+      s.frozen = 0;
+      s.ccImmune = Math.max(s.ccImmune, cfg.combat.ccImmunity.afterFreezeSeconds);
+      s.freezeStacks = 0;
+    }
+    if (s.stunned > 0 && (s.stunned -= dt) <= 0) {
+      s.stunned = 0;
+      s.ccImmune = Math.max(s.ccImmune, cfg.combat.ccImmunity.afterStunSeconds);
+    }
     if (s.vulnerable && (s.vulnerable.remaining -= dt) <= 0) s.vulnerable = null;
     if (s.brand && (s.brand.remaining -= dt) <= 0) s.brand = null;
     if (s.kbFatigue && (s.kbFatigue.remaining -= dt) <= 0) s.kbFatigue = null;

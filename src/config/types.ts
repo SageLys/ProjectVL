@@ -78,6 +78,7 @@ export interface CombatConfig {
   dangerZoneWidth: number;
   dtCap: number;
   knockbackFatigue: { decayFactor: number; windowSeconds: number; minMultiplier: number };
+  ccImmunity: { afterFreezeSeconds: number; afterStunSeconds: number };
   vfx: { shootParticles: number; killParticles: number; breakthroughParticles: number };
 }
 
@@ -122,6 +123,7 @@ export interface EnemyDef {
   xp: number;
   sides: number;
   knockbackResist: number;
+  ccResist: number;
 }
 
 export interface EnemiesConfig {

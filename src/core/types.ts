@@ -102,6 +102,8 @@ export interface EnemyStatus {
   freezeStacks: number;
   /** 眩晕剩余秒数（>0 = 不可动）。 */
   stunned: number;
+  /** 解控免疫窗：冻结/眩晕结束后一小段时间内免疫再次硬控，期间冻结层不累积。 */
+  ccImmune: number;
   /** 易伤：受到伤害 ×(1+ratio)。 */
   vulnerable: { ratio: number; remaining: number } | null;
   /** 持续伤害（直接挂敌身的 dot；区域 dot 走 Zone tick）。 */

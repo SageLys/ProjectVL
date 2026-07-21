@@ -31,6 +31,10 @@
     "windowSeconds": 2,
     "minMultiplier": 0.125
   },
+  "ccImmunity": {
+    "afterFreezeSeconds": 1.2,
+    "afterStunSeconds": 0.8
+  },
   "vfx": {
     "shootParticles": 4,
     "killParticles": 12,

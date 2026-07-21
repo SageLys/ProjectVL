@@ -12,6 +12,11 @@ describe('击退配置', () => {
     expect(c.enemies.types.tank.knockbackResist).toBe(0.4);
     expect(c.enemies.types.boss.knockbackResist).toBe(0.85);
     expect(c.combat.knockbackFatigue).toEqual({ decayFactor: 0.5, windowSeconds: 2, minMultiplier: 0.125 });
+    expect(c.enemies.types.normal.ccResist).toBe(0);
+    expect(c.enemies.types.fast.ccResist).toBe(0);
+    expect(c.enemies.types.tank.ccResist).toBe(0.25);
+    expect(c.enemies.types.boss.ccResist).toBe(0.5);
+    expect(c.combat.ccImmunity).toEqual({ afterFreezeSeconds: 1.2, afterStunSeconds: 0.8 });
   });
 });
 

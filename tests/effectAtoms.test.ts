@@ -6,6 +6,7 @@ import {
   applyKnockback, damageTakenMultiplier, isImmobile, speedMultiplier, tickStatusTimers,
 } from '../src/core/effects/statusSystem';
 import { dealDamage } from '../src/core/systems/damageSystem';
+import { cfg } from '../src/config';
 import type { GameState } from '../src/core/types';
 import { card, enemy, freshState, createDefaultConfig, constRng, resetTestEnv } from './helpers';
 
@@ -140,6 +141,88 @@ describe('弹道原子', () => {
 });
 
 describe('控制原子', () => {
+  it('freeze/stun 按敌人类型缩短硬控时长，普通敌人保持全额', () => {
+    const boss = enemy({ type: 'boss' });
+    const normal = enemy({ type: 'normal' });
+
+    applyFreeze(boss, 0.8);
+    applyFreeze(normal, 0.8);
+    expect(boss.status.frozen).toBeCloseTo(0.4);
+    expect(normal.status.frozen).toBeCloseTo(0.8);
+
+    applyStun(boss, 0.8);
+    applyStun(normal, 0.8);
+    expect(boss.status.stunned).toBeCloseTo(0.4);
+    expect(normal.status.stunned).toBeCloseTo(0.8);
+  });
+
+  it('冻结自然到期后开启免疫窗、清空冻结层，窗口内免疫 freeze/stun', () => {
+    const s = freshState();
+    const e = enemy();
+    s.enemies = [e];
+
+    applyFreeze(e, 0.8);
+    applyFreeze(e, 0.8, 3);
+    applyFreeze(e, 0.8, 3);
+    expect(e.status.freezeStacks).toBe(2);
+    tickStatusTimers(s, 0.8);
+
+    expect(e.status.frozen).toBe(0);
+    expect(e.status.ccImmune).toBeCloseTo(cfg.combat.ccImmunity.afterFreezeSeconds);
+    expect(e.status.freezeStacks).toBe(0);
+
+    applyFreeze(e, 0.8, 3);
+    applyStun(e, 0.8);
+    expect(e.status.frozen).toBe(0);
+    expect(e.status.stunned).toBe(0);
+    expect(e.status.freezeStacks).toBe(0);
+
+    tickStatusTimers(s, cfg.combat.ccImmunity.afterFreezeSeconds);
+    applyFreeze(e, 0.8, 3);
+    expect(e.status.freezeStacks).toBe(1);
+  });
+
+  it('眩晕自然到期后开启对应免疫窗', () => {
+    const s = freshState();
+    const e = enemy();
+    s.enemies = [e];
+    applyStun(e, 0.5);
+
+    tickStatusTimers(s, 0.5);
+
+    expect(e.status.stunned).toBe(0);
+    expect(e.status.ccImmune).toBeCloseTo(cfg.combat.ccImmunity.afterStunSeconds);
+  });
+
+  it('slow 不受 ccResist 或 ccImmune 影响', () => {
+    const boss = enemy({ type: 'boss' });
+    boss.status.ccImmune = 1;
+
+    applySlow(boss, 0.3, 1.5);
+
+    expect(boss.status.slow).toEqual({ ratio: 0.3, remaining: 1.5 });
+    expect(speedMultiplier(boss)).toBeCloseTo(0.7);
+  });
+
+  it('frost 3★ 持续命中 Boss 时存在解控后的行动窗口', () => {
+    const s = freshState();
+    const boss = enemy({ type: 'boss' });
+    s.enemies = [boss];
+    const shotInterval = 1 / 5;
+    let observedActionWindow = false;
+    let observedRefreeze = false;
+
+    for (let shot = 0; shot < 30; shot++) {
+      applyFreeze(boss, 0.8, 3);
+      tickStatusTimers(s, shotInterval);
+      if (boss.status.frozen === 0 && boss.status.ccImmune > 0) observedActionWindow = true;
+      if (observedActionWindow && boss.status.frozen > 0) observedRefreeze = true;
+    }
+
+    expect(observedActionWindow).toBe(true);
+    expect(observedRefreeze).toBe(true);
+  });
+
   it('slow/stun/freeze（叠层触发）作用于半径内目标', () => {
     const s = freshState();
     const e = enemy({ x: 480, y: 300, hp: 100, maxHp: 100 });
