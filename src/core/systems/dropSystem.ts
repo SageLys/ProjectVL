@@ -8,6 +8,7 @@ import { grantWildcards } from './wildcardSystem';
 import {
   getCardPool, getOrCreateCardTypeRunStats, recordCardDropShown, selectNormalEnemyDropType,
 } from './dropTypePolicy';
+import { stageForWave } from '../runStage';
 
 const TAU = Math.PI * 2;
 /** 正式卡池（P5 批次1+批次2，共 11 张技能卡）。 */
@@ -59,10 +60,40 @@ function normalDropStar(rng: Rng): number {
 
 /** 击杀掉落判定：概率命中或 boss 必掉，则在敌人位置生成掉落。 */
 export function rollDropOnKill(state: GameState, config: Config, rng: Rng, enemy: Enemy): void {
-  if (rng() < totalDropChance(state, config)) {
+  const rate = cfg.economy.ordinaryDropRate;
+  if (!rate.enabled) {
+    if (rng() < totalDropChance(state, config)) {
+      const type = selectNormalEnemyDropType(state, rng);
+      spawnGroundDrop(state, config, rng, enemy.x, enemy.y, type, undefined, 'normalKill');
+    }
+    return;
+  }
+  if (enemy.spawnKind !== 'regular') return;
+  if (stageForWave(state.wave, cfg.waves.totalWaves, cfg.waves.stagePlan) === 'validation') return;
+  state.ordinaryDrop.eligibleKillsThisWave++;
+  if (state.ordinaryDrop.credit >= 1) {
+    state.ordinaryDrop.credit -= 1;
     const type = selectNormalEnemyDropType(state, rng);
     spawnGroundDrop(state, config, rng, enemy.x, enemy.y, type, undefined, 'normalKill');
+    state.ordinaryDrop.shownThisWave++;
   }
+}
+
+/** Accumulates time-based ordinary-drop credit only during active regular combat. */
+export function tickOrdinaryDropBudget(state: GameState, dt: number): void {
+  const rate = cfg.economy.ordinaryDropRate;
+  if (!rate.enabled || state.mode !== 'playing' || state.paused || state.wavePhase !== 'regular') return;
+  const stage = stageForWave(state.wave, cfg.waves.totalWaves, cfg.waves.stagePlan);
+  if (stage === 'validation') return;
+  let base = rate.selectionPerMinute;
+  if (stage === 'build') {
+    const transition = rate.buildTransitionSeconds <= 0 ? 1 : Math.min(1, state.ordinaryDrop.buildStageSeconds / rate.buildTransitionSeconds);
+    base += (rate.buildPerMinute - rate.selectionPerMinute) * transition;
+    state.ordinaryDrop.buildStageSeconds += dt;
+  }
+  const target = base * (rate.modifiersAffectTarget ? getModifiers(state).dropRateMul : 1);
+  state.ordinaryDrop.credit = Math.min(rate.carryCap, state.ordinaryDrop.credit + target / 60 * dt);
+  state.ordinaryDrop.activeRegularSeconds += dt;
 }
 
 /**
@@ -73,11 +104,16 @@ export function tickDrops(state: GameState, _config: Config, rng: Rng, dt: numbe
   const events: GameEvent[] = [];
   for (let i = state.groundDrops.length - 1; i >= 0; i--) {
     const drop = state.groundDrops[i];
-    drop.life -= dt;
     drop.pulse += dt * 3;
+    if (drop.secure) continue;
+    drop.life -= dt;
     if (drop.life <= 0) {
       state.groundDrops.splice(i, 1);
       state.expired++;
+      events.push({
+        type: 'dropExpired', dropId: drop.id, source: drop.source, star: drop.star,
+        secure: drop.secure, validationRewardWave: drop.validationRewardWave,
+      });
       const convert = getModifiers(state).expiryConvert;
       if (convert && rng() < convert.ratio) {
         events.push(...addXp(state, drop.star * EXPIRY_CONVERT_XP_PER_STAR, rng));
@@ -96,6 +132,13 @@ export function collectDrop(state: GameState, config: Config, rng: Rng, drop: Gr
     state.groundDrops = state.groundDrops.filter(item => item.id !== drop.id);
     state.collected++;
     const events = grantWildcards(state, [{ star: drop.star, count: drop.count }]);
+    for (const event of events) if (event.type === 'wildcardsGranted') {
+      event.dropId = drop.id;
+      event.source = drop.source;
+      event.star = drop.star;
+      event.secure = drop.secure;
+      event.validationRewardWave = drop.validationRewardWave;
+    }
     if (drop.bossRewardWave !== undefined) {
       events.push({ type: 'bossRewardGranted', wave: drop.bossRewardWave, grants: [{ star: drop.star, count: drop.count }] });
     }
@@ -109,7 +152,9 @@ export function collectDrop(state: GameState, config: Config, rng: Rng, drop: Gr
   if (empty < 0) {
     const canMergeImmediately = drop.star < cfg.economy.maxStar
       && state.cards.filter(card => card?.type === drop.type && card.star === drop.star).length >= getActiveMergeCopies() - 1;
-    if (!canMergeImmediately) return [{ type: 'cardsFull' }];
+    if (!canMergeImmediately) return [{
+      type: 'cardsFull', dropId: drop.id, source: drop.source, star: drop.star, secure: drop.secure,
+    }];
   }
   state.groundDrops = state.groundDrops.filter(d => d.id !== drop.id);
   const collectedCard = { id: state.nextCardId++, type: drop.type, star: drop.star };
@@ -125,7 +170,11 @@ export function collectDrop(state: GameState, config: Config, rng: Rng, drop: Gr
     if (removableNullIndex < 0) throw new Error('Full-hand merge did not free a temporary slot');
     state.cards.splice(removableNullIndex, 1);
   }
-  const collected: GameEvent = { type: 'collected', cardType: drop.type, merges: merged };
+  const collected: GameEvent = {
+    type: 'collected', cardType: drop.type, merges: merged, dropId: drop.id,
+    source: drop.source, star: drop.star, secure: drop.secure,
+    validationRewardWave: drop.validationRewardWave,
+  };
   if (drop.bountyEncounterId !== undefined) collected.bountyEncounterId = drop.bountyEncounterId;
   const events: GameEvent[] = [collected];
   events.push(...mergeEvents);

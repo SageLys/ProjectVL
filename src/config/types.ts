@@ -2,6 +2,52 @@
 // P3 配置重组：所有可调数值经此处；variant = 对 base 的深覆盖（见 loader.ts）。
 import type { BuildTag, CardDef } from '../core/effects/defs';
 
+export type RunStage = 'selection' | 'build' | 'validation';
+
+/** Normalized curve within a stage: first wave = start, last wave = end. */
+export interface StageCurve { start: number; end: number; power: number; }
+
+export interface RegularStageConfig {
+  waveQuota: StageCurve;
+  targetOnScreen: StageCurve;
+  checkInterval: number;
+  batchMax: number;
+  maxAlive: number;
+  waveEndSprint: { window: number; multiplier: number };
+}
+
+export interface ValidationEnemySpec {
+  type: 'normal' | 'fast' | 'tank';
+  hpMul: number;
+  damageMul: number;
+  speedMul: number;
+  ccResistOverride?: number;
+  knockbackResistOverride?: number;
+  reward: { star: number; count: number };
+}
+
+export interface ValidationWaveConfig {
+  enemies: ValidationEnemySpec[];
+  bossReward: { star: number; count: number };
+}
+
+export interface StagePlanConfig {
+  selectionWaves: number;
+  validationWaves: number;
+  selection: RegularStageConfig;
+  build: RegularStageConfig;
+  validation: ValidationWaveConfig[];
+}
+
+export interface OrdinaryDropRateConfig {
+  enabled: boolean;
+  selectionPerMinute: number;
+  buildPerMinute: number;
+  buildTransitionSeconds: number;
+  carryCap: number;
+  modifiersAffectTarget: boolean;
+}
+
 export interface BountyConfig {
   enabled: boolean;
   rewardBias: {
@@ -97,6 +143,7 @@ export interface WavesConfig {
     waveEndSprint: { window: number; multiplier: number };
     maxAlive: number;
   };
+  stagePlan: StagePlanConfig;
   betweenWaves: number;
   spawnMargin: number;
   typeRoll: { tankBase: number; tankPerWave: number; fastThreshold: number };
@@ -255,6 +302,7 @@ export interface EconomyConfig {
   drops: { pickupRadius: number; chanceCap: number };
   defaults: { dropChance: number; dropLifetime: number };
   normalDropTypePolicy: NormalDropTypePolicyConfig;
+  ordinaryDropRate: OrdinaryDropRateConfig;
 }
 
 export interface TunerRange {

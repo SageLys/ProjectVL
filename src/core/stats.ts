@@ -36,6 +36,7 @@ export function totalRange(state: GameState, config: Config): number {
 }
 
 /** 掉落概率：（基础 + 眷恋加成）× 装备态掉率乘数，封顶 chanceCap。 */
+/** @deprecated Legacy fixed-probability ordinary-drop path. */
 export function totalDropChance(state: GameState, config: Config): number {
   return Math.min(
     cfg.economy.drops.chanceCap,

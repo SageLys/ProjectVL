@@ -3,7 +3,7 @@ import { updateTurret, updateBullets } from './systems/combatSystem';
 import { moveEnemies } from './systems/enemySystem';
 import { tickBountySystem } from './systems/bountySystem';
 import { tickSpawns, advanceWavePhase, tickBetween } from './systems/waveSystem';
-import { tickDrops } from './systems/dropSystem';
+import { tickDrops, tickOrdinaryDropBudget } from './systems/dropSystem';
 import { updateParticles } from './systems/particleSystem';
 import { tickEffects } from './effects/runtime';
 
@@ -15,6 +15,7 @@ export function updateGame(state: GameState, config: Config, rng: Rng, dt: numbe
   if (state.mode !== 'playing' || state.paused) return [];
   const events: GameEvent[] = [];
   state.time += dt;
+  tickOrdinaryDropBudget(state, dt);
 
   events.push(...updateTurret(state, config, rng, dt));
   tickSpawns(state, rng, dt);

@@ -8,7 +8,7 @@ export type CardType = string;
 export type EnemyType = 'normal' | 'fast' | 'tank' | 'boss';
 export type GameMode = 'ready' | 'playing' | 'ended';
 export type WavePhase = 'regular' | 'boss' | 'between';
-export type EnemySpawnKind = 'regular' | 'waveBoss' | 'bounty';
+export type EnemySpawnKind = 'regular' | 'waveBoss' | 'bounty' | 'validationElite';
 export type BountySide = 'top' | 'right' | 'bottom' | 'left';
 
 export interface BountyOffer {
@@ -81,6 +81,15 @@ export interface NormalDropDirectorState {
   typeStats: Record<CardType, CardTypeRunStats>;
 }
 
+export interface OrdinaryDropBudgetState {
+  credit: number;
+  activeRegularSeconds: number;
+  shownThisWave: number;
+  eligibleKillsThisWave: number;
+  /** Effective regular-combat seconds elapsed since the build stage began. */
+  buildStageSeconds: number;
+}
+
 /** 注入式随机源：返回 [0,1)。测试可传入确定性实现。 */
 export type Rng = () => number;
 
@@ -135,6 +144,9 @@ export interface Enemy {
   statMods?: { hpMul: number; speedMul: number; damageMul: number };
   bountyEncounterId?: number;
   bountyRewardType?: CardType;
+  ccResistOverride?: number;
+  knockbackResistOverride?: number;
+  validationReward?: { star: number; count: number };
 }
 
 export interface Bullet {
@@ -187,7 +199,11 @@ export interface GroundDropBase {
   life: number;
   maxLife: number;
   pulse: number;
+  source?: CardDropSource;
   bountyEncounterId?: number;
+  secure?: boolean;
+  /** Validation reward pickup that must be collected before its wave can finish. */
+  validationRewardWave?: number;
 }
 
 export type CardDropSource = 'normalKill' | 'bossKill' | 'bounty' | 'skillExtra' | 'debug';
@@ -195,7 +211,6 @@ export interface GroundCardDrop extends GroundDropBase {
   kind: 'card';
   type: CardType;
   star: number;
-  source?: CardDropSource;
 }
 export interface GroundWildcardDrop extends GroundDropBase {
   kind: 'wildcard';
@@ -352,6 +367,7 @@ export interface GameState {
   bountyEncounters: BountyEncounter[];
   bountyDirector: BountyDirectorState;
   normalDropDirector: NormalDropDirectorState;
+  ordinaryDrop: OrdinaryDropBudgetState;
   nextBountyOfferId: number;
   nextBountyEncounterId: number;
   runSummary: RunSummary | null;
@@ -373,8 +389,8 @@ export type GameEvent =
   | { type: 'levelUp' }
   | { type: 'gameEnd'; win: boolean }
   | { type: 'breakthrough'; damage: number }
-  | { type: 'cardsFull' }
-  | { type: 'collected'; cardType: CardType; merges: number; bountyEncounterId?: number }
+  | { type: 'cardsFull'; dropId?: number; source?: CardDropSource; star?: number; secure?: boolean }
+  | { type: 'collected'; cardType: CardType; merges: number; bountyEncounterId?: number; dropId?: number; source?: CardDropSource; star?: number; secure?: boolean; validationRewardWave?: number }
   | { type: 'equipFull' }
   | { type: 'equipRejected'; reason: 'star' | 'duplicate' }
   | { type: 'moved'; cardType: CardType; merges: number }
@@ -383,7 +399,8 @@ export type GameEvent =
   | { type: 'skillConsumed'; cardType: CardType; star: number; x: number; y: number }
   | { type: 'equipped'; cardType: CardType; star: number; slotIndex: number }
   | { type: 'fed'; cardType: CardType; resultStar: number; slotIndex?: number; targetCardId?: number }
-  | { type: 'wildcardsGranted'; grants: Array<{ star: number; count: number }>; bountyEncounterId?: number }
+  | { type: 'wildcardsGranted'; grants: Array<{ star: number; count: number }>; bountyEncounterId?: number; dropId?: number; source?: CardDropSource; star?: number; secure?: boolean; validationRewardWave?: number }
+  | { type: 'dropExpired'; dropId: number; source?: CardDropSource; star: number; secure?: boolean; validationRewardWave?: number }
   | {
       type: 'wildcardMerged';
       cardType: CardType;

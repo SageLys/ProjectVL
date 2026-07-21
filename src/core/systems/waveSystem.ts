@@ -1,9 +1,10 @@
 import { cfg } from '../../config';
 import type { Config, GameEvent, GameState, Rng } from '../types';
 import { endGame } from '../endGame';
-import { spawnEnemy, spawnWaveBoss } from './enemySystem';
+import { createEnemy, randomEdgeSpawnPosition, spawnEnemy, spawnWaveBoss } from './enemySystem';
 import { fireTrigger } from '../effects/interpreter';
 import { budgetAdmission, budgetWaveQuotaFor } from './budgetRules';
+import { resolveActiveWavePlan } from '../runStage';
 export { budgetAdmission } from './budgetRules';
 
 /** 第 wave 波的总出怪配额：base + wave*perWave。 */
@@ -16,8 +17,13 @@ export function enemyCountFor(wave: number): number {
  */
 export function startNextWave(state: GameState, config: Config, rng: Rng): GameEvent[] {
   state.wave++;
+  state.ordinaryDrop.credit = Math.min(cfg.economy.ordinaryDropRate.carryCap, state.ordinaryDrop.credit);
+  state.ordinaryDrop.activeRegularSeconds = 0;
+  state.ordinaryDrop.shownThisWave = 0;
+  state.ordinaryDrop.eligibleKillsThisWave = 0;
+  const wavePlan = resolveActiveWavePlan(cfg, state.wave);
   state.spawnLeft = cfg.waves.spawnMode === 'budget'
-    ? budgetWaveQuotaFor(state.wave, cfg.waves.budget)
+    ? budgetWaveQuotaFor(wavePlan)
     : enemyCountFor(state.wave);
   state.waveSpawnQuota = state.spawnLeft;
   state.spawnTimer = cfg.waves.firstSpawnDelay;
@@ -32,6 +38,21 @@ export function startNextWave(state: GameState, config: Config, rng: Rng): GameE
   state.bountyDirector.completedThisWave = 0;
   state.bountyDirector.guaranteedThisWave = false;
   state.bountyDirector.checkTimer = cfg.bounty.offer.checkIntervalSeconds;
+  if (wavePlan.validation) {
+    state.spawnLeft = 0;
+    state.waveSpawnQuota = 0;
+    for (const spec of wavePlan.validation.enemies) {
+      state.enemies.push(createEnemy(state, spec.type, state.wave, randomEdgeSpawnPosition(rng), {
+        hpMul: spec.hpMul,
+        damageMul: spec.damageMul,
+        speedMul: spec.speedMul,
+        spawnKind: 'validationElite',
+        ccResistOverride: spec.ccResistOverride,
+        knockbackResistOverride: spec.knockbackResistOverride,
+        validationReward: spec.reward,
+      }));
+    }
+  }
   const events: GameEvent[] = [{ type: 'waveStart', wave: state.wave }];
   events.push(...fireTrigger(state, config, rng, 'onWaveStart', { wave: state.wave }));
   return events;
@@ -56,7 +77,7 @@ const intervalSpawnStrategy: SpawnStrategy = { tick(state, rng, dt) {
 
 /** Budget target for the current wave, including the quota-based end sprint. */
 export function budgetTargetFor(state: GameState): number {
-  return budgetAdmission(state.wave, state.spawnLeft, state.enemies.length, cfg.waves.budget).effectiveTarget;
+  return budgetAdmission(resolveActiveWavePlan(cfg, state.wave), state.spawnLeft, state.enemies.length).effectiveTarget;
 }
 
 const budgetSpawnStrategy: SpawnStrategy = { tick(state, rng, dt) {
@@ -64,14 +85,14 @@ const budgetSpawnStrategy: SpawnStrategy = { tick(state, rng, dt) {
   state.spawnTimer -= dt;
   if (state.spawnTimer > 0) return;
 
-  const budget = cfg.waves.budget;
-  const count = budgetAdmission(state.wave, state.spawnLeft, state.enemies.length, budget).spawnCount;
+  const plan = resolveActiveWavePlan(cfg, state.wave);
+  const count = budgetAdmission(plan, state.spawnLeft, state.enemies.length).spawnCount;
   for (let i = 0; i < count; i++) {
     spawnEnemy(state, rng);
     state.spawnLeft--;
   }
   state.lastSpawnCheckCount = count;
-  state.spawnTimer = budget.checkInterval;
+  state.spawnTimer = plan.regular?.checkInterval ?? cfg.waves.budget.checkInterval;
 } };
 
 const SPAWN_STRATEGIES: Record<typeof cfg.waves.spawnMode, SpawnStrategy> = {
@@ -103,7 +124,7 @@ export function advanceWavePhase(state: GameState, _config: Config, rng: Rng): G
   if (state.mode !== 'playing') return [];
   const bountyActive = state.bountyEncounters.some(encounter => encounter.status === 'spawning' || encounter.status === 'active');
   if (state.wavePhase === 'regular') {
-    const blockingEnemy = state.enemies.some(enemy => enemy.spawnKind === 'regular' || enemy.spawnKind === 'bounty');
+    const blockingEnemy = state.enemies.some(enemy => enemy.spawnKind === 'regular' || enemy.spawnKind === 'bounty' || enemy.spawnKind === 'validationElite');
     if (state.spawnLeft !== 0 || blockingEnemy || bountyActive) return [];
     const events: GameEvent[] = state.bountyOffers.map(offer => ({ type: 'bountyOfferExpired' as const, offerId: offer.id }));
     state.bountyOffers.length = 0;
@@ -118,7 +139,8 @@ export function advanceWavePhase(state: GameState, _config: Config, rng: Rng): G
     && state.waveBossId !== null
     && !state.enemies.some(enemy => enemy.id === state.waveBossId)
     && state.bossRewardClaimedWave >= state.wave
-    && !state.groundDrops.some(drop => drop.kind === 'wildcard' && drop.bossRewardWave === state.wave)) return finishWave(state);
+    && !state.groundDrops.some(drop => drop.kind === 'wildcard' && drop.bossRewardWave === state.wave)
+    && !state.groundDrops.some(drop => drop.secure && drop.validationRewardWave === state.wave)) return finishWave(state);
   return [];
 }
 
@@ -155,6 +177,11 @@ export function jumpToWave(state: GameState, config: Config, rng: Rng, targetWav
   state.waveBossId = null;
   state.waveBossSpawnedAt = null;
   state.bossRewardClaimedWave = 0;
+  state.ordinaryDrop.credit = 0;
+  state.ordinaryDrop.activeRegularSeconds = 0;
+  state.ordinaryDrop.shownThisWave = 0;
+  state.ordinaryDrop.eligibleKillsThisWave = 0;
+  state.ordinaryDrop.buildStageSeconds = 0;
   state.runSummary = null;
   state.shotCd = 0;
   state.mode = 'playing';

@@ -50,6 +50,7 @@ export function formatToast(ev: GameEvent): string | null {
     case 'bountyOfferExpired':
     case 'bountyMemberSpawned':
     case 'bountyRewardDropped':
+    case 'dropExpired':
     case 'levelUp':
     case 'gameEnd':
       return null;

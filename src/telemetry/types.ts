@@ -1,8 +1,15 @@
+import type { RunStage } from '../config/types';
+import type { CardDropSource } from '../core/types';
+
 export type TelemetryEventType =
   | 'spawn'
   | 'kill'
   | 'dropLanded'
   | 'pickup'
+  | 'dropExpired'
+  | 'dropRejectedFullHand'
+  | 'validationRewardLanded'
+  | 'validationRewardPickup'
   | 'dangerEnter'
   | 'waveStart'
   | 'waveCleared'
@@ -48,6 +55,16 @@ export interface TelemetryEvent {
   laneMatch?: boolean;
   difficultyHpMultiplier?: number;
   difficultyDamageMultiplier?: number;
+  source?: CardDropSource;
+  stage?: RunStage;
+  star?: number;
+  secure?: boolean;
+  activeRegularSeconds?: number;
+  ordinaryDropsShown?: number;
+  eligibleKills?: number;
+  maturity?: number;
+  highestStar?: number;
+  equippedCount?: number;
 }
 
 export interface TelemetrySample {

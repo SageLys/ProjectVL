@@ -6,6 +6,7 @@ import { deriveMetrics } from '../src/ui/derivedMetrics';
 describe('Budget derived event estimate', () => {
   function tuned() {
     const game = buildConfig([]); game.waves.spawnMode = 'budget'; game.waves.totalWaves = 3;
+    game.economy.ordinaryDropRate.enabled = false;
     game.waves.enemyCountBase = 24; game.waves.enemyCountPerWave = 0; game.waves.budget.targetOnScreen = { base: 4, perWave: 0 };
     game.waves.budget.checkInterval = .5; game.waves.budget.batchMax = 4; game.waves.budget.maxAlive = 10;
     game.waves.budget.waveEndSprint = { window: 0, multiplier: 2 }; return game;
@@ -52,5 +53,24 @@ describe('Budget derived event estimate', () => {
       const copy = structuredClone(game); change(copy);
       expect(deriveMetrics(copy, runtime).budget!.totalDuration).not.toBe(baseline.totalDuration);
     }
+  });
+
+  it('projects stage targets and suppresses regular validation projections', () => {
+    const derived = deriveMetrics(buildConfig([]), createDefaultConfig());
+    const metrics = derived.budget!;
+    expect(metrics.projections[0]).toMatchObject({ normalTarget: 7, sprintTriggered: false });
+    expect(metrics.projections[1]).toMatchObject({ normalTarget: 10, sprintTriggered: false });
+    expect(metrics.projections[2].normalTarget).toBe(14);
+    expect(metrics.projections[5].normalTarget).toBe(28);
+    expect(metrics.projections[6]).toMatchObject({
+      normalTarget: 0,
+      peakOnScreen: 1,
+      validationEncounter: { enemyCount: 1, estimatedTtk: expect.any(Number) },
+    });
+    expect(derived.waves.map(wave => wave.stage)).toEqual([
+      'selection', 'selection', 'build', 'build', 'build', 'build', 'validation', 'validation',
+    ]);
+    expect(derived.waves.map(wave => wave.ordinaryDropsTargetPerMinute)).toEqual([35, 35, 40, 40, 40, 40, 0, 0]);
+    expect(derived.waves[6]).toMatchObject({ projectedOnScreenP50: 1, projectedOnScreenP95: 1 });
   });
 });

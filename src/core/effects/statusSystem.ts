@@ -68,13 +68,13 @@ export function applyFreeze(e: Enemy, duration: number, stacksToTrigger?: number
     if (e.status.freezeStacks < stacksToTrigger) return;
     e.status.freezeStacks = 0;
   }
-  const effective = duration * (1 - cfg.enemies.types[e.type].ccResist);
+  const effective = duration * (1 - (e.ccResistOverride ?? cfg.enemies.types[e.type].ccResist));
   e.status.frozen = Math.max(e.status.frozen, effective);
 }
 
 export function applyStun(e: Enemy, duration: number): void {
   if (e.status.ccImmune > 0) return;
-  const effective = duration * (1 - cfg.enemies.types[e.type].ccResist);
+  const effective = duration * (1 - (e.ccResistOverride ?? cfg.enemies.types[e.type].ccResist));
   e.status.stunned = Math.max(e.status.stunned, effective);
 }
 
@@ -91,7 +91,7 @@ export function applyVulnerable(e: Enemy, ratio: number, duration: number): void
 export function applyKnockback(e: Enemy, fromX: number, fromY: number, distance: number): boolean {
   if (e.status.frozen > 0) return false;
   const fatigueMultiplier = e.status.kbFatigue?.multiplier ?? 1;
-  const resistance = cfg.enemies.types[e.type].knockbackResist;
+  const resistance = e.knockbackResistOverride ?? cfg.enemies.types[e.type].knockbackResist;
   const effective = distance * (1 - resistance) * fatigueMultiplier;
   if (!(effective > 0)) return false;
   const dx = e.x - fromX;

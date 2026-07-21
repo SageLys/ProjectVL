@@ -107,9 +107,11 @@ describe('Bounty Rewards · 确定掉落', () => {
     spawnWildcardDrop(state, 10, 10, 1, 2, 12);
     const wildcardEvents = collectDrop(state, config, constRng(0), state.groundDrops[0]);
     expect(state.wildcards[1]).toBe(2);
-    expect(wildcardEvents).toEqual([{ type: 'wildcardsGranted', grants: [{ star: 1, count: 2 }] }]);
+    expect(wildcardEvents).toEqual([expect.objectContaining({ type: 'wildcardsGranted', grants: [{ star: 1, count: 2 }], dropId: expect.any(Number) })]);
     spawnGroundDrop(state, config, constRng(0), 10, 10, 'pierce', 1);
-    expect(collectDrop(state, config, constRng(0), state.groundDrops[0])).toEqual([{ type: 'cardsFull' }]);
+    expect(collectDrop(state, config, constRng(0), state.groundDrops[0])).toEqual([
+      expect.objectContaining({ type: 'cardsFull', dropId: expect.any(Number), star: 1 }),
+    ]);
     expect(state.groundDrops).toHaveLength(1);
   });
 
@@ -118,20 +120,20 @@ describe('Bounty Rewards · 确定掉落', () => {
     const config = createDefaultConfig();
     spawnWildcardDrop(state, 10, 10, 1, 2, 12);
     state.groundDrops[0].bountyEncounterId = 7;
-    expect(collectDrop(state, config, constRng(0), state.groundDrops[0])).toEqual([{
+    expect(collectDrop(state, config, constRng(0), state.groundDrops[0])).toEqual([expect.objectContaining({
       type: 'wildcardsGranted',
       grants: [{ star: 1, count: 2 }],
       bountyEncounterId: 7,
-    }]);
+    })]);
 
     spawnGroundDrop(state, config, constRng(0), 10, 10, 'pierce', 1);
     state.groundDrops[0].bountyEncounterId = 7;
-    expect(collectDrop(state, config, constRng(0), state.groundDrops[0])[0]).toEqual({
+    expect(collectDrop(state, config, constRng(0), state.groundDrops[0])[0]).toEqual(expect.objectContaining({
       type: 'collected',
       cardType: 'pierce',
       merges: 0,
       bountyEncounterId: 7,
-    });
+    }));
   });
 
   it('奖励洗牌袋重装时禁止与上一次类型相同', () => {

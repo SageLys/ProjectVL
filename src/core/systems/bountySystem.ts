@@ -5,6 +5,7 @@ import type { BountyEncounter, BountyOffer, BountySide, CardType, Config, Enemy,
 import { spawnGroundDrop, spawnWildcardDrop } from './dropSystem';
 import { calculateCommitmentScore, getCardPool, getOrCreateCardTypeRunStats, recordCardDropShown } from './dropTypePolicy';
 import { createEnemy } from './enemySystem';
+import { stageForWave } from '../runStage';
 
 const SIDES: BountySide[] = ['top', 'right', 'bottom', 'left'];
 
@@ -129,6 +130,7 @@ function unresolvedEncounterCount(state: GameState): number {
 export function canCreateOffer(state: GameState): boolean {
   const o = cfg.bounty.offer;
   return cfg.bounty.enabled
+    && (!cfg.economy.ordinaryDropRate.enabled || stageForWave(state.wave, cfg.waves.totalWaves, cfg.waves.stagePlan) !== 'validation')
     && state.wave >= o.enabledFromWave
     && state.mode === 'playing'
     && state.wavePhase === 'regular'
@@ -297,6 +299,7 @@ export function notifyBountyMemberKilled(state: GameState, enemy: Enemy, config?
     const point = rewardPoint();
     spawnWildcardDrop(state, point.x, point.y, encounter.wildcardStar, encounter.wildcardCount, lifetime);
     state.groundDrops[state.groundDrops.length - 1].bountyEncounterId = encounter.id;
+    state.groundDrops[state.groundDrops.length - 1].source = 'bounty';
   }
   events.push({ type: 'bountyRewardDropped', encounterId: encounter.id, rewardCardType: encounter.rewardCardType });
   return events;

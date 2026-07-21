@@ -112,6 +112,13 @@ export function createInitialState(difficultyId: DifficultyId = 'hell'): GameSta
         cfg.skills.cards.map(card => [card.id, createEmptyCardTypeRunStats()]),
       ),
     },
+    ordinaryDrop: {
+      credit: 0,
+      activeRegularSeconds: 0,
+      shownThisWave: 0,
+      eligibleKillsThisWave: 0,
+      buildStageSeconds: 0,
+    },
     nextBountyOfferId: 1,
     nextBountyEncounterId: 1,
     runSummary: null,

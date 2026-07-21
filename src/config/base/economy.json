@@ -29,6 +29,14 @@
     "dropChance": 0.27,
     "dropLifetime": 5
   },
+  "ordinaryDropRate": {
+    "enabled": true,
+    "selectionPerMinute": 35,
+    "buildPerMinute": 40,
+    "buildTransitionSeconds": 20,
+    "carryCap": 1.5,
+    "modifiersAffectTarget": true
+  },
   "normalDropTypePolicy": {
     "enabled": true,
     "roleBagSize": 10,

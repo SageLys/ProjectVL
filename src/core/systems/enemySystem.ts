@@ -25,6 +25,9 @@ export interface EnemyModifiers {
   bountyEncounterId?: number;
   bountyRewardType?: CardType;
   spawnKind?: Enemy['spawnKind'];
+  ccResistOverride?: number;
+  knockbackResistOverride?: number;
+  validationReward?: { star: number; count: number };
 }
 
 /** Shared enemy construction path for normal waves and independent Bounty encounters. */
@@ -64,6 +67,9 @@ export function createEnemy(
   if (statMods.hpMul !== 1 || statMods.speedMul !== 1 || statMods.damageMul !== 1) enemy.statMods = statMods;
   if (modifiers.bountyEncounterId !== undefined) enemy.bountyEncounterId = modifiers.bountyEncounterId;
   if (modifiers.bountyRewardType !== undefined) enemy.bountyRewardType = modifiers.bountyRewardType;
+  if (modifiers.ccResistOverride !== undefined) enemy.ccResistOverride = modifiers.ccResistOverride;
+  if (modifiers.knockbackResistOverride !== undefined) enemy.knockbackResistOverride = modifiers.knockbackResistOverride;
+  if (modifiers.validationReward !== undefined) enemy.validationReward = { ...modifiers.validationReward };
   return enemy;
 }
 

@@ -1,4 +1,5 @@
 import type { TelemetryEvent, TelemetrySession } from './types';
+import type { RunStage } from '../config/types';
 
 export const EVENT_UNIVERSE = new Set<TelemetryEvent['type']>([
   'spawn', 'kill', 'dropLanded', 'pickup', 'dangerEnter', 'waveStart', 'waveCleared', 'perkPopup',
@@ -7,8 +8,18 @@ export const OPPORTUNITY_EVENTS = new Set<TelemetryEvent['type']>(['dropLanded',
 
 export interface WaveMetrics {
   wave: number;
+  stage: RunStage | null;
   start: number;
   end: number;
+  activeRegularSeconds: number;
+  ordinaryDropsShownPerMinute: number | null;
+  eligibleKillsPerMinute: number | null;
+  ordinaryPickupRate: number | null;
+  ordinaryExpiryRate: number | null;
+  dropRejectedFullHand: number;
+  validationRewardDrops: number;
+  validationOrdinaryDrops: number;
+  buildAtStart: { maturity: number | null; highestStar: number | null; equippedCount: number | null };
   e1: { p50: number | null; p95: number | null };
   e2: number | null;
   e3: { p50: number | null; p95: number | null; max: number };
@@ -98,8 +109,33 @@ export function computeExperienceMetrics(session: TelemetrySession): ExperienceM
     const samples = session.samples.filter(sample => sample.wave === wave && sample.at >= start && sample.at <= end);
     const sampleValues = samples.map(sample => sample.enemies);
     const kills = session.events.filter(event => event.type === 'kill' && event.wave === wave && event.at >= start && event.at <= end);
+    const waveEvents = session.events.filter(event => event.wave === wave && event.at >= start && event.at <= end);
+    const startEvent = waveEvents.find(event => event.type === 'waveStart');
+    const clearEvent = [...waveEvents].reverse().find(event => event.type === 'waveCleared');
+    const activeRegularSeconds = clearEvent?.activeRegularSeconds ?? 0;
+    const ordinaryShown = clearEvent?.ordinaryDropsShown
+      ?? waveEvents.filter(event => event.type === 'dropLanded' && event.source === 'normalKill').length;
+    const eligibleKills = clearEvent?.eligibleKills ?? 0;
+    const ordinaryPickups = waveEvents.filter(event => event.type === 'pickup' && event.source === 'normalKill').length;
+    const ordinaryExpired = waveEvents.filter(event => event.type === 'dropExpired' && event.source === 'normalKill').length;
+    const ordinaryOutcomes = ordinaryPickups + ordinaryExpired;
     return {
-      wave, start, end,
+      wave, stage: startEvent?.stage ?? clearEvent?.stage ?? null, start, end,
+      activeRegularSeconds,
+      ordinaryDropsShownPerMinute: activeRegularSeconds > 0 ? ordinaryShown / activeRegularSeconds * 60 : null,
+      eligibleKillsPerMinute: activeRegularSeconds > 0 ? eligibleKills / activeRegularSeconds * 60 : null,
+      ordinaryPickupRate: ordinaryOutcomes > 0 ? ordinaryPickups / ordinaryOutcomes : null,
+      ordinaryExpiryRate: ordinaryOutcomes > 0 ? ordinaryExpired / ordinaryOutcomes : null,
+      dropRejectedFullHand: waveEvents.filter(event => event.type === 'dropRejectedFullHand').length,
+      validationRewardDrops: waveEvents.filter(event => event.type === 'validationRewardLanded').length,
+      validationOrdinaryDrops: (startEvent?.stage ?? clearEvent?.stage) === 'validation'
+        ? waveEvents.filter(event => event.type === 'dropLanded' && event.source === 'normalKill').length
+        : 0,
+      buildAtStart: {
+        maturity: startEvent?.maturity ?? null,
+        highestStar: startEvent?.highestStar ?? null,
+        equippedCount: startEvent?.equippedCount ?? null,
+      },
       e1: { p50: percentile(sampleValues, 0.5), p95: percentile(sampleValues, 0.95) },
       e2: maxEventGap(session.events.filter(event => event.wave === wave), start, end),
       e3: opportunityMetric(session.events.filter(event => event.wave === wave), start, end, samples.map(sample => sample.at)),

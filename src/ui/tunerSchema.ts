@@ -19,6 +19,25 @@ export const BUDGET_TUNER_PARAMS: TunerParam[] = [
   { path: 'waves.budget.maxAlive', label: 'Budget · 同屏硬上限', group: 'waves', waveDeferred: true },
 ];
 
+export const STAGE_DIRECTOR_TUNER_PARAMS: TunerParam[] = [
+  { path: 'waves.stagePlan.selectionWaves', label: '阶段导演 · 选择期波数', group: 'waves', waveDeferred: true },
+  { path: 'waves.stagePlan.validationWaves', label: '阶段导演 · 验证期波数', group: 'waves', waveDeferred: true },
+  { path: 'waves.stagePlan.selection.waveQuota.start', label: '选择期 · 配额起点', group: 'waves', waveDeferred: true },
+  { path: 'waves.stagePlan.selection.waveQuota.end', label: '选择期 · 配额终点', group: 'waves', waveDeferred: true },
+  { path: 'waves.stagePlan.selection.targetOnScreen.start', label: '选择期 · 同屏起点', group: 'waves', waveDeferred: true },
+  { path: 'waves.stagePlan.selection.targetOnScreen.end', label: '选择期 · 同屏终点', group: 'waves', waveDeferred: true },
+  { path: 'waves.stagePlan.selection.maxAlive', label: '选择期 · 同屏硬上限', group: 'waves', waveDeferred: true },
+  { path: 'waves.stagePlan.build.waveQuota.start', label: '构筑期 · 配额起点', group: 'waves', waveDeferred: true },
+  { path: 'waves.stagePlan.build.waveQuota.end', label: '构筑期 · 配额终点', group: 'waves', waveDeferred: true },
+  { path: 'waves.stagePlan.build.targetOnScreen.start', label: '构筑期 · 同屏起点', group: 'waves', waveDeferred: true },
+  { path: 'waves.stagePlan.build.targetOnScreen.end', label: '构筑期 · 同屏终点', group: 'waves', waveDeferred: true },
+  { path: 'waves.stagePlan.build.maxAlive', label: '构筑期 · 同屏硬上限', group: 'waves', waveDeferred: true },
+  { path: 'economy.ordinaryDropRate.selectionPerMinute', label: '普通掉落 · 选择期每分钟', group: 'drops' },
+  { path: 'economy.ordinaryDropRate.buildPerMinute', label: '普通掉落 · 构筑期每分钟', group: 'drops' },
+  { path: 'economy.ordinaryDropRate.buildTransitionSeconds', label: '普通掉落 · 构筑过渡秒数', group: 'drops' },
+  { path: 'economy.ordinaryDropRate.carryCap', label: '普通掉落 · 额度积压上限', group: 'drops' },
+];
+
 export const BOUNTY_TUNER_PARAMS: TunerParam[] = [
   { path: 'bounty.offer.enabledFromWave', label: '报价 · 起始波次', group: 'bounty' },
   { path: 'bounty.offer.checkIntervalSeconds', label: '报价 · 检查间隔（秒）', group: 'bounty' },
@@ -164,6 +183,7 @@ export const TUNER_PARAMS: TunerParam[] = [
 export const ALL_TUNER_PARAMS: TunerParam[] = [
   ...TUNER_PARAMS,
   ...BUDGET_TUNER_PARAMS,
+  ...STAGE_DIRECTOR_TUNER_PARAMS,
   ...BOUNTY_TUNER_PARAMS,
   ...DROP_DIRECTOR_TUNER_PARAMS,
 ];

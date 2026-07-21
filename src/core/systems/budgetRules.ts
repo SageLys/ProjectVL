@@ -1,4 +1,4 @@
-import type { WavesConfig } from '../../config/types';
+import type { ResolvedWavePlan } from '../runStage';
 
 /**
  * Pure Budget admission rule shared by the game and the tuner projection.
@@ -18,17 +18,19 @@ export interface BudgetAdmission {
 }
 
 /** Budget has its own wave quota so interval's tuned enemy counts remain untouched. */
-export function budgetWaveQuotaFor(wave: number, budget: WavesConfig['budget']): number {
-  return Math.max(0, Math.trunc(budget.waveQuota.base + wave * budget.waveQuota.perWave));
+export function budgetWaveQuotaFor(plan: ResolvedWavePlan): number {
+  return Math.max(0, Math.trunc(plan.quota));
 }
 
-export function budgetAdmission(wave: number, spawnLeft: number, alive: number, budget: WavesConfig['budget']): BudgetAdmission {
-  const normalTarget = Math.max(0, budget.targetOnScreen.base + wave * budget.targetOnScreen.perWave);
-  const batchMax = Math.max(1, budget.batchMax);
-  const releaseEstimate = Math.ceil(Math.max(0, spawnLeft) / batchMax) * Math.max(0, budget.checkInterval);
-  const inEndSprint = budget.waveEndSprint.window > 0 && releaseEstimate <= budget.waveEndSprint.window;
-  const effectiveTarget = Math.ceil(normalTarget * (inEndSprint ? budget.waveEndSprint.multiplier : 1));
-  const capacity = Math.max(0, budget.maxAlive - alive);
+export function budgetAdmission(plan: ResolvedWavePlan, spawnLeft: number, alive: number): BudgetAdmission {
+  const regular = plan.regular;
+  if (!regular) return { normalTarget: 0, effectiveTarget: 0, inEndSprint: false, capacity: 0, deficit: 0, spawnCount: 0 };
+  const normalTarget = Math.max(0, regular.targetOnScreen);
+  const batchMax = Math.max(1, regular.batchMax);
+  const releaseEstimate = Math.ceil(Math.max(0, spawnLeft) / batchMax) * Math.max(0, regular.checkInterval);
+  const inEndSprint = regular.waveEndSprint.window > 0 && releaseEstimate <= regular.waveEndSprint.window;
+  const effectiveTarget = Math.ceil(normalTarget * (inEndSprint ? regular.waveEndSprint.multiplier : 1));
+  const capacity = Math.max(0, regular.maxAlive - alive);
   const deficit = Math.max(0, effectiveTarget - alive);
   return { normalTarget, effectiveTarget, inEndSprint, capacity, deficit,
     spawnCount: Math.min(Math.max(0, spawnLeft), batchMax, capacity, deficit) };

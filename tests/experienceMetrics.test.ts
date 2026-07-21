@@ -13,6 +13,28 @@ function session(events: TelemetryEvent[], enemies: number[] = [], inputTimes: n
 
 const event = (type: TelemetryEvent['type'], at: number, extra: Partial<TelemetryEvent> = {}): TelemetryEvent => ({ type, at, wave: 1, ...extra });
 
+describe('stage and drop telemetry metrics', () => {
+  it('separates cadence, abandonment, rejection and validation rewards by source', () => {
+    const result = computeExperienceMetrics(session([
+      event('waveStart', 0, { stage: 'validation', maturity: .72, highestStar: 4, equippedCount: 3 }),
+      event('dropLanded', 1, { source: 'normalKill' }),
+      event('pickup', 2, { source: 'normalKill' }),
+      event('dropExpired', 3, { source: 'normalKill' }),
+      event('dropExpired', 4, { source: 'bounty' }),
+      event('dropRejectedFullHand', 5, { source: 'normalKill' }),
+      event('validationRewardLanded', 6, { secure: true, star: 2 }),
+      event('validationRewardLanded', 7, { secure: true, star: 3 }),
+      event('waveCleared', 10, { stage: 'validation', activeRegularSeconds: 30, ordinaryDropsShown: 20, eligibleKills: 40 }),
+    ])).waves[0];
+    expect(result).toMatchObject({
+      stage: 'validation', activeRegularSeconds: 30, ordinaryDropsShownPerMinute: 40,
+      eligibleKillsPerMinute: 80, ordinaryPickupRate: .5, ordinaryExpiryRate: .5,
+      dropRejectedFullHand: 1, validationRewardDrops: 2, validationOrdinaryDrops: 1,
+      buildAtStart: { maturity: .72, highestStar: 4, equippedCount: 3 },
+    });
+  });
+});
+
 describe('E1–E7 指标重算', () => {
   it('E1 对空样本返回 null，并按线性分位数计算 P50/P95', () => {
     expect(percentile([], .5)).toBeNull();

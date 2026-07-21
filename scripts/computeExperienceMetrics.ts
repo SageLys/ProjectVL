@@ -18,6 +18,18 @@ async function main(): Promise<void> {
     console.log(`\n${path}  seed=${session.meta.seed}  preset=${session.meta.presetName || '—'}`);
     console.table(result.waves.map(wave => ({
       wave: wave.wave,
+      stage: wave.stage ?? '—',
+      'active regular(s)': value(wave.activeRegularSeconds),
+      'ordinary shown/min': value(wave.ordinaryDropsShownPerMinute),
+      'eligible kills/min': value(wave.eligibleKillsPerMinute),
+      'ordinary pickup %': wave.ordinaryPickupRate == null ? '—' : value(wave.ordinaryPickupRate * 100, 1),
+      'ordinary expiry %': wave.ordinaryExpiryRate == null ? '—' : value(wave.ordinaryExpiryRate * 100, 1),
+      'full-hand rejects': wave.dropRejectedFullHand,
+      'validation rewards': wave.validationRewardDrops,
+      'validation ordinary': wave.validationOrdinaryDrops,
+      'build M at start': value(wave.buildAtStart.maturity, 3),
+      'highest star': wave.buildAtStart.highestStar ?? '—',
+      'equipped': wave.buildAtStart.equippedCount ?? '—',
       'E1 P50': value(wave.e1.p50, 1),
       'E1 P95': value(wave.e1.p95, 1),
       'E2 max gap(s)': value(wave.e2),

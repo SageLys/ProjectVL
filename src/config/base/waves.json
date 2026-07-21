@@ -26,6 +26,41 @@
     },
     "maxAlive": 100
   },
+  "stagePlan": {
+    "selectionWaves": 2,
+    "validationWaves": 2,
+    "selection": {
+      "waveQuota": { "start": 60, "end": 75, "power": 1 },
+      "targetOnScreen": { "start": 7, "end": 10, "power": 1 },
+      "checkInterval": 1.95,
+      "batchMax": 6,
+      "maxAlive": 24,
+      "waveEndSprint": { "window": 0, "multiplier": 1 }
+    },
+    "build": {
+      "waveQuota": { "start": 95, "end": 170, "power": 1 },
+      "targetOnScreen": { "start": 14, "end": 28, "power": 1 },
+      "checkInterval": 1.95,
+      "batchMax": 10,
+      "maxAlive": 40,
+      "waveEndSprint": { "window": 5, "multiplier": 1.5 }
+    },
+    "validation": [
+      {
+        "enemies": [
+          { "type": "tank", "hpMul": 14, "damageMul": 2, "speedMul": 0.75, "ccResistOverride": 0.7, "knockbackResistOverride": 0.8, "reward": { "star": 2, "count": 2 } }
+        ],
+        "bossReward": { "star": 3, "count": 1 }
+      },
+      {
+        "enemies": [
+          { "type": "tank", "hpMul": 20, "damageMul": 2.5, "speedMul": 0.7, "ccResistOverride": 0.7, "knockbackResistOverride": 0.8, "reward": { "star": 2, "count": 2 } },
+          { "type": "fast", "hpMul": 10, "damageMul": 2, "speedMul": 1.1, "ccResistOverride": 0.5, "knockbackResistOverride": 0.6, "reward": { "star": 3, "count": 1 } }
+        ],
+        "bossReward": { "star": 3, "count": 2 }
+      }
+    ]
+  },
   "betweenWaves": 2.4,
   "spawnMargin": 25,
   "typeRoll": {

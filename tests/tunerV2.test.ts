@@ -3,15 +3,29 @@ import { cfg } from '../src/config';
 import { createDefaultConfig } from '../src/core/createInitialState';
 import { jumpToWave, tickSpawns } from '../src/core/systems/waveSystem';
 import { budgetWaveQuotaFor } from '../src/core/systems/budgetRules';
+import { resolveActiveWavePlan } from '../src/core/runStage';
 import { createSeededRng } from '../src/debug/exposeDebugApi';
 import { deriveMetrics } from '../src/ui/derivedMetrics';
 import {
-  BOUNTY_TUNER_PARAMS, BUDGET_TUNER_PARAMS, DROP_DIRECTOR_TUNER_PARAMS, TUNER_PARAMS,
+  BOUNTY_TUNER_PARAMS, BUDGET_TUNER_PARAMS, DROP_DIRECTOR_TUNER_PARAMS, STAGE_DIRECTOR_TUNER_PARAMS, TUNER_PARAMS,
   getNumberAt, setNumberAt,
 } from '../src/ui/tunerSchema';
 import { freshState, resetTestEnv } from './helpers';
 
 beforeEach(resetTestEnv);
+
+describe('stage director tuner controls', () => {
+  it('exposes valid numeric ranges', () => {
+    expect(STAGE_DIRECTOR_TUNER_PARAMS).toHaveLength(16);
+    for (const param of STAGE_DIRECTOR_TUNER_PARAMS) {
+      const range = cfg.tuner[param.path];
+      expect(range, param.path).toBeDefined();
+      expect(range.min).toBeLessThan(range.max);
+      expect(range.step).toBeGreaterThan(0);
+      expect(() => getNumberAt(cfg, param.path)).not.toThrow();
+    }
+  });
+});
 
 describe('调参面板 v2 · 参数与派生指标', () => {
   it('§2 A/B/C/D 每个暴露参数都在 tuner.json 有 min/max/step', () => {
@@ -63,6 +77,7 @@ describe('调参面板 v2 · 参数与派生指标', () => {
   });
 
   it('TTK、击杀深度与同屏数和手算一致，damage 联动方向正确', () => {
+    cfg.economy.ordinaryDropRate.enabled = false;
     expect(BUDGET_TUNER_PARAMS).toHaveLength(9);
     for (const param of BUDGET_TUNER_PARAMS) {
       const range = cfg.tuner[param.path];
@@ -102,6 +117,7 @@ describe('调参面板 v2 · 参数与派生指标', () => {
   });
 
   it('projects every Budget control into a visible derived value', () => {
+    cfg.economy.ordinaryDropRate.enabled = false;
     const runtime = createDefaultConfig();
     cfg.waves.spawnMode = 'budget';
     cfg.waves.enemyCountBase = 20;
@@ -168,7 +184,7 @@ describe('调试模式 · seed 与跳波', () => {
     expect(first).toEqual(second);
     // 总出怪数 = 第 3 波配额（budget/interval 两种模式配额公式不同，动态取当前生效值）。
     const expectedCount = cfg.waves.spawnMode === 'budget'
-      ? budgetWaveQuotaFor(3, cfg.waves.budget)
+      ? budgetWaveQuotaFor(resolveActiveWavePlan(cfg, 3))
       : cfg.waves.enemyCountBase + 3 * cfg.waves.enemyCountPerWave;
     expect(first).toHaveLength(expectedCount);
   });

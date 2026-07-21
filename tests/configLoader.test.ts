@@ -4,6 +4,15 @@ import { resetTestEnv } from './helpers';
 import { validateProgressionConfig } from '../src/config/progressionValidator';
 afterEach(resetTestEnv);
 
+describe('validation-10 variant', () => {
+  it('keeps the encounter table and expands only the build stage', () => {
+    const c = buildConfig(['validation-10']);
+    expect(c.waves.totalWaves).toBe(10);
+    expect(c.waves.bossWaves).toEqual([1,2,3,4,5,6,7,8,9,10]);
+    expect(c.waves.stagePlan.validation).toHaveLength(2);
+  });
+});
+
 describe('击退配置', () => {
   it('加载类型抗性与连续击退递减参数', () => {
     const c = buildConfig([]);

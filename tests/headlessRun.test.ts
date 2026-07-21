@@ -10,6 +10,8 @@ import { consumeCard, moveOrSwap } from '../src/core/systems/equipmentSystem';
 import { applyPerk } from '../src/core/systems/progressionSystem';
 import type { Config, GameState, Rng } from '../src/core/types';
 import { freshState, createDefaultConfig, resetTestEnv, applyVariants } from './helpers';
+import { stageForWave } from '../src/core/runStage';
+import { calculateBuildMaturity } from '../src/core/systems/dropTypePolicy';
 
 beforeEach(resetTestEnv);
 
@@ -25,11 +27,23 @@ function seeded(seed: number): Rng {
 }
 
 /** 简单 bot：点掉落、装备 3★、手牌将满时消耗释放、升级即选 perk。 */
-function runBotGame(s: GameState, config: Config, rng: Rng): void {
+interface ValidationEntrySnapshot { wave: number; maturity: number; highestStar: number; equippedCount: number }
+
+function runBotGame(s: GameState, config: Config, rng: Rng): ValidationEntrySnapshot | undefined {
   startNextWave(s, config, rng);
   const dt = 1 / 30;
+  let validationEntry: ValidationEntrySnapshot | undefined;
   for (let frame = 0; frame < 30 * 60 * 25 && s.mode === 'playing'; frame++) {
     updateGame(s, config, rng, dt);
+    if (!validationEntry && stageForWave(s.wave, cfg.waves.totalWaves, cfg.waves.stagePlan) === 'validation') {
+      const cards = [...s.cards, ...s.equipment].filter(card => card !== null);
+      validationEntry = {
+        wave: s.wave,
+        maturity: Number(calculateBuildMaturity(s).toFixed(4)),
+        highestStar: cards.reduce((highest, card) => Math.max(highest, card.star), 0),
+        equippedCount: s.equipment.filter(card => card !== null).length,
+      };
+    }
     if (s.paused && s.offeredPerks.length) applyPerk(s, config, s.offeredPerks[frame % s.offeredPerks.length], rng);
     if (frame % 6 === 0 && s.groundDrops.length) {
       const d = s.groundDrops[0];
@@ -48,6 +62,7 @@ function runBotGame(s: GameState, config: Config, rng: Rng): void {
       if (idx >= 0) consumeCard(s, config, rng, idx, 480 + (rng() - 0.5) * 200, 300 + (rng() - 0.5) * 150);
     }
   }
+  return validationEntry;
 }
 
 describe('整局冒烟（占位技能卡=配置数据，经通用解释器结算）', () => {
@@ -73,5 +88,27 @@ describe('整局冒烟（占位技能卡=配置数据，经通用解释器结算
     runBotGame(s, config, seeded(7));
     expect(s.mode).toBe('ended');
     expect(s.wave).toBeLessThanOrEqual(3);
+  });
+
+  it('compares build maturity at validation entry for 8-wave and 10-wave layouts with one fixed seed', () => {
+    const seed = 42;
+    registerSkillDefs(cfg.skills.cards);
+    const baseState = freshState();
+    const baseConfig = createDefaultConfig();
+    baseState.hp = 1_000_000;
+    baseConfig.damage = 200;
+    const base = runBotGame(baseState, baseConfig, seeded(seed));
+
+    applyVariants(['validation-10']);
+    registerSkillDefs(cfg.skills.cards);
+    const variantState = freshState();
+    const variantConfig = createDefaultConfig();
+    variantState.hp = 1_000_000;
+    variantConfig.damage = 200;
+    const variant = runBotGame(variantState, variantConfig, seeded(seed));
+
+    expect(base).toMatchObject({ wave: 7, maturity: expect.any(Number), highestStar: expect.any(Number), equippedCount: expect.any(Number) });
+    expect(variant).toMatchObject({ wave: 9, maturity: expect.any(Number), highestStar: expect.any(Number), equippedCount: expect.any(Number) });
+    expect(variant!.equippedCount).toBeGreaterThanOrEqual(base!.equippedCount);
   });
 });

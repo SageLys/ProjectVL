@@ -9,7 +9,7 @@ import { addXp } from './progressionSystem';
 import { fireTrigger, getModifiers } from '../effects/interpreter';
 import { notifyBountyMemberKilled } from './bountySystem';
 import { controlledDamageTakenBonus } from './buildModifierSystem';
-import { grantWaveBossReward } from './waveBossSystem';
+import { grantValidationEliteReward, grantWaveBossReward } from './waveBossSystem';
 
 /**
  * 击杀结算：计分、粒子、掉落判定、经验（×xpMul）、onKill 触发。调用前敌人须已移出数组。
@@ -23,6 +23,8 @@ export function killEnemy(state: GameState, config: Config, rng: Rng, enemy: Ene
   if (enemy.spawnKind === 'waveBoss') {
     for (let i = 0; i < cfg.combat.vfx.killParticles * 2; i++) spawnParticle(state, rng, enemy.x, enemy.y, '#d6b06f', 220);
     events.push(...grantWaveBossReward(state, enemy.x, enemy.y));
+  } else if (enemy.spawnKind === 'validationElite') {
+    events.push(...grantValidationEliteReward(state, enemy));
   } else if (enemy.bountyEncounterId !== undefined) events.push(...notifyBountyMemberKilled(state, enemy, config, rng));
   else rollDropOnKill(state, config, rng, enemy);
   const xpGain = enemy.xp * cfg.progression.killXpMul * (1 + state.xpGainBonus) * getModifiers(state).xpMul;

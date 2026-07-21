@@ -5,6 +5,8 @@ import type { Enemy, GameEvent, GameState } from '../core/types';
 import { EVENT_UNIVERSE, OPPORTUNITY_EVENTS, percentile } from './metrics';
 import type { TelemetryEvent, TelemetryInputType, TelemetrySession } from './types';
 import { difficultyMultipliersFor } from '../core/difficulty';
+import { stageForWave } from '../core/runStage';
+import { calculateBuildMaturity } from '../core/systems/dropTypePolicy';
 
 declare const __GIT_COMMIT__: string;
 
@@ -77,6 +79,18 @@ export function createDevTelemetry(options: Options): DevTelemetry {
 
   function state(): GameState { return options.getState(); }
   function at(): number { return Number(state().time.toFixed(6)); }
+  function stage(wave = state().wave): TelemetryEvent['stage'] {
+    const config = options.getConfig();
+    return stageForWave(wave, config.waves.totalWaves, config.waves.stagePlan);
+  }
+  function buildSnapshot(): Pick<TelemetryEvent, 'maturity' | 'highestStar' | 'equippedCount'> {
+    const cards = [...state().cards, ...state().equipment].filter(card => card !== null);
+    return {
+      maturity: Number(calculateBuildMaturity(state()).toFixed(4)),
+      highestStar: cards.reduce((highest, card) => Math.max(highest, card.star), 0),
+      equippedCount: state().equipment.filter(card => card !== null).length,
+    };
+  }
   function affinityMatch(cardType: string): Pick<TelemetryEvent, 'lane' | 'laneMatch'> {
     const lanes: BuildTag[] = ['projectile', 'control', 'domain', 'defense'];
     const max = Math.max(...lanes.map(lane => state().buildState.affinity[lane]));
@@ -121,8 +135,19 @@ export function createDevTelemetry(options: Options): DevTelemetry {
         x: drop.x,
         y: drop.y,
         cardType: drop.kind === 'card' ? drop.type : 'wildcard',
+        source: drop.source,
+        stage: stage(),
+        star: drop.star,
+        secure: drop.secure,
         ...(drop.kind === 'card' && drop.source === 'normalKill' ? affinityMatch(drop.type) : {}),
       });
+      if (drop.secure && drop.validationRewardWave !== undefined) {
+        add({
+          type: 'validationRewardLanded', dropId: drop.id, x: drop.x, y: drop.y,
+          source: drop.source, stage: stage(drop.validationRewardWave), star: drop.star, secure: true,
+          wildcardCount: drop.kind === 'wildcard' ? drop.count : undefined,
+        });
+      }
       if (drop.bountyEncounterId !== undefined) {
         const encounter = state().bountyEncounters.find(item => item.id === drop.bountyEncounterId);
         add({
@@ -245,9 +270,22 @@ export function createDevTelemetry(options: Options): DevTelemetry {
         dangerEntries.clear();
         knownEnemies.clear(); knownDrops.clear();
         const dm = difficultyMultipliersFor(options.getDifficultyId(), 'normal', event.wave);
-        add({ type: 'waveStart', wave: event.wave, difficultyHpMultiplier: Number(dm.hp.toFixed(2)), difficultyDamageMultiplier: Number(dm.damage.toFixed(2)) });
+        add({
+          type: 'waveStart', wave: event.wave, stage: stage(event.wave),
+          difficultyHpMultiplier: Number(dm.hp.toFixed(2)), difficultyDamageMultiplier: Number(dm.damage.toFixed(2)),
+          ...buildSnapshot(),
+        });
       }
-      if (event.type === 'waveCleared') { add({ type: 'waveCleared', wave: event.wave }); shouldExport = true; }
+      if (event.type === 'waveCleared') {
+        add({
+          type: 'waveCleared', wave: event.wave, stage: stage(event.wave),
+          activeRegularSeconds: state().ordinaryDrop.activeRegularSeconds,
+          ordinaryDropsShown: state().ordinaryDrop.shownThisWave,
+          eligibleKills: state().ordinaryDrop.eligibleKillsThisWave,
+          ...buildSnapshot(),
+        });
+        shouldExport = true;
+      }
       if (event.type === 'waveBossSpawned') {
         bossSpawnedAt.set(event.wave, at());
         add({ type: 'waveBossSpawned', wave: event.wave });
@@ -257,10 +295,30 @@ export function createDevTelemetry(options: Options): DevTelemetry {
         add({ type: 'waveBossKilled', wave: event.wave, clearSeconds });
         add({ type: 'bossRewardGranted', wave: event.wave, wildcardStar: event.grants[0]?.star, wildcardCount: event.grants[0]?.count });
       }
-      if (event.type === 'gameEnd' && event.win && !events.some(item => item.type === 'waveCleared' && item.wave === state().wave)) { add({ type: 'waveCleared' }); shouldExport = true; }
+      if (event.type === 'gameEnd' && event.win && !events.some(item => item.type === 'waveCleared' && item.wave === state().wave)) {
+        add({
+          type: 'waveCleared', stage: stage(),
+          activeRegularSeconds: state().ordinaryDrop.activeRegularSeconds,
+          ordinaryDropsShown: state().ordinaryDrop.shownThisWave,
+          eligibleKills: state().ordinaryDrop.eligibleKillsThisWave,
+          ...buildSnapshot(),
+        });
+        shouldExport = true;
+      }
       if (event.type === 'levelUp') add({ type: 'perkPopup' });
+      if (event.type === 'dropExpired') add({
+        type: 'dropExpired', dropId: event.dropId, source: event.source, stage: stage(),
+        star: event.star, secure: event.secure,
+      });
+      if (event.type === 'cardsFull') add({
+        type: 'dropRejectedFullHand', dropId: event.dropId, source: event.source,
+        stage: stage(), star: event.star, secure: event.secure,
+      });
       if (event.type === 'collected') {
-        add({ type: 'pickup', cardType: event.cardType });
+        add({
+          type: 'pickup', dropId: event.dropId, cardType: event.cardType, source: event.source,
+          stage: stage(), star: event.star, secure: event.secure,
+        });
         if (event.merges > 0) add({ type: 'mergeOpportunity', cardType: event.cardType });
         if (event.bountyEncounterId !== undefined) {
           const encounter = state().bountyEncounters.find(item => item.id === event.bountyEncounterId);
@@ -271,6 +329,18 @@ export function createDevTelemetry(options: Options): DevTelemetry {
         const encounter = state().bountyEncounters.find(item => item.id === event.bountyEncounterId);
         add({ type: 'pickup', cardType: 'wildcard' });
         add({ type: 'bountyRewardPickup', encounterId: event.bountyEncounterId, rewardCardType: encounter?.rewardCardType, cardType: 'wildcard', wildcardStar: event.grants[0]?.star });
+      }
+      if (event.type === 'wildcardsGranted' && event.dropId !== undefined) {
+        if (event.bountyEncounterId === undefined) add({
+          type: 'pickup', dropId: event.dropId, cardType: 'wildcard', source: event.source,
+          stage: stage(), star: event.star ?? event.grants[0]?.star, secure: event.secure,
+        });
+        if (event.secure && event.validationRewardWave !== undefined) add({
+          type: 'validationRewardPickup', dropId: event.dropId, cardType: 'wildcard',
+          source: event.source, stage: stage(event.validationRewardWave),
+          star: event.star ?? event.grants[0]?.star, secure: true,
+          wildcardCount: event.grants[0]?.count,
+        });
       }
       if (event.type === 'bountyOfferSpawned') {
         const offer = state().bountyOffers.find(item => item.id === event.offerId);

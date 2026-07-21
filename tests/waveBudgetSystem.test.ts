@@ -9,10 +9,12 @@ import { startNextWave } from '../src/core/systems/waveSystem';
 import { applyPerk } from '../src/core/systems/progressionSystem';
 import { computeExperienceMetrics } from '../src/telemetry/metrics';
 import type { TelemetryEvent, TelemetrySession } from '../src/telemetry/types';
+import { resolveActiveWavePlan } from '../src/core/runStage';
 
 beforeEach(() => {
   resetTestEnv();
   cfg.waves.spawnMode = 'budget';
+  cfg.economy.ordinaryDropRate.enabled = false;
   cfg.waves.budget.targetOnScreen = { base: 3, perWave: 0 };
   cfg.waves.budget.checkInterval = 1;
   cfg.waves.budget.batchMax = 2;
@@ -83,7 +85,7 @@ describe('waveSystem · budget spawn strategy', () => {
       inputs: [],
     };
     const wave = computeExperienceMetrics(session).waves[0];
-    const target = cfg.waves.budget.targetOnScreen.base + cfg.waves.budget.targetOnScreen.perWave;
+    const target = resolveActiveWavePlan(cfg, 1).regular!.targetOnScreen;
     expect(wave.e1.p50).not.toBeNull();
     expect(Math.abs(wave.e1.p50! - target)).toBeLessThanOrEqual(1);
     expect(Math.max(...samples.map(sample => sample.enemies))).toBeLessThanOrEqual(cfg.waves.budget.maxAlive);
@@ -104,9 +106,9 @@ describe('waveSystem · budget spawn strategy', () => {
     const intervalQuota = intervalState.spawnLeft;
     tickSpawns(intervalState, createSeededRng(42), cfg.waves.firstSpawnDelay);
 
-    expect(budgetQuota).toBe(103); // base 已焙入 budget模式初版：waveQuota 51+52*1
+    expect(budgetQuota).toBe(60);
     expect(intervalQuota).toBe(8);
-    expect(budgetState.enemies.length).toBe(10); // 首检补 min(quota,batchMax10,deficit=target15)=10
+    expect(budgetState.enemies.length).toBe(6);
     expect(intervalState.enemies.length).toBe(1);
   });
 

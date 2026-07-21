@@ -11,10 +11,12 @@ import bounty from './base/bounty.json';
 import tuner from './base/tuner.json';
 import input from './base/input.json';
 import devShort from '../config/variants/dev-short.json';
+import validation10 from '../config/variants/validation-10.json';
 import type { DeepPartial, GameConfig } from './types';
 import { validateSkillsConfig } from './skillValidator';
 import { validateProgressionConfig } from './progressionValidator';
 import { validateDifficultyConfig } from './difficultyValidator';
+import { validateStagePlanConfig } from './stagePlanValidator';
 
 /** 将配置中的 Boss 波次限制为可达、唯一且升序的整数列表。 */
 export function normalizeBossWaves(values: readonly number[], totalWaves: number): number[] {
@@ -47,6 +49,7 @@ export function parseBossWavesInput(input: string, totalWaves: number): BossWave
 /** 已注册 variant。新增覆盖文件后在此登记（key = URL 参数名）。 */
 export const VARIANTS: Record<string, DeepPartial<GameConfig>> = {
   'dev-short': devShort as DeepPartial<GameConfig>,
+  'validation-10': validation10 as DeepPartial<GameConfig>,
 };
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
@@ -70,6 +73,7 @@ function assembleBase(): GameConfig {
   validateSkillsConfig(skills);
   validateProgressionConfig(progression);
   validateDifficultyConfig(difficulty as GameConfig['difficulty']);
+  validateStagePlanConfig((waves as GameConfig['waves']).stagePlan, waves.totalWaves);
   return structuredClone({
     combat,
     waves,
@@ -99,6 +103,7 @@ export function buildConfig(variantNames: string[] = []): GameConfig {
   cfg.waves.bossWaves = normalizeBossWaves(cfg.waves.bossWaves, cfg.waves.totalWaves);
   validateProgressionConfig(cfg.progression);
   validateDifficultyConfig(cfg.difficulty);
+  validateStagePlanConfig(cfg.waves.stagePlan, cfg.waves.totalWaves);
   return cfg;
 }
 
