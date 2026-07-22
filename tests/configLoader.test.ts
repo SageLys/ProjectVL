@@ -30,6 +30,8 @@ describe('击退配置', () => {
     expect(c.enemies.types.tank.ccResist).toBe(0.25);
     expect(c.enemies.types.boss.ccResist).toBe(0.5);
     expect(c.combat.ccImmunity).toEqual({ afterFreezeSeconds: 1.2, afterStunSeconds: 0.8 });
+    expect(c.combat.controlCeiling).toEqual({ freezeSeconds: 2.5, stunSeconds: 1.5, knockbackDistance: 120 });
+    expect(c.combat.controlBudget).toEqual({ maxControlledRatio: 0.6, minFreeAdvancers: 2 });
   });
 });
 

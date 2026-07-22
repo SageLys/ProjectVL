@@ -40,7 +40,7 @@ describe('validation fixed encounters', () => {
       validationReward: { kind: 'card', star: 4, count: 1, typePolicy: 'build' },
     });
     applyFreeze(elite, 10);
-    expect(elite.status.frozen).toBeCloseTo(3, 10);
+    expect(elite.status.frozen).toBeCloseTo(cfg.combat.controlCeiling.freezeSeconds * 0.3, 10);
     elite.status.frozen = 0;
     elite.x = 10;
     elite.y = 0;

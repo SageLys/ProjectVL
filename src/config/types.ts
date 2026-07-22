@@ -133,6 +133,8 @@ export interface CombatConfig {
   dtCap: number;
   knockbackFatigue: { decayFactor: number; windowSeconds: number; minMultiplier: number };
   ccImmunity: { afterFreezeSeconds: number; afterStunSeconds: number };
+  controlCeiling: { freezeSeconds: number; stunSeconds: number; knockbackDistance: number };
+  controlBudget: { maxControlledRatio: number; minFreeAdvancers: number };
   vfx: { shootParticles: number; killParticles: number; breakthroughParticles: number };
 }
 

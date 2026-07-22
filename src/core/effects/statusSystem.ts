@@ -10,11 +10,16 @@
 //   - 连续击退短窗递减，窗口过期重置。
 //   - freeze/stun × 类型抗性（boss/tank 减免时长）。
 //   - 硬控结束 → 免疫窗内免疫再控且不累积冻结层。
+//   - 硬控/击退 × 全局控制预算（群体中保留自由推进者）。
+//   - freeze/stun/knockback 单次潜力封顶；击退不得把射程内敌人推出射程。
 export const CONFLICT_RULES = [
   '击退 × 类型抗性(boss/tank 减免)',
   '连续击退短窗递减,窗口过期重置',
   'freeze/stun × 类型抗性(boss/tank 减免时长)',
   '硬控结束→免疫窗内免疫再控且不累积冻结层',
+  '硬控/击退 × 全局控制预算(群体中保留自由推进者)',
+  'freeze/stun/knockback 单次潜力封顶',
+  '击退射程限位(只拦截向外推出，不吸回射程外敌人)',
   'freeze/stun → 不可移动，嘲讽暂停',
   'freeze → 击退无效',
   'slow 多来源取最强，不叠乘',
@@ -33,6 +38,29 @@ export function emptyStatus(): EnemyStatus {
 /** 冻结或眩晕 = 不可移动。 */
 export function isImmobile(e: Enemy): boolean {
   return e.status.frozen > 0 || e.status.stunned > 0;
+}
+
+/** 被“中和”= 不可动（冻结/眩晕）或刚被击退（疲劳窗内）。 */
+function isNeutralized(e: Enemy): boolean {
+  return isImmobile(e) || e.status.kbFatigue !== null;
+}
+
+/**
+ * 控制预算：给新敌人施加硬控/击退前调用。true 表示为保留推进者而拒绝。
+ * 已被中和的敌人可刷新控制；小规模战斗不受预算限制。
+ */
+export function controlBudgetDenies(state: GameState, e: Enemy): boolean {
+  if (isNeutralized(e)) return false;
+  const total = state.enemies.length;
+  const budget = cfg.combat.controlBudget;
+  if (total <= budget.minFreeAdvancers) return false;
+  let free = 0;
+  for (const other of state.enemies) if (!isNeutralized(other)) free++;
+  const minFree = Math.max(
+    budget.minFreeAdvancers,
+    Math.ceil(total * (1 - budget.maxControlledRatio)),
+  );
+  return free <= minFree;
 }
 
 /** Controlled means any active slow, freeze, stun, or taunt. */
@@ -68,12 +96,14 @@ export function applyFreeze(e: Enemy, duration: number, stacksToTrigger?: number
     if (e.status.freezeStacks < stacksToTrigger) return;
     e.status.freezeStacks = 0;
   }
+  duration = Math.min(duration, cfg.combat.controlCeiling.freezeSeconds);
   const effective = duration * (1 - (e.ccResistOverride ?? cfg.enemies.types[e.type].ccResist));
   e.status.frozen = Math.max(e.status.frozen, effective);
 }
 
 export function applyStun(e: Enemy, duration: number): void {
   if (e.status.ccImmune > 0) return;
+  duration = Math.min(duration, cfg.combat.controlCeiling.stunSeconds);
   const effective = duration * (1 - (e.ccResistOverride ?? cfg.enemies.types[e.type].ccResist));
   e.status.stunned = Math.max(e.status.stunned, effective);
 }
@@ -87,9 +117,19 @@ export function applyVulnerable(e: Enemy, ratio: number, duration: number): void
   };
 }
 
-/** 击退：冻结中无效（仲裁规则 2）。返回是否实际发生位移。 */
-export function applyKnockback(e: Enemy, fromX: number, fromY: number, distance: number): boolean {
+/**
+ * 击退：冻结中无效（仲裁规则 2）。传入 clampToRange 时，不把原本在射程内的敌人推出射程。
+ * 返回是否实际发生位移。
+ */
+export function applyKnockback(
+  e: Enemy,
+  fromX: number,
+  fromY: number,
+  distance: number,
+  clampToRange?: number,
+): boolean {
   if (e.status.frozen > 0) return false;
+  distance = Math.min(distance, cfg.combat.controlCeiling.knockbackDistance);
   const fatigueMultiplier = e.status.kbFatigue?.multiplier ?? 1;
   const resistance = e.knockbackResistOverride ?? cfg.enemies.types[e.type].knockbackResist;
   const effective = distance * (1 - resistance) * fatigueMultiplier;
@@ -98,8 +138,20 @@ export function applyKnockback(e: Enemy, fromX: number, fromY: number, distance:
   const dy = e.y - fromY;
   const len = Math.hypot(dx, dy);
   if (!(len > 0)) return false;
+  const turret = cfg.combat.turret;
+  const preDist = Math.hypot(e.x - turret.x, e.y - turret.y);
   e.x += (dx / len) * effective;
   e.y += (dy / len) * effective;
+  if (clampToRange !== undefined) {
+    const turretDx = e.x - turret.x;
+    const turretDy = e.y - turret.y;
+    const postDist = Math.hypot(turretDx, turretDy);
+    const maxAllowed = Math.max(clampToRange, preDist);
+    if (postDist > maxAllowed) {
+      e.x = turret.x + (turretDx / postDist) * maxAllowed;
+      e.y = turret.y + (turretDy / postDist) * maxAllowed;
+    }
+  }
   const fatigue = cfg.combat.knockbackFatigue;
   e.status.kbFatigue = {
     multiplier: Math.max(fatigue.minMultiplier, fatigueMultiplier * fatigue.decayFactor),

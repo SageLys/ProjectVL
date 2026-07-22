@@ -76,9 +76,10 @@ function tickAuras(state: GameState, config: Config, rng: Rng, dt: number, event
 function explodeSummon(state: GameState, config: Config, rng: Rng, summon: Summon, events: GameEvent[]): void {
   if (!summon.explodeOnDeath) return;
   const { damage, knockbackDistance } = summon.explodeOnDeath;
+  const maxRange = totalRange(state, config);
   for (const e of [...state.enemies]) {
     if (Math.hypot(e.x - summon.x, e.y - summon.y) > 120 + e.r) continue;
-    applyKnockback(e, summon.x, summon.y, knockbackDistance);
+    applyKnockback(e, summon.x, summon.y, knockbackDistance, maxRange);
     events.push(...dealDamage(state, config, rng, e, damage));
   }
   for (let i = 0; i < 12; i++) spawnParticle(state, rng, summon.x, summon.y, '#ffd166', 160);
@@ -199,9 +200,10 @@ export function absorbBreach(state: GameState, config: Config, rng: Rng, damage:
       events.push({ type: 'shieldBroken' });
       if (mods.novaOnBreak) {
         const t = cfg.combat.turret;
+        const maxRange = totalRange(state, config);
         for (const e of [...state.enemies]) {
           if (Math.hypot(e.x - t.x, e.y - t.y) > 220 + e.r) continue;
-          applyKnockback(e, t.x, t.y, mods.novaOnBreak.knockbackDistance);
+          applyKnockback(e, t.x, t.y, mods.novaOnBreak.knockbackDistance, maxRange);
           events.push(...dealDamage(state, config, rng, e, mods.novaOnBreak.damage));
         }
       }

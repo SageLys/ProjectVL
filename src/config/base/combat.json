@@ -35,6 +35,15 @@
     "afterFreezeSeconds": 1.2,
     "afterStunSeconds": 0.8
   },
+  "controlCeiling": {
+    "freezeSeconds": 2.5,
+    "stunSeconds": 1.5,
+    "knockbackDistance": 120
+  },
+  "controlBudget": {
+    "maxControlledRatio": 0.6,
+    "minFreeAdvancers": 2
+  },
   "vfx": {
     "shootParticles": 4,
     "killParticles": 12,

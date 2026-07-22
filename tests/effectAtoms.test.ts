@@ -241,10 +241,11 @@ describe('控制原子', () => {
 
   it('knockback：从 origin 推开', () => {
     const s = freshState();
-    const e = enemy({ x: 520, y: 300, hp: 100, maxHp: 100 });
+    const t = cfg.combat.turret;
+    const e = enemy({ x: t.x + 40, y: t.y, hp: 100, maxHp: 100 });
     s.enemies = [e];
-    ATOMS.knockback(ctxFor(s), { distance: 60, radius: 100 });
-    expect(e.x).toBe(580);
+    ATOMS.knockback(ctxFor(s, { origin: t }), { distance: 60, radius: 100 });
+    expect(e.x).toBe(t.x + 100);
   });
 
   it('knockback: boss 类型抗性将 60px 击退降为 9px', () => {

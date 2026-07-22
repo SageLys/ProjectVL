@@ -70,8 +70,8 @@ describe('整局冒烟（占位技能卡=配置数据，经通用解释器结算
     registerSkillDefs(cfg.skills.cards); // 全部正式卡（批次1+批次2）
     const s = freshState();
     const config = createDefaultConfig();
-    // 固定使用能在 11 卡池下跑满拾取、合成、装备与消耗路径的 seed。
-    runBotGame(s, config, seeded(1));
+    // 固定使用能在当前控制预算与 11 卡池下跑满拾取、合成、装备与消耗路径的 seed。
+    runBotGame(s, config, seeded(3));
     expect(s.mode).toBe('ended');
     expect(s.collected).toBeGreaterThan(0);
     expect(s.kills).toBeGreaterThan(0);

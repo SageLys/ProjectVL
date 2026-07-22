@@ -9,6 +9,7 @@ import type { Bullet, CardType, Config, Enemy, GameEvent, GameState, GroundDrop,
 import type { AtomName, EffectDef } from './defs';
 import {
   applyBrand, applyDot, applyFreeze, applyKnockback, applySlow, applyStun, applyTaunt, applyVulnerable,
+  controlBudgetDenies,
 } from './statusSystem';
 import { dealDamage, tryExecute } from '../systems/damageSystem';
 import { spawnGroundDrop } from '../systems/dropSystem';
@@ -239,19 +240,27 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
   freeze(ctx, p) {
     if (ctx.bullet && !ctx.enemy) { (ctx.bullet.riders ??= []).push({ atom: 'freeze', params: p }); return; }
     const stacks = typeof p.stacksToTrigger === 'number' ? (p.stacksToTrigger as number) : undefined;
-    for (const e of targets(ctx, p)) applyFreeze(e, num(p, 'duration', 1), stacks);
+    for (const e of targets(ctx, p)) {
+      if (controlBudgetDenies(ctx.state, e)) continue;
+      applyFreeze(e, num(p, 'duration', 1), stacks);
+    }
   },
   stun(ctx, p) {
     if (ctx.bullet && !ctx.enemy) { (ctx.bullet.riders ??= []).push({ atom: 'stun', params: p }); return; }
     const chance = num(p, 'chance', 1);
-    for (const e of targets(ctx, p)) if (ctx.rng() < chance) applyStun(e, num(p, 'duration', 0.5));
+    for (const e of targets(ctx, p)) {
+      if (controlBudgetDenies(ctx.state, e)) continue;
+      if (ctx.rng() < chance) applyStun(e, num(p, 'duration', 0.5));
+    }
   },
   knockback(ctx, p) {
     if (ctx.bullet && !ctx.enemy) { (ctx.bullet.riders ??= []).push({ atom: 'knockback', params: p }); return; }
     const from = ctx.bullet ? { x: ctx.bullet.x, y: ctx.bullet.y } : ctx.origin;
     const collision = num(p, 'collisionDamage', 0);
+    const maxRange = totalRange(ctx.state, ctx.config);
     for (const e of targets(ctx, p)) {
-      if (!applyKnockback(e, from.x, from.y, num(p, 'distance', 60))) continue;
+      if (controlBudgetDenies(ctx.state, e)) continue;
+      if (!applyKnockback(e, from.x, from.y, num(p, 'distance', 60), maxRange)) continue;
       if (collision > 0) {
         for (const other of ctx.state.enemies) {
           if (other === e) continue;
