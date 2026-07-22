@@ -16,6 +16,12 @@ export interface RegularStageConfig {
   waveEndSprint: { window: number; multiplier: number };
 }
 
+export type ValidationRewardTypePolicy = 'build' | 'pivot' | 'uniform';
+
+export type ValidationRewardSpec =
+  | { kind: 'wildcard'; star: number; count: number }
+  | { kind: 'card'; star: number; count: number; typePolicy: ValidationRewardTypePolicy };
+
 export interface ValidationEnemySpec {
   type: 'normal' | 'fast' | 'tank';
   hpMul: number;
@@ -23,12 +29,12 @@ export interface ValidationEnemySpec {
   speedMul: number;
   ccResistOverride?: number;
   knockbackResistOverride?: number;
-  reward: { star: number; count: number };
+  reward: ValidationRewardSpec;
 }
 
 export interface ValidationWaveConfig {
   enemies: ValidationEnemySpec[];
-  bossReward: { star: number; count: number };
+  bossReward: ValidationRewardSpec;
 }
 
 export interface StagePlanConfig {
@@ -92,12 +98,14 @@ export interface BountyConfig {
   };
   reward: {
     cardCount: number;
-    cardStarBase: number;
-    cardStarUpgradeEveryWaves: number;
+    cardStarByWave?: number[];
+    cardStarBase?: number;
+    cardStarUpgradeEveryWaves?: number;
     cardStarMax: number;
     wildcardCount: number;
-    wildcardStarBase: number;
-    wildcardStarUpgradeEveryWaves: number;
+    wildcardStarByWave?: number[];
+    wildcardStarBase?: number;
+    wildcardStarUpgradeEveryWaves?: number;
     wildcardStarMax: number;
     dropLifetimeSeconds: number;
     repeatProtection: number;
@@ -150,10 +158,8 @@ export interface WavesConfig {
   bossWaves: number[];
   waveBoss: {
     reward: {
-      starTierEveryWaves: number;
-      starMax: number;
-      bonusCountEveryWaves: number;
-      finalWaveBonusCount: number;
+      schedule: Record<RunStage, number[]>;
+      count: number;
     };
   };
 }

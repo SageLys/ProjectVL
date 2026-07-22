@@ -22,8 +22,8 @@ describe('stage and drop telemetry metrics', () => {
       event('dropExpired', 3, { source: 'normalKill' }),
       event('dropExpired', 4, { source: 'bounty' }),
       event('dropRejectedFullHand', 5, { source: 'normalKill' }),
-      event('validationRewardLanded', 6, { secure: true, star: 2 }),
-      event('validationRewardLanded', 7, { secure: true, star: 3 }),
+      event('validationRewardLanded', 6, { secure: true, star: 4, rewardKind: 'card', typePolicy: 'build' }),
+      event('validationRewardLanded', 7, { secure: true, star: 5, rewardKind: 'wildcard' }),
       event('waveCleared', 10, { stage: 'validation', activeRegularSeconds: 30, ordinaryDropsShown: 20, eligibleKills: 40 }),
     ])).waves[0];
     expect(result).toMatchObject({

@@ -59,6 +59,12 @@ export interface TelemetryEvent {
   stage?: RunStage;
   star?: number;
   secure?: boolean;
+  rewardKind?: 'card' | 'wildcard';
+  typePolicy?: 'build' | 'pivot' | 'uniform';
+  firstOperation?: 'merge' | 'equip' | 'consume' | 'unused';
+  firstOperationSeconds?: number;
+  reached5BeforeFinalBoss?: boolean;
+  reached6BeforeFinalBoss?: boolean;
   activeRegularSeconds?: number;
   ordinaryDropsShown?: number;
   eligibleKills?: number;

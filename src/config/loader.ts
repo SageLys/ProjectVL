@@ -18,6 +18,17 @@ import { validateProgressionConfig } from './progressionValidator';
 import { validateDifficultyConfig } from './difficultyValidator';
 import { validateStagePlanConfig } from './stagePlanValidator';
 
+function normalizeValidationRewards(config: GameConfig): void {
+  for (const wave of config.waves.stagePlan.validation) {
+    for (const enemy of wave.enemies) {
+      const reward = enemy.reward as unknown as Record<string, unknown>;
+      if (!reward.kind) reward.kind = 'wildcard';
+    }
+    const bossReward = wave.bossReward as unknown as Record<string, unknown>;
+    if (!bossReward.kind) bossReward.kind = 'wildcard';
+  }
+}
+
 /** 将配置中的 Boss 波次限制为可达、唯一且升序的整数列表。 */
 export function normalizeBossWaves(values: readonly number[], totalWaves: number): number[] {
   return [...new Set(values)]
@@ -73,8 +84,7 @@ function assembleBase(): GameConfig {
   validateSkillsConfig(skills);
   validateProgressionConfig(progression);
   validateDifficultyConfig(difficulty as GameConfig['difficulty']);
-  validateStagePlanConfig((waves as GameConfig['waves']).stagePlan, waves.totalWaves);
-  return structuredClone({
+  const config = structuredClone({
     combat,
     waves,
     enemies,
@@ -87,6 +97,9 @@ function assembleBase(): GameConfig {
     // 可玩原型的构建预览也保留调参面板；可在运行时用 ?devtools=0 隐藏。
     tuner,
   }) as unknown as GameConfig;
+  normalizeValidationRewards(config);
+  validateStagePlanConfig(config.waves.stagePlan, config.waves.totalWaves, config.economy.maxStar, config.waves.waveBoss.reward);
+  return config;
 }
 
 /** base + 依序叠加各 variant。未注册的名字忽略并告警（不炸整局）。 */
@@ -101,9 +114,10 @@ export function buildConfig(variantNames: string[] = []): GameConfig {
     cfg = deepMerge<GameConfig>(cfg, patch);
   }
   cfg.waves.bossWaves = normalizeBossWaves(cfg.waves.bossWaves, cfg.waves.totalWaves);
+  normalizeValidationRewards(cfg);
   validateProgressionConfig(cfg.progression);
   validateDifficultyConfig(cfg.difficulty);
-  validateStagePlanConfig(cfg.waves.stagePlan, cfg.waves.totalWaves);
+  validateStagePlanConfig(cfg.waves.stagePlan, cfg.waves.totalWaves, cfg.economy.maxStar, cfg.waves.waveBoss.reward);
   return cfg;
 }
 

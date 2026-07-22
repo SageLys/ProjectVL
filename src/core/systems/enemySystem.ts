@@ -1,5 +1,6 @@
 import { cfg } from '../../config';
 import type { CardType, Config, Enemy, EnemyType, GameEvent, GameState, Rng, Summon } from '../types';
+import type { ValidationRewardSpec } from '../../config/types';
 import { endGame } from '../endGame';
 import { spawnParticle } from './particleSystem';
 import { killEnemy } from './damageSystem';
@@ -27,7 +28,7 @@ export interface EnemyModifiers {
   spawnKind?: Enemy['spawnKind'];
   ccResistOverride?: number;
   knockbackResistOverride?: number;
-  validationReward?: { star: number; count: number };
+  validationReward?: ValidationRewardSpec;
 }
 
 /** Shared enemy construction path for normal waves and independent Bounty encounters. */

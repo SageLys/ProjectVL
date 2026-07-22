@@ -30,4 +30,19 @@ describe('run stage plan', () => {
     expect(stageCurveValue({ start: 2, end: 8, power: 2 }, 1)).toBe(8);
     expect(() => validateStagePlanConfig(plan, 4)).toThrow(/stage-plan-config/);
   });
+
+  it('rejects unusable validation rewards and invalid Boss schedules', () => {
+    const config = buildConfig();
+    const invalidWildcard = structuredClone(config.waves.stagePlan);
+    invalidWildcard.validation[0].bossReward = { kind: 'wildcard', star: 6, count: 1 };
+    expect(() => validateStagePlanConfig(invalidWildcard, 8, 6, config.waves.waveBoss.reward)).toThrow(/between 1 and 5/);
+
+    const invalidCard = structuredClone(config.waves.stagePlan);
+    invalidCard.validation[0].enemies[0].reward = { kind: 'card', star: 7, count: 1, typePolicy: 'build' };
+    expect(() => validateStagePlanConfig(invalidCard, 8, 6, config.waves.waveBoss.reward)).toThrow(/between 1 and 6/);
+
+    const invalidSchedule = structuredClone(config.waves.waveBoss.reward);
+    invalidSchedule.schedule.build = [];
+    expect(() => validateStagePlanConfig(config.waves.stagePlan, 8, 6, invalidSchedule)).toThrow(/non-empty array/);
+  });
 });

@@ -42,13 +42,11 @@
   },
   "reward": {
     "cardCount": 1,
-    "cardStarBase": 1,
-    "cardStarUpgradeEveryWaves": 4,
-    "cardStarMax": 2,
+    "cardStarByWave": [1, 1, 2, 2, 3, 3],
+    "cardStarMax": 3,
     "wildcardCount": 1,
-    "wildcardStarBase": 1,
-    "wildcardStarUpgradeEveryWaves": 4,
-    "wildcardStarMax": 2,
+    "wildcardStarByWave": [1, 1, 2, 2, 3, 4],
+    "wildcardStarMax": 4,
     "dropLifetimeSeconds": 12,
     "repeatProtection": 1
   },

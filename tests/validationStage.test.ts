@@ -34,7 +34,11 @@ describe('validation fixed encounters', () => {
     const state = freshState();
     jumpToWave(state, createDefaultConfig(), constRng(0.25), 7);
     const elite = state.enemies[0];
-    expect(elite).toMatchObject({ ccResistOverride: 0.7, knockbackResistOverride: 0.8, validationReward: { star: 2, count: 2 } });
+    expect(elite).toMatchObject({
+      ccResistOverride: 0.7,
+      knockbackResistOverride: 0.8,
+      validationReward: { kind: 'card', star: 4, count: 1, typePolicy: 'build' },
+    });
     applyFreeze(elite, 10);
     expect(elite.status.frozen).toBeCloseTo(3, 10);
     elite.status.frozen = 0;
@@ -81,12 +85,19 @@ describe('validation fixed encounters', () => {
     const wave8 = rewardsFor(8);
     expect(wave7.groundDrops).toHaveLength(2);
     expect(wave8.groundDrops).toHaveLength(3);
-    expect(wave7.groundDrops.map(drop => [drop.star, drop.kind === 'wildcard' ? drop.count : 0])).toEqual([[2, 2], [3, 1]]);
-    expect(wave8.groundDrops.map(drop => [drop.star, drop.kind === 'wildcard' ? drop.count : 0])).toEqual([[2, 2], [3, 1], [3, 2]]);
+    expect(wave7.groundDrops).toEqual([
+      expect.objectContaining({ kind: 'card', star: 4, validationTypePolicy: 'build', source: 'validationElite' }),
+      expect.objectContaining({ kind: 'wildcard', star: 5, count: 1, source: 'bossKill' }),
+    ]);
+    expect(wave8.groundDrops).toEqual([
+      expect.objectContaining({ kind: 'card', star: 5, validationTypePolicy: 'build', source: 'validationElite' }),
+      expect.objectContaining({ kind: 'card', star: 3, validationTypePolicy: 'pivot', source: 'validationElite' }),
+      expect.objectContaining({ kind: 'wildcard', star: 5, count: 1, source: 'bossKill' }),
+    ]);
     expect([...wave7.groundDrops, ...wave8.groundDrops].every(drop => drop.secure)).toBe(true);
   });
 
-  it('keeps secure rewards forever, blocks wave completion, and bypasses a full hand', () => {
+  it('keeps secure rewards forever, lets wildcards bypass a full hand, and holds concrete cards until space exists', () => {
     const state = freshState();
     const runtime = createDefaultConfig();
     jumpToWave(state, runtime, constRng(0.25), 7);
@@ -102,10 +113,22 @@ describe('validation fixed encounters', () => {
     killEnemy(state, runtime, constRng(0.25), boss);
     expect(advanceWavePhase(state, runtime, constRng(0.25))).toEqual([]);
     state.cards.fill(card('pierce', 1));
-    for (const drop of [...state.groundDrops]) collectDrop(state, runtime, constRng(0.25), drop);
+    const cardDrop = state.groundDrops.find(drop => drop.kind === 'card')!;
+    const wildcardDrop = state.groundDrops.find(drop => drop.kind === 'wildcard')!;
+    expect(collectDrop(state, runtime, constRng(0.25), wildcardDrop)).toContainEqual(
+      expect.objectContaining({ type: 'wildcardsGranted', grants: [{ star: 5, count: 1 }] }),
+    );
+    expect(collectDrop(state, runtime, constRng(0.25), cardDrop)).toEqual([
+      expect.objectContaining({ type: 'cardsFull', dropId: cardDrop.id, secure: true }),
+    ]);
+    expect(state.groundDrops).toEqual([cardDrop]);
+    expect(advanceWavePhase(state, runtime, constRng(0.25))).toEqual([]);
+    state.cards[0] = null;
+    expect(collectDrop(state, runtime, constRng(0.25), cardDrop)).toContainEqual(
+      expect.objectContaining({ type: 'collected', star: 4, validationTypePolicy: 'build' }),
+    );
     expect(state.groundDrops).toHaveLength(0);
-    expect(state.wildcards[2]).toBe(2);
-    expect(state.wildcards[3]).toBe(1);
+    expect(state.wildcards[5]).toBe(1);
     expect(advanceWavePhase(state, runtime, constRng(0.25))).toContainEqual({ type: 'waveCleared', wave: 7 });
   });
 });

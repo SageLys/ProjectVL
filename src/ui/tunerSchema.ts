@@ -72,12 +72,8 @@ export const BOUNTY_TUNER_PARAMS: TunerParam[] = [
   { path: 'bounty.encounter.composition.tankWeight', label: '敌群 · 重装权重', group: 'bounty' },
 
   { path: 'bounty.reward.cardCount', label: '奖励 · 指定卡数量', group: 'bounty' },
-  { path: 'bounty.reward.cardStarBase', label: '奖励 · 指定卡基础星级', group: 'bounty' },
-  { path: 'bounty.reward.cardStarUpgradeEveryWaves', label: '奖励 · 指定卡升星波数', group: 'bounty' },
   { path: 'bounty.reward.cardStarMax', label: '奖励 · 指定卡星级上限', group: 'bounty' },
   { path: 'bounty.reward.wildcardCount', label: '奖励 · 万能卡数量', group: 'bounty' },
-  { path: 'bounty.reward.wildcardStarBase', label: '奖励 · 万能卡基础星级', group: 'bounty' },
-  { path: 'bounty.reward.wildcardStarUpgradeEveryWaves', label: '奖励 · 万能卡升星波数', group: 'bounty' },
   { path: 'bounty.reward.wildcardStarMax', label: '奖励 · 万能卡星级上限', group: 'bounty' },
   { path: 'bounty.reward.dropLifetimeSeconds', label: '奖励 · 地面寿命', group: 'bounty' },
   { path: 'bounty.reward.repeatProtection', label: '奖励 · 重复保护', group: 'bounty' },
@@ -142,8 +138,6 @@ export const TUNER_PARAMS: TunerParam[] = [
   { path: 'waves.typeRoll.tankBase', label: '重装概率 · 基础', group: 'waves', waveDeferred: true },
   { path: 'waves.typeRoll.tankPerWave', label: '重装概率 · 每波', group: 'waves', waveDeferred: true },
   { path: 'waves.typeRoll.fastThreshold', label: '高速阈值', group: 'waves', waveDeferred: true },
-  { path: 'waves.waveBoss.reward.starMax', label: '波末 Boss · 万能卡星级上限', group: 'waves', waveDeferred: true },
-  { path: 'waves.waveBoss.reward.starTierEveryWaves', label: '波末 Boss · 升星间隔波数', group: 'waves', waveDeferred: true },
 
   { path: 'combat.defaults.damage', label: '基础伤害', group: 'combat' },
   { path: 'combat.defaults.fireRate', label: '每秒攻击', group: 'combat' },

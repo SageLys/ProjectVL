@@ -174,6 +174,7 @@ export function collectDrop(state: GameState, config: Config, rng: Rng, drop: Gr
     type: 'collected', cardType: drop.type, merges: merged, dropId: drop.id,
     source: drop.source, star: drop.star, secure: drop.secure,
     validationRewardWave: drop.validationRewardWave,
+    validationTypePolicy: drop.validationTypePolicy,
   };
   if (drop.bountyEncounterId !== undefined) collected.bountyEncounterId = drop.bountyEncounterId;
   const events: GameEvent[] = [collected];

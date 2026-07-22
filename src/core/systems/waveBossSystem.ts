@@ -1,52 +1,103 @@
 import { cfg } from '../../config';
 import type { GameConfig } from '../../config';
-import type { Enemy, GameEvent, GameState } from '../types';
-import { spawnWildcardDrop } from './dropSystem';
+import type { ValidationRewardSpec } from '../../config/types';
+import type { Config, Enemy, GameEvent, GameState, Rng } from '../types';
+import { spawnGroundDrop, spawnWildcardDrop } from './dropSystem';
 import type { WildcardGrant } from './wildcardSystem';
-import { resolveActiveWavePlan } from '../runStage';
+import { resolveActiveWavePlan, stageForWave } from '../runStage';
+import {
+  recordCardDropShown, selectBuildType, selectPivotType, selectUniformCardType,
+} from './dropTypePolicy';
 
-export function computeWaveBossReward(wave: number, game: GameConfig = cfg): WildcardGrant[] {
-  const reward = game.waves.waveBoss.reward;
-  const safeWave = Math.max(1, Math.trunc(wave));
-  const star = Math.min(
-    reward.starMax,
-    1 + Math.floor((safeWave - 1) / Math.max(1, reward.starTierEveryWaves)),
-  );
-  const count = 1
-    + (safeWave % Math.max(1, reward.bonusCountEveryWaves) === 0 ? 1 : 0)
-    + (safeWave === game.waves.totalWaves ? reward.finalWaveBonusCount : 0);
-  return [{ star, count }];
+function stageWaveIndex(wave: number, game: GameConfig): number {
+  const plan = game.waves.stagePlan;
+  const stage = stageForWave(wave, game.waves.totalWaves, plan);
+  if (stage === 'selection') return Math.max(0, wave - 1);
+  if (stage === 'build') return Math.max(0, wave - plan.selectionWaves - 1);
+  return Math.max(0, wave - (game.waves.totalWaves - plan.validationWaves + 1));
 }
 
-/** Drops the Boss reward for manual pickup, using the same wildcard drop presentation as elite rewards. */
-export function grantWaveBossReward(state: GameState, x: number, y: number): GameEvent[] {
+export function computeWaveBossReward(wave: number, game: GameConfig = cfg): WildcardGrant[] {
+  const safeWave = Math.max(1, Math.min(game.waves.totalWaves, Math.trunc(wave)));
+  const stage = stageForWave(safeWave, game.waves.totalWaves, game.waves.stagePlan);
+  const schedule = game.waves.waveBoss.reward.schedule[stage];
+  const star = schedule[Math.min(schedule.length - 1, stageWaveIndex(safeWave, game))];
+  return [{ star, count: game.waves.waveBoss.reward.count }];
+}
+
+function spawnValidationCardReward(
+  state: GameState,
+  config: Config,
+  rng: Rng,
+  x: number,
+  y: number,
+  spec: Extract<ValidationRewardSpec, { kind: 'card' }>,
+  source: 'validationElite' | 'bossKill',
+): void {
+  for (let index = 0; index < spec.count; index++) {
+    const type = spec.typePolicy === 'build'
+      ? selectBuildType(state, rng)
+      : spec.typePolicy === 'pivot'
+        ? selectPivotType(state, rng)
+        : selectUniformCardType(rng);
+    spawnGroundDrop(state, config, rng, x, y, type, spec.star, source);
+    recordCardDropShown(state, type, source);
+    const drop = state.groundDrops[state.groundDrops.length - 1];
+    drop.secure = true;
+    drop.validationRewardWave = state.wave;
+    drop.validationTypePolicy = spec.typePolicy;
+  }
+}
+
+function spawnValidationReward(
+  state: GameState,
+  config: Config,
+  rng: Rng,
+  x: number,
+  y: number,
+  spec: ValidationRewardSpec,
+  source: 'validationElite' | 'bossKill',
+): void {
+  if (spec.kind === 'card') {
+    spawnValidationCardReward(state, config, rng, x, y, spec, source);
+    return;
+  }
+  spawnWildcardDrop(state, x, y, spec.star, spec.count, cfg.bounty.reward.dropLifetimeSeconds);
+  const drop = state.groundDrops[state.groundDrops.length - 1];
+  drop.source = source;
+  drop.secure = true;
+  drop.validationRewardWave = state.wave;
+}
+
+/** Drops the Boss reward for manual pickup. Validation rewards are secure and gate wave completion. */
+export function grantWaveBossReward(state: GameState, config: Config, rng: Rng, x: number, y: number): GameEvent[] {
   if (state.bossRewardClaimedWave >= state.wave) return [];
   const plan = resolveActiveWavePlan(cfg, state.wave);
-  const grants = plan.validation ? [plan.validation.bossReward] : computeWaveBossReward(state.wave);
-  const lifetime = cfg.bounty.reward.dropLifetimeSeconds;
-  for (const grant of grants) {
-    spawnWildcardDrop(state, x, y, grant.star, grant.count, lifetime);
+  if (plan.validation) {
+    spawnValidationReward(state, config, rng, x, y, plan.validation.bossReward, 'bossKill');
     const drop = state.groundDrops[state.groundDrops.length - 1];
-    if (drop.kind !== 'wildcard') throw new Error('Boss reward must be a wildcard drop');
-    drop.bossRewardWave = state.wave;
-    drop.source = 'bossKill';
-    if (plan.validation) {
-      drop.secure = true;
-      drop.validationRewardWave = state.wave;
+    if (drop.kind === 'wildcard') drop.bossRewardWave = state.wave;
+  } else {
+    for (const grant of computeWaveBossReward(state.wave)) {
+      spawnWildcardDrop(state, x, y, grant.star, grant.count, cfg.bounty.reward.dropLifetimeSeconds);
+      const drop = state.groundDrops[state.groundDrops.length - 1];
+      if (drop.kind !== 'wildcard') throw new Error('Boss reward must be a wildcard drop');
+      drop.bossRewardWave = state.wave;
+      drop.source = 'bossKill';
     }
   }
   state.bossRewardClaimedWave = state.wave;
   return [];
 }
 
-/** Drops one secure wildcard pickup for a defeated validation elite. */
-export function grantValidationEliteReward(state: GameState, enemy: Enemy): GameEvent[] {
-  const reward = enemy.validationReward;
-  if (!reward) return [];
-  spawnWildcardDrop(state, enemy.x, enemy.y, reward.star, reward.count, cfg.bounty.reward.dropLifetimeSeconds);
-  const drop = state.groundDrops[state.groundDrops.length - 1];
-  if (drop.kind !== 'wildcard') throw new Error('Validation reward must be a wildcard drop');
-  drop.secure = true;
-  drop.validationRewardWave = state.wave;
+/** Drops the configured secure reward for a defeated validation elite. */
+export function grantValidationEliteReward(
+  state: GameState,
+  config: Config,
+  rng: Rng,
+  enemy: Enemy,
+): GameEvent[] {
+  if (!enemy.validationReward) return [];
+  spawnValidationReward(state, config, rng, enemy.x, enemy.y, enemy.validationReward, 'validationElite');
   return [];
 }

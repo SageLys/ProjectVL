@@ -2,6 +2,7 @@
 import type { BuildTag, EffectDef } from './effects/defs';
 import type { RunSummary } from './settlement';
 import type { DifficultyId } from '../config/types';
+import type { ValidationRewardSpec, ValidationRewardTypePolicy } from '../config/types';
 
 /** 卡牌类型 = 技能 id 字符串（schema: ^[a-z][a-zA-Z0-9]*$），由 skills.json 的 cards[].id 决定。 */
 export type CardType = string;
@@ -146,7 +147,7 @@ export interface Enemy {
   bountyRewardType?: CardType;
   ccResistOverride?: number;
   knockbackResistOverride?: number;
-  validationReward?: { star: number; count: number };
+  validationReward?: ValidationRewardSpec;
 }
 
 export interface Bullet {
@@ -204,9 +205,10 @@ export interface GroundDropBase {
   secure?: boolean;
   /** Validation reward pickup that must be collected before its wave can finish. */
   validationRewardWave?: number;
+  validationTypePolicy?: ValidationRewardTypePolicy;
 }
 
-export type CardDropSource = 'normalKill' | 'bossKill' | 'bounty' | 'skillExtra' | 'debug';
+export type CardDropSource = 'normalKill' | 'bossKill' | 'bounty' | 'skillExtra' | 'debug' | 'validationElite';
 export interface GroundCardDrop extends GroundDropBase {
   kind: 'card';
   type: CardType;
@@ -390,7 +392,7 @@ export type GameEvent =
   | { type: 'gameEnd'; win: boolean }
   | { type: 'breakthrough'; damage: number }
   | { type: 'cardsFull'; dropId?: number; source?: CardDropSource; star?: number; secure?: boolean }
-  | { type: 'collected'; cardType: CardType; merges: number; bountyEncounterId?: number; dropId?: number; source?: CardDropSource; star?: number; secure?: boolean; validationRewardWave?: number }
+  | { type: 'collected'; cardType: CardType; merges: number; bountyEncounterId?: number; dropId?: number; source?: CardDropSource; star?: number; secure?: boolean; validationRewardWave?: number; validationTypePolicy?: ValidationRewardTypePolicy }
   | { type: 'equipFull' }
   | { type: 'equipRejected'; reason: 'star' | 'duplicate' }
   | { type: 'moved'; cardType: CardType; merges: number }

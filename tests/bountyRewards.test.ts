@@ -40,6 +40,21 @@ function spawnedEncounter() {
 }
 
 describe('Bounty Rewards · 确定掉落', () => {
+  it('uses the configured per-wave star schedules through wave 6', () => {
+    cfg.bounty.offer.baseChancePerCheck = 1;
+    cfg.bounty.offer.maxChancePerCheck = 1;
+    const rewards = Array.from({ length: 6 }, (_, index) => {
+      const state = freshState();
+      state.wave = index + 1;
+      state.spawnLeft = 10;
+      state.waveSpawnQuota = 10;
+      state.bountyDirector.checkTimer = 0;
+      tickBountySystem(state, createDefaultConfig(), constRng(0), 0);
+      return [state.bountyOffers[0].rewardCardStar, state.bountyOffers[0].wildcardStar];
+    });
+    expect(rewards).toEqual([[1, 1], [1, 1], [2, 2], [2, 2], [3, 3], [3, 4]]);
+  });
+
   it('biases rewards toward the primary lane and preserves repeat protection', () => {
     const state = freshState();
     state.buildState.affinity.control = 3;

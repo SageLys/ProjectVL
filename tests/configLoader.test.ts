@@ -2,6 +2,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { buildConfig, deepMerge, variantsFromSearch, cfg, applyVariants } from '../src/config';
 import { resetTestEnv } from './helpers';
 import { validateProgressionConfig } from '../src/config/progressionValidator';
+import { computeWaveBossReward } from '../src/core/systems/waveBossSystem';
 afterEach(resetTestEnv);
 
 describe('validation-10 variant', () => {
@@ -10,6 +11,9 @@ describe('validation-10 variant', () => {
     expect(c.waves.totalWaves).toBe(10);
     expect(c.waves.bossWaves).toEqual([1,2,3,4,5,6,7,8,9,10]);
     expect(c.waves.stagePlan.validation).toHaveLength(2);
+    expect(Array.from({ length: 10 }, (_, index) => computeWaveBossReward(index + 1, c)[0].star)).toEqual(
+      [1, 1, 2, 2, 3, 4, 4, 4, 5, 5],
+    );
   });
 });
 

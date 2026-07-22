@@ -59,6 +59,14 @@ export function createDevTelemetry(options: Options): DevTelemetry {
   let killsBefore = 0;
   let nextSample = 0;
   const bossSpawnedAt = new Map<number, number>();
+  const validationRewardLandedAt = new Map<number, number>();
+  const pendingValidationRewards: Array<{
+    telemetry: TelemetryEvent;
+    rewardKind: 'card' | 'wildcard';
+    cardType?: string;
+    star: number;
+    resolved: boolean;
+  }> = [];
   let fps = 0;
   let lastHudUpdate = -Infinity;
   const frameTimes: number[] = [];
@@ -90,6 +98,38 @@ export function createDevTelemetry(options: Options): DevTelemetry {
       highestStar: cards.reduce((highest, card) => Math.max(highest, card.star), 0),
       equippedCount: state().equipment.filter(card => card !== null).length,
     };
+  }
+  function beforeFinalBoss(): boolean {
+    const finalWave = options.getConfig().waves.totalWaves;
+    return state().wave < finalWave || (state().wave === finalWave && !bossSpawnedAt.has(finalWave));
+  }
+  function highStarFlags(): Pick<TelemetryEvent, 'reached5BeforeFinalBoss' | 'reached6BeforeFinalBoss'> {
+    const highest = beforeFinalBoss()
+      ? [...state().cards, ...state().equipment].reduce((value, card) => Math.max(value, card?.star ?? 0), 0)
+      : 0;
+    return { reached5BeforeFinalBoss: highest >= 5, reached6BeforeFinalBoss: highest >= 6 };
+  }
+  function resolveValidationOperation(
+    rewardKind: 'card' | 'wildcard',
+    operation: 'merge' | 'equip' | 'consume',
+    cardType: string,
+    resultingStar?: number,
+    wildcardStar?: number,
+  ): void {
+    const pending = pendingValidationRewards.find(item => !item.resolved
+      && item.rewardKind === rewardKind
+      && (rewardKind === 'card' ? item.cardType === cardType : item.star === wildcardStar));
+    if (!pending) return;
+    pending.resolved = true;
+    pending.telemetry.firstOperation = operation;
+    pending.telemetry.firstOperationSeconds = Math.max(
+      0,
+      at() - (pending.telemetry.dropId === undefined ? pending.telemetry.at : validationRewardLandedAt.get(pending.telemetry.dropId) ?? pending.telemetry.at),
+    );
+    if (beforeFinalBoss()) {
+      if ((resultingStar ?? 0) >= 5) pending.telemetry.reached5BeforeFinalBoss = true;
+      if ((resultingStar ?? 0) >= 6) pending.telemetry.reached6BeforeFinalBoss = true;
+    }
   }
   function affinityMatch(cardType: string): Pick<TelemetryEvent, 'lane' | 'laneMatch'> {
     const lanes: BuildTag[] = ['projectile', 'control', 'domain', 'defense'];
@@ -142,9 +182,13 @@ export function createDevTelemetry(options: Options): DevTelemetry {
         ...(drop.kind === 'card' && drop.source === 'normalKill' ? affinityMatch(drop.type) : {}),
       });
       if (drop.secure && drop.validationRewardWave !== undefined) {
+        validationRewardLandedAt.set(drop.id, at());
         add({
           type: 'validationRewardLanded', dropId: drop.id, x: drop.x, y: drop.y,
           source: drop.source, stage: stage(drop.validationRewardWave), star: drop.star, secure: true,
+          rewardKind: drop.kind,
+          cardType: drop.kind === 'card' ? drop.type : 'wildcard',
+          typePolicy: drop.validationTypePolicy,
           wildcardCount: drop.kind === 'wildcard' ? drop.count : undefined,
         });
       }
@@ -226,6 +270,8 @@ export function createDevTelemetry(options: Options): DevTelemetry {
     knownEnemies.clear(); knownDrops.clear(); dangerEntries.clear(); before.clear();
     killsBefore = 0; nextSample = 0;
     bossSpawnedAt.clear();
+    validationRewardLandedAt.clear();
+    pendingValidationRewards.length = 0;
     startedAt = new Date().toISOString();
     filename = `session_${safeIso(startedAt)}_${options.getSeed()}.json`;
   }
@@ -324,6 +370,18 @@ export function createDevTelemetry(options: Options): DevTelemetry {
           const encounter = state().bountyEncounters.find(item => item.id === event.bountyEncounterId);
           add({ type: 'bountyRewardPickup', encounterId: event.bountyEncounterId, rewardCardType: encounter?.rewardCardType ?? event.cardType, cardType: event.cardType });
         }
+        if (event.secure && event.validationRewardWave !== undefined && event.dropId !== undefined) {
+          const pickup = add({
+            type: 'validationRewardPickup', dropId: event.dropId, cardType: event.cardType,
+            source: event.source, stage: stage(event.validationRewardWave), star: event.star,
+            secure: true, rewardKind: 'card', typePolicy: event.validationTypePolicy,
+            ...highStarFlags(),
+          });
+          pendingValidationRewards.push({
+            telemetry: pickup, rewardKind: 'card', cardType: event.cardType,
+            star: event.star ?? 1, resolved: false,
+          });
+        }
       }
       if (event.type === 'wildcardsGranted' && event.bountyEncounterId !== undefined) {
         const encounter = state().bountyEncounters.find(item => item.id === event.bountyEncounterId);
@@ -335,12 +393,35 @@ export function createDevTelemetry(options: Options): DevTelemetry {
           type: 'pickup', dropId: event.dropId, cardType: 'wildcard', source: event.source,
           stage: stage(), star: event.star ?? event.grants[0]?.star, secure: event.secure,
         });
-        if (event.secure && event.validationRewardWave !== undefined) add({
-          type: 'validationRewardPickup', dropId: event.dropId, cardType: 'wildcard',
-          source: event.source, stage: stage(event.validationRewardWave),
-          star: event.star ?? event.grants[0]?.star, secure: true,
-          wildcardCount: event.grants[0]?.count,
-        });
+        if (event.secure && event.validationRewardWave !== undefined) {
+          const pickup = add({
+            type: 'validationRewardPickup', dropId: event.dropId, cardType: 'wildcard', rewardKind: 'wildcard',
+            source: event.source, stage: stage(event.validationRewardWave),
+            star: event.star ?? event.grants[0]?.star, secure: true,
+            wildcardCount: event.grants[0]?.count,
+            ...highStarFlags(),
+          });
+          pendingValidationRewards.push({
+            telemetry: pickup, rewardKind: 'wildcard', star: event.star ?? event.grants[0]?.star ?? 1, resolved: false,
+          });
+        }
+      }
+      if (event.type === 'merged') resolveValidationOperation('card', 'merge', event.cardType, event.resultStar);
+      if (event.type === 'fed') resolveValidationOperation('card', 'merge', event.cardType, event.resultStar);
+      if (event.type === 'equipped') resolveValidationOperation('card', 'equip', event.cardType, event.star);
+      if (event.type === 'skillConsumed') resolveValidationOperation('card', 'consume', event.cardType, event.star);
+      if (event.type === 'wildcardMerged') {
+        resolveValidationOperation('wildcard', 'merge', event.cardType, event.resultStar, event.consumedStar);
+      }
+      if (event.type === 'gameEnd') {
+        for (const pending of pendingValidationRewards.filter(item => !item.resolved)) {
+          pending.resolved = true;
+          pending.telemetry.firstOperation = 'unused';
+          pending.telemetry.firstOperationSeconds = Math.max(
+            0,
+            at() - (pending.telemetry.dropId === undefined ? pending.telemetry.at : validationRewardLandedAt.get(pending.telemetry.dropId) ?? pending.telemetry.at),
+          );
+        }
       }
       if (event.type === 'bountyOfferSpawned') {
         const offer = state().bountyOffers.find(item => item.id === event.offerId);

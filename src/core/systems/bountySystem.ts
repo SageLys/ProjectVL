@@ -110,7 +110,11 @@ export function selectBountyRewardType(state: GameState, rng: Rng): CardType {
   return type;
 }
 
-function rewardStar(base: number, every: number, max: number, wave: number): number {
+function rewardStar(schedule: number[] | undefined, max: number, wave: number, base = 1, every = 1): number {
+  if (schedule?.length) {
+    const index = Math.min(schedule.length - 1, Math.max(0, Math.trunc(wave) - 1));
+    return Math.min(max, schedule[index]);
+  }
   return Math.min(max, base + Math.floor((wave - 1) / Math.max(1, every)));
 }
 
@@ -147,9 +151,15 @@ function createOffer(state: GameState, rng: Rng, guaranteed: boolean): GameEvent
   const offer: BountyOffer = {
     id: state.nextBountyOfferId++,
     rewardCardType: selectBountyRewardType(state, rng),
-    rewardCardStar: rewardStar(reward.cardStarBase, reward.cardStarUpgradeEveryWaves, reward.cardStarMax, state.wave),
+    rewardCardStar: rewardStar(
+      reward.cardStarByWave, reward.cardStarMax, state.wave,
+      reward.cardStarBase, reward.cardStarUpgradeEveryWaves,
+    ),
     rewardCardCount: reward.cardCount,
-    wildcardStar: rewardStar(reward.wildcardStarBase, reward.wildcardStarUpgradeEveryWaves, reward.wildcardStarMax, state.wave),
+    wildcardStar: rewardStar(
+      reward.wildcardStarByWave, reward.wildcardStarMax, state.wave,
+      reward.wildcardStarBase, reward.wildcardStarUpgradeEveryWaves,
+    ),
     wildcardCount: reward.wildcardCount,
     side,
     ...anchor,
