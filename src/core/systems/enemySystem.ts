@@ -4,11 +4,12 @@ import type { ValidationRewardSpec } from '../../config/types';
 import { endGame } from '../endGame';
 import { spawnParticle } from './particleSystem';
 import { killEnemy } from './damageSystem';
-import { emptyStatus, speedMultiplier } from '../effects/statusSystem';
+import { emptyStatus, isImmobile, speedMultiplier } from '../effects/statusSystem';
 import { absorbBreach } from '../effects/runtime';
 import { fireTrigger, getModifiers } from '../effects/interpreter';
 import { notifyBountyMemberBreached, notifyBountyMemberKilled } from './bountySystem';
 import { difficultyMultipliersFor } from '../difficulty';
+import { totalRange } from '../stats';
 
 /**
  * 敌人类型判定：roll < tankBase + wave*tankPerWave → 重装；
@@ -56,6 +57,9 @@ export function createEnemy(
     r: def.r,
     color: def.color,
     damage: def.damage * dm.damage * (modifiers.damageMul ?? 1),
+    contactDps: def.contactDps === undefined
+      ? undefined
+      : def.contactDps * dm.damage * (modifiers.damageMul ?? 1),
     xp: def.xp,
     hit: 0,
     status: emptyStatus(),
@@ -87,7 +91,10 @@ export function resyncEnemyStats(enemy: Enemy, state: GameState, key: EnemyStatC
     enemy.hp = enemy.maxHp * ratio;
   } else if (key === 'speedBase' || key === 'speedPerWave') {
     enemy.speed = (def.speedBase + state.wave * def.speedPerWave) * dm.speed * ext.speedMul;
-  } else if (key === 'damage') enemy.damage = def.damage * dm.damage * ext.damageMul;
+  } else if (key === 'damage') {
+    enemy.damage = def.damage * dm.damage * ext.damageMul;
+    if (def.contactDps !== undefined) enemy.contactDps = def.contactDps * dm.damage * ext.damageMul;
+  }
   else if (key === 'r') enemy.r = def.r;
   else if (key === 'xp') enemy.xp = def.xp;
 }
@@ -114,6 +121,12 @@ export function spawnEnemy(state: GameState, rng: Rng): void {
 export function spawnWaveBoss(state: GameState, rng: Rng): Enemy {
   const spawn = randomEdgeSpawnPosition(rng);
   const boss = createEnemy(state, 'boss', state.wave, spawn, { spawnKind: 'waveBoss' });
+  boss.bossRuntime = {
+    phase: 'approach',
+    orbitDirection: boss.id % 2 === 0 ? 1 : -1,
+    contactTickRemaining: cfg.enemies.bossBehavior.contactWarmup,
+    contactAngle: 0,
+  };
   state.enemies.push(boss);
   return boss;
 }
@@ -139,6 +152,213 @@ function moveTargetFor(state: GameState, e: Enemy): { x: number; y: number; summ
   return { x: cfg.combat.turret.x, y: cfg.combat.turret.y, summon: null };
 }
 
+function ensureBossRuntime(boss: Enemy): NonNullable<Enemy['bossRuntime']> {
+  if (!boss.bossRuntime) {
+    boss.bossRuntime = {
+      phase: 'approach',
+      orbitDirection: boss.id % 2 === 0 ? 1 : -1,
+      contactTickRemaining: cfg.enemies.bossBehavior.contactWarmup,
+      contactAngle: 0,
+    };
+  }
+  return boss.bossRuntime;
+}
+
+function enterBossContact(
+  state: GameState,
+  config: Config,
+  rng: Rng,
+  boss: Enemy,
+  events: GameEvent[],
+): void {
+  const runtime = ensureBossRuntime(boss);
+  const t = cfg.combat.turret;
+  const bb = cfg.enemies.bossBehavior;
+  const dx = boss.x - t.x;
+  const dy = boss.y - t.y;
+  runtime.phase = 'contact';
+  runtime.contactAngle = Math.hypot(dx, dy) > 0 ? Math.atan2(dy, dx) : runtime.contactAngle;
+  runtime.contactTickRemaining = bb.contactWarmup;
+  boss.x = t.x + Math.cos(runtime.contactAngle) * bb.contactDistance;
+  boss.y = t.y + Math.sin(runtime.contactAngle) * bb.contactDistance;
+  events.push(...fireTrigger(state, config, rng, 'onBreach', {
+    enemy: boss,
+    damage: 0,
+    point: { x: boss.x, y: boss.y },
+  }));
+  events.push({ type: 'bossContactStarted', enemyId: boss.id });
+}
+
+function leaveBossContact(boss: Enemy, events: GameEvent[]): void {
+  ensureBossRuntime(boss).phase = 'approach';
+  events.push({ type: 'bossContactEnded', enemyId: boss.id });
+}
+
+/** Returns true when either combatant died and no more pulses should be resolved. */
+function resolveBossContactPulse(
+  state: GameState,
+  config: Config,
+  rng: Rng,
+  boss: Enemy,
+  events: GameEvent[],
+): boolean {
+  const interval = cfg.enemies.bossBehavior.contactTickInterval;
+  const fallbackDps = (cfg.enemies.types.boss.contactDps ?? 0)
+    * difficultyMultipliersFor(state.difficultyId, 'boss', state.wave).damage;
+  const pulseDamage = (boss.contactDps ?? fallbackDps) * interval;
+  const mods = getModifiers(state);
+  if (mods.thornsRatio > 0 && pulseDamage * mods.thornsRatio >= boss.hp) {
+    const index = state.enemies.indexOf(boss);
+    if (index >= 0) state.enemies.splice(index, 1);
+    events.push(...killEnemy(state, config, rng, boss));
+    return true;
+  }
+
+  const damage = absorbBreach(state, config, rng, pulseDamage, events);
+  if (!state.enemies.includes(boss)) return true;
+  if (damage != null) {
+    state.hp -= damage;
+    state.bountyDirector.lastHpLossAt = state.time;
+    events.push({ type: 'bossContactDamage', enemyId: boss.id, damage });
+  }
+  if (state.hp <= 0) {
+    events.push(...endGame(state, false));
+    return true;
+  }
+  return false;
+}
+
+function tickBossContact(
+  state: GameState,
+  config: Config,
+  rng: Rng,
+  boss: Enemy,
+  dt: number,
+  events: GameEvent[],
+): void {
+  const runtime = ensureBossRuntime(boss);
+  const bb = cfg.enemies.bossBehavior;
+  const t = cfg.combat.turret;
+  const dx = boss.x - t.x;
+  const dy = boss.y - t.y;
+  const dist = Math.hypot(dx, dy);
+  if (dist > bb.contactExitDistance) {
+    leaveBossContact(boss, events);
+    return;
+  }
+
+  if (dist > 0) runtime.contactAngle = Math.atan2(dy, dx);
+  boss.x = t.x + Math.cos(runtime.contactAngle) * bb.contactDistance;
+  boss.y = t.y + Math.sin(runtime.contactAngle) * bb.contactDistance;
+  if (bb.hardControlPausesDamage && isImmobile(boss)) return;
+
+  runtime.contactTickRemaining -= dt;
+  while (runtime.contactTickRemaining <= 0) {
+    runtime.contactTickRemaining += bb.contactTickInterval;
+    if (resolveBossContactPulse(state, config, rng, boss, events)) return;
+  }
+}
+
+function moveBossApproach(
+  state: GameState,
+  config: Config,
+  rng: Rng,
+  boss: Enemy,
+  target: { x: number; y: number; summon: Summon | null },
+  dt: number,
+  events: GameEvent[],
+): void {
+  const t = cfg.combat.turret;
+  const bb = cfg.enemies.bossBehavior;
+  const turretDx = t.x - boss.x;
+  const turretDy = t.y - boss.y;
+  const turretDist = Math.hypot(turretDx, turretDy);
+  if (!target.summon && turretDist <= bb.contactDistance) {
+    enterBossContact(state, config, rng, boss, events);
+    return;
+  }
+
+  const targetDx = target.x - boss.x;
+  const targetDy = target.y - boss.y;
+  const targetDist = Math.hypot(targetDx, targetDy) || 1;
+  let dirX = targetDx / targetDist;
+  let dirY = targetDy / targetDist;
+  if (!target.summon && !boss.status.taunt) {
+    const orbitStart = Math.min(
+      totalRange(state, config) * bb.orbitStartRangeRatio,
+      bb.orbitStartMaxDistance,
+    );
+    const curveSpan = orbitStart - bb.contactDistance;
+    if (turretDist <= orbitStart && curveSpan > 0 && turretDist > 0) {
+      const radialX = turretDx / turretDist;
+      const radialY = turretDy / turretDist;
+      const progress = Math.max(0, Math.min(1, (turretDist - bb.contactDistance) / curveSpan));
+      const curveWeight = Math.sin(Math.PI * progress) * bb.curveStrength;
+      const tangentX = -radialY * ensureBossRuntime(boss).orbitDirection;
+      const tangentY = radialX * ensureBossRuntime(boss).orbitDirection;
+      const mixedX = radialX + tangentX * curveWeight;
+      const mixedY = radialY + tangentY * curveWeight;
+      const mixedLen = Math.hypot(mixedX, mixedY) || 1;
+      dirX = mixedX / mixedLen;
+      dirY = mixedY / mixedLen;
+    }
+  }
+
+  const rawStep = boss.speed * speedMultiplier(boss) * config.enemySpeed * dt;
+  const contactGap = turretDist - bb.contactDistance;
+  if (!target.summon && !boss.status.taunt && rawStep + 1e-6 >= contactGap) {
+    boss.x = t.x - (turretDx / turretDist) * bb.contactDistance;
+    boss.y = t.y - (turretDy / turretDist) * bb.contactDistance;
+    enterBossContact(state, config, rng, boss, events);
+    return;
+  }
+  boss.x += dirX * rawStep;
+  boss.y += dirY * rawStep;
+
+  if (target.summon && Math.hypot(target.x - boss.x, target.y - boss.y) < 16 + boss.r) {
+    target.summon.hp -= boss.damage;
+    state.vfx.push({
+      kind: 'summonEvent', x: target.summon.x, y: target.summon.y,
+      event: 'hit', remaining: 0.22,
+    });
+    for (let k = 0; k < 6; k++) spawnParticle(state, rng, boss.x, boss.y, '#8793a3', 120);
+    boss.status.taunt = null;
+    return;
+  }
+
+  const postDx = boss.x - t.x;
+  const postDy = boss.y - t.y;
+  const postDist = Math.hypot(postDx, postDy);
+  if (!target.summon && postDist <= bb.contactDistance) {
+    if (postDist > 0) {
+      boss.x = t.x + (postDx / postDist) * bb.contactDistance;
+      boss.y = t.y + (postDy / postDist) * bb.contactDistance;
+    }
+    enterBossContact(state, config, rng, boss, events);
+  }
+}
+
+function moveWaveBoss(
+  state: GameState,
+  config: Config,
+  rng: Rng,
+  boss: Enemy,
+  target: { x: number; y: number; summon: Summon | null },
+  dt: number,
+  events: GameEvent[],
+): void {
+  boss.hit -= dt;
+  if (ensureBossRuntime(boss).phase === 'contact') {
+    tickBossContact(state, config, rng, boss, dt, events);
+  } else {
+    moveBossApproach(state, config, rng, boss, target, dt, events);
+  }
+}
+
+function isWaveBoss(enemy: Enemy): boolean {
+  return enemy.spawnKind === 'waveBoss';
+}
+
 /**
  * 推进敌人：向目标移动（状态仲裁后的速度），触及召唤物 → 自爆伤图腾；
  * 触及炮台 → 护盾吸收/减免/反伤 → 扣血、breakthrough 事件、onBreach 触发；HP 归零判负。
@@ -153,6 +373,10 @@ export function moveEnemies(state: GameState, config: Config, rng: Rng, dt: numb
     if (targetId !== e.tauntVfxTargetId) {
       if (targetId != null) state.vfx.push({ kind: 'tauntPulse', enemyId: e.id, remaining: 0.6 });
       e.tauntVfxTargetId = targetId;
+    }
+    if (isWaveBoss(e)) {
+      moveWaveBoss(state, config, rng, e, target, dt, events);
+      continue;
     }
     const dx = target.x - e.x;
     const dy = target.y - e.y;
@@ -198,7 +422,6 @@ export function moveEnemies(state: GameState, config: Config, rng: Rng, dt: numb
       }
       events.push(...fireTrigger(state, config, rng, 'onBreach', { enemy: e, damage: damage ?? 0, point: { x: e.x, y: e.y } }));
       if (state.hp <= 0) events.push(...endGame(state, false));
-      else if (e.spawnKind === 'waveBoss' && state.enemies.includes(e)) Object.assign(e, randomEdgeSpawnPosition(rng));
     }
   }
   return events;

@@ -126,6 +126,13 @@ export interface EnemyStatus {
   kbFatigue: { multiplier: number; remaining: number } | null;
 }
 
+export interface BossRuntimeState {
+  phase: 'approach' | 'contact';
+  orbitDirection: -1 | 1;
+  contactTickRemaining: number;
+  contactAngle: number;
+}
+
 export interface Enemy {
   id: number;
   x: number;
@@ -139,6 +146,8 @@ export interface Enemy {
   r: number;
   color: string;
   damage: number;
+  /** Difficulty-adjusted contact damage per second. Only populated for wave Bosses. */
+  contactDps?: number;
   xp: number;
   hit: number;
   status: EnemyStatus;
@@ -150,6 +159,7 @@ export interface Enemy {
   validationReward?: ValidationRewardSpec;
   /** Presentation-only memory used to emit a pulse when taunt target changes. */
   tauntVfxTargetId?: number;
+  bossRuntime?: BossRuntimeState;
 }
 
 export interface AttackRider extends EffectDef {
@@ -475,6 +485,9 @@ export type GameEvent =
   | { type: 'levelUp' }
   | { type: 'gameEnd'; win: boolean }
   | { type: 'breakthrough'; damage: number }
+  | { type: 'bossContactStarted'; enemyId: number }
+  | { type: 'bossContactDamage'; enemyId: number; damage: number }
+  | { type: 'bossContactEnded'; enemyId: number }
   | { type: 'cardsFull'; dropId?: number; source?: CardDropSource; star?: number; secure?: boolean }
   | { type: 'collected'; cardType: CardType; merges: number; bountyEncounterId?: number; dropId?: number; source?: CardDropSource; star?: number; secure?: boolean; validationRewardWave?: number; validationTypePolicy?: ValidationRewardTypePolicy }
   | { type: 'equipFull' }

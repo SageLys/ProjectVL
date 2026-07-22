@@ -45,7 +45,7 @@ describe('wave phase machine', () => {
     expect(state.between).toBe(0);
   });
 
-  it('keeps a surviving Boss in the phase after a breakthrough', () => {
+  it('keeps a surviving Boss in the phase after entering contact', () => {
     const state = freshState(); state.wave = 1; state.spawnLeft = 0;
     advanceWavePhase(state, config, constRng(0));
     const boss = state.enemies[0];
@@ -55,12 +55,19 @@ describe('wave phase machine', () => {
     expect(state.wavePhase).toBe('boss');
     expect(state.enemies).toContain(boss);
     expect(state.waveBossId).toBe(boss.id);
+    expect(boss.bossRuntime?.phase).toBe('contact');
+    expect(Math.hypot(boss.x - 270, boss.y - 365)).toBeCloseTo(config.range < 48 ? config.range : 48);
+    expect(boss.x).not.toBeCloseTo(-25);
+    expect(boss.x).not.toBeCloseTo(565);
+    expect(boss.y).not.toBeCloseTo(-25);
+    expect(boss.y).not.toBeCloseTo(755);
   });
 
   it('keeps HP-zero defeat behavior and creates a failure summary', () => {
-    const state = freshState(); state.wave = 3; state.hp = 10;
+    const state = freshState(); state.wave = 3; state.hp = 5;
     state.enemies = [enemy({ x: 270, y: 365, type: 'boss', spawnKind: 'waveBoss', hp: 100, maxHp: 100, speed: 12, r: 35, damage: 28, xp: 5 })];
-    const events = moveEnemies(state, config, constRng(0), 0.016);
+    moveEnemies(state, config, constRng(0), 0);
+    const events = moveEnemies(state, config, constRng(0), 0.4);
     expect(events).toContainEqual({ type: 'gameEnd', win: false });
     expect(state.runSummary).toMatchObject({ win: false, clearedWaves: 2, score: { win: 0 } });
   });

@@ -181,11 +181,24 @@ export interface EnemyDef {
   sides: number;
   knockbackResist: number;
   ccResist: number;
+  contactDps?: number;
+}
+
+export interface BossBehaviorConfig {
+  orbitStartRangeRatio: number;
+  orbitStartMaxDistance: number;
+  curveStrength: number;
+  contactDistance: number;
+  contactExitDistance: number;
+  contactWarmup: number;
+  contactTickInterval: number;
+  hardControlPausesDamage: boolean;
 }
 
 export interface EnemiesConfig {
   defaults: { enemySpeed: number };
   types: Record<'normal' | 'fast' | 'tank' | 'boss', EnemyDef>;
+  bossBehavior: BossBehaviorConfig;
 }
 
 export interface SkillsConfig {

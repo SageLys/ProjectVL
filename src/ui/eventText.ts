@@ -25,6 +25,10 @@ export function formatToast(ev: GameEvent): string | null {
     case 'waveBossSpawned': return T.waveBoss;
     case 'bossRewardGranted': return fmt(T.bossReward, { desc: wildcardGrantDescription(ev.grants) });
     case 'breakthrough': return fmt(T.breakthrough, { damage: Math.round(ev.damage) });
+    case 'bossContactStarted': return T.bossContactStarted;
+    case 'bossContactDamage':
+    case 'bossContactEnded':
+      return null;
     case 'cardsFull': return ev.secure ? '验证奖励待处理：请消耗、合成或替换一张手牌' : T.cardsFull;
     case 'collected': return ev.merges ? fmt(T.collectMerged, { count: ev.merges }) : fmt(T.collect, { name: name(ev.cardType) });
     case 'equipFull': return T.equipFull;
