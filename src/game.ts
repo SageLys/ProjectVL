@@ -24,6 +24,7 @@ import { createUpgradeFeedback } from './ui/upgradeFeedback';
 import { renderHud } from './ui/renderHud';
 import { renderCards } from './ui/renderCards';
 import { renderEquipment } from './ui/renderEquipment';
+import { renderMergeHints } from './ui/renderMergeHints';
 import type { TunerPanel } from './ui/tunerPanel';
 import { createModals } from './ui/modals';
 import { formatToast, SLOT_CHANGING } from './ui/eventText';
@@ -104,7 +105,10 @@ function resolveOfferedPerks(currentState: GameState): PerkDef[] {
 function refreshSlots(): void {
   renderCards(refs, state, slotHandlers);
   renderEquipment(refs, state, slotHandlers);
+  renderMergeHints(refs.dock, state);
 }
+
+window.addEventListener('resize', () => renderMergeHints(refs.dock, state));
 
 const slotHandlers: SlotHandlers = {
   dragStart(e, source, index, el) {
