@@ -72,6 +72,12 @@
     "highestCard": "最高成就：{star}★{name}"
   },
   "cards": {
+    "fusion": {
+      "name": "形态融合",
+      "beamMortar": "已融合：光束轰击",
+      "hand": { "shortByTier": { "1": "形态融合" }, "milestones": {} },
+      "equip": { "shortByTier": { "1": "形态融合" }, "milestones": {} }
+    },
     "pierce": {
       "name": "直球拒绝",
       "hand": {

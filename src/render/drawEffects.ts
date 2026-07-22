@@ -29,6 +29,26 @@ export function drawZones(ctx: CanvasRenderingContext2D, state: GameState): void
   }
 }
 
+/** Taunt ranges are a ground-layer affordance: zones below, combat entities above. */
+export function drawTauntRanges(ctx: CanvasRenderingContext2D, state: GameState): void {
+  for (const summon of state.summons) {
+    if (!summon.tauntRadius || summon.tauntRadius <= 0) continue;
+    ctx.save();
+    ctx.globalAlpha = 0.08;
+    ctx.fillStyle = '#ffd166';
+    ctx.beginPath();
+    ctx.arc(summon.x, summon.y, summon.tauntRadius, 0, TAU);
+    ctx.fill();
+    ctx.globalAlpha = 0.28;
+    ctx.strokeStyle = '#ffd166';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(summon.x, summon.y, summon.tauntRadius, 0, TAU);
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
 /** 召唤物与炮台护盾：在实体层之上绘制。 */
 export function drawSummonsAndShield(ctx: CanvasRenderingContext2D, state: GameState): void {
   for (const s of state.summons) {

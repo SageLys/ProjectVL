@@ -87,13 +87,13 @@
       "id": "decoy", "category": "control", "synergyTags": ["control", "defense"], "textKey": "cards.decoy", "teaching": false, "implementationBatch": 1,
       "stars": {
         "3": { "tier": "core", "equip": [
-          { "trigger": "onWaveStart", "effects": [{ "atom": "summon", "params": { "kind": "decoy", "count": 1, "hp": 60, "tauntRadius": 140, "duration": 999, "explode": true, "explodeDamageMul": 1.2, "knockbackDistance": 70 } }] }
+          { "trigger": "onWaveStart", "effects": [{ "atom": "summon", "params": { "kind": "decoy", "count": 1, "hp": 60, "tauntRadius": 140, "placement": "threatDirection", "distanceFromTurret": 150, "explode": true, "explodeDamageMul": 1.2, "knockbackDistance": 70 } }] }
         ] },
         "5": { "tier": "dual", "equip": [
-          { "trigger": "onWaveStart", "effects": [{ "atom": "summon", "params": { "kind": "decoy", "count": 1, "hp": 60, "tauntRadius": 140, "duration": 999, "explode": true, "explodeDamageMul": 1.2, "knockbackDistance": 70, "respawnOnce": true } }] }
+          { "trigger": "onWaveStart", "effects": [{ "atom": "summon", "params": { "kind": "decoy", "count": 1, "hp": 60, "tauntRadius": 140, "placement": "threatDirection", "distanceFromTurret": 150, "explode": true, "explodeDamageMul": 1.2, "knockbackDistance": 70, "respawnOnce": true } }] }
         ] },
         "6": { "tier": "transform", "equip": [
-          { "trigger": "onWaveStart", "effects": [{ "atom": "summon", "params": { "kind": "mirrorTurret", "count": 1, "hp": 80, "damageRatio": 0.3, "priorityWeight": 5, "tauntRadius": 2000, "duration": 999 } }] }
+          { "trigger": "onWaveStart", "effects": [{ "atom": "summon", "params": { "kind": "mirrorTurret", "count": 1, "hp": 80, "damageRatio": 0.3, "priorityWeight": 5, "tauntRadius": 2000, "placement": "threatDirection", "distanceFromTurret": 150 } }] }
         ] }
       },
       "amplifyAxis": { "description": "图腾 HP +50%、嘲讽半径 +20", "params": { "hp": "+50%", "tauntRadius": "+20" } },
@@ -101,18 +101,18 @@
         "1": { "radius": 120, "duration": 4, "effects": [{ "atom": "summon", "params": { "kind": "decoy", "count": 1, "hp": 30, "tauntRadius": 120, "duration": 4 } }] },
         "3": { "radius": 160, "duration": 5, "effects": [{ "atom": "summon", "params": { "kind": "decoy", "count": 1, "hp": 50, "tauntRadius": 160, "duration": 5, "explode": true, "explodeDamageMul": 1.5, "knockbackDistance": 90 } }] },
         "6": { "radius": 160, "duration": 5, "effects": [{ "atom": "summon", "params": { "kind": "mirrorTurret", "count": 1, "hp": 9999, "damageRatio": 0.6, "duration": 5 } }] }
-      } }, "designNotes": "让它们打错目标。5★ 重生：图腾被摧毁时在新位置重生一次（每实例限一次）。"
+      } }, "designNotes": "让它们打错目标。装备态每卡每绑定单实例，按威胁方向放在炮台外围；敌人撞诱饵会消散且不给击杀奖励，这是刻意设计。5★ 重生：图腾被摧毁时在新位置重生一次（每波限一次）。"
     },
     {
       "id": "scorch", "category": "domain", "synergyTags": ["domain"], "textKey": "cards.scorch", "teaching": false, "implementationBatch": 1,
       "stars": {
         "3": { "tier": "core", "equip": [
           { "trigger": "onHit", "effects": [{ "atom": "groundZone", "params": { "radius": 40, "duration": 2.5, "tickInterval": 0.5, "effects": [{ "atom": "dot", "params": { "damageRatio": 0.15 } }] } }] },
-          { "trigger": "onKill", "triggerParams": { "requiresStatus": "dot" }, "effects": [{ "atom": "groundZone", "params": { "radius": 40, "duration": 2.5, "tickInterval": 0.5, "effects": [{ "atom": "dot", "params": { "damageRatio": 0.15 } }] } }] }
+          { "trigger": "onKill", "triggerParams": { "requiresSource": "dot" }, "effects": [{ "atom": "groundZone", "params": { "radius": 40, "duration": 2.5, "tickInterval": 0.5, "effects": [{ "atom": "dot", "params": { "damageRatio": 0.15 } }] } }] }
         ] },
         "5": { "tier": "dual", "equip": [
           { "trigger": "onHit", "effects": [{ "atom": "groundZone", "params": { "radius": 40, "duration": 2.5, "tickInterval": 0.5, "effects": [{ "atom": "dot", "params": { "damageRatio": 0.15 } }, { "atom": "vulnerable", "params": { "ratio": 0.15, "duration": 0.6 } }] } }] },
-          { "trigger": "onKill", "triggerParams": { "requiresStatus": "dot" }, "effects": [{ "atom": "groundZone", "params": { "radius": 40, "duration": 2.5, "tickInterval": 0.5, "effects": [{ "atom": "dot", "params": { "damageRatio": 0.15 } }, { "atom": "vulnerable", "params": { "ratio": 0.15, "duration": 0.6 } }] } }] }
+          { "trigger": "onKill", "triggerParams": { "requiresSource": "dot" }, "effects": [{ "atom": "groundZone", "params": { "radius": 40, "duration": 2.5, "tickInterval": 0.5, "effects": [{ "atom": "dot", "params": { "damageRatio": 0.15 } }, { "atom": "vulnerable", "params": { "ratio": 0.15, "duration": 0.6 } }] } }] }
         ] },
         "6": { "tier": "transform", "equip": [
           { "trigger": "passive", "effects": [{ "atom": "aura", "params": { "radius": 200, "tickInterval": 0.5, "effects": [{ "atom": "dot", "params": { "damageRatio": 0.1 } }, { "atom": "slow", "params": { "ratio": 0.15, "duration": 0.6 } }] } }] }

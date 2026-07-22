@@ -148,6 +148,13 @@ export interface Enemy {
   ccResistOverride?: number;
   knockbackResistOverride?: number;
   validationReward?: ValidationRewardSpec;
+  /** Presentation-only memory used to emit a pulse when taunt target changes. */
+  tauntVfxTargetId?: number;
+}
+
+export interface AttackRider extends EffectDef {
+  /** Equipment card that attached this rider, for DEV attribution only. */
+  sourceCardId?: number;
 }
 
 export interface Bullet {
@@ -169,7 +176,7 @@ export interface Bullet {
   /** 已命中敌人 id（穿透弹防重复命中）。 */
   hitIds?: number[];
   /** 命中时施加的附着效果（onFire 装备态写入，如减速/冻结层/击退）。 */
-  riders?: EffectDef[];
+  riders?: AttackRider[];
   /** mortar 落点。 */
   targetX?: number;
   targetY?: number;
@@ -180,6 +187,72 @@ export interface Bullet {
   ricochetLeft?: number;
   /** 分裂代数（split 原子用，0=原弹）；配合 split 的 maxDepth 参数防止子弹片再分裂形成指数级增殖。 */
   splitDepth?: number;
+  /** 统一攻击实例；普通弹/榴弹/分裂片与光束共享同一命中与触发语义。 */
+  attack?: AttackInstance;
+  /** 原子生成的分裂片延迟到下一帧进入 beginAttack/onFire。 */
+  pendingOnFire?: boolean;
+  /** 0..1 visual flight progress for mortar arc rendering. */
+  flightProgress?: number;
+  /** DEV attribution for projectiles emitted by an equipment summon. */
+  sourceCardId?: number;
+}
+
+export type AttackDelivery = 'projectile' | 'line' | 'lob';
+
+export interface WeaponImpactSpec {
+  kind: 'aoe';
+  sourceCardId?: number;
+  sourceCardType: CardType;
+  sourceStar: number;
+  damageRatio: number;
+  radius: number;
+  falloff: number;
+}
+
+/** 每次开火（或每道持续光束）只有一个实例，命中去重与 riders 均挂在这里。 */
+export interface AttackInstance {
+  attackId: number;
+  delivery: AttackDelivery;
+  /** 开火时快照的炮台基础伤害，供融合 impact 使用。 */
+  baseDamage: number;
+  damage: number;
+  riders: AttackRider[];
+  hitIds: number[];
+  impacts: WeaponImpactSpec[];
+  sourceStar: number;
+  /** Card owning the delivery axis; ordinary turret shots have no source card. */
+  sourceCardId?: number;
+}
+
+/** 真持续光束运行时实体；表现层在后续任务中读取这些数据绘制。 */
+export interface BeamEntity extends AttackInstance {
+  angle: number;
+  width: number;
+  range: number;
+  remaining: number;
+  duration: number;
+  tickTimer: number;
+  tickInterval: number;
+  damagePerTick: number;
+}
+
+/** Pure output channel: combat rules may append and age VFX, but never branch on them. */
+export type CombatVfx =
+  | { kind: 'mortarTarget'; x: number; y: number; radius: number; remaining: number }
+  | { kind: 'mortarImpact'; x: number; y: number; radius: number; remaining: number }
+  | { kind: 'tauntPulse'; enemyId: number; remaining: number }
+  | { kind: 'summonEvent'; x: number; y: number; event: 'hit' | 'destroyed' | 'respawn'; remaining: number };
+
+export interface PerCardCombatTelemetry {
+  triggers: number;
+  hits: number;
+  damage: number;
+  suppressedByFusion?: number;
+}
+
+export interface CombatTelemetryState {
+  wave: number;
+  perCard: Record<number, PerCardCombatTelemetry>;
 }
 
 export interface Particle {
@@ -245,6 +318,12 @@ export interface Zone {
 export interface Summon {
   id: number;
   kind: 'decoy' | 'mirrorTurret' | 'orbital';
+  /** 装备态召唤物来源；无来源表示消耗态/其他临时召唤物，仍走自身 duration。 */
+  sourceCardId?: number;
+  sourceBindingIndex?: number;
+  /** 装备态重生/换波刷新复用的放置策略。 */
+  placement?: 'threatDirection';
+  distanceFromTurret?: number;
   x: number;
   y: number;
   hp: number;
@@ -313,6 +392,8 @@ export interface GameState {
   between: number;
   enemies: Enemy[];
   bullets: Bullet[];
+  beams: BeamEntity[];
+  vfx: CombatVfx[];
   particles: Particle[];
   groundDrops: GroundDrop[];
   cards: (Card | null)[];
@@ -333,6 +414,9 @@ export interface GameState {
   nextEnemyId: number;
   nextZoneId: number;
   nextSummonId: number;
+  nextAttackId: number;
+  /** Per-wave DEV counters. Core writes plain data; the HUD is an optional reader. */
+  combatTelemetry: CombatTelemetryState;
   spawnLeft: number;
   waveSpawnQuota: number;
   spawnTimer: number;

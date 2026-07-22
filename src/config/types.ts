@@ -127,6 +127,8 @@ export interface CombatConfig {
   /** Minimum visible space between the attack circle and every canvas edge. */
   attackPreviewMargin: number;
   bullet: { speed: number; life: number; radius: number; spread: number; muzzleOffset: number };
+  /** 多个主炮形态同时装备时的确定性融合衰减。 */
+  weaponFusion: { damping: number; radiusMul: number };
   breakthroughDist: number;
   /** 遥测危险区在突破线外额外延伸的宽度（像素）；不参与战斗判定。 */
   dangerZoneWidth: number;

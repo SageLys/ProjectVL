@@ -2,12 +2,13 @@
 // updateGame 在各系统推进后统一调用 tickEffects。
 import { cfg } from '../../config';
 import type { Config, GameEvent, GameState, Rng, Summon, Zone } from '../types';
-import { runEffects, type EffectCtx } from './registry';
+import { runEffects, threatDirectionSummonPosition, type EffectCtx } from './registry';
 import { fireTrigger, getModifiers, tickIntervalBindings } from './interpreter';
 import { tickStatusTimers, applyKnockback } from './statusSystem';
 import { dealDamage } from '../systems/damageSystem';
 import { spawnParticle } from '../systems/particleSystem';
 import { totalDamage, totalRange } from '../stats';
+import { recordCardImpact } from '../../telemetry/combatCounters';
 
 function insideZone(zone: Zone, x: number, y: number, r: number): boolean {
   const d = Math.hypot(x - zone.x, y - zone.y);
@@ -80,7 +81,9 @@ function explodeSummon(state: GameState, config: Config, rng: Rng, summon: Summo
   for (const e of [...state.enemies]) {
     if (Math.hypot(e.x - summon.x, e.y - summon.y) > 120 + e.r) continue;
     applyKnockback(e, summon.x, summon.y, knockbackDistance, maxRange);
+    const hpBefore = Math.max(0, e.hp);
     events.push(...dealDamage(state, config, rng, e, damage));
+    recordCardImpact(state, summon.sourceCardId, hpBefore - Math.max(0, e.hp));
   }
   for (let i = 0; i < 12; i++) spawnParticle(state, rng, summon.x, summon.y, '#ffd166', 160);
 }
@@ -107,6 +110,7 @@ function tickSummons(state: GameState, config: Config, rng: Rng, dt: number, eve
             vx: Math.cos(a) * B.speed, vy: Math.sin(a) * B.speed,
             r: B.radius, life: B.life,
             damage: totalDamage(state, config) * (s.damageRatio ?? 0.3),
+            sourceCardId: s.sourceCardId,
           });
           s.fireCd = 0.7;
         }
@@ -122,7 +126,9 @@ function tickSummons(state: GameState, config: Config, rng: Rng, dt: number, eve
       if (s.fireCd <= 0) {
         for (const e of [...state.enemies]) {
           if (Math.hypot(e.x - s.x, e.y - s.y) <= 20 + e.r) {
+            const hpBefore = Math.max(0, e.hp);
             events.push(...dealDamage(state, config, rng, e, totalDamage(state, config) * (s.damageRatio ?? 0.5)));
+            recordCardImpact(state, s.sourceCardId, hpBefore - Math.max(0, e.hp));
             s.fireCd = 0.25;
             break;
           }
@@ -132,14 +138,22 @@ function tickSummons(state: GameState, config: Config, rng: Rng, dt: number, eve
     const dead = s.hp <= 0;
     const expired = s.remaining != null && s.remaining <= 0;
     if (dead || expired) {
+      if (dead) state.vfx.push({ kind: 'summonEvent', x: s.x, y: s.y, event: 'destroyed', remaining: 0.4 });
       explodeSummon(state, config, rng, s, events);
       // 重生一次（decoy 5★）：只对"被摧毁"（非到期）生效，每个召唤物实例限一次。
       if (dead && s.respawnOnce && !s.respawned) {
-        const { width, height } = cfg.combat.canvas;
-        s.x = 40 + rng() * (width - 80);
-        s.y = 40 + rng() * (height - 80);
+        if (s.placement === 'threatDirection' && s.sourceCardId != null) {
+          const position = threatDirectionSummonPosition(state, s.sourceCardId, s.distanceFromTurret ?? 150);
+          s.x = position.x;
+          s.y = position.y;
+        } else {
+          const { width, height } = cfg.combat.canvas;
+          s.x = 40 + rng() * (width - 80);
+          s.y = 40 + rng() * (height - 80);
+        }
         s.hp = s.maxHp;
         s.respawned = true;
+        state.vfx.push({ kind: 'summonEvent', x: s.x, y: s.y, event: 'respawn', remaining: 0.55 });
         continue;
       }
       state.summons.splice(i, 1);
@@ -166,13 +180,20 @@ function tickBuffs(state: GameState, dt: number): void {
   }
 }
 
+function tickVfx(state: GameState, dt: number): void {
+  for (let i = state.vfx.length - 1; i >= 0; i--) {
+    state.vfx[i].remaining -= dt;
+    if (state.vfx[i].remaining <= 0) state.vfx.splice(i, 1);
+  }
+}
+
 /** 挂敌身的 dot 结算 + 状态计时推进。 */
 function tickDots(state: GameState, config: Config, rng: Rng, dt: number, events: GameEvent[]): void {
   for (const enemy of [...state.enemies]) {
     let total = 0;
     for (const dot of enemy.status.dots) if (dot.remaining > 0) total += dot.dps * dt;
     enemy.status.dots = enemy.status.dots.filter(d => d.remaining > 0);
-    if (total > 0) events.push(...dealDamage(state, config, rng, enemy, total));
+    if (total > 0) events.push(...dealDamage(state, config, rng, enemy, total, 'dot'));
   }
   tickStatusTimers(state, dt);
 }
@@ -187,6 +208,7 @@ export function tickEffects(state: GameState, config: Config, rng: Rng, dt: numb
   tickShield(state, dt);
   tickBuffs(state, dt);
   tickDots(state, config, rng, dt, events);
+  tickVfx(state, dt);
   return events;
 }
 

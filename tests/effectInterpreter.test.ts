@@ -130,10 +130,11 @@ describe('解释器 · 装备态触发绑定', () => {
     }]);
     const s = freshState();
     equipCard(s, 'pierce', 3);
-    expect(getModifiers(s).morph).toBe('none');
-    s.cards = s.cards.map(() => null);
+    expect(getModifiers(s).weaponForms).toEqual([]);
+    s.equipment = s.equipment.map(() => null);
     equipCard(s, 'pierce', 6);
-    expect(getModifiers(s).morph).toBe('beam');
+    expect(getModifiers(s).weaponForms).toHaveLength(1);
+    expect(getModifiers(s).weaponForms[0]).toMatchObject({ kind: 'beam', star: 6 });
   });
 });
 
@@ -194,7 +195,7 @@ describe('解释器 · passive 修饰聚合', () => {
     registerSkillDefs([def('splitBlast', passive([{ atom: 'mortarMorph', params: { radius: 90, damageRatio: 1, falloff: 0.5 } }]))]);
     const s = freshState();
     equipCard(s, 'splitBlast', 3);
-    expect(getModifiers(s).morph).toBe('mortar');
+    expect(getModifiers(s).weaponForms[0]).toMatchObject({ kind: 'mortar' });
     shoot(s, config, rng, enemy({ x: 350, y: 365 }));
     expect(s.bullets[0].kind).toBe('mortar');
     const e = enemy({ x: 350, y: 365, hp: 1000, maxHp: 1000 });
@@ -214,6 +215,8 @@ describe('解释器 · passive 修饰聚合', () => {
     expect(e.hp).toBe(1000);
     updateTurret(s, config, rng, 0.3);
     expect(s.bullets).toHaveLength(0);
+    expect(s.beams).toHaveLength(1);
+    updateTurret(s, config, rng, 0.1);
     expect(e.hp).toBeLessThan(1000);
   });
 });

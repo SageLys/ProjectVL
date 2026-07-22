@@ -1,7 +1,7 @@
 import { cfg } from '../../config';
 import type { Card, Config, GameEvent, GameState, Rng, SlotKind } from '../types';
 import { autoMergeCards, commitMerge } from './cardSystem';
-import { getSkillDef, releaseConsumable } from '../effects/interpreter';
+import { getSkillDef, reconcileEquipmentPassives, releaseConsumable } from '../effects/interpreter';
 
 function collectionFor(state: GameState, kind: SlotKind): (Card | null)[] {
   return kind === 'cards' ? state.cards : state.equipment;
@@ -13,6 +13,7 @@ function feed(state: GameState, config: Config, rng: Rng, source: (Card | null)[
   state.equipOps++;
   const events: GameEvent[] = [{ type: 'fed', cardType: target.type, resultStar: target.star, slotIndex: targetIndex, targetCardId: target.id }];
   events.push(...commitMerge(state, config, rng, target.type, target.star));
+  events.push(...reconcileEquipmentPassives(state, config, rng));
   return events;
 }
 
@@ -68,6 +69,9 @@ export function moveOrSwap(state: GameState, config: Config, rng: Rng, sourceKin
     : { merged: 0, events: [] as GameEvent[] };
   if (!replaced && !(targetKind === 'equipment' && sourceKind === 'cards')) events.push({ type: 'moved', cardType: moving.type, merges: merged });
   events.push(...mergeEvents);
+  if (sourceKind === 'equipment' || targetKind === 'equipment') {
+    events.push(...reconcileEquipmentPassives(state, config, rng));
+  }
   return events;
 }
 
@@ -80,5 +84,6 @@ export function consumeCard(state: GameState, config: Config, rng: Rng, sourceIn
   state.consumes++;
   const events: GameEvent[] = [{ type: 'skillConsumed', cardType: card.type, star: card.star, x, y }];
   if (getSkillDef(card.type)) events.push(...releaseConsumable(state, config, rng, card.type, card.star, x, y));
+  if (sourceKind === 'equipment') events.push(...reconcileEquipmentPassives(state, config, rng));
   return events;
 }

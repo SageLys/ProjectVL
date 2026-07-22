@@ -5,7 +5,7 @@
 //   - 区域 tick：zoneTick=true + ctx.enemy 逐个结算。
 // 纯修饰类原子（掉率乘数/反伤/换形等）在 interpreter.getModifiers 聚合，这里是 no-op。
 import { cfg } from '../../config';
-import type { Bullet, CardType, Config, Enemy, GameEvent, GameState, GroundDrop, Rng, Zone } from '../types';
+import type { AttackInstance, Bullet, CardType, Config, Enemy, GameEvent, GameState, GroundDrop, Rng, Summon, Zone } from '../types';
 import type { AtomName, EffectDef } from './defs';
 import {
   applyBrand, applyDot, applyFreeze, applyKnockback, applySlow, applyStun, applyTaunt, applyVulnerable,
@@ -35,6 +35,10 @@ export interface EffectCtx {
   consume?: boolean;
   /** 区域周期结算（dot 直接掉血而非叠状态）。 */
   zoneTick?: boolean;
+  attack?: AttackInstance;
+  /** 装备态绑定来源；存在时 summon 按(卡,绑定)维持单实例。 */
+  sourceCardId?: number;
+  sourceBindingIndex?: number;
   bullet?: Bullet;
   enemy?: Enemy;
   drop?: GroundDrop;
@@ -98,7 +102,7 @@ function makeZone(ctx: EffectCtx, p: Record<string, unknown>, fallbackRadius: nu
 function chainFrom(ctx: EffectCtx, p: Record<string, unknown>, start: Enemy, initialHit: boolean): void {
   const searchRange = num(p, 'searchRange', 130);
   const retention = num(p, 'damageRetention', 0.7);
-  let dmg = ctx.bullet ? ctx.bullet.damage : ctx.baseDamage * num(p, 'damageMul', 1);
+  let dmg = ctx.attack?.damage ?? (ctx.bullet ? ctx.bullet.damage : ctx.baseDamage * num(p, 'damageMul', 1));
   const visited = new Set<number>([start.id]);
   let current = start;
   if (initialHit) ctx.events.push(...dealDamage(ctx.state, ctx.config, ctx.rng, start, dmg, 'chain'));
@@ -152,10 +156,83 @@ const noopModifier: AtomHandler = () => {
   // 纯修饰原子：由 interpreter.getModifiers 聚合读取，触发式调用无动作。
 };
 
+/** Data-audit contract: these handlers intentionally do nothing at trigger time. */
+export const NOOP_MODIFIER_ATOMS = [
+  'dropRateMul', 'dropLifetimeMul', 'xpMul', 'expiryConvert', 'mergeRule',
+  'thorns', 'breachReduction', 'novaOnBreak',
+] as const satisfies readonly AtomName[];
+
+/** riders 属于 attack；projectile bullet 保留同一数组引用以兼容渲染/旧测试。 */
+function attachRider(ctx: EffectCtx, atom: AtomName, params: Record<string, unknown>): boolean {
+  if (ctx.enemy) return false;
+  const riders = ctx.attack?.riders ?? (ctx.bullet ? (ctx.bullet.riders ??= []) : undefined);
+  if (!riders) return false;
+  riders.push({ atom, params, sourceCardId: ctx.sourceCardId });
+  if (ctx.bullet && ctx.attack) ctx.bullet.riders = ctx.attack.riders;
+  return true;
+}
+
+/** 装备召唤物外围放置：优先朝 1/dist 加权威胁方向，无敌人时按装备槽序号均分方位。 */
+export function threatDirectionSummonPosition(
+  state: GameState, sourceCardId: number, distanceFromTurret: number,
+): { x: number; y: number } {
+  const turret = cfg.combat.turret;
+  let vx = 0;
+  let vy = 0;
+  for (const enemy of state.enemies) {
+    const dx = enemy.x - turret.x;
+    const dy = enemy.y - turret.y;
+    const distance = Math.max(1, Math.hypot(dx, dy));
+    const weight = 1 / distance;
+    vx += (dx / distance) * weight;
+    vy += (dy / distance) * weight;
+  }
+  let angle: number;
+  if (Math.hypot(vx, vy) > 1e-9) {
+    angle = Math.atan2(vy, vx);
+  } else {
+    const slot = Math.max(0, state.equipment.findIndex(card => card?.id === sourceCardId));
+    angle = slot / Math.max(1, state.equipment.length) * Math.PI * 2;
+  }
+  return {
+    x: turret.x + Math.cos(angle) * distanceFromTurret,
+    y: turret.y + Math.sin(angle) * distanceFromTurret,
+  };
+}
+
+export function equipmentSummonPosition(ctx: EffectCtx, p: Record<string, unknown>): { x: number; y: number } {
+  if (p.placement !== 'threatDirection' || ctx.sourceCardId == null) return ctx.origin;
+  return threatDirectionSummonPosition(ctx.state, ctx.sourceCardId, num(p, 'distanceFromTurret', 150));
+}
+
+function configureSummon(summon: Summon, ctx: EffectCtx, p: Record<string, unknown>, position: { x: number; y: number }): void {
+  const kind = str(p, 'kind', 'decoy') as Summon['kind'];
+  const hp = num(p, 'hp', 40);
+  summon.kind = kind;
+  summon.x = position.x;
+  summon.y = position.y;
+  summon.hp = hp;
+  summon.maxHp = hp;
+  summon.remaining = ctx.sourceCardId != null ? undefined : (cappedDuration(ctx, num(p, 'duration', ctx.duration ?? 4)) || undefined);
+  summon.placement = ctx.sourceCardId != null && p.placement === 'threatDirection' ? 'threatDirection' : undefined;
+  summon.distanceFromTurret = summon.placement ? num(p, 'distanceFromTurret', 150) : undefined;
+  summon.tauntRadius = num(p, 'tauntRadius', kind === 'orbital' ? 0 : 140);
+  summon.priorityWeight = num(p, 'priorityWeight', 1);
+  summon.damageRatio = num(p, 'damageRatio', 0.3);
+  summon.fireCd = 0;
+  summon.angle = ctx.rng() * Math.PI * 2;
+  summon.explodeOnDeath = p.explode
+    ? { damage: ctx.baseDamage * num(p, 'explodeDamageMul', 1.5), knockbackDistance: num(p, 'knockbackDistance', 80) }
+    : null;
+  summon.respawnOnce = p.respawnOnce === true;
+  summon.respawned = false;
+}
+
 export const ATOMS: Record<AtomName, AtomHandler> = {
   // —— 弹道 ——
   pierce(ctx, p) {
-    if (ctx.bullet) {
+    // pierce/ricochet 只描述实体弹轨迹；line/lob 下明确 no-op，不属于被动丢失。
+    if (ctx.bullet && (!ctx.attack || ctx.attack.delivery === 'projectile')) {
       ctx.bullet.pierceLeft = num(p, 'count', 1);
       ctx.bullet.damageRetention = num(p, 'damageRetention', 0.8);
       ctx.bullet.rampPerPierce = num(p, 'rampPerPierce', 0);
@@ -178,8 +255,8 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
     });
   },
   chain(ctx, p) {
-    if (ctx.bullet && !ctx.enemy) { (ctx.bullet.riders ??= []).push({ atom: 'chain', params: p }); return; }
-    if (ctx.enemy) { chainFrom(ctx, p, ctx.enemy, !ctx.bullet); return; }
+    if (attachRider(ctx, 'chain', p)) return;
+    if (ctx.enemy) { chainFrom(ctx, p, ctx.enemy, !ctx.attack && !ctx.bullet); return; }
     // 无敌人载荷（interval 3★ / 消耗落点）：取 origin 附近至多 targets 个起点。
     const count = num(p, 'targets', 1);
     const picked = new Set<number>();
@@ -191,13 +268,13 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
     }
   },
   split(ctx, p) {
-    if (ctx.bullet && !ctx.enemy) { (ctx.bullet.riders ??= []).push({ atom: 'split', params: p }); return; }
+    if (attachRider(ctx, 'split', p)) return;
     // 命中即触发 onHit（含子弹片自身命中），maxDepth 防止子弹片再分裂形成指数级增殖（默认 1=只裂一代）。
     const depth = ctx.bullet?.splitDepth ?? 0;
     if (depth >= num(p, 'maxDepth', 1)) return;
     const origin = ctx.enemy ? { x: ctx.enemy.x, y: ctx.enemy.y } : ctx.origin;
     const count = num(p, 'count', 2);
-    const dmg = (ctx.bullet ? ctx.bullet.damage : ctx.baseDamage) * num(p, 'damageRatio', 0.5);
+    const dmg = (ctx.attack?.damage ?? (ctx.bullet ? ctx.bullet.damage : ctx.baseDamage)) * num(p, 'damageRatio', 0.5);
     for (let i = 0; i < count; i++) {
       const a = ctx.rng() * Math.PI * 2;
       const speed = cfg.combat.bullet.speed * 0.8;
@@ -210,17 +287,18 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
         kind: 'fragment',
         hitIds: ctx.enemy ? [ctx.enemy.id] : [],
         splitDepth: depth + 1,
+        pendingOnFire: true,
       });
     }
   },
   ricochet(ctx, p) {
-    if (ctx.bullet) ctx.bullet.ricochetLeft = num(p, 'bounces', 1);
+    if (ctx.bullet && (!ctx.attack || ctx.attack.delivery === 'projectile')) ctx.bullet.ricochetLeft = num(p, 'bounces', 1);
   },
   aoeOnHit(ctx, p) {
-    if (ctx.bullet && !ctx.enemy) { (ctx.bullet.riders ??= []).push({ atom: 'aoeOnHit', params: p }); return; }
+    if (attachRider(ctx, 'aoeOnHit', p)) return;
     const at = ctx.enemy ? { x: ctx.enemy.x, y: ctx.enemy.y } : ctx.origin;
     explode(ctx, at.x, at.y, num(p, 'radius', ctx.radius ?? 70),
-      (ctx.bullet ? ctx.bullet.damage : ctx.baseDamage) * num(p, 'damageRatio', 0.6), num(p, 'falloff', 0.5));
+      (ctx.attack?.damage ?? (ctx.bullet ? ctx.bullet.damage : ctx.baseDamage)) * num(p, 'damageRatio', 0.6), num(p, 'falloff', 0.5));
   },
   beamMorph(ctx, p) {
     // 装备态换形由 getModifiers 聚合；触发式调用（interval 绑定）= 立即发射一道光束。
@@ -234,11 +312,11 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
 
   // —— 控制 ——
   slow(ctx, p) {
-    if (ctx.bullet && !ctx.enemy) { (ctx.bullet.riders ??= []).push({ atom: 'slow', params: p }); return; }
+    if (attachRider(ctx, 'slow', p)) return;
     for (const e of targets(ctx, p)) applySlow(e, num(p, 'ratio', 0.3), num(p, 'duration', 1.5));
   },
   freeze(ctx, p) {
-    if (ctx.bullet && !ctx.enemy) { (ctx.bullet.riders ??= []).push({ atom: 'freeze', params: p }); return; }
+    if (attachRider(ctx, 'freeze', p)) return;
     const stacks = typeof p.stacksToTrigger === 'number' ? (p.stacksToTrigger as number) : undefined;
     for (const e of targets(ctx, p)) {
       if (controlBudgetDenies(ctx.state, e)) continue;
@@ -246,7 +324,7 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
     }
   },
   stun(ctx, p) {
-    if (ctx.bullet && !ctx.enemy) { (ctx.bullet.riders ??= []).push({ atom: 'stun', params: p }); return; }
+    if (attachRider(ctx, 'stun', p)) return;
     const chance = num(p, 'chance', 1);
     for (const e of targets(ctx, p)) {
       if (controlBudgetDenies(ctx.state, e)) continue;
@@ -254,7 +332,7 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
     }
   },
   knockback(ctx, p) {
-    if (ctx.bullet && !ctx.enemy) { (ctx.bullet.riders ??= []).push({ atom: 'knockback', params: p }); return; }
+    if (attachRider(ctx, 'knockback', p)) return;
     const from = ctx.bullet ? { x: ctx.bullet.x, y: ctx.bullet.y } : ctx.origin;
     const collision = num(p, 'collisionDamage', 0);
     const maxRange = totalRange(ctx.state, ctx.config);
@@ -279,7 +357,7 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
     for (const e of targets(ctx, p, num(p, 'radius', 120))) applyTaunt(e, ctx.origin.x, ctx.origin.y, duration, summonId);
   },
   vulnerable(ctx, p) {
-    if (ctx.bullet && !ctx.enemy) { (ctx.bullet.riders ??= []).push({ atom: 'vulnerable', params: p }); return; }
+    if (attachRider(ctx, 'vulnerable', p)) return;
     for (const e of targets(ctx, p)) applyVulnerable(e, num(p, 'ratio', 0.2), num(p, 'duration', 2));
   },
 
@@ -299,7 +377,7 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
       : num(p, 'damagePerTick', 5);
     if (ctx.zoneTick && ctx.enemy) {
       // 区域周期结算：每 tick 直接掉血，不叠状态。
-      ctx.events.push(...dealDamage(ctx.state, ctx.config, ctx.rng, ctx.enemy, perTick));
+      ctx.events.push(...dealDamage(ctx.state, ctx.config, ctx.rng, ctx.enemy, perTick, 'dot'));
       return;
     }
     const duration = cappedDuration(ctx, num(p, 'duration', ctx.duration ?? 2));
@@ -307,29 +385,35 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
   },
   summon(ctx, p) {
     const kind = str(p, 'kind', 'decoy') as 'decoy' | 'mirrorTurret' | 'orbital';
+    if (ctx.sourceCardId != null && ctx.sourceBindingIndex != null) {
+      const matches = ctx.state.summons.filter(s =>
+        s.sourceCardId === ctx.sourceCardId && s.sourceBindingIndex === ctx.sourceBindingIndex);
+      const summon = matches[0] ?? {
+        id: ctx.state.nextSummonId++, kind, x: ctx.origin.x, y: ctx.origin.y,
+        hp: 0, maxHp: 0, sourceCardId: ctx.sourceCardId, sourceBindingIndex: ctx.sourceBindingIndex,
+      };
+      configureSummon(summon, ctx, p, equipmentSummonPosition(ctx, p));
+      if (!matches.length) ctx.state.summons.push(summon);
+      // 装备态每(卡,绑定)严格单实例；重复实例由刷新动作就地收敛。
+      for (let i = matches.length - 1; i >= 1; i--) {
+        const index = ctx.state.summons.indexOf(matches[i]);
+        if (index >= 0) ctx.state.summons.splice(index, 1);
+      }
+      return;
+    }
     const count = num(p, 'count', 1);
     for (let i = 0; i < count; i++) {
       const jitter = count > 1 ? 30 : 0;
-      const duration = num(p, 'duration', ctx.duration ?? 4);
-      ctx.state.summons.push({
+      const summon: Summon = {
         id: ctx.state.nextSummonId++,
         kind,
         x: ctx.origin.x + (ctx.rng() - 0.5) * jitter,
         y: ctx.origin.y + (ctx.rng() - 0.5) * jitter,
-        hp: num(p, 'hp', 40),
-        maxHp: num(p, 'hp', 40),
-        remaining: cappedDuration(ctx, duration) || undefined,
-        tauntRadius: num(p, 'tauntRadius', kind === 'orbital' ? 0 : 140),
-        priorityWeight: num(p, 'priorityWeight', 1),
-        damageRatio: num(p, 'damageRatio', 0.3),
-        fireCd: 0,
-        angle: ctx.rng() * Math.PI * 2,
-        explodeOnDeath: p.explode
-          ? { damage: ctx.baseDamage * num(p, 'explodeDamageMul', 1.5), knockbackDistance: num(p, 'knockbackDistance', 80) }
-          : null,
-        respawnOnce: p.respawnOnce === true,
-        respawned: false,
-      });
+        hp: 0,
+        maxHp: 0,
+      };
+      configureSummon(summon, ctx, p, { x: summon.x, y: summon.y });
+      ctx.state.summons.push(summon);
     }
   },
 
@@ -376,7 +460,13 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
     const hits = num(p, 'absorbHits', 2);
     const regen = typeof p.regenSeconds === 'number' ? (p.regenSeconds as number) : null;
     const cur = ctx.state.shield;
-    if (cur && cur.hits >= hits) { cur.regenSeconds = regen ?? cur.regenSeconds; return; }
+    // 融合契约：容量取最大；所有声明了再生的来源中，间隔取最小。
+    if (cur) {
+      cur.maxHits = Math.max(cur.maxHits, hits);
+      cur.hits = Math.max(cur.hits, hits);
+      if (regen != null) cur.regenSeconds = cur.regenSeconds == null ? regen : Math.min(cur.regenSeconds, regen);
+      return;
+    }
     ctx.state.shield = { hits, maxHits: hits, regenRemaining: null, regenSeconds: regen };
   },
   thorns: noopModifier,

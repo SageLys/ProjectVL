@@ -7,6 +7,9 @@ import type { TelemetryEvent, TelemetryInputType, TelemetrySession } from './typ
 import { difficultyMultipliersFor } from '../core/difficulty';
 import { stageForWave } from '../core/runStage';
 import { calculateBuildMaturity } from '../core/systems/dropTypePolicy';
+import { composeWeaponForm, getModifiers } from '../core/effects/interpreter';
+import { cardDisplayName } from '../ui/cardMeta';
+import { combatFormLabel } from '../debug/devToolsMode';
 
 declare const __GIT_COMMIT__: string;
 
@@ -76,8 +79,10 @@ export function createDevTelemetry(options: Options): DevTelemetry {
   hud.innerHTML = `<header><b>DEV 遥测</b><button type="button" data-hide>隐藏</button></header><dl>
     <dt>当前同屏</dt><dd data-current>0</dd><dt>本波 E1 P50/P95</dt><dd data-e1>—</dd>
     <dt>空档 当前 / E2最大</dt><dd data-gap>0.00 / 0.00s</dd><dt>滚动 10s 机会</dt><dd data-e3>0</dd>
-    <dt>本波危险区进入</dt><dd data-e4>0</dd><dt>开局 90s 操作</dt><dd data-e6>0</dd><dt>FPS</dt><dd data-fps>0</dd></dl>`;
+    <dt>本波危险区进入</dt><dd data-e4>0</dd><dt>开局 90s 操作</dt><dd data-e6>0</dd><dt>FPS</dt><dd data-fps>0</dd></dl>
+    <section class="telemetry-cards"><b>装备触发（本波）</b><div data-card-stats></div></section>`;
   document.body.append(hud);
+  hud.style.width = '250px';
   const actions = document.createElement('div');
   actions.className = 'telemetry-actions';
   actions.innerHTML = `<button type="button" data-toggle>HUD</button><button type="button" data-export>导出会话</button><button type="button" data-baseline>导出手感基线</button><label>空档警戒(s)<input data-threshold type="number" min="0.25" step="0.25" value="3"></label>`;
@@ -494,6 +499,17 @@ export function createDevTelemetry(options: Options): DevTelemetry {
     hud.querySelector('[data-e4]')!.textContent = String(events.filter(event => event.type === 'dangerEnter' && event.wave === wave).length);
     hud.querySelector('[data-e6]')!.textContent = String(inputs.filter(input => input.at <= 90).length);
     hud.querySelector('[data-fps]')!.textContent = fps.toFixed(0);
+    const form = composeWeaponForm(getModifiers(state()).weaponForms);
+    const formLabel = combatFormLabel(form);
+    hud.querySelector<HTMLElement>('[data-card-stats]')!.innerHTML = state().equipment
+      .map(card => {
+        if (!card) return '';
+        const stats = state().combatTelemetry.perCard[card.id] ?? { triggers: 0, hits: 0, damage: 0 };
+        const damped = stats.suppressedByFusion ? ` · 融合衰减×${stats.suppressedByFusion}` : '';
+        return `<div class="telemetry-card" style="display:grid;padding:4px 0;border-top:1px solid #234">`
+          + `<span>${cardDisplayName(card.type)} ${card.star}★</span><small>${formLabel}</small>`
+          + `<em>触发 ${stats.triggers} · 命中 ${stats.hits} · 伤害 ${stats.damage.toFixed(1)}${damped}</em></div>`;
+      }).join('');
   }
 
   hud.querySelector('[data-hide]')!.addEventListener('click', () => { hud.hidden = true; });

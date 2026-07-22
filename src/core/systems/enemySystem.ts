@@ -149,6 +149,11 @@ export function moveEnemies(state: GameState, config: Config, rng: Rng, dt: numb
   for (let i = state.enemies.length - 1; i >= 0; i--) {
     const e = state.enemies[i];
     const target = moveTargetFor(state, e);
+    const targetId = target.summon?.id;
+    if (targetId !== e.tauntVfxTargetId) {
+      if (targetId != null) state.vfx.push({ kind: 'tauntPulse', enemyId: e.id, remaining: 0.6 });
+      e.tauntVfxTargetId = targetId;
+    }
     const dx = target.x - e.x;
     const dy = target.y - e.y;
     const len = Math.hypot(dx, dy) || 1;
@@ -157,9 +162,13 @@ export function moveEnemies(state: GameState, config: Config, rng: Rng, dt: numb
     e.y += (dy / len) * e.speed * speedMul * dt;
     e.hit -= dt;
 
-    // 撞上嘲讽召唤物：召唤物掉血，敌人消散（不给击杀奖励）。
+    // 撞上嘲讽召唤物：召唤物掉血，敌人消散（刻意不给击杀奖励）；waveBoss 清嘲讽后继续推进。
     if (target.summon && Math.hypot(target.x - e.x, target.y - e.y) < 16 + e.r) {
       target.summon.hp -= e.damage;
+      state.vfx.push({
+        kind: 'summonEvent', x: target.summon.x, y: target.summon.y,
+        event: 'hit', remaining: 0.22,
+      });
       for (let k = 0; k < 6; k++) spawnParticle(state, rng, e.x, e.y, '#8793a3', 120);
       if (e.spawnKind === 'waveBoss') {
         e.status.taunt = null;

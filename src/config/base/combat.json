@@ -23,6 +23,10 @@
     "spread": 0.05,
     "muzzleOffset": 24
   },
+  "weaponFusion": {
+    "damping": 0.75,
+    "radiusMul": 0.6
+  },
   "breakthroughDist": 48,
   "dangerZoneWidth": 72,
   "dtCap": 0.033,

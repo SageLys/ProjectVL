@@ -2,7 +2,7 @@ import { cfg } from '../../config';
 import type { Config, GameEvent, GameState, Rng } from '../types';
 import { endGame } from '../endGame';
 import { createEnemy, randomEdgeSpawnPosition, spawnEnemy, spawnWaveBoss } from './enemySystem';
-import { fireTrigger } from '../effects/interpreter';
+import { fireTrigger, reconcileEquipmentPassives } from '../effects/interpreter';
 import { budgetAdmission, budgetWaveQuotaFor } from './budgetRules';
 import { resolveActiveWavePlan } from '../runStage';
 export { budgetAdmission } from './budgetRules';
@@ -17,6 +17,7 @@ export function enemyCountFor(wave: number): number {
  */
 export function startNextWave(state: GameState, config: Config, rng: Rng): GameEvent[] {
   state.wave++;
+  state.combatTelemetry = { wave: state.wave, perCard: {} };
   state.ordinaryDrop.credit = Math.min(cfg.economy.ordinaryDropRate.carryCap, state.ordinaryDrop.credit);
   state.ordinaryDrop.activeRegularSeconds = 0;
   state.ordinaryDrop.shownThisWave = 0;
@@ -55,6 +56,7 @@ export function startNextWave(state: GameState, config: Config, rng: Rng): GameE
   }
   const events: GameEvent[] = [{ type: 'waveStart', wave: state.wave }];
   events.push(...fireTrigger(state, config, rng, 'onWaveStart', { wave: state.wave }));
+  events.push(...reconcileEquipmentPassives(state, config, rng));
   return events;
 }
 
@@ -157,6 +159,8 @@ export function jumpToWave(state: GameState, config: Config, rng: Rng, targetWav
   const wave = Math.max(1, Math.min(cfg.waves.totalWaves, Math.trunc(targetWave)));
   state.enemies.length = 0;
   state.bullets.length = 0;
+  state.beams.length = 0;
+  state.vfx.length = 0;
   state.particles.length = 0;
   state.groundDrops.length = 0;
   state.zones.length = 0;

@@ -5,7 +5,9 @@ import { drawBullets } from './drawBullets';
 import { drawEnemies } from './drawEnemies';
 import { drawDrops } from './drawDrops';
 import { drawTurret } from './drawTurret';
-import { drawZones, drawSummonsAndShield } from './drawEffects';
+import { drawZones, drawTauntRanges, drawSummonsAndShield } from './drawEffects';
+import { drawBeams } from './drawBeams';
+import { drawVfx } from './drawVfx';
 import { drawBountyOffers } from './drawBountyOffers';
 import { drawBountyEffects } from './drawBountyEffects';
 
@@ -15,9 +17,12 @@ export function createRenderer(ctx: CanvasRenderingContext2D) {
     drawArena(ctx, state, config);
     drawBountyOffers(ctx, state);
     drawZones(ctx, state);
+    drawTauntRanges(ctx, state);
     drawParticles(ctx, state);
     drawBullets(ctx, state);
     drawEnemies(ctx, state);
+    drawBeams(ctx, state);
+    drawVfx(ctx, state);
     drawBountyEffects(ctx, state);
     drawDrops(ctx, state);
     drawSummonsAndShield(ctx, state);

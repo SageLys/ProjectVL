@@ -1,12 +1,116 @@
 // 通用效果解释器：触发器 → 装备态绑定 → 效果原子；消耗态 → 落点释放。
 // GameEvent 流是触发器总线（P2 §3），本模块把 8 个触发器接到各系统的结算点上。
 // 卡 = 数据（CardDef JSON）。本模块不认识任何具体卡，禁止每卡硬编码 if。
+//
+// 被动融合契约（与装备槽顺序无关）：
+//   数值乘数乘法叠加；加法数值相加（breachReduction 封顶 0.9）；阈值取最高；
+//   slow/vulnerable/freeze/stun 交给 statusSystem 取最强并延长；aura 按来源并行；
+//   所有触发绑定独立触发且所有攻击形态必须经过统一攻击管线；summon 每(卡,绑定)单实例（B2）；
+//   shield 的 absorbHits 取最大、regenSeconds 取最小；weaponForm 按正交轴确定性融合。
 import { cfg } from '../../config';
-import type { Bullet, Card, CardType, Config, Enemy, GameEvent, GameState, GroundDrop, Rng } from '../types';
+import type { AttackInstance, Bullet, Card, CardType, Config, Enemy, GameEvent, GameState, GroundDrop, Rng, Summon, WeaponImpactSpec } from '../types';
 import type { BindingDef, CardDef, EffectDef, Trigger } from './defs';
 import { ATOMS, runEffects, type EffectCtx } from './registry';
 import { totalDamage } from '../stats';
 import { applyBuildScalingToBindings, applyBuildScalingToTier } from '../systems/buildModifierSystem';
+import { recordCardImpact, recordCardTrigger, totalEnemyHp } from '../../telemetry/combatCounters';
+
+export const FUSION_RULES = [
+  '数值乘数(dropRateMul/dropLifetimeMul/xpMul): 乘法叠加',
+  '加法数值(thorns/breachReduction): 加法，breachReduction 上限 0.9',
+  '阈值(execute): 取最高',
+  '状态(slow/vulnerable/freeze/stun): statusSystem 取最强，时长取最大',
+  '光环/领域(aura): 按来源独立并行',
+  '触发绑定: 所有装备独立触发，所有攻击形态经过统一攻击管线',
+  '召唤物(summon): 每个(卡,绑定)单实例（B2）',
+  '护盾(shield): absorbHits 取最大，regenSeconds 取最小',
+  '主炮形态(weaponForm): delivery/impact/cadence 正交轴确定性融合',
+] as const;
+
+/** Passive no-op atoms wired into getModifiers; kept explicit for config audits. */
+export const MODIFIER_ATOMS_HANDLED = [
+  'dropRateMul', 'dropLifetimeMul', 'xpMul', 'expiryConvert', 'mergeRule',
+  'thorns', 'breachReduction', 'novaOnBreak',
+] as const;
+
+export interface WeaponFormContribution {
+  sourceCardId: number;
+  sourceCardType: CardType;
+  star: number;
+  kind: 'beam' | 'mortar';
+  params: Record<string, unknown>;
+}
+
+export interface WeaponFormSpec {
+  delivery: 'projectile' | 'line' | 'lob';
+  deliveryDamageRatio: number;
+  interval: number;
+  duration: number;
+  tickInterval: number;
+  width: number;
+  sourceStar: number;
+  sourceCardType?: CardType;
+  suppressedSourceCardTypes: CardType[];
+  impacts: WeaponImpactSpec[];
+}
+
+const formNumber = (p: Record<string, unknown>, key: string, fallback: number): number =>
+  typeof p[key] === 'number' ? (p[key] as number) : fallback;
+
+/**
+ * 主炮形态正交融合：先按 cardType（再按 id）排序，再独立选择 delivery 与叠加 impact。
+ * line > lob > projectile；第 2 个及之后贡献应用统一衰减，因此装备槽互换不改变输出。
+ */
+export function composeWeaponForm(forms: WeaponFormContribution[]): WeaponFormSpec {
+  const sorted = [...forms].sort((a, b) =>
+    a.sourceCardType.localeCompare(b.sourceCardType) || a.sourceCardId - b.sourceCardId);
+  let delivery: WeaponFormSpec['delivery'] = 'projectile';
+  let deliveryDamageRatio = 1;
+  let interval = 0.9;
+  let duration = 0.6;
+  let tickInterval = 0.1;
+  let width = 26;
+  let sourceStar = 0;
+  let sourceCardType: CardType | undefined;
+  const suppressedSourceCardTypes: CardType[] = [];
+  const impacts: WeaponImpactSpec[] = [];
+
+  sorted.forEach((form, index) => {
+    const damping = index === 0 ? 1 : cfg.combat.weaponFusion.damping;
+    if (index > 0) suppressedSourceCardTypes.push(form.sourceCardType);
+    if (form.kind === 'beam') {
+      // line 的 delivery 优先级最高；其 damageRatio 属于投递轴本体。
+      delivery = 'line';
+      deliveryDamageRatio = formNumber(form.params, 'damageRatio', 1) * damping;
+      interval = formNumber(form.params, 'interval', 0.9);
+      duration = formNumber(form.params, 'duration', 0.6);
+      tickInterval = formNumber(form.params, 'tickInterval', 0.1);
+      width = formNumber(form.params, 'width', 26);
+      sourceStar = form.star;
+      sourceCardType = form.sourceCardType;
+    } else {
+      // mortar 的核心轴是 aoe；没有 line 时才用 lob 作为默认包装。
+      if (delivery !== 'line') {
+        delivery = 'lob';
+        sourceStar = form.star;
+        sourceCardType = form.sourceCardType;
+      }
+      impacts.push({
+        kind: 'aoe',
+        sourceCardType: form.sourceCardType,
+        sourceStar: form.star,
+        damageRatio: formNumber(form.params, 'damageRatio', 1.2) * damping,
+        radius: formNumber(form.params, 'radius', 90) * (index === 0 ? 1 : cfg.combat.weaponFusion.radiusMul),
+        falloff: formNumber(form.params, 'falloff', 0.5),
+      });
+    }
+  });
+
+  return {
+    delivery, deliveryDamageRatio, interval, duration, tickInterval, width,
+    sourceStar, sourceCardType, suppressedSourceCardTypes, impacts,
+  };
+}
 
 // —— 技能定义注册表（启动时由配置注入；测试可注入 fixture）——
 let DEFS = new Map<string, CardDef>();
@@ -58,6 +162,7 @@ function* equippedBindings(state: GameState): Generator<{ card: Card; def: CardD
 }
 
 export interface TriggerPayload {
+  attack?: AttackInstance;
   bullet?: Bullet;
   enemy?: Enemy;
   drop?: GroundDrop;
@@ -87,13 +192,19 @@ function bindingConditionMet(binding: BindingDef, payload: TriggerPayload): bool
   return true;
 }
 
-function baseCtx(state: GameState, config: Config, rng: Rng, star: number, payload: TriggerPayload = {}): EffectCtx {
+function baseCtx(
+  state: GameState, config: Config, rng: Rng, star: number, payload: TriggerPayload = {},
+  source?: { cardId: number; bindingIndex: number },
+): EffectCtx {
   return {
     state, config, rng,
     events: [],
     origin: payload.point ?? { x: cfg.combat.turret.x, y: cfg.combat.turret.y },
     star,
     baseDamage: totalDamage(state, config),
+    attack: payload.attack,
+    sourceCardId: source?.cardId,
+    sourceBindingIndex: source?.bindingIndex,
     bullet: payload.bullet,
     enemy: payload.enemy,
     drop: payload.drop,
@@ -142,8 +253,14 @@ function fireTriggerBindings(state: GameState, config: Config, rng: Rng, trigger
     if (binding.trigger !== trigger) continue;
     if (!bindingConditionMet(binding, payload)) continue;
     if (!cooldownReady(state, card.id, bindingIndex, binding)) continue;
-    const ctx = baseCtx(state, config, rng, card.star, payload);
+    const ctx = baseCtx(state, config, rng, card.star, payload, { cardId: card.id, bindingIndex });
+    const hpBefore = totalEnemyHp(state);
+    recordCardTrigger(state, card.id);
     runEffects(ctx, binding.effects);
+    const attributedDamage = Math.max(0, hpBefore - totalEnemyHp(state));
+    if (attributedDamage > 0 || trigger === 'onHit') {
+      recordCardImpact(state, card.id, attributedDamage, trigger === 'onHit' ? 1 : 0);
+    }
     events.push(...ctx.events);
   }
   return events;
@@ -160,8 +277,12 @@ export function tickIntervalBindings(state: GameState, config: Config, rng: Rng,
     liveKeys.add(key);
     const clock = (state.intervalClocks[key] ?? seconds) - dt;
     if (clock <= 0) {
-      const ctx = baseCtx(state, config, rng, card.star);
+      const ctx = baseCtx(state, config, rng, card.star, {}, { cardId: card.id, bindingIndex });
+      const hpBefore = totalEnemyHp(state);
+      recordCardTrigger(state, card.id);
       runEffects(ctx, binding.effects);
+      const attributedDamage = Math.max(0, hpBefore - totalEnemyHp(state));
+      if (attributedDamage > 0) recordCardImpact(state, card.id, attributedDamage);
       events.push(...ctx.events);
       state.intervalClocks[key] = seconds;
     } else {
@@ -169,7 +290,7 @@ export function tickIntervalBindings(state: GameState, config: Config, rng: Rng,
     }
   }
   for (const key of Object.keys(state.intervalClocks)) {
-    if (!liveKeys.has(key) && !key.startsWith('aura:') && !key.startsWith('morph:')) delete state.intervalClocks[key];
+    if (!liveKeys.has(key) && !key.startsWith('aura:') && !key.startsWith('weapon:')) delete state.intervalClocks[key];
   }
   return events;
 }
@@ -185,8 +306,7 @@ export interface Modifiers {
   novaOnBreak: { damage: number; knockbackDistance: number } | null;
   mergeRules: { rule: string; value: number }[];
   expiryConvert: { ratio: number } | null;
-  morph: 'none' | 'beam' | 'mortar';
-  morphParams: Record<string, unknown>;
+  weaponForms: WeaponFormContribution[];
   auras: { key: string; radius: number | null; radiusRatioOfRange: number | null; tickInterval: number; effects: EffectDef[]; star: number }[];
 }
 
@@ -198,7 +318,7 @@ export function getModifiers(state: GameState): Modifiers {
     dropRateMul: 1, dropLifetimeMul: 1, xpMul: 1,
     thornsRatio: 0, breachReduction: 0, executeThreshold: 0,
     novaOnBreak: null, mergeRules: [], expiryConvert: null,
-    morph: 'none', morphParams: {},
+    weaponForms: [],
     auras: [],
   };
   for (const { card, binding, bindingIndex } of equippedBindings(state)) {
@@ -221,10 +341,14 @@ export function getModifiers(state: GameState): Modifiers {
           m.expiryConvert = { ratio: num(p, 'ratio', 0.5) };
           break;
         case 'beamMorph':
-          if (binding.trigger === 'passive') { m.morph = 'beam'; m.morphParams = p; }
+          if (binding.trigger === 'passive') m.weaponForms.push({
+            sourceCardId: card.id, sourceCardType: card.type, star: card.star, kind: 'beam', params: p,
+          });
           break;
         case 'mortarMorph':
-          if (binding.trigger === 'passive') { m.morph = 'mortar'; m.morphParams = p; }
+          if (binding.trigger === 'passive') m.weaponForms.push({
+            sourceCardId: card.id, sourceCardType: card.type, star: card.star, kind: 'mortar', params: p,
+          });
           break;
         case 'aura':
           if (binding.trigger === 'passive') {
@@ -243,6 +367,66 @@ export function getModifiers(state: GameState): Modifiers {
     }
   }
   return m;
+}
+
+interface ExpectedEquipmentSummon {
+  card: Card;
+  bindingIndex: number;
+  effect: EffectDef;
+}
+
+function equipmentSummonMatches(summon: Summon, expected: ExpectedEquipmentSummon, baseDamage: number): boolean {
+  const p = expected.effect.params ?? {};
+  const kind = String(p.kind ?? 'decoy');
+  const hp = num(p, 'hp', 40);
+  const tauntRadius = num(p, 'tauntRadius', kind === 'orbital' ? 0 : 140);
+  const explode = p.explode === true;
+  return summon.kind === kind
+    && summon.maxHp === hp
+    && summon.remaining === undefined
+    && summon.tauntRadius === tauntRadius
+    && summon.priorityWeight === num(p, 'priorityWeight', 1)
+    && summon.damageRatio === num(p, 'damageRatio', 0.3)
+    && !!summon.explodeOnDeath === explode
+    && (!explode || (summon.explodeOnDeath?.damage === baseDamage * num(p, 'explodeDamageMul', 1.5)
+      && summon.explodeOnDeath.knockbackDistance === num(p, 'knockbackDistance', 80)))
+    && !!summon.respawnOnce === (p.respawnOnce === true);
+}
+
+/**
+ * 声明式装备被动对账：清理失去来源的召唤物、收敛重复实例，并立即补齐当前装备绑定。
+ * 临时/消耗态召唤物没有 source 标记，不参与此生命周期。
+ */
+export function reconcileEquipmentPassives(state: GameState, config: Config, rng: Rng): GameEvent[] {
+  const events: GameEvent[] = [];
+  const expected = new Map<string, ExpectedEquipmentSummon>();
+  for (const { card, binding, bindingIndex } of equippedBindings(state)) {
+    const summonEffect = binding.effects.find(effect => effect.atom === 'summon');
+    if (summonEffect) expected.set(`${card.id}:${bindingIndex}`, { card, bindingIndex, effect: summonEffect });
+  }
+
+  const kept = new Set<string>();
+  for (let i = state.summons.length - 1; i >= 0; i--) {
+    const summon = state.summons[i];
+    if (summon.sourceCardId == null || summon.sourceBindingIndex == null) continue;
+    const key = `${summon.sourceCardId}:${summon.sourceBindingIndex}`;
+    if (!expected.has(key) || kept.has(key)) state.summons.splice(i, 1);
+    else kept.add(key);
+  }
+
+  const baseDamage = totalDamage(state, config);
+  for (const [key, item] of expected) {
+    const existing = state.summons.find(s =>
+      s.sourceCardId === item.card.id && s.sourceBindingIndex === item.bindingIndex);
+    if (existing && equipmentSummonMatches(existing, item, baseDamage)) continue;
+    const ctx = baseCtx(state, config, rng, item.card.star, {}, {
+      cardId: item.card.id, bindingIndex: item.bindingIndex,
+    });
+    runEffects(ctx, [item.effect]);
+    events.push(...ctx.events);
+    kept.add(key);
+  }
+  return events;
 }
 
 /**
