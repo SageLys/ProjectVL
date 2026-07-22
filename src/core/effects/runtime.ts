@@ -61,6 +61,7 @@ function tickAuras(state: GameState, config: Config, rng: Rng, dt: number, event
           star: aura.star,
           baseDamage: totalDamage(state, config),
           zoneTick: true,
+          sourceCardType: aura.sourceCardType,
           enemy,
         };
         runEffects(ctx, aura.effects);

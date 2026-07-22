@@ -194,7 +194,7 @@ function bindingConditionMet(binding: BindingDef, payload: TriggerPayload): bool
 
 function baseCtx(
   state: GameState, config: Config, rng: Rng, star: number, payload: TriggerPayload = {},
-  source?: { cardId: number; bindingIndex: number },
+  source?: { cardId: number; cardType: CardType; bindingIndex: number },
 ): EffectCtx {
   return {
     state, config, rng,
@@ -204,6 +204,7 @@ function baseCtx(
     baseDamage: totalDamage(state, config),
     attack: payload.attack,
     sourceCardId: source?.cardId,
+    sourceCardType: source?.cardType,
     sourceBindingIndex: source?.bindingIndex,
     bullet: payload.bullet,
     enemy: payload.enemy,
@@ -253,7 +254,7 @@ function fireTriggerBindings(state: GameState, config: Config, rng: Rng, trigger
     if (binding.trigger !== trigger) continue;
     if (!bindingConditionMet(binding, payload)) continue;
     if (!cooldownReady(state, card.id, bindingIndex, binding)) continue;
-    const ctx = baseCtx(state, config, rng, card.star, payload, { cardId: card.id, bindingIndex });
+    const ctx = baseCtx(state, config, rng, card.star, payload, { cardId: card.id, cardType: card.type, bindingIndex });
     const hpBefore = totalEnemyHp(state);
     recordCardTrigger(state, card.id);
     runEffects(ctx, binding.effects);
@@ -277,7 +278,7 @@ export function tickIntervalBindings(state: GameState, config: Config, rng: Rng,
     liveKeys.add(key);
     const clock = (state.intervalClocks[key] ?? seconds) - dt;
     if (clock <= 0) {
-      const ctx = baseCtx(state, config, rng, card.star, {}, { cardId: card.id, bindingIndex });
+      const ctx = baseCtx(state, config, rng, card.star, {}, { cardId: card.id, cardType: card.type, bindingIndex });
       const hpBefore = totalEnemyHp(state);
       recordCardTrigger(state, card.id);
       runEffects(ctx, binding.effects);
@@ -307,7 +308,7 @@ export interface Modifiers {
   mergeRules: { rule: string; value: number }[];
   expiryConvert: { ratio: number } | null;
   weaponForms: WeaponFormContribution[];
-  auras: { key: string; radius: number | null; radiusRatioOfRange: number | null; tickInterval: number; effects: EffectDef[]; star: number }[];
+  auras: { key: string; sourceCardType: CardType; radius: number | null; radiusRatioOfRange: number | null; tickInterval: number; effects: EffectDef[]; star: number }[];
 }
 
 const num = (p: Record<string, unknown> | undefined, k: string, d: number): number =>
@@ -354,6 +355,7 @@ export function getModifiers(state: GameState): Modifiers {
           if (binding.trigger === 'passive') {
             m.auras.push({
               key: `aura:${card.id}:${bindingIndex}`,
+              sourceCardType: card.type,
               radius: typeof p.radius === 'number' ? (p.radius as number) : null,
               radiusRatioOfRange: typeof p.radiusRatioOfRange === 'number' ? (p.radiusRatioOfRange as number) : null,
               tickInterval: num(p, 'tickInterval', 1),
@@ -420,7 +422,7 @@ export function reconcileEquipmentPassives(state: GameState, config: Config, rng
       s.sourceCardId === item.card.id && s.sourceBindingIndex === item.bindingIndex);
     if (existing && equipmentSummonMatches(existing, item, baseDamage)) continue;
     const ctx = baseCtx(state, config, rng, item.card.star, {}, {
-      cardId: item.card.id, bindingIndex: item.bindingIndex,
+      cardId: item.card.id, cardType: item.card.type, bindingIndex: item.bindingIndex,
     });
     runEffects(ctx, [item.effect]);
     events.push(...ctx.events);
@@ -446,6 +448,7 @@ export function releaseConsumable(state: GameState, config: Config, rng: Rng, ca
     star,
     baseDamage: totalDamage(state, config),
     consume: true,
+    sourceCardType: cardType,
   };
   runEffects(ctx, tier.effects);
   return ctx.events;

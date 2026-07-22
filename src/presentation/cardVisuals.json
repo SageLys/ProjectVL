@@ -14,7 +14,7 @@
     "frost": { "hueOffset": -8, "accent": "#58D8EA", "shape": "circle", "glyph": "snow" },
     "decoy": { "hueOffset": 10, "accent": "#6A9DE8", "shape": "square", "glyph": "target" },
     "impact": { "hueOffset": 24, "accent": "#8C8FE3", "shape": "octagon", "glyph": "impact" },
-    "scorch": { "hueOffset": -6, "accent": "#F28A47", "shape": "pentagon", "glyph": "ember" },
+    "scorch": { "hueOffset": -6, "accent": "#F05252", "shape": "pentagon", "glyph": "ember" },
     "sanctum": { "hueOffset": 14, "accent": "#EFCB59", "shape": "ring", "glyph": "crosshair" },
     "harvest": { "hueOffset": 0, "accent": "#B4D75B", "shape": "capsule", "glyph": "harvest" },
     "aegis": { "hueOffset": -10, "accent": "#60D3A8", "shape": "verticalHexagon", "glyph": "barrier" },

@@ -16,6 +16,7 @@ import { spawnGroundDrop } from '../systems/dropSystem';
 import { recordCardDropShown, selectUniformCardType } from '../systems/dropTypePolicy';
 import { spawnParticle } from '../systems/particleSystem';
 import { totalRange } from '../stats';
+import { resolveCardVisual } from '../../presentation/cardVisual';
 
 export interface EffectCtx {
   state: GameState;
@@ -38,6 +39,8 @@ export interface EffectCtx {
   attack?: AttackInstance;
   /** 装备态绑定来源；存在时 summon 按(卡,绑定)维持单实例。 */
   sourceCardId?: number;
+  /** Semantic source used by presentation entities to inherit the skill accent. */
+  sourceCardType?: CardType;
   sourceBindingIndex?: number;
   bullet?: Bullet;
   enemy?: Enemy;
@@ -92,7 +95,9 @@ function makeZone(ctx: EffectCtx, p: Record<string, unknown>, fallbackRadius: nu
     tickTimer: 0,
     effects: (Array.isArray(p.effects) ? (p.effects as EffectDef[]) : []),
     baseDamage: ctx.baseDamage,
-    color: typeof p.color === 'string' ? (p.color as string) : undefined,
+    color: typeof p.color === 'string'
+      ? (p.color as string)
+      : ctx.sourceCardType ? resolveCardVisual(ctx.sourceCardType).accent : undefined,
   };
   ctx.state.zones.push(zone);
   return zone;
