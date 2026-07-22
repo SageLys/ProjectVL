@@ -26,12 +26,12 @@ function duplicateEquippedType(cards: (Card | null)[], moving: Card, skipIndex: 
 }
 
 /**
- * 手牌内部可移动/交换；手牌拖入装备格后持续生效。
- * 装备卡不能通过本函数返回手牌；同型同星拖到已装备卡只执行喂养。
+ * 手牌内部可移动/交换；开关启用时，手牌与装备也可原子对调。
+ * 同型同星拖到已装备卡时，喂养始终优先于对调。
  */
 export function moveOrSwap(state: GameState, config: Config, rng: Rng, sourceKind: SlotKind, sourceIndex: number, targetKind: SlotKind, targetIndex: number): GameEvent[] {
   if (sourceKind === targetKind && sourceIndex === targetIndex) return [];
-  if (sourceKind === 'equipment' && targetKind !== 'equipment') return [];
+  if (sourceKind === 'equipment' && targetKind !== 'equipment' && !cfg.economy.equipSwappable) return [];
   const source = collectionFor(state, sourceKind);
   const target = collectionFor(state, targetKind);
   const moving = source[sourceIndex];
@@ -42,20 +42,27 @@ export function moveOrSwap(state: GameState, config: Config, rng: Rng, sourceKin
     return feed(state, config, rng, source, sourceIndex, replaced, targetIndex);
   }
 
-  if (targetKind === 'equipment') {
-    if (moving.star < cfg.economy.equipThreshold) return [{ type: 'equipRejected', reason: 'star' }];
-    if (cfg.economy.placeholderAssumptions.distinctEquippedTypes && cfg.economy.equipDistinctTypes && duplicateEquippedType(state.equipment, moving, targetIndex)) {
+  const enteringEquipment = targetKind === 'equipment'
+    ? { card: moving, index: targetIndex }
+    : sourceKind === 'equipment' && replaced
+      ? { card: replaced, index: sourceIndex }
+      : null;
+  if (enteringEquipment) {
+    if (enteringEquipment.card.star < cfg.economy.equipThreshold) return [{ type: 'equipRejected', reason: 'star' }];
+    if (cfg.economy.placeholderAssumptions.distinctEquippedTypes && cfg.economy.equipDistinctTypes && duplicateEquippedType(state.equipment, enteringEquipment.card, enteringEquipment.index)) {
       return [{ type: 'equipRejected', reason: 'duplicate' }];
     }
-    if (sourceKind === 'cards' && replaced) return [{ type: 'equipFull' }];
+    if (sourceKind === 'cards' && replaced && !cfg.economy.equipSwappable) return [{ type: 'equipFull' }];
   }
 
   target[targetIndex] = moving;
   source[sourceIndex] = replaced ?? null;
   state.equipOps++;
-  const events: GameEvent[] = targetKind === 'equipment' && sourceKind === 'cards'
-    ? [{ type: 'equipped', cardType: moving.type, star: moving.star, slotIndex: targetIndex }]
-    : replaced ? [{ type: 'swapped', a: moving.type, b: replaced.type }] : [];
+  const events: GameEvent[] = replaced
+    ? [{ type: 'swapped', a: moving.type, b: replaced.type }]
+    : targetKind === 'equipment' && sourceKind === 'cards'
+      ? [{ type: 'equipped', cardType: moving.type, star: moving.star, slotIndex: targetIndex }]
+      : [];
   const { merged, events: mergeEvents } = (targetKind === 'cards' || sourceKind === 'cards')
     ? autoMergeCards(state, config, rng)
     : { merged: 0, events: [] as GameEvent[] };

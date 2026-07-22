@@ -92,6 +92,7 @@ describe('四项占位假设 · 开关可翻转', () => {
 
   it('喂养开关关闭后同型同星不再升级装备', () => {
     patchEconomy({ feedEquipped: false });
+    cfg.economy.equipSwappable = false;
     const s = freshState(); s.equipment[0] = card('pierce', 3); s.cards[0] = card('pierce', 3);
     expect(moveOrSwap(s, config, rng, 'cards', 0, 'equipment', 0)).toEqual([{ type: 'equipFull' }]);
     expect(s.equipment[0]!.star).toBe(3);

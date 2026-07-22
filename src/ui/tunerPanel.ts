@@ -97,6 +97,7 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
   const baseline = Object.fromEntries(ALL_TUNER_PARAMS.map(param => [param.path, getNumberAt(cfg, param.path)]));
   const baselineSpawnMode = cfg.waves.spawnMode;
   const baselineBountyEnabled = cfg.bounty.enabled;
+  const baselineEquipSwappable = cfg.economy.equipSwappable;
   const pendingWaves = new Map<string, number>();
   const baselineBossWaves = [...cfg.waves.bossWaves];
   let pendingBossWaves: number[] | null = null;
@@ -129,6 +130,7 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
       <label>目标波次<input id="jumpWaveInput" type="number" min="1" step="1" value="1"></label><button class="btn" id="jumpWaveBtn">清场并跳波</button>
       <label>RNG seed<input id="seedInput" type="number" step="1"></label><button class="btn" id="applySeedBtn">应用 seed</button>
       <label>timeScale <output id="timeScaleVal"></output><input id="timeScaleInput" type="range" min="0.25" max="3" step="0.25"></label>
+      <label class="debug-check"><input id="equipSwappableInput" type="checkbox">装备可与手牌对调</label>
       <label class="debug-check"><input id="invincibleInput" type="checkbox">锁血不死</label><button class="btn" id="restartWaveBtn">重开本波</button>
     </div></section>
   </div>`;
@@ -252,6 +254,7 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
     root.querySelector<HTMLInputElement>('#timeScaleInput')!.value = String(scale);
     root.querySelector<HTMLOutputElement>('#timeScaleVal')!.value = `${scale}×`;
     root.querySelector<HTMLInputElement>('#invincibleInput')!.checked = hooks.debug.getInvincible();
+    root.querySelector<HTMLInputElement>('#equipSwappableInput')!.checked = cfg.economy.equipSwappable;
     const spawn = hooks.debug.getSpawnTelemetry();
     const pendingHint = pendingSpawnMode
       ? ` ${pendingSpawnMode} 将于下一波生效；点“重开本波”可立即应用。`
@@ -315,6 +318,10 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
     hooks.onImmediateChange('bounty.enabled');
     syncInputs();
   });
+  root.querySelector<HTMLInputElement>('#equipSwappableInput')!.addEventListener('change', event => {
+    cfg.economy.equipSwappable = (event.currentTarget as HTMLInputElement).checked;
+    syncInputs();
+  });
   root.querySelector<HTMLInputElement>('#bossWavesInput')!.addEventListener('input', event => {
     const input = event.currentTarget as HTMLInputElement;
     bossWavesDraft = input.value;
@@ -350,6 +357,7 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
     if (hooks.isWaveActive()) pendingSpawnMode = baselineSpawnMode;
     else cfg.waves.spawnMode = baselineSpawnMode;
     cfg.bounty.enabled = baselineBountyEnabled;
+    cfg.economy.equipSwappable = baselineEquipSwappable;
     bossWavesDraft = formatBossWaves(baselineBossWaves);
     bossWavesError = '';
     if (hooks.isWaveActive()) pendingBossWaves = [...baselineBossWaves];

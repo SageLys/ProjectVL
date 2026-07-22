@@ -295,6 +295,7 @@ export interface EconomyConfig {
   equipSlots: number;
   equipIrreversible: false;
   unequipPolicy: 'consume';
+  equipSwappable: boolean;
   inRunSlotExpansion: boolean;
   equipDistinctTypes: boolean;
   feedEquipped: boolean;

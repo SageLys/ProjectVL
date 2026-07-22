@@ -7,6 +7,7 @@
   "equipSlots": 3,
   "equipIrreversible": false,
   "unequipPolicy": "consume",
+  "equipSwappable": true,
   "inRunSlotExpansion": false,
   "equipDistinctTypes": true,
   "feedEquipped": true,
