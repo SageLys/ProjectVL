@@ -43,6 +43,9 @@
     </section>
 
     <section class="game-dock" id="dock" aria-label="拇指操作区">
+      <div class="dock-toast" aria-live="polite">
+        <div class="toast" id="toast"></div>
+      </div>
       <div class="dock-row equipment-row" id="equipmentBar">
         <div class="dock-label"><strong>装备</strong><small id="equipmentHint">拖入 3★+ 卡装备</small></div>
         <div class="equipment-slots" id="equipmentSlots" aria-label="装备占位格"></div>
@@ -57,9 +60,6 @@
         <button class="btn" id="testWildcardBtn" hidden>生成万能卡</button>
       </div>
     </section>
-    <div class="bottom-notice" aria-live="polite">
-      <div class="toast" id="toast"></div>
-    </div>
   </main>
 
   <div class="modal" id="levelModal"><div class="modal-card"><h2>经验升级</h2><p>选择一个即时强化，然后继续战斗。</p><div class="choices" id="perkChoices"></div></div></div>

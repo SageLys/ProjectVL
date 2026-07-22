@@ -25,8 +25,8 @@ export function createCardElement(card: Card, source: SlotSource, index: number,
     `<span class="card-head">` +
       `<svg class="card-icon" viewBox="0 0 16 16" aria-hidden="true">${glyphToSvg(meta.shape, meta.glyph)}</svg>` +
       `<strong class="card-name">${meta.name}</strong>` +
-      `<span class="card-stars">${'★'.repeat(card.star)}</span>` +
     `</span>` +
+    `<span class="card-stars" aria-hidden="true">${'★'.repeat(card.star)}</span>` +
     `<span class="card-desc">${meta.desc}</span>`;
   el.addEventListener('pointerdown', e => handlers.dragStart(e, source, index, el));
   return el;
