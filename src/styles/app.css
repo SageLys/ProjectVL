@@ -4,10 +4,10 @@ html, body { margin:0; min-height:100%; background:#030914; color:var(--text); f
 body { display:grid; place-items:center; min-height:100dvh; overflow:hidden; touch-action:manipulation; }
 button, input, select { font:inherit; }
 .game-shell { width:min(100vw, calc((100dvh - 345px) * 540 / 730 + 16px), 540px); max-height:100dvh; display:grid; grid-template-rows:auto auto auto; overflow:hidden; background:#0b1524; box-shadow:0 0 60px #000; }
-.game-hud { display:grid; grid-template-columns:1fr 1fr 34px; align-items:center; gap:10px; padding:6px 12px; border-bottom:1px solid var(--line); background:#0e1a2c; font-size:10px; }
+.game-hud { display:grid; grid-template-columns:1fr 1fr auto; align-items:center; gap:10px; padding:6px 12px; border-bottom:1px solid var(--line); background:#0e1a2c; font-size:10px; }
 .game-hud span { color:var(--muted); }.game-hud b,.game-hud strong { color:var(--text); }.hud-progress { display:grid; grid-template-columns:auto 1fr; gap:2px 8px; }.hud-progress .bar { grid-column:1/-1; }
 .bar { height:7px; overflow:hidden; border-radius:9px; background:#1d3350; }.bar i { display:block; width:100%; height:100%; background:#e0567a; transition:width .2s; }.bar.xp i { background:linear-gradient(90deg,#37d5ff,#8d79ff); }
-.hud-vital span { display:block; margin-top:3px; }.hud-pause { width:32px; height:32px; border:1px solid var(--line); border-radius:8px; background:#101e32; color:var(--muted); cursor:pointer; }
+.hud-vital span { display:block; margin-top:3px; }.hud-controls { display:flex; gap:5px; }.hud-speed,.hud-pause { height:32px; border:1px solid var(--line); border-radius:8px; background:#101e32; color:var(--muted); cursor:pointer; }.hud-speed { min-width:38px; padding:0 7px; color:var(--cyan); font-size:11px; font-weight:800; }.hud-pause { width:32px; }.hud-speed:hover,.hud-pause:hover { border-color:#3a5878; color:var(--text); }.hud-speed:disabled,.hud-pause:disabled { opacity:.45; cursor:default; }
 .arena { position:relative; width:calc(100% - 20px); aspect-ratio:540 / 730; margin:8px 10px; overflow:hidden; border:1px solid var(--line); border-radius:10px; background:#081221; }
 canvas { display:block; width:100%; height:100%; touch-action:none; cursor:crosshair; }
 .center-msg { position:absolute; z-index:4; inset:50% auto auto 50%; translate:-50% -50%; width:85%; text-align:center; pointer-events:none; text-shadow:0 2px 16px #000; }.center-msg h2 { margin:0; font-size:28px; }.center-msg p { margin:6px 0; color:#c7d7e9; font-size:12px; }

@@ -38,6 +38,7 @@ export function getDomRefs() {
     upgradeBanner: el<HTMLElement>('#upgradeBanner'),
     celebrationFx: el<HTMLElement>('#celebrationFx'),
     startBtn: el<HTMLButtonElement>('#startBtn'),
+    speedBtn: el<HTMLButtonElement>('#speedBtn'),
     pauseBtn: el<HTMLButtonElement>('#pauseBtn'),
     testCardBtn: el<HTMLButtonElement>('#testCardBtn'),
     testWildcardBtn: el<HTMLButtonElement>('#testWildcardBtn'),

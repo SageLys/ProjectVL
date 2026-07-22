@@ -30,6 +30,7 @@ import { formatToast, SLOT_CHANGING } from './ui/eventText';
 import type { SlotHandlers, SlotSource } from './ui/slotFactory';
 import { createPointerRouter, type PreviewSpec } from './input/pointerRouter';
 import { createKeyboard } from './input/keyboard';
+import { formatPlaySpeed, nextPlaySpeed } from './ui/gameSpeed';
 import type { DevTelemetry } from './telemetry/devTelemetry';
 import type { PerkDef } from './config/types';
 import type { DifficultyId } from './config/types';
@@ -44,7 +45,7 @@ const rng: Rng = DEV_TOOLS_ENABLED ? () => rngSource() : Math.random;
 let tuner: TunerPanel | null = null;
 let telemetry: DevTelemetry | null = null;
 let devSeed = 1;
-let devTimeScale = 1;
+let timeScale = 1;
 let devInvincible = false;
 const evidenceMode = DEV_TOOLS_ENABLED ? new URLSearchParams(location.search).get('evidence') : null;
 const refs = getDomRefs();
@@ -85,6 +86,7 @@ function dispatch(events: GameEvent[]): void {
     if (ev.type === 'levelUp') modals.showLevel(resolveOfferedPerks(state), state);
     if (ev.type === 'gameEnd') {
       refs.pauseBtn.disabled = true;
+      refs.speedBtn.disabled = true;
       modals.showResult(ev.win, state);
     }
     if (SLOT_CHANGING.has(ev.type)) slotsChanged = true;
@@ -170,6 +172,7 @@ createKeyboard(togglePause);
 
 refs.startBtn.addEventListener('click', start);
 refs.pauseBtn.addEventListener('click', togglePause);
+refs.speedBtn.addEventListener('click', () => setTimeScale(nextPlaySpeed(timeScale)));
 refs.testCardBtn.addEventListener('click', () => dispatch(spawnTestDrops(state, config, rng)));
 refs.testWildcardBtn.addEventListener('click', () => {
   const grants: WildcardGrant[] = [];
@@ -196,6 +199,8 @@ function reset(): void {
   refs.pauseBtn.setAttribute('aria-pressed', 'false');
   refs.pauseBtn.title = texts.buttons.pause;
   refs.pauseBtn.disabled = true;
+  refs.speedBtn.disabled = true;
+  syncSpeedButton();
   modals.message(texts.center.readyTitle, texts.center.readyBody, true);
   refreshSlots();
   renderHud(refs, state, config);
@@ -208,6 +213,7 @@ function start(): void {
   state.mode = 'playing';
   state.paused = false;
   refs.pauseBtn.disabled = false;
+  refs.speedBtn.disabled = false;
   dispatch(startNextWave(state, config, rng));
   refs.startBtn.textContent = texts.buttons.restart;
   refs.startBtn.parentElement?.setAttribute('hidden', '');
@@ -223,10 +229,22 @@ function togglePause(): void {
   modals.message(state.paused ? texts.center.pausedTitle : '', texts.center.pausedBody, state.paused);
 }
 
+function setTimeScale(scale: number): void {
+  timeScale = Math.max(0.25, Math.min(3, scale));
+  syncSpeedButton();
+  tuner?.syncInputs();
+}
+
+function syncSpeedButton(): void {
+  const label = formatPlaySpeed(timeScale);
+  refs.speedBtn.textContent = label;
+  refs.speedBtn.setAttribute('aria-label', `游戏速度：${label}`);
+  refs.speedBtn.title = `游戏速度 ${label}，点击切换`;
+}
+
 let last = performance.now();
 function loop(now: number): void {
-  const scale = DEV_TOOLS_ENABLED ? devTimeScale : 1;
-  const dt = Math.min(cfg.combat.dtCap, ((now - last) / 1000) * scale);
+  const dt = Math.min(cfg.combat.dtCap, ((now - last) / 1000) * timeScale);
   last = now;
   const lockedHp = state.hp;
   if (DEV_TOOLS_ENABLED) telemetry?.beforeUpdate();
@@ -298,8 +316,8 @@ if (DEV_TOOLS_ENABLED) void Promise.all([import('./debug/exposeDebugApi'), impor
     debug: {
       getSeed: () => devSeed,
       setSeed(seed) { devSeed = Math.trunc(Number.isFinite(seed) ? seed : 1); rngSource = debugModule.createSeededRng(devSeed); },
-      getTimeScale: () => devTimeScale,
-      setTimeScale(scale) { devTimeScale = Math.max(0.25, Math.min(3, scale)); },
+      getTimeScale: () => timeScale,
+      setTimeScale,
       getInvincible: () => devInvincible,
       setInvincible(value) { devInvincible = value; },
       jumpToWave(wave) { dispatch(jumpToWave(state, config, rng, wave)); modals.hideResult(); modals.hideLevel(); modals.message('', '', false); },
@@ -364,9 +382,9 @@ if (DEV_TOOLS_ENABLED) void Promise.all([import('./debug/exposeDebugApi'), impor
     jumpToWave: wave => { tuner?.applyPendingWaveChanges(); dispatch(jumpToWave(state, config, rng, wave)); },
     restartWave: () => { tuner?.applyPendingWaveChanges(); dispatch(restartWave(state, config, rng)); },
     setInvincible: value => { devInvincible = value; tuner?.syncInputs(); },
-    setTimeScale: scale => { devTimeScale = Math.max(0.25, Math.min(3, scale)); tuner?.syncInputs(); },
+    setTimeScale,
     setSeed: seed => { devSeed = Math.trunc(seed); rngSource = debugModule.createSeededRng(devSeed); tuner?.syncInputs(); },
-    getDebugSettings: () => ({ seed: devSeed, timeScale: devTimeScale, invincible: devInvincible }),
+    getDebugSettings: () => ({ seed: devSeed, timeScale, invincible: devInvincible }),
     getBountyTelemetry,
   });
 });
