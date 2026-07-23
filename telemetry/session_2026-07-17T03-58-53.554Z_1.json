@@ -1,0 +1,8041 @@
+{
+  "meta": {
+    "startedAt": "2026-07-17T03:58:53.554Z",
+    "exportedAt": "2026-07-17T04:03:32.648Z",
+    "config": {
+      "combat": {
+        "canvas": {
+          "width": 540,
+          "height": 730
+        },
+        "turret": {
+          "x": 270,
+          "y": 365
+        },
+        "hp": {
+          "max": 100
+        },
+        "defaults": {
+          "damage": 18,
+          "fireRate": 5,
+          "range": 150
+        },
+        "attackPreviewMargin": 60,
+        "bullet": {
+          "speed": 465,
+          "life": 1.6,
+          "radius": 4,
+          "spread": 0.05,
+          "muzzleOffset": 24
+        },
+        "breakthroughDist": 48,
+        "dangerZoneWidth": 72,
+        "dtCap": 0.033,
+        "knockbackFatigue": {
+          "decayFactor": 0.5,
+          "windowSeconds": 2,
+          "minMultiplier": 0.125
+        },
+        "vfx": {
+          "shootParticles": 4,
+          "killParticles": 12,
+          "breakthroughParticles": 10
+        }
+      },
+      "waves": {
+        "totalWaves": 8,
+        "spawnMode": "budget",
+        "enemyCountBase": 5,
+        "enemyCountPerWave": 3,
+        "firstSpawnDelay": 0.4,
+        "spawnInterval": {
+          "base": 0.72,
+          "perWave": 0.05,
+          "min": 0.28
+        },
+        "budget": {
+          "waveQuota": {
+            "base": 51,
+            "perWave": 52
+          },
+          "targetOnScreen": {
+            "base": 5,
+            "perWave": 10
+          },
+          "checkInterval": 1.95,
+          "batchMax": 10,
+          "waveEndSprint": {
+            "window": 7,
+            "multiplier": 3
+          },
+          "maxAlive": 100
+        },
+        "betweenWaves": 2.4,
+        "spawnMargin": 25,
+        "typeRoll": {
+          "tankBase": 0.2,
+          "tankPerWave": 0.025,
+          "fastThreshold": 0.47
+        },
+        "bossWaves": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "waveBoss": {
+          "reward": {
+            "starTierEveryWaves": 3,
+            "starMax": 3,
+            "bonusCountEveryWaves": 3,
+            "finalWaveBonusCount": 1
+          }
+        }
+      },
+      "enemies": {
+        "defaults": {
+          "enemySpeed": 1
+        },
+        "types": {
+          "normal": {
+            "label": "热情追求者",
+            "hpBase": 38,
+            "hpPerWave": 12,
+            "speedBase": 24,
+            "speedPerWave": 2,
+            "r": 16,
+            "color": "#8793a3",
+            "damage": 8,
+            "xp": 1,
+            "sides": 4,
+            "knockbackResist": 0
+          },
+          "fast": {
+            "label": "急切追求者",
+            "hpBase": 23,
+            "hpPerWave": 10,
+            "speedBase": 42,
+            "speedPerWave": 3,
+            "r": 12,
+            "color": "#8793a3",
+            "damage": 6,
+            "xp": 1,
+            "sides": 3,
+            "knockbackResist": 0
+          },
+          "tank": {
+            "label": "执着追求者",
+            "hpBase": 90,
+            "hpPerWave": 45,
+            "speedBase": 15,
+            "speedPerWave": 1.5,
+            "r": 22,
+            "color": "#8793a3",
+            "damage": 14,
+            "xp": 2,
+            "sides": 6,
+            "knockbackResist": 0.4
+          },
+          "boss": {
+            "label": "命定追求者",
+            "hpBase": 300,
+            "hpPerWave": 320,
+            "speedBase": 18,
+            "speedPerWave": 0,
+            "r": 35,
+            "color": "#596371",
+            "damage": 28,
+            "xp": 5,
+            "sides": 8,
+            "knockbackResist": 0.85
+          }
+        }
+      },
+      "skills": {
+        "version": "0.4.0",
+        "cards": [
+          {
+            "id": "pierce",
+            "category": "projectile",
+            "synergyTags": [
+              "projectile"
+            ],
+            "textKey": "cards.pierce",
+            "teaching": true,
+            "implementationBatch": 1,
+            "stars": {
+              "3": {
+                "tier": "core",
+                "equip": [
+                  {
+                    "trigger": "onFire",
+                    "effects": [
+                      {
+                        "atom": "pierce",
+                        "params": {
+                          "count": 2,
+                          "damageRetention": 0.8,
+                          "rampPerPierce": 0.1
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "5": {
+                "tier": "dual",
+                "equip": [
+                  {
+                    "trigger": "onFire",
+                    "effects": [
+                      {
+                        "atom": "pierce",
+                        "params": {
+                          "count": 2,
+                          "damageRetention": 0.8,
+                          "rampPerPierce": 0.1
+                        }
+                      },
+                      {
+                        "atom": "ricochet",
+                        "params": {
+                          "bounces": 1
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "6": {
+                "tier": "transform",
+                "equip": [
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "beamMorph",
+                        "params": {
+                          "interval": 0.9,
+                          "width": 32,
+                          "damageRatio": 1.3
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "amplifyAxis": {
+              "description": "穿透数 +1、伤害保留 +10pt",
+              "params": {
+                "count": "+1",
+                "damageRetention": "+0.1"
+              }
+            },
+            "consumable": {
+              "placement": "point",
+              "interpolation": "linear",
+              "anchors": {
+                "1": {
+                  "radius": 40,
+                  "effects": [
+                    {
+                      "atom": "pierce",
+                      "params": {
+                        "damageMul": 3,
+                        "width": 10,
+                        "damageRetention": 1
+                      }
+                    }
+                  ]
+                },
+                "3": {
+                  "radius": 70,
+                  "effects": [
+                    {
+                      "atom": "pierce",
+                      "params": {
+                        "damageMul": 5,
+                        "width": 16,
+                        "damageRetention": 1
+                      }
+                    }
+                  ]
+                },
+                "6": {
+                  "radius": 110,
+                  "effects": [
+                    {
+                      "atom": "pierce",
+                      "params": {
+                        "damageMul": 8,
+                        "width": 24,
+                        "damageRetention": 1
+                      }
+                    },
+                    {
+                      "atom": "knockback",
+                      "params": {
+                        "distance": 40
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "designNotes": "教学卡：一击洞穿一列敌人。3★装备态单核心原子（rampPerPierce 为同原子参数，非独立修饰）。"
+          },
+          {
+            "id": "chainLightning",
+            "category": "projectile",
+            "synergyTags": [
+              "projectile",
+              "control"
+            ],
+            "textKey": "cards.chainLightning",
+            "teaching": false,
+            "implementationBatch": 1,
+            "stars": {
+              "3": {
+                "tier": "core",
+                "equip": [
+                  {
+                    "trigger": "onHit",
+                    "effects": [
+                      {
+                        "atom": "chain",
+                        "params": {
+                          "bounces": 2,
+                          "damageRetention": 0.7,
+                          "searchRange": 120
+                        }
+                      },
+                      {
+                        "atom": "slow",
+                        "params": {
+                          "ratio": 0.2,
+                          "duration": 1.2
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "5": {
+                "tier": "dual",
+                "equip": [
+                  {
+                    "trigger": "onHit",
+                    "effects": [
+                      {
+                        "atom": "chain",
+                        "params": {
+                          "bounces": 3,
+                          "damageRetention": 0.7,
+                          "searchRange": 140
+                        }
+                      },
+                      {
+                        "atom": "slow",
+                        "params": {
+                          "ratio": 0.2,
+                          "duration": 1.2
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "onKill",
+                    "triggerParams": {
+                      "requiresSource": "chain"
+                    },
+                    "effects": [
+                      {
+                        "atom": "chain",
+                        "params": {
+                          "bounces": 2,
+                          "damageRetention": 0.5,
+                          "searchRange": 140
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "6": {
+                "tier": "transform",
+                "equip": [
+                  {
+                    "trigger": "interval",
+                    "triggerParams": {
+                      "seconds": 1.2
+                    },
+                    "effects": [
+                      {
+                        "atom": "chain",
+                        "params": {
+                          "bounces": 2,
+                          "damageRetention": 0.8,
+                          "searchRange": 160,
+                          "targets": 3
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "amplifyAxis": {
+              "description": "弹跳 +1、搜索半径 +20",
+              "params": {
+                "bounces": "+1",
+                "searchRange": "+20"
+              }
+            },
+            "consumable": {
+              "placement": "point",
+              "interpolation": "linear",
+              "anchors": {
+                "1": {
+                  "radius": 120,
+                  "effects": [
+                    {
+                      "atom": "chain",
+                      "params": {
+                        "bounces": 4,
+                        "damageRetention": 0.8,
+                        "searchRange": 140
+                      }
+                    }
+                  ]
+                },
+                "3": {
+                  "radius": 140,
+                  "effects": [
+                    {
+                      "atom": "chain",
+                      "params": {
+                        "bounces": 7,
+                        "damageRetention": 0.8,
+                        "searchRange": 140
+                      }
+                    },
+                    {
+                      "atom": "slow",
+                      "params": {
+                        "ratio": 0.25,
+                        "duration": 1.5
+                      }
+                    }
+                  ]
+                },
+                "6": {
+                  "radius": 160,
+                  "effects": [
+                    {
+                      "atom": "chain",
+                      "params": {
+                        "bounces": 12,
+                        "damageRetention": 0.85,
+                        "searchRange": 160
+                      }
+                    },
+                    {
+                      "atom": "stun",
+                      "params": {
+                        "duration": 0.5
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "designNotes": "电弧在敌群中跳跃。5★ 断链重引：击杀来源为 chain 的敌人从死亡点重新起链。"
+          },
+          {
+            "id": "frost",
+            "category": "control",
+            "synergyTags": [
+              "control",
+              "domain"
+            ],
+            "textKey": "cards.frost",
+            "teaching": false,
+            "implementationBatch": 1,
+            "stars": {
+              "3": {
+                "tier": "core",
+                "equip": [
+                  {
+                    "trigger": "onFire",
+                    "effects": [
+                      {
+                        "atom": "slow",
+                        "params": {
+                          "ratio": 0.3,
+                          "duration": 1.5
+                        }
+                      },
+                      {
+                        "atom": "freeze",
+                        "params": {
+                          "duration": 0.8,
+                          "stacksToTrigger": 3
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "5": {
+                "tier": "dual",
+                "equip": [
+                  {
+                    "trigger": "onFire",
+                    "effects": [
+                      {
+                        "atom": "slow",
+                        "params": {
+                          "ratio": 0.3,
+                          "duration": 1.5
+                        }
+                      },
+                      {
+                        "atom": "freeze",
+                        "params": {
+                          "duration": 0.8,
+                          "stacksToTrigger": 3
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "onKill",
+                    "triggerParams": {
+                      "requiresStatus": "frozen"
+                    },
+                    "effects": [
+                      {
+                        "atom": "aoeOnHit",
+                        "params": {
+                          "radius": 80,
+                          "damageRatio": 0.5,
+                          "falloff": 0.5
+                        }
+                      },
+                      {
+                        "atom": "groundZone",
+                        "params": {
+                          "radius": 80,
+                          "duration": 0.1,
+                          "tickInterval": 0.05,
+                          "effects": [
+                            {
+                              "atom": "slow",
+                              "params": {
+                                "ratio": 0.3,
+                                "duration": 1.5
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "6": {
+                "tier": "transform",
+                "equip": [
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "aura",
+                        "params": {
+                          "radiusRatioOfRange": 0.6,
+                          "tickInterval": 1,
+                          "effects": [
+                            {
+                              "atom": "slow",
+                              "params": {
+                                "ratio": 0.35,
+                                "duration": 1.2
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "interval",
+                    "triggerParams": {
+                      "seconds": 4
+                    },
+                    "effects": [
+                      {
+                        "atom": "freeze",
+                        "params": {
+                          "duration": 0.6,
+                          "radius": 150
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "amplifyAxis": {
+              "description": "减速比 +10pt、触发层数 -1",
+              "params": {
+                "ratio": "+0.1",
+                "stacksToTrigger": "-1"
+              }
+            },
+            "consumable": {
+              "placement": "point",
+              "interpolation": "linear",
+              "anchors": {
+                "1": {
+                  "radius": 90,
+                  "duration": 3,
+                  "effects": [
+                    {
+                      "atom": "freeze",
+                      "params": {
+                        "duration": 3
+                      }
+                    }
+                  ]
+                },
+                "3": {
+                  "radius": 130,
+                  "duration": 3,
+                  "effects": [
+                    {
+                      "atom": "freeze",
+                      "params": {
+                        "duration": 3
+                      }
+                    },
+                    {
+                      "atom": "slow",
+                      "params": {
+                        "ratio": 0.4,
+                        "duration": 2
+                      }
+                    }
+                  ]
+                },
+                "6": {
+                  "radius": 170,
+                  "duration": 3.5,
+                  "effects": [
+                    {
+                      "atom": "freeze",
+                      "params": {
+                        "duration": 3.5
+                      }
+                    },
+                    {
+                      "atom": "vulnerable",
+                      "params": {
+                        "ratio": 0.3,
+                        "duration": 3.5
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "designNotes": "让世界慢下来。5★ 碎冰：冻结中被击杀的敌人碎裂造成 AoE 并减速周围敌人。"
+          },
+          {
+            "id": "decoy",
+            "category": "control",
+            "synergyTags": [
+              "control",
+              "defense"
+            ],
+            "textKey": "cards.decoy",
+            "teaching": false,
+            "implementationBatch": 1,
+            "stars": {
+              "3": {
+                "tier": "core",
+                "equip": [
+                  {
+                    "trigger": "onWaveStart",
+                    "effects": [
+                      {
+                        "atom": "summon",
+                        "params": {
+                          "kind": "decoy",
+                          "count": 1,
+                          "hp": 60,
+                          "tauntRadius": 140,
+                          "duration": 999,
+                          "explode": true,
+                          "explodeDamageMul": 1.2,
+                          "knockbackDistance": 70
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "5": {
+                "tier": "dual",
+                "equip": [
+                  {
+                    "trigger": "onWaveStart",
+                    "effects": [
+                      {
+                        "atom": "summon",
+                        "params": {
+                          "kind": "decoy",
+                          "count": 1,
+                          "hp": 60,
+                          "tauntRadius": 140,
+                          "duration": 999,
+                          "explode": true,
+                          "explodeDamageMul": 1.2,
+                          "knockbackDistance": 70,
+                          "respawnOnce": true
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "6": {
+                "tier": "transform",
+                "equip": [
+                  {
+                    "trigger": "onWaveStart",
+                    "effects": [
+                      {
+                        "atom": "summon",
+                        "params": {
+                          "kind": "mirrorTurret",
+                          "count": 1,
+                          "hp": 80,
+                          "damageRatio": 0.3,
+                          "priorityWeight": 5,
+                          "tauntRadius": 2000,
+                          "duration": 999
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "amplifyAxis": {
+              "description": "图腾 HP +50%、嘲讽半径 +20",
+              "params": {
+                "hp": "+50%",
+                "tauntRadius": "+20"
+              }
+            },
+            "consumable": {
+              "placement": "point",
+              "interpolation": "linear",
+              "anchors": {
+                "1": {
+                  "radius": 120,
+                  "duration": 4,
+                  "effects": [
+                    {
+                      "atom": "summon",
+                      "params": {
+                        "kind": "decoy",
+                        "count": 1,
+                        "hp": 30,
+                        "tauntRadius": 120,
+                        "duration": 4
+                      }
+                    }
+                  ]
+                },
+                "3": {
+                  "radius": 160,
+                  "duration": 5,
+                  "effects": [
+                    {
+                      "atom": "summon",
+                      "params": {
+                        "kind": "decoy",
+                        "count": 1,
+                        "hp": 50,
+                        "tauntRadius": 160,
+                        "duration": 5,
+                        "explode": true,
+                        "explodeDamageMul": 1.5,
+                        "knockbackDistance": 90
+                      }
+                    }
+                  ]
+                },
+                "6": {
+                  "radius": 160,
+                  "duration": 5,
+                  "effects": [
+                    {
+                      "atom": "summon",
+                      "params": {
+                        "kind": "mirrorTurret",
+                        "count": 1,
+                        "hp": 9999,
+                        "damageRatio": 0.6,
+                        "duration": 5
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "designNotes": "让它们打错目标。5★ 重生：图腾被摧毁时在新位置重生一次（每实例限一次）。"
+          },
+          {
+            "id": "scorch",
+            "category": "domain",
+            "synergyTags": [
+              "domain"
+            ],
+            "textKey": "cards.scorch",
+            "teaching": false,
+            "implementationBatch": 1,
+            "stars": {
+              "3": {
+                "tier": "core",
+                "equip": [
+                  {
+                    "trigger": "onHit",
+                    "effects": [
+                      {
+                        "atom": "groundZone",
+                        "params": {
+                          "radius": 40,
+                          "duration": 2.5,
+                          "tickInterval": 0.5,
+                          "effects": [
+                            {
+                              "atom": "dot",
+                              "params": {
+                                "damageRatio": 0.15
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "onKill",
+                    "triggerParams": {
+                      "requiresStatus": "dot"
+                    },
+                    "effects": [
+                      {
+                        "atom": "groundZone",
+                        "params": {
+                          "radius": 40,
+                          "duration": 2.5,
+                          "tickInterval": 0.5,
+                          "effects": [
+                            {
+                              "atom": "dot",
+                              "params": {
+                                "damageRatio": 0.15
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "5": {
+                "tier": "dual",
+                "equip": [
+                  {
+                    "trigger": "onHit",
+                    "effects": [
+                      {
+                        "atom": "groundZone",
+                        "params": {
+                          "radius": 40,
+                          "duration": 2.5,
+                          "tickInterval": 0.5,
+                          "effects": [
+                            {
+                              "atom": "dot",
+                              "params": {
+                                "damageRatio": 0.15
+                              }
+                            },
+                            {
+                              "atom": "vulnerable",
+                              "params": {
+                                "ratio": 0.15,
+                                "duration": 0.6
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "onKill",
+                    "triggerParams": {
+                      "requiresStatus": "dot"
+                    },
+                    "effects": [
+                      {
+                        "atom": "groundZone",
+                        "params": {
+                          "radius": 40,
+                          "duration": 2.5,
+                          "tickInterval": 0.5,
+                          "effects": [
+                            {
+                              "atom": "dot",
+                              "params": {
+                                "damageRatio": 0.15
+                              }
+                            },
+                            {
+                              "atom": "vulnerable",
+                              "params": {
+                                "ratio": 0.15,
+                                "duration": 0.6
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "6": {
+                "tier": "transform",
+                "equip": [
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "aura",
+                        "params": {
+                          "radius": 200,
+                          "tickInterval": 0.5,
+                          "effects": [
+                            {
+                              "atom": "dot",
+                              "params": {
+                                "damageRatio": 0.1
+                              }
+                            },
+                            {
+                              "atom": "slow",
+                              "params": {
+                                "ratio": 0.15,
+                                "duration": 0.6
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "amplifyAxis": {
+              "description": "灼烧区半径 +25%、DoT +30%",
+              "params": {
+                "radius": "+25%",
+                "damageRatio": "+30%"
+              }
+            },
+            "consumable": {
+              "placement": "point",
+              "interpolation": "linear",
+              "anchors": {
+                "1": {
+                  "radius": 110,
+                  "duration": 3,
+                  "effects": [
+                    {
+                      "atom": "groundZone",
+                      "params": {
+                        "radius": 110,
+                        "duration": 3,
+                        "tickInterval": 0.5,
+                        "effects": [
+                          {
+                            "atom": "dot",
+                            "params": {
+                              "damageRatio": 0.2
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "3": {
+                  "radius": 140,
+                  "duration": 4,
+                  "effects": [
+                    {
+                      "atom": "groundZone",
+                      "params": {
+                        "radius": 140,
+                        "duration": 4,
+                        "tickInterval": 0.5,
+                        "effects": [
+                          {
+                            "atom": "dot",
+                            "params": {
+                              "damageRatio": 0.2
+                            }
+                          },
+                          {
+                            "atom": "vulnerable",
+                            "params": {
+                              "ratio": 0.15,
+                              "duration": 0.6
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "6": {
+                  "radius": 180,
+                  "duration": 5,
+                  "effects": [
+                    {
+                      "atom": "groundZone",
+                      "params": {
+                        "radius": 180,
+                        "duration": 5,
+                        "tickInterval": 0.5,
+                        "effects": [
+                          {
+                            "atom": "dot",
+                            "params": {
+                              "damageRatio": 0.25
+                            }
+                          },
+                          {
+                            "atom": "vulnerable",
+                            "params": {
+                              "ratio": 0.15,
+                              "duration": 0.6
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "designNotes": "所过之处皆成火海。5★ 干柴：灼烧区内叠加易伤，令灼痕成为全构筑的伤害乘法底座。"
+          },
+          {
+            "id": "harvest",
+            "category": "economy",
+            "synergyTags": [
+              "utility"
+            ],
+            "textKey": "cards.harvest",
+            "teaching": true,
+            "implementationBatch": 1,
+            "stars": {
+              "3": {
+                "tier": "core",
+                "equip": [
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "dropRateMul",
+                        "params": {
+                          "mul": 1.25
+                        }
+                      },
+                      {
+                        "atom": "dropLifetimeMul",
+                        "params": {
+                          "mul": 1.25
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "5": {
+                "tier": "dual",
+                "equip": [
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "dropRateMul",
+                        "params": {
+                          "mul": 1.25
+                        }
+                      },
+                      {
+                        "atom": "dropLifetimeMul",
+                        "params": {
+                          "mul": 1.25
+                        }
+                      },
+                      {
+                        "atom": "expiryConvert",
+                        "params": {
+                          "ratio": 0.5
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "6": {
+                "tier": "transform",
+                "equip": [
+                  {
+                    "trigger": "onWaveStart",
+                    "effects": [
+                      {
+                        "atom": "extraDrop",
+                        "params": {
+                          "count": 2,
+                          "at": "turret",
+                          "starWeights": {
+                            "1": 1
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "expiryConvert",
+                        "params": {
+                          "ratio": 1
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "amplifyAxis": {
+              "description": "掉率倍率 +10%、时限倍率 +10%",
+              "params": {
+                "mul": "+10%"
+              }
+            },
+            "consumable": {
+              "placement": "point",
+              "interpolation": "linear",
+              "anchors": {
+                "1": {
+                  "radius": 90,
+                  "effects": [
+                    {
+                      "atom": "extraDrop",
+                      "params": {
+                        "count": 2,
+                        "at": "point",
+                        "starWeights": {
+                          "1": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "3": {
+                  "radius": 130,
+                  "effects": [
+                    {
+                      "atom": "extraDrop",
+                      "params": {
+                        "count": 3,
+                        "at": "point",
+                        "starWeights": {
+                          "1": 4,
+                          "2": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "6": {
+                  "radius": 180,
+                  "effects": [
+                    {
+                      "atom": "extraDrop",
+                      "params": {
+                        "count": 1,
+                        "at": "point",
+                        "starWeights": {
+                          "2": 1
+                        }
+                      }
+                    },
+                    {
+                      "atom": "extraDrop",
+                      "params": {
+                        "count": 3,
+                        "at": "point",
+                        "starWeights": {
+                          "1": 1
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "designNotes": "教学卡：更多、更久、不浪费。刻意不做自动拾取——拾取仍是核心注意力动词。"
+          },
+          {
+            "id": "aegis",
+            "category": "defense",
+            "synergyTags": [
+              "defense"
+            ],
+            "textKey": "cards.aegis",
+            "teaching": false,
+            "implementationBatch": 1,
+            "stars": {
+              "3": {
+                "tier": "core",
+                "equip": [
+                  {
+                    "trigger": "onWaveStart",
+                    "effects": [
+                      {
+                        "atom": "shield",
+                        "params": {
+                          "absorbHits": 2,
+                          "regenSeconds": 10
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "breachReduction",
+                        "params": {
+                          "ratio": 0.2
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "5": {
+                "tier": "dual",
+                "equip": [
+                  {
+                    "trigger": "onWaveStart",
+                    "effects": [
+                      {
+                        "atom": "shield",
+                        "params": {
+                          "absorbHits": 2,
+                          "regenSeconds": 10
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "breachReduction",
+                        "params": {
+                          "ratio": 0.2
+                        }
+                      },
+                      {
+                        "atom": "novaOnBreak",
+                        "params": {
+                          "damage": 30,
+                          "knockbackDistance": 100
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "6": {
+                "tier": "transform",
+                "equip": [
+                  {
+                    "trigger": "onWaveStart",
+                    "effects": [
+                      {
+                        "atom": "shield",
+                        "params": {
+                          "absorbHits": 3,
+                          "regenSeconds": 6
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "novaOnBreak",
+                        "params": {
+                          "damage": 50,
+                          "knockbackDistance": 130
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "amplifyAxis": {
+              "description": "吸收次数 +1、再生 -2s",
+              "params": {
+                "absorbHits": "+1",
+                "regenSeconds": "-2"
+              }
+            },
+            "consumable": {
+              "placement": "point",
+              "interpolation": "linear",
+              "anchors": {
+                "1": {
+                  "radius": 90,
+                  "effects": [
+                    {
+                      "atom": "shield",
+                      "params": {
+                        "absorbHits": 4
+                      }
+                    },
+                    {
+                      "atom": "knockback",
+                      "params": {
+                        "distance": 70
+                      }
+                    }
+                  ]
+                },
+                "3": {
+                  "radius": 120,
+                  "effects": [
+                    {
+                      "atom": "shield",
+                      "params": {
+                        "absorbHits": 6
+                      }
+                    },
+                    {
+                      "atom": "knockback",
+                      "params": {
+                        "distance": 100
+                      }
+                    }
+                  ]
+                },
+                "6": {
+                  "radius": 150,
+                  "effects": [
+                    {
+                      "atom": "shield",
+                      "params": {
+                        "absorbHits": 8
+                      }
+                    },
+                    {
+                      "atom": "burstDamage",
+                      "params": {
+                        "damageMul": 5,
+                        "radius": 150
+                      }
+                    },
+                    {
+                      "atom": "knockback",
+                      "params": {
+                        "distance": 140
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "designNotes": "撑住这一波。5★ 碎盾新星：护盾破裂时对周围敌人造成击退+伤害。"
+          },
+          {
+            "id": "splitBlast",
+            "category": "projectile",
+            "synergyTags": [
+              "projectile",
+              "domain"
+            ],
+            "textKey": "cards.splitBlast",
+            "teaching": false,
+            "implementationBatch": 2,
+            "stars": {
+              "3": {
+                "tier": "core",
+                "equip": [
+                  {
+                    "trigger": "onHit",
+                    "effects": [
+                      {
+                        "atom": "split",
+                        "params": {
+                          "count": 2,
+                          "damageRatio": 0.5,
+                          "maxDepth": 1
+                        }
+                      },
+                      {
+                        "atom": "aoeOnHit",
+                        "params": {
+                          "radius": 40,
+                          "damageRatio": 0.6,
+                          "falloff": 0.5
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "5": {
+                "tier": "dual",
+                "equip": [
+                  {
+                    "trigger": "onHit",
+                    "effects": [
+                      {
+                        "atom": "split",
+                        "params": {
+                          "count": 2,
+                          "damageRatio": 0.5,
+                          "maxDepth": 2
+                        }
+                      },
+                      {
+                        "atom": "aoeOnHit",
+                        "params": {
+                          "radius": 40,
+                          "damageRatio": 0.6,
+                          "falloff": 0.5
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "6": {
+                "tier": "transform",
+                "equip": [
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "mortarMorph",
+                        "params": {
+                          "radius": 90,
+                          "damageRatio": 1.3,
+                          "falloff": 0.5
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "amplifyAxis": {
+              "description": "子弹片 +1、AoE 半径 +25%",
+              "params": {
+                "count": "+1",
+                "radius": "+25%"
+              }
+            },
+            "consumable": {
+              "placement": "point",
+              "interpolation": "linear",
+              "anchors": {
+                "1": {
+                  "radius": 110,
+                  "effects": [
+                    {
+                      "atom": "burstDamage",
+                      "params": {
+                        "damageMul": 4,
+                        "radius": 110
+                      }
+                    }
+                  ]
+                },
+                "3": {
+                  "radius": 140,
+                  "effects": [
+                    {
+                      "atom": "burstDamage",
+                      "params": {
+                        "damageMul": 6,
+                        "radius": 140
+                      }
+                    },
+                    {
+                      "atom": "split",
+                      "params": {
+                        "count": 4,
+                        "damageRatio": 0.5,
+                        "maxDepth": 1
+                      }
+                    }
+                  ]
+                },
+                "6": {
+                  "radius": 180,
+                  "effects": [
+                    {
+                      "atom": "burstDamage",
+                      "params": {
+                        "damageMul": 9,
+                        "radius": 180
+                      }
+                    },
+                    {
+                      "atom": "split",
+                      "params": {
+                        "count": 4,
+                        "damageRatio": 0.5,
+                        "maxDepth": 2
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "designNotes": "一发变一片。5★ 连环裂变：子弹片命中后再分裂一次（maxDepth 封顶，防止指数级增殖）。6★ 换形为榴弹主炮；「命中炸出子弹片」的联动未实装（简化，记入 S6）。"
+          },
+          {
+            "id": "impact",
+            "category": "control",
+            "synergyTags": [
+              "control",
+              "defense"
+            ],
+            "textKey": "cards.impact",
+            "teaching": true,
+            "implementationBatch": 2,
+            "stars": {
+              "3": {
+                "tier": "core",
+                "equip": [
+                  {
+                    "trigger": "onFire",
+                    "effects": [
+                      {
+                        "atom": "knockback",
+                        "params": {
+                          "distance": 22,
+                          "collisionDamage": 0.3
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "5": {
+                "tier": "dual",
+                "equip": [
+                  {
+                    "trigger": "onFire",
+                    "effects": [
+                      {
+                        "atom": "knockback",
+                        "params": {
+                          "distance": 22,
+                          "collisionDamage": 0.3
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "onBreach",
+                    "triggerParams": {
+                      "cooldownSeconds": 6
+                    },
+                    "effects": [
+                      {
+                        "atom": "groundZone",
+                        "params": {
+                          "radius": 150,
+                          "duration": 0.1,
+                          "tickInterval": 0.05,
+                          "effects": [
+                            {
+                              "atom": "knockback",
+                              "params": {
+                                "distance": 80
+                              }
+                            },
+                            {
+                              "atom": "stun",
+                              "params": {
+                                "duration": 0.4
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "6": {
+                "tier": "transform",
+                "equip": [
+                  {
+                    "trigger": "interval",
+                    "triggerParams": {
+                      "seconds": 4
+                    },
+                    "effects": [
+                      {
+                        "atom": "knockback",
+                        "params": {
+                          "distance": 100,
+                          "radius": 150
+                        }
+                      },
+                      {
+                        "atom": "stun",
+                        "params": {
+                          "duration": 0.4,
+                          "radius": 150
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "amplifyAxis": {
+              "description": "击退距离 +30%、碰撞伤 +50%",
+              "params": {
+                "distance": "+30%",
+                "collisionDamage": "+50%"
+              }
+            },
+            "consumable": {
+              "placement": "point",
+              "interpolation": "linear",
+              "anchors": {
+                "1": {
+                  "radius": 100,
+                  "effects": [
+                    {
+                      "atom": "knockback",
+                      "params": {
+                        "distance": 80
+                      }
+                    }
+                  ]
+                },
+                "3": {
+                  "radius": 140,
+                  "effects": [
+                    {
+                      "atom": "knockback",
+                      "params": {
+                        "distance": 120
+                      }
+                    },
+                    {
+                      "atom": "stun",
+                      "params": {
+                        "duration": 0.5
+                      }
+                    }
+                  ]
+                },
+                "6": {
+                  "radius": 180,
+                  "effects": [
+                    {
+                      "atom": "knockback",
+                      "params": {
+                        "distance": 180,
+                        "collisionDamage": 0.5
+                      }
+                    },
+                    {
+                      "atom": "stun",
+                      "params": {
+                        "duration": 1
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "designNotes": "教学卡：把它们轰开。5★ 破门反制：突破瞬间自动全向冲击波，冷却 6s 内置保命（不叠加触发）。"
+          },
+          {
+            "id": "sanctum",
+            "category": "domain",
+            "synergyTags": [
+              "domain",
+              "control"
+            ],
+            "textKey": "cards.sanctum",
+            "teaching": false,
+            "implementationBatch": 2,
+            "stars": {
+              "3": {
+                "tier": "core",
+                "equip": [
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "aura",
+                        "params": {
+                          "radiusRatioOfRange": 0.5,
+                          "tickInterval": 0.5,
+                          "effects": [
+                            {
+                              "atom": "vulnerable",
+                              "params": {
+                                "ratio": 0.2,
+                                "duration": 0.6
+                              }
+                            },
+                            {
+                              "atom": "slow",
+                              "params": {
+                                "ratio": 0.1,
+                                "duration": 0.6
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "5": {
+                "tier": "dual",
+                "equip": [
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "aura",
+                        "params": {
+                          "radiusRatioOfRange": 0.5,
+                          "tickInterval": 0.5,
+                          "effects": [
+                            {
+                              "atom": "vulnerable",
+                              "params": {
+                                "ratio": 0.2,
+                                "duration": 0.6
+                              }
+                            },
+                            {
+                              "atom": "slow",
+                              "params": {
+                                "ratio": 0.1,
+                                "duration": 0.6
+                              }
+                            },
+                            {
+                              "atom": "focusPriority",
+                              "params": {
+                                "priorityWeight": 3,
+                                "duration": 0.6,
+                                "hpThresholdRatio": 0.3
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "6": {
+                "tier": "transform",
+                "equip": [
+                  {
+                    "trigger": "interval",
+                    "triggerParams": {
+                      "seconds": 3
+                    },
+                    "effects": [
+                      {
+                        "atom": "vulnerable",
+                        "params": {
+                          "ratio": 0.4,
+                          "duration": 2,
+                          "radius": 170
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "amplifyAxis": {
+              "description": "易伤 +10pt、光环半径 +15%",
+              "params": {
+                "ratio": "+0.1",
+                "radiusRatioOfRange": "+15%"
+              }
+            },
+            "consumable": {
+              "placement": "point",
+              "interpolation": "linear",
+              "anchors": {
+                "1": {
+                  "radius": 110,
+                  "duration": 4,
+                  "effects": [
+                    {
+                      "atom": "vulnerable",
+                      "params": {
+                        "ratio": 0.3,
+                        "duration": 4
+                      }
+                    }
+                  ]
+                },
+                "3": {
+                  "radius": 140,
+                  "duration": 5,
+                  "effects": [
+                    {
+                      "atom": "vulnerable",
+                      "params": {
+                        "ratio": 0.4,
+                        "duration": 5
+                      }
+                    }
+                  ]
+                },
+                "6": {
+                  "radius": 170,
+                  "duration": 5,
+                  "effects": [
+                    {
+                      "atom": "vulnerable",
+                      "params": {
+                        "ratio": 0.5,
+                        "duration": 5
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "designNotes": "进入领域者皆被审判。5★ 处刑印记：环内濒死敌人（hpThresholdRatio）被烙印优先索敌。amplifyAxis 的 ratio 键同时略微放大环内减速（易伤/减速共用参数名，接受此耦合）。「被烙印者死亡掉落时限+50%」未实装（简化，记入 S6）。"
+          },
+          {
+            "id": "thorns",
+            "category": "defense",
+            "synergyTags": [
+              "defense",
+              "domain"
+            ],
+            "textKey": "cards.thorns",
+            "teaching": false,
+            "implementationBatch": 2,
+            "stars": {
+              "3": {
+                "tier": "core",
+                "equip": [
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "breachReduction",
+                        "params": {
+                          "ratio": 0.35
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "onBreach",
+                    "effects": [
+                      {
+                        "atom": "groundZone",
+                        "params": {
+                          "radius": 100,
+                          "duration": 0.1,
+                          "tickInterval": 0.05,
+                          "effects": [
+                            {
+                              "atom": "burstDamage",
+                              "params": {
+                                "damageMul": 1.5,
+                                "radius": 100
+                              }
+                            },
+                            {
+                              "atom": "knockback",
+                              "params": {
+                                "distance": 90
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "5": {
+                "tier": "dual",
+                "equip": [
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "breachReduction",
+                        "params": {
+                          "ratio": 0.35
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "onBreach",
+                    "effects": [
+                      {
+                        "atom": "groundZone",
+                        "params": {
+                          "radius": 100,
+                          "duration": 0.1,
+                          "tickInterval": 0.05,
+                          "effects": [
+                            {
+                              "atom": "burstDamage",
+                              "params": {
+                                "damageMul": 1.5,
+                                "radius": 100
+                              }
+                            },
+                            {
+                              "atom": "knockback",
+                              "params": {
+                                "distance": 90
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "aura",
+                        "params": {
+                          "radius": 90,
+                          "tickInterval": 0.5,
+                          "effects": [
+                            {
+                              "atom": "dot",
+                              "params": {
+                                "damageRatio": 0.1
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "6": {
+                "tier": "transform",
+                "equip": [
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "aura",
+                        "params": {
+                          "radius": 130,
+                          "tickInterval": 0.4,
+                          "effects": [
+                            {
+                              "atom": "dot",
+                              "params": {
+                                "damageRatio": 0.15
+                              }
+                            },
+                            {
+                              "atom": "execute",
+                              "params": {
+                                "hpThresholdRatio": 0.2
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "amplifyAxis": {
+              "description": "反噬 +50pt、减免 +10pt",
+              "params": {
+                "damageMul": "+0.5",
+                "ratio": "+0.1"
+              }
+            },
+            "consumable": {
+              "placement": "point",
+              "interpolation": "linear",
+              "anchors": {
+                "1": {
+                  "radius": 90,
+                  "duration": 4,
+                  "effects": [
+                    {
+                      "atom": "groundZone",
+                      "params": {
+                        "radius": 90,
+                        "duration": 4,
+                        "tickInterval": 0.5,
+                        "effects": [
+                          {
+                            "atom": "dot",
+                            "params": {
+                              "damageRatio": 0.15
+                            }
+                          },
+                          {
+                            "atom": "slow",
+                            "params": {
+                              "ratio": 0.3,
+                              "duration": 0.6
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "3": {
+                  "radius": 120,
+                  "duration": 4,
+                  "effects": [
+                    {
+                      "atom": "groundZone",
+                      "params": {
+                        "radius": 120,
+                        "duration": 4,
+                        "tickInterval": 0.5,
+                        "effects": [
+                          {
+                            "atom": "dot",
+                            "params": {
+                              "damageRatio": 0.2
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "atom": "focusPriority",
+                      "params": {
+                        "priorityWeight": 2,
+                        "duration": 4
+                      }
+                    }
+                  ]
+                },
+                "6": {
+                  "radius": 150,
+                  "duration": 5,
+                  "effects": [
+                    {
+                      "atom": "groundZone",
+                      "params": {
+                        "radius": 150,
+                        "duration": 5,
+                        "tickInterval": 0.5,
+                        "effects": [
+                          {
+                            "atom": "dot",
+                            "params": {
+                              "damageRatio": 0.25
+                            }
+                          },
+                          {
+                            "atom": "execute",
+                            "params": {
+                              "hpThresholdRatio": 0.15
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "designNotes": "碰我者死。突破反噬用近瞬时 groundZone 包裹 burstDamage/knockback，命中突破点附近的存活敌人（突破的敌人本身已在结算前移出场，直接反噬它没有意义）。6★ 处决不计入突破惩罚（execute 走击杀结算，非突破结算，天然满足）。"
+          }
+        ]
+      },
+      "progression": {
+        "xpNeedBase": 10,
+        "xpGrowth": 2,
+        "killXpMul": 1,
+        "perkChoices": 3,
+        "perks": [
+          {
+            "id": "proj_damage",
+            "title": "超压弹道",
+            "desc": "弹道类技能的衍生伤害提高 15%",
+            "lane": "projectile",
+            "affinityGain": 1,
+            "effects": [
+              {
+                "kind": "buildScaling",
+                "targetTags": [
+                  "projectile"
+                ],
+                "axis": "effectDamageMul",
+                "value": 0.15
+              }
+            ],
+            "offerRole": "route",
+            "weight": 1,
+            "maxStacks": 5
+          },
+          {
+            "id": "proj_quantity",
+            "title": "增殖弹药",
+            "desc": "穿透 / 弹跳 / 分裂数量 +1",
+            "lane": "projectile",
+            "affinityGain": 1,
+            "effects": [
+              {
+                "kind": "buildScaling",
+                "targetTags": [
+                  "projectile"
+                ],
+                "axis": "quantityAdd",
+                "value": 1
+              }
+            ],
+            "offerRole": "route",
+            "weight": 1,
+            "maxStacks": 3
+          },
+          {
+            "id": "ctrl_potency",
+            "title": "凝滞力场",
+            "desc": "减速、冻结、眩晕、击退效果增强 20%",
+            "lane": "control",
+            "affinityGain": 1,
+            "effects": [
+              {
+                "kind": "buildScaling",
+                "targetTags": [
+                  "control"
+                ],
+                "axis": "controlPotencyMul",
+                "value": 0.2
+              }
+            ],
+            "offerRole": "route",
+            "weight": 1,
+            "maxStacks": 5
+          },
+          {
+            "id": "ctrl_bridge",
+            "title": "乘虚而入",
+            "desc": "处于减速 / 冻结 / 眩晕的追求者承受伤害 +10%",
+            "lane": "control",
+            "affinityGain": 1,
+            "effects": [
+              {
+                "kind": "buildScaling",
+                "targetTags": [
+                  "control"
+                ],
+                "axis": "controlledDamageTakenMul",
+                "value": 0.1
+              }
+            ],
+            "offerRole": "bridge",
+            "weight": 1,
+            "maxStacks": 5
+          },
+          {
+            "id": "domain_area",
+            "title": "领域扩张",
+            "desc": "区域与光环的半径和持续时间提高 15%",
+            "lane": "domain",
+            "affinityGain": 1,
+            "effects": [
+              {
+                "kind": "buildScaling",
+                "targetTags": [
+                  "domain"
+                ],
+                "axis": "areaScaleMul",
+                "value": 0.15
+              }
+            ],
+            "offerRole": "route",
+            "weight": 1,
+            "maxStacks": 5
+          },
+          {
+            "id": "domain_dot",
+            "title": "余烬灼心",
+            "desc": "持续伤害提高 20%",
+            "lane": "domain",
+            "affinityGain": 1,
+            "effects": [
+              {
+                "kind": "buildScaling",
+                "targetTags": [
+                  "domain"
+                ],
+                "axis": "dotDamageMul",
+                "value": 0.2
+              }
+            ],
+            "offerRole": "route",
+            "weight": 1,
+            "maxStacks": 5
+          },
+          {
+            "id": "def_durability",
+            "title": "加固壁垒",
+            "desc": "护盾吸收次数与召唤物耐久提高 25%",
+            "lane": "defense",
+            "affinityGain": 1,
+            "effects": [
+              {
+                "kind": "buildScaling",
+                "targetTags": [
+                  "defense"
+                ],
+                "axis": "defenseDurabilityMul",
+                "value": 0.25
+              }
+            ],
+            "offerRole": "route",
+            "weight": 1,
+            "maxStacks": 4
+          },
+          {
+            "id": "def_bridge",
+            "title": "荆棘反击",
+            "desc": "破盾新星、反噬与突破反击伤害提高 25%",
+            "lane": "defense",
+            "affinityGain": 1,
+            "effects": [
+              {
+                "kind": "buildScaling",
+                "targetTags": [
+                  "defense"
+                ],
+                "axis": "retaliationMul",
+                "value": 0.25
+              }
+            ],
+            "offerRole": "bridge",
+            "weight": 1,
+            "maxStacks": 4
+          },
+          {
+            "id": "damage",
+            "title": "高能弹芯",
+            "desc": "基础伤害 +15%",
+            "lane": "utility",
+            "affinityGain": 0,
+            "effects": [
+              {
+                "kind": "stat",
+                "stat": "damagePct",
+                "value": 0.15
+              }
+            ],
+            "offerRole": "utility",
+            "weight": 0.7,
+            "maxStacks": 99
+          },
+          {
+            "id": "rate",
+            "title": "过载供能",
+            "desc": "射速 +12%",
+            "lane": "utility",
+            "affinityGain": 0,
+            "effects": [
+              {
+                "kind": "stat",
+                "stat": "fireRatePct",
+                "value": 0.12
+              }
+            ],
+            "offerRole": "utility",
+            "weight": 0.7,
+            "maxStacks": 99
+          },
+          {
+            "id": "repair",
+            "title": "重整心防",
+            "desc": "私人空间恢复 20 点",
+            "lane": "utility",
+            "affinityGain": 0,
+            "effects": [
+              {
+                "kind": "stat",
+                "stat": "heal",
+                "value": 20
+              }
+            ],
+            "offerRole": "utility",
+            "weight": 0.8,
+            "maxStacks": 99
+          },
+          {
+            "id": "maxhp",
+            "title": "扩容心防",
+            "desc": "心防上限 +15",
+            "lane": "utility",
+            "affinityGain": 0,
+            "effects": [
+              {
+                "kind": "stat",
+                "stat": "maxHp",
+                "value": 15
+              }
+            ],
+            "offerRole": "utility",
+            "weight": 0.6,
+            "maxStacks": 99
+          },
+          {
+            "id": "xpgain",
+            "title": "洞悉弱点",
+            "desc": "击破经验 +12%",
+            "lane": "utility",
+            "affinityGain": 0,
+            "effects": [
+              {
+                "kind": "stat",
+                "stat": "xpGainPct",
+                "value": 0.12
+              }
+            ],
+            "offerRole": "utility",
+            "weight": 0.5,
+            "maxStacks": 6
+          }
+        ],
+        "settlement": {
+          "winBonus": 500,
+          "perWaveCleared": 40,
+          "perKill": 2,
+          "hpRatioBonusMax": 200,
+          "perEquippedStarSquared": 10,
+          "wildcardStarValue": {
+            "1": 15,
+            "2": 40,
+            "3": 100,
+            "4": 250,
+            "5": 600
+          }
+        }
+      },
+      "economy": {
+        "maxStar": 6,
+        "mergeCopies": 2,
+        "mergeCopiesWhenTwoCopyDisabled": 3,
+        "equipThreshold": 3,
+        "handSlots": 7,
+        "equipSlots": 3,
+        "equipIrreversible": false,
+        "unequipPolicy": "consume",
+        "inRunSlotExpansion": false,
+        "equipDistinctTypes": true,
+        "feedEquipped": true,
+        "placeholderAssumptions": {
+          "twoCopyMerge": true,
+          "normalDropsOnlyOneStar": true,
+          "feedEquipped": true,
+          "distinctEquippedTypes": true
+        },
+        "dropStarPolicy": {
+          "normal": 1,
+          "bountyBossMax": 2,
+          "star2Share": 0.05
+        },
+        "drops": {
+          "pickupRadius": 34,
+          "chanceCap": 0.95
+        },
+        "defaults": {
+          "dropChance": 0.27,
+          "dropLifetime": 5
+        },
+        "normalDropTypePolicy": {
+          "enabled": true,
+          "roleBagSize": 10,
+          "earlyMix": {
+            "discovery": 6,
+            "build": 3,
+            "pivot": 1
+          },
+          "lateMix": {
+            "discovery": 1,
+            "build": 7,
+            "pivot": 2
+          },
+          "bootstrapMinDiscovery": 6,
+          "affinity": {
+            "scorePerStack": 2.5,
+            "scoreCap": 6,
+            "pityWindow": 2
+          },
+          "maturity": {
+            "fullMergeOps": 10,
+            "fullHighestStar": 4,
+            "fullEquippedTypes": 2,
+            "mergeWeight": 0.25,
+            "starWeight": 0.35,
+            "equipWeight": 0.4
+          },
+          "build": {
+            "topK": 3,
+            "scorePower": 1.25,
+            "mergeReadyMultiplier": 1.5,
+            "equippedBaseBonus": 6,
+            "equippedStarBonus": 2,
+            "historicalMergeWeight": 0.5,
+            "historicalMergeCap": 8,
+            "maxWeightRatio": 6
+          },
+          "pivot": {
+            "excludeTopK": 2,
+            "candidateFraction": 0.5
+          },
+          "maxSameTypeStreak": 2
+        }
+      },
+      "bounty": {
+        "enabled": true,
+        "rewardBias": {
+          "enabled": true,
+          "primaryShare": 0.7,
+          "secondaryShare": 0.15,
+          "nearMergeBonus": 2,
+          "investedBonus": 1.5,
+          "droughtBonus": 1.5
+        },
+        "offer": {
+          "enabledFromWave": 1,
+          "checkIntervalSeconds": 4,
+          "baseChancePerCheck": 0.1,
+          "minChancePerCheck": 0.02,
+          "maxChancePerCheck": 0.42,
+          "noDamageRampSeconds": 35,
+          "noDamageBonusMax": 0.18,
+          "healthyHpThreshold": 0.75,
+          "healthyHpBonusMax": 0.1,
+          "recentDamagePenalty": 0.12,
+          "recentDamagePenaltySeconds": 10,
+          "markWindowSeconds": 8,
+          "cooldownSeconds": 12,
+          "minOffersPerWave": 1,
+          "maxOffersPerWave": 2,
+          "guaranteeAtWaveProgress": 0.55,
+          "maxConcurrentOffers": 1,
+          "maxConcurrentEncounters": 1
+        },
+        "encounter": {
+          "enemyCountBase": 3,
+          "enemyCountPerWave": 0.5,
+          "enemyCountMax": 7,
+          "hpMul": 1.35,
+          "speedMul": 1.1,
+          "damageMul": 1.15,
+          "spawnIntervalSeconds": 0.18,
+          "spawnSpread": 110,
+          "emergencyOverrideDistance": 95,
+          "composition": {
+            "normalWeight": 0.5,
+            "fastWeight": 0.3,
+            "tankWeight": 0.2
+          }
+        },
+        "reward": {
+          "cardCount": 1,
+          "cardStarBase": 1,
+          "cardStarUpgradeEveryWaves": 4,
+          "cardStarMax": 2,
+          "wildcardCount": 1,
+          "wildcardStarBase": 1,
+          "wildcardStarUpgradeEveryWaves": 4,
+          "wildcardStarMax": 2,
+          "dropLifetimeSeconds": 12,
+          "repeatProtection": 1
+        },
+        "visual": {
+          "offerRadius": 30,
+          "offerEdgeInset": 28,
+          "enemyGlowRadius": 10,
+          "enemyPulseSpeed": 3,
+          "showRewardName": true
+        }
+      },
+      "input": {
+        "tapMaxPx": 8,
+        "tapMaxMs": 150,
+        "reticleOffsetY": 30,
+        "confirmStyle": "hold-ring",
+        "holdOrDbl": "double-tap"
+      }
+    },
+    "presetName": "",
+    "seed": 1,
+    "gitCommit": "b5c7c2379f7cd92805e00969be036cc26b529f45"
+  },
+  "events": [
+    {
+      "at": 0,
+      "wave": 1,
+      "type": "waveStart"
+    },
+    {
+      "at": 0.4001,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 1,
+      "x": 282.88575451043425,
+      "y": -24.566037334657192
+    },
+    {
+      "at": 0.4001,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 2,
+      "x": -24.610051717248542,
+      "y": 220.7192830941694
+    },
+    {
+      "at": 0.4001,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 3,
+      "x": 235.1632411452461,
+      "y": 754.567525737058
+    },
+    {
+      "at": 0.4001,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 4,
+      "x": 564.5659365338595,
+      "y": 357.6111774451103
+    },
+    {
+      "at": 0.4001,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 5,
+      "x": 564.760079872119,
+      "y": 198.50129333462476
+    },
+    {
+      "at": 0.4001,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 6,
+      "x": 564.8020066235488,
+      "y": 79.65576445135628
+    },
+    {
+      "at": 0.4001,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 7,
+      "x": -24.32226477955663,
+      "y": 223.99340011315596
+    },
+    {
+      "at": 0.4001,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 8,
+      "x": 235.89354190074334,
+      "y": -24.725499156149308
+    },
+    {
+      "at": 0.4001,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 9,
+      "x": -24.60537406489789,
+      "y": 229.79522251406232
+    },
+    {
+      "at": 0.4001,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 10,
+      "x": 291.6434307845083,
+      "y": 754.7248739388531
+    },
+    {
+      "at": 2.3667,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 11,
+      "x": 373.73371205778204,
+      "y": -24.580419418062153
+    },
+    {
+      "at": 2.3667,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 12,
+      "x": -24.496097478943355,
+      "y": 690.8349156237849
+    },
+    {
+      "at": 2.3667,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 13,
+      "x": -24.406213834869597,
+      "y": 136.61944108043505
+    },
+    {
+      "at": 2.3667,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 14,
+      "x": 564.3446146903375,
+      "y": 199.84808082765488
+    },
+    {
+      "at": 2.3667,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 15,
+      "x": 305.8552366161128,
+      "y": 754.7256088077206
+    },
+    {
+      "at": 4.0001,
+      "wave": 1,
+      "type": "bountyOffer",
+      "offerId": 1,
+      "rewardCardType": "aegis",
+      "rewardCardStar": 1,
+      "wildcardStar": 1,
+      "guaranteed": false
+    },
+    {
+      "at": 4.7334,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 7,
+      "x": 150.85808567348562,
+      "y": 307.92040306303517,
+      "distance": 132.1093340225166,
+      "range": 150
+    },
+    {
+      "at": 5.4501,
+      "wave": 1,
+      "type": "bountyAccepted",
+      "offerId": 1,
+      "encounterId": 1,
+      "rewardCardType": "aegis",
+      "rewardCardStar": 1,
+      "wildcardStar": 1,
+      "guaranteed": false,
+      "memberCount": 3,
+      "decisionSeconds": 1.4500000000000082,
+      "hpAtAccept": 100
+    },
+    {
+      "at": 5.4668,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 16,
+      "x": 565,
+      "y": 35
+    },
+    {
+      "at": 5.4668,
+      "wave": 1,
+      "type": "bountyMemberSpawned",
+      "encounterId": 1,
+      "enemyId": 16
+    },
+    {
+      "at": 5.6334,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 17,
+      "x": 565,
+      "y": 43.3242045189254
+    },
+    {
+      "at": 5.6334,
+      "wave": 1,
+      "type": "bountyMemberSpawned",
+      "encounterId": 1,
+      "enemyId": 17
+    },
+    {
+      "at": 5.8169,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 18,
+      "x": 565,
+      "y": 67.2964181364514
+    },
+    {
+      "at": 5.8169,
+      "wave": 1,
+      "type": "bountyMemberSpawned",
+      "encounterId": 1,
+      "enemyId": 18
+    },
+    {
+      "at": 6.5834,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 4,
+      "x": 404.282153500996,
+      "y": 361.63169809726526,
+      "distance": 134.32439170371487,
+      "range": 150
+    },
+    {
+      "at": 7.0171,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 14,
+      "x": 382.5085491939138,
+      "y": 301.873304639125,
+      "distance": 129.00834588856657,
+      "range": 150
+    },
+    {
+      "at": 7.0171,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 1,
+      "x": 382.5085491939138,
+      "y": 301.873304639125,
+      "cardType": "pierce"
+    },
+    {
+      "at": 7.9668,
+      "wave": 1,
+      "type": "pickup",
+      "cardType": "pierce"
+    },
+    {
+      "at": 7.9834,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 13,
+      "x": 175.3014959668059,
+      "y": 291.53926356296876,
+      "distance": 119.85110122145666,
+      "visibleSeconds": 0.13339999999999996
+    },
+    {
+      "at": 8.1168,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 13,
+      "x": 179.4508879111603,
+      "y": 294.7580830270156,
+      "distance": 114.59960122145668,
+      "range": 150
+    },
+    {
+      "at": 8.2502,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 19,
+      "x": 564.6928069574278,
+      "y": 70.62822318429154
+    },
+    {
+      "at": 8.2669,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 9,
+      "x": 161.28943469325895,
+      "y": 315.10889451924714,
+      "distance": 119.61232969641055,
+      "visibleSeconds": 0.06649999999999956
+    },
+    {
+      "at": 8.3334,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 9,
+      "x": 162.46858643946223,
+      "y": 315.6500487665979,
+      "distance": 118.31492969641056,
+      "range": 150
+    },
+    {
+      "at": 8.4168,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 2,
+      "x": 162.58146914104867,
+      "y": 312.3934356585538,
+      "distance": 119.60849210531079,
+      "visibleSeconds": 0.3165999999999993
+    },
+    {
+      "at": 8.7334,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 2,
+      "x": 169.58886313228885,
+      "y": 315.8251985016903,
+      "distance": 111.80589210531073,
+      "range": 150
+    },
+    {
+      "at": 8.7334,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 2,
+      "x": 169.58886313228885,
+      "y": 315.8251985016903,
+      "cardType": "decoy"
+    },
+    {
+      "at": 9.2001,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 12,
+      "x": 181.19268728387053,
+      "y": 463.25774770310517,
+      "distance": 132.4436626477367,
+      "range": 150
+    },
+    {
+      "at": 10.2168,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 20,
+      "x": 564.708363081427,
+      "y": 690.0671048856055
+    },
+    {
+      "at": 10.2168,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 21,
+      "x": -24.425562663374865,
+      "y": 613.3463892048198
+    },
+    {
+      "at": 10.2168,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 22,
+      "x": 341.28665295786726,
+      "y": 754.5728917959851
+    },
+    {
+      "at": 10.2503,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 1,
+      "x": 274.43340979298637,
+      "y": 230.9678109237227,
+      "distance": 134.10549142735167,
+      "range": 150
+    },
+    {
+      "at": 10.3834,
+      "wave": 1,
+      "type": "pickup",
+      "cardType": "decoy"
+    },
+    {
+      "at": 10.8335,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 3,
+      "x": 259.32478322732305,
+      "y": 484.3772877143381,
+      "distance": 119.85364856847495,
+      "visibleSeconds": 0.016899999999999693
+    },
+    {
+      "at": 10.8504,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 3,
+      "x": 259.32478322732305,
+      "y": 484.3772877143381,
+      "distance": 119.85364856847495,
+      "range": 150
+    },
+    {
+      "at": 12.1668,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 23,
+      "x": 564.7150045977667,
+      "y": 692.983265865918
+    },
+    {
+      "at": 12.1668,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 24,
+      "x": 564.6343042599852,
+      "y": 188.33039726350296
+    },
+    {
+      "at": 13.2501,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 11,
+      "x": 301.0362271905565,
+      "y": 248.4409164947562,
+      "distance": 120.62034383057542,
+      "range": 150
+    },
+    {
+      "at": 13.2501,
+      "wave": 1,
+      "type": "perkPopup"
+    },
+    {
+      "at": 13.6503,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 5,
+      "x": 374.4014164919611,
+      "y": 306.0276288855467,
+      "distance": 119.90578101321357,
+      "visibleSeconds": 0.416500000000001
+    },
+    {
+      "at": 14.0668,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 5,
+      "x": 368.6562632500688,
+      "y": 309.27284643598455,
+      "distance": 113.30743101321391,
+      "range": 150
+    },
+    {
+      "at": 14.0668,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 3,
+      "x": 368.6562632500688,
+      "y": 309.27284643598455,
+      "cardType": "sanctum",
+      "lane": "projectile",
+      "laneMatch": false
+    },
+    {
+      "at": 14.1169,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 25,
+      "x": -24.652661491967855,
+      "y": 143.9725226968945
+    },
+    {
+      "at": 14.1169,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 26,
+      "x": 564.6143730269365,
+      "y": 517.4562428084993
+    },
+    {
+      "at": 16.117,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 21,
+      "x": 178.52624413635468,
+      "y": 442.15762439320787,
+      "distance": 119.66932361221541,
+      "visibleSeconds": 0.8331999999999979
+    },
+    {
+      "at": 16.6171,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 16,
+      "x": 352.7875134990678,
+      "y": 272.39023913663556,
+      "distance": 124.21892045307705,
+      "range": 150
+    },
+    {
+      "at": 16.7835,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 10,
+      "x": 276.65392643478066,
+      "y": 484.81467572366824,
+      "distance": 119.9992968969704,
+      "visibleSeconds": 1.0333000000000006
+    },
+    {
+      "at": 16.8501,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 8,
+      "x": 259.55660239580675,
+      "y": 245.66605062491746,
+      "distance": 119.79004978283476,
+      "visibleSeconds": 2.6000999999999976
+    },
+    {
+      "at": 16.9502,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 21,
+      "x": 206.62551720755533,
+      "y": 418.4560376716381,
+      "distance": 82.90882361221547,
+      "range": 150
+    },
+    {
+      "at": 17.3338,
+      "wave": 1,
+      "type": "pickup",
+      "cardType": "sanctum"
+    },
+    {
+      "at": 17.8168,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 10,
+      "x": 275.7238185132301,
+      "y": 468.0665826840338,
+      "distance": 103.2253968969709,
+      "range": 150
+    },
+    {
+      "at": 18.0003,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 6,
+      "x": 356.13595726919306,
+      "y": 281.62743696445045,
+      "distance": 119.8765506752548,
+      "visibleSeconds": 2.866500000000002
+    },
+    {
+      "at": 18.0505,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 27,
+      "x": -24.628210350192997,
+      "y": 179.41416490103077
+    },
+    {
+      "at": 18.0505,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 28,
+      "x": 401.8080596514593,
+      "y": -24.583776738448947
+    },
+    {
+      "at": 18.0505,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 29,
+      "x": 47.37584536654655,
+      "y": -24.61848764435153
+    },
+    {
+      "at": 18.8168,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 15,
+      "x": 280.98866648902947,
+      "y": 484.4404260463674,
+      "distance": 119.94484634758128,
+      "visibleSeconds": 4.2834
+    },
+    {
+      "at": 19.4502,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 8,
+      "x": 263.27292560486495,
+      "y": 288.1314955403824,
+      "distance": 77.16229978283394,
+      "range": 150
+    },
+    {
+      "at": 19.4502,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 4,
+      "x": 263.27292560486495,
+      "y": 288.1314955403824,
+      "cardType": "harvest",
+      "lane": "projectile",
+      "laneMatch": false
+    },
+    {
+      "at": 19.6668,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 19,
+      "x": 354.68681355448854,
+      "y": 280.4054419031115,
+      "distance": 119.70002359908099,
+      "visibleSeconds": 2.033800000000003
+    },
+    {
+      "at": 20.017,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 30,
+      "x": -24.770649173996915,
+      "y": 565.0933548273417
+    },
+    {
+      "at": 20.6336,
+      "wave": 1,
+      "type": "pickup",
+      "cardType": "harvest"
+    },
+    {
+      "at": 20.7669,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 24,
+      "x": 372.8647961074968,
+      "y": 303.3198683889616,
+      "distance": 119.94000547687125,
+      "visibleSeconds": 2.7835
+    },
+    {
+      "at": 20.8502,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 22,
+      "x": 291.5229042096399,
+      "y": 482.6200548755377,
+      "distance": 119.57304342761302,
+      "visibleSeconds": 2.7668
+    },
+    {
+      "at": 20.8668,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 6,
+      "x": 322.34785406269646,
+      "y": 314.33155791165825,
+      "distance": 72.85320067525521,
+      "range": 150
+    },
+    {
+      "at": 21.7006,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 19,
+      "x": 317.590034575133,
+      "y": 317.4618086839618,
+      "distance": 67.26582359908043,
+      "range": 150
+    },
+    {
+      "at": 21.9835,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 31,
+      "x": 564.6731738213477,
+      "y": 107.26537470027718
+    },
+    {
+      "at": 21.9835,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 32,
+      "x": 416.7291729438034,
+      "y": 754.5936628373038
+    },
+    {
+      "at": 22.2668,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 26,
+      "x": 376.42148274141795,
+      "y": 420.07069884666794,
+      "distance": 119.82618186499275,
+      "visibleSeconds": 1.9506000000000014
+    },
+    {
+      "at": 22.3002,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 18,
+      "x": 354.4206715971926,
+      "y": 279.80563960064023,
+      "distance": 119.93718704712498,
+      "visibleSeconds": 3.9681999999999995
+    },
+    {
+      "at": 22.4837,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 20,
+      "x": 350.4879489232111,
+      "y": 453.77924013109913,
+      "distance": 119.83348196610496,
+      "visibleSeconds": 2.3499000000000017
+    },
+    {
+      "at": 22.8003,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 5,
+      "x": 229.198082089588,
+      "y": 568.335174776778,
+      "cardType": "decoy"
+    },
+    {
+      "at": 22.8003,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 6,
+      "x": 225.32508404476192,
+      "y": 606.16013930475,
+      "cardType": "impact"
+    },
+    {
+      "at": 23.0835,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 17,
+      "x": 350.93349741236045,
+      "y": 276.74797572478894,
+      "distance": 119.74410545855274,
+      "visibleSeconds": 3.966799999999999
+    },
+    {
+      "at": 23.1002,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 15,
+      "x": 274.5389674135682,
+      "y": 414.33594101053853,
+      "distance": 49.54429634757942,
+      "range": 150
+    },
+    {
+      "at": 23.2002,
+      "wave": 1,
+      "type": "pickup",
+      "cardType": "decoy"
+    },
+    {
+      "at": 23.2002,
+      "wave": 1,
+      "type": "mergeOpportunity",
+      "cardType": "decoy"
+    },
+    {
+      "at": 23.3836,
+      "wave": 1,
+      "type": "pickup",
+      "cardType": "impact"
+    },
+    {
+      "at": 23.6837,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 25,
+      "x": 174.32446657028245,
+      "y": 293.2310172033654,
+      "distance": 119.60181682869468,
+      "visibleSeconds": 2.766599999999997
+    },
+    {
+      "at": 23.9337,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 33,
+      "x": -24.29146379870099,
+      "y": 255.49172877405474
+    },
+    {
+      "at": 23.9337,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 34,
+      "x": 138.32456542316845,
+      "y": -24.586196588403652
+    },
+    {
+      "at": 23.9337,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 35,
+      "x": -24.601174214461942,
+      "y": 233.41646181945816
+    },
+    {
+      "at": 24.2174,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 26,
+      "x": 331.7741921774781,
+      "y": 396.9667406078919,
+      "distance": 69.55518186499292,
+      "range": 150
+    },
+    {
+      "at": 24.5169,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 23,
+      "x": 350.0978267244397,
+      "y": 454.13949540403706,
+      "distance": 119.83952389284893,
+      "visibleSeconds": 2.7668
+    },
+    {
+      "at": 24.8336,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 20,
+      "x": 309.74260410798047,
+      "y": 408.8366021341135,
+      "distance": 59.17028196610381,
+      "range": 150
+    },
+    {
+      "at": 25.8837,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 36,
+      "x": 500.52746668227945,
+      "y": -24.628546265960622
+    },
+    {
+      "at": 25.8837,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 37,
+      "x": 371.09077340885653,
+      "y": -24.27698177688257
+    },
+    {
+      "at": 26.2684,
+      "wave": 1,
+      "type": "bountyFailed",
+      "encounterId": 1,
+      "rewardCardType": "aegis",
+      "rewardCardStar": 1,
+      "wildcardStar": 1,
+      "guaranteed": false,
+      "hpAtAccept": 100
+    },
+    {
+      "at": 26.8337,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 27,
+      "x": 168.59681048888174,
+      "y": 301.1262942718463,
+      "distance": 119.84346926918688,
+      "visibleSeconds": 0.9665999999999997
+    },
+    {
+      "at": 27.117,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 31,
+      "x": 464.53519831676084,
+      "y": 194.85062469183057,
+      "distance": 258.44680942488293,
+      "range": 150
+    },
+    {
+      "at": 27.8003,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 27,
+      "x": 189.4962286732701,
+      "y": 314.29080412045226,
+      "distance": 95.14346926918714,
+      "range": 150
+    },
+    {
+      "at": 27.8338,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 38,
+      "x": 564.6746808140144,
+      "y": 100.97523915604019
+    },
+    {
+      "at": 27.8338,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 39,
+      "x": -24.352287599113637,
+      "y": 187.8204337664484
+    },
+    {
+      "at": 27.8338,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 40,
+      "x": 367.85882935600796,
+      "y": -24.266813157961607
+    },
+    {
+      "at": 27.8338,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 41,
+      "x": 416.0867550164057,
+      "y": -24.59100800778461
+    },
+    {
+      "at": 27.8338,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 42,
+      "x": 157.8417719817845,
+      "y": -24.27355169239218
+    },
+    {
+      "at": 27.8338,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 43,
+      "x": 122.27111265836814,
+      "y": 754.5915766649722
+    },
+    {
+      "at": 28.2503,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 33,
+      "x": 157.76016516138455,
+      "y": 323.2346354283999,
+      "distance": 119.7586164014863,
+      "visibleSeconds": 0.03340000000000032
+    },
+    {
+      "at": 28.2837,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 33,
+      "x": 158.46026640790691,
+      "y": 323.4951488534248,
+      "distance": 119.01161640148607,
+      "range": 150
+    },
+    {
+      "at": 28.9173,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 28,
+      "x": 311.398472164032,
+      "y": 242.63894575556643,
+      "distance": 129.1745373257646,
+      "range": 150
+    },
+    {
+      "at": 29.8003,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 44,
+      "x": 214.70300484465466,
+      "y": -24.572683263690013
+    },
+    {
+      "at": 29.8003,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 45,
+      "x": 473.51466292200087,
+      "y": 754.617445052265
+    },
+    {
+      "at": 30.1671,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 29,
+      "x": 203.4506578722752,
+      "y": 248.5308141822168,
+      "distance": 134.14129186305863,
+      "range": 150
+    },
+    {
+      "at": 30.1671,
+      "wave": 1,
+      "type": "perkPopup"
+    },
+    {
+      "at": 31.2007,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 35,
+      "x": 147.5253877274585,
+      "y": 310.29674614134666,
+      "distance": 134.13603779012425,
+      "range": 150
+    },
+    {
+      "at": 31.7504,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 46,
+      "x": -24.646996894563582,
+      "y": 576.026308672118
+    },
+    {
+      "at": 31.7504,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 47,
+      "x": 564.7568950817815,
+      "y": 522.2837716170983
+    },
+    {
+      "at": 31.9172,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 37,
+      "x": 303.0347226140838,
+      "y": 237.7909909143052,
+      "distance": 131.4284021463924,
+      "range": 150
+    },
+    {
+      "at": 31.9172,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 7,
+      "x": 303.0347226140838,
+      "y": 237.7909909143052,
+      "cardType": "pierce",
+      "lane": "projectile",
+      "laneMatch": true
+    },
+    {
+      "at": 32.5673,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 39,
+      "x": 157.49682438081652,
+      "y": 297.2809276642954,
+      "distance": 131.31198453457793,
+      "range": 150
+    },
+    {
+      "at": 33.0839,
+      "wave": 1,
+      "type": "pickup",
+      "cardType": "pierce"
+    },
+    {
+      "at": 33.1674,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 32,
+      "x": 314.39632438307524,
+      "y": 482.88062514016866,
+      "distance": 125.963786074269,
+      "range": 150
+    },
+    {
+      "at": 33.7005,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 48,
+      "x": 333.7683084123213,
+      "y": -24.728066110991225
+    },
+    {
+      "at": 33.7005,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 49,
+      "x": 406.10301988329707,
+      "y": -24.290606000503736
+    },
+    {
+      "at": 33.7005,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 50,
+      "x": 302.9237306184294,
+      "y": 754.2511738347059
+    },
+    {
+      "at": 34.1009,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 40,
+      "x": 299.1006067444768,
+      "y": 249.24242837430037,
+      "distance": 119.35937626167318,
+      "visibleSeconds": 0.24959999999999383
+    },
+    {
+      "at": 34.1839,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 42,
+      "x": 236.9555712105431,
+      "y": 250.31093629234869,
+      "distance": 119.35457933468321,
+      "visibleSeconds": 0.5666999999999973
+    },
+    {
+      "at": 34.3505,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 40,
+      "x": 296.5442942764315,
+      "y": 259.41103160019696,
+      "distance": 108.87437626167325,
+      "range": 150
+    },
+    {
+      "at": 34.3505,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 30,
+      "x": 170.90792609456327,
+      "y": 432.264721097906,
+      "distance": 119.76552849321718,
+      "visibleSeconds": 1.2170000000000059
+    },
+    {
+      "at": 34.3505,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 8,
+      "x": 296.5442942764315,
+      "y": 259.41103160019696,
+      "cardType": "thorns",
+      "lane": "projectile",
+      "laneMatch": false
+    },
+    {
+      "at": 34.7506,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 42,
+      "x": 243.80783961195672,
+      "y": 274.0934701723833,
+      "distance": 94.60457933468308,
+      "range": 150
+    },
+    {
+      "at": 35.1506,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 34,
+      "x": 231.70563255374847,
+      "y": 251.69901100316065,
+      "distance": 119.59754464774953,
+      "visibleSeconds": 1.033300000000004
+    },
+    {
+      "at": 35.3172,
+      "wave": 1,
+      "type": "pickup",
+      "cardType": "thorns"
+    },
+    {
+      "at": 35.5675,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 30,
+      "x": 187.29149313539747,
+      "y": 421.1433869269987,
+      "distance": 99.96387849321718,
+      "range": 150
+    },
+    {
+      "at": 35.5675,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 9,
+      "x": 187.29149313539747,
+      "y": 421.1433869269987,
+      "cardType": "chainLightning",
+      "lane": "projectile",
+      "laneMatch": true
+    },
+    {
+      "at": 35.6506,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 51,
+      "x": -24.65990251278711,
+      "y": 138.44933986143081
+    },
+    {
+      "at": 35.6506,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 52,
+      "x": 435.36672009412916,
+      "y": -24.749375887178214
+    },
+    {
+      "at": 35.6506,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 53,
+      "x": 343.6511863716133,
+      "y": -24.7324849772121
+    },
+    {
+      "at": 36.1839,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 34,
+      "x": 240.16886150693085,
+      "y": 276.7390436358478,
+      "distance": 93.16594464774911,
+      "range": 150
+    },
+    {
+      "at": 36.7006,
+      "wave": 1,
+      "type": "pickup",
+      "cardType": "chainLightning"
+    },
+    {
+      "at": 37.6172,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 54,
+      "x": -24.57844542413581,
+      "y": 437.6923105663092
+    },
+    {
+      "at": 37.9006,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 38,
+      "x": 370.06215991663873,
+      "y": 275.3455791704215,
+      "distance": 134.35159478573428,
+      "range": 150
+    },
+    {
+      "at": 37.9006,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 10,
+      "x": 370.06215991663873,
+      "y": 275.3455791704215,
+      "cardType": "splitBlast",
+      "lane": "projectile",
+      "laneMatch": true
+    },
+    {
+      "at": 38.5006,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 36,
+      "x": 333.7082841511795,
+      "y": 257.3227392546032,
+      "distance": 125.1125011784178,
+      "range": 150
+    },
+    {
+      "at": 38.9672,
+      "wave": 1,
+      "type": "pickup",
+      "cardType": "splitBlast"
+    },
+    {
+      "at": 39.1175,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 41,
+      "x": 313.23495879653467,
+      "y": 249.69898467642872,
+      "distance": 123.14051241075974,
+      "range": 150
+    },
+    {
+      "at": 39.2509,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 43,
+      "x": 227.51889142556357,
+      "y": 477.03145414421346,
+      "distance": 119.81523819356225,
+      "visibleSeconds": 0.43319999999999936
+    },
+    {
+      "at": 39.5673,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 55,
+      "x": 564.6858201804611,
+      "y": 638.9914555635622
+    },
+    {
+      "at": 39.5673,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 56,
+      "x": 298.32503816824163,
+      "y": 754.728466206511
+    },
+    {
+      "at": 39.5673,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 57,
+      "x": 337.6141722051006,
+      "y": 754.5773188332304
+    },
+    {
+      "at": 39.6841,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 43,
+      "x": 231.3565253519358,
+      "y": 466.91082114587016,
+      "distance": 108.99143819356233,
+      "range": 150
+    },
+    {
+      "at": 39.7172,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 50,
+      "x": 280.10444700139976,
+      "y": 484.46300684539256,
+      "distance": 119.88957358230284,
+      "visibleSeconds": 0.38350000000000506
+    },
+    {
+      "at": 40.1007,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 50,
+      "x": 278.71216235768946,
+      "y": 468.00228317597566,
+      "distance": 103.37007358230244,
+      "range": 150
+    },
+    {
+      "at": 40.2006,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 49,
+      "x": 309.5679944836093,
+      "y": 251.82507879724702,
+      "distance": 119.89240583416569,
+      "visibleSeconds": 0.29999999999999716
+    },
+    {
+      "at": 40.3342,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 44,
+      "x": 253.19266190686437,
+      "y": 246.5906762913831,
+      "distance": 119.59621463453179,
+      "visibleSeconds": 0.7663999999999973
+    },
+    {
+      "at": 40.5006,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 49,
+      "x": 305.35913212791115,
+      "y": 263.8635374473738,
+      "distance": 107.13940583416468,
+      "range": 150
+    },
+    {
+      "at": 41.084,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 46,
+      "x": 172.6458045963969,
+      "y": 434.72511753485725,
+      "distance": 119.74736480579683,
+      "visibleSeconds": 0.6498999999999953
+    },
+    {
+      "at": 41.1006,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 44,
+      "x": 255.9323447275902,
+      "y": 265.89200694711354,
+      "distance": 100.10141463453125,
+      "range": 150
+    },
+    {
+      "at": 41.5175,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 58,
+      "x": 358.8695230403105,
+      "y": 754.5716053099542
+    },
+    {
+      "at": 41.5175,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 59,
+      "x": 254.18299320585285,
+      "y": 754.5609617355931
+    },
+    {
+      "at": 41.5175,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 60,
+      "x": 79.34101165098284,
+      "y": -24.605323997817546
+    },
+    {
+      "at": 41.5175,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 61,
+      "x": 415.69520584897873,
+      "y": -24.58843804325437
+    },
+    {
+      "at": 41.7339,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 46,
+      "x": 186.03032952826385,
+      "y": 425.13911489620637,
+      "distance": 103.28416480579718,
+      "range": 150
+    },
+    {
+      "at": 42.1007,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 45,
+      "x": 325.4462979887896,
+      "y": 471.1488378765048,
+      "distance": 119.75753731266416,
+      "visibleSeconds": 0.283299999999997
+    },
+    {
+      "at": 42.384,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 45,
+      "x": 322.2346431024295,
+      "y": 465.00030413821156,
+      "distance": 112.82073731266338,
+      "range": 150
+    },
+    {
+      "at": 43.4839,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 62,
+      "x": 441.05269176717024,
+      "y": 754.6071908012846
+    },
+    {
+      "at": 43.4839,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 63,
+      "x": 564.805453019867,
+      "y": 76.40155529393101
+    },
+    {
+      "at": 44.5507,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 47,
+      "x": 378.6608080446874,
+      "y": 422.98195733975535,
+      "distance": 123.16281330772539,
+      "range": 150
+    },
+    {
+      "at": 44.5507,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 11,
+      "x": 378.6608080446874,
+      "y": 422.98195733975535,
+      "cardType": "chainLightning",
+      "lane": "projectile",
+      "laneMatch": true
+    },
+    {
+      "at": 44.6843,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 54,
+      "x": 153.8148685335246,
+      "y": 393.6706844677257,
+      "distance": 119.67035105543087,
+      "visibleSeconds": 0.4831000000000003
+    },
+    {
+      "at": 45.1674,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 54,
+      "x": 165.5855810320676,
+      "y": 390.7660582066329,
+      "distance": 107.5465510554314,
+      "range": 150
+    },
+    {
+      "at": 45.334,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 51,
+      "x": 174.93403734644494,
+      "y": 291.9080848388012,
+      "distance": 119.91649309906879,
+      "visibleSeconds": 0.46689999999999543
+    },
+    {
+      "at": 45.4507,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 64,
+      "x": 279.54936340963525,
+      "y": -24.563331174575694
+    },
+    {
+      "at": 45.4507,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 65,
+      "x": 564.5632883632529,
+      "y": 370.92589632663413
+    },
+    {
+      "at": 45.4507,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 66,
+      "x": 564.5711608194765,
+      "y": 422.0220871104215
+    },
+    {
+      "at": 45.5507,
+      "wave": 1,
+      "type": "pickup",
+      "cardType": "chainLightning"
+    },
+    {
+      "at": 45.5507,
+      "wave": 1,
+      "type": "mergeOpportunity",
+      "cardType": "chainLightning"
+    },
+    {
+      "at": 45.8009,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 51,
+      "x": 184.20942336134195,
+      "y": 299.0395092599566,
+      "distance": 108.21649309906883,
+      "range": 150
+    },
+    {
+      "at": 47.4173,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 67,
+      "x": 179.77741309022554,
+      "y": -24.272290059943998
+    },
+    {
+      "at": 49.3677,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 48,
+      "x": 292.1242331628254,
+      "y": 229.78495636131657,
+      "distance": 137.01310053879567,
+      "range": 150
+    },
+    {
+      "at": 50.0007,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 57,
+      "x": 291.30114372654634,
+      "y": 487.7322939914917,
+      "distance": 124.56706913335056,
+      "range": 150
+    },
+    {
+      "at": 50.0007,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 12,
+      "x": 291.30114372654634,
+      "y": 487.7322939914917,
+      "cardType": "aegis",
+      "lane": "projectile",
+      "laneMatch": false
+    },
+    {
+      "at": 50.4341,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 55,
+      "x": 357.76889515227157,
+      "y": 446.60530873609656,
+      "distance": 119.84492217096258,
+      "visibleSeconds": 0.16660000000000252
+    },
+    {
+      "at": 50.6007,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 55,
+      "x": 354.9146190947634,
+      "y": 443.95147472705605,
+      "distance": 115.94752217096202,
+      "range": 150
+    },
+    {
+      "at": 50.9007,
+      "wave": 1,
+      "type": "pickup",
+      "cardType": "aegis"
+    },
+    {
+      "at": 51.334,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 68,
+      "x": 172.93665952226985,
+      "y": -24.27519177366168
+    },
+    {
+      "at": 51.334,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 69,
+      "x": 471.0239838365744,
+      "y": 754.7565709975142
+    },
+    {
+      "at": 51.334,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 70,
+      "x": 241.9033686439884,
+      "y": -24.569518149208136
+    },
+    {
+      "at": 51.3674,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 59,
+      "x": 264.5549192771573,
+      "y": 499.10823619951213,
+      "distance": 134.21873163095535,
+      "range": 150
+    },
+    {
+      "at": 52.0007,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 65,
+      "x": 394.7318516750415,
+      "y": 367.5093012294989,
+      "distance": 124.75708963800382,
+      "range": 150
+    },
+    {
+      "at": 52.0007,
+      "wave": 1,
+      "type": "bountyOffer",
+      "offerId": 2,
+      "rewardCardType": "sanctum",
+      "rewardCardStar": 1,
+      "wildcardStar": 1,
+      "guaranteed": false,
+      "lane": "projectile",
+      "laneMatch": false
+    },
+    {
+      "at": 52.2844,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 58,
+      "x": 296.6088790700395,
+      "y": 481.64362967395067,
+      "distance": 119.64016377821343,
+      "visibleSeconds": 0.31640000000000157
+    },
+    {
+      "at": 52.3841,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 66,
+      "x": 387.58820997162314,
+      "y": 387.76232722004147,
+      "distance": 119.77107607766898,
+      "visibleSeconds": 0.8166000000000011
+    },
+    {
+      "at": 52.6008,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 58,
+      "x": 294.8746782205207,
+      "y": 474.0415250855143,
+      "distance": 111.84276377821364,
+      "range": 150
+    },
+    {
+      "at": 53.2007,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 66,
+      "x": 367.16984922751425,
+      "y": 383.8098101380447,
+      "distance": 98.97367607766795,
+      "range": 150
+    },
+    {
+      "at": 53.2007,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 13,
+      "x": 367.16984922751425,
+      "y": 383.8098101380447,
+      "cardType": "frost",
+      "lane": "projectile",
+      "laneMatch": false
+    },
+    {
+      "at": 53.2841,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 71,
+      "x": -24.470878152705858,
+      "y": 661.990918891894
+    },
+    {
+      "at": 53.2841,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 72,
+      "x": -24.79997443962201,
+      "y": 85.6842240175448
+    },
+    {
+      "at": 53.2841,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 73,
+      "x": -24.59461237443446,
+      "y": 251.9743920103499
+    },
+    {
+      "at": 53.2841,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 74,
+      "x": 285.31184342576955,
+      "y": 754.5661350036576
+    },
+    {
+      "at": 53.6015,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 60,
+      "x": 217.4421103637972,
+      "y": 257.5996943670464,
+      "distance": 119.57072138723221,
+      "visibleSeconds": 0.4491999999999976
+    },
+    {
+      "at": 53.6673,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 53,
+      "x": 292.23334473508197,
+      "y": 247.35007309673887,
+      "distance": 119.73231359349775,
+      "visibleSeconds": 1.1669000000000054
+    },
+    {
+      "at": 53.8174,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 67,
+      "x": 243.02719528553254,
+      "y": 248.62375963526262,
+      "distance": 119.461129726769,
+      "visibleSeconds": 0.6167999999999978
+    },
+    {
+      "at": 54.0507,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 60,
+      "x": 222.3860474130492,
+      "y": 267.7024658785188,
+      "distance": 108.32312138723292,
+      "range": 150
+    },
+    {
+      "at": 54.0507,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 14,
+      "x": 222.3860474130492,
+      "y": 267.7024658785188,
+      "cardType": "impact",
+      "lane": "projectile",
+      "laneMatch": false
+    },
+    {
+      "at": 54.0674,
+      "wave": 1,
+      "type": "pickup",
+      "cardType": "frost"
+    },
+    {
+      "at": 54.4342,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 67,
+      "x": 249.12751628067355,
+      "y": 274.9440637322185,
+      "distance": 92.44312972676913,
+      "range": 150
+    },
+    {
+      "at": 54.4342,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 15,
+      "x": 249.12751628067355,
+      "y": 274.9440637322185,
+      "cardType": "decoy",
+      "lane": "projectile",
+      "laneMatch": false
+    },
+    {
+      "at": 54.8342,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 53,
+      "x": 288.70861157193383,
+      "y": 266.0015447461446,
+      "distance": 100.75071359349822,
+      "range": 150
+    },
+    {
+      "at": 54.9509,
+      "wave": 1,
+      "type": "pickup",
+      "cardType": "impact"
+    },
+    {
+      "at": 55.1508,
+      "wave": 1,
+      "type": "pickup",
+      "cardType": "decoy"
+    },
+    {
+      "at": 55.2507,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 75,
+      "x": -24.56804371888042,
+      "y": 334.9372858251208
+    },
+    {
+      "at": 55.2507,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 76,
+      "x": 475.27575199989417,
+      "y": -24.33523920535039
+    },
+    {
+      "at": 55.2507,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 77,
+      "x": -24.670857992202198,
+      "y": 618.5292100972085
+    },
+    {
+      "at": 55.2841,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 52,
+      "x": 316.7940821769338,
+      "y": 254.71200303608933,
+      "distance": 119.80454248939479,
+      "visibleSeconds": 0.20019999999999527
+    },
+    {
+      "at": 55.4843,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 52,
+      "x": 315.6127716948827,
+      "y": 257.4962090894372,
+      "distance": 116.78009248939438,
+      "range": 150
+    },
+    {
+      "at": 56.0008,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 64,
+      "x": 272.9388990748717,
+      "y": 245.10851985822802,
+      "distance": 119.92749533929735,
+      "visibleSeconds": 0.13350000000000506
+    },
+    {
+      "at": 56.1343,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 64,
+      "x": 272.8646078007133,
+      "y": 248.13920944421088,
+      "distance": 116.89589533929718,
+      "range": 150
+    },
+    {
+      "at": 57.2008,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 78,
+      "x": -24.583010430700746,
+      "y": 418.45809164622096
+    },
+    {
+      "at": 57.2008,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 79,
+      "x": 564.6896830677077,
+      "y": 90.90089808032909
+    },
+    {
+      "at": 57.2008,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 80,
+      "x": 44.71212411405242,
+      "y": -24.36511507559824
+    },
+    {
+      "at": 57.2008,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 81,
+      "x": 399.9640744087295,
+      "y": 754.3042459540001
+    },
+    {
+      "at": 57.2008,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 82,
+      "x": 157.8514610689133,
+      "y": 754.5927378888108
+    },
+    {
+      "at": 57.2008,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 83,
+      "x": 45.565934027741044,
+      "y": -24.63276618515443
+    },
+    {
+      "at": 57.2008,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 84,
+      "x": 468.7583690552365,
+      "y": 754.6224838971075
+    },
+    {
+      "at": 57.2008,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 85,
+      "x": 564.6870222075926,
+      "y": 634.0476167968687
+    },
+    {
+      "at": 57.2008,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 86,
+      "x": -24.80337596515225,
+      "y": 640.1296168971303
+    },
+    {
+      "at": 57.2008,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 87,
+      "x": 232.40182006063588,
+      "y": -24.578159992684526
+    },
+    {
+      "at": 57.584,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 68,
+      "x": 240.98124135181635,
+      "y": 248.61947175723657,
+      "distance": 119.94380228901447,
+      "visibleSeconds": 0.21679999999999922
+    },
+    {
+      "at": 57.8008,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 68,
+      "x": 243.16084539698014,
+      "y": 257.3608336194575,
+      "distance": 110.93480228901532,
+      "range": 150
+    },
+    {
+      "at": 57.9341,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 62,
+      "x": 317.3920853498827,
+      "y": 475.0075521768341,
+      "distance": 119.78176526395596,
+      "visibleSeconds": 0.6672000000000011
+    },
+    {
+      "at": 57.9674,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 56,
+      "x": 262.004917787846,
+      "y": 484.67572961610125,
+      "distance": 119.94249288190268,
+      "visibleSeconds": 0.8338000000000036
+    },
+    {
+      "at": 58.6013,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 62,
+      "x": 310.69936749606006,
+      "y": 459.4722681083298,
+      "distance": 102.86616526395593,
+      "range": 150
+    },
+    {
+      "at": 58.6013,
+      "wave": 1,
+      "type": "perkPopup"
+    },
+    {
+      "at": 58.8012,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 56,
+      "x": 262.90393589821423,
+      "y": 471.21862618158644,
+      "distance": 106.45539288190267,
+      "range": 150
+    },
+    {
+      "at": 59.1513,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 88,
+      "x": 417.64710317196676,
+      "y": -24.593979192077544
+    },
+    {
+      "at": 59.1513,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 89,
+      "x": 564.6914634430062,
+      "y": 73.20166868257634
+    },
+    {
+      "at": 59.1513,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 90,
+      "x": 564.2537473622415,
+      "y": 330.0436006118589
+    },
+    {
+      "at": 59.1513,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 91,
+      "x": -24.58302042903182,
+      "y": 450.531386484943
+    },
+    {
+      "at": 59.1513,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 92,
+      "x": -24.810065676470906,
+      "y": 55.13820726727514
+    },
+    {
+      "at": 59.1513,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 93,
+      "x": -24.60881405821128,
+      "y": 506.90452356731964
+    },
+    {
+      "at": 59.1513,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 94,
+      "x": 363.73048288166905,
+      "y": 754.2693814044798
+    },
+    {
+      "at": 59.1513,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 95,
+      "x": 461.6827846593669,
+      "y": -24.610398810337763
+    },
+    {
+      "at": 59.1513,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 96,
+      "x": -24.649161446418784,
+      "y": 579.8453760821744
+    },
+    {
+      "at": 59.1513,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 97,
+      "x": 263.49941221215084,
+      "y": -24.565860438351606
+    },
+    {
+      "at": 59.668,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 71,
+      "x": 177.2702918041514,
+      "y": 458.5232761162251,
+      "distance": 131.70194363637503,
+      "range": 150
+    },
+    {
+      "at": 60.0016,
+      "wave": 1,
+      "type": "bountyOfferExpired",
+      "offerId": 2
+    },
+    {
+      "at": 60.7346,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 73,
+      "x": 155.85871283109157,
+      "y": 321.2079962189206,
+      "distance": 122.25372399946471,
+      "range": 150
+    },
+    {
+      "at": 60.7346,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 16,
+      "x": 155.85871283109157,
+      "y": 321.2079962189206,
+      "cardType": "decoy",
+      "lane": "control",
+      "laneMatch": true
+    },
+    {
+      "at": 61.1179,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 98,
+      "x": 291.8031640152338,
+      "y": -24.56907437696499
+    },
+    {
+      "at": 61.1179,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 99,
+      "x": 72.89109763264995,
+      "y": -24.614879480095535
+    },
+    {
+      "at": 61.1179,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 100,
+      "x": 564.5746538131739,
+      "y": 314.30068880354776
+    },
+    {
+      "at": 61.1179,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 101,
+      "x": 478.08439245045565,
+      "y": 754.7583784456584
+    },
+    {
+      "at": 61.1179,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 102,
+      "x": 126.38298818296254,
+      "y": 754.7429937007483
+    },
+    {
+      "at": 61.1179,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 103,
+      "x": 340.31054075674496,
+      "y": -24.57526206846882
+    },
+    {
+      "at": 61.1179,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 104,
+      "x": 564.7099417502117,
+      "y": 40.273571786978984
+    },
+    {
+      "at": 61.1179,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 105,
+      "x": 415.1516764872527,
+      "y": 754.3000692768869
+    },
+    {
+      "at": 61.1179,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 106,
+      "x": 564.5718737419439,
+      "y": 402.6009038140425
+    },
+    {
+      "at": 61.218,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 63,
+      "x": 355.70753784548145,
+      "y": 281.09699933153354,
+      "distance": 119.93954962691548,
+      "visibleSeconds": 0.7169999999999987
+    },
+    {
+      "at": 61.7514,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 70,
+      "x": 261.3872458363846,
+      "y": 245.5811826000425,
+      "distance": 119.72900017743099,
+      "visibleSeconds": 0.7999000000000009
+    },
+    {
+      "at": 61.935,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 63,
+      "x": 347.4540295974128,
+      "y": 289.1767333369998,
+      "distance": 108.38954962691436,
+      "range": 150
+    },
+    {
+      "at": 61.935,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 17,
+      "x": 347.4540295974128,
+      "y": 289.1767333369998,
+      "cardType": "scorch",
+      "lane": "control",
+      "laneMatch": false
+    },
+    {
+      "at": 61.985,
+      "wave": 1,
+      "type": "pickup",
+      "cardType": "decoy"
+    },
+    {
+      "at": 61.985,
+      "wave": 1,
+      "type": "mergeOpportunity",
+      "cardType": "decoy"
+    },
+    {
+      "at": 62.0346,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 75,
+      "x": 150.90190930448355,
+      "y": 352.8452128949547,
+      "distance": 119.71672421548476,
+      "visibleSeconds": 1.5168000000000035
+    },
+    {
+      "at": 62.368,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 76,
+      "x": 325.90067677399014,
+      "y": 258.9762580260642,
+      "distance": 119.85791390619907,
+      "visibleSeconds": 0.7834999999999965
+    },
+    {
+      "at": 62.5513,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 70,
+      "x": 262.85226791529124,
+      "y": 265.8942207762556,
+      "distance": 99.36320017743158,
+      "range": 150
+    },
+    {
+      "at": 63.0847,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 90,
+      "x": 388.4866739875505,
+      "y": 350.9241639734078,
+      "distance": 119.31982682052293,
+      "visibleSeconds": 0.8999000000000024
+    },
+    {
+      "at": 63.1515,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 76,
+      "x": 309.8115794100777,
+      "y": 289.491564923005,
+      "distance": 85.36091390620001,
+      "range": 150
+    },
+    {
+      "at": 63.1515,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 18,
+      "x": 309.8115794100777,
+      "y": 289.491564923005,
+      "cardType": "chainLightning",
+      "lane": "control",
+      "laneMatch": true
+    },
+    {
+      "at": 63.5514,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 75,
+      "x": 189.70037766855805,
+      "y": 356.8048659860598,
+      "distance": 80.71672421548493,
+      "range": 150
+    },
+    {
+      "at": 63.668,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 74,
+      "x": 274.70844886726564,
+      "y": 484.79303706800465,
+      "distance": 119.88553382586238,
+      "visibleSeconds": 1.3834000000000017
+    },
+    {
+      "at": 63.668,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 81,
+      "x": 307.8091375832747,
+      "y": 478.2563584513073,
+      "distance": 119.40072702643816,
+      "visibleSeconds": 0.7500000000000071
+    },
+    {
+      "at": 63.9846,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 90,
+      "x": 349.0112500237528,
+      "y": 355.61371745731293,
+      "distance": 79.56682682052318,
+      "range": 150
+    },
+    {
+      "at": 64.1017,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 78,
+      "x": 151.9570704760041,
+      "y": 386.4212955983296,
+      "distance": 119.97085110858418,
+      "visibleSeconds": 1.9496000000000038
+    },
+    {
+      "at": 64.1183,
+      "wave": 1,
+      "type": "pickup",
+      "cardType": "scorch"
+    },
+    {
+      "at": 64.318,
+      "wave": 1,
+      "type": "pickup",
+      "cardType": "chainLightning"
+    },
+    {
+      "at": 64.418,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 81,
+      "x": 297.3584895953065,
+      "y": 446.95169481101965,
+      "distance": 86.39772702643859,
+      "range": 150
+    },
+    {
+      "at": 64.5347,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 80,
+      "x": 209.9932170347042,
+      "y": 261.2902559104991,
+      "distance": 119.81871732310388,
+      "visibleSeconds": 0.9333000000000027
+    },
+    {
+      "at": 65.0514,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 74,
+      "x": 273.31285960474327,
+      "y": 449.28625320561673,
+      "distance": 84.3513338258624,
+      "range": 150
+    },
+    {
+      "at": 65.0514,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 19,
+      "x": 273.31285960474327,
+      "y": 449.28625320561673,
+      "cardType": "aegis",
+      "lane": "control",
+      "laneMatch": false
+    },
+    {
+      "at": 65.3846,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 94,
+      "x": 298.06715501945774,
+      "y": 481.5648968863314,
+      "distance": 119.89637349397746,
+      "visibleSeconds": 1.1166999999999945
+    },
+    {
+      "at": 65.468,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 80,
+      "x": 230.65250852768378,
+      "y": 296.9957166589351,
+      "distance": 78.56721732310386,
+      "range": 150
+    },
+    {
+      "at": 65.6016,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 77,
+      "x": 179.33608862563153,
+      "y": 443.0055075404689,
+      "distance": 119.6026924126104,
+      "visibleSeconds": 1.5501000000000005
+    },
+    {
+      "at": 66.0513,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 78,
+      "x": 201.4099868203582,
+      "y": 377.44705594260734,
+      "distance": 69.71025110858396,
+      "range": 150
+    },
+    {
+      "at": 66.0513,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 20,
+      "x": 201.4099868203582,
+      "y": 377.44705594260734,
+      "cardType": "sanctum",
+      "lane": "control",
+      "laneMatch": true
+    },
+    {
+      "at": 66.3347,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 91,
+      "x": 154.77812029496414,
+      "y": 398.4543624076472,
+      "distance": 119.98031474731157,
+      "visibleSeconds": 1.4331999999999994
+    },
+    {
+      "at": 66.5013,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 94,
+      "x": 286.47944695977304,
+      "y": 433.4403187383255,
+      "distance": 70.39637349397739,
+      "range": 150
+    },
+    {
+      "at": 66.968,
+      "wave": 1,
+      "type": "pickup",
+      "cardType": "aegis"
+    },
+    {
+      "at": 67.1181,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 93,
+      "x": 162.00796205197958,
+      "y": 417.01663345703594,
+      "distance": 119.86663596001313,
+      "visibleSeconds": 1.2665999999999968
+    },
+    {
+      "at": 67.1517,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 77,
+      "x": 209.55999694649697,
+      "y": 417.0014308060046,
+      "distance": 79.73169241261056,
+      "range": 150
+    },
+    {
+      "at": 67.6514,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 87,
+      "x": 258.50380932514736,
+      "y": 245.88080813334335,
+      "distance": 119.67265465008255,
+      "visibleSeconds": 1.5333000000000112
+    },
+    {
+      "at": 67.6847,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 105,
+      "x": 311.9139733186581,
+      "y": 477.41422153368393,
+      "distance": 119.97390700640432,
+      "visibleSeconds": 2.8501999999999867
+    },
+    {
+      "at": 67.7679,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 91,
+      "x": 190.14897420113846,
+      "y": 388.18453025185937,
+      "distance": 83.14871474731184,
+      "range": 150
+    },
+    {
+      "at": 67.9347,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 85,
+      "x": 358.584425525118,
+      "y": 445.8770891717913,
+      "distance": 119.9512567608904,
+      "visibleSeconds": 2.4332999999999885
+    },
+    {
+      "at": 67.9347,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 106,
+      "x": 388.7615679638781,
+      "y": 380.15943201599333,
+      "distance": 119.72517865631424,
+      "visibleSeconds": 1.8499999999999943
+    },
+    {
+      "at": 68.0013,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 100,
+      "x": 388.1994765602691,
+      "y": 344.6566609930144,
+      "distance": 119.93734906639693,
+      "visibleSeconds": 2.7834000000000003
+    },
+    {
+      "at": 68.068,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 79,
+      "x": 357.80157468681824,
+      "y": 283.3333039750148,
+      "distance": 119.91065739592229,
+      "visibleSeconds": 2.7668000000000035
+    },
+    {
+      "at": 68.1847,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 82,
+      "x": 236.851215488344,
+      "y": 480.15554137997003,
+      "distance": 119.8317179427642,
+      "visibleSeconds": 11.500099999999989
+    },
+    {
+      "at": 68.3847,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 93,
+      "x": 191.28600448559536,
+      "y": 402.91424933181065,
+      "distance": 87.36923596001294,
+      "range": 150
+    },
+    {
+      "at": 68.9346,
+      "wave": 1,
+      "type": "pickup",
+      "cardType": "sanctum"
+    },
+    {
+      "at": 69.1847,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 87,
+      "x": 262.2922518371959,
+      "y": 285.13522059325584,
+      "distance": 80.2358546500822,
+      "range": 150
+    },
+    {
+      "at": 69.4181,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 84,
+      "x": 324.4124437983129,
+      "y": 471.663742555257,
+      "distance": 119.74083687697652,
+      "visibleSeconds": 1.8333000000000084
+    },
+    {
+      "at": 69.5348,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 97,
+      "x": 268.0037235013846,
+      "y": 245.36756102110746,
+      "distance": 119.64909350219654,
+      "visibleSeconds": 2.3333999999999975
+    },
+    {
+      "at": 69.7847,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 106,
+      "x": 341.4794071871306,
+      "y": 374.1240561435362,
+      "distance": 72.05937865631385,
+      "range": 150
+    },
+    {
+      "at": 69.8846,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 83,
+      "x": 210.1689357646413,
+      "y": 261.1292130014439,
+      "distance": 119.87033260667559,
+      "visibleSeconds": 4.733499999999992
+    },
+    {
+      "at": 70.368,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 85,
+      "x": 312.1811475550841,
+      "y": 403.51115376047363,
+      "distance": 57.11705676088905,
+      "range": 150
+    },
+    {
+      "at": 70.5013,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 89,
+      "x": 354.997456144996,
+      "y": 280.83700600091584,
+      "distance": 119.6159567533128,
+      "visibleSeconds": 5.500299999999996
+    },
+    {
+      "at": 70.5682,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 88,
+      "x": 312.4526813595812,
+      "y": 252.98080894963917,
+      "distance": 119.79369481819724,
+      "visibleSeconds": 6.049899999999994
+    },
+    {
+      "at": 70.635,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 72,
+      "x": 183.02179176194227,
+      "y": 282.5902719335133,
+      "distance": 119.81891331628418,
+      "visibleSeconds": 8.4165
+    },
+    {
+      "at": 70.6514,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 69,
+      "x": 324.91822514151653,
+      "y": 471.47853409286836,
+      "distance": 119.80688492428317,
+      "visibleSeconds": 10.95020000000001
+    },
+    {
+      "at": 70.7847,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 100,
+      "x": 317.30502898736256,
+      "y": 356.85832061672016,
+      "distance": 48.0005490663944,
+      "range": 150
+    },
+    {
+      "at": 71.2514,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 84,
+      "x": 302.9495340046821,
+      "y": 429.59038350525367,
+      "distance": 72.50923687697622,
+      "range": 150
+    },
+    {
+      "at": 71.2514,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 95,
+      "x": 322.80098586393643,
+      "y": 257.67782604168286,
+      "distance": 119.60766334705691,
+      "visibleSeconds": 6.400099999999995
+    },
+    {
+      "at": 71.2514,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 96,
+      "x": 171.40042197136125,
+      "y": 433.33171529110456,
+      "distance": 119.96291136034583,
+      "visibleSeconds": 9.266899999999993
+    },
+    {
+      "at": 71.2514,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 21,
+      "x": 302.9495340046821,
+      "y": 429.59038350525367,
+      "cardType": "scorch",
+      "lane": "control",
+      "laneMatch": false
+    },
+    {
+      "at": 71.5182,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 98,
+      "x": 276.69279239642304,
+      "y": 245.416212204324,
+      "distance": 119.77093041979293,
+      "visibleSeconds": 6.750100000000003
+    },
+    {
+      "at": 71.7348,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 103,
+      "x": 291.28304022651395,
+      "y": 247.07534909248193,
+      "distance": 119.82984224701046,
+      "visibleSeconds": 7.083699999999993
+    },
+    {
+      "at": 71.8682,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 97,
+      "x": 269.00865320067913,
+      "y": 305.5907770997889,
+      "distance": 59.417493502195875,
+      "range": 150
+    },
+    {
+      "at": 71.8682,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 22,
+      "x": 269.00865320067913,
+      "y": 305.5907770997889,
+      "cardType": "aegis",
+      "lane": "control",
+      "laneMatch": false
+    },
+    {
+      "at": 72.6182,
+      "wave": 1,
+      "type": "pickup",
+      "cardType": "scorch"
+    },
+    {
+      "at": 72.6182,
+      "wave": 1,
+      "type": "mergeOpportunity",
+      "cardType": "scorch"
+    },
+    {
+      "at": 72.7848,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 99,
+      "x": 209.63487364604725,
+      "y": 245.67940541131225,
+      "distance": 133.72117548364082,
+      "range": 150
+    },
+    {
+      "at": 73.0181,
+      "wave": 1,
+      "type": "pickup",
+      "cardType": "aegis"
+    },
+    {
+      "at": 73.3848,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 104,
+      "x": 350.6556901007641,
+      "y": 276.1294515348366,
+      "distance": 120.01381058082212,
+      "range": 150
+    },
+    {
+      "at": 74.3685,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 86,
+      "x": 182.28757146173106,
+      "y": 446.85892302570875,
+      "distance": 119.976470188991,
+      "visibleSeconds": 5.516400000000004
+    },
+    {
+      "at": 74.6181,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 83,
+      "x": 209.41884016614713,
+      "y": 274.39762921674713,
+      "distance": 108.9902129475893,
+      "range": 150
+    },
+    {
+      "at": 76.0016,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 89,
+      "x": 337.8336431695203,
+      "y": 308.0892185419184,
+      "distance": 88.54513081936993,
+      "range": 150
+    },
+    {
+      "at": 76.0016,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 23,
+      "x": 337.8336431695203,
+      "y": 308.0892185419184,
+      "cardType": "splitBlast",
+      "lane": "control",
+      "laneMatch": false
+    },
+    {
+      "at": 76.6181,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 88,
+      "x": 299.77887905476774,
+      "y": 296.42760361999115,
+      "distance": 74.75931502532335,
+      "range": 150
+    },
+    {
+      "at": 77.6515,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 95,
+      "x": 301.31308003088543,
+      "y": 307.50710990307203,
+      "distance": 65.4671016062119,
+      "range": 150
+    },
+    {
+      "at": 77.6515,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 24,
+      "x": 301.31308003088543,
+      "y": 307.50710990307203,
+      "cardType": "harvest",
+      "lane": "control",
+      "laneMatch": false
+    },
+    {
+      "at": 77.8015,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 92,
+      "x": 187.30449244807104,
+      "y": 278.0824174466829,
+      "distance": 119.97171802630749,
+      "visibleSeconds": 4.3670999999999935
+    },
+    {
+      "at": 78.2683,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 98,
+      "x": 273.7629350467862,
+      "y": 308.4319061147909,
+      "distance": 56.69311180357068,
+      "range": 150
+    },
+    {
+      "at": 78.8515,
+      "wave": 1,
+      "type": "pickup",
+      "cardType": "splitBlast"
+    },
+    {
+      "at": 79.0349,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 102,
+      "x": 228.6012621436715,
+      "y": 477.34649588805564,
+      "distance": 119.73132687154983,
+      "visibleSeconds": 3.4499000000000137
+    },
+    {
+      "at": 79.0849,
+      "wave": 1,
+      "type": "pickup",
+      "cardType": "harvest"
+    },
+    {
+      "at": 79.6848,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 82,
+      "x": 269.4116548046478,
+      "y": 428.2459933244943,
+      "distance": 63.24872980282584,
+      "range": 150
+    },
+    {
+      "at": 79.6848,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 25,
+      "x": 269.4116548046478,
+      "y": 428.2459933244943,
+      "cardType": "decoy",
+      "lane": "control",
+      "laneMatch": true
+    },
+    {
+      "at": 79.8849,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 86,
+      "x": 214.9952835790119,
+      "y": 408.3481202497429,
+      "distance": 70.03269491986933,
+      "range": 150
+    },
+    {
+      "at": 79.8849,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 26,
+      "x": 214.9952835790119,
+      "y": 408.3481202497429,
+      "cardType": "impact",
+      "lane": "control",
+      "laneMatch": true
+    },
+    {
+      "at": 80.1849,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 27,
+      "x": 318.053629054133,
+      "y": 536.5100318428703,
+      "cardType": "sanctum"
+    },
+    {
+      "at": 80.1849,
+      "wave": 1,
+      "type": "dropLanded",
+      "dropId": 28,
+      "x": 324.9945683222303,
+      "y": 504.2387937430866,
+      "cardType": "harvest"
+    },
+    {
+      "at": 80.5183,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 96,
+      "x": 219.75419161364783,
+      "y": 397.4928192286555,
+      "distance": 59.83664898558492,
+      "range": 150
+    },
+    {
+      "at": 80.5349,
+      "wave": 1,
+      "type": "pickup",
+      "cardType": "decoy"
+    },
+    {
+      "at": 80.635,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 101,
+      "x": 326.4188509236816,
+      "y": 470.6769303590035,
+      "distance": 119.79440867440468,
+      "visibleSeconds": 3.4831999999999965
+    },
+    {
+      "at": 82.6017,
+      "wave": 1,
+      "type": "pickup",
+      "cardType": "impact"
+    },
+    {
+      "at": 84.1182,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 101,
+      "x": 283.7983445581279,
+      "y": 455.35119826993866,
+      "distance": 91.3987600646671,
+      "range": 150
+    },
+    {
+      "at": 84.1182,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 107,
+      "x": -25,
+      "y": 125.8601656416431
+    },
+    {
+      "at": 84.1182,
+      "wave": 1,
+      "type": "waveBossSpawned"
+    },
+    {
+      "at": 98.5517,
+      "wave": 1,
+      "type": "dangerEnter",
+      "enemyId": 107,
+      "x": 176.81999086485402,
+      "y": 289.4642306776639,
+      "distance": 119.95068382274049,
+      "visibleSeconds": 5.316800000000001
+    },
+    {
+      "at": 103.8685,
+      "wave": 1,
+      "type": "kill",
+      "enemyId": 107,
+      "x": 192.2038100320348,
+      "y": 301.93502378762537,
+      "distance": 100.14708382274098,
+      "range": 150
+    },
+    {
+      "at": 103.8685,
+      "wave": 1,
+      "type": "waveBossKilled",
+      "clearSeconds": 19.750299999999996
+    },
+    {
+      "at": 103.8685,
+      "wave": 1,
+      "type": "bossRewardGranted",
+      "wildcardStar": 1,
+      "wildcardCount": 1
+    },
+    {
+      "at": 103.8685,
+      "wave": 1,
+      "type": "waveCleared"
+    }
+  ],
+  "samples": [
+    {
+      "at": 0.25,
+      "wave": 1,
+      "enemies": 0
+    },
+    {
+      "at": 0.5,
+      "wave": 1,
+      "enemies": 10
+    },
+    {
+      "at": 0.75,
+      "wave": 1,
+      "enemies": 10
+    },
+    {
+      "at": 1,
+      "wave": 1,
+      "enemies": 10
+    },
+    {
+      "at": 1.25,
+      "wave": 1,
+      "enemies": 10
+    },
+    {
+      "at": 1.5,
+      "wave": 1,
+      "enemies": 10
+    },
+    {
+      "at": 1.75,
+      "wave": 1,
+      "enemies": 10
+    },
+    {
+      "at": 2,
+      "wave": 1,
+      "enemies": 10
+    },
+    {
+      "at": 2.25,
+      "wave": 1,
+      "enemies": 10
+    },
+    {
+      "at": 2.5,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 2.75,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 3,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 3.25,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 3.5,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 3.75,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 4,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 4.25,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 4.5,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 4.75,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 5,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 5.25,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 5.5,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 5.75,
+      "wave": 1,
+      "enemies": 16
+    },
+    {
+      "at": 6,
+      "wave": 1,
+      "enemies": 17
+    },
+    {
+      "at": 6.25,
+      "wave": 1,
+      "enemies": 17
+    },
+    {
+      "at": 6.5,
+      "wave": 1,
+      "enemies": 17
+    },
+    {
+      "at": 6.75,
+      "wave": 1,
+      "enemies": 16
+    },
+    {
+      "at": 7,
+      "wave": 1,
+      "enemies": 16
+    },
+    {
+      "at": 7.25,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 7.5,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 7.75,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 8,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 8.25,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 8.5,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 8.75,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 9,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 9.25,
+      "wave": 1,
+      "enemies": 12
+    },
+    {
+      "at": 9.5,
+      "wave": 1,
+      "enemies": 12
+    },
+    {
+      "at": 9.75,
+      "wave": 1,
+      "enemies": 12
+    },
+    {
+      "at": 10,
+      "wave": 1,
+      "enemies": 12
+    },
+    {
+      "at": 10.25,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 10.5,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 10.75,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 11,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 11.25,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 11.5,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 11.75,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 12,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 12.25,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 12.5,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 12.75,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 13,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 13.25,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 13.5,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 13.75,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 14,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 14.25,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 14.5,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 14.75,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 15,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 15.25,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 15.5,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 15.75,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 16,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 16.25,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 16.5,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 16.75,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 17,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 17.25,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 17.5,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 17.75,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 18,
+      "wave": 1,
+      "enemies": 12
+    },
+    {
+      "at": 18.25,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 18.5,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 18.75,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 19,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 19.25,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 19.5,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 19.75,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 20,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 20.25,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 20.5,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 20.75,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 21,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 21.25,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 21.5,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 21.75,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 22,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 22.25,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 22.5,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 22.75,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 23,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 23.25,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 23.5,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 23.75,
+      "wave": 1,
+      "enemies": 12
+    },
+    {
+      "at": 24,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 24.25,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 24.5,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 24.75,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 25,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 25.25,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 25.5,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 25.75,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 26,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 26.25,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 26.5,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 26.75,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 27,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 27.25,
+      "wave": 1,
+      "enemies": 11
+    },
+    {
+      "at": 27.5,
+      "wave": 1,
+      "enemies": 10
+    },
+    {
+      "at": 27.75,
+      "wave": 1,
+      "enemies": 10
+    },
+    {
+      "at": 28,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 28.25,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 28.5,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 28.75,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 29,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 29.25,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 29.5,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 29.75,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 30,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 30.25,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 30.5,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 30.75,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 31,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 31.25,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 31.5,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 31.75,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 32,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 32.25,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 32.5,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 32.75,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 33,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 33.25,
+      "wave": 1,
+      "enemies": 12
+    },
+    {
+      "at": 33.5,
+      "wave": 1,
+      "enemies": 12
+    },
+    {
+      "at": 33.75,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 34,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 34.25,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 34.5,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 34.75,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 35,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 35.25,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 35.5,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 35.75,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 36,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 36.25,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 36.5,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 36.75,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 37,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 37.25,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 37.5,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 37.75,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 38,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 38.25,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 38.5,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 38.75,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 39,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 39.25,
+      "wave": 1,
+      "enemies": 12
+    },
+    {
+      "at": 39.5,
+      "wave": 1,
+      "enemies": 12
+    },
+    {
+      "at": 39.75,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 40,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 40.25,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 40.5,
+      "wave": 1,
+      "enemies": 12
+    },
+    {
+      "at": 40.75,
+      "wave": 1,
+      "enemies": 12
+    },
+    {
+      "at": 41,
+      "wave": 1,
+      "enemies": 12
+    },
+    {
+      "at": 41.25,
+      "wave": 1,
+      "enemies": 11
+    },
+    {
+      "at": 41.5,
+      "wave": 1,
+      "enemies": 11
+    },
+    {
+      "at": 41.75,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 42,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 42.25,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 42.5,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 42.75,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 43,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 43.25,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 43.5,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 43.75,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 44,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 44.25,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 44.5,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 44.75,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 45,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 45.25,
+      "wave": 1,
+      "enemies": 12
+    },
+    {
+      "at": 45.5,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 45.75,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 46,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 46.25,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 46.5,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 46.75,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 47,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 47.25,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 47.5,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 47.75,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 48,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 48.25,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 48.5,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 48.75,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 49,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 49.25,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 49.5,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 49.75,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 50,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 50.25,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 50.5,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 50.75,
+      "wave": 1,
+      "enemies": 12
+    },
+    {
+      "at": 51,
+      "wave": 1,
+      "enemies": 12
+    },
+    {
+      "at": 51.25,
+      "wave": 1,
+      "enemies": 12
+    },
+    {
+      "at": 51.5,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 51.75,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 52,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 52.25,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 52.5,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 52.75,
+      "wave": 1,
+      "enemies": 12
+    },
+    {
+      "at": 53,
+      "wave": 1,
+      "enemies": 12
+    },
+    {
+      "at": 53.25,
+      "wave": 1,
+      "enemies": 11
+    },
+    {
+      "at": 53.5,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 53.75,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 54,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 54.25,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 54.5,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 54.75,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 55,
+      "wave": 1,
+      "enemies": 12
+    },
+    {
+      "at": 55.25,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 55.5,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 55.75,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 56,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 56.25,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 56.5,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 56.75,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 57,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 57.25,
+      "wave": 1,
+      "enemies": 23
+    },
+    {
+      "at": 57.5,
+      "wave": 1,
+      "enemies": 23
+    },
+    {
+      "at": 57.75,
+      "wave": 1,
+      "enemies": 23
+    },
+    {
+      "at": 58,
+      "wave": 1,
+      "enemies": 22
+    },
+    {
+      "at": 58.25,
+      "wave": 1,
+      "enemies": 22
+    },
+    {
+      "at": 58.5,
+      "wave": 1,
+      "enemies": 22
+    },
+    {
+      "at": 58.75,
+      "wave": 1,
+      "enemies": 21
+    },
+    {
+      "at": 59,
+      "wave": 1,
+      "enemies": 20
+    },
+    {
+      "at": 59.25,
+      "wave": 1,
+      "enemies": 30
+    },
+    {
+      "at": 59.5,
+      "wave": 1,
+      "enemies": 30
+    },
+    {
+      "at": 59.75,
+      "wave": 1,
+      "enemies": 29
+    },
+    {
+      "at": 60,
+      "wave": 1,
+      "enemies": 29
+    },
+    {
+      "at": 60.25,
+      "wave": 1,
+      "enemies": 29
+    },
+    {
+      "at": 60.5,
+      "wave": 1,
+      "enemies": 29
+    },
+    {
+      "at": 60.75,
+      "wave": 1,
+      "enemies": 28
+    },
+    {
+      "at": 61,
+      "wave": 1,
+      "enemies": 28
+    },
+    {
+      "at": 61.25,
+      "wave": 1,
+      "enemies": 37
+    },
+    {
+      "at": 61.5,
+      "wave": 1,
+      "enemies": 37
+    },
+    {
+      "at": 61.75,
+      "wave": 1,
+      "enemies": 37
+    },
+    {
+      "at": 62,
+      "wave": 1,
+      "enemies": 36
+    },
+    {
+      "at": 62.25,
+      "wave": 1,
+      "enemies": 36
+    },
+    {
+      "at": 62.5,
+      "wave": 1,
+      "enemies": 36
+    },
+    {
+      "at": 62.75,
+      "wave": 1,
+      "enemies": 35
+    },
+    {
+      "at": 63,
+      "wave": 1,
+      "enemies": 35
+    },
+    {
+      "at": 63.25,
+      "wave": 1,
+      "enemies": 34
+    },
+    {
+      "at": 63.5,
+      "wave": 1,
+      "enemies": 34
+    },
+    {
+      "at": 63.75,
+      "wave": 1,
+      "enemies": 33
+    },
+    {
+      "at": 64,
+      "wave": 1,
+      "enemies": 32
+    },
+    {
+      "at": 64.25,
+      "wave": 1,
+      "enemies": 32
+    },
+    {
+      "at": 64.5,
+      "wave": 1,
+      "enemies": 31
+    },
+    {
+      "at": 64.75,
+      "wave": 1,
+      "enemies": 31
+    },
+    {
+      "at": 65,
+      "wave": 1,
+      "enemies": 31
+    },
+    {
+      "at": 65.25,
+      "wave": 1,
+      "enemies": 30
+    },
+    {
+      "at": 65.5,
+      "wave": 1,
+      "enemies": 29
+    },
+    {
+      "at": 65.75,
+      "wave": 1,
+      "enemies": 29
+    },
+    {
+      "at": 66,
+      "wave": 1,
+      "enemies": 29
+    },
+    {
+      "at": 66.25,
+      "wave": 1,
+      "enemies": 28
+    },
+    {
+      "at": 66.5,
+      "wave": 1,
+      "enemies": 27
+    },
+    {
+      "at": 66.75,
+      "wave": 1,
+      "enemies": 27
+    },
+    {
+      "at": 67,
+      "wave": 1,
+      "enemies": 27
+    },
+    {
+      "at": 67.25,
+      "wave": 1,
+      "enemies": 26
+    },
+    {
+      "at": 67.5,
+      "wave": 1,
+      "enemies": 26
+    },
+    {
+      "at": 67.75,
+      "wave": 1,
+      "enemies": 26
+    },
+    {
+      "at": 68,
+      "wave": 1,
+      "enemies": 25
+    },
+    {
+      "at": 68.25,
+      "wave": 1,
+      "enemies": 25
+    },
+    {
+      "at": 68.5,
+      "wave": 1,
+      "enemies": 24
+    },
+    {
+      "at": 68.75,
+      "wave": 1,
+      "enemies": 24
+    },
+    {
+      "at": 69,
+      "wave": 1,
+      "enemies": 24
+    },
+    {
+      "at": 69.25,
+      "wave": 1,
+      "enemies": 23
+    },
+    {
+      "at": 69.5,
+      "wave": 1,
+      "enemies": 23
+    },
+    {
+      "at": 69.75,
+      "wave": 1,
+      "enemies": 23
+    },
+    {
+      "at": 70,
+      "wave": 1,
+      "enemies": 22
+    },
+    {
+      "at": 70.25,
+      "wave": 1,
+      "enemies": 22
+    },
+    {
+      "at": 70.5,
+      "wave": 1,
+      "enemies": 21
+    },
+    {
+      "at": 70.75,
+      "wave": 1,
+      "enemies": 20
+    },
+    {
+      "at": 71,
+      "wave": 1,
+      "enemies": 18
+    },
+    {
+      "at": 71.25,
+      "wave": 1,
+      "enemies": 17
+    },
+    {
+      "at": 71.5,
+      "wave": 1,
+      "enemies": 17
+    },
+    {
+      "at": 71.75,
+      "wave": 1,
+      "enemies": 17
+    },
+    {
+      "at": 72,
+      "wave": 1,
+      "enemies": 16
+    },
+    {
+      "at": 72.25,
+      "wave": 1,
+      "enemies": 16
+    },
+    {
+      "at": 72.5,
+      "wave": 1,
+      "enemies": 16
+    },
+    {
+      "at": 72.75,
+      "wave": 1,
+      "enemies": 16
+    },
+    {
+      "at": 73,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 73.25,
+      "wave": 1,
+      "enemies": 15
+    },
+    {
+      "at": 73.5,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 73.75,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 74,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 74.25,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 74.5,
+      "wave": 1,
+      "enemies": 14
+    },
+    {
+      "at": 74.75,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 75,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 75.25,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 75.5,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 75.75,
+      "wave": 1,
+      "enemies": 13
+    },
+    {
+      "at": 76,
+      "wave": 1,
+      "enemies": 12
+    },
+    {
+      "at": 76.25,
+      "wave": 1,
+      "enemies": 12
+    },
+    {
+      "at": 76.5,
+      "wave": 1,
+      "enemies": 12
+    },
+    {
+      "at": 76.75,
+      "wave": 1,
+      "enemies": 11
+    },
+    {
+      "at": 77,
+      "wave": 1,
+      "enemies": 11
+    },
+    {
+      "at": 77.25,
+      "wave": 1,
+      "enemies": 11
+    },
+    {
+      "at": 77.5,
+      "wave": 1,
+      "enemies": 11
+    },
+    {
+      "at": 77.75,
+      "wave": 1,
+      "enemies": 10
+    },
+    {
+      "at": 78,
+      "wave": 1,
+      "enemies": 10
+    },
+    {
+      "at": 78.25,
+      "wave": 1,
+      "enemies": 10
+    },
+    {
+      "at": 78.5,
+      "wave": 1,
+      "enemies": 9
+    },
+    {
+      "at": 78.75,
+      "wave": 1,
+      "enemies": 9
+    },
+    {
+      "at": 79,
+      "wave": 1,
+      "enemies": 8
+    },
+    {
+      "at": 79.25,
+      "wave": 1,
+      "enemies": 7
+    },
+    {
+      "at": 79.5,
+      "wave": 1,
+      "enemies": 7
+    },
+    {
+      "at": 79.75,
+      "wave": 1,
+      "enemies": 6
+    },
+    {
+      "at": 80,
+      "wave": 1,
+      "enemies": 5
+    },
+    {
+      "at": 80.25,
+      "wave": 1,
+      "enemies": 5
+    },
+    {
+      "at": 80.5,
+      "wave": 1,
+      "enemies": 5
+    },
+    {
+      "at": 80.75,
+      "wave": 1,
+      "enemies": 4
+    },
+    {
+      "at": 81,
+      "wave": 1,
+      "enemies": 4
+    },
+    {
+      "at": 81.25,
+      "wave": 1,
+      "enemies": 4
+    },
+    {
+      "at": 81.5,
+      "wave": 1,
+      "enemies": 4
+    },
+    {
+      "at": 81.75,
+      "wave": 1,
+      "enemies": 3
+    },
+    {
+      "at": 82,
+      "wave": 1,
+      "enemies": 3
+    },
+    {
+      "at": 82.25,
+      "wave": 1,
+      "enemies": 2
+    },
+    {
+      "at": 82.5,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 82.75,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 83,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 83.25,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 83.5,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 83.75,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 84,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 84.25,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 84.5,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 84.75,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 85,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 85.25,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 85.5,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 85.75,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 86,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 86.25,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 86.5,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 86.75,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 87,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 87.25,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 87.5,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 87.75,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 88,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 88.25,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 88.5,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 88.75,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 89,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 89.25,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 89.5,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 89.75,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 90,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 90.25,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 90.5,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 90.75,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 91,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 91.25,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 91.5,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 91.75,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 92,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 92.25,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 92.5,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 92.75,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 93,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 93.25,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 93.5,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 93.75,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 94,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 94.25,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 94.5,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 94.75,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 95,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 95.25,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 95.5,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 95.75,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 96,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 96.25,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 96.5,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 96.75,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 97,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 97.25,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 97.5,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 97.75,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 98,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 98.25,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 98.5,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 98.75,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 99,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 99.25,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 99.5,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 99.75,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 100,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 100.25,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 100.5,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 100.75,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 101,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 101.25,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 101.5,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 101.75,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 102,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 102.25,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 102.5,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 102.75,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 103,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 103.25,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 103.5,
+      "wave": 1,
+      "enemies": 1
+    },
+    {
+      "at": 103.75,
+      "wave": 1,
+      "enemies": 1
+    }
+  ],
+  "inputs": [
+    {
+      "type": "bountyAccept",
+      "at": 5.4501,
+      "wave": 1
+    },
+    {
+      "type": "pickupClick",
+      "at": 7.9668,
+      "wave": 1
+    },
+    {
+      "type": "pickupClick",
+      "at": 10.3834,
+      "wave": 1
+    },
+    {
+      "type": "perkSelect",
+      "at": 13.2501,
+      "wave": 1,
+      "detail": "proj_quantity:projectile"
+    },
+    {
+      "type": "pickupClick",
+      "at": 17.3338,
+      "wave": 1
+    },
+    {
+      "type": "consumeRelease",
+      "at": 20.1005,
+      "wave": 1
+    },
+    {
+      "type": "pickupClick",
+      "at": 20.6336,
+      "wave": 1
+    },
+    {
+      "type": "consumeRelease",
+      "at": 22.8003,
+      "wave": 1
+    },
+    {
+      "type": "pickupClick",
+      "at": 23.2002,
+      "wave": 1
+    },
+    {
+      "type": "pickupClick",
+      "at": 23.3836,
+      "wave": 1
+    },
+    {
+      "type": "consumeRelease",
+      "at": 26.6003,
+      "wave": 1
+    },
+    {
+      "type": "consumeRelease",
+      "at": 29.0836,
+      "wave": 1
+    },
+    {
+      "type": "perkSelect",
+      "at": 30.1671,
+      "wave": 1,
+      "detail": "ctrl_potency:control"
+    },
+    {
+      "type": "pickupClick",
+      "at": 33.0839,
+      "wave": 1
+    },
+    {
+      "type": "pickupClick",
+      "at": 35.3172,
+      "wave": 1
+    },
+    {
+      "type": "pickupClick",
+      "at": 36.7006,
+      "wave": 1
+    },
+    {
+      "type": "pickupClick",
+      "at": 38.9672,
+      "wave": 1
+    },
+    {
+      "type": "consumeRelease",
+      "at": 44.7174,
+      "wave": 1
+    },
+    {
+      "type": "pickupClick",
+      "at": 45.5507,
+      "wave": 1
+    },
+    {
+      "type": "consumeRelease",
+      "at": 49.2674,
+      "wave": 1
+    },
+    {
+      "type": "pickupClick",
+      "at": 50.9007,
+      "wave": 1
+    },
+    {
+      "type": "consumeRelease",
+      "at": 52.7674,
+      "wave": 1
+    },
+    {
+      "type": "pickupClick",
+      "at": 54.0674,
+      "wave": 1
+    },
+    {
+      "type": "pickupClick",
+      "at": 54.9509,
+      "wave": 1
+    },
+    {
+      "type": "pickupClick",
+      "at": 55.1508,
+      "wave": 1
+    },
+    {
+      "type": "perkSelect",
+      "at": 58.6013,
+      "wave": 1,
+      "detail": "ctrl_potency:control"
+    },
+    {
+      "type": "pickupClick",
+      "at": 61.985,
+      "wave": 1
+    },
+    {
+      "type": "dragDrop",
+      "at": 63.368,
+      "wave": 1
+    },
+    {
+      "type": "pickupClick",
+      "at": 64.1183,
+      "wave": 1
+    },
+    {
+      "type": "pickupClick",
+      "at": 64.318,
+      "wave": 1
+    },
+    {
+      "type": "pickupClick",
+      "at": 66.968,
+      "wave": 1
+    },
+    {
+      "type": "consumeRelease",
+      "at": 68.5514,
+      "wave": 1
+    },
+    {
+      "type": "pickupClick",
+      "at": 68.9346,
+      "wave": 1
+    },
+    {
+      "type": "consumeRelease",
+      "at": 70.468,
+      "wave": 1
+    },
+    {
+      "type": "consumeRelease",
+      "at": 71.9014,
+      "wave": 1
+    },
+    {
+      "type": "pickupClick",
+      "at": 72.6182,
+      "wave": 1
+    },
+    {
+      "type": "pickupClick",
+      "at": 73.0181,
+      "wave": 1
+    },
+    {
+      "type": "consumeRelease",
+      "at": 75.5348,
+      "wave": 1
+    },
+    {
+      "type": "pickupClick",
+      "at": 78.8515,
+      "wave": 1
+    },
+    {
+      "type": "pickupClick",
+      "at": 79.0849,
+      "wave": 1
+    },
+    {
+      "type": "consumeRelease",
+      "at": 80.1849,
+      "wave": 1
+    },
+    {
+      "type": "pickupClick",
+      "at": 80.5349,
+      "wave": 1
+    },
+    {
+      "type": "consumeRelease",
+      "at": 82.2015,
+      "wave": 1
+    },
+    {
+      "type": "pickupClick",
+      "at": 82.6017,
+      "wave": 1
+    },
+    {
+      "type": "consumeRelease",
+      "at": 85.2016,
+      "wave": 1
+    },
+    {
+      "type": "consumeRelease",
+      "at": 96.6518,
+      "wave": 1
+    },
+    {
+      "type": "consumeRelease",
+      "at": 99.0185,
+      "wave": 1
+    }
+  ]
+}

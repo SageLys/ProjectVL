@@ -1,0 +1,23 @@
+node:internal/fs/watchers:321
+    const error = new UVException({
+                  ^
+
+Error: EBUSY: resource busy or locked, watch 'C:\ProjectVL\.codex_tmp\chrome-ui-check\8591e1bb-a593-4078-a8be-f18ef3e2d9bb.tmp'
+    at FSWatcher.<computed> (node:internal/fs/watchers:321:19)
+    at Object.watch (node:fs:2532:36)
+    at createFsWatchInstance (file:///C:/ProjectVL/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:42780:17)
+    at setFsWatchListener (file:///C:/ProjectVL/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:42827:15)
+    at NodeFsHandler._watchWithNodeFs (file:///C:/ProjectVL/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:42982:14)
+    at NodeFsHandler._handleFile (file:///C:/ProjectVL/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:43046:23)
+    at NodeFsHandler._addToNodeFs (file:///C:/ProjectVL/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:43288:21)
+Emitted 'error' event on FSWatcher instance at:
+    at FSWatcher._handleError (file:///C:/ProjectVL/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:44481:10)
+    at NodeFsHandler._addToNodeFs (file:///C:/ProjectVL/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:43296:18) {
+  errno: -4082,
+  syscall: 'watch',
+  code: 'EBUSY',
+  path: 'C:\\ProjectVL\\.codex_tmp\\chrome-ui-check\\8591e1bb-a593-4078-a8be-f18ef3e2d9bb.tmp',
+  filename: 'C:\\ProjectVL\\.codex_tmp\\chrome-ui-check\\8591e1bb-a593-4078-a8be-f18ef3e2d9bb.tmp'
+}
+
+Node.js v26.3.0

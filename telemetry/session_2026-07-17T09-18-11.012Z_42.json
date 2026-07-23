@@ -1,0 +1,2804 @@
+{
+  "meta": {
+    "startedAt": "2026-07-17T09:18:11.012Z",
+    "exportedAt": "2026-07-17T09:18:11.646Z",
+    "config": {
+      "combat": {
+        "canvas": {
+          "width": 540,
+          "height": 730
+        },
+        "turret": {
+          "x": 270,
+          "y": 365
+        },
+        "hp": {
+          "max": 100
+        },
+        "defaults": {
+          "damage": 1000,
+          "fireRate": 20,
+          "range": 150
+        },
+        "attackPreviewMargin": 60,
+        "bullet": {
+          "speed": 465,
+          "life": 1.6,
+          "radius": 4,
+          "spread": 0.05,
+          "muzzleOffset": 24
+        },
+        "breakthroughDist": 48,
+        "dangerZoneWidth": 72,
+        "dtCap": 0.033,
+        "knockbackFatigue": {
+          "decayFactor": 0.5,
+          "windowSeconds": 2,
+          "minMultiplier": 0.125
+        },
+        "vfx": {
+          "shootParticles": 4,
+          "killParticles": 12,
+          "breakthroughParticles": 10
+        }
+      },
+      "waves": {
+        "totalWaves": 3,
+        "spawnMode": "budget",
+        "enemyCountBase": 5,
+        "enemyCountPerWave": 3,
+        "firstSpawnDelay": 0.4,
+        "spawnInterval": {
+          "base": 0.72,
+          "perWave": 0.05,
+          "min": 0.28
+        },
+        "budget": {
+          "waveQuota": {
+            "base": 51,
+            "perWave": 52
+          },
+          "targetOnScreen": {
+            "base": 5,
+            "perWave": 10
+          },
+          "checkInterval": 1.95,
+          "batchMax": 10,
+          "waveEndSprint": {
+            "window": 7,
+            "multiplier": 3
+          },
+          "maxAlive": 100
+        },
+        "betweenWaves": 2.4,
+        "spawnMargin": 25,
+        "typeRoll": {
+          "tankBase": 0.2,
+          "tankPerWave": 0.025,
+          "fastThreshold": 0.47
+        },
+        "bossWaves": [
+          1,
+          2,
+          3
+        ],
+        "waveBoss": {
+          "reward": {
+            "starTierEveryWaves": 3,
+            "starMax": 3,
+            "bonusCountEveryWaves": 3,
+            "finalWaveBonusCount": 1
+          }
+        }
+      },
+      "enemies": {
+        "defaults": {
+          "enemySpeed": 1
+        },
+        "types": {
+          "normal": {
+            "label": "热情追求者",
+            "hpBase": 38,
+            "hpPerWave": 12,
+            "speedBase": 24,
+            "speedPerWave": 2,
+            "r": 16,
+            "color": "#8793a3",
+            "damage": 8,
+            "xp": 1,
+            "sides": 4,
+            "knockbackResist": 0
+          },
+          "fast": {
+            "label": "急切追求者",
+            "hpBase": 23,
+            "hpPerWave": 10,
+            "speedBase": 42,
+            "speedPerWave": 3,
+            "r": 12,
+            "color": "#8793a3",
+            "damage": 6,
+            "xp": 1,
+            "sides": 3,
+            "knockbackResist": 0
+          },
+          "tank": {
+            "label": "执着追求者",
+            "hpBase": 90,
+            "hpPerWave": 45,
+            "speedBase": 15,
+            "speedPerWave": 1.5,
+            "r": 22,
+            "color": "#8793a3",
+            "damage": 14,
+            "xp": 2,
+            "sides": 6,
+            "knockbackResist": 0.4
+          },
+          "boss": {
+            "label": "命定追求者",
+            "hpBase": 300,
+            "hpPerWave": 320,
+            "speedBase": 18,
+            "speedPerWave": 0,
+            "r": 35,
+            "color": "#596371",
+            "damage": 28,
+            "xp": 5,
+            "sides": 8,
+            "knockbackResist": 0.85
+          }
+        }
+      },
+      "difficulty": {
+        "defaultDifficulty": "standard",
+        "profiles": {
+          "relaxed": {
+            "label": "轻松",
+            "description": "前期敌人明显较弱，后期仍有压力",
+            "enemy": {
+              "hp": {
+                "start": 0.45,
+                "end": 0.85,
+                "power": 1.65
+              },
+              "damage": {
+                "start": 0.35,
+                "end": 0.75,
+                "power": 1.5
+              },
+              "speed": {
+                "start": 0.95,
+                "end": 1,
+                "power": 1.2
+              }
+            },
+            "boss": {
+              "hp": {
+                "start": 0.6,
+                "end": 0.9,
+                "power": 1.5
+              },
+              "damage": {
+                "start": 0.45,
+                "end": 0.8,
+                "power": 1.4
+              }
+            }
+          },
+          "standard": {
+            "label": "标准",
+            "description": "前期宽松，后期接近完整压力",
+            "enemy": {
+              "hp": {
+                "start": 0.65,
+                "end": 0.95,
+                "power": 1.55
+              },
+              "damage": {
+                "start": 0.55,
+                "end": 0.9,
+                "power": 1.45
+              },
+              "speed": {
+                "start": 0.98,
+                "end": 1,
+                "power": 1.2
+              }
+            },
+            "boss": {
+              "hp": {
+                "start": 0.75,
+                "end": 1,
+                "power": 1.45
+              },
+              "damage": {
+                "start": 0.65,
+                "end": 0.95,
+                "power": 1.4
+              }
+            }
+          },
+          "hard": {
+            "label": "困难",
+            "description": "仅缓和开局，后期接近当前版本",
+            "enemy": {
+              "hp": {
+                "start": 0.82,
+                "end": 1,
+                "power": 1.35
+              },
+              "damage": {
+                "start": 0.75,
+                "end": 1,
+                "power": 1.3
+              },
+              "speed": {
+                "start": 1,
+                "end": 1,
+                "power": 1
+              }
+            },
+            "boss": {
+              "hp": {
+                "start": 0.9,
+                "end": 1,
+                "power": 1.3
+              },
+              "damage": {
+                "start": 0.85,
+                "end": 1,
+                "power": 1.3
+              }
+            }
+          },
+          "hell": {
+            "label": "地狱",
+            "description": "当前版本原始难度",
+            "enemy": {
+              "hp": {
+                "start": 1,
+                "end": 1,
+                "power": 1
+              },
+              "damage": {
+                "start": 1,
+                "end": 1,
+                "power": 1
+              },
+              "speed": {
+                "start": 1,
+                "end": 1,
+                "power": 1
+              }
+            }
+          }
+        }
+      },
+      "skills": {
+        "version": "0.4.0",
+        "cards": [
+          {
+            "id": "pierce",
+            "category": "projectile",
+            "synergyTags": [
+              "projectile"
+            ],
+            "textKey": "cards.pierce",
+            "teaching": true,
+            "implementationBatch": 1,
+            "stars": {
+              "3": {
+                "tier": "core",
+                "equip": [
+                  {
+                    "trigger": "onFire",
+                    "effects": [
+                      {
+                        "atom": "pierce",
+                        "params": {
+                          "count": 2,
+                          "damageRetention": 0.8,
+                          "rampPerPierce": 0.1
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "5": {
+                "tier": "dual",
+                "equip": [
+                  {
+                    "trigger": "onFire",
+                    "effects": [
+                      {
+                        "atom": "pierce",
+                        "params": {
+                          "count": 2,
+                          "damageRetention": 0.8,
+                          "rampPerPierce": 0.1
+                        }
+                      },
+                      {
+                        "atom": "ricochet",
+                        "params": {
+                          "bounces": 1
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "6": {
+                "tier": "transform",
+                "equip": [
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "beamMorph",
+                        "params": {
+                          "interval": 0.9,
+                          "width": 32,
+                          "damageRatio": 1.3
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "amplifyAxis": {
+              "description": "穿透数 +1、伤害保留 +10pt",
+              "params": {
+                "count": "+1",
+                "damageRetention": "+0.1"
+              }
+            },
+            "consumable": {
+              "placement": "point",
+              "interpolation": "linear",
+              "anchors": {
+                "1": {
+                  "radius": 40,
+                  "effects": [
+                    {
+                      "atom": "pierce",
+                      "params": {
+                        "damageMul": 3,
+                        "width": 10,
+                        "damageRetention": 1
+                      }
+                    }
+                  ]
+                },
+                "3": {
+                  "radius": 70,
+                  "effects": [
+                    {
+                      "atom": "pierce",
+                      "params": {
+                        "damageMul": 5,
+                        "width": 16,
+                        "damageRetention": 1
+                      }
+                    }
+                  ]
+                },
+                "6": {
+                  "radius": 110,
+                  "effects": [
+                    {
+                      "atom": "pierce",
+                      "params": {
+                        "damageMul": 8,
+                        "width": 24,
+                        "damageRetention": 1
+                      }
+                    },
+                    {
+                      "atom": "knockback",
+                      "params": {
+                        "distance": 40
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "designNotes": "教学卡：一击洞穿一列敌人。3★装备态单核心原子（rampPerPierce 为同原子参数，非独立修饰）。"
+          },
+          {
+            "id": "chainLightning",
+            "category": "projectile",
+            "synergyTags": [
+              "projectile",
+              "control"
+            ],
+            "textKey": "cards.chainLightning",
+            "teaching": false,
+            "implementationBatch": 1,
+            "stars": {
+              "3": {
+                "tier": "core",
+                "equip": [
+                  {
+                    "trigger": "onHit",
+                    "effects": [
+                      {
+                        "atom": "chain",
+                        "params": {
+                          "bounces": 2,
+                          "damageRetention": 0.7,
+                          "searchRange": 120
+                        }
+                      },
+                      {
+                        "atom": "slow",
+                        "params": {
+                          "ratio": 0.2,
+                          "duration": 1.2
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "5": {
+                "tier": "dual",
+                "equip": [
+                  {
+                    "trigger": "onHit",
+                    "effects": [
+                      {
+                        "atom": "chain",
+                        "params": {
+                          "bounces": 3,
+                          "damageRetention": 0.7,
+                          "searchRange": 140
+                        }
+                      },
+                      {
+                        "atom": "slow",
+                        "params": {
+                          "ratio": 0.2,
+                          "duration": 1.2
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "onKill",
+                    "triggerParams": {
+                      "requiresSource": "chain"
+                    },
+                    "effects": [
+                      {
+                        "atom": "chain",
+                        "params": {
+                          "bounces": 2,
+                          "damageRetention": 0.5,
+                          "searchRange": 140
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "6": {
+                "tier": "transform",
+                "equip": [
+                  {
+                    "trigger": "interval",
+                    "triggerParams": {
+                      "seconds": 1.2
+                    },
+                    "effects": [
+                      {
+                        "atom": "chain",
+                        "params": {
+                          "bounces": 2,
+                          "damageRetention": 0.8,
+                          "searchRange": 160,
+                          "targets": 3
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "amplifyAxis": {
+              "description": "弹跳 +1、搜索半径 +20",
+              "params": {
+                "bounces": "+1",
+                "searchRange": "+20"
+              }
+            },
+            "consumable": {
+              "placement": "point",
+              "interpolation": "linear",
+              "anchors": {
+                "1": {
+                  "radius": 120,
+                  "effects": [
+                    {
+                      "atom": "chain",
+                      "params": {
+                        "bounces": 4,
+                        "damageRetention": 0.8,
+                        "searchRange": 140
+                      }
+                    }
+                  ]
+                },
+                "3": {
+                  "radius": 140,
+                  "effects": [
+                    {
+                      "atom": "chain",
+                      "params": {
+                        "bounces": 7,
+                        "damageRetention": 0.8,
+                        "searchRange": 140
+                      }
+                    },
+                    {
+                      "atom": "slow",
+                      "params": {
+                        "ratio": 0.25,
+                        "duration": 1.5
+                      }
+                    }
+                  ]
+                },
+                "6": {
+                  "radius": 160,
+                  "effects": [
+                    {
+                      "atom": "chain",
+                      "params": {
+                        "bounces": 12,
+                        "damageRetention": 0.85,
+                        "searchRange": 160
+                      }
+                    },
+                    {
+                      "atom": "stun",
+                      "params": {
+                        "duration": 0.5
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "designNotes": "电弧在敌群中跳跃。5★ 断链重引：击杀来源为 chain 的敌人从死亡点重新起链。"
+          },
+          {
+            "id": "frost",
+            "category": "control",
+            "synergyTags": [
+              "control",
+              "domain"
+            ],
+            "textKey": "cards.frost",
+            "teaching": false,
+            "implementationBatch": 1,
+            "stars": {
+              "3": {
+                "tier": "core",
+                "equip": [
+                  {
+                    "trigger": "onFire",
+                    "effects": [
+                      {
+                        "atom": "slow",
+                        "params": {
+                          "ratio": 0.3,
+                          "duration": 1.5
+                        }
+                      },
+                      {
+                        "atom": "freeze",
+                        "params": {
+                          "duration": 0.8,
+                          "stacksToTrigger": 3
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "5": {
+                "tier": "dual",
+                "equip": [
+                  {
+                    "trigger": "onFire",
+                    "effects": [
+                      {
+                        "atom": "slow",
+                        "params": {
+                          "ratio": 0.3,
+                          "duration": 1.5
+                        }
+                      },
+                      {
+                        "atom": "freeze",
+                        "params": {
+                          "duration": 0.8,
+                          "stacksToTrigger": 3
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "onKill",
+                    "triggerParams": {
+                      "requiresStatus": "frozen"
+                    },
+                    "effects": [
+                      {
+                        "atom": "aoeOnHit",
+                        "params": {
+                          "radius": 80,
+                          "damageRatio": 0.5,
+                          "falloff": 0.5
+                        }
+                      },
+                      {
+                        "atom": "groundZone",
+                        "params": {
+                          "radius": 80,
+                          "duration": 0.1,
+                          "tickInterval": 0.05,
+                          "effects": [
+                            {
+                              "atom": "slow",
+                              "params": {
+                                "ratio": 0.3,
+                                "duration": 1.5
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "6": {
+                "tier": "transform",
+                "equip": [
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "aura",
+                        "params": {
+                          "radiusRatioOfRange": 0.6,
+                          "tickInterval": 1,
+                          "effects": [
+                            {
+                              "atom": "slow",
+                              "params": {
+                                "ratio": 0.35,
+                                "duration": 1.2
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "interval",
+                    "triggerParams": {
+                      "seconds": 4
+                    },
+                    "effects": [
+                      {
+                        "atom": "freeze",
+                        "params": {
+                          "duration": 0.6,
+                          "radius": 150
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "amplifyAxis": {
+              "description": "减速比 +10pt、触发层数 -1",
+              "params": {
+                "ratio": "+0.1",
+                "stacksToTrigger": "-1"
+              }
+            },
+            "consumable": {
+              "placement": "point",
+              "interpolation": "linear",
+              "anchors": {
+                "1": {
+                  "radius": 90,
+                  "duration": 3,
+                  "effects": [
+                    {
+                      "atom": "freeze",
+                      "params": {
+                        "duration": 3
+                      }
+                    }
+                  ]
+                },
+                "3": {
+                  "radius": 130,
+                  "duration": 3,
+                  "effects": [
+                    {
+                      "atom": "freeze",
+                      "params": {
+                        "duration": 3
+                      }
+                    },
+                    {
+                      "atom": "slow",
+                      "params": {
+                        "ratio": 0.4,
+                        "duration": 2
+                      }
+                    }
+                  ]
+                },
+                "6": {
+                  "radius": 170,
+                  "duration": 3.5,
+                  "effects": [
+                    {
+                      "atom": "freeze",
+                      "params": {
+                        "duration": 3.5
+                      }
+                    },
+                    {
+                      "atom": "vulnerable",
+                      "params": {
+                        "ratio": 0.3,
+                        "duration": 3.5
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "designNotes": "让世界慢下来。5★ 碎冰：冻结中被击杀的敌人碎裂造成 AoE 并减速周围敌人。"
+          },
+          {
+            "id": "decoy",
+            "category": "control",
+            "synergyTags": [
+              "control",
+              "defense"
+            ],
+            "textKey": "cards.decoy",
+            "teaching": false,
+            "implementationBatch": 1,
+            "stars": {
+              "3": {
+                "tier": "core",
+                "equip": [
+                  {
+                    "trigger": "onWaveStart",
+                    "effects": [
+                      {
+                        "atom": "summon",
+                        "params": {
+                          "kind": "decoy",
+                          "count": 1,
+                          "hp": 60,
+                          "tauntRadius": 140,
+                          "duration": 999,
+                          "explode": true,
+                          "explodeDamageMul": 1.2,
+                          "knockbackDistance": 70
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "5": {
+                "tier": "dual",
+                "equip": [
+                  {
+                    "trigger": "onWaveStart",
+                    "effects": [
+                      {
+                        "atom": "summon",
+                        "params": {
+                          "kind": "decoy",
+                          "count": 1,
+                          "hp": 60,
+                          "tauntRadius": 140,
+                          "duration": 999,
+                          "explode": true,
+                          "explodeDamageMul": 1.2,
+                          "knockbackDistance": 70,
+                          "respawnOnce": true
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "6": {
+                "tier": "transform",
+                "equip": [
+                  {
+                    "trigger": "onWaveStart",
+                    "effects": [
+                      {
+                        "atom": "summon",
+                        "params": {
+                          "kind": "mirrorTurret",
+                          "count": 1,
+                          "hp": 80,
+                          "damageRatio": 0.3,
+                          "priorityWeight": 5,
+                          "tauntRadius": 2000,
+                          "duration": 999
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "amplifyAxis": {
+              "description": "图腾 HP +50%、嘲讽半径 +20",
+              "params": {
+                "hp": "+50%",
+                "tauntRadius": "+20"
+              }
+            },
+            "consumable": {
+              "placement": "point",
+              "interpolation": "linear",
+              "anchors": {
+                "1": {
+                  "radius": 120,
+                  "duration": 4,
+                  "effects": [
+                    {
+                      "atom": "summon",
+                      "params": {
+                        "kind": "decoy",
+                        "count": 1,
+                        "hp": 30,
+                        "tauntRadius": 120,
+                        "duration": 4
+                      }
+                    }
+                  ]
+                },
+                "3": {
+                  "radius": 160,
+                  "duration": 5,
+                  "effects": [
+                    {
+                      "atom": "summon",
+                      "params": {
+                        "kind": "decoy",
+                        "count": 1,
+                        "hp": 50,
+                        "tauntRadius": 160,
+                        "duration": 5,
+                        "explode": true,
+                        "explodeDamageMul": 1.5,
+                        "knockbackDistance": 90
+                      }
+                    }
+                  ]
+                },
+                "6": {
+                  "radius": 160,
+                  "duration": 5,
+                  "effects": [
+                    {
+                      "atom": "summon",
+                      "params": {
+                        "kind": "mirrorTurret",
+                        "count": 1,
+                        "hp": 9999,
+                        "damageRatio": 0.6,
+                        "duration": 5
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "designNotes": "让它们打错目标。5★ 重生：图腾被摧毁时在新位置重生一次（每实例限一次）。"
+          },
+          {
+            "id": "scorch",
+            "category": "domain",
+            "synergyTags": [
+              "domain"
+            ],
+            "textKey": "cards.scorch",
+            "teaching": false,
+            "implementationBatch": 1,
+            "stars": {
+              "3": {
+                "tier": "core",
+                "equip": [
+                  {
+                    "trigger": "onHit",
+                    "effects": [
+                      {
+                        "atom": "groundZone",
+                        "params": {
+                          "radius": 40,
+                          "duration": 2.5,
+                          "tickInterval": 0.5,
+                          "effects": [
+                            {
+                              "atom": "dot",
+                              "params": {
+                                "damageRatio": 0.15
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "onKill",
+                    "triggerParams": {
+                      "requiresStatus": "dot"
+                    },
+                    "effects": [
+                      {
+                        "atom": "groundZone",
+                        "params": {
+                          "radius": 40,
+                          "duration": 2.5,
+                          "tickInterval": 0.5,
+                          "effects": [
+                            {
+                              "atom": "dot",
+                              "params": {
+                                "damageRatio": 0.15
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "5": {
+                "tier": "dual",
+                "equip": [
+                  {
+                    "trigger": "onHit",
+                    "effects": [
+                      {
+                        "atom": "groundZone",
+                        "params": {
+                          "radius": 40,
+                          "duration": 2.5,
+                          "tickInterval": 0.5,
+                          "effects": [
+                            {
+                              "atom": "dot",
+                              "params": {
+                                "damageRatio": 0.15
+                              }
+                            },
+                            {
+                              "atom": "vulnerable",
+                              "params": {
+                                "ratio": 0.15,
+                                "duration": 0.6
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "onKill",
+                    "triggerParams": {
+                      "requiresStatus": "dot"
+                    },
+                    "effects": [
+                      {
+                        "atom": "groundZone",
+                        "params": {
+                          "radius": 40,
+                          "duration": 2.5,
+                          "tickInterval": 0.5,
+                          "effects": [
+                            {
+                              "atom": "dot",
+                              "params": {
+                                "damageRatio": 0.15
+                              }
+                            },
+                            {
+                              "atom": "vulnerable",
+                              "params": {
+                                "ratio": 0.15,
+                                "duration": 0.6
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "6": {
+                "tier": "transform",
+                "equip": [
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "aura",
+                        "params": {
+                          "radius": 200,
+                          "tickInterval": 0.5,
+                          "effects": [
+                            {
+                              "atom": "dot",
+                              "params": {
+                                "damageRatio": 0.1
+                              }
+                            },
+                            {
+                              "atom": "slow",
+                              "params": {
+                                "ratio": 0.15,
+                                "duration": 0.6
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "amplifyAxis": {
+              "description": "灼烧区半径 +25%、DoT +30%",
+              "params": {
+                "radius": "+25%",
+                "damageRatio": "+30%"
+              }
+            },
+            "consumable": {
+              "placement": "point",
+              "interpolation": "linear",
+              "anchors": {
+                "1": {
+                  "radius": 110,
+                  "duration": 3,
+                  "effects": [
+                    {
+                      "atom": "groundZone",
+                      "params": {
+                        "radius": 110,
+                        "duration": 3,
+                        "tickInterval": 0.5,
+                        "effects": [
+                          {
+                            "atom": "dot",
+                            "params": {
+                              "damageRatio": 0.2
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "3": {
+                  "radius": 140,
+                  "duration": 4,
+                  "effects": [
+                    {
+                      "atom": "groundZone",
+                      "params": {
+                        "radius": 140,
+                        "duration": 4,
+                        "tickInterval": 0.5,
+                        "effects": [
+                          {
+                            "atom": "dot",
+                            "params": {
+                              "damageRatio": 0.2
+                            }
+                          },
+                          {
+                            "atom": "vulnerable",
+                            "params": {
+                              "ratio": 0.15,
+                              "duration": 0.6
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "6": {
+                  "radius": 180,
+                  "duration": 5,
+                  "effects": [
+                    {
+                      "atom": "groundZone",
+                      "params": {
+                        "radius": 180,
+                        "duration": 5,
+                        "tickInterval": 0.5,
+                        "effects": [
+                          {
+                            "atom": "dot",
+                            "params": {
+                              "damageRatio": 0.25
+                            }
+                          },
+                          {
+                            "atom": "vulnerable",
+                            "params": {
+                              "ratio": 0.15,
+                              "duration": 0.6
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "designNotes": "所过之处皆成火海。5★ 干柴：灼烧区内叠加易伤，令灼痕成为全构筑的伤害乘法底座。"
+          },
+          {
+            "id": "harvest",
+            "category": "economy",
+            "synergyTags": [
+              "utility"
+            ],
+            "textKey": "cards.harvest",
+            "teaching": true,
+            "implementationBatch": 1,
+            "stars": {
+              "3": {
+                "tier": "core",
+                "equip": [
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "dropRateMul",
+                        "params": {
+                          "mul": 1.25
+                        }
+                      },
+                      {
+                        "atom": "dropLifetimeMul",
+                        "params": {
+                          "mul": 1.25
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "5": {
+                "tier": "dual",
+                "equip": [
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "dropRateMul",
+                        "params": {
+                          "mul": 1.25
+                        }
+                      },
+                      {
+                        "atom": "dropLifetimeMul",
+                        "params": {
+                          "mul": 1.25
+                        }
+                      },
+                      {
+                        "atom": "expiryConvert",
+                        "params": {
+                          "ratio": 0.5
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "6": {
+                "tier": "transform",
+                "equip": [
+                  {
+                    "trigger": "onWaveStart",
+                    "effects": [
+                      {
+                        "atom": "extraDrop",
+                        "params": {
+                          "count": 2,
+                          "at": "turret",
+                          "starWeights": {
+                            "1": 1
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "expiryConvert",
+                        "params": {
+                          "ratio": 1
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "amplifyAxis": {
+              "description": "掉率倍率 +10%、时限倍率 +10%",
+              "params": {
+                "mul": "+10%"
+              }
+            },
+            "consumable": {
+              "placement": "point",
+              "interpolation": "linear",
+              "anchors": {
+                "1": {
+                  "radius": 90,
+                  "effects": [
+                    {
+                      "atom": "extraDrop",
+                      "params": {
+                        "count": 2,
+                        "at": "point",
+                        "starWeights": {
+                          "1": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "3": {
+                  "radius": 130,
+                  "effects": [
+                    {
+                      "atom": "extraDrop",
+                      "params": {
+                        "count": 3,
+                        "at": "point",
+                        "starWeights": {
+                          "1": 4,
+                          "2": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "6": {
+                  "radius": 180,
+                  "effects": [
+                    {
+                      "atom": "extraDrop",
+                      "params": {
+                        "count": 1,
+                        "at": "point",
+                        "starWeights": {
+                          "2": 1
+                        }
+                      }
+                    },
+                    {
+                      "atom": "extraDrop",
+                      "params": {
+                        "count": 3,
+                        "at": "point",
+                        "starWeights": {
+                          "1": 1
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "designNotes": "教学卡：更多、更久、不浪费。刻意不做自动拾取——拾取仍是核心注意力动词。"
+          },
+          {
+            "id": "aegis",
+            "category": "defense",
+            "synergyTags": [
+              "defense"
+            ],
+            "textKey": "cards.aegis",
+            "teaching": false,
+            "implementationBatch": 1,
+            "stars": {
+              "3": {
+                "tier": "core",
+                "equip": [
+                  {
+                    "trigger": "onWaveStart",
+                    "effects": [
+                      {
+                        "atom": "shield",
+                        "params": {
+                          "absorbHits": 2,
+                          "regenSeconds": 10
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "breachReduction",
+                        "params": {
+                          "ratio": 0.2
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "5": {
+                "tier": "dual",
+                "equip": [
+                  {
+                    "trigger": "onWaveStart",
+                    "effects": [
+                      {
+                        "atom": "shield",
+                        "params": {
+                          "absorbHits": 2,
+                          "regenSeconds": 10
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "breachReduction",
+                        "params": {
+                          "ratio": 0.2
+                        }
+                      },
+                      {
+                        "atom": "novaOnBreak",
+                        "params": {
+                          "damage": 30,
+                          "knockbackDistance": 100
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "6": {
+                "tier": "transform",
+                "equip": [
+                  {
+                    "trigger": "onWaveStart",
+                    "effects": [
+                      {
+                        "atom": "shield",
+                        "params": {
+                          "absorbHits": 3,
+                          "regenSeconds": 6
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "novaOnBreak",
+                        "params": {
+                          "damage": 50,
+                          "knockbackDistance": 130
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "amplifyAxis": {
+              "description": "吸收次数 +1、再生 -2s",
+              "params": {
+                "absorbHits": "+1",
+                "regenSeconds": "-2"
+              }
+            },
+            "consumable": {
+              "placement": "point",
+              "interpolation": "linear",
+              "anchors": {
+                "1": {
+                  "radius": 90,
+                  "effects": [
+                    {
+                      "atom": "shield",
+                      "params": {
+                        "absorbHits": 4
+                      }
+                    },
+                    {
+                      "atom": "knockback",
+                      "params": {
+                        "distance": 70
+                      }
+                    }
+                  ]
+                },
+                "3": {
+                  "radius": 120,
+                  "effects": [
+                    {
+                      "atom": "shield",
+                      "params": {
+                        "absorbHits": 6
+                      }
+                    },
+                    {
+                      "atom": "knockback",
+                      "params": {
+                        "distance": 100
+                      }
+                    }
+                  ]
+                },
+                "6": {
+                  "radius": 150,
+                  "effects": [
+                    {
+                      "atom": "shield",
+                      "params": {
+                        "absorbHits": 8
+                      }
+                    },
+                    {
+                      "atom": "burstDamage",
+                      "params": {
+                        "damageMul": 5,
+                        "radius": 150
+                      }
+                    },
+                    {
+                      "atom": "knockback",
+                      "params": {
+                        "distance": 140
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "designNotes": "撑住这一波。5★ 碎盾新星：护盾破裂时对周围敌人造成击退+伤害。"
+          },
+          {
+            "id": "splitBlast",
+            "category": "projectile",
+            "synergyTags": [
+              "projectile",
+              "domain"
+            ],
+            "textKey": "cards.splitBlast",
+            "teaching": false,
+            "implementationBatch": 2,
+            "stars": {
+              "3": {
+                "tier": "core",
+                "equip": [
+                  {
+                    "trigger": "onHit",
+                    "effects": [
+                      {
+                        "atom": "split",
+                        "params": {
+                          "count": 2,
+                          "damageRatio": 0.5,
+                          "maxDepth": 1
+                        }
+                      },
+                      {
+                        "atom": "aoeOnHit",
+                        "params": {
+                          "radius": 40,
+                          "damageRatio": 0.6,
+                          "falloff": 0.5
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "5": {
+                "tier": "dual",
+                "equip": [
+                  {
+                    "trigger": "onHit",
+                    "effects": [
+                      {
+                        "atom": "split",
+                        "params": {
+                          "count": 2,
+                          "damageRatio": 0.5,
+                          "maxDepth": 2
+                        }
+                      },
+                      {
+                        "atom": "aoeOnHit",
+                        "params": {
+                          "radius": 40,
+                          "damageRatio": 0.6,
+                          "falloff": 0.5
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "6": {
+                "tier": "transform",
+                "equip": [
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "mortarMorph",
+                        "params": {
+                          "radius": 90,
+                          "damageRatio": 1.3,
+                          "falloff": 0.5
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "amplifyAxis": {
+              "description": "子弹片 +1、AoE 半径 +25%",
+              "params": {
+                "count": "+1",
+                "radius": "+25%"
+              }
+            },
+            "consumable": {
+              "placement": "point",
+              "interpolation": "linear",
+              "anchors": {
+                "1": {
+                  "radius": 110,
+                  "effects": [
+                    {
+                      "atom": "burstDamage",
+                      "params": {
+                        "damageMul": 4,
+                        "radius": 110
+                      }
+                    }
+                  ]
+                },
+                "3": {
+                  "radius": 140,
+                  "effects": [
+                    {
+                      "atom": "burstDamage",
+                      "params": {
+                        "damageMul": 6,
+                        "radius": 140
+                      }
+                    },
+                    {
+                      "atom": "split",
+                      "params": {
+                        "count": 4,
+                        "damageRatio": 0.5,
+                        "maxDepth": 1
+                      }
+                    }
+                  ]
+                },
+                "6": {
+                  "radius": 180,
+                  "effects": [
+                    {
+                      "atom": "burstDamage",
+                      "params": {
+                        "damageMul": 9,
+                        "radius": 180
+                      }
+                    },
+                    {
+                      "atom": "split",
+                      "params": {
+                        "count": 4,
+                        "damageRatio": 0.5,
+                        "maxDepth": 2
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "designNotes": "一发变一片。5★ 连环裂变：子弹片命中后再分裂一次（maxDepth 封顶，防止指数级增殖）。6★ 换形为榴弹主炮；「命中炸出子弹片」的联动未实装（简化，记入 S6）。"
+          },
+          {
+            "id": "impact",
+            "category": "control",
+            "synergyTags": [
+              "control",
+              "defense"
+            ],
+            "textKey": "cards.impact",
+            "teaching": true,
+            "implementationBatch": 2,
+            "stars": {
+              "3": {
+                "tier": "core",
+                "equip": [
+                  {
+                    "trigger": "onFire",
+                    "effects": [
+                      {
+                        "atom": "knockback",
+                        "params": {
+                          "distance": 22,
+                          "collisionDamage": 0.3
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "5": {
+                "tier": "dual",
+                "equip": [
+                  {
+                    "trigger": "onFire",
+                    "effects": [
+                      {
+                        "atom": "knockback",
+                        "params": {
+                          "distance": 22,
+                          "collisionDamage": 0.3
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "onBreach",
+                    "triggerParams": {
+                      "cooldownSeconds": 6
+                    },
+                    "effects": [
+                      {
+                        "atom": "groundZone",
+                        "params": {
+                          "radius": 150,
+                          "duration": 0.1,
+                          "tickInterval": 0.05,
+                          "effects": [
+                            {
+                              "atom": "knockback",
+                              "params": {
+                                "distance": 80
+                              }
+                            },
+                            {
+                              "atom": "stun",
+                              "params": {
+                                "duration": 0.4
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "6": {
+                "tier": "transform",
+                "equip": [
+                  {
+                    "trigger": "interval",
+                    "triggerParams": {
+                      "seconds": 4
+                    },
+                    "effects": [
+                      {
+                        "atom": "knockback",
+                        "params": {
+                          "distance": 100,
+                          "radius": 150
+                        }
+                      },
+                      {
+                        "atom": "stun",
+                        "params": {
+                          "duration": 0.4,
+                          "radius": 150
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "amplifyAxis": {
+              "description": "击退距离 +30%、碰撞伤 +50%",
+              "params": {
+                "distance": "+30%",
+                "collisionDamage": "+50%"
+              }
+            },
+            "consumable": {
+              "placement": "point",
+              "interpolation": "linear",
+              "anchors": {
+                "1": {
+                  "radius": 100,
+                  "effects": [
+                    {
+                      "atom": "knockback",
+                      "params": {
+                        "distance": 80
+                      }
+                    }
+                  ]
+                },
+                "3": {
+                  "radius": 140,
+                  "effects": [
+                    {
+                      "atom": "knockback",
+                      "params": {
+                        "distance": 120
+                      }
+                    },
+                    {
+                      "atom": "stun",
+                      "params": {
+                        "duration": 0.5
+                      }
+                    }
+                  ]
+                },
+                "6": {
+                  "radius": 180,
+                  "effects": [
+                    {
+                      "atom": "knockback",
+                      "params": {
+                        "distance": 180,
+                        "collisionDamage": 0.5
+                      }
+                    },
+                    {
+                      "atom": "stun",
+                      "params": {
+                        "duration": 1
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "designNotes": "教学卡：把它们轰开。5★ 破门反制：突破瞬间自动全向冲击波，冷却 6s 内置保命（不叠加触发）。"
+          },
+          {
+            "id": "sanctum",
+            "category": "domain",
+            "synergyTags": [
+              "domain",
+              "control"
+            ],
+            "textKey": "cards.sanctum",
+            "teaching": false,
+            "implementationBatch": 2,
+            "stars": {
+              "3": {
+                "tier": "core",
+                "equip": [
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "aura",
+                        "params": {
+                          "radiusRatioOfRange": 0.5,
+                          "tickInterval": 0.5,
+                          "effects": [
+                            {
+                              "atom": "vulnerable",
+                              "params": {
+                                "ratio": 0.2,
+                                "duration": 0.6
+                              }
+                            },
+                            {
+                              "atom": "slow",
+                              "params": {
+                                "ratio": 0.1,
+                                "duration": 0.6
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "5": {
+                "tier": "dual",
+                "equip": [
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "aura",
+                        "params": {
+                          "radiusRatioOfRange": 0.5,
+                          "tickInterval": 0.5,
+                          "effects": [
+                            {
+                              "atom": "vulnerable",
+                              "params": {
+                                "ratio": 0.2,
+                                "duration": 0.6
+                              }
+                            },
+                            {
+                              "atom": "slow",
+                              "params": {
+                                "ratio": 0.1,
+                                "duration": 0.6
+                              }
+                            },
+                            {
+                              "atom": "focusPriority",
+                              "params": {
+                                "priorityWeight": 3,
+                                "duration": 0.6,
+                                "hpThresholdRatio": 0.3
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "6": {
+                "tier": "transform",
+                "equip": [
+                  {
+                    "trigger": "interval",
+                    "triggerParams": {
+                      "seconds": 3
+                    },
+                    "effects": [
+                      {
+                        "atom": "vulnerable",
+                        "params": {
+                          "ratio": 0.4,
+                          "duration": 2,
+                          "radius": 170
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "amplifyAxis": {
+              "description": "易伤 +10pt、光环半径 +15%",
+              "params": {
+                "ratio": "+0.1",
+                "radiusRatioOfRange": "+15%"
+              }
+            },
+            "consumable": {
+              "placement": "point",
+              "interpolation": "linear",
+              "anchors": {
+                "1": {
+                  "radius": 110,
+                  "duration": 4,
+                  "effects": [
+                    {
+                      "atom": "vulnerable",
+                      "params": {
+                        "ratio": 0.3,
+                        "duration": 4
+                      }
+                    }
+                  ]
+                },
+                "3": {
+                  "radius": 140,
+                  "duration": 5,
+                  "effects": [
+                    {
+                      "atom": "vulnerable",
+                      "params": {
+                        "ratio": 0.4,
+                        "duration": 5
+                      }
+                    }
+                  ]
+                },
+                "6": {
+                  "radius": 170,
+                  "duration": 5,
+                  "effects": [
+                    {
+                      "atom": "vulnerable",
+                      "params": {
+                        "ratio": 0.5,
+                        "duration": 5
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "designNotes": "进入领域者皆被审判。5★ 处刑印记：环内濒死敌人（hpThresholdRatio）被烙印优先索敌。amplifyAxis 的 ratio 键同时略微放大环内减速（易伤/减速共用参数名，接受此耦合）。「被烙印者死亡掉落时限+50%」未实装（简化，记入 S6）。"
+          },
+          {
+            "id": "thorns",
+            "category": "defense",
+            "synergyTags": [
+              "defense",
+              "domain"
+            ],
+            "textKey": "cards.thorns",
+            "teaching": false,
+            "implementationBatch": 2,
+            "stars": {
+              "3": {
+                "tier": "core",
+                "equip": [
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "breachReduction",
+                        "params": {
+                          "ratio": 0.35
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "onBreach",
+                    "effects": [
+                      {
+                        "atom": "groundZone",
+                        "params": {
+                          "radius": 100,
+                          "duration": 0.1,
+                          "tickInterval": 0.05,
+                          "effects": [
+                            {
+                              "atom": "burstDamage",
+                              "params": {
+                                "damageMul": 1.5,
+                                "radius": 100
+                              }
+                            },
+                            {
+                              "atom": "knockback",
+                              "params": {
+                                "distance": 90
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "5": {
+                "tier": "dual",
+                "equip": [
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "breachReduction",
+                        "params": {
+                          "ratio": 0.35
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "onBreach",
+                    "effects": [
+                      {
+                        "atom": "groundZone",
+                        "params": {
+                          "radius": 100,
+                          "duration": 0.1,
+                          "tickInterval": 0.05,
+                          "effects": [
+                            {
+                              "atom": "burstDamage",
+                              "params": {
+                                "damageMul": 1.5,
+                                "radius": 100
+                              }
+                            },
+                            {
+                              "atom": "knockback",
+                              "params": {
+                                "distance": 90
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "aura",
+                        "params": {
+                          "radius": 90,
+                          "tickInterval": 0.5,
+                          "effects": [
+                            {
+                              "atom": "dot",
+                              "params": {
+                                "damageRatio": 0.1
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "6": {
+                "tier": "transform",
+                "equip": [
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "aura",
+                        "params": {
+                          "radius": 130,
+                          "tickInterval": 0.4,
+                          "effects": [
+                            {
+                              "atom": "dot",
+                              "params": {
+                                "damageRatio": 0.15
+                              }
+                            },
+                            {
+                              "atom": "execute",
+                              "params": {
+                                "hpThresholdRatio": 0.2
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "amplifyAxis": {
+              "description": "反噬 +50pt、减免 +10pt",
+              "params": {
+                "damageMul": "+0.5",
+                "ratio": "+0.1"
+              }
+            },
+            "consumable": {
+              "placement": "point",
+              "interpolation": "linear",
+              "anchors": {
+                "1": {
+                  "radius": 90,
+                  "duration": 4,
+                  "effects": [
+                    {
+                      "atom": "groundZone",
+                      "params": {
+                        "radius": 90,
+                        "duration": 4,
+                        "tickInterval": 0.5,
+                        "effects": [
+                          {
+                            "atom": "dot",
+                            "params": {
+                              "damageRatio": 0.15
+                            }
+                          },
+                          {
+                            "atom": "slow",
+                            "params": {
+                              "ratio": 0.3,
+                              "duration": 0.6
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "3": {
+                  "radius": 120,
+                  "duration": 4,
+                  "effects": [
+                    {
+                      "atom": "groundZone",
+                      "params": {
+                        "radius": 120,
+                        "duration": 4,
+                        "tickInterval": 0.5,
+                        "effects": [
+                          {
+                            "atom": "dot",
+                            "params": {
+                              "damageRatio": 0.2
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "atom": "focusPriority",
+                      "params": {
+                        "priorityWeight": 2,
+                        "duration": 4
+                      }
+                    }
+                  ]
+                },
+                "6": {
+                  "radius": 150,
+                  "duration": 5,
+                  "effects": [
+                    {
+                      "atom": "groundZone",
+                      "params": {
+                        "radius": 150,
+                        "duration": 5,
+                        "tickInterval": 0.5,
+                        "effects": [
+                          {
+                            "atom": "dot",
+                            "params": {
+                              "damageRatio": 0.25
+                            }
+                          },
+                          {
+                            "atom": "execute",
+                            "params": {
+                              "hpThresholdRatio": 0.15
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "designNotes": "碰我者死。突破反噬用近瞬时 groundZone 包裹 burstDamage/knockback，命中突破点附近的存活敌人（突破的敌人本身已在结算前移出场，直接反噬它没有意义）。6★ 处决不计入突破惩罚（execute 走击杀结算，非突破结算，天然满足）。"
+          }
+        ]
+      },
+      "progression": {
+        "xpNeedBase": 10,
+        "xpGrowth": 2,
+        "killXpMul": 1,
+        "perkChoices": 3,
+        "perks": [
+          {
+            "id": "proj_damage",
+            "title": "超压弹道",
+            "desc": "弹道类技能的衍生伤害提高 15%",
+            "lane": "projectile",
+            "affinityGain": 1,
+            "effects": [
+              {
+                "kind": "buildScaling",
+                "targetTags": [
+                  "projectile"
+                ],
+                "axis": "effectDamageMul",
+                "value": 0.15
+              }
+            ],
+            "offerRole": "route",
+            "weight": 1,
+            "maxStacks": 5
+          },
+          {
+            "id": "proj_quantity",
+            "title": "增殖弹药",
+            "desc": "穿透 / 弹跳 / 分裂数量 +1",
+            "lane": "projectile",
+            "affinityGain": 1,
+            "effects": [
+              {
+                "kind": "buildScaling",
+                "targetTags": [
+                  "projectile"
+                ],
+                "axis": "quantityAdd",
+                "value": 1
+              }
+            ],
+            "offerRole": "route",
+            "weight": 1,
+            "maxStacks": 3
+          },
+          {
+            "id": "ctrl_potency",
+            "title": "凝滞力场",
+            "desc": "减速、冻结、眩晕、击退效果增强 20%",
+            "lane": "control",
+            "affinityGain": 1,
+            "effects": [
+              {
+                "kind": "buildScaling",
+                "targetTags": [
+                  "control"
+                ],
+                "axis": "controlPotencyMul",
+                "value": 0.2
+              }
+            ],
+            "offerRole": "route",
+            "weight": 1,
+            "maxStacks": 5
+          },
+          {
+            "id": "ctrl_bridge",
+            "title": "乘虚而入",
+            "desc": "处于减速 / 冻结 / 眩晕的追求者承受伤害 +10%",
+            "lane": "control",
+            "affinityGain": 1,
+            "effects": [
+              {
+                "kind": "buildScaling",
+                "targetTags": [
+                  "control"
+                ],
+                "axis": "controlledDamageTakenMul",
+                "value": 0.1
+              }
+            ],
+            "offerRole": "bridge",
+            "weight": 1,
+            "maxStacks": 5
+          },
+          {
+            "id": "domain_area",
+            "title": "领域扩张",
+            "desc": "区域与光环的半径和持续时间提高 15%",
+            "lane": "domain",
+            "affinityGain": 1,
+            "effects": [
+              {
+                "kind": "buildScaling",
+                "targetTags": [
+                  "domain"
+                ],
+                "axis": "areaScaleMul",
+                "value": 0.15
+              }
+            ],
+            "offerRole": "route",
+            "weight": 1,
+            "maxStacks": 5
+          },
+          {
+            "id": "domain_dot",
+            "title": "余烬灼心",
+            "desc": "持续伤害提高 20%",
+            "lane": "domain",
+            "affinityGain": 1,
+            "effects": [
+              {
+                "kind": "buildScaling",
+                "targetTags": [
+                  "domain"
+                ],
+                "axis": "dotDamageMul",
+                "value": 0.2
+              }
+            ],
+            "offerRole": "route",
+            "weight": 1,
+            "maxStacks": 5
+          },
+          {
+            "id": "def_durability",
+            "title": "加固壁垒",
+            "desc": "护盾吸收次数与召唤物耐久提高 25%",
+            "lane": "defense",
+            "affinityGain": 1,
+            "effects": [
+              {
+                "kind": "buildScaling",
+                "targetTags": [
+                  "defense"
+                ],
+                "axis": "defenseDurabilityMul",
+                "value": 0.25
+              }
+            ],
+            "offerRole": "route",
+            "weight": 1,
+            "maxStacks": 4
+          },
+          {
+            "id": "def_bridge",
+            "title": "荆棘反击",
+            "desc": "破盾新星、反噬与突破反击伤害提高 25%",
+            "lane": "defense",
+            "affinityGain": 1,
+            "effects": [
+              {
+                "kind": "buildScaling",
+                "targetTags": [
+                  "defense"
+                ],
+                "axis": "retaliationMul",
+                "value": 0.25
+              }
+            ],
+            "offerRole": "bridge",
+            "weight": 1,
+            "maxStacks": 4
+          },
+          {
+            "id": "damage",
+            "title": "高能弹芯",
+            "desc": "基础伤害 +15%",
+            "lane": "utility",
+            "affinityGain": 0,
+            "effects": [
+              {
+                "kind": "stat",
+                "stat": "damagePct",
+                "value": 0.15
+              }
+            ],
+            "offerRole": "utility",
+            "weight": 0.7,
+            "maxStacks": 99
+          },
+          {
+            "id": "rate",
+            "title": "过载供能",
+            "desc": "射速 +12%",
+            "lane": "utility",
+            "affinityGain": 0,
+            "effects": [
+              {
+                "kind": "stat",
+                "stat": "fireRatePct",
+                "value": 0.12
+              }
+            ],
+            "offerRole": "utility",
+            "weight": 0.7,
+            "maxStacks": 99
+          },
+          {
+            "id": "repair",
+            "title": "重整心防",
+            "desc": "私人空间恢复 20 点",
+            "lane": "utility",
+            "affinityGain": 0,
+            "effects": [
+              {
+                "kind": "stat",
+                "stat": "heal",
+                "value": 20
+              }
+            ],
+            "offerRole": "utility",
+            "weight": 0.8,
+            "maxStacks": 99
+          },
+          {
+            "id": "maxhp",
+            "title": "扩容心防",
+            "desc": "心防上限 +15",
+            "lane": "utility",
+            "affinityGain": 0,
+            "effects": [
+              {
+                "kind": "stat",
+                "stat": "maxHp",
+                "value": 15
+              }
+            ],
+            "offerRole": "utility",
+            "weight": 0.6,
+            "maxStacks": 99
+          },
+          {
+            "id": "xpgain",
+            "title": "洞悉弱点",
+            "desc": "击破经验 +12%",
+            "lane": "utility",
+            "affinityGain": 0,
+            "effects": [
+              {
+                "kind": "stat",
+                "stat": "xpGainPct",
+                "value": 0.12
+              }
+            ],
+            "offerRole": "utility",
+            "weight": 0.5,
+            "maxStacks": 6
+          }
+        ],
+        "settlement": {
+          "winBonus": 500,
+          "perWaveCleared": 40,
+          "perKill": 2,
+          "hpRatioBonusMax": 200,
+          "perEquippedStarSquared": 10,
+          "wildcardStarValue": {
+            "1": 15,
+            "2": 40,
+            "3": 100,
+            "4": 250,
+            "5": 600
+          }
+        }
+      },
+      "economy": {
+        "maxStar": 6,
+        "mergeCopies": 2,
+        "mergeCopiesWhenTwoCopyDisabled": 3,
+        "equipThreshold": 3,
+        "handSlots": 7,
+        "equipSlots": 3,
+        "equipIrreversible": false,
+        "unequipPolicy": "consume",
+        "inRunSlotExpansion": false,
+        "equipDistinctTypes": true,
+        "feedEquipped": true,
+        "placeholderAssumptions": {
+          "twoCopyMerge": true,
+          "normalDropsOnlyOneStar": true,
+          "feedEquipped": true,
+          "distinctEquippedTypes": true
+        },
+        "dropStarPolicy": {
+          "normal": 1,
+          "bountyBossMax": 2,
+          "star2Share": 0.05
+        },
+        "drops": {
+          "pickupRadius": 34,
+          "chanceCap": 0.95
+        },
+        "defaults": {
+          "dropChance": 0.27,
+          "dropLifetime": 5
+        },
+        "normalDropTypePolicy": {
+          "enabled": true,
+          "roleBagSize": 10,
+          "earlyMix": {
+            "discovery": 6,
+            "build": 3,
+            "pivot": 1
+          },
+          "lateMix": {
+            "discovery": 1,
+            "build": 7,
+            "pivot": 2
+          },
+          "bootstrapMinDiscovery": 6,
+          "affinity": {
+            "scorePerStack": 2.5,
+            "scoreCap": 6,
+            "pityWindow": 2
+          },
+          "maturity": {
+            "fullMergeOps": 10,
+            "fullHighestStar": 4,
+            "fullEquippedTypes": 2,
+            "mergeWeight": 0.25,
+            "starWeight": 0.35,
+            "equipWeight": 0.4
+          },
+          "build": {
+            "topK": 3,
+            "scorePower": 1.25,
+            "mergeReadyMultiplier": 1.5,
+            "equippedBaseBonus": 6,
+            "equippedStarBonus": 2,
+            "historicalMergeWeight": 0.5,
+            "historicalMergeCap": 8,
+            "maxWeightRatio": 6
+          },
+          "pivot": {
+            "excludeTopK": 2,
+            "candidateFraction": 0.5
+          },
+          "maxSameTypeStreak": 2
+        }
+      },
+      "bounty": {
+        "enabled": true,
+        "rewardBias": {
+          "enabled": true,
+          "primaryShare": 0.7,
+          "secondaryShare": 0.15,
+          "nearMergeBonus": 2,
+          "investedBonus": 1.5,
+          "droughtBonus": 1.5
+        },
+        "offer": {
+          "enabledFromWave": 1,
+          "checkIntervalSeconds": 4,
+          "baseChancePerCheck": 0.1,
+          "minChancePerCheck": 0.02,
+          "maxChancePerCheck": 0.42,
+          "noDamageRampSeconds": 35,
+          "noDamageBonusMax": 0.18,
+          "healthyHpThreshold": 0.75,
+          "healthyHpBonusMax": 0.1,
+          "recentDamagePenalty": 0.12,
+          "recentDamagePenaltySeconds": 10,
+          "markWindowSeconds": 8,
+          "cooldownSeconds": 12,
+          "minOffersPerWave": 1,
+          "maxOffersPerWave": 2,
+          "guaranteeAtWaveProgress": 0.55,
+          "maxConcurrentOffers": 1,
+          "maxConcurrentEncounters": 1
+        },
+        "encounter": {
+          "enemyCountBase": 3,
+          "enemyCountPerWave": 0.5,
+          "enemyCountMax": 7,
+          "hpMul": 1.35,
+          "speedMul": 1.1,
+          "damageMul": 1.15,
+          "spawnIntervalSeconds": 0.18,
+          "spawnSpread": 110,
+          "emergencyOverrideDistance": 95,
+          "composition": {
+            "normalWeight": 0.5,
+            "fastWeight": 0.3,
+            "tankWeight": 0.2
+          }
+        },
+        "reward": {
+          "cardCount": 1,
+          "cardStarBase": 1,
+          "cardStarUpgradeEveryWaves": 4,
+          "cardStarMax": 2,
+          "wildcardCount": 1,
+          "wildcardStarBase": 1,
+          "wildcardStarUpgradeEveryWaves": 4,
+          "wildcardStarMax": 2,
+          "dropLifetimeSeconds": 12,
+          "repeatProtection": 1
+        },
+        "visual": {
+          "offerRadius": 30,
+          "offerEdgeInset": 28,
+          "enemyGlowRadius": 10,
+          "enemyPulseSpeed": 3,
+          "showRewardName": true
+        }
+      },
+      "input": {
+        "tapMaxPx": 8,
+        "tapMaxMs": 150,
+        "reticleOffsetY": 30,
+        "confirmStyle": "hold-ring",
+        "holdOrDbl": "double-tap"
+      }
+    },
+    "presetName": "",
+    "seed": 42,
+    "difficulty": {
+      "id": "hell",
+      "hpMultiplierAtWave1": 1,
+      "damageMultiplierAtWave1": 1
+    },
+    "gitCommit": "b5c7c2379f7cd92805e00969be036cc26b529f45"
+  },
+  "events": [
+    {
+      "at": 0,
+      "wave": 1,
+      "type": "waveStart",
+      "difficultyHpMultiplier": 1,
+      "difficultyDamageMultiplier": 1
+    },
+    {
+      "at": 0.429,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 1,
+      "x": 564.326273779347,
+      "y": 597.0961450765786
+    },
+    {
+      "at": 0.429,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 2,
+      "x": 282.4710122472994,
+      "y": -24.142440259907083
+    },
+    {
+      "at": 0.429,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 3,
+      "x": 441.1745125900044,
+      "y": 753.6409796088976
+    },
+    {
+      "at": 0.429,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 4,
+      "x": 449.20881223593386,
+      "y": -24.22064243820863
+    },
+    {
+      "at": 0.429,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 5,
+      "x": 564.2896164213233,
+      "y": 165.66869743709827
+    },
+    {
+      "at": 0.429,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 6,
+      "x": 321.8784433108416,
+      "y": 754.1495241251604
+    },
+    {
+      "at": 0.429,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 7,
+      "x": 564.5653868518178,
+      "y": 587.3146894217612
+    },
+    {
+      "at": 0.429,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 8,
+      "x": 50.090526910060454,
+      "y": 754.5258444240209
+    },
+    {
+      "at": 0.429,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 9,
+      "x": 122.79985711109761,
+      "y": -23.611286919057836
+    },
+    {
+      "at": 0.429,
+      "wave": 1,
+      "type": "spawn",
+      "enemyId": 10,
+      "x": 48.17291120477183,
+      "y": 754.2545495543247
+    },
+    {
+      "at": 0.627,
+      "wave": 2,
+      "type": "waveStart",
+      "difficultyHpMultiplier": 1,
+      "difficultyDamageMultiplier": 1
+    },
+    {
+      "at": 0.924,
+      "wave": 3,
+      "type": "waveStart",
+      "difficultyHpMultiplier": 1,
+      "difficultyDamageMultiplier": 1
+    }
+  ],
+  "samples": [
+    {
+      "at": 0,
+      "wave": 1,
+      "enemies": 0
+    },
+    {
+      "at": 0.25,
+      "wave": 1,
+      "enemies": 0
+    },
+    {
+      "at": 0.5,
+      "wave": 1,
+      "enemies": 10
+    },
+    {
+      "at": 0.75,
+      "wave": 2,
+      "enemies": 0
+    },
+    {
+      "at": 1,
+      "wave": 3,
+      "enemies": 0
+    },
+    {
+      "at": 1.25,
+      "wave": 3,
+      "enemies": 0
+    }
+  ],
+  "inputs": []
+}
