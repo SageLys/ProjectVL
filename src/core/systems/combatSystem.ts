@@ -290,10 +290,14 @@ export function updateTurret(state: GameState, config: Config, rng: Rng, dt: num
   if (form.delivery === 'line') {
     const key = 'weapon:line';
     const clock = (state.intervalClocks[key] ?? form.interval) - dt;
-    if (target && clock <= 0) {
+    if (target && clock <= 1e-9) {
       const duration = Math.max(form.tickInterval, form.duration);
       const tickCount = Math.max(1, Math.round(duration / form.tickInterval));
-      const damagePerTick = totalDamage(state, config) * form.deliveryDamageRatio / tickCount;
+      const baselineDps = totalDamage(state, config)
+        * totalFireRate(state, config)
+        * totalMulti(state);
+      const cycleDamage = baselineDps * form.interval * form.deliveryDamageRatio;
+      const damagePerTick = cycleDamage / tickCount;
       const begun = beginAttack(
         state, config, rng, 'line', damagePerTick, form.sourceStar, form.impacts, undefined,
         equippedCardId(state, form.sourceCardType),
@@ -319,7 +323,7 @@ export function updateTurret(state: GameState, config: Config, rng: Rng, dt: num
     return events;
   }
 
-  if (target && state.shotCd <= 0) {
+  if (target && state.shotCd <= 1e-9) {
     events.push(...shoot(state, config, rng, target));
     state.shotCd = 1 / totalFireRate(state, config);
   }

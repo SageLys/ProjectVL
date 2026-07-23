@@ -31,7 +31,7 @@ function skill(id: CardType, bindings: BindingDef[]): CardDef {
 }
 
 const beamSkill = () => skill('pierce', [{ trigger: 'passive', effects: [{
-  atom: 'beamMorph', params: { interval: 9, duration: 0.6, tickInterval: 0.1, width: 32, damageRatio: 1 },
+  atom: 'beamMorph', params: { interval: 0.9, duration: 0.6, tickInterval: 0.1, width: 32, damageRatio: 1 },
 }] }]);
 
 const mortarSkill = () => skill('splitBlast', [{ trigger: 'passive', effects: [{
@@ -57,7 +57,7 @@ describe('weaponForm 正交融合', () => {
     equip(state, 'splitBlast', 6);
     const spec = composeWeaponForm(getModifiers(state).weaponForms);
     expect(spec.delivery).toBe('line');
-    expect(spec.deliveryDamageRatio).toBe(1.3);
+    expect(spec.deliveryDamageRatio).toBe(1);
     expect(spec.impacts[0]).toMatchObject({
       sourceCardType: 'splitBlast', sourceStar: 6,
       damageRatio: 1.3 * cfg.combat.weaponFusion.damping,
@@ -120,8 +120,10 @@ describe('持续光束统一触发链', () => {
     emitBeam(state);
     for (let i = 0; i < 6; i++) updateTurret(state, config, rng, 0.1);
 
-    expect(direct.hp).toBeCloseTo(100 - config.damage, 5);
-    expect(chained.hp).toBeCloseTo(100 - (config.damage / 6) * 0.5, 5);
+    const tickCount = 6;
+    const cycleDamage = config.damage * config.fireRate * state.multi * 0.9;
+    expect(direct.hp).toBeCloseTo(100 - cycleDamage, 5);
+    expect(chained.hp).toBeCloseTo(100 - (cycleDamage / tickCount) * 0.5, 5);
   });
 
   it('onFire frost riders 与 onHit scorch 在 line delivery 下照常生效，且每敌只触发一次 onHit', () => {

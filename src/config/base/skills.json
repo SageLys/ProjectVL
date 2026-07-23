@@ -6,7 +6,7 @@
       "stars": {
         "3": { "tier": "core", "equip": [{ "trigger": "onFire", "effects": [{ "atom": "pierce", "params": { "count": 2, "damageRetention": 0.8, "rampPerPierce": 0.1 } }] }] },
         "5": { "tier": "dual", "equip": [{ "trigger": "onFire", "effects": [{ "atom": "pierce", "params": { "count": 2, "damageRetention": 0.8, "rampPerPierce": 0.1 } }, { "atom": "ricochet", "params": { "bounces": 1 } }] }] },
-        "6": { "tier": "transform", "equip": [{ "trigger": "passive", "effects": [{ "atom": "beamMorph", "params": { "interval": 0.9, "width": 32, "damageRatio": 1.3 } }] }] }
+        "6": { "tier": "transform", "equip": [{ "trigger": "passive", "effects": [{ "atom": "beamMorph", "params": { "interval": 0.9, "width": 32, "damageRatio": 1.0 } }] }] }
       },
       "amplifyAxis": { "description": "穿透数 +1、伤害保留 +10pt", "params": { "count": "+1", "damageRetention": "+0.1" } },
       "consumable": { "placement": "point", "interpolation": "linear", "anchors": {
