@@ -48,6 +48,8 @@ function runBotGame(s: GameState, config: Config, rng: Rng): ValidationEntrySnap
       const decision = s.decisions.current;
       const choice = decision.kind === 'godDraft' || decision.kind === 'godFocus'
         ? decision.candidates[0]
+        : decision.kind === 'waveBaseReward'
+          ? decision.candidates[0]
         : decision.kind === 'evolutionBranch' || decision.kind === 'relic'
           ? decision.options[0]
           : decision.recipeId;

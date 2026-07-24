@@ -34,8 +34,17 @@
     "godFocus": { "title": "选择本波重点", "body": "重点神将在下一波活跃池中占据更多位置。" },
     "evolutionBranch": { "title": "选择进化分支", "body": "为这张卡选择一条进化路线。" },
     "recipeEvolution": { "title": "卡间进化", "body": "确认要完成的进化配方。" },
-    "relic": { "title": "选择遗物", "body": "选择一件遗物强化本局构筑。" }
+    "relic": { "title": "选择遗物", "body": "选择一件遗物强化本局构筑。" },
+    "waveBaseReward": { "title": "强化炮台", "body": "从下列 5 项中选择 1 项强化。" }
   },
+  "waveRewardStats": {
+    "damageAdd": "基础伤害",
+    "fireRateAdd": "基础射速",
+    "rangeAdd": "基础射程",
+    "maxHpAdd": "心防上限",
+    "xpGainPct": "经验取得"
+  },
+  "waveRewardCapped": "已达到上限",
   "evolution": {
     "lockNotice": "本局同一卡族将锁定此路线。",
     "pending": "待选择进化路线",
@@ -98,6 +107,7 @@
     "bountyFailed": "赏金失败：敌群已突破防线",
     "tunerReset": "已恢复默认参数",
     "perkApplied": "{title} 已生效",
+    "waveBaseRewardChosen": "{stat} +{add} 已生效",
     "mergeSuffix": "，自动合成 {count} 次"
   },
   "wildcard": {

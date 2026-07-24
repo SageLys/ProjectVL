@@ -1,11 +1,15 @@
 {
-  "version": "0.1.0",
-  "rewards": [
-    { "id": "waveDamage", "waves": "all", "effect": { "stat": "damageAdd", "add": 2 } },
-    { "id": "waveHeal", "waves": "all", "effect": { "stat": "heal", "add": 8 } },
-    { "id": "maxHpMilestone", "waves": [2, 5, 8], "effect": { "stat": "maxHpAdd", "add": 10 } },
-    { "id": "rangeMilestone", "waves": [3, 6], "effect": { "stat": "rangeAdd", "add": 8 } },
-    { "id": "multiMilestone", "waves": [5, 9], "effect": { "stat": "multiAdd", "add": 1 } },
-    { "id": "fireRateMilestone", "waves": [4, 7], "effect": { "stat": "fireRateAdd", "add": 0.15 } }
+  "version": "0.2.0",
+  "floor": [
+    { "id": "floorHeal", "stat": "heal", "add": 8 },
+    { "id": "floorDamage", "stat": "damageAdd", "add": 1 },
+    { "id": "floorRange", "stat": "rangeAdd", "add": 4 }
+  ],
+  "choice": [
+    { "id": "optDamage", "stat": "damageAdd", "add": 2 },
+    { "id": "optFireRate", "stat": "fireRateAdd", "add": 0.15 },
+    { "id": "optMaxHp", "stat": "maxHpAdd", "add": 10 },
+    { "id": "optRange", "stat": "rangeAdd", "add": 8 },
+    { "id": "optXpGain", "stat": "xpGainPct", "add": 0.08 }
   ]
 }

@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { cfg } from '../src/config';
 import { createDefaultConfig } from '../src/core/createInitialState';
 import { updateGame } from '../src/core/updateGame';
+import { resolveCurrentDecision } from '../src/core/systems/decisionQueueSystem';
 import { restartWave, startNextWave } from '../src/core/systems/waveSystem';
 import { constRng, freshState, resetTestEnv } from './helpers';
 
@@ -18,8 +19,12 @@ describe('spawn-mode wave boundary lifecycle', () => {
     cfg.waves.intermission.settleSeconds = 0;
     cfg.waves.intermission.freeSeconds = { selection: 0, buildEarly: 0, buildLate: 0, validation: 0 };
     state.spawnLeft = 0; state.enemies.length = 0;
-    for (let step = 0; step < 4; step++) {
+    for (let step = 0; step < 5; step++) {
       updateGame(state, runtime, constRng(.5), 0, () => { if (pending) { cfg.waves.spawnMode = pending; pending = null; } });
+      const decision = state.decisions.current;
+      if (decision?.kind === 'waveBaseReward') {
+        resolveCurrentDecision(state, runtime, constRng(.5), decision.candidates[0]);
+      }
     }
     updateGame(state, runtime, constRng(.5), 0);
     expect(cfg.waves.spawnMode).toBe('budget'); expect(state.enemies).toHaveLength(4);

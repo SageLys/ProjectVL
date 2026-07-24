@@ -107,6 +107,7 @@ export function createInitialState(difficultyId: DifficultyId = 'hell'): GameSta
       multiAdd: 0,
     },
     waveRewardsClaimedWave: 0,
+    waveChoiceOfferedWave: 0,
     damageBonus: 0,
     fireRateBonus: 0,
     multi: 1,

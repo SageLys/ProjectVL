@@ -410,6 +410,17 @@ export function createDevTelemetry(options: Options): DevTelemetry {
         wave: event.wave,
         waveRewards: event.granted.map(reward => ({ ...reward })),
       });
+      if (event.type === 'waveBaseRewardOffered') add({
+        type: 'wave_base_reward_offered',
+        wave: event.wave,
+        candidates: [...event.candidates],
+      });
+      if (event.type === 'waveBaseRewardChosen') add({
+        type: 'wave_base_reward_resolved',
+        wave: event.wave,
+        waveRewardStat: event.stat,
+        waveRewardAdd: event.add,
+      });
       if (event.type === 'godOffer') add({
         type: 'god_offer',
         wave: event.wave,

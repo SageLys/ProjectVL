@@ -17,7 +17,9 @@ export type {
   RelicDef,
   RelicsConfig,
   RunBaseStatKind,
-  WaveRewardDef,
+  WaveChoiceOptionDef,
+  WaveChoiceStatKind,
+  WaveFloorRewardDef,
   WaveRewardsConfig,
 } from './types';
 export { buildConfig, deepMerge, normalizeBossWaves, parseBossWavesInput, variantsFromSearch, VARIANTS } from './loader';

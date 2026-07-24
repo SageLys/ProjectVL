@@ -12,7 +12,12 @@ import { tickEffects } from './effects/runtime';
  * 效果运行时（区域/光环/召唤物/护盾/状态/interval 绑定）在实体推进后统一 tick。
  */
 export function updateGame(state: GameState, config: Config, rng: Rng, dt: number, beforeWaveStart?: () => void): GameEvent[] {
-  if (state.mode !== 'playing' || state.paused) return [];
+  if (
+    state.mode !== 'playing'
+    || state.paused
+    || state.decisions.current !== null
+    || state.decisions.pending.length > 0
+  ) return [];
   if (state.intermission.active) {
     state.time += dt;
     return tickBetween(state, config, rng, dt, beforeWaveStart);

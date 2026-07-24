@@ -32,6 +32,7 @@ export function formatToast(ev: GameEvent): string | null {
     case 'activePoolCreated':
     case 'intermissionReady':
     case 'waveRewardsGranted':
+    case 'waveBaseRewardOffered':
     case 'relicOffered':
     case 'evolutionBranchOffered':
       return null;
@@ -63,6 +64,11 @@ export function formatToast(ev: GameEvent): string | null {
     case 'shieldBroken': return T.shieldBroken;
     case 'testDrops': return fmt(T.testDrops, { name: name(ev.cardType) });
     case 'relicSelected': return fmt(T.perkApplied, { title: ev.title });
+    case 'waveBaseRewardChosen': {
+      const add = ev.stat === 'xpGainPct' ? `${ev.add * 100}%` : String(ev.add);
+      const stat = (texts.waveRewardStats as Record<string, string>)[ev.stat] ?? ev.stat;
+      return fmt(T.waveBaseRewardChosen, { stat, add });
+    }
     case 'evolutionBranchSelected': return `${name(ev.cardType)}：路线已锁定`;
     case 'bountyAccepted': return fmt(T.bountyAccepted, { name: name(ev.rewardCardType) });
     case 'bountyCompleted': return fmt(T.bountyCompleted, { name: name(ev.rewardCardType) });

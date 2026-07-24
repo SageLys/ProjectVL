@@ -3,6 +3,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { consumeCard } from '../src/core/systems/equipmentSystem';
 import { renderEquipment } from '../src/ui/renderEquipment';
 import { SLOT_CHANGING } from '../src/ui/eventText';
+import { createModals } from '../src/ui/modals';
 import { card, freshState, createDefaultConfig, constRng, resetTestEnv } from './helpers';
 
 const config = createDefaultConfig();
@@ -33,5 +34,31 @@ describe('DOM: equipment bar refresh after consuming an equipped skill', () => {
     console.log('AFTER occupied?', stillOccupied, '| state.equipment[0]=', s.equipment[0]);
     console.log('AFTER slot0 text:', container.children[0].textContent);
     expect(stillOccupied).toBe(false);
+  });
+});
+
+describe('DOM: wave base reward decision', () => {
+  it('renders all five options and disables the capped range option', () => {
+    document.body.innerHTML = '<button id="restartBtn"></button>';
+    const modals = createModals({
+      restartBtn: document.querySelector('#restartBtn'),
+    } as never, {
+      onDecision() {},
+      onRestart() {},
+    });
+    const state = freshState();
+
+    modals.showDecision({
+      kind: 'waveBaseReward',
+      wave: 1,
+      candidates: ['optDamage', 'optFireRate', 'optMaxHp', 'optXpGain'],
+      capped: ['optRange'],
+    }, state);
+
+    const buttons = document.querySelectorAll<HTMLButtonElement>('[data-decision-choice]');
+    const range = document.querySelector<HTMLButtonElement>('[data-decision-choice="optRange"]')!;
+    expect(buttons).toHaveLength(5);
+    expect(range.disabled).toBe(true);
+    expect(range.textContent).toContain('已达到上限');
   });
 });

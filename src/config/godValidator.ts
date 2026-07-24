@@ -1,6 +1,8 @@
 import type { GameConfig } from './types';
 
 const RUN_BASE_STATS = new Set(['damageAdd', 'fireRateAdd', 'rangeAdd', 'multiAdd', 'maxHpAdd', 'heal']);
+const WAVE_CHOICE_STATS = new Set(['damageAdd', 'fireRateAdd', 'maxHpAdd', 'rangeAdd', 'xpGainPct']);
+const REQUIRED_WAVE_CHOICE_STATS = ['damageAdd', 'fireRateAdd', 'maxHpAdd', 'rangeAdd', 'xpGainPct'];
 const BUILD_TAGS = new Set(['projectile', 'control', 'domain', 'defense', 'utility']);
 const RELIC_RARITIES = new Set(['common', 'rare', 'epic']);
 const BUILD_SCALING_AXES = new Set([
@@ -26,10 +28,10 @@ function stringArray(value: unknown, path: string): string[] {
   return value as string[];
 }
 
-function versionedArray(value: unknown, key: string, path: string): unknown[] {
+function versionedArray(value: unknown, key: string, path: string, version = '0.1.0'): unknown[] {
   if (value === undefined || value === null) return [];
   const root = object(value, path);
-  if (root.version !== '0.1.0') fail(`${path}.version`, '必须等于 0.1.0');
+  if (root.version !== version) fail(`${path}.version`, `必须等于 ${version}`);
   if (!Array.isArray(root[key])) fail(`${path}.${key}`, '必须是数组');
   return root[key] as unknown[];
 }
@@ -107,24 +109,45 @@ export function validateGodConfig(
     if (recipe.allowedPhase !== 'intermission') fail(`${path}.allowedPhase`, '必须为 intermission');
   }
 
-  const rewards = versionedArray(config.waveRewards, 'rewards', '$.waveRewards');
+  const floorRewards = versionedArray(config.waveRewards, 'floor', '$.waveRewards', '0.2.0');
+  const choiceRewards = versionedArray(config.waveRewards, 'choice', '$.waveRewards', '0.2.0');
   const rewardIds = new Set<string>();
-  for (const [index, raw] of rewards.entries()) {
-    const path = `$.waveRewards.rewards[${index}]`;
-    const reward = object(raw, path);
+  const validateRewardIdentityAndAdd = (reward: Record<string, unknown>, path: string): void => {
     if (typeof reward.id !== 'string' || !reward.id) fail(`${path}.id`, '必须是非空字符串');
     if (rewardIds.has(reward.id)) fail(`${path}.id`, `重复的奖励 id: ${reward.id}`);
     rewardIds.add(reward.id);
-    if (reward.waves !== 'all'
-      && (!Array.isArray(reward.waves)
-        || reward.waves.some(wave => !Number.isInteger(wave) || Number(wave) < 1))) {
-      fail(`${path}.waves`, '必须为 all 或正整数波次数组');
+    if (typeof reward.add !== 'number' || !Number.isFinite(reward.add)) {
+      fail(`${path}.add`, '必须是有限数值');
     }
-    const effect = object(reward.effect, `${path}.effect`);
-    if (!RUN_BASE_STATS.has(String(effect.stat))) fail(`${path}.effect.stat`, `非法基础属性: ${String(effect.stat)}`);
-    if (typeof effect.add !== 'number' || !Number.isFinite(effect.add)) {
-      fail(`${path}.effect.add`, '必须是有限数值');
+  };
+  for (const [index, raw] of floorRewards.entries()) {
+    const path = `$.waveRewards.floor[${index}]`;
+    const reward = object(raw, path);
+    validateRewardIdentityAndAdd(reward, path);
+    const stat = String(reward.stat);
+    if (stat.endsWith('Pct')) {
+      fail(`${path}.stat`, `保底层禁止百分比永久成长: ${stat}`);
     }
+    if (!RUN_BASE_STATS.has(stat)) fail(`${path}.stat`, `非法基础属性: ${stat}`);
+  }
+  if (choiceRewards.length !== 5) {
+    fail('$.waveRewards.choice', `固定菜单必须恰好包含 5 项（当前 ${choiceRewards.length} 项）`);
+  }
+  const choiceStats = new Set<string>();
+  for (const [index, raw] of choiceRewards.entries()) {
+    const path = `$.waveRewards.choice[${index}]`;
+    const reward = object(raw, path);
+    validateRewardIdentityAndAdd(reward, path);
+    const stat = String(reward.stat);
+    if (stat.endsWith('Pct') && stat !== 'xpGainPct') {
+      fail(`${path}.stat`, `选择层仅允许 xpGainPct 作为百分比永久成长例外: ${stat}`);
+    }
+    if (!WAVE_CHOICE_STATS.has(stat)) fail(`${path}.stat`, `非法选择属性: ${stat}`);
+    if (choiceStats.has(stat)) fail(`${path}.stat`, `选择菜单属性重复: ${stat}`);
+    choiceStats.add(stat);
+  }
+  for (const stat of REQUIRED_WAVE_CHOICE_STATS) {
+    if (!choiceStats.has(stat)) fail('$.waveRewards.choice', `固定菜单缺少属性: ${stat}`);
   }
 
   const relics = versionedArray(config.relics, 'relics', '$.relics');

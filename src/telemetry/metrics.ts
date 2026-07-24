@@ -4,6 +4,7 @@ import type { RunStage } from '../config/types';
 export const EVENT_UNIVERSE = new Set<TelemetryEvent['type']>([
   'spawn', 'kill', 'dropLanded', 'pickup', 'dangerEnter', 'waveStart', 'waveCleared', 'perkPopup',
   'decision_offered', 'decision_resolved', 'intermission_ready', 'wave_rewards_granted',
+  'wave_base_reward_offered', 'wave_base_reward_resolved',
   'god_offer', 'god_selected', 'run_roster_created', 'active_pool_created',
   'card_shown_by_god', 'card_collected_by_god',
   'evolution_branch_offered', 'evolution_branch_selected',

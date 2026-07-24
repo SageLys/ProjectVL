@@ -1,4 +1,4 @@
-import type { RunBaseStatKind, RunStage } from '../config/types';
+import type { RunBaseStatKind, RunStage, WaveChoiceStatKind } from '../config/types';
 import type { CardDropSource } from '../core/types';
 
 export type TelemetryEventType =
@@ -30,6 +30,8 @@ export type TelemetryEventType =
   | 'decision_resolved'
   | 'intermission_ready'
   | 'wave_rewards_granted'
+  | 'wave_base_reward_offered'
+  | 'wave_base_reward_resolved'
   | 'god_offer'
   | 'god_selected'
   | 'run_roster_created'
@@ -89,6 +91,8 @@ export interface TelemetryEvent {
   choice?: string;
   automatic?: boolean;
   waveRewards?: Array<{ id: string; stat: RunBaseStatKind; add: number }>;
+  waveRewardStat?: WaveChoiceStatKind;
+  waveRewardAdd?: number;
   godId?: string;
   focusGod?: string;
   godRole?: 'main' | 'sub' | 'focus';

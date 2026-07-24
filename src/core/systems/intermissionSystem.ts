@@ -1,7 +1,7 @@
 import { cfg } from '../../config';
 import type { GameEvent, GameState, Rng } from '../types';
 import { stageForWave } from '../runStage';
-import { grantWaveRewards } from './waveRewardSystem';
+import { enqueueWaveBaseRewardDecision, grantFloorRewards } from './waveRewardSystem';
 import { enqueueGodPoolDecisionForIntermission } from './godPoolSystem';
 
 export interface IntermissionTickResult {
@@ -73,7 +73,7 @@ export function tickIntermission(
   if (!intermission.active) return { events: [], complete: false };
 
   if (intermission.step === 'settle') {
-    const events = grantWaveRewards(state, intermission.afterWave);
+    const events = grantFloorRewards(state, intermission.afterWave);
     const granted = events.find(event => event.type === 'waveRewardsGranted');
     if (granted?.type === 'waveRewardsGranted') {
       intermission.rewardsGranted = granted.granted.map(reward => ({ ...reward }));
@@ -86,6 +86,11 @@ export function tickIntermission(
   if (intermission.step === 'decide') {
     const godEvents = enqueueGodPoolDecisionForIntermission(state, rng);
     if (godEvents.length) return { events: godEvents, complete: false };
+    if (state.decisions.current || state.decisions.pending.length) {
+      return { events: [], complete: false };
+    }
+    const waveRewardEvents = enqueueWaveBaseRewardDecision(state, intermission.afterWave);
+    if (waveRewardEvents.length) return { events: waveRewardEvents, complete: false };
     if (state.decisions.current || state.decisions.pending.length) {
       return { events: [], complete: false };
     }

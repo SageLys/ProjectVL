@@ -24,6 +24,7 @@ function validChoices(decision: RunDecision): string[] {
   switch (decision.kind) {
     case 'godDraft':
     case 'godFocus':
+    case 'waveBaseReward':
       return decision.candidates;
     case 'evolutionBranch':
     case 'relic':

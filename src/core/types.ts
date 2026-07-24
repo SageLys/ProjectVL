@@ -1,7 +1,7 @@
 // 纯规则层类型定义。core/ 内禁止出现 DOM / Canvas / 浏览器 API。（P3 重构版）
 import type { BuildTag, EffectDef } from './effects/defs';
 import type { RunSummary } from './settlement';
-import type { CardStatKind, DifficultyId, GodId, RunBaseStatKind } from '../config/types';
+import type { CardStatKind, DifficultyId, GodId, RunBaseStatKind, WaveChoiceStatKind } from '../config/types';
 import type { ValidationRewardSpec, ValidationRewardTypePolicy } from '../config/types';
 
 /** 卡牌类型 = 技能 id 字符串（schema: ^[a-z][a-zA-Z0-9]*$），由 skills.json 的 cards[].id 决定。 */
@@ -115,7 +115,8 @@ export type RunDecision =
   | { kind: 'godFocus'; wave: number; candidates: GodId[] }
   | { kind: 'evolutionBranch'; cardType: CardType; checkpointStar: number; options: string[]; provisionalCardId: number }
   | { kind: 'recipeEvolution'; recipeId: string }
-  | { kind: 'relic'; relicIndex: number; options: string[] };
+  | { kind: 'relic'; relicIndex: number; options: string[] }
+  | { kind: 'waveBaseReward'; wave: number; candidates: string[]; capped: string[] };
 
 export interface DecisionQueueState {
   current: RunDecision | null;
@@ -513,6 +514,8 @@ export interface GameState {
   runBaseStats: RunBaseStats;
   /** Highest wave whose automatic base rewards were settled. Persist this with the run. */
   waveRewardsClaimedWave: number;
+  /** Highest wave whose base-reward choice was offered. Persist this with the run. */
+  waveChoiceOfferedWave: number;
   /** Legacy perk-only additive damage source; removed with stat perks in C4. */
   damageBonus: number;
   /** Legacy perk-only additive fire-rate source; removed with stat perks in C4. */
@@ -568,6 +571,8 @@ export type GameEvent =
   | { type: 'activePoolCreated'; wave: number; focusGod: GodId | null; cardTypes: CardType[] }
   | { type: 'intermissionReady'; wave: number; automatic: boolean }
   | { type: 'waveRewardsGranted'; wave: number; granted: WaveRewardGrant[] }
+  | { type: 'waveBaseRewardOffered'; wave: number; candidates: string[] }
+  | { type: 'waveBaseRewardChosen'; wave: number; stat: WaveChoiceStatKind; add: number }
   | { type: 'bossRewardGranted'; wave: number; grants: Array<{ star: number; count: number }> }
   | { type: 'levelUp' }
   | { type: 'relicOffered'; relicIndex: number; options: string[] }

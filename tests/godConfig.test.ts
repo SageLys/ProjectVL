@@ -14,7 +14,8 @@ describe('神池构筑 C0 数据契约', () => {
     expect(config.skills.cards.every(card => card.god !== undefined && godIds.has(card.god))).toBe(true);
     expect(config.relics.relics.length).toBeGreaterThanOrEqual(20);
     expect(config.evolutionRecipes.recipes).toEqual([]);
-    expect(config.waveRewards.rewards).toHaveLength(6);
+    expect(config.waveRewards.floor).toHaveLength(3);
+    expect(config.waveRewards.choice).toHaveLength(5);
   });
 
   it('拒绝卡牌引用不存在的神', () => {
@@ -54,7 +55,6 @@ describe('神池构筑 C0 数据契约', () => {
     compatible.gods.gods = [];
     compatible.relics.relics = [];
     compatible.evolutionRecipes.recipes = [];
-    compatible.waveRewards.rewards = [];
 
     expect(() => validateGodConfig(compatible)).not.toThrow();
   });

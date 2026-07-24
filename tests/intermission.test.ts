@@ -18,6 +18,11 @@ function enterFreeStep(state: ReturnType<typeof freshState>, freeSeconds: number
   cfg.waves.intermission.freeSeconds.selection = freeSeconds;
   beginIntermission(state);
   updateGame(state, runtime, constRng(0), 0); // settle -> decide
+  updateGame(state, runtime, constRng(0), 0); // enqueue wave base reward choice
+  const decision = state.decisions.current;
+  expect(decision?.kind).toBe('waveBaseReward');
+  if (decision?.kind !== 'waveBaseReward') throw new Error('expected waveBaseReward');
+  resolveCurrentDecision(state, runtime, constRng(0), decision.candidates[0]);
   updateGame(state, runtime, constRng(0), 0); // decide -> free
   expect(state.intermission.step).toBe('free');
 }

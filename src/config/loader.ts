@@ -35,7 +35,7 @@ function optionalBaseConfig<K extends 'gods' | 'relics' | 'evolutionRecipes' | '
 const gods = optionalBaseConfig('gods.json', { version: '0.1.0', gods: [] });
 const relics = optionalBaseConfig('relics.json', { version: '0.1.0', relics: [] });
 const evolutionRecipes = optionalBaseConfig('evolutionRecipes.json', { version: '0.1.0', recipes: [] });
-const waveRewards = optionalBaseConfig('waveRewards.json', { version: '0.1.0', rewards: [] });
+const waveRewards = optionalBaseConfig('waveRewards.json', { version: '0.2.0', floor: [], choice: [] });
 
 function normalizeValidationRewards(config: GameConfig): void {
   for (const wave of config.waves.stagePlan.validation) {

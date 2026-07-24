@@ -306,15 +306,25 @@ export interface EvolutionRecipesConfig {
 
 export type RunBaseStatKind = 'damageAdd' | 'fireRateAdd' | 'rangeAdd' | 'multiAdd' | 'maxHpAdd' | 'heal';
 
-export interface WaveRewardDef {
+/** xpGainPct is the sole percentage-based exception in wave-end growth. */
+export type WaveChoiceStatKind = RunBaseStatKind | 'xpGainPct';
+
+export interface WaveFloorRewardDef {
   id: string;
-  waves: 'all' | number[];
-  effect: { stat: RunBaseStatKind; add: number };
+  stat: RunBaseStatKind;
+  add: number;
+}
+
+export interface WaveChoiceOptionDef {
+  id: string;
+  stat: WaveChoiceStatKind;
+  add: number;
 }
 
 export interface WaveRewardsConfig {
   version: string;
-  rewards: WaveRewardDef[];
+  floor: WaveFloorRewardDef[];
+  choice: WaveChoiceOptionDef[];
 }
 
 export interface EvolutionOptionDef {

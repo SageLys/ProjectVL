@@ -41,6 +41,10 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
         const copy = texts.decisions[decision.kind];
         const options = decision.kind === 'godDraft' || decision.kind === 'godFocus'
           ? decision.candidates
+          : decision.kind === 'waveBaseReward'
+            ? cfg.waveRewards.choice
+              .map(option => option.id)
+              .filter(id => decision.candidates.includes(id) || decision.capped.includes(id))
           : decision.kind === 'evolutionBranch' || decision.kind === 'relic'
             ? decision.options
             : [decision.recipeId];
@@ -108,6 +112,22 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
                 button.append(benefits);
               }
             }
+          } else if (decision.kind === 'waveBaseReward') {
+            const optionDef = cfg.waveRewards.choice.find(item => item.id === option);
+            label.textContent = optionDef
+              ? (texts.waveRewardStats as Record<string, string>)[optionDef.stat] ?? optionDef.stat
+              : option;
+            const desc = document.createElement('span');
+            desc.className = 'choice-desc';
+            const capped = decision.capped.includes(option);
+            desc.textContent = capped
+              ? texts.waveRewardCapped
+              : optionDef?.stat === 'xpGainPct'
+                ? `+${optionDef.add * 100}%`
+                : `+${optionDef?.add ?? 0}`;
+            button.disabled = capped;
+            button.classList.toggle('choice-capped', capped);
+            button.append(label, desc);
           } else {
             label.textContent = option;
             button.append(label);

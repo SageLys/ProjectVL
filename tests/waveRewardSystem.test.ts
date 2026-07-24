@@ -5,7 +5,7 @@ import { validateGodConfig } from '../src/config/godValidator';
 import { totalDamage, totalFireRate, totalMulti, totalRange } from '../src/core/stats';
 import { beginIntermission, tickIntermission } from '../src/core/systems/intermissionSystem';
 import { advanceWavePhase, jumpToWave } from '../src/core/systems/waveSystem';
-import { grantWaveRewards } from '../src/core/systems/waveRewardSystem';
+import { grantFloorRewards } from '../src/core/systems/waveRewardSystem';
 import { createDevTelemetry } from '../src/telemetry/devTelemetry';
 import { createIntermissionPanel } from '../src/ui/intermissionPanel';
 import {
@@ -20,49 +20,62 @@ beforeEach(() => {
   document.body.innerHTML = '';
 });
 
-describe('waveRewardSystem', () => {
-  it('第 2 波同时结算伤害、治疗和血上限奖励', () => {
+describe('waveRewardSystem floor', () => {
+  it('每波自动精确结算回血、基础伤害和未触顶射程', () => {
     const state = freshState();
     const runtime = createDefaultConfig();
     state.hp = 50;
 
-    const events = grantWaveRewards(state, 2);
+    const events = grantFloorRewards(state, 2);
 
     expect(events).toEqual([{
       type: 'waveRewardsGranted',
       wave: 2,
       granted: [
-        { id: 'waveDamage', stat: 'damageAdd', add: 2 },
-        { id: 'waveHeal', stat: 'heal', add: 8 },
-        { id: 'maxHpMilestone', stat: 'maxHpAdd', add: 10 },
+        { id: 'floorHeal', stat: 'heal', add: 8 },
+        { id: 'floorDamage', stat: 'damageAdd', add: 1 },
+        { id: 'floorRange', stat: 'rangeAdd', add: 4 },
       ],
     }]);
-    expect(state.maxHp).toBe(110);
-    expect(state.hp).toBe(68);
-    expect(state.runBaseStats.damageAdd).toBe(2);
-    expect(totalDamage(state, runtime)).toBe(runtime.damage + 2);
+    expect(state.maxHp).toBe(100);
+    expect(state.hp).toBe(58);
+    expect(totalDamage(state, runtime)).toBe(runtime.damage + 1);
+    expect(totalRange(state, runtime)).toBe(runtime.range + 4);
   });
 
-  it('同一波只发一次；跳到第 5 波只结算第 5 波奖励', () => {
+  it('治疗不溢出，射程达到 210 后保底不再加射程', () => {
     const state = freshState();
-    const runtime = createDefaultConfig();
+    state.hp = 99;
+    state.runBaseStats.rangeAdd = 60;
 
-    expect(grantWaveRewards(state, 2)).toHaveLength(1);
+    const events = grantFloorRewards(state, 1);
+
+    expect(state.hp).toBe(100);
+    expect(state.runBaseStats.rangeAdd).toBe(60);
+    expect(events[0]).toMatchObject({
+      granted: [
+        { id: 'floorHeal' },
+        { id: 'floorDamage' },
+      ],
+    });
+  });
+
+  it('同一波只发一次；跳到第 5 波只结算第 5 波保底', () => {
+    const runtime = createDefaultConfig();
+    const state = freshState();
+
+    expect(grantFloorRewards(state, 2)).toHaveLength(1);
     const snapshot = structuredClone({
       hp: state.hp,
-      maxHp: state.maxHp,
       runBaseStats: state.runBaseStats,
     });
-    expect(grantWaveRewards(state, 2)).toEqual([]);
-    expect({
-      hp: state.hp,
-      maxHp: state.maxHp,
-      runBaseStats: state.runBaseStats,
-    }).toEqual(snapshot);
+    expect(grantFloorRewards(state, 2)).toEqual([]);
+    expect({ hp: state.hp, runBaseStats: state.runBaseStats }).toEqual(snapshot);
 
     const jumped = freshState();
     jumpToWave(jumped, runtime, constRng(0), 5);
     expect(jumped.waveRewardsClaimedWave).toBe(4);
+    expect(jumped.waveChoiceOfferedWave).toBe(4);
     cfg.waves.bossWaves = [];
     jumped.spawnLeft = 0;
     jumped.enemies.length = 0;
@@ -74,16 +87,33 @@ describe('waveRewardSystem', () => {
       wave: 5,
     }));
     expect(jumped.runBaseStats).toEqual({
-      damageAdd: 2,
+      damageAdd: 1,
       fireRateAdd: 0,
-      rangeAdd: 0,
-      multiAdd: 1,
+      rangeAdd: 4,
+      multiAdd: 0,
     });
-    expect(jumped.maxHp).toBe(110);
     expect(jumped.waveRewardsClaimedWave).toBe(5);
   });
 
-  it('所有最终属性公式读取 RunBaseStats，rangeAdd 使用像素基数', () => {
+  it('读档恢复到已结算的 settle 帧不会重复发放', () => {
+    const state = freshState();
+    state.wave = 3;
+    beginIntermission(state);
+    tickIntermission(state, 0);
+    const restored = structuredClone(state);
+    const before = structuredClone({
+      hp: restored.hp,
+      runBaseStats: restored.runBaseStats,
+    });
+
+    expect(tickIntermission(restored, 0).events).toEqual([]);
+    expect({
+      hp: restored.hp,
+      runBaseStats: restored.runBaseStats,
+    }).toEqual(before);
+  });
+
+  it('所有最终属性公式仍读取 RunBaseStats，乘法 buff 语义不变', () => {
     const state = freshState();
     const runtime = createDefaultConfig();
     runtime.damage = 10;
@@ -110,24 +140,25 @@ describe('waveRewardSystem', () => {
     expect(totalMulti(state)).toBe(3);
   });
 
-  it('治疗不溢出上限，maxHpAdd 同步增加当前生命', () => {
-    const state = freshState();
-    state.hp = 99;
+  it('校验器禁止保底 pct，仅允许 choice 的 xpGainPct 例外', () => {
+    const floorPct = structuredClone(cfg) as any;
+    floorPct.waveRewards.floor[0].stat = 'damagePct';
+    expect(() => validateGodConfig(floorPct)).toThrow(/floor.*禁止百分比/);
 
-    grantWaveRewards(state, 2);
+    const choicePct = structuredClone(cfg) as any;
+    choicePct.waveRewards.choice[0].stat = 'damagePct';
+    expect(() => validateGodConfig(choicePct)).toThrow(/choice.*仅允许 xpGainPct/);
 
-    expect(state.maxHp).toBe(110);
-    expect(state.hp).toBe(110);
+    expect(() => validateGodConfig(structuredClone(cfg))).not.toThrow();
   });
 
-  it('配置校验拒绝百分比型永久成长条目', () => {
-    const invalid = structuredClone(cfg) as any;
-    invalid.waveRewards.rewards[0].effect.stat = 'damagePct';
-
-    expect(() => validateGodConfig(invalid)).toThrow(/waveRewards.*非法基础属性/);
+  it('校验器要求固定五项菜单', () => {
+    const invalid = structuredClone(cfg);
+    invalid.waveRewards.choice.pop();
+    expect(() => validateGodConfig(invalid)).toThrow(/必须恰好包含 5 项/);
   });
 
-  it('波间面板展示本波实际结算的逐项汇总', () => {
+  it('波间面板只展示本波实际结算的保底汇总', () => {
     const arena = document.createElement('div');
     document.body.append(arena);
     const panel = createIntermissionPanel(arena, { onReady() {} });
@@ -141,12 +172,12 @@ describe('waveRewardSystem', () => {
     const summary = arena.querySelector<HTMLElement>('[data-testid="intermission-rewards"]')!;
     expect(summary.hidden).toBe(false);
     expect(summary.querySelectorAll('[data-wave-reward]')).toHaveLength(3);
-    expect(summary.textContent).toContain('基础伤害 +2');
+    expect(summary.textContent).toContain('基础伤害 +1');
     expect(summary.textContent).toContain('恢复心防 +8');
-    expect(summary.textContent).toContain('心防上限 +10');
+    expect(summary.textContent).toContain('基础射程 +4');
   });
 
-  it('记录 wave_rewards_granted 遥测及逐项奖励', () => {
+  it('记录 wave_rewards_granted 保底遥测及逐项奖励', () => {
     const state = freshState();
     state.wave = 2;
     const telemetry = createDevTelemetry({
@@ -158,15 +189,15 @@ describe('waveRewardSystem', () => {
       getDifficultyId: () => state.difficultyId,
     });
 
-    telemetry.recordGameEvents(grantWaveRewards(state, 2));
+    telemetry.recordGameEvents(grantFloorRewards(state, 2));
 
     expect(telemetry.getSession().events).toContainEqual(expect.objectContaining({
       type: 'wave_rewards_granted',
       wave: 2,
       waveRewards: [
-        { id: 'waveDamage', stat: 'damageAdd', add: 2 },
-        { id: 'waveHeal', stat: 'heal', add: 8 },
-        { id: 'maxHpMilestone', stat: 'maxHpAdd', add: 10 },
+        { id: 'floorHeal', stat: 'heal', add: 8 },
+        { id: 'floorDamage', stat: 'damageAdd', add: 1 },
+        { id: 'floorRange', stat: 'rangeAdd', add: 4 },
       ],
     }));
   });

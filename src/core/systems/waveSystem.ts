@@ -192,6 +192,7 @@ export function jumpToWave(state: GameState, config: Config, rng: Rng, targetWav
   endIntermission(state);
   // Debug jumps skip prior rewards but never make an already claimed wave claimable again.
   state.waveRewardsClaimedWave = Math.max(state.waveRewardsClaimedWave, wave - 1);
+  state.waveChoiceOfferedWave = Math.max(state.waveChoiceOfferedWave ?? 0, wave - 1);
   state.wavePhase = 'regular';
   state.waveBossId = null;
   state.waveBossSpawnedAt = null;
