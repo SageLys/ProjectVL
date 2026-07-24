@@ -23,7 +23,7 @@ export function resolveTierCopy(shortByTier: Record<string, string>, star: numbe
     .filter(Number.isFinite)
     .sort((a, b) => a - b);
   const tier = [...tiers].reverse().find(value => value <= star) ?? tiers[0];
-  return (tier === undefined ? undefined : shortByTier[String(tier)]) || '效果说明';
+  return (tier === undefined ? undefined : shortByTier[String(tier)]) || '暂无机制说明';
 }
 
 export function cardDisplayName(cardType: CardType): string {
@@ -71,5 +71,5 @@ export function resolveCardMeta(cardType: CardType, star: number, context: CardC
     const shortByTier = context === 'hand' ? entry.hand.shortByTier : entry.equip.shortByTier;
     return { name: entry.name, desc: resolveTierCopy(shortByTier, star), ...visual };
   }
-  return { name: cardType, desc: '效果说明', ...visual };
+  return { name: cardType, desc: '暂无机制说明', ...visual };
 }

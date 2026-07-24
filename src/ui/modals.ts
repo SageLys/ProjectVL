@@ -4,6 +4,7 @@ import type { GameState, RunDecision } from '../core/types';
 import type { DomRefs } from './domRefs';
 import { cardDisplayName, evolutionChoiceCopy } from './cardMeta';
 import { fmt } from './format';
+import { buildEvolutionOptionViewModel } from './cardDetailModel';
 
 /** 升级三选一 / 结算 / 中心引导文案的显隐控制。 */
 export function createModals(refs: DomRefs, hooks: { onDecision(choice: string): void; onRestart(): void }) {
@@ -50,7 +51,7 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
             : [decision.recipeId];
         decisionTitle.textContent = copy.title;
         decisionBody.textContent = decision.kind === 'evolutionBranch'
-          ? `${copy.body} ${texts.evolution.lockNotice}`
+          ? `${copy.body} ${decision.checkpointStar === 5 ? '该分支会叠加到当前 3★ 路线上，不会替换之前的选择。 ' : ''}${texts.evolution.lockNotice}`
           : copy.body;
         decisionChoices.replaceChildren(...options.map(option => {
           const button = document.createElement('button');
@@ -78,13 +79,33 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
               .find(card => card.id === decision.cardType)?.evolutionTree?.checkpoints
               .find(checkpoint => checkpoint.star === decision.checkpointStar)?.options
               .find(item => item.id === option);
-            const optionCopy = (texts.evolution as unknown as Record<string, Record<string, { name: string; summary: string }>>)
-              [decision.cardType]?.[option];
-            label.textContent = optionCopy?.name ?? optionDef?.textKey ?? option;
+            const provisionalCard = state
+              ? [...state.cards, ...state.equipment].find(card => card?.id === decision.provisionalCardId)
+              : null;
+            const optionModel = optionDef
+              ? buildEvolutionOptionViewModel(
+                decision.cardType,
+                decision.checkpointStar,
+                optionDef,
+                provisionalCard?.evolutionPath,
+                provisionalCard?.star ?? decision.checkpointStar,
+              )
+              : null;
+            label.textContent = optionModel?.name ?? optionDef?.textKey ?? option;
             const desc = document.createElement('span');
             desc.className = 'choice-desc';
-            desc.textContent = optionCopy?.summary ?? '';
-            button.append(label, desc);
+            desc.textContent = optionModel?.intent ?? '';
+            const effects = document.createElement('ul');
+            effects.className = 'choice-effects';
+            for (const line of optionModel?.exactEffects.flatMap(block => block.lines) ?? []) {
+              const item = document.createElement('li');
+              item.textContent = line.text;
+              effects.append(item);
+            }
+            const fit = document.createElement('span');
+            fit.className = 'choice-fit';
+            fit.textContent = `适合：${optionModel?.keywords.join('、') || '当前机制强化'}`;
+            button.append(label, desc, effects, fit);
           } else if (decision.kind === 'relic') {
             const relic = cfg.relics.relics.find(item => item.id === option);
             label.textContent = relic?.title ?? option;

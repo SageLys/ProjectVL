@@ -8,6 +8,8 @@ export type SlotSource = 'cards' | 'equipment' | 'wildcard';
 export interface SlotHandlers {
   /** 指针按下：开始拖拽。 */
   dragStart(e: PointerEvent, source: SlotSource, index: number, el: HTMLElement): void;
+  /** 短按卡牌：打开详情。wildcard 没有可检查的卡牌实例。 */
+  inspect?(source: Exclude<SlotSource, 'wildcard'>, index: number, el: HTMLElement): void;
 }
 
 /** 构造一张卡牌按钮；手牌和装备卡都可拖到战场消耗释放。 */
@@ -34,21 +36,21 @@ export function createCardElement(card: Card, source: SlotSource, index: number,
     `${source === 'equipment' ? '已装备' : ''}${card.star}星${meta.name}。${pendingCopy} ${routeBadges.join(' / ')} ${meta.desc}。${affixLabels.join('，')}`,
   );
   el.style.setProperty('--card', meta.accent);
+  const compactAffixes = affixLabels.length
+    ? affixLabels.slice(0, 2).map(label => `<span class="card-affix"><i aria-hidden="true">◆</i>${label}</span>`).join('')
+    : '<span class="card-affix empty">—</span>';
   el.innerHTML =
     `<span class="card-head">` +
       `<svg class="card-icon" viewBox="0 0 16 16" aria-hidden="true">${glyphToSvg(meta.shape, meta.glyph)}</svg>` +
       `<strong class="card-name">${meta.name}</strong>` +
     `</span>` +
     `<span class="card-stars" aria-hidden="true">${'★'.repeat(card.star)}</span>` +
-    (routeBadges.length ? `<span class="card-evolution-route">${routeBadges.join(' · ')}</span>` : '') +
-    (card.provisional ? `<span class="card-evolution-pending">${texts.evolution.pending}</span>` : '') +
-    `<span class="card-skill-section"><small>${texts.affixes.skillTitle}</small><span class="card-desc">${meta.desc}</span></span>` +
-    `<span class="card-affix-section"><small>${texts.affixes.slotTitle}</small>` +
-      (affixLabels.length
-        ? affixLabels.map(label => `<span class="card-affix"><i aria-hidden="true">◆</i>${label}</span>`).join('')
-        : '<span class="card-affix empty">—</span>') +
-    `</span>`;
+    `<span class="card-affix-compact">${compactAffixes}</span>` +
+    (card.provisional ? '<span class="card-status-badge" aria-hidden="true">!</span>' : '');
   el.addEventListener('pointerdown', e => handlers.dragStart(e, source, index, el));
+  el.addEventListener('click', () => {
+    if (source !== 'wildcard') handlers.inspect?.(source, index, el);
+  });
   return el;
 }
 

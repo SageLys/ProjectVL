@@ -31,6 +31,8 @@ import { renderEquipment } from './ui/renderEquipment';
 import { renderMergeHints } from './ui/renderMergeHints';
 import type { TunerPanel } from './ui/tunerPanel';
 import { createModals } from './ui/modals';
+import { createCardDetailModal } from './ui/cardDetailModal';
+import { resolvePauseState } from './ui/pauseState';
 import { formatToast, SLOT_CHANGING } from './ui/eventText';
 import type { SlotHandlers, SlotSource } from './ui/slotFactory';
 import { createPointerRouter, type PreviewSpec } from './input/pointerRouter';
@@ -52,6 +54,8 @@ let telemetry: DevTelemetry | null = null;
 let devSeed = 1;
 let timeScale = 1;
 let devInvincible = false;
+let manualPaused = false;
+const uiPauseReasons = new Set<'cardDetail'>();
 const evidenceMode = DEV_TOOLS_ENABLED ? new URLSearchParams(location.search).get('evidence') : null;
 const refs = getDomRefs();
 let selectedDifficulty: DifficultyId = cfg.difficulty.defaultDifficulty;
@@ -118,6 +122,10 @@ const slotHandlers: SlotHandlers = {
   dragStart(e, source, index, el) {
     pointerRouter.begin(e, source, index, el);
   },
+  inspect(source, index, el) {
+    const card = source === 'cards' ? state.cards[index] : state.equipment[index];
+    if (card) cardDetail.open(card, source, el);
+  },
 };
 
 const modals = createModals(refs, {
@@ -128,6 +136,17 @@ const modals = createModals(refs, {
   onRestart() {
     reset();
     start();
+  },
+});
+
+const cardDetail = createCardDetailModal({
+  onOpen() {
+    uiPauseReasons.add('cardDetail');
+    syncPauseState();
+  },
+  onClose() {
+    uiPauseReasons.delete('cardDetail');
+    syncPauseState();
   },
 });
 
@@ -194,6 +213,9 @@ refs.testWildcardBtn.addEventListener('click', () => {
 });
 
 function reset(): void {
+  cardDetail.close();
+  manualPaused = false;
+  uiPauseReasons.clear();
   state = createInitialState(selectedDifficulty);
   if (DEV_TOOLS_ENABLED) telemetry?.reset();
   const createEvidenceCard = (type: string, star: number) => {
@@ -230,7 +252,9 @@ function start(): void {
   else if (state.difficultyId !== selectedDifficulty) reset();
   tuner?.applyPendingWaveChanges();
   state.mode = 'playing';
-  state.paused = false;
+  manualPaused = false;
+  uiPauseReasons.clear();
+  syncPauseState();
   refs.pauseBtn.disabled = false;
   refs.speedBtn.disabled = false;
   dispatch(beginOpeningIntermission(state));
@@ -241,11 +265,17 @@ function start(): void {
 
 function togglePause(): void {
   if (state.mode !== 'playing' || state.intermission.active || state.decisions.current) return;
-  state.paused = !state.paused;
+  manualPaused = !manualPaused;
+  syncPauseState();
+}
+
+function syncPauseState(): void {
+  state.paused = resolvePauseState(manualPaused, uiPauseReasons);
   refs.pauseBtn.textContent = state.paused ? texts.buttons.resume : texts.buttons.pause;
   refs.pauseBtn.setAttribute('aria-pressed', String(state.paused));
   refs.pauseBtn.title = state.paused ? texts.buttons.resume : texts.buttons.pause;
-  modals.message(state.paused ? texts.center.pausedTitle : '', texts.center.pausedBody, state.paused);
+  const showManualPause = manualPaused && !uiPauseReasons.size;
+  modals.message(showManualPause ? texts.center.pausedTitle : '', texts.center.pausedBody, showManualPause);
 }
 
 function setTimeScale(scale: number): void {

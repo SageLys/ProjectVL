@@ -111,911 +111,2019 @@
     "chainLightning": {
       "chainLightningA": {
         "name": "长链",
-        "summary": "长链分支。"
+        "summary": "围绕连锁、减速，强化密集敌群能力。",
+        "intent": "围绕连锁、减速，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群",
+          "稳定控场"
+        ],
+        "buildFit": "密集敌群、稳定控场"
       },
       "chainLightningB": {
         "name": "高压",
-        "summary": "高压分支。"
+        "summary": "围绕连锁、减速，强化密集敌群能力。",
+        "intent": "围绕连锁、减速，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群",
+          "稳定控场"
+        ],
+        "buildFit": "密集敌群、稳定控场"
       },
       "chainLightningC": {
         "name": "感电",
-        "summary": "感电分支。"
+        "summary": "围绕连锁、易伤，强化密集敌群能力。",
+        "intent": "围绕连锁、易伤，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群",
+          "稳定控场"
+        ],
+        "buildFit": "密集敌群、稳定控场"
       },
       "chainLightningA2": {
         "name": "断链重引",
-        "summary": "断链重引分支。"
+        "summary": "围绕连锁，强化密集敌群能力。",
+        "intent": "围绕连锁，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群"
+        ],
+        "buildFit": "密集敌群"
       },
       "chainLightningB2": {
         "name": "感电灼流",
-        "summary": "感电灼流分支。"
+        "summary": "围绕持续伤害，强化持续作战能力。",
+        "intent": "围绕持续伤害，强化持续作战能力。",
+        "keywords": [
+          "持续作战"
+        ],
+        "buildFit": "持续作战"
       },
       "chainLightningC2": {
         "name": "链末爆",
-        "summary": "链末爆分支。"
+        "summary": "围绕范围爆发，强化密集敌群能力。",
+        "intent": "围绕范围爆发，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群"
+        ],
+        "buildFit": "密集敌群"
       }
     },
     "pierce": {
       "pierceA": {
         "name": "贯影",
-        "summary": "贯影分支。"
+        "summary": "围绕穿透，强化高生命目标能力。",
+        "intent": "围绕穿透，强化高生命目标能力。",
+        "keywords": [
+          "高生命目标"
+        ],
+        "buildFit": "高生命目标"
       },
       "pierceB": {
         "name": "重击",
-        "summary": "重击分支。"
+        "summary": "围绕穿透，强化高生命目标能力。",
+        "intent": "围绕穿透，强化高生命目标能力。",
+        "keywords": [
+          "高生命目标"
+        ],
+        "buildFit": "高生命目标"
       },
       "pierceC": {
         "name": "破甲",
-        "summary": "破甲分支。"
+        "summary": "围绕穿透、易伤，强化高生命目标能力。",
+        "intent": "围绕穿透、易伤，强化高生命目标能力。",
+        "keywords": [
+          "高生命目标",
+          "稳定控场"
+        ],
+        "buildFit": "高生命目标、稳定控场"
       },
       "pierceA2": {
         "name": "弹射",
-        "summary": "弹射分支。"
+        "summary": "围绕弹射，强化密集敌群能力。",
+        "intent": "围绕弹射，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群"
+        ],
+        "buildFit": "密集敌群"
       },
       "pierceB2": {
         "name": "贯序增伤",
-        "summary": "贯序增伤分支。"
+        "summary": "围绕穿透，强化高生命目标能力。",
+        "intent": "围绕穿透，强化高生命目标能力。",
+        "keywords": [
+          "高生命目标"
+        ],
+        "buildFit": "高生命目标"
       },
       "pierceC2": {
         "name": "穿透分裂",
-        "summary": "穿透分裂分支。"
+        "summary": "围绕分裂，强化密集敌群能力。",
+        "intent": "围绕分裂，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群"
+        ],
+        "buildFit": "密集敌群"
       }
     },
     "staticSurge": {
       "staticSurgeA": {
         "name": "层容扩展",
-        "summary": "层容扩展分支。"
+        "summary": "围绕易伤，强化稳定控场能力。",
+        "intent": "围绕易伤，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       },
       "staticSurgeB": {
         "name": "高压感电",
-        "summary": "高压感电分支。"
+        "summary": "围绕易伤，强化稳定控场能力。",
+        "intent": "围绕易伤，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       },
       "staticSurgeC": {
         "name": "满载震慑",
-        "summary": "满载震慑分支。"
+        "summary": "围绕易伤、眩晕，强化稳定控场能力。",
+        "intent": "围绕易伤、眩晕，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       },
       "staticSurgeA2": {
         "name": "电荷传染",
-        "summary": "电荷传染分支。"
+        "summary": "围绕领域、易伤，强化稳定控场能力。",
+        "intent": "围绕领域、易伤，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       },
       "staticSurgeB2": {
         "name": "静电引爆",
-        "summary": "静电引爆分支。"
+        "summary": "围绕爆发伤害，强化高生命目标能力。",
+        "intent": "围绕爆发伤害，强化高生命目标能力。",
+        "keywords": [
+          "高生命目标"
+        ],
+        "buildFit": "高生命目标"
       },
       "staticSurgeC2": {
         "name": "长效蓄电",
-        "summary": "长效蓄电分支。"
+        "summary": "围绕易伤，强化稳定控场能力。",
+        "intent": "围绕易伤，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       }
     },
     "stormcall": {
       "stormcallA": {
         "name": "疾雷",
-        "summary": "疾雷分支。"
+        "summary": "围绕迫击炮，强化密集敌群能力。",
+        "intent": "围绕迫击炮，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群"
+        ],
+        "buildFit": "密集敌群"
       },
       "stormcallB": {
         "name": "重雷",
-        "summary": "重雷分支。"
+        "summary": "围绕迫击炮，强化密集敌群能力。",
+        "intent": "围绕迫击炮，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群"
+        ],
+        "buildFit": "密集敌群"
       },
       "stormcallC": {
         "name": "静电余场",
-        "summary": "静电余场分支。"
+        "summary": "围绕迫击炮、领域、减速，强化密集敌群能力。",
+        "intent": "围绕迫击炮、领域、减速，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群",
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "密集敌群、稳定控场、持续作战"
       },
       "stormcallA2": {
         "name": "双雷",
-        "summary": "双雷分支。"
+        "summary": "围绕迫击炮，强化密集敌群能力。",
+        "intent": "围绕迫击炮，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群"
+        ],
+        "buildFit": "密集敌群"
       },
       "stormcallB2": {
         "name": "裁决高血",
-        "summary": "裁决高血分支。"
+        "summary": "围绕索敌优先、迫击炮，强化密集敌群能力。",
+        "intent": "围绕索敌优先、迫击炮，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群"
+        ],
+        "buildFit": "密集敌群"
       },
       "stormcallC2": {
         "name": "雷附感电",
-        "summary": "雷附感电分支。"
+        "summary": "围绕领域、易伤，强化稳定控场能力。",
+        "intent": "围绕领域、易伤，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       }
     },
     "arcSplitter": {
       "arcSplitterA": {
         "name": "多重裂片",
-        "summary": "多重裂片分支。"
+        "summary": "围绕分裂，强化密集敌群能力。",
+        "intent": "围绕分裂，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群"
+        ],
+        "buildFit": "密集敌群"
       },
       "arcSplitterB": {
         "name": "高能裂片",
-        "summary": "高能裂片分支。"
+        "summary": "围绕分裂，强化密集敌群能力。",
+        "intent": "围绕分裂，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群"
+        ],
+        "buildFit": "密集敌群"
       },
       "arcSplitterC": {
         "name": "感电裂片",
-        "summary": "感电裂片分支。"
+        "summary": "围绕分裂、易伤，强化密集敌群能力。",
+        "intent": "围绕分裂、易伤，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群",
+          "稳定控场"
+        ],
+        "buildFit": "密集敌群、稳定控场"
       },
       "arcSplitterA2": {
         "name": "二次分裂",
-        "summary": "二次分裂分支。"
+        "summary": "围绕分裂，强化密集敌群能力。",
+        "intent": "围绕分裂，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群"
+        ],
+        "buildFit": "密集敌群"
       },
       "arcSplitterB2": {
         "name": "折返裂片",
-        "summary": "折返裂片分支。"
+        "summary": "围绕弹射，强化密集敌群能力。",
+        "intent": "围绕弹射，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群"
+        ],
+        "buildFit": "密集敌群"
       },
       "arcSplitterC2": {
         "name": "充能裂片",
-        "summary": "充能裂片分支。"
+        "summary": "围绕属性强化，强化弹道输出能力。",
+        "intent": "围绕属性强化，强化弹道输出能力。",
+        "keywords": [
+          "弹道输出"
+        ],
+        "buildFit": "弹道输出"
       }
     },
     "galvanicWard": {
       "galvanicWardA": {
         "name": "增层矩阵",
-        "summary": "增层矩阵分支。"
+        "summary": "围绕护盾、破盾冲击，强化承压防守能力。",
+        "intent": "围绕护盾、破盾冲击，强化承压防守能力。",
+        "keywords": [
+          "承压防守"
+        ],
+        "buildFit": "承压防守"
       },
       "galvanicWardB": {
         "name": "爆裂矩阵",
-        "summary": "爆裂矩阵分支。"
+        "summary": "围绕护盾、破盾冲击，强化承压防守能力。",
+        "intent": "围绕护盾、破盾冲击，强化承压防守能力。",
+        "keywords": [
+          "承压防守"
+        ],
+        "buildFit": "承压防守"
       },
       "galvanicWardC": {
         "name": "感电矩阵",
-        "summary": "感电矩阵分支。"
+        "summary": "围绕护盾、破盾冲击、易伤，强化稳定控场能力。",
+        "intent": "围绕护盾、破盾冲击、易伤，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "承压防守"
+        ],
+        "buildFit": "稳定控场、承压防守"
       },
       "galvanicWardA2": {
         "name": "快速再生",
-        "summary": "快速再生分支。"
+        "summary": "围绕护盾，强化承压防守能力。",
+        "intent": "围绕护盾，强化承压防守能力。",
+        "keywords": [
+          "承压防守"
+        ],
+        "buildFit": "承压防守"
       },
       "galvanicWardB2": {
         "name": "满盾超频",
-        "summary": "满盾超频分支。"
+        "summary": "围绕属性强化，强化防御反制能力。",
+        "intent": "围绕属性强化，强化防御反制能力。",
+        "keywords": [
+          "防御反制"
+        ],
+        "buildFit": "防御反制"
       },
       "galvanicWardC2": {
         "name": "破盾过压",
-        "summary": "破盾过压分支。"
+        "summary": "围绕易伤，强化稳定控场能力。",
+        "intent": "围绕易伤，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       }
     },
     "overcharge": {
       "overchargeA": {
         "name": "长效过载",
-        "summary": "长效过载分支。"
+        "summary": "围绕属性强化，强化资源成长能力。",
+        "intent": "围绕属性强化，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "overchargeB": {
         "name": "强效过载",
-        "summary": "强效过载分支。"
+        "summary": "围绕属性强化，强化资源成长能力。",
+        "intent": "围绕属性强化，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "overchargeC": {
         "name": "连杀电池",
-        "summary": "连杀电池分支。"
+        "summary": "围绕属性强化，强化资源成长能力。",
+        "intent": "围绕属性强化，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "overchargeA2": {
         "name": "满载放电",
-        "summary": "满载放电分支。"
+        "summary": "围绕爆发伤害，强化高生命目标能力。",
+        "intent": "围绕爆发伤害，强化高生命目标能力。",
+        "keywords": [
+          "高生命目标"
+        ],
+        "buildFit": "高生命目标"
       },
       "overchargeB2": {
         "name": "击杀回流",
-        "summary": "击杀回流分支。"
+        "summary": "围绕恢复，强化承压防守能力。",
+        "intent": "围绕恢复，强化承压防守能力。",
+        "keywords": [
+          "承压防守"
+        ],
+        "buildFit": "承压防守"
       },
       "overchargeC2": {
         "name": "磁暴丰收",
-        "summary": "磁暴丰收分支。"
+        "summary": "围绕掉率，强化资源成长能力。",
+        "intent": "围绕掉率，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       }
     },
     "frost": {
       "frostA": {
         "name": "凝霜",
-        "summary": "凝霜分支。"
+        "summary": "围绕减速、冻结，强化稳定控场能力。",
+        "intent": "围绕减速、冻结，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       },
       "frostB": {
         "name": "速冻",
-        "summary": "速冻分支。"
+        "summary": "围绕减速、冻结，强化稳定控场能力。",
+        "intent": "围绕减速、冻结，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       },
       "frostC": {
         "name": "冰痕",
-        "summary": "冰痕分支。"
+        "summary": "围绕减速、冻结、领域，强化稳定控场能力。",
+        "intent": "围绕减速、冻结、领域，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       },
       "frostA2": {
         "name": "碎冰",
-        "summary": "碎冰分支。"
+        "summary": "围绕范围爆发、领域、减速，强化密集敌群能力。",
+        "intent": "围绕范围爆发、领域、减速，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群",
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "密集敌群、稳定控场、持续作战"
       },
       "frostB2": {
         "name": "寒创",
-        "summary": "寒创分支。"
+        "summary": "围绕范围爆发，强化密集敌群能力。",
+        "intent": "围绕范围爆发，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群"
+        ],
+        "buildFit": "密集敌群"
       },
       "frostC2": {
         "name": "冻伤易感",
-        "summary": "冻伤易感分支。"
+        "summary": "围绕易伤，强化稳定控场能力。",
+        "intent": "围绕易伤，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       }
     },
     "impact": {
       "impactA": {
         "name": "重锤",
-        "summary": "重锤分支。"
+        "summary": "围绕击退，强化稳定控场能力。",
+        "intent": "围绕击退，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       },
       "impactB": {
         "name": "寒锤",
-        "summary": "寒锤分支。"
+        "summary": "围绕击退、减速，强化稳定控场能力。",
+        "intent": "围绕击退、减速，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       },
       "impactC": {
         "name": "撞击",
-        "summary": "撞击分支。"
+        "summary": "围绕击退、爆发伤害，强化高生命目标能力。",
+        "intent": "围绕击退、爆发伤害，强化高生命目标能力。",
+        "keywords": [
+          "高生命目标",
+          "稳定控场"
+        ],
+        "buildFit": "高生命目标、稳定控场"
       },
       "impactA2": {
         "name": "破门反制",
-        "summary": "破门反制分支。"
+        "summary": "围绕领域、击退、眩晕，强化稳定控场能力。",
+        "intent": "围绕领域、击退、眩晕，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       },
       "impactB2": {
         "name": "冲击波",
-        "summary": "冲击波分支。"
+        "summary": "围绕击退，强化稳定控场能力。",
+        "intent": "围绕击退，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       },
       "impactC2": {
         "name": "撞晕",
-        "summary": "撞晕分支。"
+        "summary": "围绕眩晕，强化稳定控场能力。",
+        "intent": "围绕眩晕，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       }
     },
     "glacialSpike": {
       "glacialSpikeA": {
         "name": "长锥",
-        "summary": "长锥分支。"
+        "summary": "围绕穿透、冻结，强化高生命目标能力。",
+        "intent": "围绕穿透、冻结，强化高生命目标能力。",
+        "keywords": [
+          "高生命目标",
+          "稳定控场"
+        ],
+        "buildFit": "高生命目标、稳定控场"
       },
       "glacialSpikeB": {
         "name": "深冻",
-        "summary": "深冻分支。"
+        "summary": "围绕穿透、冻结，强化高生命目标能力。",
+        "intent": "围绕穿透、冻结，强化高生命目标能力。",
+        "keywords": [
+          "高生命目标",
+          "稳定控场"
+        ],
+        "buildFit": "高生命目标、稳定控场"
       },
       "glacialSpikeC": {
         "name": "冻创",
-        "summary": "冻创分支。"
+        "summary": "围绕穿透、爆发伤害，强化高生命目标能力。",
+        "intent": "围绕穿透、爆发伤害，强化高生命目标能力。",
+        "keywords": [
+          "高生命目标"
+        ],
+        "buildFit": "高生命目标"
       },
       "glacialSpikeA2": {
         "name": "冰爆",
-        "summary": "冰爆分支。"
+        "summary": "围绕范围爆发、减速，强化密集敌群能力。",
+        "intent": "围绕范围爆发、减速，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群",
+          "稳定控场"
+        ],
+        "buildFit": "密集敌群、稳定控场"
       },
       "glacialSpikeB2": {
         "name": "寒链",
-        "summary": "寒链分支。"
+        "summary": "围绕连锁，强化密集敌群能力。",
+        "intent": "围绕连锁，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群"
+        ],
+        "buildFit": "密集敌群"
       },
       "glacialSpikeC2": {
         "name": "碎冰处决",
-        "summary": "碎冰处决分支。"
+        "summary": "围绕处决，强化高生命目标能力。",
+        "intent": "围绕处决，强化高生命目标能力。",
+        "keywords": [
+          "高生命目标"
+        ],
+        "buildFit": "高生命目标"
       }
     },
     "permafrost": {
       "permafrostA": {
         "name": "广域冻土",
-        "summary": "广域冻土分支。"
+        "summary": "围绕领域、减速，强化稳定控场能力。",
+        "intent": "围绕领域、减速，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       },
       "permafrostB": {
         "name": "酷寒冻土",
-        "summary": "酷寒冻土分支。"
+        "summary": "围绕领域、减速，强化稳定控场能力。",
+        "intent": "围绕领域、减速，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       },
       "permafrostC": {
         "name": "积霜冻土",
-        "summary": "积霜冻土分支。"
+        "summary": "围绕领域、减速、冻结，强化稳定控场能力。",
+        "intent": "围绕领域、减速、冻结，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       },
       "permafrostA2": {
         "name": "双生冻土",
-        "summary": "双生冻土分支。"
+        "summary": "围绕领域、减速，强化稳定控场能力。",
+        "intent": "围绕领域、减速，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       },
       "permafrostB2": {
         "name": "冻土易感",
-        "summary": "冻土易感分支。"
+        "summary": "围绕领域、易伤，强化稳定控场能力。",
+        "intent": "围绕领域、易伤，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       },
       "permafrostC2": {
         "name": "余寒",
-        "summary": "余寒分支。"
+        "summary": "围绕减速，强化稳定控场能力。",
+        "intent": "围绕减速，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       }
     },
     "iceTomb": {
       "iceTombA": {
         "name": "速封",
-        "summary": "速封分支。"
+        "summary": "围绕冻结，强化稳定控场能力。",
+        "intent": "围绕冻结，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       },
       "iceTombB": {
         "name": "深封",
-        "summary": "深封分支。"
+        "summary": "围绕冻结，强化稳定控场能力。",
+        "intent": "围绕冻结，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       },
       "iceTombC": {
         "name": "冰棺反噬",
-        "summary": "冰棺反噬分支。"
+        "summary": "围绕冻结、反伤，强化稳定控场能力。",
+        "intent": "围绕冻结、反伤，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "承压防守"
+        ],
+        "buildFit": "稳定控场、承压防守"
       },
       "iceTombA2": {
         "name": "爆棺",
-        "summary": "爆棺分支。"
+        "summary": "围绕范围爆发，强化密集敌群能力。",
+        "intent": "围绕范围爆发，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群"
+        ],
+        "buildFit": "密集敌群"
       },
       "iceTombB2": {
         "name": "冰封传染",
-        "summary": "冰封传染分支。"
+        "summary": "围绕领域、冻结，强化稳定控场能力。",
+        "intent": "围绕领域、冻结，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       },
       "iceTombC2": {
         "name": "棺中易感",
-        "summary": "棺中易感分支。"
+        "summary": "围绕易伤，强化稳定控场能力。",
+        "intent": "围绕易伤，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       }
     },
     "frozenBulwark": {
       "frozenBulwarkA": {
         "name": "厚冰",
-        "summary": "厚冰分支。"
+        "summary": "围绕护盾、破盾冲击，强化承压防守能力。",
+        "intent": "围绕护盾、破盾冲击，强化承压防守能力。",
+        "keywords": [
+          "承压防守"
+        ],
+        "buildFit": "承压防守"
       },
       "frozenBulwarkB": {
         "name": "广寒碎裂",
-        "summary": "广寒碎裂分支。"
+        "summary": "围绕护盾、冻结，强化稳定控场能力。",
+        "intent": "围绕护盾、冻结，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "承压防守"
+        ],
+        "buildFit": "稳定控场、承压防守"
       },
       "frozenBulwarkC": {
         "name": "冰镜远射",
-        "summary": "冰镜远射分支。"
+        "summary": "围绕护盾、属性强化，强化承压防守能力。",
+        "intent": "围绕护盾、属性强化，强化承压防守能力。",
+        "keywords": [
+          "承压防守"
+        ],
+        "buildFit": "承压防守"
       },
       "frozenBulwarkA2": {
         "name": "冰盾再生",
-        "summary": "冰盾再生分支。"
+        "summary": "围绕护盾，强化承压防守能力。",
+        "intent": "围绕护盾，强化承压防守能力。",
+        "keywords": [
+          "承压防守"
+        ],
+        "buildFit": "承压防守"
       },
       "frozenBulwarkB2": {
         "name": "碎冰新星",
-        "summary": "碎冰新星分支。"
+        "summary": "围绕爆发伤害、冻结，强化高生命目标能力。",
+        "intent": "围绕爆发伤害、冻结，强化高生命目标能力。",
+        "keywords": [
+          "高生命目标",
+          "稳定控场"
+        ],
+        "buildFit": "高生命目标、稳定控场"
       },
       "frozenBulwarkC2": {
         "name": "控场增幅",
-        "summary": "控场增幅分支。"
+        "summary": "围绕属性强化，强化防御反制能力。",
+        "intent": "围绕属性强化，强化防御反制能力。",
+        "keywords": [
+          "防御反制"
+        ],
+        "buildFit": "防御反制"
       }
     },
     "hoarfrostTithe": {
       "hoarfrostTitheA": {
         "name": "寒获经验",
-        "summary": "寒获经验分支。"
+        "summary": "围绕属性强化，强化资源成长能力。",
+        "intent": "围绕属性强化，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "hoarfrostTitheB": {
         "name": "寒获掉落",
-        "summary": "寒获掉落分支。"
+        "summary": "围绕额外掉落，强化资源成长能力。",
+        "intent": "围绕额外掉落，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "hoarfrostTitheC": {
         "name": "冬藏延时",
-        "summary": "冬藏延时分支。"
+        "summary": "围绕属性强化，强化资源成长能力。",
+        "intent": "围绕属性强化，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "hoarfrostTitheA2": {
         "name": "冻杀回春",
-        "summary": "冻杀回春分支。"
+        "summary": "围绕恢复，强化承压防守能力。",
+        "intent": "围绕恢复，强化承压防守能力。",
+        "keywords": [
+          "承压防守"
+        ],
+        "buildFit": "承压防守"
       },
       "hoarfrostTitheB2": {
         "name": "冻杀合鸣",
-        "summary": "冻杀合鸣分支。"
+        "summary": "围绕合成脉冲，强化资源成长能力。",
+        "intent": "围绕合成脉冲，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "hoarfrostTitheC2": {
         "name": "霜税加征",
-        "summary": "霜税加征分支。"
+        "summary": "围绕额外掉落，强化资源成长能力。",
+        "intent": "围绕额外掉落，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       }
     },
     "scorch": {
       "scorchA": {
         "name": "灼心",
-        "summary": "灼心分支。"
+        "summary": "围绕领域、持续伤害，强化持续作战能力。",
+        "intent": "围绕领域、持续伤害，强化持续作战能力。",
+        "keywords": [
+          "持续作战"
+        ],
+        "buildFit": "持续作战"
       },
       "scorchB": {
         "name": "长燃",
-        "summary": "长燃分支。"
+        "summary": "围绕领域、持续伤害，强化持续作战能力。",
+        "intent": "围绕领域、持续伤害，强化持续作战能力。",
+        "keywords": [
+          "持续作战"
+        ],
+        "buildFit": "持续作战"
       },
       "scorchC": {
         "name": "灼缓",
-        "summary": "灼缓分支。"
+        "summary": "围绕领域、持续伤害、减速，强化稳定控场能力。",
+        "intent": "围绕领域、持续伤害、减速，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       },
       "scorchA2": {
         "name": "蔓延",
-        "summary": "蔓延分支。"
+        "summary": "围绕领域、易伤，强化稳定控场能力。",
+        "intent": "围绕领域、易伤，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       },
       "scorchB2": {
         "name": "灼烧易感",
-        "summary": "灼烧易感分支。"
+        "summary": "围绕易伤，强化稳定控场能力。",
+        "intent": "围绕易伤，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       },
       "scorchC2": {
         "name": "速燃",
-        "summary": "速燃分支。"
+        "summary": "围绕持续伤害，强化持续作战能力。",
+        "intent": "围绕持续伤害，强化持续作战能力。",
+        "keywords": [
+          "持续作战"
+        ],
+        "buildFit": "持续作战"
       }
     },
     "splitBlast": {
       "splitBlastA": {
         "name": "爆裂",
-        "summary": "爆裂分支。"
+        "summary": "围绕分裂、范围爆发，强化密集敌群能力。",
+        "intent": "围绕分裂、范围爆发，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群"
+        ],
+        "buildFit": "密集敌群"
       },
       "splitBlastB": {
         "name": "重爆",
-        "summary": "重爆分支。"
+        "summary": "围绕分裂、范围爆发，强化密集敌群能力。",
+        "intent": "围绕分裂、范围爆发，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群"
+        ],
+        "buildFit": "密集敌群"
       },
       "splitBlastC": {
         "name": "燃片",
-        "summary": "燃片分支。"
+        "summary": "围绕分裂、持续伤害，强化密集敌群能力。",
+        "intent": "围绕分裂、持续伤害，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群",
+          "持续作战"
+        ],
+        "buildFit": "密集敌群、持续作战"
       },
       "splitBlastA2": {
         "name": "连环裂变",
-        "summary": "连环裂变分支。"
+        "summary": "围绕分裂，强化密集敌群能力。",
+        "intent": "围绕分裂，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群"
+        ],
+        "buildFit": "密集敌群"
       },
       "splitBlastB2": {
         "name": "大爆心",
-        "summary": "大爆心分支。"
+        "summary": "围绕范围爆发，强化密集敌群能力。",
+        "intent": "围绕范围爆发，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群"
+        ],
+        "buildFit": "密集敌群"
       },
       "splitBlastC2": {
         "name": "爆炸推拒",
-        "summary": "爆炸推拒分支。"
+        "summary": "围绕击退，强化稳定控场能力。",
+        "intent": "围绕击退，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       }
     },
     "meteor": {
       "meteorA": {
         "name": "广域陨星",
-        "summary": "广域陨星分支。"
+        "summary": "围绕迫击炮，强化密集敌群能力。",
+        "intent": "围绕迫击炮，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群"
+        ],
+        "buildFit": "密集敌群"
       },
       "meteorB": {
         "name": "重陨",
-        "summary": "重陨分支。"
+        "summary": "围绕迫击炮，强化密集敌群能力。",
+        "intent": "围绕迫击炮，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群"
+        ],
+        "buildFit": "密集敌群"
       },
       "meteorC": {
         "name": "熔痕",
-        "summary": "熔痕分支。"
+        "summary": "围绕迫击炮、领域、持续伤害，强化密集敌群能力。",
+        "intent": "围绕迫击炮、领域、持续伤害，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群",
+          "持续作战"
+        ],
+        "buildFit": "密集敌群、持续作战"
       },
       "meteorA2": {
         "name": "三连陨",
-        "summary": "三连陨分支。"
+        "summary": "围绕迫击炮，强化密集敌群能力。",
+        "intent": "围绕迫击炮，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群"
+        ],
+        "buildFit": "密集敌群"
       },
       "meteorB2": {
         "name": "震地陨星",
-        "summary": "震地陨星分支。"
+        "summary": "围绕眩晕，强化稳定控场能力。",
+        "intent": "围绕眩晕，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       },
       "meteorC2": {
         "name": "长燃熔痕",
-        "summary": "长燃熔痕分支。"
+        "summary": "围绕领域、持续伤害，强化持续作战能力。",
+        "intent": "围绕领域、持续伤害，强化持续作战能力。",
+        "keywords": [
+          "持续作战"
+        ],
+        "buildFit": "持续作战"
       }
     },
     "magmaPool": {
       "magmaPoolA": {
         "name": "广域熔岩",
-        "summary": "广域熔岩分支。"
+        "summary": "围绕领域、持续伤害，强化持续作战能力。",
+        "intent": "围绕领域、持续伤害，强化持续作战能力。",
+        "keywords": [
+          "持续作战"
+        ],
+        "buildFit": "持续作战"
       },
       "magmaPoolB": {
         "name": "炽烈熔岩",
-        "summary": "炽烈熔岩分支。"
+        "summary": "围绕领域、持续伤害，强化持续作战能力。",
+        "intent": "围绕领域、持续伤害，强化持续作战能力。",
+        "keywords": [
+          "持续作战"
+        ],
+        "buildFit": "持续作战"
       },
       "magmaPoolC": {
         "name": "熔岩易感",
-        "summary": "熔岩易感分支。"
+        "summary": "围绕领域、持续伤害、易伤，强化稳定控场能力。",
+        "intent": "围绕领域、持续伤害、易伤，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       },
       "magmaPoolA2": {
         "name": "双池",
-        "summary": "双池分支。"
+        "summary": "围绕领域、持续伤害，强化持续作战能力。",
+        "intent": "围绕领域、持续伤害，强化持续作战能力。",
+        "keywords": [
+          "持续作战"
+        ],
+        "buildFit": "持续作战"
       },
       "magmaPoolB2": {
         "name": "迟滞池缘",
-        "summary": "迟滞池缘分支。"
+        "summary": "围绕领域、减速，强化稳定控场能力。",
+        "intent": "围绕领域、减速，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       },
       "magmaPoolC2": {
         "name": "熔亡爆裂",
-        "summary": "熔亡爆裂分支。"
+        "summary": "围绕范围爆发，强化密集敌群能力。",
+        "intent": "围绕范围爆发，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群"
+        ],
+        "buildFit": "密集敌群"
       }
     },
     "flashfire": {
       "flashfireA": {
         "name": "强震",
-        "summary": "强震分支。"
+        "summary": "围绕击退、持续伤害，强化稳定控场能力。",
+        "intent": "围绕击退、持续伤害，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       },
       "flashfireB": {
         "name": "烈燃",
-        "summary": "烈燃分支。"
+        "summary": "围绕击退、持续伤害，强化稳定控场能力。",
+        "intent": "围绕击退、持续伤害，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       },
       "flashfireC": {
         "name": "广域冲击",
-        "summary": "广域冲击分支。"
+        "summary": "围绕击退、持续伤害，强化稳定控场能力。",
+        "intent": "围绕击退、持续伤害，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       },
       "flashfireA2": {
         "name": "燃烧撞击",
-        "summary": "燃烧撞击分支。"
+        "summary": "围绕爆发伤害，强化高生命目标能力。",
+        "intent": "围绕爆发伤害，强化高生命目标能力。",
+        "keywords": [
+          "高生命目标"
+        ],
+        "buildFit": "高生命目标"
       },
       "flashfireB2": {
         "name": "爆燃眩晕",
-        "summary": "爆燃眩晕分支。"
+        "summary": "围绕眩晕，强化稳定控场能力。",
+        "intent": "围绕眩晕，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       },
       "flashfireC2": {
         "name": "火线",
-        "summary": "火线分支。"
+        "summary": "围绕领域、持续伤害，强化持续作战能力。",
+        "intent": "围绕领域、持续伤害，强化持续作战能力。",
+        "keywords": [
+          "持续作战"
+        ],
+        "buildFit": "持续作战"
       }
     },
     "cinderheart": {
       "cinderheartA": {
         "name": "烈焰反噬",
-        "summary": "烈焰反噬分支。"
+        "summary": "围绕突破减免、反伤、持续伤害，强化持续作战能力。",
+        "intent": "围绕突破减免、反伤、持续伤害，强化持续作战能力。",
+        "keywords": [
+          "持续作战",
+          "承压防守"
+        ],
+        "buildFit": "持续作战、承压防守"
       },
       "cinderheartB": {
         "name": "耐火心防",
-        "summary": "耐火心防分支。"
+        "summary": "围绕突破减免、反伤、持续伤害，强化持续作战能力。",
+        "intent": "围绕突破减免、反伤、持续伤害，强化持续作战能力。",
+        "keywords": [
+          "持续作战",
+          "承压防守"
+        ],
+        "buildFit": "持续作战、承压防守"
       },
       "cinderheartC": {
         "name": "余烬护盾",
-        "summary": "余烬护盾分支。"
+        "summary": "围绕突破减免、护盾，强化承压防守能力。",
+        "intent": "围绕突破减免、护盾，强化承压防守能力。",
+        "keywords": [
+          "承压防守"
+        ],
+        "buildFit": "承压防守"
       },
       "cinderheartA2": {
         "name": "爆心",
-        "summary": "爆心分支。"
+        "summary": "围绕破盾冲击，强化承压防守能力。",
+        "intent": "围绕破盾冲击，强化承压防守能力。",
+        "keywords": [
+          "承压防守"
+        ],
+        "buildFit": "承压防守"
       },
       "cinderheartB2": {
         "name": "近身灼环",
-        "summary": "近身灼环分支。"
+        "summary": "围绕光环、持续伤害，强化持续作战能力。",
+        "intent": "围绕光环、持续伤害，强化持续作战能力。",
+        "keywords": [
+          "持续作战"
+        ],
+        "buildFit": "持续作战"
       },
       "cinderheartC2": {
         "name": "突破重灼",
-        "summary": "突破重灼分支。"
+        "summary": "围绕持续伤害，强化持续作战能力。",
+        "intent": "围绕持续伤害，强化持续作战能力。",
+        "keywords": [
+          "持续作战"
+        ],
+        "buildFit": "持续作战"
       }
     },
     "ashHarvest": {
       "ashHarvestA": {
         "name": "灰烬经验",
-        "summary": "灰烬经验分支。"
+        "summary": "围绕属性强化，强化资源成长能力。",
+        "intent": "围绕属性强化，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "ashHarvestB": {
         "name": "灰烬掉落",
-        "summary": "灰烬掉落分支。"
+        "summary": "围绕额外掉落，强化资源成长能力。",
+        "intent": "围绕额外掉落，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "ashHarvestC": {
         "name": "余烬延时",
-        "summary": "余烬延时分支。"
+        "summary": "围绕属性强化，强化资源成长能力。",
+        "intent": "围绕属性强化，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "ashHarvestA2": {
         "name": "灰烬转化",
-        "summary": "灰烬转化分支。"
+        "summary": "围绕过期转化，强化资源成长能力。",
+        "intent": "围绕过期转化，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "ashHarvestB2": {
         "name": "焚杀振奋",
-        "summary": "焚杀振奋分支。"
+        "summary": "围绕属性强化，强化资源成长能力。",
+        "intent": "围绕属性强化，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "ashHarvestC2": {
         "name": "焚杀回春",
-        "summary": "焚杀回春分支。"
+        "summary": "围绕恢复，强化承压防守能力。",
+        "intent": "围绕恢复，强化承压防守能力。",
+        "keywords": [
+          "承压防守"
+        ],
+        "buildFit": "承压防守"
       }
     },
     "aegis": {
       "aegisA": {
         "name": "增层",
-        "summary": "增层分支。"
+        "summary": "围绕护盾、突破减免，强化承压防守能力。",
+        "intent": "围绕护盾、突破减免，强化承压防守能力。",
+        "keywords": [
+          "承压防守"
+        ],
+        "buildFit": "承压防守"
       },
       "aegisB": {
         "name": "速生",
-        "summary": "速生分支。"
+        "summary": "围绕护盾、突破减免，强化承压防守能力。",
+        "intent": "围绕护盾、突破减免，强化承压防守能力。",
+        "keywords": [
+          "承压防守"
+        ],
+        "buildFit": "承压防守"
       },
       "aegisC": {
         "name": "碎盾新星",
-        "summary": "碎盾新星分支。"
+        "summary": "围绕护盾、破盾冲击，强化承压防守能力。",
+        "intent": "围绕护盾、破盾冲击，强化承压防守能力。",
+        "keywords": [
+          "承压防守"
+        ],
+        "buildFit": "承压防守"
       },
       "aegisA2": {
         "name": "碎盾反制",
-        "summary": "碎盾反制分支。"
+        "summary": "围绕破盾冲击，强化承压防守能力。",
+        "intent": "围绕破盾冲击，强化承压防守能力。",
+        "keywords": [
+          "承压防守"
+        ],
+        "buildFit": "承压防守"
       },
       "aegisB2": {
         "name": "壁垒减伤",
-        "summary": "壁垒减伤分支。"
+        "summary": "围绕突破减免，强化承压防守能力。",
+        "intent": "围绕突破减免，强化承压防守能力。",
+        "keywords": [
+          "承压防守"
+        ],
+        "buildFit": "承压防守"
       },
       "aegisC2": {
         "name": "震退新星",
-        "summary": "震退新星分支。"
+        "summary": "围绕破盾冲击，强化承压防守能力。",
+        "intent": "围绕破盾冲击，强化承压防守能力。",
+        "keywords": [
+          "承压防守"
+        ],
+        "buildFit": "承压防守"
       }
     },
     "thorns": {
       "thornsA": {
         "name": "反噬",
-        "summary": "反噬分支。"
+        "summary": "围绕突破减免、领域、爆发伤害、击退，强化高生命目标能力。",
+        "intent": "围绕突破减免、领域、爆发伤害、击退，强化高生命目标能力。",
+        "keywords": [
+          "高生命目标",
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "高生命目标、稳定控场、持续作战"
       },
       "thornsB": {
         "name": "广域荆棘",
-        "summary": "广域荆棘分支。"
+        "summary": "围绕突破减免、反伤、爆发伤害，强化高生命目标能力。",
+        "intent": "围绕突破减免、反伤、爆发伤害，强化高生命目标能力。",
+        "keywords": [
+          "高生命目标",
+          "承压防守"
+        ],
+        "buildFit": "高生命目标、承压防守"
       },
       "thornsC": {
         "name": "迟滞荆棘",
-        "summary": "迟滞荆棘分支。"
+        "summary": "围绕突破减免、反伤、减速，强化稳定控场能力。",
+        "intent": "围绕突破减免、反伤、减速，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "承压防守"
+        ],
+        "buildFit": "稳定控场、承压防守"
       },
       "thornsA2": {
         "name": "荆棘领域",
-        "summary": "荆棘领域分支。"
+        "summary": "围绕光环、持续伤害，强化持续作战能力。",
+        "intent": "围绕光环、持续伤害，强化持续作战能力。",
+        "keywords": [
+          "持续作战"
+        ],
+        "buildFit": "持续作战"
       },
       "thornsB2": {
         "name": "刺伤易感",
-        "summary": "刺伤易感分支。"
+        "summary": "围绕易伤，强化稳定控场能力。",
+        "intent": "围绕易伤，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       },
       "thornsC2": {
         "name": "残血处决",
-        "summary": "残血处决分支。"
+        "summary": "围绕处决，强化高生命目标能力。",
+        "intent": "围绕处决，强化高生命目标能力。",
+        "keywords": [
+          "高生命目标"
+        ],
+        "buildFit": "高生命目标"
       }
     },
     "decoy": {
       "decoyA": {
         "name": "坚固图腾",
-        "summary": "坚固图腾分支。"
+        "summary": "围绕召唤，强化持续作战能力。",
+        "intent": "围绕召唤，强化持续作战能力。",
+        "keywords": [
+          "持续作战"
+        ],
+        "buildFit": "持续作战"
       },
       "decoyB": {
         "name": "广域嘲讽",
-        "summary": "广域嘲讽分支。"
+        "summary": "围绕召唤，强化持续作战能力。",
+        "intent": "围绕召唤，强化持续作战能力。",
+        "keywords": [
+          "持续作战"
+        ],
+        "buildFit": "持续作战"
       },
       "decoyC": {
         "name": "亡语爆裂",
-        "summary": "亡语爆裂分支。"
+        "summary": "围绕召唤，强化持续作战能力。",
+        "intent": "围绕召唤，强化持续作战能力。",
+        "keywords": [
+          "持续作战"
+        ],
+        "buildFit": "持续作战"
       },
       "decoyA2": {
         "name": "重生图腾",
-        "summary": "重生图腾分支。"
+        "summary": "围绕召唤，强化持续作战能力。",
+        "intent": "围绕召唤，强化持续作战能力。",
+        "keywords": [
+          "持续作战"
+        ],
+        "buildFit": "持续作战"
       },
       "decoyB2": {
         "name": "双图腾",
-        "summary": "双图腾分支。"
+        "summary": "围绕召唤，强化持续作战能力。",
+        "intent": "围绕召唤，强化持续作战能力。",
+        "keywords": [
+          "持续作战"
+        ],
+        "buildFit": "持续作战"
       },
       "decoyC2": {
         "name": "寒意图腾",
-        "summary": "寒意图腾分支。"
+        "summary": "围绕光环、减速，强化稳定控场能力。",
+        "intent": "围绕光环、减速，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       }
     },
     "sanctum": {
       "sanctumA": {
         "name": "审判圣域",
-        "summary": "审判圣域分支。"
+        "summary": "围绕光环、易伤、减速，强化稳定控场能力。",
+        "intent": "围绕光环、易伤、减速，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       },
       "sanctumB": {
         "name": "迟滞圣域",
-        "summary": "迟滞圣域分支。"
+        "summary": "围绕光环、易伤、减速，强化稳定控场能力。",
+        "intent": "围绕光环、易伤、减速，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       },
       "sanctumC": {
         "name": "迅捷圣域",
-        "summary": "迅捷圣域分支。"
+        "summary": "围绕属性强化、光环、易伤、减速，强化稳定控场能力。",
+        "intent": "围绕属性强化、光环、易伤、减速，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       },
       "sanctumA2": {
         "name": "处刑印记",
-        "summary": "处刑印记分支。"
+        "summary": "围绕光环、索敌优先，强化持续作战能力。",
+        "intent": "围绕光环、索敌优先，强化持续作战能力。",
+        "keywords": [
+          "持续作战"
+        ],
+        "buildFit": "持续作战"
       },
       "sanctumB2": {
         "name": "易感圣域",
-        "summary": "易感圣域分支。"
+        "summary": "围绕光环、易伤，强化稳定控场能力。",
+        "intent": "围绕光环、易伤，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       },
       "sanctumC2": {
         "name": "双重圣域",
-        "summary": "双重圣域分支。"
+        "summary": "围绕光环、易伤、减速，强化稳定控场能力。",
+        "intent": "围绕光环、易伤、减速，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       }
     },
     "sentinel": {
       "sentinelA": {
         "name": "重炮哨戒",
-        "summary": "重炮哨戒分支。"
+        "summary": "围绕召唤，强化持续作战能力。",
+        "intent": "围绕召唤，强化持续作战能力。",
+        "keywords": [
+          "持续作战"
+        ],
+        "buildFit": "持续作战"
       },
       "sentinelB": {
         "name": "速射哨戒",
-        "summary": "速射哨戒分支。"
+        "summary": "围绕召唤，强化持续作战能力。",
+        "intent": "围绕召唤，强化持续作战能力。",
+        "keywords": [
+          "持续作战"
+        ],
+        "buildFit": "持续作战"
       },
       "sentinelC": {
         "name": "加固哨戒",
-        "summary": "加固哨戒分支。"
+        "summary": "围绕召唤，强化持续作战能力。",
+        "intent": "围绕召唤，强化持续作战能力。",
+        "keywords": [
+          "持续作战"
+        ],
+        "buildFit": "持续作战"
       },
       "sentinelA2": {
         "name": "双哨戒",
-        "summary": "双哨戒分支。"
+        "summary": "围绕召唤，强化持续作战能力。",
+        "intent": "围绕召唤，强化持续作战能力。",
+        "keywords": [
+          "持续作战"
+        ],
+        "buildFit": "持续作战"
       },
       "sentinelB2": {
         "name": "寒弹哨戒",
-        "summary": "寒弹哨戒分支。"
+        "summary": "围绕减速，强化稳定控场能力。",
+        "intent": "围绕减速，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       },
       "sentinelC2": {
         "name": "亡语哨戒",
-        "summary": "亡语哨戒分支。"
+        "summary": "围绕破盾冲击，强化承压防守能力。",
+        "intent": "围绕破盾冲击，强化承压防守能力。",
+        "keywords": [
+          "承压防守"
+        ],
+        "buildFit": "承压防守"
       }
     },
     "retribution": {
       "retributionA": {
         "name": "长晕反制",
-        "summary": "长晕反制分支。"
+        "summary": "围绕爆发伤害、眩晕，强化高生命目标能力。",
+        "intent": "围绕爆发伤害、眩晕，强化高生命目标能力。",
+        "keywords": [
+          "高生命目标",
+          "稳定控场"
+        ],
+        "buildFit": "高生命目标、稳定控场"
       },
       "retributionB": {
         "name": "重罚反制",
-        "summary": "重罚反制分支。"
+        "summary": "围绕爆发伤害、眩晕，强化高生命目标能力。",
+        "intent": "围绕爆发伤害、眩晕，强化高生命目标能力。",
+        "keywords": [
+          "高生命目标",
+          "稳定控场"
+        ],
+        "buildFit": "高生命目标、稳定控场"
       },
       "retributionC": {
         "name": "迅捷反制",
-        "summary": "迅捷反制分支。"
+        "summary": "围绕爆发伤害、眩晕，强化高生命目标能力。",
+        "intent": "围绕爆发伤害、眩晕，强化高生命目标能力。",
+        "keywords": [
+          "高生命目标",
+          "稳定控场"
+        ],
+        "buildFit": "高生命目标、稳定控场"
       },
       "retributionA2": {
         "name": "易感审判",
-        "summary": "易感审判分支。"
+        "summary": "围绕易伤，强化稳定控场能力。",
+        "intent": "围绕易伤，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       },
       "retributionB2": {
         "name": "反制回盾",
-        "summary": "反制回盾分支。"
+        "summary": "围绕护盾，强化承压防守能力。",
+        "intent": "围绕护盾，强化承压防守能力。",
+        "keywords": [
+          "承压防守"
+        ],
+        "buildFit": "承压防守"
       },
       "retributionC2": {
         "name": "全向震退",
-        "summary": "全向震退分支。"
+        "summary": "围绕击退，强化稳定控场能力。",
+        "intent": "围绕击退，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       }
     },
     "ironvine": {
       "ironvineA": {
         "name": "守成丰收",
-        "summary": "守成丰收分支。"
+        "summary": "围绕掉率，强化资源成长能力。",
+        "intent": "围绕掉率，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "ironvineB": {
         "name": "守成延时",
-        "summary": "守成延时分支。"
+        "summary": "围绕掉率、掉落时限，强化资源成长能力。",
+        "intent": "围绕掉率、掉落时限，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "ironvineC": {
         "name": "铁蔓转化",
-        "summary": "铁蔓转化分支。"
+        "summary": "围绕掉率、过期转化，强化资源成长能力。",
+        "intent": "围绕掉率、过期转化，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "ironvineA2": {
         "name": "守成经验",
-        "summary": "守成经验分支。"
+        "summary": "围绕经验获取，强化资源成长能力。",
+        "intent": "围绕经验获取，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "ironvineB2": {
         "name": "壁垒回春",
-        "summary": "壁垒回春分支。"
+        "summary": "围绕护盾、恢复，强化承压防守能力。",
+        "intent": "围绕护盾、恢复，强化承压防守能力。",
+        "keywords": [
+          "承压防守"
+        ],
+        "buildFit": "承压防守"
       },
       "ironvineC2": {
         "name": "反击战利",
-        "summary": "反击战利分支。"
+        "summary": "围绕额外掉落，强化资源成长能力。",
+        "intent": "围绕额外掉落，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       }
     },
     "harvest": {
       "harvestA": {
         "name": "丰收",
-        "summary": "丰收分支。"
+        "summary": "围绕掉率、掉落时限，强化资源成长能力。",
+        "intent": "围绕掉率、掉落时限，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "harvestB": {
         "name": "长留",
-        "summary": "长留分支。"
+        "summary": "围绕掉率、掉落时限，强化资源成长能力。",
+        "intent": "围绕掉率、掉落时限，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "harvestC": {
         "name": "拾取回春",
-        "summary": "拾取回春分支。"
+        "summary": "围绕恢复、掉率，强化承压防守能力。",
+        "intent": "围绕恢复、掉率，强化承压防守能力。",
+        "keywords": [
+          "承压防守",
+          "资源成长"
+        ],
+        "buildFit": "承压防守、资源成长"
       },
       "harvestA2": {
         "name": "过期转化",
-        "summary": "过期转化分支。"
+        "summary": "围绕过期转化，强化资源成长能力。",
+        "intent": "围绕过期转化，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "harvestB2": {
         "name": "智慧收获",
-        "summary": "智慧收获分支。"
+        "summary": "围绕经验获取，强化资源成长能力。",
+        "intent": "围绕经验获取，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "harvestC2": {
         "name": "合成脉冲",
-        "summary": "合成脉冲分支。"
+        "summary": "围绕合成脉冲，强化资源成长能力。",
+        "intent": "围绕合成脉冲，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       }
     },
     "fateLoom": {
       "fateLoomA": {
         "name": "强命脉冲",
-        "summary": "强命脉冲分支。"
+        "summary": "围绕合成脉冲，强化资源成长能力。",
+        "intent": "围绕合成脉冲，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "fateLoomB": {
         "name": "迅捷织命",
-        "summary": "迅捷织命分支。"
+        "summary": "围绕合成脉冲、属性强化，强化资源成长能力。",
+        "intent": "围绕合成脉冲、属性强化，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "fateLoomC": {
         "name": "迟滞织命",
-        "summary": "迟滞织命分支。"
+        "summary": "围绕合成脉冲、减速，强化稳定控场能力。",
+        "intent": "围绕合成脉冲、减速，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "资源成长"
+        ],
+        "buildFit": "稳定控场、资源成长"
       },
       "fateLoomA2": {
         "name": "易感命纹",
-        "summary": "易感命纹分支。"
+        "summary": "围绕易伤，强化稳定控场能力。",
+        "intent": "围绕易伤，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       },
       "fateLoomB2": {
         "name": "合成回春",
-        "summary": "合成回春分支。"
+        "summary": "围绕恢复，强化承压防守能力。",
+        "intent": "围绕恢复，强化承压防守能力。",
+        "keywords": [
+          "承压防守"
+        ],
+        "buildFit": "承压防守"
       },
       "fateLoomC2": {
         "name": "合成振奋",
-        "summary": "合成振奋分支。"
+        "summary": "围绕属性强化，强化资源成长能力。",
+        "intent": "围绕属性强化，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       }
     },
     "goldenVolley": {
       "goldenVolleyA": {
         "name": "吉运连发",
-        "summary": "吉运连发分支。"
+        "summary": "围绕爆发伤害，强化高生命目标能力。",
+        "intent": "围绕爆发伤害，强化高生命目标能力。",
+        "keywords": [
+          "高生命目标"
+        ],
+        "buildFit": "高生命目标"
       },
       "goldenVolleyB": {
         "name": "重金追加",
-        "summary": "重金追加分支。"
+        "summary": "围绕爆发伤害，强化高生命目标能力。",
+        "intent": "围绕爆发伤害，强化高生命目标能力。",
+        "keywords": [
+          "高生命目标"
+        ],
+        "buildFit": "高生命目标"
       },
       "goldenVolleyC": {
         "name": "鎏金烙印",
-        "summary": "鎏金烙印分支。"
+        "summary": "围绕爆发伤害、索敌优先，强化高生命目标能力。",
+        "intent": "围绕爆发伤害、索敌优先，强化高生命目标能力。",
+        "keywords": [
+          "高生命目标"
+        ],
+        "buildFit": "高生命目标"
       },
       "goldenVolleyA2": {
         "name": "烙印增伤",
-        "summary": "烙印增伤分支。"
+        "summary": "围绕爆发伤害，强化高生命目标能力。",
+        "intent": "围绕爆发伤害，强化高生命目标能力。",
+        "keywords": [
+          "高生命目标"
+        ],
+        "buildFit": "高生命目标"
       },
       "goldenVolleyB2": {
         "name": "赏金标记",
-        "summary": "赏金标记分支。"
+        "summary": "围绕额外掉落，强化资源成长能力。",
+        "intent": "围绕额外掉落，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "goldenVolleyC2": {
         "name": "金弹裂变",
-        "summary": "金弹裂变分支。"
+        "summary": "围绕分裂，强化密集敌群能力。",
+        "intent": "围绕分裂，强化密集敌群能力。",
+        "keywords": [
+          "密集敌群"
+        ],
+        "buildFit": "密集敌群"
       }
     },
     "bountyCall": {
       "bountyCallA": {
         "name": "重赏标记",
-        "summary": "重赏标记分支。"
+        "summary": "围绕索敌优先，强化控制能力。",
+        "intent": "围绕索敌优先，强化控制能力。",
+        "keywords": [
+          "控制"
+        ],
+        "buildFit": "控制"
       },
       "bountyCallB": {
         "name": "易感号令",
-        "summary": "易感号令分支。"
+        "summary": "围绕索敌优先、易伤，强化稳定控场能力。",
+        "intent": "围绕索敌优先、易伤，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       },
       "bountyCallC": {
         "name": "迟滞号令",
-        "summary": "迟滞号令分支。"
+        "summary": "围绕索敌优先、减速，强化稳定控场能力。",
+        "intent": "围绕索敌优先、减速，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场"
+        ],
+        "buildFit": "稳定控场"
       },
       "bountyCallA2": {
         "name": "标记传染",
-        "summary": "标记传染分支。"
+        "summary": "围绕领域、索敌优先，强化持续作战能力。",
+        "intent": "围绕领域、索敌优先，强化持续作战能力。",
+        "keywords": [
+          "持续作战"
+        ],
+        "buildFit": "持续作战"
       },
       "bountyCallB2": {
         "name": "富集经验",
-        "summary": "富集经验分支。"
+        "summary": "围绕属性强化，强化控制能力。",
+        "intent": "围绕属性强化，强化控制能力。",
+        "keywords": [
+          "控制"
+        ],
+        "buildFit": "控制"
       },
       "bountyCallC2": {
         "name": "双重号令",
-        "summary": "双重号令分支。"
+        "summary": "围绕索敌优先，强化控制能力。",
+        "intent": "围绕索敌优先，强化控制能力。",
+        "keywords": [
+          "控制"
+        ],
+        "buildFit": "控制"
       }
     },
     "overgrowth": {
       "overgrowthA": {
         "name": "广域蔓生",
-        "summary": "广域蔓生分支。"
+        "summary": "围绕领域、减速、易伤，强化稳定控场能力。",
+        "intent": "围绕领域、减速、易伤，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       },
       "overgrowthB": {
         "name": "缠足蔓生",
-        "summary": "缠足蔓生分支。"
+        "summary": "围绕领域、减速、易伤，强化稳定控场能力。",
+        "intent": "围绕领域、减速、易伤，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       },
       "overgrowthC": {
         "name": "易感蔓生",
-        "summary": "易感蔓生分支。"
+        "summary": "围绕领域、减速、易伤，强化稳定控场能力。",
+        "intent": "围绕领域、减速、易伤，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       },
       "overgrowthA2": {
         "name": "入域缠绕",
-        "summary": "入域缠绕分支。"
+        "summary": "围绕领域、眩晕，强化稳定控场能力。",
+        "intent": "围绕领域、眩晕，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       },
       "overgrowthB2": {
         "name": "沃土经验",
-        "summary": "沃土经验分支。"
+        "summary": "围绕属性强化，强化持续领域能力。",
+        "intent": "围绕属性强化，强化持续领域能力。",
+        "keywords": [
+          "持续领域"
+        ],
+        "buildFit": "持续领域"
       },
       "overgrowthC2": {
         "name": "双生藤域",
-        "summary": "双生藤域分支。"
+        "summary": "围绕领域、减速、易伤，强化稳定控场能力。",
+        "intent": "围绕领域、减速、易伤，强化稳定控场能力。",
+        "keywords": [
+          "稳定控场",
+          "持续作战"
+        ],
+        "buildFit": "稳定控场、持续作战"
       }
     },
     "springOfLife": {
       "springOfLifeA": {
         "name": "丰沛涌泉",
-        "summary": "丰沛涌泉分支。"
+        "summary": "围绕恢复，强化承压防守能力。",
+        "intent": "围绕恢复，强化承压防守能力。",
+        "keywords": [
+          "承压防守"
+        ],
+        "buildFit": "承压防守"
       },
       "springOfLifeB": {
         "name": "急流涌泉",
-        "summary": "急流涌泉分支。"
+        "summary": "围绕恢复，强化承压防守能力。",
+        "intent": "围绕恢复，强化承压防守能力。",
+        "keywords": [
+          "承压防守"
+        ],
+        "buildFit": "承压防守"
       },
       "springOfLifeC": {
         "name": "溢流护盾",
-        "summary": "溢流护盾分支。"
+        "summary": "围绕恢复、护盾，强化承压防守能力。",
+        "intent": "围绕恢复、护盾，强化承压防守能力。",
+        "keywords": [
+          "承压防守"
+        ],
+        "buildFit": "承压防守"
       },
       "springOfLifeA2": {
         "name": "应急回春",
-        "summary": "应急回春分支。"
+        "summary": "围绕恢复，强化承压防守能力。",
+        "intent": "围绕恢复，强化承压防守能力。",
+        "keywords": [
+          "承压防守"
+        ],
+        "buildFit": "承压防守"
       },
       "springOfLifeB2": {
         "name": "生命脉冲",
-        "summary": "生命脉冲分支。"
+        "summary": "围绕爆发伤害，强化高生命目标能力。",
+        "intent": "围绕爆发伤害，强化高生命目标能力。",
+        "keywords": [
+          "高生命目标"
+        ],
+        "buildFit": "高生命目标"
       },
       "springOfLifeC2": {
         "name": "茁壮心防",
-        "summary": "茁壮心防分支。"
+        "summary": "围绕属性强化，强化防御反制能力。",
+        "intent": "围绕属性强化，强化防御反制能力。",
+        "keywords": [
+          "防御反制"
+        ],
+        "buildFit": "防御反制"
       }
     },
     "luckyStar": {
       "luckyStarA": {
         "name": "旺运",
-        "summary": "旺运分支。"
+        "summary": "围绕掉率、经验获取，强化资源成长能力。",
+        "intent": "围绕掉率、经验获取，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "luckyStarB": {
         "name": "长运",
-        "summary": "长运分支。"
+        "summary": "围绕掉率、经验获取、掉落时限，强化资源成长能力。",
+        "intent": "围绕掉率、经验获取、掉落时限，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "luckyStarC": {
         "name": "慧运",
-        "summary": "慧运分支。"
+        "summary": "围绕掉率、经验获取，强化资源成长能力。",
+        "intent": "围绕掉率、经验获取，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "luckyStarA2": {
         "name": "福运掉落",
-        "summary": "福运掉落分支。"
+        "summary": "围绕额外掉落，强化资源成长能力。",
+        "intent": "围绕额外掉落，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "luckyStarB2": {
         "name": "惜福转化",
-        "summary": "惜福转化分支。"
+        "summary": "围绕过期转化，强化资源成长能力。",
+        "intent": "围绕过期转化，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       },
       "luckyStarC2": {
         "name": "合福脉冲",
-        "summary": "合福脉冲分支。"
+        "summary": "围绕合成脉冲，强化资源成长能力。",
+        "intent": "围绕合成脉冲，强化资源成长能力。",
+        "keywords": [
+          "资源成长"
+        ],
+        "buildFit": "资源成长"
       }
     }
   },
@@ -1096,9 +2204,9 @@
       "name": "连环闪电",
       "hand": {
         "shortByTier": {
-          "1": "连环闪电的即时释放",
-          "3": "连环闪电强化释放",
-          "6": "连环闪电终极释放"
+          "1": "连锁 · 拖放释放",
+          "3": "连锁 + 减速 · 拖放释放",
+          "6": "连锁 + 眩晕 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -1115,9 +2223,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "连环闪电分支成形",
-          "5": "连环闪电第二分支叠加",
-          "6": "连环闪电公共终态"
+          "3": "选择连锁 / 减速分支",
+          "5": "叠加连锁 / 持续伤害分支",
+          "6": "连锁 · 终态"
         },
         "milestones": {
           "3": {
@@ -1136,15 +2244,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "连环闪电以弹道输出为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "pierce": {
       "name": "雷霆贯枪",
       "hand": {
         "shortByTier": {
-          "1": "雷霆贯枪的即时释放",
-          "3": "雷霆贯枪强化释放",
-          "6": "雷霆贯枪终极释放"
+          "1": "穿透 · 拖放释放",
+          "3": "穿透 · 拖放释放",
+          "6": "穿透 + 击退 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -1161,9 +2270,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "雷霆贯枪分支成形",
-          "5": "雷霆贯枪第二分支叠加",
-          "6": "雷霆贯枪公共终态"
+          "3": "选择穿透 / 易伤分支",
+          "5": "叠加弹射 / 穿透分支",
+          "6": "光束 · 终态"
         },
         "milestones": {
           "3": {
@@ -1182,15 +2291,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "雷霆贯枪以弹道输出为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "staticSurge": {
       "name": "静电充能",
       "hand": {
         "shortByTier": {
-          "1": "静电充能的即时释放",
-          "3": "静电充能强化释放",
-          "6": "静电充能终极释放"
+          "1": "易伤 · 拖放释放",
+          "3": "易伤 · 拖放释放",
+          "6": "易伤 + 眩晕 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -1207,9 +2317,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "静电充能分支成形",
-          "5": "静电充能第二分支叠加",
-          "6": "静电充能公共终态"
+          "3": "选择易伤 / 眩晕分支",
+          "5": "叠加领域 / 易伤分支",
+          "6": "光环 + 易伤 · 终态"
         },
         "milestones": {
           "3": {
@@ -1228,15 +2338,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "静电充能以控制为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "stormcall": {
       "name": "唤雷",
       "hand": {
         "shortByTier": {
-          "1": "唤雷的即时释放",
-          "3": "唤雷强化释放",
-          "6": "唤雷终极释放"
+          "1": "迫击炮 · 拖放释放",
+          "3": "迫击炮 · 拖放释放",
+          "6": "迫击炮 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -1253,9 +2364,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "唤雷分支成形",
-          "5": "唤雷第二分支叠加",
-          "6": "唤雷公共终态"
+          "3": "选择迫击炮 / 领域分支",
+          "5": "叠加迫击炮 / 索敌优先分支",
+          "6": "领域 + 爆发伤害 · 终态"
         },
         "milestones": {
           "3": {
@@ -1274,15 +2385,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "唤雷以持续领域为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "arcSplitter": {
       "name": "弧光裂片",
       "hand": {
         "shortByTier": {
-          "1": "弧光裂片的即时释放",
-          "3": "弧光裂片强化释放",
-          "6": "弧光裂片终极释放"
+          "1": "分裂 · 拖放释放",
+          "3": "分裂 + 爆发伤害 · 拖放释放",
+          "6": "分裂 + 爆发伤害 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -1299,9 +2411,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "弧光裂片分支成形",
-          "5": "弧光裂片第二分支叠加",
-          "6": "弧光裂片公共终态"
+          "3": "选择分裂 / 易伤分支",
+          "5": "叠加分裂 / 弹射分支",
+          "6": "分裂 · 终态"
         },
         "milestones": {
           "3": {
@@ -1320,15 +2432,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "弧光裂片以弹道输出为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "galvanicWard": {
       "name": "电磁壁垒",
       "hand": {
         "shortByTier": {
-          "1": "电磁壁垒的即时释放",
-          "3": "电磁壁垒强化释放",
-          "6": "电磁壁垒终极释放"
+          "1": "护盾 + 爆发伤害 · 拖放释放",
+          "3": "护盾 + 爆发伤害 · 拖放释放",
+          "6": "护盾 + 爆发伤害 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -1345,9 +2458,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "电磁壁垒分支成形",
-          "5": "电磁壁垒第二分支叠加",
-          "6": "电磁壁垒公共终态"
+          "3": "选择护盾 / 破盾冲击分支",
+          "5": "叠加护盾 / 属性强化分支",
+          "6": "护盾 + 属性强化 · 终态"
         },
         "milestones": {
           "3": {
@@ -1366,15 +2479,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "电磁壁垒以防御反制为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "overcharge": {
       "name": "过载核心",
       "hand": {
         "shortByTier": {
-          "1": "过载核心的即时释放",
-          "3": "过载核心强化释放",
-          "6": "过载核心终极释放"
+          "1": "属性强化 · 拖放释放",
+          "3": "属性强化 · 拖放释放",
+          "6": "属性强化 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -1391,9 +2505,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "过载核心分支成形",
-          "5": "过载核心第二分支叠加",
-          "6": "过载核心公共终态"
+          "3": "选择属性强化分支",
+          "5": "叠加爆发伤害 / 恢复分支",
+          "6": "属性强化 + 掉率 · 终态"
         },
         "milestones": {
           "3": {
@@ -1412,15 +2526,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "过载核心以资源成长为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "frost": {
       "name": "霜寒",
       "hand": {
         "shortByTier": {
-          "1": "霜寒的即时释放",
-          "3": "霜寒强化释放",
-          "6": "霜寒终极释放"
+          "1": "冻结 · 拖放释放",
+          "3": "冻结 + 减速 · 拖放释放",
+          "6": "冻结 + 易伤 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -1437,9 +2552,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "霜寒分支成形",
-          "5": "霜寒第二分支叠加",
-          "6": "霜寒公共终态"
+          "3": "选择减速 / 冻结分支",
+          "5": "叠加范围爆发 / 领域分支",
+          "6": "光环 + 减速 · 终态"
         },
         "milestones": {
           "3": {
@@ -1458,15 +2573,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "霜寒以控制为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "impact": {
       "name": "凛冬重锤",
       "hand": {
         "shortByTier": {
-          "1": "凛冬重锤的即时释放",
-          "3": "凛冬重锤强化释放",
-          "6": "凛冬重锤终极释放"
+          "1": "击退 · 拖放释放",
+          "3": "击退 + 眩晕 · 拖放释放",
+          "6": "击退 + 眩晕 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -1483,9 +2599,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "凛冬重锤分支成形",
-          "5": "凛冬重锤第二分支叠加",
-          "6": "凛冬重锤公共终态"
+          "3": "选择击退 / 减速分支",
+          "5": "叠加领域 / 击退分支",
+          "6": "击退 + 眩晕 · 终态"
         },
         "milestones": {
           "3": {
@@ -1504,15 +2620,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "凛冬重锤以控制为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "glacialSpike": {
       "name": "冰锥",
       "hand": {
         "shortByTier": {
-          "1": "冰锥的即时释放",
-          "3": "冰锥强化释放",
-          "6": "冰锥终极释放"
+          "1": "穿透 + 冻结 · 拖放释放",
+          "3": "穿透 + 冻结 · 拖放释放",
+          "6": "穿透 + 冻结 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -1529,9 +2646,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "冰锥分支成形",
-          "5": "冰锥第二分支叠加",
-          "6": "冰锥公共终态"
+          "3": "选择穿透 / 冻结分支",
+          "5": "叠加范围爆发 / 减速分支",
+          "6": "光束 + 冻结 · 终态"
         },
         "milestones": {
           "3": {
@@ -1550,15 +2667,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "冰锥以弹道输出为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "permafrost": {
       "name": "冻土",
       "hand": {
         "shortByTier": {
-          "1": "冻土的即时释放",
-          "3": "冻土强化释放",
-          "6": "冻土终极释放"
+          "1": "领域 + 减速 · 拖放释放",
+          "3": "领域 + 减速 · 拖放释放",
+          "6": "领域 + 减速 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -1575,9 +2693,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "冻土分支成形",
-          "5": "冻土第二分支叠加",
-          "6": "冻土公共终态"
+          "3": "选择领域 / 减速分支",
+          "5": "叠加领域 / 减速分支",
+          "6": "光环 + 减速 · 终态"
         },
         "milestones": {
           "3": {
@@ -1596,15 +2714,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "冻土以持续领域为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "iceTomb": {
       "name": "冰棺",
       "hand": {
         "shortByTier": {
-          "1": "冰棺的即时释放",
-          "3": "冰棺强化释放",
-          "6": "冰棺终极释放"
+          "1": "冻结 · 拖放释放",
+          "3": "冻结 · 拖放释放",
+          "6": "冻结 + 易伤 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -1621,9 +2740,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "冰棺分支成形",
-          "5": "冰棺第二分支叠加",
-          "6": "冰棺公共终态"
+          "3": "选择冻结 / 反伤分支",
+          "5": "叠加范围爆发 / 领域分支",
+          "6": "冻结 · 终态"
         },
         "milestones": {
           "3": {
@@ -1642,15 +2761,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "冰棺以控制为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "frozenBulwark": {
       "name": "冰晶壁垒",
       "hand": {
         "shortByTier": {
-          "1": "冰晶壁垒的即时释放",
-          "3": "冰晶壁垒强化释放",
-          "6": "冰晶壁垒终极释放"
+          "1": "护盾 + 冻结 · 拖放释放",
+          "3": "护盾 + 冻结 · 拖放释放",
+          "6": "护盾 + 冻结 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -1667,9 +2787,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "冰晶壁垒分支成形",
-          "5": "冰晶壁垒第二分支叠加",
-          "6": "冰晶壁垒公共终态"
+          "3": "选择护盾 / 破盾冲击分支",
+          "5": "叠加护盾 / 爆发伤害分支",
+          "6": "光环 + 减速 · 终态"
         },
         "milestones": {
           "3": {
@@ -1688,15 +2808,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "冰晶壁垒以防御反制为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "hoarfrostTithe": {
       "name": "霜税",
       "hand": {
         "shortByTier": {
-          "1": "霜税的即时释放",
-          "3": "霜税强化释放",
-          "6": "霜税终极释放"
+          "1": "属性强化 · 拖放释放",
+          "3": "属性强化 · 拖放释放",
+          "6": "属性强化 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -1713,9 +2834,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "霜税分支成形",
-          "5": "霜税第二分支叠加",
-          "6": "霜税公共终态"
+          "3": "选择属性强化 / 额外掉落分支",
+          "5": "叠加恢复 / 合成脉冲分支",
+          "6": "额外掉落 · 终态"
         },
         "milestones": {
           "3": {
@@ -1734,15 +2855,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "霜税以资源成长为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "scorch": {
       "name": "灼心",
       "hand": {
         "shortByTier": {
-          "1": "灼心的即时释放",
-          "3": "灼心强化释放",
-          "6": "灼心终极释放"
+          "1": "领域 + 持续伤害 · 拖放释放",
+          "3": "领域 + 持续伤害 · 拖放释放",
+          "6": "领域 + 持续伤害 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -1759,9 +2881,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "灼心分支成形",
-          "5": "灼心第二分支叠加",
-          "6": "灼心公共终态"
+          "3": "选择领域 / 持续伤害分支",
+          "5": "叠加领域 / 易伤分支",
+          "6": "光环 + 持续伤害 · 终态"
         },
         "milestones": {
           "3": {
@@ -1780,15 +2902,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "灼心以持续领域为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "splitBlast": {
       "name": "爆裂弹",
       "hand": {
         "shortByTier": {
-          "1": "爆裂弹的即时释放",
-          "3": "爆裂弹强化释放",
-          "6": "爆裂弹终极释放"
+          "1": "爆发伤害 · 拖放释放",
+          "3": "爆发伤害 + 分裂 · 拖放释放",
+          "6": "爆发伤害 + 分裂 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -1805,9 +2928,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "爆裂弹分支成形",
-          "5": "爆裂弹第二分支叠加",
-          "6": "爆裂弹公共终态"
+          "3": "选择分裂 / 范围爆发分支",
+          "5": "叠加分裂 / 范围爆发分支",
+          "6": "迫击炮 · 终态"
         },
         "milestones": {
           "3": {
@@ -1826,15 +2949,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "爆裂弹以弹道输出为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "meteor": {
       "name": "陨星",
       "hand": {
         "shortByTier": {
-          "1": "陨星的即时释放",
-          "3": "陨星强化释放",
-          "6": "陨星终极释放"
+          "1": "迫击炮 · 拖放释放",
+          "3": "迫击炮 · 拖放释放",
+          "6": "迫击炮 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -1851,9 +2975,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "陨星分支成形",
-          "5": "陨星第二分支叠加",
-          "6": "陨星公共终态"
+          "3": "选择迫击炮 / 领域分支",
+          "5": "叠加迫击炮 / 眩晕分支",
+          "6": "迫击炮 · 终态"
         },
         "milestones": {
           "3": {
@@ -1872,15 +2996,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "陨星以弹道输出为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "magmaPool": {
       "name": "熔岩池",
       "hand": {
         "shortByTier": {
-          "1": "熔岩池的即时释放",
-          "3": "熔岩池强化释放",
-          "6": "熔岩池终极释放"
+          "1": "领域 + 持续伤害 · 拖放释放",
+          "3": "领域 + 持续伤害 · 拖放释放",
+          "6": "领域 + 持续伤害 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -1897,9 +3022,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "熔岩池分支成形",
-          "5": "熔岩池第二分支叠加",
-          "6": "熔岩池公共终态"
+          "3": "选择领域 / 持续伤害分支",
+          "5": "叠加领域 / 持续伤害分支",
+          "6": "光环 + 持续伤害 · 终态"
         },
         "milestones": {
           "3": {
@@ -1918,15 +3043,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "熔岩池以持续领域为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "flashfire": {
       "name": "爆燃冲击",
       "hand": {
         "shortByTier": {
-          "1": "爆燃冲击的即时释放",
-          "3": "爆燃冲击强化释放",
-          "6": "爆燃冲击终极释放"
+          "1": "击退 + 持续伤害 · 拖放释放",
+          "3": "击退 + 持续伤害 · 拖放释放",
+          "6": "击退 + 持续伤害 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -1943,9 +3069,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "爆燃冲击分支成形",
-          "5": "爆燃冲击第二分支叠加",
-          "6": "爆燃冲击公共终态"
+          "3": "选择击退 / 持续伤害分支",
+          "5": "叠加爆发伤害 / 眩晕分支",
+          "6": "爆发伤害 + 击退 · 终态"
         },
         "milestones": {
           "3": {
@@ -1964,15 +3090,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "爆燃冲击以控制为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "cinderheart": {
       "name": "烬心",
       "hand": {
         "shortByTier": {
-          "1": "烬心的即时释放",
-          "3": "烬心强化释放",
-          "6": "烬心终极释放"
+          "1": "属性强化 + 领域 · 拖放释放",
+          "3": "属性强化 + 领域 · 拖放释放",
+          "6": "属性强化 + 领域 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -1989,9 +3116,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "烬心分支成形",
-          "5": "烬心第二分支叠加",
-          "6": "烬心公共终态"
+          "3": "选择突破减免 / 反伤分支",
+          "5": "叠加破盾冲击 / 光环分支",
+          "6": "恢复 + 属性强化 · 终态"
         },
         "milestones": {
           "3": {
@@ -2010,15 +3137,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "烬心以防御反制为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "ashHarvest": {
       "name": "燃灰",
       "hand": {
         "shortByTier": {
-          "1": "燃灰的即时释放",
-          "3": "燃灰强化释放",
-          "6": "燃灰终极释放"
+          "1": "属性强化 · 拖放释放",
+          "3": "属性强化 · 拖放释放",
+          "6": "属性强化 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -2035,9 +3163,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "燃灰分支成形",
-          "5": "燃灰第二分支叠加",
-          "6": "燃灰公共终态"
+          "3": "选择属性强化 / 额外掉落分支",
+          "5": "叠加过期转化 / 属性强化分支",
+          "6": "属性强化 · 终态"
         },
         "milestones": {
           "3": {
@@ -2056,15 +3184,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "燃灰以资源成长为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "aegis": {
       "name": "神盾",
       "hand": {
         "shortByTier": {
-          "1": "神盾的即时释放",
-          "3": "神盾强化释放",
-          "6": "神盾终极释放"
+          "1": "护盾 + 击退 · 拖放释放",
+          "3": "护盾 + 击退 · 拖放释放",
+          "6": "护盾 + 爆发伤害 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -2081,9 +3210,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "神盾分支成形",
-          "5": "神盾第二分支叠加",
-          "6": "神盾公共终态"
+          "3": "选择护盾 / 突破减免分支",
+          "5": "叠加破盾冲击 / 突破减免分支",
+          "6": "护盾 + 破盾冲击 · 终态"
         },
         "milestones": {
           "3": {
@@ -2102,15 +3231,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "神盾以防御反制为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "thorns": {
       "name": "荆棘",
       "hand": {
         "shortByTier": {
-          "1": "荆棘的即时释放",
-          "3": "荆棘强化释放",
-          "6": "荆棘终极释放"
+          "1": "领域 + 持续伤害 · 拖放释放",
+          "3": "领域 + 持续伤害 · 拖放释放",
+          "6": "领域 + 持续伤害 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -2127,9 +3257,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "荆棘分支成形",
-          "5": "荆棘第二分支叠加",
-          "6": "荆棘公共终态"
+          "3": "选择突破减免 / 领域分支",
+          "5": "叠加光环 / 持续伤害分支",
+          "6": "光环 + 持续伤害 · 终态"
         },
         "milestones": {
           "3": {
@@ -2148,15 +3278,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "荆棘以防御反制为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "decoy": {
       "name": "磐垒图腾",
       "hand": {
         "shortByTier": {
-          "1": "磐垒图腾的即时释放",
-          "3": "磐垒图腾强化释放",
-          "6": "磐垒图腾终极释放"
+          "1": "召唤 · 拖放释放",
+          "3": "召唤 · 拖放释放",
+          "6": "召唤 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -2173,9 +3304,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "磐垒图腾分支成形",
-          "5": "磐垒图腾第二分支叠加",
-          "6": "磐垒图腾公共终态"
+          "3": "选择召唤分支",
+          "5": "叠加召唤 / 光环分支",
+          "6": "召唤 · 终态"
         },
         "milestones": {
           "3": {
@@ -2194,15 +3325,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "磐垒图腾以控制为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "sanctum": {
       "name": "圣域",
       "hand": {
         "shortByTier": {
-          "1": "圣域的即时释放",
-          "3": "圣域强化释放",
-          "6": "圣域终极释放"
+          "1": "易伤 · 拖放释放",
+          "3": "易伤 · 拖放释放",
+          "6": "易伤 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -2219,9 +3351,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "圣域分支成形",
-          "5": "圣域第二分支叠加",
-          "6": "圣域公共终态"
+          "3": "选择光环 / 易伤分支",
+          "5": "叠加光环 / 索敌优先分支",
+          "6": "易伤 · 终态"
         },
         "milestones": {
           "3": {
@@ -2240,15 +3372,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "圣域以持续领域为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "sentinel": {
       "name": "哨戒炮塔",
       "hand": {
         "shortByTier": {
-          "1": "哨戒炮塔的即时释放",
-          "3": "哨戒炮塔强化释放",
-          "6": "哨戒炮塔终极释放"
+          "1": "召唤 · 拖放释放",
+          "3": "召唤 · 拖放释放",
+          "6": "召唤 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -2265,9 +3398,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "哨戒炮塔分支成形",
-          "5": "哨戒炮塔第二分支叠加",
-          "6": "哨戒炮塔公共终态"
+          "3": "选择召唤分支",
+          "5": "叠加召唤 / 减速分支",
+          "6": "召唤 + 光束 · 终态"
         },
         "milestones": {
           "3": {
@@ -2286,15 +3419,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "哨戒炮塔以弹道输出为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "retribution": {
       "name": "天罚",
       "hand": {
         "shortByTier": {
-          "1": "天罚的即时释放",
-          "3": "天罚强化释放",
-          "6": "天罚终极释放"
+          "1": "爆发伤害 + 眩晕 · 拖放释放",
+          "3": "爆发伤害 + 眩晕 · 拖放释放",
+          "6": "爆发伤害 + 眩晕 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -2311,9 +3445,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "天罚分支成形",
-          "5": "天罚第二分支叠加",
-          "6": "天罚公共终态"
+          "3": "选择爆发伤害 / 眩晕分支",
+          "5": "叠加易伤 / 护盾分支",
+          "6": "爆发伤害 + 眩晕 · 终态"
         },
         "milestones": {
           "3": {
@@ -2332,15 +3466,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "天罚以控制为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "ironvine": {
       "name": "铁蔓",
       "hand": {
         "shortByTier": {
-          "1": "铁蔓的即时释放",
-          "3": "铁蔓强化释放",
-          "6": "铁蔓终极释放"
+          "1": "属性强化 · 拖放释放",
+          "3": "属性强化 · 拖放释放",
+          "6": "属性强化 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -2357,9 +3492,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "铁蔓分支成形",
-          "5": "铁蔓第二分支叠加",
-          "6": "铁蔓公共终态"
+          "3": "选择掉率 / 掉落时限分支",
+          "5": "叠加经验获取 / 护盾分支",
+          "6": "掉率 + 属性强化 · 终态"
         },
         "milestones": {
           "3": {
@@ -2378,15 +3513,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "铁蔓以资源成长为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "harvest": {
       "name": "眷恋",
       "hand": {
         "shortByTier": {
-          "1": "眷恋的即时释放",
-          "3": "眷恋强化释放",
-          "6": "眷恋终极释放"
+          "1": "额外掉落 · 拖放释放",
+          "3": "额外掉落 · 拖放释放",
+          "6": "额外掉落 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -2403,9 +3539,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "眷恋分支成形",
-          "5": "眷恋第二分支叠加",
-          "6": "眷恋公共终态"
+          "3": "选择掉率 / 掉落时限分支",
+          "5": "叠加过期转化 / 经验获取分支",
+          "6": "额外掉落 + 过期转化 · 终态"
         },
         "milestones": {
           "3": {
@@ -2424,15 +3560,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "眷恋以资源成长为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "fateLoom": {
       "name": "命运织机",
       "hand": {
         "shortByTier": {
-          "1": "命运织机的即时释放",
-          "3": "命运织机强化释放",
-          "6": "命运织机终极释放"
+          "1": "爆发伤害 · 拖放释放",
+          "3": "爆发伤害 + 减速 · 拖放释放",
+          "6": "爆发伤害 + 易伤 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -2449,9 +3586,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "命运织机分支成形",
-          "5": "命运织机第二分支叠加",
-          "6": "命运织机公共终态"
+          "3": "选择合成脉冲 / 属性强化分支",
+          "5": "叠加易伤 / 恢复分支",
+          "6": "合成脉冲 + 属性强化 · 终态"
         },
         "milestones": {
           "3": {
@@ -2470,15 +3607,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "命运织机以资源成长为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "goldenVolley": {
       "name": "鎏金弹",
       "hand": {
         "shortByTier": {
-          "1": "鎏金弹的即时释放",
-          "3": "鎏金弹强化释放",
-          "6": "鎏金弹终极释放"
+          "1": "爆发伤害 + 索敌优先 · 拖放释放",
+          "3": "爆发伤害 + 分裂 · 拖放释放",
+          "6": "爆发伤害 + 分裂 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -2495,9 +3633,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "鎏金弹分支成形",
-          "5": "鎏金弹第二分支叠加",
-          "6": "鎏金弹公共终态"
+          "3": "选择爆发伤害 / 索敌优先分支",
+          "5": "叠加爆发伤害 / 额外掉落分支",
+          "6": "光束 + 属性强化 · 终态"
         },
         "milestones": {
           "3": {
@@ -2516,15 +3654,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "鎏金弹以弹道输出为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "bountyCall": {
       "name": "富集号令",
       "hand": {
         "shortByTier": {
-          "1": "富集号令的即时释放",
-          "3": "富集号令强化释放",
-          "6": "富集号令终极释放"
+          "1": "索敌优先 · 拖放释放",
+          "3": "索敌优先 + 易伤 · 拖放释放",
+          "6": "索敌优先 + 易伤 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -2541,9 +3680,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "富集号令分支成形",
-          "5": "富集号令第二分支叠加",
-          "6": "富集号令公共终态"
+          "3": "选择索敌优先 / 易伤分支",
+          "5": "叠加领域 / 索敌优先分支",
+          "6": "光环 + 索敌优先 · 终态"
         },
         "milestones": {
           "3": {
@@ -2562,15 +3701,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "富集号令以控制为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "overgrowth": {
       "name": "蔓生",
       "hand": {
         "shortByTier": {
-          "1": "蔓生的即时释放",
-          "3": "蔓生强化释放",
-          "6": "蔓生终极释放"
+          "1": "领域 + 减速 · 拖放释放",
+          "3": "领域 + 减速 · 拖放释放",
+          "6": "领域 + 减速 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -2587,9 +3727,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "蔓生分支成形",
-          "5": "蔓生第二分支叠加",
-          "6": "蔓生公共终态"
+          "3": "选择领域 / 减速分支",
+          "5": "叠加领域 / 眩晕分支",
+          "6": "领域 + 减速 · 终态"
         },
         "milestones": {
           "3": {
@@ -2608,15 +3748,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "蔓生以持续领域为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "springOfLife": {
       "name": "生命涌泉",
       "hand": {
         "shortByTier": {
-          "1": "生命涌泉的即时释放",
-          "3": "生命涌泉强化释放",
-          "6": "生命涌泉终极释放"
+          "1": "恢复 · 拖放释放",
+          "3": "恢复 · 拖放释放",
+          "6": "恢复 + 护盾 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -2633,9 +3774,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "生命涌泉分支成形",
-          "5": "生命涌泉第二分支叠加",
-          "6": "生命涌泉公共终态"
+          "3": "选择恢复 / 护盾分支",
+          "5": "叠加恢复 / 爆发伤害分支",
+          "6": "恢复 + 突破减免 · 终态"
         },
         "milestones": {
           "3": {
@@ -2654,15 +3795,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "生命涌泉以防御反制为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "luckyStar": {
       "name": "吉星",
       "hand": {
         "shortByTier": {
-          "1": "吉星的即时释放",
-          "3": "吉星强化释放",
-          "6": "吉星终极释放"
+          "1": "属性强化 · 拖放释放",
+          "3": "属性强化 · 拖放释放",
+          "6": "属性强化 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -2679,9 +3821,9 @@
       },
       "equip": {
         "shortByTier": {
-          "3": "吉星分支成形",
-          "5": "吉星第二分支叠加",
-          "6": "吉星公共终态"
+          "3": "选择掉率 / 经验获取分支",
+          "5": "叠加额外掉落 / 过期转化分支",
+          "6": "掉率 + 经验获取 · 终态"
         },
         "milestones": {
           "3": {
@@ -2700,15 +3842,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "吉星以资源成长为核心；消耗时释放当前星级效果，装备后按已选路线持续生效。"
     },
     "frozenThunder": {
       "name": "霜雷",
       "hand": {
         "shortByTier": {
-          "1": "霜雷的即时释放",
-          "3": "霜雷强化释放",
-          "6": "霜雷终极释放"
+          "1": "连锁 + 冻结 · 拖放释放",
+          "3": "连锁 + 冻结 · 拖放释放",
+          "6": "连锁 + 冻结 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -2727,7 +3870,7 @@
         "shortByTier": {
           "3": "霜雷分支成形",
           "5": "霜雷第二分支叠加",
-          "6": "霜雷公共终态"
+          "6": "连锁 + 冻结 · 持续生效"
         },
         "milestones": {
           "3": {
@@ -2746,15 +3889,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "霜雷是由指定前置卡在波间合成的 6★ 配方终态，以连锁、冻结、爆发伤害为核心。"
     },
     "solarLance": {
       "name": "日炙长枪",
       "hand": {
         "shortByTier": {
-          "1": "日炙长枪的即时释放",
-          "3": "日炙长枪强化释放",
-          "6": "日炙长枪终极释放"
+          "1": "穿透 + 持续伤害 · 拖放释放",
+          "3": "光束 + 持续伤害 · 拖放释放",
+          "6": "光束 + 持续伤害 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -2773,7 +3917,7 @@
         "shortByTier": {
           "3": "日炙长枪分支成形",
           "5": "日炙长枪第二分支叠加",
-          "6": "日炙长枪公共终态"
+          "6": "光束 + 持续伤害 · 持续生效"
         },
         "milestones": {
           "3": {
@@ -2792,15 +3936,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "日炙长枪是由指定前置卡在波间合成的 6★ 配方终态，以光束、持续伤害、易伤为核心。"
     },
     "avalanche": {
       "name": "雪崩",
       "hand": {
         "shortByTier": {
-          "1": "雪崩的即时释放",
-          "3": "雪崩强化释放",
-          "6": "雪崩终极释放"
+          "1": "击退 + 冻结 · 拖放释放",
+          "3": "击退 + 冻结 · 拖放释放",
+          "6": "击退 + 冻结 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -2819,7 +3964,7 @@
         "shortByTier": {
           "3": "雪崩分支成形",
           "5": "雪崩第二分支叠加",
-          "6": "雪崩公共终态"
+          "6": "击退 + 冻结 · 持续生效"
         },
         "milestones": {
           "3": {
@@ -2838,15 +3983,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "雪崩是由指定前置卡在波间合成的 6★ 配方终态，以击退、冻结、爆发伤害为核心。"
     },
     "pyrestorm": {
       "name": "焚风暴",
       "hand": {
         "shortByTier": {
-          "1": "焚风暴的即时释放",
-          "3": "焚风暴强化释放",
-          "6": "焚风暴终极释放"
+          "1": "迫击炮 + 领域 · 拖放释放",
+          "3": "迫击炮 + 领域 · 拖放释放",
+          "6": "迫击炮 + 领域 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -2865,7 +4011,7 @@
         "shortByTier": {
           "3": "焚风暴分支成形",
           "5": "焚风暴第二分支叠加",
-          "6": "焚风暴公共终态"
+          "6": "迫击炮 + 领域 · 持续生效"
         },
         "milestones": {
           "3": {
@@ -2884,15 +4030,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "焚风暴是由指定前置卡在波间合成的 6★ 配方终态，以迫击炮、领域、持续伤害、易伤为核心。"
     },
     "crownOfThorns": {
       "name": "荆棘王冠",
       "hand": {
         "shortByTier": {
-          "1": "荆棘王冠的即时释放",
-          "3": "荆棘王冠强化释放",
-          "6": "荆棘王冠终极释放"
+          "1": "护盾 + 领域 · 拖放释放",
+          "3": "护盾 + 领域 · 拖放释放",
+          "6": "护盾 + 领域 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -2911,7 +4058,7 @@
         "shortByTier": {
           "3": "荆棘王冠分支成形",
           "5": "荆棘王冠第二分支叠加",
-          "6": "荆棘王冠公共终态"
+          "6": "护盾 + 光环 · 持续生效"
         },
         "milestones": {
           "3": {
@@ -2930,15 +4077,16 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "荆棘王冠是由指定前置卡在波间合成的 6★ 配方终态，以护盾、领域、持续伤害、处决、爆发伤害、击退为核心。"
     },
     "goldenIdol": {
       "name": "黄金偶像",
       "hand": {
         "shortByTier": {
-          "1": "黄金偶像的即时释放",
-          "3": "黄金偶像强化释放",
-          "6": "黄金偶像终极释放"
+          "1": "召唤 + 额外掉落 · 拖放释放",
+          "3": "召唤 + 额外掉落 · 拖放释放",
+          "6": "召唤 + 额外掉落 · 拖放释放"
         },
         "milestones": {
           "3": {
@@ -2957,7 +4105,7 @@
         "shortByTier": {
           "3": "黄金偶像分支成形",
           "5": "黄金偶像第二分支叠加",
-          "6": "黄金偶像公共终态"
+          "6": "召唤 + 额外掉落 · 持续生效"
         },
         "milestones": {
           "3": {
@@ -2976,7 +4124,8 @@
             "fx": "transform"
           }
         }
-      }
+      },
+      "overview": "黄金偶像是由指定前置卡在波间合成的 6★ 配方终态，以召唤、额外掉落、属性强化为核心。"
     },
     "fusion": {
       "name": "形态融合",
@@ -2994,5 +4143,128 @@
         "milestones": {}
       }
     }
+  },
+  "effectText": {
+    "triggers": {
+      "onFire": "每次开火时",
+      "onHit": "命中敌人时",
+      "onKill": "击杀敌人时",
+      "onWaveStart": "每波开始时",
+      "onBreach": "敌人突破防线时",
+      "onPickup": "拾取掉落时",
+      "interval": "周期触发",
+      "onMerge": "完成合成时",
+      "passive": "持续生效"
+    },
+    "atoms": {
+      "pierce": "穿透",
+      "chain": "连锁",
+      "split": "分裂",
+      "ricochet": "弹射",
+      "aoeOnHit": "范围爆发",
+      "beamMorph": "光束",
+      "mortarMorph": "迫击炮",
+      "slow": "减速",
+      "freeze": "冻结",
+      "stun": "眩晕",
+      "knockback": "击退",
+      "taunt": "嘲讽",
+      "vulnerable": "易伤",
+      "aura": "光环",
+      "groundZone": "领域",
+      "dot": "持续伤害",
+      "summon": "召唤",
+      "dropRateMul": "掉率",
+      "dropLifetimeMul": "掉落时限",
+      "xpMul": "经验获取",
+      "extraDrop": "额外掉落",
+      "expiryConvert": "过期转化",
+      "mergeRule": "合成规则",
+      "mergePulse": "合成脉冲",
+      "shield": "护盾",
+      "thorns": "反伤",
+      "breachReduction": "突破减免",
+      "novaOnBreak": "破盾冲击",
+      "execute": "处决",
+      "burstDamage": "爆发伤害",
+      "focusPriority": "索敌优先",
+      "restore": "恢复",
+      "statBuff": "属性强化"
+    },
+    "sources": {
+      "chain": "连锁",
+      "dot": "持续伤害",
+      "summon": "召唤物",
+      "projectile": "弹道"
+    },
+    "statuses": {
+      "frozen": "冻结",
+      "dot": "持续伤害",
+      "controlled": "受控",
+      "brand": "标记",
+      "vulnerable": "易伤"
+    },
+    "stats": {
+      "damage": "伤害",
+      "fireRate": "攻速",
+      "range": "射程",
+      "multi": "多重射击",
+      "maxHp": "生命上限",
+      "speed": "移动速度"
+    }
+  },
+  "glossary": {
+    "pierce": "弹道命中后继续前进，并可命中后续目标。",
+    "chain": "命中后在搜索范围内寻找新目标并继续传递伤害。",
+    "split": "一枚弹道生成多枚子弹道，子弹道按独立倍率结算。",
+    "ricochet": "弹道命中后改变方向并继续寻找目标。",
+    "aoeOnHit": "在命中点对一定半径内的敌人结算范围伤害。",
+    "beamMorph": "把主炮投射方式改为持续或周期结算的直线光束。",
+    "mortarMorph": "把主炮投射方式改为落点爆炸的抛射攻击。",
+    "slow": "按比例降低目标移动速度，持续时间结束后恢复。",
+    "freeze": "目标暂时无法移动；重复控制仍受抗性与免疫窗限制。",
+    "stun": "目标暂时无法行动；重复控制仍受抗性与免疫窗限制。",
+    "knockback": "把目标沿远离作用点的方向推开。",
+    "taunt": "提高指定单位的索敌优先级，使敌人更倾向攻击它。",
+    "vulnerable": "提高目标受到的伤害，可按配置叠层。",
+    "aura": "以持续存在的来源为中心，周期影响范围内目标。",
+    "groundZone": "在固定位置生成持续区域，并按间隔结算内部效果。",
+    "dot": "在一段时间内按固定间隔重复造成伤害。",
+    "summon": "生成拥有独立生命与行为的临时单位。",
+    "dropRateMul": "乘算调整普通掉落物的生成概率。",
+    "dropLifetimeMul": "乘算调整掉落物从生成到过期的时间。",
+    "xpMul": "乘算调整本局获得的经验。",
+    "extraDrop": "满足触发条件时额外生成掉落物。",
+    "expiryConvert": "掉落物自然过期时把一部分价值转为其他收益。",
+    "mergeRule": "改变同类同星卡牌合并时使用的规则。",
+    "mergePulse": "完成卡牌合成时，以炮台为中心释放一次范围效果。",
+    "shield": "抵挡指定次数的伤害，耗尽后按规则恢复。",
+    "thorns": "受到伤害后，按比例向攻击来源返还伤害。",
+    "breachReduction": "降低敌人突破防线时造成的生命损失。",
+    "novaOnBreak": "护盾耗尽时自动释放一次范围反击。",
+    "execute": "目标生命比例低于阈值时直接完成击杀。",
+    "burstDamage": "按倍率立即结算一次独立伤害。",
+    "focusPriority": "临时改变索敌评分，让符合条件的目标更早被选中。",
+    "restore": "立即恢复固定数值或最大生命比例的生命。",
+    "statBuff": "在指定时间内提高一项基础属性，可按配置叠层。"
+  },
+  "affixHelp": {
+    "damageAdd": "提高炮台基础伤害。",
+    "fireRateAdd": "提高炮台每秒攻击次数。",
+    "rangeAdd": "扩大炮台索敌与攻击范围。",
+    "multiAdd": "增加每次攻击生成的基础弹道数量。",
+    "maxHpAdd": "提高生命上限并按结算规则同步当前生命。",
+    "heal": "立即回复生命，不提供装备常驻效果。",
+    "effectDamageMul": "强化本卡产生的爆发、分裂、光束、迫击炮、召唤、穿透和连锁伤害。",
+    "quantityAdd": "增加本卡的穿透、连锁、分裂或弹射数量，结果取整数。",
+    "controlPotencyMul": "强化本卡的减速、冻结、眩晕、击退或易伤幅度。",
+    "controlledDamageTakenMul": "提高所有受控敌人承受的伤害。",
+    "areaScaleMul": "扩大本卡光环或领域的范围与持续时间。",
+    "dotDamageMul": "提高本卡持续伤害的每跳倍率。",
+    "defenseDurabilityMul": "提高本卡护盾次数或召唤物生命。",
+    "retaliationMul": "提高本卡破盾、反伤或突破反击的伤害。",
+    "dropRateMul": "提高本卡提供的掉落概率。",
+    "dropLifetimeMul": "延长本卡影响的掉落物存在时间。",
+    "xpMul": "提高本卡提供的经验获取倍率。"
   }
 }

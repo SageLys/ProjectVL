@@ -123,7 +123,7 @@ describe('run-scoped card affix templates', () => {
     expect(state.runBuild.cardAffixRolls.pierce).toEqual(template);
   });
 
-  it('emits one affix_rolled telemetry entry per rolled stat and renders a separate card section', () => {
+  it('emits one affix_rolled telemetry entry per rolled stat and renders compact affix rows', () => {
     const state = freshState();
     const created = createCardWithAffixes(state, seededRng(12), 'pierce', 1);
     const telemetry = createDevTelemetry({
@@ -143,8 +143,9 @@ describe('run-scoped card affix templates', () => {
       && event.affixValue !== undefined)).toBe(true);
 
     const element = createCardElement(created.card, 'cards', 0, { dragStart() {} });
-    expect(element.querySelector('.card-skill-section')?.textContent).toContain('技能效果');
-    expect(element.querySelectorAll('.card-affix')).toHaveLength(created.card.affixes!.length);
-    expect(element.querySelector('.card-affix-section')?.textContent).toContain('数值词条');
+    expect(element.querySelector('.card-skill-section')).toBeNull();
+    expect(element.querySelector('.card-affix-section')).toBeNull();
+    expect(element.querySelector('.card-affix-compact')).not.toBeNull();
+    expect(element.querySelectorAll('.card-affix')).toHaveLength(Math.min(2, created.card.affixes!.length));
   });
 });
