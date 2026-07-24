@@ -1062,6 +1062,7 @@
     "skillConsumed": "消耗释放：{star}星{name}",
     "equipped": "已装备：{star}星{name}",
     "shieldBroken": "护盾破裂！",
+    "shieldRestored": "护盾重铸",
     "breakthrough": "私人空间受压 -{damage}",
     "bountyAccepted": "已接受赏金：迎战{name}敌群",
     "bountyCompleted": "赏金完成：{name}奖励已落地",

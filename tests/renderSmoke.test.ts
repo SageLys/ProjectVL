@@ -9,7 +9,7 @@ import { drawBountyOffers } from '../src/render/drawBountyOffers';
 import { drawBountyEffects } from '../src/render/drawBountyEffects';
 import { drawBeams } from '../src/render/drawBeams';
 import { drawBullets } from '../src/render/drawBullets';
-import { drawTauntRanges } from '../src/render/drawEffects';
+import { drawSummonsAndShield, drawTauntRanges } from '../src/render/drawEffects';
 import { drawVfx } from '../src/render/drawVfx';
 import { spawnGroundDrop, spawnWildcardDrop } from '../src/core/systems/dropSystem';
 import { registerSkillDefs } from '../src/core/effects/interpreter';
@@ -68,12 +68,20 @@ describe('渲染冒烟 · 战斗表现实体', () => {
       { kind: 'mortarImpact', x: 120, y: 100, radius: 60, remaining: 0.2 },
       { kind: 'tauntPulse', enemyId: 7, remaining: 0.5 },
       { kind: 'summonEvent', x: 210, y: 100, event: 'respawn', remaining: 0.4 },
+      { kind: 'shieldAbsorb', x: 270, y: 365, remaining: 0.2 },
+      { kind: 'shieldBreak', x: 270, y: 365, remaining: 0.3 },
+      { kind: 'shieldRegen', x: 270, y: 365, remaining: 0.4 },
+      { kind: 'thornsReflect', x: 270, y: 365, enemyId: 999, remaining: 0.25 },
+      { kind: 'retaliationNova', x: 270, y: 365, radius: 220, remaining: 0.3 },
+      { kind: 'breachMitigated', x: 270, y: 365, remaining: 0.2 },
     );
+    s.shield = { hits: 2, maxHits: 3, regenRemaining: null, regenSeconds: 2 };
     const ctx = fakeCtx();
     expect(() => drawTauntRanges(ctx, s)).not.toThrow();
     expect(() => drawBullets(ctx, s)).not.toThrow();
     expect(() => drawBeams(ctx, s)).not.toThrow();
     expect(() => drawVfx(ctx, s)).not.toThrow();
+    expect(() => drawSummonsAndShield(ctx, s)).not.toThrow();
   });
 });
 

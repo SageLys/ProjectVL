@@ -203,11 +203,15 @@ function resolveBossContactPulse(
   events: GameEvent[],
 ): boolean {
   const interval = cfg.enemies.bossBehavior.contactTickInterval;
+  const t = cfg.combat.turret;
   const fallbackDps = (cfg.enemies.types.boss.contactDps ?? 0)
     * difficultyMultipliersFor(state.difficultyId, 'boss', state.wave).damage;
   const pulseDamage = (boss.contactDps ?? fallbackDps) * interval;
   const mods = getModifiers(state);
   if (mods.thornsRatio > 0 && pulseDamage * mods.thornsRatio >= boss.hp) {
+    state.vfx.push({
+      kind: 'thornsReflect', x: t.x, y: t.y, enemyId: boss.id, remaining: 0.35,
+    });
     const index = state.enemies.indexOf(boss);
     if (index >= 0) state.enemies.splice(index, 1);
     events.push(...killEnemy(state, config, rng, boss));
@@ -408,6 +412,9 @@ export function moveEnemies(state: GameState, config: Config, rng: Rng, dt: numb
       const mods = getModifiers(state);
       // 反伤（thorns）：反噬若致死，按击杀结算（有奖励）后不再造成突破。
       if (mods.thornsRatio > 0 && e.damage * mods.thornsRatio >= e.hp) {
+        state.vfx.push({
+          kind: 'thornsReflect', x: t.x, y: t.y, enemyId: e.id, remaining: 0.35,
+        });
         state.enemies.splice(i, 1);
         events.push(...killEnemy(state, config, rng, e));
         continue;

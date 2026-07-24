@@ -65,6 +65,7 @@ export function formatToast(ev: GameEvent): string | null {
     case 'skillConsumed': return fmt(T.skillConsumed, { name: name(ev.cardType), star: ev.star });
     case 'equipped': return fmt(T.equipped, { name: name(ev.cardType), star: ev.star });
     case 'shieldBroken': return T.shieldBroken;
+    case 'shieldRestored': return T.shieldRestored;
     case 'testDrops': return fmt(T.testDrops, { name: name(ev.cardType) });
     case 'relicSelected': return fmt(T.perkApplied, { title: ev.title });
     case 'waveBaseRewardChosen': {

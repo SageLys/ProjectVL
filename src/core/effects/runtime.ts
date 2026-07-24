@@ -162,7 +162,7 @@ function tickSummons(state: GameState, config: Config, rng: Rng, dt: number, eve
   }
 }
 
-function tickShield(state: GameState, dt: number): void {
+function tickShield(state: GameState, dt: number, events: GameEvent[]): void {
   const shield = state.shield;
   if (!shield) return;
   if (shield.hits <= 0 && shield.regenRemaining != null) {
@@ -170,6 +170,9 @@ function tickShield(state: GameState, dt: number): void {
     if (shield.regenRemaining <= 0) {
       shield.hits = shield.maxHits;
       shield.regenRemaining = null;
+      const t = cfg.combat.turret;
+      state.vfx.push({ kind: 'shieldRegen', x: t.x, y: t.y, remaining: 0.5 });
+      events.push({ type: 'shieldRestored' });
     }
   }
 }
@@ -213,7 +216,7 @@ export function tickEffects(state: GameState, config: Config, rng: Rng, dt: numb
   tickAuras(state, config, rng, dt, events);
   tickZones(state, config, rng, dt, events);
   tickSummons(state, config, rng, dt, events);
-  tickShield(state, dt);
+  tickShield(state, dt, events);
   tickStatModifiers(state, dt);
   tickDots(state, config, rng, dt, events);
   tickVfx(state, dt);
@@ -224,12 +227,15 @@ export function tickEffects(state: GameState, config: Config, rng: Rng, dt: numb
 export function absorbBreach(state: GameState, config: Config, rng: Rng, damage: number, events: GameEvent[]): number | null {
   const mods = getModifiers(state);
   const shield = state.shield;
+  const t = cfg.combat.turret;
   if (shield && shield.hits > 0) {
     shield.hits--;
+    state.vfx.push({ kind: 'shieldAbsorb', x: t.x, y: t.y, remaining: 0.25 });
     if (shield.hits <= 0) {
       events.push({ type: 'shieldBroken' });
+      state.vfx.push({ kind: 'shieldBreak', x: t.x, y: t.y, remaining: 0.45 });
       if (mods.novaOnBreak) {
-        const t = cfg.combat.turret;
+        state.vfx.push({ kind: 'retaliationNova', x: t.x, y: t.y, radius: 220, remaining: 0.4 });
         const maxRange = totalRange(state, config);
         for (const e of [...state.enemies]) {
           if (Math.hypot(e.x - t.x, e.y - t.y) > 220 + e.r) continue;
@@ -240,6 +246,9 @@ export function absorbBreach(state: GameState, config: Config, rng: Rng, damage:
       if (shield.regenSeconds != null) shield.regenRemaining = shield.regenSeconds;
     }
     return null;
+  }
+  if (mods.breachReduction > 0) {
+    state.vfx.push({ kind: 'breachMitigated', x: t.x, y: t.y, remaining: 0.3 });
   }
   return damage * (1 - mods.breachReduction);
 }

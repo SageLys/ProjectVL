@@ -322,7 +322,13 @@ export type CombatVfx =
   | { kind: 'mortarTarget'; x: number; y: number; radius: number; remaining: number }
   | { kind: 'mortarImpact'; x: number; y: number; radius: number; remaining: number }
   | { kind: 'tauntPulse'; enemyId: number; remaining: number }
-  | { kind: 'summonEvent'; x: number; y: number; event: 'hit' | 'destroyed' | 'respawn'; remaining: number };
+  | { kind: 'summonEvent'; x: number; y: number; event: 'hit' | 'destroyed' | 'respawn'; remaining: number }
+  | { kind: 'shieldAbsorb'; x: number; y: number; remaining: number }
+  | { kind: 'shieldBreak'; x: number; y: number; remaining: number }
+  | { kind: 'shieldRegen'; x: number; y: number; remaining: number }
+  | { kind: 'thornsReflect'; x: number; y: number; enemyId: number; remaining: number }
+  | { kind: 'retaliationNova'; x: number; y: number; radius: number; remaining: number }
+  | { kind: 'breachMitigated'; x: number; y: number; remaining: number };
 
 export interface PerCardCombatTelemetry {
   triggers: number;
@@ -631,4 +637,5 @@ export type GameEvent =
   | { type: 'bountyFailed'; encounterId: number }
   | { type: 'bountyRewardDropped'; encounterId: number; rewardCardType: CardType }
   | { type: 'shieldBroken' }
+  | { type: 'shieldRestored' }
   | { type: 'testDrops'; cardType: CardType };

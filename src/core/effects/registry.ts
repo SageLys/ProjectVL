@@ -497,10 +497,18 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
   // —— 共用 ——
   burstDamage(ctx, p) {
     const dmg = ctx.baseDamage * num(p, 'damageMul', 3);
-    for (const e of targets(ctx, p, num(p, 'radius', ctx.radius ?? 100))) {
+    const radius = num(p, 'radius', ctx.radius ?? 100);
+    for (const e of targets(ctx, p, radius)) {
       ctx.events.push(...dealDamage(ctx.state, ctx.config, ctx.rng, e, dmg));
     }
     for (let i = 0; i < 10; i++) spawnParticle(ctx.state, ctx.rng, ctx.origin.x, ctx.origin.y, '#ff9de2', 140);
+    ctx.state.vfx.push({
+      kind: 'retaliationNova',
+      x: ctx.origin.x,
+      y: ctx.origin.y,
+      radius,
+      remaining: 0.4,
+    });
   },
   focusPriority(ctx, p) {
     const weight = num(p, 'priorityWeight', 1);

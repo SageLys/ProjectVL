@@ -84,15 +84,56 @@ export function drawSummonsAndShield(ctx: CanvasRenderingContext2D, state: GameS
   }
 
   const shield = state.shield;
-  if (shield && shield.hits > 0) {
-    const t = cfg.combat.turret;
-    ctx.save();
-    ctx.globalAlpha = 0.25 + 0.15 * (shield.hits / shield.maxHits);
-    ctx.strokeStyle = '#8cecff';
-    ctx.lineWidth = 4;
+  if (!shield) return;
+
+  const t = cfg.combat.turret;
+  const radius = 46;
+  const maxHits = Math.max(1, Math.round(shield.maxHits));
+  const hits = Math.max(0, Math.min(maxHits, Math.round(shield.hits)));
+  ctx.save();
+  ctx.strokeStyle = '#8cecff';
+  ctx.lineCap = 'round';
+
+  if (hits > 0) {
+    const ratio = hits / maxHits;
+    const segmentAngle = TAU / maxHits;
+    const gap = Math.min(0.14, segmentAngle * 0.22);
+    for (let i = 0; i < maxHits; i++) {
+      const start = -Math.PI / 2 + i * segmentAngle + gap / 2;
+      const end = -Math.PI / 2 + (i + 1) * segmentAngle - gap / 2;
+      ctx.globalAlpha = i < hits ? 0.42 + ratio * 0.38 : 0.09;
+      ctx.lineWidth = i < hits ? 3 + ratio * 2 : 2;
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, radius, start, end);
+      ctx.stroke();
+    }
+
+    // The top remaining segment breathes so a full/strong shield reads at a glance.
+    const top = hits - 1;
+    const pulse = 0.5 + 0.5 * Math.sin(state.time * 4.5);
+    const start = -Math.PI / 2 + top * segmentAngle + gap / 2;
+    const end = -Math.PI / 2 + (top + 1) * segmentAngle - gap / 2;
+    ctx.globalAlpha = 0.22 + pulse * 0.28;
+    ctx.lineWidth = 5 + pulse * 1.5;
     ctx.beginPath();
-    ctx.arc(t.x, t.y, 46, 0, TAU);
+    ctx.arc(t.x, t.y, radius + 1.5, start, end);
     ctx.stroke();
-    ctx.restore();
+  } else if (shield.regenRemaining != null) {
+    const regenSeconds = Math.max(0.001, shield.regenSeconds ?? shield.regenRemaining);
+    const progress = Math.max(0, Math.min(1, 1 - shield.regenRemaining / regenSeconds));
+    ctx.setLineDash([5, 7]);
+    ctx.globalAlpha = 0.18;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, radius, 0, TAU);
+    ctx.stroke();
+
+    ctx.globalAlpha = 0.42 + progress * 0.32;
+    ctx.lineWidth = 3.5;
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, radius, -Math.PI / 2, -Math.PI / 2 + TAU * progress);
+    ctx.stroke();
+    ctx.setLineDash([]);
   }
+  ctx.restore();
 }
