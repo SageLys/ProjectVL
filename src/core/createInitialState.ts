@@ -44,7 +44,7 @@ export function createInitialState(difficultyId: DifficultyId = 'hell'): GameSta
     maxHp: cfg.combat.hp.max,
     wave: 0,
     decisions: { current: null, pending: [] },
-    runBuild: { evolutionChoices: {}, cardAffixRolls: {} },
+    runBuild: { cardAffixRolls: {} },
     godPool: {
       mainGod: null,
       subGods: [],

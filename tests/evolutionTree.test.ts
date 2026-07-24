@@ -49,25 +49,27 @@ describe('single-card evolution tree', () => {
     resolveCurrentDecision(state, config, rng, 'pierceA');
     expect(product.provisional).toBe(false);
     expect(product.evolutionPath).toEqual(['3:pierceA']);
-    expect(state.runBuild.evolutionChoices.pierce?.[3]).toBe('pierceA');
     expect(state.decisions.current).toBeNull();
   });
 
-  it('later copies inherit the family route and do not ask again', () => {
+  it('later copies choose their own route without changing the existing card', () => {
     const state = freshState();
     state.cards[0] = card('pierce', 2);
     state.cards[1] = card('pierce', 2);
     autoMergeCards(state, config, rng);
-    resolveCurrentDecision(state, config, rng, 'pierceB');
+    resolveCurrentDecision(state, config, rng, 'pierceA');
+    moveOrSwap(state, config, rng, 'cards', 0, 'equipment', 0);
 
+    state.cards[0] = card('pierce', 2);
     state.cards[1] = card('pierce', 2);
-    state.cards[2] = card('pierce', 2);
     autoMergeCards(state, config, rng);
-    const inherited = state.cards.filter(Boolean);
-    expect(inherited).toHaveLength(1);
-    expect(inherited[0]).toMatchObject({ star: 4, evolutionPath: ['3:pierceB'] });
-    expect(inherited[0]?.provisional).not.toBe(true);
-    expect(state.decisions.current).toBeNull();
+    const laterCopy = state.cards.find(Boolean)!;
+    expect(laterCopy).toMatchObject({ star: 3, provisional: true, evolutionPath: [] });
+    expect(state.decisions.current).toMatchObject({ kind: 'evolutionBranch', provisionalCardId: laterCopy.id });
+
+    resolveCurrentDecision(state, config, rng, 'pierceB');
+    expect(state.equipment[0]).toMatchObject({ star: 3, evolutionPath: ['3:pierceA'] });
+    expect(laterCopy).toMatchObject({ star: 3, provisional: false, evolutionPath: ['3:pierceB'] });
   });
 
   it('stacks branch 3, persistent shared-4 amplify, independent branch 5, and shared 6', () => {
@@ -111,8 +113,12 @@ describe('single-card evolution tree', () => {
     ]);
     expect(provisional.provisional).toBe(true);
 
-    const events = resolveCurrentDecision(state, config, rng, 'pierceC');
-    expect(events.filter(event => event.type === 'merged')).toHaveLength(2);
+    const firstEvents = resolveCurrentDecision(state, config, rng, 'pierceC');
+    expect(firstEvents.filter(event => event.type === 'merged')).toHaveLength(1);
+    expect(state.decisions.current).toMatchObject({ kind: 'evolutionBranch', checkpointStar: 3 });
+
+    const secondEvents = resolveCurrentDecision(state, config, rng, 'pierceB');
+    expect(secondEvents.filter(event => event.type === 'merged')).toHaveLength(1);
     expect(state.cards.filter(Boolean)).toHaveLength(1);
     expect(state.cards.find(Boolean)).toMatchObject({
       type: 'pierce',
@@ -123,9 +129,8 @@ describe('single-card evolution tree', () => {
     expect(state.merges).toBe(3);
   });
 
-  it('the 5★ checkpoint is independent from the locked 3★ choice', () => {
+  it('the 5★ checkpoint is independent from this card\'s 3★ choice', () => {
     const state = freshState();
-    state.runBuild.evolutionChoices.pierce = { 3: 'pierceA' };
     state.cards[0] = { ...card('pierce', 4), evolutionPath: ['3:pierceA'] };
     state.cards[1] = { ...card('pierce', 4), evolutionPath: ['3:pierceA'] };
     autoMergeCards(state, config, rng);
@@ -134,7 +139,6 @@ describe('single-card evolution tree', () => {
 
     resolveCurrentDecision(state, config, rng, 'pierceB2');
     expect(product.evolutionPath).toEqual(['3:pierceA', '5:pierceB2']);
-    expect(state.runBuild.evolutionChoices.pierce).toEqual({ 3: 'pierceA', 5: 'pierceB2' });
   });
 
   it('wildcard upgrades enter the same checkpoint decision flow', () => {
@@ -171,7 +175,7 @@ describe('single-card evolution tree', () => {
     });
   });
 
-  it('queues behind an existing build decision without overwriting either choice set', () => {
+  it('queues behind an existing build decision without overwriting either decision', () => {
     const state = freshState();
     enqueueDecision(state, { kind: 'recipeEvolution', recipeId: 'recipe1' });
     state.cards[0] = card('pierce', 2);
@@ -198,14 +202,12 @@ describe('single-card evolution tree', () => {
     expect(resolveCardBindings(recipe, [], 6)).toEqual(recipe.stars['6'].equip);
   });
 
-  it('jumpToWave preserves run-locked choices and settlement records every family path', () => {
+  it('jumpToWave preserves per-card paths and settlement records them', () => {
     const state = freshState();
-    state.runBuild.evolutionChoices.pierce = { 3: 'pierceA', 5: 'pierceC2' };
     state.cards[0] = { ...card('pierce', 5), evolutionPath: ['3:pierceA', '5:pierceC2'] };
     state.cards[1] = card('frost', 3);
 
     jumpToWave(state, config, rng, 4);
-    expect(state.runBuild.evolutionChoices.pierce).toEqual({ 3: 'pierceA', 5: 'pierceC2' });
     expect(buildRunSummary(state, false).cardEvolutions).toEqual(expect.arrayContaining([
       { type: 'pierce', highestStar: 5, path: ['3:pierceA', '5:pierceC2'] },
       { type: 'frost', highestStar: 3, path: ['3:frostA'] },

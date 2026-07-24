@@ -105,7 +105,7 @@
   },
   "waveRewardCapped": "已达到上限",
   "evolution": {
-    "lockNotice": "本局同一卡族将锁定此路线。",
+    "lockNotice": "此路线仅对当前卡牌生效。",
     "pending": "待选择进化路线",
     "nextCheckpoint": "下一星将触发路线选择",
     "chainLightning": {

@@ -16,6 +16,11 @@ function setPathChoice(card: Card, checkpointStar: number, optionId: string): vo
   ].sort((a, b) => Number(a.split(':', 1)[0]) - Number(b.split(':', 1)[0]));
 }
 
+function hasPathChoice(card: Card, checkpointStar: number): boolean {
+  const prefix = `${checkpointStar}:`;
+  return (card.evolutionPath ?? []).some(entry => entry.startsWith(prefix));
+}
+
 function definition(cardType: CardType) {
   return cfg.skills.cards.find(card => card.id === cardType);
 }
@@ -24,13 +29,9 @@ export function evolutionCheckpointOptions(cardType: CardType, star: number) {
   return definition(cardType)?.evolutionTree?.checkpoints.find(checkpoint => checkpoint.star === star)?.options;
 }
 
-/** Copies material paths and all run-locked choices that the new star has reached. */
-export function inheritEvolutionPath(state: GameState, result: Card, materials: Card[] = []): void {
-  result.evolutionPath = [...new Set(materials.flatMap(card => card.evolutionPath ?? []))];
-  const choices = state.runBuild.evolutionChoices[result.type] ?? {};
-  for (const [star, optionId] of Object.entries(choices)) {
-    if (Number(star) <= result.star) setPathChoice(result, Number(star), optionId);
-  }
+/** The merge result continues the primary material's instance-specific route. */
+export function inheritEvolutionPath(result: Card, materials: Card[] = []): void {
+  result.evolutionPath = [...(materials[0]?.evolutionPath ?? [])];
 }
 
 function findCardById(state: GameState, cardId: number): Card | undefined {
@@ -53,14 +54,7 @@ function applyEvolutionChoice(
     || provisional.star < decision.checkpointStar
   ) return [];
 
-  const familyChoices = state.runBuild.evolutionChoices[decision.cardType] ?? {};
-  familyChoices[decision.checkpointStar] = choice;
-  state.runBuild.evolutionChoices[decision.cardType] = familyChoices;
-
-  for (const card of [...state.cards, ...state.equipment]) {
-    if (!card || card.type !== decision.cardType || card.star < decision.checkpointStar) continue;
-    setPathChoice(card, decision.checkpointStar, choice);
-  }
+  setPathChoice(provisional, decision.checkpointStar, choice);
   provisional.provisional = false;
   const continuedEvolutionEvents = finalizeEvolutionUpgrade(state, provisional);
 
@@ -82,18 +76,15 @@ function ensureEvolutionResolver(): void {
 }
 
 /**
- * Finalizes an upgrade when its route is already locked, or turns it into a
- * provisional product and queues the one-time family choice.
+ * Finalizes an upgrade when this card already has a route, or turns it into a
+ * provisional product and queues an instance-specific branch choice.
  */
 export function finalizeEvolutionUpgrade(state: GameState, card: Card): GameEvent[] {
   const checkpoint = definition(card.type)?.evolutionTree?.checkpoints
     .filter(item => item.star <= card.star)
     .sort((a, b) => a.star - b.star)
-    .find(item => !state.runBuild.evolutionChoices[card.type]?.[item.star]);
-  if (!checkpoint) {
-    inheritEvolutionPath(state, card, [card]);
-    return [];
-  }
+    .find(item => !hasPathChoice(card, item.star));
+  if (!checkpoint) return [];
 
   ensureEvolutionResolver();
   card.provisional = true;

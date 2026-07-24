@@ -47,7 +47,7 @@ export function autoMergeCards(state: GameState, config: Config, rng: Rng): { me
         const materials = [a, ...partners.map(index => state.cards[index]!)];
         const created = createCardWithAffixes(state, rng, a.type, resultStar);
         const resultCard = created.card;
-        inheritEvolutionPath(state, resultCard, materials);
+        inheritEvolutionPath(resultCard, materials);
         state.cards[i] = resultCard;
         for (const j of partners) state.cards[j] = null;
         merged++;

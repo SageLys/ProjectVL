@@ -105,7 +105,7 @@ export interface Card {
   type: CardType;
   star: number;
   evolutionPath?: string[];
-  /** Checkpoint merge product waiting for a run-locked branch choice. */
+  /** Checkpoint merge product waiting for this card's branch choice. */
   provisional?: boolean;
   affixes?: CardAffixRoll[];
 }
@@ -467,7 +467,6 @@ export interface BuildState {
 }
 
 export interface RunBuildState {
-  evolutionChoices: Partial<Record<CardType, Record<number, string>>>;
   cardAffixRolls: Record<CardType, CardAffixRoll[]>;
 }
 
@@ -480,7 +479,7 @@ export interface GameState {
   maxHp: number;
   wave: number;
   decisions: DecisionQueueState;
-  /** Choices that are locked for the current run, shared by every copy of a card family. */
+  /** Run-scoped build data; evolution routes themselves are stored per card instance. */
   runBuild: RunBuildState;
   godPool: GodPoolState;
   intermission: IntermissionState;

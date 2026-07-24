@@ -15,7 +15,7 @@
 
 - "合并"= 所有路径共同获得公共节点，同时**保留**已选分支效果（叠加，不清除）。
 - 5★ 分支与 3★ 分支独立组合（3×3 = 9 条路径）。
-- 分支选择**按本局卡族锁定**：同一 cardType 本局第一次到关键星级时选一次，后续同类卡自动继承。
+- 分支选择**按卡牌实例生效**：每张卡到达关键星级时独立选择，后续同类卡不会自动继承。
 - 关键星合成中断自动连锁，经决策队列选择后再续。
 
 ## 二、硬性不变量
@@ -62,33 +62,33 @@ export function resolveCardBindings(def: CardDef, evolutionPath: string[], star:
 状态：
 
 ```ts
-// GameState 增加：
-// runBuild: { evolutionChoices: Record<CardType, Record<number /*checkpointStar*/, string /*optionId*/>> };
-// Card 增加：provisional?: boolean;   // 待选择分支的半成品卡
+// Card 增加：
+// evolutionPath?: string[];           // 当前卡牌实例已选择的路线
+// provisional?: boolean;              // 待选择分支的半成品卡
 ```
 
 `autoMergeCards` 改造：
 
 ```text
 发现可合成(type, star→resultStar)
-  → resultStar 不是该卡 checkpoint 星级，或该卡族该 checkpoint 已有选择：
-       直接完成（已有选择则把 optionId 写入 evolutionPath）→ 继续连锁
-  → 是 checkpoint 且未选择：
+  → 结果卡已从主材料继承该 checkpoint 的选择：
+       直接完成 → 继续连锁
+  → 结果卡到达 checkpoint 且自身尚未选择：
        消耗材料，生成 provisional 卡（占原槽，provisional=true，装备/消耗/继续合成均禁止）
        enqueueDecision({ kind:'evolutionBranch', cardType, checkpointStar, options, provisionalCardId })
-       本轮连锁在该卡族上暂停（其他卡族可继续）
+       本轮连锁在该卡类型上暂停（其他卡类型可继续）
 选择完成（decisionQueue apply）：
-       provisional=false；写 runBuild.evolutionChoices 与 card.evolutionPath
+       provisional=false；只写当前 card.evolutionPath
        重新调用 autoMergeCards 续连锁
 ```
 
 - 一次拾取触发多个 checkpoint 时依决策队列顺序逐个处理（C1 已保证不覆盖）。
 - 万能卡合成（`wildcardSystem`）升到 checkpoint 星级时走同一待决路径。
-- 已锁路线的卡族，后续副本升星自动继承（不再弹选择）。
+- 已选路线只保留在当前卡牌上；后续同类卡升星时仍会独立弹出选择。
 
 ## 六、UI
 
-- 进化选择弹窗（通用决策弹窗的 evolutionBranch 渲染）：显示 3 个分支的名称与效果摘要（文案 `texts.json` 增 `evolution.*`，每 option 一键）；显示"本局该卡族将锁定此路线"。
+- 进化选择弹窗（通用决策弹窗的 evolutionBranch 渲染）：显示 3 个分支的名称与效果摘要（文案 `texts.json` 增 `evolution.*`，每 option 一键）；显示"此路线仅对当前卡牌生效"。
 - 卡面：3★+ 显示路线徽记；provisional 卡显示待选状态；合成提示注明"下一星将触发路线选择"。
 
 ## 七、临时迁移（仅为本阶段可测）
@@ -100,10 +100,10 @@ export function resolveCardBindings(def: CardDef, evolutionPath: string[], star:
 新增 `tests/evolutionTree.test.ts`；改 `tests/cardSystem.test.ts`：
 
 1. pierce 2★+2★ 合成 → 出现 provisional 卡 + evolutionBranch 决策；选择后卡成形、材料计数正确（不复制不丢失）。
-2. 同卡族第二次升 3★ 自动继承路线，不再弹选择。
+2. 同名卡第二次升 3★ 仍独立弹出选择，且不会改写第一张卡的路线。
 3. 3★ 选 A、5★ 选 B2 后：`resolveCardBindings` 同时含 A 效果 + 4★ 公共 + B2 效果；6★ 再叠终态。
 4. 4★ 对 3★ 分支效果做同构放大（等价旧 amplify 语义）。
 5. provisional 卡不可装备/消耗/参与合成；选择后可继续自动连锁（预置 4 张 2★ 一次拾取的连锁用例）。
 6. 无 evolutionTree 的卡行为与改动前完全一致（固定 seed 回归）。
-7. `jumpToWave` 不清除 runBuild.evolutionChoices（局内持久）。
+7. `jumpToWave` 保留各卡实例的 `evolutionPath`。
 8. 遥测：`evolution_branch_offered/evolution_branch_selected`；runSummary 增加各卡最高星与路径。

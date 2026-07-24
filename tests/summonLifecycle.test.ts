@@ -21,12 +21,6 @@ afterEach(resetTestEnv);
 function equipDecoy(state: GameState, star: number, slot = 0): void {
   const decoy = card('decoy', star);
   state.cards[0] = decoy;
-  state.runBuild.evolutionChoices.decoy = Object.fromEntries(
-    (decoy.evolutionPath ?? []).map(token => {
-      const [checkpoint, optionId] = token.split(':');
-      return [Number(checkpoint), optionId];
-    }),
-  );
   const events = moveOrSwap(state, config, rng, 'cards', 0, 'equipment', slot);
   expect(events).toContainEqual({ type: 'equipped', cardType: 'decoy', star, slotIndex: slot });
 }

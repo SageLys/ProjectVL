@@ -120,7 +120,6 @@ export function renderMergeHints(dock: HTMLElement, state: GameState): void {
     const triggersChoice = sourceCard
       ? cfg.skills.cards.find(card => card.id === sourceCard.type)?.evolutionTree?.checkpoints
         .some(checkpoint => checkpoint.star === resultStar)
-        && !state.runBuild.evolutionChoices[sourceCard.type]?.[resultStar]
       : false;
     if (triggersChoice) {
       const label = document.createElementNS(SVG_NS, 'text');

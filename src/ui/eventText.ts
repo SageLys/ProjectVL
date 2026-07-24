@@ -72,7 +72,7 @@ export function formatToast(ev: GameEvent): string | null {
       const stat = (texts.waveRewardStats as Record<string, string>)[ev.stat] ?? ev.stat;
       return fmt(T.waveBaseRewardChosen, { stat, add });
     }
-    case 'evolutionBranchSelected': return `${name(ev.cardType)}：路线已锁定`;
+    case 'evolutionBranchSelected': return `${name(ev.cardType)}：本卡路线已确定`;
     case 'recipeCompleted': return `卡间进化完成：${name(ev.outputCardType)} ${ev.outputStar}★`;
     case 'recipeRejected': return ev.reason === 'phase'
       ? '卡间进化只能在波间完成'

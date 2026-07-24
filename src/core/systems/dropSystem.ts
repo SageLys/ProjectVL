@@ -154,8 +154,7 @@ export function collectDrop(state: GameState, config: Config, rng: Rng, drop: Gr
   const originalLength = state.cards.length;
   if (empty < 0) {
     const unresolvedCheckpoint = cfg.skills.cards.find(card => card.id === drop.type)?.evolutionTree?.checkpoints
-      .some(checkpoint => checkpoint.star <= drop.star
-        && !state.runBuild.evolutionChoices[drop.type]?.[checkpoint.star]);
+      .some(checkpoint => checkpoint.star <= drop.star);
     const canMergeImmediately = drop.star < cfg.economy.maxStar
       && !unresolvedCheckpoint
       && state.cards.filter(card => card?.type === drop.type && card.star === drop.star).length >= getActiveMergeCopies() - 1;

@@ -63,11 +63,7 @@ export function buildRunSummary(state: GameState, win: boolean): RunSummary {
   const cardEvolutions = new Map<CardType, { type: CardType; highestStar: number; path: string[] }>();
   for (const [type, stats] of Object.entries(state.normalDropDirector.typeStats)) {
     if (stats.highestStarReached <= 0) continue;
-    const path = Object.entries(state.runBuild.evolutionChoices[type] ?? {})
-      .filter(([star]) => Number(star) <= stats.highestStarReached)
-      .sort(([a], [b]) => Number(a) - Number(b))
-      .map(([star, optionId]) => `${star}:${optionId}`);
-    cardEvolutions.set(type, { type, highestStar: stats.highestStarReached, path });
+    cardEvolutions.set(type, { type, highestStar: stats.highestStarReached, path: [] });
   }
   for (const card of highestByType.values()) {
     const recorded = cardEvolutions.get(card.type);
