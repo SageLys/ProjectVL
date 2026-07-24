@@ -1,7 +1,7 @@
 // 纯规则层类型定义。core/ 内禁止出现 DOM / Canvas / 浏览器 API。（P3 重构版）
 import type { BuildTag, EffectDef } from './effects/defs';
 import type { RunSummary } from './settlement';
-import type { DifficultyId } from '../config/types';
+import type { CardStatKind, DifficultyId, GodId, RunBaseStatKind } from '../config/types';
 import type { ValidationRewardSpec, ValidationRewardTypePolicy } from '../config/types';
 
 /** 卡牌类型 = 技能 id 字符串（schema: ^[a-z][a-zA-Z0-9]*$），由 skills.json 的 cards[].id 决定。 */
@@ -94,10 +94,72 @@ export interface OrdinaryDropBudgetState {
 /** 注入式随机源：返回 [0,1)。测试可传入确定性实现。 */
 export type Rng = () => number;
 
+export interface CardAffixRoll {
+  stat: CardStatKind;
+  value: number;
+  consumableDuration: number;
+}
+
 export interface Card {
   id: number;
   type: CardType;
   star: number;
+  evolutionPath?: string[];
+  affixes?: CardAffixRoll[];
+}
+
+export type RunDecision =
+  | { kind: 'godDraft'; wave: number; candidates: GodId[]; role: 'main' | 'sub' }
+  | { kind: 'godFocus'; wave: number; candidates: GodId[] }
+  | { kind: 'evolutionBranch'; cardType: CardType; checkpointStar: number; options: string[]; provisionalCardId: number }
+  | { kind: 'recipeEvolution'; recipeId: string }
+  | { kind: 'relic'; options: string[] };
+
+export interface DecisionQueueState {
+  current: RunDecision | null;
+  pending: RunDecision[];
+}
+
+export interface GodPoolState {
+  mainGod: GodId | null;
+  subGods: GodId[];
+  focusGod: GodId | null;
+  runRoster: CardType[];
+  rosterByGod: Record<GodId, CardType[]>;
+  offerDrought: Record<GodId, number>;
+  bootstrapQueue: CardType[];
+  bootstrapDropsRemaining: number;
+  activePool: CardType[];
+  previousActivePool: CardType[];
+  activePoolHistory: CardType[];
+  activePoolWave: number;
+  lastDecisionAfterWave: number;
+  offerRosterPreviews: Record<GodId, CardType[]>;
+}
+
+export interface RunBaseStats {
+  damageAdd: number;
+  fireRateAdd: number;
+  rangeAdd: number;
+  multiAdd: number;
+}
+
+export interface WaveRewardGrant {
+  id: string;
+  stat: RunBaseStatKind;
+  add: number;
+}
+
+export type IntermissionStep = 'settle' | 'decide' | 'free';
+
+export interface IntermissionState {
+  active: boolean;
+  afterWave: number;
+  step: IntermissionStep;
+  settleRemaining: number;
+  freeRemaining: number;
+  readyConfirmed: boolean;
+  rewardsGranted: WaveRewardGrant[];
 }
 
 export type WildcardInventory = Record<number, number>;
@@ -399,7 +461,9 @@ export interface GameState {
   hp: number;
   maxHp: number;
   wave: number;
-  between: number;
+  decisions: DecisionQueueState;
+  godPool: GodPoolState;
+  intermission: IntermissionState;
   enemies: Enemy[];
   bullets: Bullet[];
   beams: BeamEntity[];
@@ -436,8 +500,14 @@ export interface GameState {
   waveBossId: number | null;
   waveBossSpawnedAt: number | null;
   bossRewardClaimedWave: number;
+  runBaseStats: RunBaseStats;
+  /** Highest wave whose automatic base rewards were settled. Persist this with the run. */
+  waveRewardsClaimedWave: number;
+  /** Legacy perk-only additive damage source; removed with stat perks in C4. */
   damageBonus: number;
+  /** Legacy perk-only additive fire-rate source; removed with stat perks in C4. */
   fireRateBonus: number;
+  /** Legacy base projectile count; C2 wave growth is stored in runBaseStats.multiAdd. */
   multi: number;
   shotCd: number;
   turretAngle: number;
@@ -449,6 +519,7 @@ export interface GameState {
   perkStacks: Record<string, number>;
   buildState: BuildState;
   xpGainBonus: number;
+  /** Legacy perk percentage source; C2 wave growth is pixel-based runBaseStats.rangeAdd. */
   rangeBonus: number;
   kills: number;
   merges: number;
@@ -481,6 +552,14 @@ export type GameEvent =
   | { type: 'waveStart'; wave: number }
   | { type: 'waveCleared'; wave: number }
   | { type: 'waveBossSpawned'; wave: number }
+  | { type: 'decisionOffered'; kind: RunDecision['kind'] }
+  | { type: 'decisionResolved'; kind: RunDecision['kind']; choice: string }
+  | { type: 'godOffer'; wave: number; role: 'main' | 'sub' | 'focus'; candidates: GodId[] }
+  | { type: 'godSelected'; wave: number; role: 'main' | 'sub' | 'focus'; god: GodId }
+  | { type: 'runRosterCreated'; cardTypes: CardType[] }
+  | { type: 'activePoolCreated'; wave: number; focusGod: GodId | null; cardTypes: CardType[] }
+  | { type: 'intermissionReady'; wave: number; automatic: boolean }
+  | { type: 'waveRewardsGranted'; wave: number; granted: WaveRewardGrant[] }
   | { type: 'bossRewardGranted'; wave: number; grants: Array<{ star: number; count: number }> }
   | { type: 'levelUp' }
   | { type: 'gameEnd'; win: boolean }

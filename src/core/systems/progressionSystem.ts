@@ -135,7 +135,7 @@ export function applyPerk(state: GameState, config: Config, perkId: string, rng:
   state.buildState.scalingVersion++;
   state.pendingLevelUps = Math.max(0, state.pendingLevelUps - 1);
   state.offeredPerks = state.pendingLevelUps > 0 ? rollPerkChoices(state, rng) : [];
-  state.paused = state.pendingLevelUps > 0;
+  state.paused = state.pendingLevelUps > 0 || state.decisions.current !== null;
   return [
     { type: 'perkApplied', title: perk.title, lane: perk.lane },
     ...(state.pendingLevelUps > 0 ? [{ type: 'levelUp' as const }] : []),

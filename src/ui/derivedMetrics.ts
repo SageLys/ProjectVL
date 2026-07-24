@@ -3,10 +3,22 @@ import { budgetAdmission, budgetWaveQuotaFor } from '../core/systems/budgetRules
 import type { Config, EnemyType } from '../core/types';
 import type { DifficultyId, RunStage } from '../config/types';
 import { difficultyMultipliersFor } from '../core/difficulty';
-import { resolveActiveWavePlan } from '../core/runStage';
+import { resolveActiveWavePlan, stageForWave } from '../core/runStage';
 import type { ResolvedWavePlan } from '../core/runStage';
 
 const TYPES: EnemyType[] = ['normal', 'fast', 'tank', 'boss'];
+
+function intermissionSecondsFor(game: GameConfig, afterWave: number): number {
+  const stage = stageForWave(afterWave, game.waves.totalWaves, game.waves.stagePlan);
+  const free = stage === 'selection'
+    ? game.waves.intermission.freeSeconds.selection
+    : stage === 'validation'
+      ? game.waves.intermission.freeSeconds.validation
+      : afterWave <= game.waves.stagePlan.selectionWaves + 3
+        ? game.waves.intermission.freeSeconds.buildEarly
+        : game.waves.intermission.freeSeconds.buildLate;
+  return game.waves.intermission.settleSeconds + free;
+}
 export interface DerivedCell { hitRate: number; ttk: number; entryWalk: number; insideWalk: number; killDepth: number; onScreen: number; }
 export interface BudgetProjection {
   normalTarget: number;
@@ -125,8 +137,12 @@ export function deriveMetrics(game: GameConfig, runtime: Config, difficultyId: D
     return item.duration + boss.entryWalk + boss.ttk;
   });
   const waveDurations = game.waves.spawnMode === 'budget' ? budgetWaveDurations : intervalWaveDurations;
-  const totalDuration = waveDurations.reduce((sum, seconds) => sum + seconds, 0) + Math.max(0, game.waves.totalWaves - 1) * game.waves.betweenWaves;
-  const budgetTotalDuration = budgetWaveDurations.reduce((sum, seconds) => sum + seconds, 0) + Math.max(0, game.waves.totalWaves - 1) * game.waves.betweenWaves;
+  const intermissionDuration = Array.from(
+    { length: Math.max(0, game.waves.totalWaves - 1) },
+    (_, index) => intermissionSecondsFor(game, index + 1),
+  ).reduce((sum, seconds) => sum + seconds, 0);
+  const totalDuration = waveDurations.reduce((sum, seconds) => sum + seconds, 0) + intermissionDuration;
+  const budgetTotalDuration = budgetWaveDurations.reduce((sum, seconds) => sum + seconds, 0) + intermissionDuration;
   const totalEnemies = waveDurations.reduce((sum, _, i) => sum + (game.waves.spawnMode === 'budget'
     ? budgetWaveQuotaFor(plans[i])
     : game.waves.enemyCountBase + (i + 1) * game.waves.enemyCountPerWave), 0);

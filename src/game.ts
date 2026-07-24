@@ -4,10 +4,10 @@ import './styles/app.css';
 import { activeVariants, cfg } from './config';
 import { texts } from './data';
 import type { GameEvent, GameState, Rng } from './core/types';
-import { createInitialState, createDefaultConfig } from './core/createInitialState';
+import { createCardInstance, createInitialState, createDefaultConfig } from './core/createInitialState';
 import { updateGame } from './core/updateGame';
 import { registerSkillDefs, resolveConsumableTier } from './core/effects/interpreter';
-import { jumpToWave, restartWave, startNextWave } from './core/systems/waveSystem';
+import { jumpToWave, restartWave } from './core/systems/waveSystem';
 import { budgetAdmission } from './core/systems/budgetRules';
 import { resolveActiveWavePlan } from './core/runStage';
 import { moveOrSwap, consumeCard } from './core/systems/equipmentSystem';
@@ -15,6 +15,8 @@ import { collectNearest, spawnTestDrops, spawnGroundDrop } from './core/systems/
 import { recordCardDropShown, selectUniformCardType } from './core/systems/dropTypePolicy';
 import { acceptBountyOfferAt, calculateOfferChance } from './core/systems/bountySystem';
 import { applyPerk } from './core/systems/progressionSystem';
+import { resolveCurrentDecision } from './core/systems/decisionQueueSystem';
+import { beginOpeningIntermission, confirmIntermissionReady } from './core/systems/intermissionSystem';
 import { checkWildcardTarget, grantWildcards, useWildcardOnSlot, type WildcardGrant } from './core/systems/wildcardSystem';
 import { totalRange } from './core/stats';
 import { createRenderer } from './render/canvasRenderer';
@@ -31,6 +33,7 @@ import { formatToast, SLOT_CHANGING } from './ui/eventText';
 import type { SlotHandlers, SlotSource } from './ui/slotFactory';
 import { createPointerRouter, type PreviewSpec } from './input/pointerRouter';
 import { createKeyboard } from './input/keyboard';
+import { createIntermissionPanel } from './ui/intermissionPanel';
 import { formatPlaySpeed, nextPlaySpeed } from './ui/gameSpeed';
 import type { DevTelemetry } from './telemetry/devTelemetry';
 import type { PerkDef } from './config/types';
@@ -94,6 +97,8 @@ function dispatch(events: GameEvent[]): void {
   }
   if (slotsChanged) refreshSlots();
   upgradeFeedback.handle(events);
+  syncDecisionUi();
+  intermissionPanel.render(state);
 }
 
 function resolveOfferedPerks(currentState: GameState): PerkDef[] {
@@ -106,6 +111,15 @@ function refreshSlots(): void {
   renderCards(refs, state, slotHandlers);
   renderEquipment(refs, state, slotHandlers);
   renderMergeHints(refs.dock, state);
+}
+
+function syncDecisionUi(): void {
+  if (state.pendingLevelUps > 0 || state.offeredPerks.length > 0) {
+    modals.hideDecision();
+    return;
+  }
+  if (state.decisions.current) modals.showDecision(state.decisions.current, state);
+  else modals.hideDecision();
 }
 
 window.addEventListener('resize', () => renderMergeHints(refs.dock, state));
@@ -123,11 +137,22 @@ const modals = createModals(refs, {
     const applied = events.find(event => event.type === 'perkApplied');
     if (DEV_TOOLS_ENABLED && applied?.type === 'perkApplied') telemetry?.recordInput('perkSelect', `${id}:${applied.lane}`);
     if (!events.some(event => event.type === 'levelUp')) modals.hideLevel();
+    syncDecisionUi();
     renderHud(refs, state, config);
+  },
+  onDecision(choice) {
+    dispatch(resolveCurrentDecision(state, config, rng, choice));
+    syncDecisionUi();
   },
   onRestart() {
     reset();
     start();
+  },
+});
+
+const intermissionPanel = createIntermissionPanel(refs.arena, {
+  onReady() {
+    dispatch(confirmIntermissionReady(state));
   },
 });
 
@@ -142,7 +167,7 @@ function previewFor(source: SlotSource, index: number): PreviewSpec {
 const pointerRouter = createPointerRouter({
   canvas: refs.canvas, dock: refs.dock, aimPreview: refs.aimPreview, screenPreview: refs.screenPreview,
   input: cfg.input,
-  isPaused: () => state.paused,
+  isPaused: () => state.paused || (state.intermission.active && state.intermission.step !== 'free'),
   onBountyOfferTap: (x, y) => {
     if (!cfg.bounty.enabled) return false;
     const events = acceptBountyOfferAt(state, x, y);
@@ -188,15 +213,16 @@ function reset(): void {
   state = createInitialState(selectedDifficulty);
   if (DEV_TOOLS_ENABLED) telemetry?.reset();
   if (evidenceMode === 'equip') {
-    state.cards[0] = { id: state.nextCardId++, type: 'pierce', star: 4 };
+    state.cards[0] = createCardInstance(state.nextCardId++, 'pierce', 4);
   } else if (evidenceMode === 'upgrade4' || evidenceMode === 'upgrade5' || evidenceMode === 'upgrade6') {
     const sourceStar = Number(evidenceMode.charAt(evidenceMode.length - 1)) - 1;
-    state.equipment[0] = { id: state.nextCardId++, type: 'pierce', star: sourceStar };
-    state.cards[0] = { id: state.nextCardId++, type: 'pierce', star: sourceStar };
-    state.cards[1] = { id: state.nextCardId++, type: 'frost', star: 1 };
+    state.equipment[0] = createCardInstance(state.nextCardId++, 'pierce', sourceStar);
+    state.cards[0] = createCardInstance(state.nextCardId++, 'pierce', sourceStar);
+    state.cards[1] = createCardInstance(state.nextCardId++, 'frost', 1);
   }
   modals.hideResult();
   modals.hideLevel();
+  modals.hideDecision();
   refs.startBtn.textContent = texts.buttons.start;
   refs.startBtn.parentElement?.removeAttribute('hidden');
   refs.pauseBtn.textContent = texts.buttons.pause;
@@ -208,6 +234,7 @@ function reset(): void {
   modals.message(texts.center.readyTitle, texts.center.readyBody, true);
   refreshSlots();
   renderHud(refs, state, config);
+  intermissionPanel.render(state);
 }
 
 function start(): void {
@@ -218,14 +245,14 @@ function start(): void {
   state.paused = false;
   refs.pauseBtn.disabled = false;
   refs.speedBtn.disabled = false;
-  dispatch(startNextWave(state, config, rng));
+  dispatch(beginOpeningIntermission(state));
   refs.startBtn.textContent = texts.buttons.restart;
   refs.startBtn.parentElement?.setAttribute('hidden', '');
   modals.message('', '', false);
 }
 
 function togglePause(): void {
-  if (state.mode !== 'playing') return;
+  if (state.mode !== 'playing' || state.intermission.active || state.decisions.current || state.pendingLevelUps > 0) return;
   state.paused = !state.paused;
   refs.pauseBtn.textContent = state.paused ? texts.buttons.resume : texts.buttons.pause;
   refs.pauseBtn.setAttribute('aria-pressed', String(state.paused));
@@ -263,6 +290,7 @@ function loop(now: number): void {
   }
   dispatch(events);
   renderHud(refs, state, config);
+  intermissionPanel.render(state);
   render(state, config);
   if (DEV_TOOLS_ENABLED) telemetry?.updateFrame(now);
   requestAnimationFrame(loop);
@@ -362,7 +390,7 @@ if (DEV_TOOLS_ENABLED) void Promise.all([import('./debug/exposeDebugApi'), impor
       reset();
     },
     spawnGroundDrop: (x, y, type = null, star) => {
-      const selectedType = type ?? selectUniformCardType(rng);
+      const selectedType = type ?? selectUniformCardType(state, rng);
       spawnGroundDrop(state, config, rng, x, y, selectedType, star);
       recordCardDropShown(state, selectedType, 'debug');
     },

@@ -8,6 +8,7 @@ import { resolveActiveWavePlan, stageForWave } from '../runStage';
 import {
   recordCardDropShown, selectBuildType, selectPivotType, selectUniformCardType,
 } from './dropTypePolicy';
+import { selectFocusGodCard } from './activePoolSystem';
 
 function stageWaveIndex(wave: number, game: GameConfig): number {
   const plan = game.waves.stagePlan;
@@ -39,7 +40,9 @@ function spawnValidationCardReward(
       ? selectBuildType(state, rng)
       : spec.typePolicy === 'pivot'
         ? selectPivotType(state, rng)
-        : selectUniformCardType(rng);
+        : spec.typePolicy === 'focusGod'
+          ? selectFocusGodCard(state, rng)
+          : selectUniformCardType(state, rng);
     spawnGroundDrop(state, config, rng, x, y, type, spec.star, source);
     recordCardDropShown(state, type, source);
     const drop = state.groundDrops[state.groundDrops.length - 1];

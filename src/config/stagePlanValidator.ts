@@ -26,8 +26,8 @@ function reward(value: ValidationRewardSpec | undefined, path: string, maxStar: 
   if (!Number.isInteger(value.star)) fail(`${path}.star must be an integer`);
   const limit = value.kind === 'wildcard' ? maxStar - 1 : maxStar;
   if (value.star < 1 || value.star > limit) fail(`${path}.star must be between 1 and ${limit}`);
-  if (value.kind === 'card' && !['build', 'pivot', 'uniform'].includes(value.typePolicy)) {
-    fail(`${path}.typePolicy must be build, pivot, or uniform`);
+  if (value.kind === 'card' && !['build', 'pivot', 'uniform', 'focusGod'].includes(value.typePolicy)) {
+    fail(`${path}.typePolicy must be build, pivot, uniform, or focusGod`);
   }
 }
 
@@ -44,6 +44,16 @@ function waveBossReward(value: WavesConfig['waveBoss']['reward'] | undefined, ma
       }
     }
   }
+}
+
+function intermission(value: WavesConfig['intermission'] | undefined): void {
+  if (!value || typeof value !== 'object') fail('intermission is required');
+  for (const key of ['selection', 'buildEarly', 'buildLate', 'validation'] as const) {
+    const seconds = value.freeSeconds?.[key];
+    if (!Number.isFinite(seconds) || seconds < 0) fail(`intermission.freeSeconds.${key} must be >= 0`);
+  }
+  if (!Number.isFinite(value.settleSeconds) || value.settleSeconds < 0) fail('intermission.settleSeconds must be >= 0');
+  if (typeof value.autoReadyHighlight !== 'boolean') fail('intermission.autoReadyHighlight must be boolean');
 }
 
 export function validateStagePlanConfig(
@@ -70,4 +80,8 @@ export function validateStagePlanConfig(
     reward(wave.bossReward, `validation[${waveIndex}].bossReward`, maxStar);
   }
   if (bossReward) waveBossReward(bossReward, maxStar);
+}
+
+export function validateIntermissionConfig(value: WavesConfig['intermission']): void {
+  intermission(value);
 }

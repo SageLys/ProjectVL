@@ -22,6 +22,40 @@
   "levelup": {
     "benefits": "生效中：{names}"
   },
+  "gods": {
+    "storm": { "name": "风暴", "theme": "连锁、穿透与高速投射" },
+    "winter": { "name": "凛冬", "theme": "冻结、减速与阵地控制" },
+    "inferno": { "name": "炼狱", "theme": "灼烧、爆裂与持续压制" },
+    "bulwark": { "name": "壁垒", "theme": "护盾、反击与召唤防线" },
+    "plenty": { "name": "丰饶", "theme": "收获、资源与成长循环" }
+  },
+  "decisions": {
+    "godDraft": { "title": "选择神祇", "body": "主神决定 5 张核心名册，副神各带来 3 张支援卡。" },
+    "godFocus": { "title": "选择本波重点", "body": "重点神将在下一波活跃池中占据更多位置。" },
+    "evolutionBranch": { "title": "选择进化分支", "body": "为这张卡选择一条进化路线。" },
+    "recipeEvolution": { "title": "卡间进化", "body": "确认要完成的进化配方。" },
+    "relic": { "title": "选择遗物", "body": "选择一件遗物强化本局构筑。" }
+  },
+  "intermission": {
+    "title": "第 {wave} 波结束",
+    "steps": {
+      "settle": "正在结算本波成果",
+      "decide": "等待构筑决策完成",
+      "free": "自由整备：可整理手牌与装备"
+    },
+    "countdown": "{seconds} 秒后自动准备完成",
+    "waiting": "完成选择后进入自由整备",
+    "ready": "准备完成",
+    "rewardsTitle": "本波基础奖励",
+    "rewardStats": {
+      "damageAdd": "基础伤害",
+      "fireRateAdd": "基础射速",
+      "rangeAdd": "基础射程",
+      "multiAdd": "同发数",
+      "maxHpAdd": "心防上限",
+      "heal": "恢复心防"
+    }
+  },
   "toast": {
     "waveStart": "第 {wave} 波追求者开始",
     "waveClear": "第 {wave} 波完成 · 整理卡槽",

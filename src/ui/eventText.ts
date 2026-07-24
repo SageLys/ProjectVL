@@ -23,6 +23,15 @@ export function formatToast(ev: GameEvent): string | null {
     case 'waveStart': return fmt(T.waveStart, { wave: ev.wave });
     case 'waveCleared': return fmt(T.waveClear, { wave: ev.wave });
     case 'waveBossSpawned': return T.waveBoss;
+    case 'decisionOffered':
+    case 'decisionResolved':
+    case 'godOffer':
+    case 'godSelected':
+    case 'runRosterCreated':
+    case 'activePoolCreated':
+    case 'intermissionReady':
+    case 'waveRewardsGranted':
+      return null;
     case 'bossRewardGranted': return fmt(T.bossReward, { desc: wildcardGrantDescription(ev.grants) });
     case 'breakthrough': return fmt(T.breakthrough, { damage: Math.round(ev.damage) });
     case 'bossContactStarted': return T.bossContactStarted;

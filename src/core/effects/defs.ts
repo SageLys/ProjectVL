@@ -2,11 +2,12 @@
 // 技能 = 数据（JSON 实例）+ 通用解释器（触发器 → 效果原子）。禁止每张卡硬编码 if。
 // v0.3.0（P3）：新增 'passive' 触发器承载常驻修饰类原子（掉率/反伤/突破减免等，
 // 设计表中"掉率+25%"这类无事件语义的装备态此前在 schema 中无处安放）。
+import type { CardAffixPoolDef, EvolutionTreeDef, GodId } from '../../config/types';
 
 /** 效果原子五大类别。 */
 export type Category = 'projectile' | 'control' | 'domain' | 'economy' | 'defense';
 
-/** 宽协同流派标签。utility 为通用辅助，暂不作为主推流派。 */
+/** 机制标签：描述效果协同与缩放目标，与神（GodId）流派身份无关。 */
 export type BuildTag = 'projectile' | 'control' | 'domain' | 'defense' | 'utility';
 
 /** 触发器库。装备态效果绑定到其一；passive = 常驻修饰（无事件，聚合读取）。 */
@@ -68,8 +69,9 @@ export interface ConsumableTierDef {
 
 export interface CardDef {
   id: string;
+  god?: GodId;
   category: Category;
-  /** 宽协同标签（1~2 个，非空、去重）；与 category 独立，仅用于构筑协同。 */
+  /** 机制标签（1~2 个，非空、去重）；与 category 和神身份独立，仅用于效果协同。 */
   synergyTags: BuildTag[];
   textKey: string;
   teaching: boolean;
@@ -80,6 +82,9 @@ export interface CardDef {
     anchors: { '1': ConsumableTierDef; '3': ConsumableTierDef; '6': ConsumableTierDef };
     interpolation?: 'linear';
   };
+  evolutionTree?: EvolutionTreeDef;
+  affixPool?: CardAffixPoolDef;
+  recipeOnly?: boolean;
   implementationBatch?: 1 | 2;
   designNotes?: string;
 }

@@ -5,6 +5,9 @@ import { createEnemy, randomEdgeSpawnPosition, spawnEnemy, spawnWaveBoss } from 
 import { fireTrigger, reconcileEquipmentPassives } from '../effects/interpreter';
 import { budgetAdmission, budgetWaveQuotaFor } from './budgetRules';
 import { resolveActiveWavePlan } from '../runStage';
+import { clearDecisionQueue } from './decisionQueueSystem';
+import { beginIntermission, endIntermission, tickIntermission } from './intermissionSystem';
+import { generateActivePool } from './activePoolSystem';
 export { budgetAdmission } from './budgetRules';
 
 /** 第 wave 波的总出怪配额：base + wave*perWave。 */
@@ -16,7 +19,9 @@ export function enemyCountFor(wave: number): number {
  * 进入下一波：推进波数、排定生成节奏，并触发 onWaveStart（装备态护盾回填/图腾/空投等）。
  */
 export function startNextWave(state: GameState, config: Config, rng: Rng): GameEvent[] {
+  endIntermission(state);
   state.wave++;
+  const activePool = generateActivePool(state, state.wave, rng);
   state.combatTelemetry = { wave: state.wave, perCard: {} };
   state.ordinaryDrop.credit = Math.min(cfg.economy.ordinaryDropRate.carryCap, state.ordinaryDrop.credit);
   state.ordinaryDrop.activeRegularSeconds = 0;
@@ -32,7 +37,6 @@ export function startNextWave(state: GameState, config: Config, rng: Rng): GameE
   state.wavePhase = 'regular';
   state.waveBossId = null;
   state.waveBossSpawnedAt = null;
-  state.between = 0;
   state.bountyOffers.length = 0;
   state.bountyDirector.offersThisWave = 0;
   state.bountyDirector.acceptedThisWave = 0;
@@ -54,7 +58,15 @@ export function startNextWave(state: GameState, config: Config, rng: Rng): GameE
       }));
     }
   }
-  const events: GameEvent[] = [{ type: 'waveStart', wave: state.wave }];
+  const events: GameEvent[] = [
+    { type: 'waveStart', wave: state.wave },
+    ...(state.godPool.mainGod ? [{
+      type: 'activePoolCreated',
+      wave: state.wave,
+      focusGod: state.godPool.focusGod,
+      cardTypes: activePool,
+    } as const] : []),
+  ];
   events.push(...fireTrigger(state, config, rng, 'onWaveStart', { wave: state.wave }));
   events.push(...reconcileEquipmentPassives(state, config, rng));
   return events;
@@ -110,15 +122,13 @@ export function tickSpawns(state: GameState, rng: Rng, dt: number): void {
 
 /**
  * 波次清空判定：本波敌人生成完且场上清空时，最后一波→胜利结束，
- * 否则进入 betweenWaves 间隔并产出 waveCleared。
+ * 否则进入正式波间阶段并产出 waveCleared。
  */
 function finishWave(state: GameState): GameEvent[] {
-  state.wavePhase = 'between';
   state.waveBossId = null;
   state.waveBossSpawnedAt = null;
   if (state.wave >= cfg.waves.totalWaves) return endGame(state, true);
-  state.between = cfg.waves.betweenWaves;
-  return [{ type: 'waveCleared', wave: state.wave }];
+  return beginIntermission(state);
 }
 
 /** Advance the explicit regular -> Boss -> between wave phase machine. */
@@ -146,12 +156,14 @@ export function advanceWavePhase(state: GameState, _config: Config, rng: Rng): G
   return [];
 }
 
-/** 波间隔倒计时；归零则开启下一波。 */
+/** 正式波间状态机；只有显式准备完成或 free 超时才开启下一波。 */
 export function tickBetween(state: GameState, config: Config, rng: Rng, dt: number, beforeWaveStart?: () => void): GameEvent[] {
   if (state.wavePhase !== 'between' || state.mode !== 'playing') return [];
-  state.between -= dt;
-  if (state.between <= 0) { beforeWaveStart?.(); return startNextWave(state, config, rng); }
-  return [];
+  const result = tickIntermission(state, dt, rng);
+  if (!result.complete) return result.events;
+  beforeWaveStart?.();
+  endIntermission(state);
+  return [...result.events, ...startNextWave(state, config, rng)];
 }
 
 /** 调试入口：清理战场瞬态并直接开启指定波；不改变卡牌、成长、HP 与经济状态。 */
@@ -176,7 +188,10 @@ export function jumpToWave(state: GameState, config: Config, rng: Rng, targetWav
   state.intervalClocks = {};
   state.spawnLeft = 0;
   state.spawnTimer = 0;
-  state.between = 0;
+  clearDecisionQueue(state);
+  endIntermission(state);
+  // Debug jumps skip prior rewards but never make an already claimed wave claimable again.
+  state.waveRewardsClaimedWave = Math.max(state.waveRewardsClaimedWave, wave - 1);
   state.wavePhase = 'regular';
   state.waveBossId = null;
   state.waveBossSpawnedAt = null;

@@ -1,4 +1,4 @@
-import type { RunStage } from '../config/types';
+import type { RunBaseStatKind, RunStage } from '../config/types';
 import type { CardDropSource } from '../core/types';
 
 export type TelemetryEventType =
@@ -25,7 +25,17 @@ export type TelemetryEventType =
   | 'bountyCompleted'
   | 'bountyFailed'
   | 'bountyRewardLanded'
-  | 'bountyRewardPickup';
+  | 'bountyRewardPickup'
+  | 'decision_offered'
+  | 'decision_resolved'
+  | 'intermission_ready'
+  | 'wave_rewards_granted'
+  | 'god_offer'
+  | 'god_selected'
+  | 'run_roster_created'
+  | 'active_pool_created'
+  | 'card_shown_by_god'
+  | 'card_collected_by_god';
 
 export interface TelemetryEvent {
   type: TelemetryEventType;
@@ -60,7 +70,7 @@ export interface TelemetryEvent {
   star?: number;
   secure?: boolean;
   rewardKind?: 'card' | 'wildcard';
-  typePolicy?: 'build' | 'pivot' | 'uniform';
+  typePolicy?: 'build' | 'pivot' | 'uniform' | 'focusGod';
   firstOperation?: 'merge' | 'equip' | 'consume' | 'unused';
   firstOperationSeconds?: number;
   reached5BeforeFinalBoss?: boolean;
@@ -71,6 +81,15 @@ export interface TelemetryEvent {
   maturity?: number;
   highestStar?: number;
   equippedCount?: number;
+  decisionKind?: string;
+  choice?: string;
+  automatic?: boolean;
+  waveRewards?: Array<{ id: string; stat: RunBaseStatKind; add: number }>;
+  godId?: string;
+  focusGod?: string;
+  godRole?: 'main' | 'sub' | 'focus';
+  candidates?: string[];
+  cardTypes?: string[];
 }
 
 export interface TelemetrySample {

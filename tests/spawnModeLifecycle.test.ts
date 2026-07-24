@@ -15,8 +15,12 @@ describe('spawn-mode wave boundary lifecycle', () => {
     expect(state.enemies).toHaveLength(1); // actual active mode is interval
     cfg.waves.budget.targetOnScreen = { base: 4, perWave: 0 }; cfg.waves.budget.batchMax = 4; cfg.waves.budget.maxAlive = 4; cfg.waves.budget.checkInterval = .5;
     let pending: 'budget' | null = 'budget';
-    cfg.waves.betweenWaves = .01; state.spawnLeft = 0; state.enemies.length = 0;
-    updateGame(state, runtime, constRng(.5), .02, () => { if (pending) { cfg.waves.spawnMode = pending; pending = null; } });
+    cfg.waves.intermission.settleSeconds = 0;
+    cfg.waves.intermission.freeSeconds = { selection: 0, buildEarly: 0, buildLate: 0, validation: 0 };
+    state.spawnLeft = 0; state.enemies.length = 0;
+    for (let step = 0; step < 4; step++) {
+      updateGame(state, runtime, constRng(.5), 0, () => { if (pending) { cfg.waves.spawnMode = pending; pending = null; } });
+    }
     updateGame(state, runtime, constRng(.5), 0);
     expect(cfg.waves.spawnMode).toBe('budget'); expect(state.enemies).toHaveLength(4);
   });

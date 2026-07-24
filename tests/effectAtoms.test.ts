@@ -363,6 +363,18 @@ describe('领域/经济/防御/共用原子', () => {
     expect(s.normalDropDirector.ordinaryDropCount).toBe(0);
   });
 
+  it('extraDrop selects card types only from the active pool', () => {
+    const s = freshState();
+    s.godPool.mainGod = 'storm';
+    s.godPool.runRoster = ['pierce', 'chainLightning', 'frost'];
+    s.godPool.activePool = ['pierce', 'chainLightning'];
+    s.godPool.rosterByGod.storm = ['pierce', 'chainLightning'];
+
+    ATOMS.extraDrop(ctxFor(s, { rng: constRng(0.99) }), { count: 4, starWeights: { '1': 1 } });
+
+    expect(s.groundDrops.every(drop => drop.kind === 'card' && s.godPool.activePool.includes(drop.type))).toBe(true);
+  });
+
   it('shield：写入护盾状态（取更强者）', () => {
     const s = freshState();
     ATOMS.shield(ctxFor(s), { absorbHits: 2, regenSeconds: 10 });

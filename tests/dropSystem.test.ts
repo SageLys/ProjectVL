@@ -191,7 +191,7 @@ describe('ordinary drop time budget', () => {
   it('finishes the build ramp once, then sustains 40/min', () => {
     const state = freshState();
     const config = createDefaultConfig();
-    state.wave = 3;
+    state.wave = 4;
     for (let i = 0; i < 200; i++) {
       tickOrdinaryDropBudget(state, 0.1);
       rollDropOnKill(state, config, constRng(0.2), enemy());
@@ -221,7 +221,7 @@ describe('ordinary drop time budget', () => {
     state.paused = true;
     tickOrdinaryDropBudget(state, 10);
     state.paused = false;
-    state.wave = 7;
+    state.wave = 9;
     tickOrdinaryDropBudget(state, 10);
     expect(state.ordinaryDrop.credit).toBe(0);
     expect(state.ordinaryDrop.activeRegularSeconds).toBe(120);

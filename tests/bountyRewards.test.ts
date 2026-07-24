@@ -40,6 +40,22 @@ function spawnedEncounter() {
 }
 
 describe('Bounty Rewards · 确定掉落', () => {
+  it('selected-god runs draw every Bounty card from the frozen run roster', () => {
+    const state = freshState();
+    state.godPool.mainGod = 'storm';
+    state.godPool.subGods = ['winter', 'inferno'];
+    state.godPool.focusGod = 'storm';
+    state.godPool.rosterByGod.storm = ['pierce', 'chainLightning'];
+    state.godPool.rosterByGod.winter = ['frost'];
+    state.godPool.rosterByGod.inferno = ['scorch'];
+    state.godPool.runRoster = ['pierce', 'chainLightning', 'frost', 'scorch'];
+    const rng = createSeededRng(333);
+
+    const rewards = Array.from({ length: 100 }, () => selectBountyRewardType(state, rng));
+
+    expect(rewards.every(type => state.godPool.runRoster.includes(type))).toBe(true);
+  });
+
   it('uses the configured per-wave star schedules through wave 6', () => {
     cfg.bounty.offer.baseChancePerCheck = 1;
     cfg.bounty.offer.maxChancePerCheck = 1;

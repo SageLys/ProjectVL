@@ -42,7 +42,7 @@ describe('wave phase machine', () => {
     const state = freshState(); state.wave = 1; state.spawnLeft = 0;
     advanceWavePhase(state, config, constRng(0));
     expect(advanceWavePhase(state, config, constRng(0))).toEqual([]);
-    expect(state.between).toBe(0);
+    expect(state.intermission.active).toBe(false);
   });
 
   it('keeps a surviving Boss in the phase after entering contact', () => {

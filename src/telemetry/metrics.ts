@@ -3,8 +3,13 @@ import type { RunStage } from '../config/types';
 
 export const EVENT_UNIVERSE = new Set<TelemetryEvent['type']>([
   'spawn', 'kill', 'dropLanded', 'pickup', 'dangerEnter', 'waveStart', 'waveCleared', 'perkPopup',
+  'decision_offered', 'decision_resolved', 'intermission_ready', 'wave_rewards_granted',
+  'god_offer', 'god_selected', 'run_roster_created', 'active_pool_created',
+  'card_shown_by_god', 'card_collected_by_god',
 ]);
-export const OPPORTUNITY_EVENTS = new Set<TelemetryEvent['type']>(['dropLanded', 'perkPopup', 'mergeOpportunity']);
+export const OPPORTUNITY_EVENTS = new Set<TelemetryEvent['type']>([
+  'dropLanded', 'perkPopup', 'mergeOpportunity', 'decision_offered', 'god_offer',
+]);
 
 export interface WaveMetrics {
   wave: number;

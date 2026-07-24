@@ -9,15 +9,15 @@ function buffMul(state: GameState, kind: 'fireRateMul' | 'damageMul'): number {
 }
 
 export function totalDamage(state: GameState, config: Config): number {
-  return (config.damage + state.damageBonus) * buffMul(state, 'damageMul');
+  return (config.damage + state.damageBonus + state.runBaseStats.damageAdd) * buffMul(state, 'damageMul');
 }
 
 export function totalFireRate(state: GameState, config: Config): number {
-  return (config.fireRate + state.fireRateBonus) * buffMul(state, 'fireRateMul');
+  return (config.fireRate + state.fireRateBonus + state.runBaseStats.fireRateAdd) * buffMul(state, 'fireRateMul');
 }
 
 export function totalMulti(state: GameState): number {
-  return state.multi;
+  return state.multi + state.runBaseStats.multiAdd;
 }
 
 /**
@@ -32,7 +32,10 @@ export function maxAttackRange(): number {
 }
 
 export function totalRange(state: GameState, config: Config): number {
-  return Math.min(config.range + config.range * state.rangeBonus, maxAttackRange());
+  return Math.min(
+    config.range + config.range * state.rangeBonus + state.runBaseStats.rangeAdd,
+    maxAttackRange(),
+  );
 }
 
 /** 掉落概率：（基础 + 眷恋加成）× 装备态掉率乘数，封顶 chanceCap。 */

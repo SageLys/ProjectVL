@@ -1,17 +1,36 @@
 import { texts } from '../data';
 import { cfg } from '../config';
-import type { GameState } from '../core/types';
+import type { GameState, RunDecision } from '../core/types';
 import type { PerkDef } from '../config/types';
 import type { DomRefs } from './domRefs';
 import { cardDisplayName } from './cardMeta';
 import { fmt } from './format';
 
 /** 升级三选一 / 结算 / 中心引导文案的显隐控制。 */
-export function createModals(refs: DomRefs, hooks: { onPerk(id: string): void; onRestart(): void }) {
+export function createModals(refs: DomRefs, hooks: { onPerk(id: string): void; onDecision(choice: string): void; onRestart(): void }) {
+  const decisionModal = document.createElement('div');
+  const decisionCard = document.createElement('div');
+  const decisionTitle = document.createElement('h2');
+  const decisionBody = document.createElement('p');
+  const decisionChoices = document.createElement('div');
+  let renderedDecision: RunDecision | null = null;
+  decisionModal.className = 'modal';
+  decisionModal.id = 'decisionModal';
+  decisionCard.className = 'modal-card';
+  decisionChoices.className = 'choices';
+  decisionCard.append(decisionTitle, decisionBody, decisionChoices);
+  decisionModal.append(decisionCard);
+  document.body.append(decisionModal);
+
   refs.perkChoices.addEventListener('click', event => {
     const button = (event.target as Element).closest<HTMLButtonElement>('[data-perk]');
     const id = button?.dataset.perk;
     if (id) hooks.onPerk(id);
+  });
+  decisionChoices.addEventListener('click', event => {
+    const button = (event.target as Element).closest<HTMLButtonElement>('[data-decision-choice]');
+    const choice = button?.dataset.decisionChoice;
+    if (choice) hooks.onDecision(choice);
   });
   refs.restartBtn.addEventListener('click', () => hooks.onRestart());
 
@@ -58,6 +77,50 @@ export function createModals(refs: DomRefs, hooks: { onPerk(id: string): void; o
       refs.levelModal.classList.add('show');
     },
     hideLevel(): void { refs.levelModal.classList.remove('show'); },
+    showDecision(decision: RunDecision, state?: GameState): void {
+      // dispatch() synchronizes this modal every animation frame. Replacing a
+      // button between pointerdown and pointerup suppresses the browser click.
+      if (renderedDecision !== decision) {
+        const copy = texts.decisions[decision.kind];
+        const options = decision.kind === 'godDraft' || decision.kind === 'godFocus'
+          ? decision.candidates
+          : decision.kind === 'evolutionBranch' || decision.kind === 'relic'
+            ? decision.options
+            : [decision.recipeId];
+        decisionTitle.textContent = copy.title;
+        decisionBody.textContent = copy.body;
+        decisionChoices.replaceChildren(...options.map(option => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'choice';
+          button.dataset.decisionChoice = option;
+          const label = document.createElement('b');
+          if (decision.kind === 'godDraft' || decision.kind === 'godFocus') {
+            const godCopy = (texts.gods as Record<string, { name: string; theme: string }>)[option];
+            label.textContent = godCopy?.name ?? option;
+            const theme = document.createElement('span');
+            theme.className = 'choice-desc';
+            theme.textContent = godCopy?.theme ?? '';
+            button.append(label, theme);
+            if (decision.kind === 'godDraft' && decision.role === 'main' && state) {
+              const preview = document.createElement('span');
+              preview.className = 'god-roster-preview';
+              preview.textContent = (state.godPool.offerRosterPreviews[option] ?? [])
+                .map(cardDisplayName)
+                .join(' · ');
+              button.append(preview);
+            }
+          } else {
+            label.textContent = option;
+            button.append(label);
+          }
+          return button;
+        }));
+        renderedDecision = decision;
+      }
+      decisionModal.classList.add('show');
+    },
+    hideDecision(): void { decisionModal.classList.remove('show'); },
     hideResult(): void { refs.resultModal.classList.remove('show'); },
     showResult(win: boolean, state: GameState): void {
       refs.resultTitle.textContent = win ? texts.result.winTitle : texts.result.loseTitle;

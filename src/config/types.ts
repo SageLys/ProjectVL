@@ -1,6 +1,7 @@
 // 配置层类型：游戏域 + input（T1 输入校准值）+ tuner（调参面板元数据）。
 // P3 配置重组：所有可调数值经此处；variant = 对 base 的深覆盖（见 loader.ts）。
 import type { BuildTag, CardDef } from '../core/effects/defs';
+import type { BindingDef } from '../core/effects/defs';
 
 export type RunStage = 'selection' | 'build' | 'validation';
 
@@ -16,7 +17,7 @@ export interface RegularStageConfig {
   waveEndSprint: { window: number; multiplier: number };
 }
 
-export type ValidationRewardTypePolicy = 'build' | 'pivot' | 'uniform';
+export type ValidationRewardTypePolicy = 'build' | 'pivot' | 'uniform' | 'focusGod';
 
 export type ValidationRewardSpec =
   | { kind: 'wildcard'; star: number; count: number }
@@ -156,7 +157,16 @@ export interface WavesConfig {
     maxAlive: number;
   };
   stagePlan: StagePlanConfig;
-  betweenWaves: number;
+  intermission: {
+    freeSeconds: {
+      selection: number;
+      buildEarly: number;
+      buildLate: number;
+      validation: number;
+    };
+    settleSeconds: number;
+    autoReadyHighlight: boolean;
+  };
   spawnMargin: number;
   typeRoll: { tankBase: number; tankPerWave: number; fastThreshold: number };
   bossWaves: number[];
@@ -206,6 +216,23 @@ export interface SkillsConfig {
   cards: CardDef[];
 }
 
+// 神是重新设计后的流派身份；BuildTag 只保留为机制标签。
+export type GodId = string;
+
+export interface GodDef {
+  id: GodId;
+  textKey: string;
+  anchorCardIds: string[];
+  variableCardIds: string[];
+  mainRosterSize: number;
+  subRosterSize: number;
+}
+
+export interface GodsConfig {
+  version: string;
+  gods: GodDef[];
+}
+
 export type DifficultyId = 'relaxed' | 'standard' | 'hard' | 'hell';
 
 export interface DifficultyCurve { start: number; end: number; power: number; }
@@ -245,6 +272,92 @@ export interface PerkBuildEffect {
 }
 
 export type PerkEffect = PerkStatEffect | PerkBuildEffect;
+
+export interface RelicDef {
+  id: string;
+  god?: GodId;
+  rarity: 'common' | 'rare' | 'epic';
+  textKey: string;
+  targetTags: BuildTag[];
+  effects: PerkEffect[];
+  poolInfluence?: { godWeightAdd: number; pityDrops?: number };
+  maxStacks: number;
+}
+
+export interface RelicsConfig {
+  version: string;
+  relics: RelicDef[];
+}
+
+export interface CardRequirement {
+  cardId: string;
+  minStar: number;
+}
+
+export interface EvolutionRecipeDef {
+  id: string;
+  ingredientA: CardRequirement;
+  ingredientB: CardRequirement;
+  outputCardId: string;
+  outputStar: number;
+  allowedPhase: 'intermission';
+}
+
+export interface EvolutionRecipesConfig {
+  version: string;
+  recipes: EvolutionRecipeDef[];
+}
+
+export type RunBaseStatKind = 'damageAdd' | 'fireRateAdd' | 'rangeAdd' | 'multiAdd' | 'maxHpAdd' | 'heal';
+
+export interface WaveRewardDef {
+  id: string;
+  waves: 'all' | number[];
+  effect: { stat: RunBaseStatKind; add: number };
+}
+
+export interface WaveRewardsConfig {
+  version: string;
+  rewards: WaveRewardDef[];
+}
+
+export interface EvolutionOptionDef {
+  id: string;
+  textKey: string;
+  equip: BindingDef[];
+}
+
+export interface EvolutionCheckpointDef {
+  star: number;
+  options: EvolutionOptionDef[];
+}
+
+export interface EvolutionSharedNodeDef {
+  star: number;
+  equip?: BindingDef[];
+  amplify?: Record<string, string>;
+}
+
+export interface EvolutionTreeDef {
+  checkpoints: EvolutionCheckpointDef[];
+  sharedNodes: EvolutionSharedNodeDef[];
+}
+
+export type CardStatKind = RunBaseStatKind | BuildScalingAxis;
+
+export interface CardAffixCandidateDef {
+  stat: CardStatKind;
+  weight: number;
+  min: number;
+  max: number;
+  step: number;
+  consumableDuration: number;
+}
+
+export interface CardAffixPoolDef {
+  count: number;
+  candidates: CardAffixCandidateDef[];
+}
 
 export interface PerkDef {
   id: string;
@@ -355,6 +468,10 @@ export interface GameConfig {
   enemies: EnemiesConfig;
   difficulty: DifficultyConfig;
   skills: SkillsConfig;
+  gods: GodsConfig;
+  relics: RelicsConfig;
+  evolutionRecipes: EvolutionRecipesConfig;
+  waveRewards: WaveRewardsConfig;
   progression: ProgressionConfig;
   economy: EconomyConfig;
   bounty: BountyConfig;

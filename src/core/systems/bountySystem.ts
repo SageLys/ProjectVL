@@ -3,7 +3,9 @@ import { getSkillDef } from '../effects/interpreter';
 import type { BuildTag } from '../effects/defs';
 import type { BountyEncounter, BountyOffer, BountySide, CardType, Config, Enemy, EnemyType, GameEvent, GameState, Rng } from '../types';
 import { spawnGroundDrop, spawnWildcardDrop } from './dropSystem';
-import { calculateCommitmentScore, getCardPool, getOrCreateCardTypeRunStats, recordCardDropShown } from './dropTypePolicy';
+import { calculateCommitmentScore, getOrCreateCardTypeRunStats, recordCardDropShown } from './dropTypePolicy';
+import { cardGodInRun, getRunRoster } from './activePoolSystem';
+import { getSelectedGods } from './godPoolSystem';
 import { createEnemy } from './enemySystem';
 import { stageForWave } from '../runStage';
 
@@ -31,8 +33,8 @@ export function calculateOfferChance(state: GameState): number {
   );
 }
 
-function shuffleRewardBag(rng: Rng, last: CardType | null): CardType[] {
-  const bag = getCardPool();
+function shuffleRewardBag(state: GameState, rng: Rng, last: CardType | null): CardType[] {
+  const bag = getRunRoster(state);
   for (let i = bag.length - 1; i > 0; i--) {
     const j = Math.floor(rng() * (i + 1));
     [bag[i], bag[j]] = [bag[j], bag[i]];
@@ -47,9 +49,9 @@ function shuffleRewardBag(rng: Rng, last: CardType | null): CardType[] {
 
 function drawUniformRewardType(state: GameState, rng: Rng): CardType {
   if (!state.bountyDirector.rewardBag.length) {
-    state.bountyDirector.rewardBag = shuffleRewardBag(rng, state.bountyDirector.lastRewardType);
+    state.bountyDirector.rewardBag = shuffleRewardBag(state, rng, state.bountyDirector.lastRewardType);
   }
-  const type = state.bountyDirector.rewardBag.pop() ?? getCardPool()[0];
+  const type = state.bountyDirector.rewardBag.pop() ?? getRunRoster(state)[0];
   state.bountyDirector.lastRewardType = type;
   return type;
 }
@@ -64,6 +66,7 @@ function weightedRewardChoice(state: GameState, candidates: CardType[], rng: Rng
       .filter(card => card?.type === type && card.star === 1).length;
     if (oneStarCount === cfg.economy.mergeCopies - 1) weight *= bias.nearMergeBonus;
     if (calculateCommitmentScore(state, type) > 0) weight *= bias.investedBonus;
+    if (cardGodInRun(state, type) === state.godPool.focusGod) weight *= 1.75;
     if (getOrCreateCardTypeRunStats(state, type).totalShown === 0) weight *= bias.droughtBonus;
     if (type === state.bountyDirector.lastRewardType
       && cfg.bounty.reward.repeatProtection > 0
@@ -82,6 +85,12 @@ function weightedRewardChoice(state: GameState, candidates: CardType[], rng: Rng
 
 /** 按玩家流派倾向选择 Bounty 奖励；零倾向或关闭时保持旧均匀洗牌袋行为。 */
 export function selectBountyRewardType(state: GameState, rng: Rng): CardType {
+  const pool = getRunRoster(state);
+  if (getSelectedGods(state).length) {
+    const type = weightedRewardChoice(state, pool, rng);
+    state.bountyDirector.lastRewardType = type;
+    return type;
+  }
   const maxAffinity = Math.max(...COMBAT_LANES.map(lane => state.buildState.affinity[lane]));
   if (!cfg.bounty.rewardBias.enabled || maxAffinity <= 0) return drawUniformRewardType(state, rng);
 
@@ -92,7 +101,6 @@ export function selectBountyRewardType(state: GameState, rng: Rng): CardType {
   const secondaryLanes = COMBAT_LANES.filter(
     lane => lane !== primaryLane && state.buildState.affinity[lane] > 0,
   );
-  const pool = getCardPool();
   const tagged = (type: CardType, lanes: BuildTag[]) => (
     getSkillDef(type)?.synergyTags.some(tag => lanes.includes(tag)) ?? false
   );
@@ -138,7 +146,7 @@ export function canCreateOffer(state: GameState): boolean {
     && state.wave >= o.enabledFromWave
     && state.mode === 'playing'
     && state.wavePhase === 'regular'
-    && state.between <= 0
+    && !state.intermission.active
     && state.bountyDirector.offersThisWave < o.maxOffersPerWave
     && state.bountyOffers.length < o.maxConcurrentOffers
     && unresolvedEncounterCount(state) < o.maxConcurrentEncounters;
@@ -249,7 +257,7 @@ function tickEncounterSpawns(state: GameState, rng: Rng, dt: number): GameEvent[
 export function tickBountySystem(state: GameState, _config: Config, rng: Rng, dt: number): GameEvent[] {
   const events = [...tickOffers(state, dt), ...tickEncounterSpawns(state, rng, dt)];
   state.bountyDirector.cooldownRemaining = Math.max(0, state.bountyDirector.cooldownRemaining - dt);
-  if (state.mode !== 'playing' || state.between > 0) return events;
+  if (state.mode !== 'playing' || state.intermission.active) return events;
 
   state.bountyDirector.checkTimer -= dt;
   const interval = Math.max(Number.EPSILON, cfg.bounty.offer.checkIntervalSeconds);

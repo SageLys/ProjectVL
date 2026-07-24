@@ -5,14 +5,14 @@ import { validateProgressionConfig } from '../src/config/progressionValidator';
 import { computeWaveBossReward } from '../src/core/systems/waveBossSystem';
 afterEach(resetTestEnv);
 
-describe('validation-10 variant', () => {
-  it('keeps the encounter table and expands only the build stage', () => {
-    const c = buildConfig(['validation-10']);
+describe('10-wave base configuration', () => {
+  it('uses 3 recruitment, 5 convergence, and 2 validation waves', () => {
+    const c = buildConfig();
     expect(c.waves.totalWaves).toBe(10);
     expect(c.waves.bossWaves).toEqual([1,2,3,4,5,6,7,8,9,10]);
     expect(c.waves.stagePlan.validation).toHaveLength(2);
     expect(Array.from({ length: 10 }, (_, index) => computeWaveBossReward(index + 1, c)[0].star)).toEqual(
-      [1, 1, 2, 2, 3, 4, 4, 4, 5, 5],
+      [1, 1, 1, 2, 2, 3, 4, 4, 5, 5],
     );
   });
 });
@@ -43,7 +43,7 @@ describe('config · 方案A base', () => {
   it('dev-short 只覆盖波次', () => { const c=buildConfig(['dev-short']); expect(c.economy.handSlots).toBe(7); expect(c.waves.totalWaves).toBe(3); expect(c.waves.bossWaves).toEqual([1, 2, 3]); });
   it('未知 variant 忽略不炸', () => { expect(buildConfig(['nope']).economy.handSlots).toBe(7); });
   it('URL 参数解析', () => { expect(variantsFromSearch('?variant=dev-short')).toEqual(['dev-short']); expect(variantsFromSearch('?variant=a&variant=b')).toEqual(['a','b']); expect(variantsFromSearch('')).toEqual([]); });
-  it('applyVariants 就地替换单例', () => { const ref=cfg; applyVariants(['dev-short']); expect(ref.waves.totalWaves).toBe(3); applyVariants([]); expect(ref.waves.totalWaves).toBe(8); });
+  it('applyVariants 就地替换单例', () => { const ref=cfg; applyVariants(['dev-short']); expect(ref.waves.totalWaves).toBe(3); applyVariants([]); expect(ref.waves.totalWaves).toBe(10); });
 });
 
 describe('config · data-driven perks', () => {

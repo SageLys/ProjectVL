@@ -13,6 +13,10 @@ import { tickEffects } from './effects/runtime';
  */
 export function updateGame(state: GameState, config: Config, rng: Rng, dt: number, beforeWaveStart?: () => void): GameEvent[] {
   if (state.mode !== 'playing' || state.paused) return [];
+  if (state.intermission.active) {
+    state.time += dt;
+    return tickBetween(state, config, rng, dt, beforeWaveStart);
+  }
   const events: GameEvent[] = [];
   state.time += dt;
   tickOrdinaryDropBudget(state, dt);
@@ -26,7 +30,6 @@ export function updateGame(state: GameState, config: Config, rng: Rng, dt: numbe
   events.push(...tickDrops(state, config, rng, dt));
   updateParticles(state, dt);
   events.push(...advanceWavePhase(state, config, rng));
-  events.push(...tickBetween(state, config, rng, dt, beforeWaveStart));
 
   return events;
 }

@@ -1,6 +1,7 @@
 import type { Config, GameState } from '../core/types';
 import { totalDamage, totalFireRate, totalMulti } from '../core/stats';
 import type { DomRefs } from './domRefs';
+import { texts } from '../data';
 
 /** 刷新 HUD：血/经验/等级/波次/实时数值 + 调参回显 + 当前可执行操作提示。 */
 export function renderHud(refs: DomRefs, state: GameState, config: Config): void {
@@ -11,6 +12,17 @@ export function renderHud(refs: DomRefs, state: GameState, config: Config): void
   refs.xpBar.style.width = `${(state.xp / state.xpNeed) * 100}%`;
   refs.levelText.textContent = String(state.level);
   refs.waveText.textContent = String(state.wave);
+  const godCopy = texts.gods as Record<string, { name: string }>;
+  const selectedGods = [
+    ...(state.godPool.mainGod ? [state.godPool.mainGod] : []),
+    ...state.godPool.subGods,
+  ];
+  refs.godPoolText.textContent = selectedGods.length
+    ? `${selectedGods.map(id => godCopy[id]?.name ?? id).join(' · ')}`
+      + (state.godPool.focusGod
+        ? ` ｜重点 ${godCopy[state.godPool.focusGod]?.name ?? state.godPool.focusGod}`
+        : '')
+    : '';
   if (refs.damageStat) refs.damageStat.textContent = String(Math.round(totalDamage(state, config)));
   if (refs.rateStat) refs.rateStat.textContent = `${totalFireRate(state, config).toFixed(1)}/s`;
   if (refs.multiStat) refs.multiStat.textContent = String(totalMulti(state));

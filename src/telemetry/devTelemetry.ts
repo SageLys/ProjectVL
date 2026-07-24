@@ -10,6 +10,7 @@ import { calculateBuildMaturity } from '../core/systems/dropTypePolicy';
 import { composeWeaponForm, getModifiers } from '../core/effects/interpreter';
 import { cardDisplayName } from '../ui/cardMeta';
 import { combatFormLabel } from '../debug/devToolsMode';
+import { cardGodInRun } from '../core/systems/activePoolSystem';
 
 declare const __GIT_COMMIT__: string;
 
@@ -186,6 +187,16 @@ export function createDevTelemetry(options: Options): DevTelemetry {
         secure: drop.secure,
         ...(drop.kind === 'card' && drop.source === 'normalKill' ? affinityMatch(drop.type) : {}),
       });
+      if (drop.kind === 'card') {
+        const godId = cardGodInRun(state(), drop.type);
+        if (godId) add({
+          type: 'card_shown_by_god',
+          cardType: drop.type,
+          godId,
+          source: drop.source,
+          stage: stage(),
+        });
+      }
       if (drop.secure && drop.validationRewardWave !== undefined) {
         validationRewardLandedAt.set(drop.id, at());
         add({
@@ -357,6 +368,47 @@ export function createDevTelemetry(options: Options): DevTelemetry {
         shouldExport = true;
       }
       if (event.type === 'levelUp') add({ type: 'perkPopup' });
+      if (event.type === 'decisionOffered') add({
+        type: 'decision_offered',
+        decisionKind: event.kind,
+      });
+      if (event.type === 'decisionResolved') add({
+        type: 'decision_resolved',
+        decisionKind: event.kind,
+        choice: event.choice,
+      });
+      if (event.type === 'intermissionReady') add({
+        type: 'intermission_ready',
+        wave: event.wave,
+        automatic: event.automatic,
+      });
+      if (event.type === 'waveRewardsGranted') add({
+        type: 'wave_rewards_granted',
+        wave: event.wave,
+        waveRewards: event.granted.map(reward => ({ ...reward })),
+      });
+      if (event.type === 'godOffer') add({
+        type: 'god_offer',
+        wave: event.wave,
+        godRole: event.role,
+        candidates: [...event.candidates],
+      });
+      if (event.type === 'godSelected') add({
+        type: 'god_selected',
+        wave: event.wave,
+        godRole: event.role,
+        godId: event.god,
+      });
+      if (event.type === 'runRosterCreated') add({
+        type: 'run_roster_created',
+        cardTypes: [...event.cardTypes],
+      });
+      if (event.type === 'activePoolCreated') add({
+        type: 'active_pool_created',
+        wave: event.wave,
+        focusGod: event.focusGod ?? undefined,
+        cardTypes: [...event.cardTypes],
+      });
       if (event.type === 'dropExpired') add({
         type: 'dropExpired', dropId: event.dropId, source: event.source, stage: stage(),
         star: event.star, secure: event.secure,
@@ -366,9 +418,18 @@ export function createDevTelemetry(options: Options): DevTelemetry {
         stage: stage(), star: event.star, secure: event.secure,
       });
       if (event.type === 'collected') {
+        const godId = cardGodInRun(state(), event.cardType);
         add({
           type: 'pickup', dropId: event.dropId, cardType: event.cardType, source: event.source,
           stage: stage(), star: event.star, secure: event.secure,
+        });
+        if (godId) add({
+          type: 'card_collected_by_god',
+          cardType: event.cardType,
+          godId,
+          source: event.source,
+          stage: stage(),
+          star: event.star,
         });
         if (event.merges > 0) add({ type: 'mergeOpportunity', cardType: event.cardType });
         if (event.bountyEncounterId !== undefined) {

@@ -25,7 +25,11 @@ describe('Budget derived event estimate', () => {
     expect(game).toEqual(before);
   });
   it('is globally self-consistent and counts boss guaranteed drops', () => {
-    const game = tuned(); game.waves.betweenWaves = 3; game.waves.bossWaves = [2]; const metrics = deriveMetrics(game, createDefaultConfig());
+    const game = tuned();
+    game.waves.intermission.settleSeconds = 0;
+    game.waves.intermission.freeSeconds = { selection: 3, buildEarly: 3, buildLate: 3, validation: 3 };
+    game.waves.bossWaves = [2];
+    const metrics = deriveMetrics(game, createDefaultConfig());
     expect(metrics.totalDuration).toBeCloseTo(metrics.waveDurations.reduce((a, b) => a + b, 0) + 6, 10);
     expect(metrics.expectedDrops).toBeGreaterThan(0);
   });
@@ -59,18 +63,21 @@ describe('Budget derived event estimate', () => {
     const derived = deriveMetrics(buildConfig([]), createDefaultConfig());
     const metrics = derived.budget!;
     expect(metrics.projections[0]).toMatchObject({ normalTarget: 7, sprintTriggered: false });
-    expect(metrics.projections[1]).toMatchObject({ normalTarget: 10, sprintTriggered: false });
-    expect(metrics.projections[2].normalTarget).toBe(14);
-    expect(metrics.projections[5].normalTarget).toBe(28);
-    expect(metrics.projections[6]).toMatchObject({
+    expect(metrics.projections[1]).toMatchObject({ normalTarget: 8.5, sprintTriggered: false });
+    expect(metrics.projections[2].normalTarget).toBe(10);
+    expect(metrics.projections[3].normalTarget).toBe(14);
+    expect(metrics.projections[7].normalTarget).toBe(28);
+    expect(metrics.projections[8]).toMatchObject({
       normalTarget: 0,
       peakOnScreen: 1,
       validationEncounter: { enemyCount: 1, estimatedTtk: expect.any(Number) },
     });
     expect(derived.waves.map(wave => wave.stage)).toEqual([
-      'selection', 'selection', 'build', 'build', 'build', 'build', 'validation', 'validation',
+      'selection', 'selection', 'selection',
+      'build', 'build', 'build', 'build', 'build',
+      'validation', 'validation',
     ]);
-    expect(derived.waves.map(wave => wave.ordinaryDropsTargetPerMinute)).toEqual([35, 35, 40, 40, 40, 40, 0, 0]);
-    expect(derived.waves[6]).toMatchObject({ projectedOnScreenP50: 1, projectedOnScreenP95: 1 });
+    expect(derived.waves.map(wave => wave.ordinaryDropsTargetPerMinute)).toEqual([35, 35, 35, 40, 40, 40, 40, 40, 0, 0]);
+    expect(derived.waves[8]).toMatchObject({ projectedOnScreenP50: 1, projectedOnScreenP95: 1 });
   });
 });

@@ -1,5 +1,5 @@
 import { cfg } from '../config';
-import type { CardTypeRunStats, Config, GameState, WildcardInventory } from './types';
+import type { Card, CardType, CardTypeRunStats, Config, GameState, WildcardInventory } from './types';
 import type { DifficultyId } from '../config/types';
 
 function createEmptyWildcardInventory(maxStar: number): WildcardInventory {
@@ -17,6 +17,11 @@ function createEmptyCardTypeRunStats(): CardTypeRunStats {
     highestStarReached: 0,
     lastOrdinaryShownAt: 0,
   };
+}
+
+/** C0 兼容卡实例工厂：新字段先写空默认值，后续阶段再消费。 */
+export function createCardInstance(id: number, type: CardType, star: number): Card {
+  return { id, type, star, evolutionPath: [], affixes: [] };
 }
 
 /** 从各域 defaults 组装一份可变的运行期参数副本（调参面板操作对象）。 */
@@ -38,7 +43,32 @@ export function createInitialState(difficultyId: DifficultyId = 'hell'): GameSta
     hp: cfg.combat.hp.max,
     maxHp: cfg.combat.hp.max,
     wave: 0,
-    between: 0,
+    decisions: { current: null, pending: [] },
+    godPool: {
+      mainGod: null,
+      subGods: [],
+      focusGod: null,
+      runRoster: [],
+      rosterByGod: Object.fromEntries(cfg.gods.gods.map(god => [god.id, []])),
+      offerDrought: Object.fromEntries(cfg.gods.gods.map(god => [god.id, 0])),
+      bootstrapQueue: [],
+      bootstrapDropsRemaining: 0,
+      activePool: [],
+      previousActivePool: [],
+      activePoolHistory: [],
+      activePoolWave: 0,
+      lastDecisionAfterWave: -1,
+      offerRosterPreviews: Object.fromEntries(cfg.gods.gods.map(god => [god.id, []])),
+    },
+    intermission: {
+      active: false,
+      afterWave: 0,
+      step: 'decide',
+      settleRemaining: 0,
+      freeRemaining: 0,
+      readyConfirmed: false,
+      rewardsGranted: [],
+    },
     enemies: [],
     bullets: [],
     beams: [],
@@ -69,6 +99,13 @@ export function createInitialState(difficultyId: DifficultyId = 'hell'): GameSta
     waveBossId: null,
     waveBossSpawnedAt: null,
     bossRewardClaimedWave: 0,
+    runBaseStats: {
+      damageAdd: 0,
+      fireRateAdd: 0,
+      rangeAdd: 0,
+      multiAdd: 0,
+    },
+    waveRewardsClaimedWave: 0,
     damageBonus: 0,
     fireRateBonus: 0,
     multi: 1,

@@ -27,9 +27,9 @@ describe('run settlement', () => {
   it('awards victory and HP score, while all-zero affinity has no top lane', () => {
     const state = freshState(); state.hp = 50; state.maxHp = 100;
     const summary = buildRunSummary(state, true);
-    expect(summary.clearedWaves).toBe(8);
+    expect(summary.clearedWaves).toBe(10);
     expect(summary.topLane).toBeNull();
-    expect(summary.score).toMatchObject({ win: 500, waves: 320, hp: 100, total: 920 });
+    expect(summary.score).toMatchObject({ win: 500, waves: 400, hp: 100, total: 1000 });
   });
 
   it('endGame stores both victory and failure summaries', () => {

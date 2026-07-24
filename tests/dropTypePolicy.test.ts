@@ -23,6 +23,19 @@ import { card, constRng, createDefaultConfig, enemy, freshState, resetTestEnv, s
 beforeEach(() => { resetTestEnv(); registerSkillDefs(cfg.skills.cards); });
 
 describe('NormalDropDirector · card pool and discovery', () => {
+  it('all ordinary roles stay inside the cached active pool', () => {
+    const state = freshState();
+    state.godPool.mainGod = 'storm';
+    state.godPool.runRoster = ['pierce', 'chainLightning', 'frost'];
+    state.godPool.activePool = ['pierce', 'chainLightning'];
+    state.godPool.rosterByGod.storm = ['pierce', 'chainLightning'];
+    const rng = createSeededRng(712);
+
+    const shown = Array.from({ length: 40 }, () => selectNormalEnemyDropType(state, rng));
+
+    expect(shown.every(type => state.godPool.activePool.includes(type))).toBe(true);
+  });
+
   it('reads the active configured pool and automatically includes a twelfth card', () => {
     expect(getCardPool()).toHaveLength(11);
     const state = freshState();

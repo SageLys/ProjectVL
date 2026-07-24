@@ -3,6 +3,15 @@
   "waves": {
     "totalWaves": 3,
     "bossWaves": [1, 2, 3],
-    "stagePlan": { "selectionWaves": 1, "validationWaves": 1 }
+    "stagePlan": { "selectionWaves": 1, "validationWaves": 1 },
+    "intermission": {
+      "freeSeconds": {
+        "selection": 5,
+        "buildEarly": 5,
+        "buildLate": 5,
+        "validation": 5
+      },
+      "settleSeconds": 0.5
+    }
   }
 }

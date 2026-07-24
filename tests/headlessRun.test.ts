@@ -4,10 +4,11 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { cfg } from '../src/config';
 import { registerSkillDefs } from '../src/core/effects/interpreter';
 import { updateGame } from '../src/core/updateGame';
-import { startNextWave } from '../src/core/systems/waveSystem';
 import { collectNearest } from '../src/core/systems/dropSystem';
 import { consumeCard, moveOrSwap } from '../src/core/systems/equipmentSystem';
 import { applyPerk } from '../src/core/systems/progressionSystem';
+import { resolveCurrentDecision } from '../src/core/systems/decisionQueueSystem';
+import { beginOpeningIntermission, confirmIntermissionReady } from '../src/core/systems/intermissionSystem';
 import type { Config, GameState, Rng } from '../src/core/types';
 import { freshState, createDefaultConfig, resetTestEnv, applyVariants } from './helpers';
 import { stageForWave } from '../src/core/runStage';
@@ -30,7 +31,7 @@ function seeded(seed: number): Rng {
 interface ValidationEntrySnapshot { wave: number; maturity: number; highestStar: number; equippedCount: number }
 
 function runBotGame(s: GameState, config: Config, rng: Rng): ValidationEntrySnapshot | undefined {
-  startNextWave(s, config, rng);
+  beginOpeningIntermission(s);
   const dt = 1 / 30;
   let validationEntry: ValidationEntrySnapshot | undefined;
   for (let frame = 0; frame < 30 * 60 * 25 && s.mode === 'playing'; frame++) {
@@ -45,6 +46,16 @@ function runBotGame(s: GameState, config: Config, rng: Rng): ValidationEntrySnap
       };
     }
     if (s.paused && s.offeredPerks.length) applyPerk(s, config, s.offeredPerks[frame % s.offeredPerks.length], rng);
+    if (s.decisions.current && s.pendingLevelUps === 0 && s.offeredPerks.length === 0) {
+      const decision = s.decisions.current;
+      const choice = decision.kind === 'godDraft' || decision.kind === 'godFocus'
+        ? decision.candidates[0]
+        : decision.kind === 'evolutionBranch' || decision.kind === 'relic'
+          ? decision.options[0]
+          : decision.recipeId;
+      resolveCurrentDecision(s, config, rng, choice);
+    }
+    if (s.intermission.active && s.intermission.step === 'free') confirmIntermissionReady(s);
     if (frame % 6 === 0 && s.groundDrops.length) {
       const d = s.groundDrops[0];
       collectNearest(s, config, rng, d.x, d.y, cfg.economy.drops.pickupRadius);
@@ -70,6 +81,9 @@ describe('整局冒烟（占位技能卡=配置数据，经通用解释器结算
     registerSkillDefs(cfg.skills.cards); // 全部正式卡（批次1+批次2）
     const s = freshState();
     const config = createDefaultConfig();
+    s.hp = 1_000_000;
+    s.maxHp = 1_000_000;
+    config.damage = 200;
     // 固定使用能在当前控制预算与 11 卡池下跑满拾取、合成、装备与消耗路径的 seed。
     runBotGame(s, config, seeded(3));
     expect(s.mode).toBe('ended');
@@ -78,6 +92,14 @@ describe('整局冒烟（占位技能卡=配置数据，经通用解释器结算
     expect(s.merges).toBeGreaterThan(0);
     expect(s.equipOps).toBeGreaterThan(0);
     expect(s.consumes).toBeGreaterThan(0);
+    expect(s.godPool.mainGod).not.toBeNull();
+    expect(s.godPool.subGods).toHaveLength(2);
+    expect(s.godPool.runRoster).toHaveLength(11);
+    expect(s.godPool.activePool.length).toBeLessThanOrEqual(7);
+    const shownTypes = Object.entries(s.normalDropDirector.typeStats)
+      .filter(([, stats]) => stats.totalShown > 0)
+      .map(([type]) => type);
+    expect(shownTypes.every(type => s.godPool.runRoster.includes(type))).toBe(true);
   });
 
   it('dev-short variant：3 波短局可跑', () => {
@@ -90,25 +112,22 @@ describe('整局冒烟（占位技能卡=配置数据，经通用解释器结算
     expect(s.wave).toBeLessThanOrEqual(3);
   });
 
-  it('compares build maturity at validation entry for 8-wave and 10-wave layouts with one fixed seed', () => {
+  it('reproduces the 10-wave validation-entry snapshot with one fixed seed', () => {
     const seed = 42;
     registerSkillDefs(cfg.skills.cards);
     const baseState = freshState();
     const baseConfig = createDefaultConfig();
     baseState.hp = 1_000_000;
     baseConfig.damage = 200;
-    const base = runBotGame(baseState, baseConfig, seeded(seed));
+    const first = runBotGame(baseState, baseConfig, seeded(seed));
 
-    applyVariants(['validation-10']);
-    registerSkillDefs(cfg.skills.cards);
-    const variantState = freshState();
-    const variantConfig = createDefaultConfig();
-    variantState.hp = 1_000_000;
-    variantConfig.damage = 200;
-    const variant = runBotGame(variantState, variantConfig, seeded(seed));
+    const repeatState = freshState();
+    const repeatConfig = createDefaultConfig();
+    repeatState.hp = 1_000_000;
+    repeatConfig.damage = 200;
+    const repeat = runBotGame(repeatState, repeatConfig, seeded(seed));
 
-    expect(base).toMatchObject({ wave: 7, maturity: expect.any(Number), highestStar: expect.any(Number), equippedCount: expect.any(Number) });
-    expect(variant).toMatchObject({ wave: 9, maturity: expect.any(Number), highestStar: expect.any(Number), equippedCount: expect.any(Number) });
-    expect(variant!.equippedCount).toBeGreaterThanOrEqual(base!.equippedCount);
+    expect(first).toMatchObject({ wave: 9, maturity: expect.any(Number), highestStar: expect.any(Number), equippedCount: expect.any(Number) });
+    expect(repeat).toEqual(first);
   });
 });

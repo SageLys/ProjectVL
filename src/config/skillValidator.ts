@@ -2,8 +2,16 @@ import type { SkillsConfig } from './types';
 
 const CATEGORIES = new Set(['projectile', 'control', 'domain', 'economy', 'defense']);
 const BUILD_TAGS = new Set(['projectile', 'control', 'domain', 'defense', 'utility']);
+const CARD_STATS = new Set([
+  'damageAdd', 'fireRateAdd', 'rangeAdd', 'multiAdd', 'maxHpAdd', 'heal',
+  'effectDamageMul', 'quantityAdd', 'controlPotencyMul', 'controlledDamageTakenMul',
+  'areaScaleMul', 'dotDamageMul', 'defenseDurabilityMul', 'retaliationMul',
+]);
 const TIERS: Record<string, string> = { '3': 'core', '5': 'dual', '6': 'transform' };
-const CARD_KEYS = new Set(['id', 'category', 'synergyTags', 'textKey', 'teaching', 'stars', 'amplifyAxis', 'consumable', 'implementationBatch', 'designNotes']);
+const CARD_KEYS = new Set([
+  'id', 'god', 'category', 'synergyTags', 'textKey', 'teaching', 'stars', 'amplifyAxis',
+  'consumable', 'evolutionTree', 'affixPool', 'recipeOnly', 'implementationBatch', 'designNotes',
+]);
 
 function fail(path: string, message: string): never { throw new Error(`[skills-schema v0.4.0] ${path}: ${message}`); }
 function object(value: unknown, path: string): Record<string, unknown> {
@@ -18,6 +26,72 @@ function effects(value: unknown, path: string): void {
     for (const key of Object.keys(e)) if (key !== 'atom' && key !== 'params') fail(`${path}[${i}].${key}`, '不允许的字段');
   });
 }
+function bindings(value: unknown, path: string): void {
+  if (!Array.isArray(value) || value.length < 1) fail(path, '必须是非空绑定数组');
+  value.forEach((rawBinding, i) => {
+    const binding = object(rawBinding, `${path}[${i}]`);
+    if (typeof binding.trigger !== 'string') fail(`${path}[${i}].trigger`, '缺少触发器');
+    effects(binding.effects, `${path}[${i}].effects`);
+  });
+}
+function evolutionTree(value: unknown, path: string): void {
+  const tree = object(value, path);
+  if (!Array.isArray(tree.checkpoints)) fail(`${path}.checkpoints`, '必须是数组');
+  const checkpointStars = new Set<number>();
+  tree.checkpoints.forEach((rawCheckpoint, checkpointIndex) => {
+    const checkpointPath = `${path}.checkpoints[${checkpointIndex}]`;
+    const checkpoint = object(rawCheckpoint, checkpointPath);
+    if (checkpoint.star !== 3 && checkpoint.star !== 5) fail(`${checkpointPath}.star`, '只能为 3 或 5');
+    if (checkpointStars.has(checkpoint.star)) fail(`${checkpointPath}.star`, '进化检查点星级不得重复');
+    checkpointStars.add(checkpoint.star);
+    if (!Array.isArray(checkpoint.options) || checkpoint.options.length !== 3) {
+      fail(`${checkpointPath}.options`, '每个检查点必须恰好有 3 个选项');
+    }
+    const optionIds = new Set<string>();
+    checkpoint.options.forEach((rawOption, optionIndex) => {
+      const optionPath = `${checkpointPath}.options[${optionIndex}]`;
+      const option = object(rawOption, optionPath);
+      if (typeof option.id !== 'string' || !option.id) fail(`${optionPath}.id`, '必须是非空字符串');
+      if (optionIds.has(option.id)) fail(`${optionPath}.id`, '同一检查点 option id 不得重复');
+      optionIds.add(option.id);
+      if (typeof option.textKey !== 'string' || !option.textKey) fail(`${optionPath}.textKey`, '必须是非空字符串');
+      bindings(option.equip, `${optionPath}.equip`);
+    });
+  });
+
+  if (!Array.isArray(tree.sharedNodes)) fail(`${path}.sharedNodes`, '必须是数组');
+  const sharedStars = new Set<number>();
+  tree.sharedNodes.forEach((rawNode, nodeIndex) => {
+    const nodePath = `${path}.sharedNodes[${nodeIndex}]`;
+    const node = object(rawNode, nodePath);
+    if (node.star !== 4 && node.star !== 6) fail(`${nodePath}.star`, '只能为 4 或 6');
+    if (sharedStars.has(node.star)) fail(`${nodePath}.star`, '公共节点星级不得重复');
+    sharedStars.add(node.star);
+    if (node.equip !== undefined) bindings(node.equip, `${nodePath}.equip`);
+    if (node.amplify !== undefined) {
+      const amplify = object(node.amplify, `${nodePath}.amplify`);
+      if (Object.values(amplify).some(item => typeof item !== 'string')) fail(`${nodePath}.amplify`, '值必须为字符串');
+    }
+  });
+}
+function affixPool(value: unknown, path: string): void {
+  const pool = object(value, path);
+  if (!Number.isInteger(pool.count) || Number(pool.count) < 0) fail(`${path}.count`, '必须是非负整数');
+  if (!Array.isArray(pool.candidates)) fail(`${path}.candidates`, '必须是数组');
+  if (Number(pool.count) > pool.candidates.length) fail(`${path}.count`, '不得超过候选数量');
+  pool.candidates.forEach((rawCandidate, index) => {
+    const candidatePath = `${path}.candidates[${index}]`;
+    const candidate = object(rawCandidate, candidatePath);
+    if (!CARD_STATS.has(String(candidate.stat))) fail(`${candidatePath}.stat`, '非法词条属性');
+    for (const key of ['weight', 'min', 'max', 'step', 'consumableDuration']) {
+      if (typeof candidate[key] !== 'number' || !Number.isFinite(candidate[key])) fail(`${candidatePath}.${key}`, '必须是有限数值');
+    }
+    if (Number(candidate.weight) <= 0) fail(`${candidatePath}.weight`, '必须大于 0');
+    if (Number(candidate.step) <= 0) fail(`${candidatePath}.step`, '必须大于 0');
+    if (Number(candidate.max) < Number(candidate.min)) fail(candidatePath, 'max 不得小于 min');
+    if (Number(candidate.consumableDuration) < 0) fail(`${candidatePath}.consumableDuration`, '不得小于 0');
+  });
+}
 
 /** 启动/构建共用的严格 v0.4.0 卡牌结构校验；失败即抛错，绝不降级。 */
 export function validateSkillsConfig(value: unknown): asserts value is SkillsConfig {
@@ -28,6 +102,8 @@ export function validateSkillsConfig(value: unknown): asserts value is SkillsCon
     const path = `$.cards[${index}]`; const card = object(raw, path);
     for (const key of Object.keys(card)) if (!CARD_KEYS.has(key)) fail(`${path}.${key}`, 'v0.4.0 不允许的字段');
     if (typeof card.id !== 'string' || !/^[a-z][a-zA-Z0-9]*$/.test(card.id)) fail(`${path}.id`, '非法 id');
+    if (typeof card.god !== 'string' || !card.god) fail(`${path}.god`, '必须是非空字符串');
+    if (card.recipeOnly !== undefined && typeof card.recipeOnly !== 'boolean') fail(`${path}.recipeOnly`, '必须是布尔值');
     if (!CATEGORIES.has(String(card.category))) fail(`${path}.category`, '非法类别');
     if (!Array.isArray(card.synergyTags) || card.synergyTags.length < 1 || card.synergyTags.length > 2) {
       fail(`${path}.synergyTags`, '必须是长度为 1~2 的非空数组');
@@ -40,12 +116,7 @@ export function validateSkillsConfig(value: unknown): asserts value is SkillsCon
     for (const [star, tierName] of Object.entries(TIERS)) {
       const tier = object(stars[star], `${path}.stars.${star}`);
       if (tier.tier !== tierName) fail(`${path}.stars.${star}.tier`, `必须为 ${tierName}`);
-      if (!Array.isArray(tier.equip) || tier.equip.length < 1) fail(`${path}.stars.${star}.equip`, '必须是非空绑定数组');
-      tier.equip.forEach((rawBinding, i) => {
-        const binding = object(rawBinding, `${path}.stars.${star}.equip[${i}]`);
-        if (typeof binding.trigger !== 'string') fail(`${path}.stars.${star}.equip[${i}].trigger`, '缺少触发器');
-        effects(binding.effects, `${path}.stars.${star}.equip[${i}].effects`);
-      });
+      bindings(tier.equip, `${path}.stars.${star}.equip`);
     }
     const axis = object(card.amplifyAxis, `${path}.amplifyAxis`);
     const params = object(axis.params, `${path}.amplifyAxis.params`);
@@ -55,5 +126,7 @@ export function validateSkillsConfig(value: unknown): asserts value is SkillsCon
     const anchors = object(consumable.anchors, `${path}.consumable.anchors`);
     if (Object.keys(anchors).sort().join(',') !== '1,3,6') fail(`${path}.consumable.anchors`, '必须且只能定义 1/3/6 锚点');
     for (const star of ['1', '3', '6']) effects(object(anchors[star], `${path}.consumable.anchors.${star}`).effects, `${path}.consumable.anchors.${star}.effects`);
+    if (card.evolutionTree !== undefined) evolutionTree(card.evolutionTree, `${path}.evolutionTree`);
+    if (card.affixPool !== undefined) affixPool(card.affixPool, `${path}.affixPool`);
   });
 }

@@ -2,6 +2,7 @@ import { cfg } from '../../config';
 import type { CardType, Config, GameEvent, GameState, Rng } from '../types';
 import { fireTrigger } from '../effects/interpreter';
 import { getOrCreateCardTypeRunStats } from './dropTypePolicy';
+import { createCardInstance } from '../createInitialState';
 
 export function getActiveMergeCopies(): number {
   return cfg.economy.placeholderAssumptions.twoCopyMerge ? 2 : cfg.economy.mergeCopiesWhenTwoCopyDisabled;
@@ -37,7 +38,7 @@ export function autoMergeCards(state: GameState, config: Config, rng: Rng): { me
       }
       if (partners.length === mergeCopies - 1) {
         const resultStar = a.star + 1;
-        const resultCard = { id: state.nextCardId++, type: a.type, star: resultStar };
+        const resultCard = createCardInstance(state.nextCardId++, a.type, resultStar);
         state.cards[i] = resultCard;
         for (const j of partners) state.cards[j] = null;
         merged++;

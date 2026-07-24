@@ -13,17 +13,17 @@ describe('validation fixed encounters', () => {
   it('spawns 1 then 2 validation elites with zero Budget quota and waits before the Boss', () => {
     const state = freshState();
     const runtime = createDefaultConfig();
-    jumpToWave(state, runtime, constRng(0.25), 7);
+    jumpToWave(state, runtime, constRng(0.25), 9);
     expect(state.spawnLeft).toBe(0);
     expect(state.waveSpawnQuota).toBe(0);
     expect(state.enemies.map(enemy => enemy.spawnKind)).toEqual(['validationElite']);
     expect(advanceWavePhase(state, runtime, constRng(0.25))).toEqual([]);
     state.enemies.length = 0;
-    expect(advanceWavePhase(state, runtime, constRng(0.25))).toContainEqual({ type: 'waveBossSpawned', wave: 7 });
+    expect(advanceWavePhase(state, runtime, constRng(0.25))).toContainEqual({ type: 'waveBossSpawned', wave: 9 });
     expect(state.enemies).toHaveLength(1);
     expect(state.enemies[0].spawnKind).toBe('waveBoss');
 
-    jumpToWave(state, runtime, constRng(0.25), 8);
+    jumpToWave(state, runtime, constRng(0.25), 10);
     expect(state.spawnLeft).toBe(0);
     expect(state.enemies).toHaveLength(2);
     expect(state.enemies.every(enemy => enemy.spawnKind === 'validationElite')).toBe(true);
@@ -32,12 +32,12 @@ describe('validation fixed encounters', () => {
 
   it('stores and applies per-instance control and knockback resistance overrides', () => {
     const state = freshState();
-    jumpToWave(state, createDefaultConfig(), constRng(0.25), 7);
+    jumpToWave(state, createDefaultConfig(), constRng(0.25), 9);
     const elite = state.enemies[0];
     expect(elite).toMatchObject({
       ccResistOverride: 0.7,
       knockbackResistOverride: 0.8,
-      validationReward: { kind: 'card', star: 4, count: 1, typePolicy: 'build' },
+      validationReward: { kind: 'card', star: 4, count: 1, typePolicy: 'focusGod' },
     });
     applyFreeze(elite, 10);
     expect(elite.status.frozen).toBeCloseTo(cfg.combat.controlCeiling.freezeSeconds * 0.3, 10);
@@ -50,7 +50,7 @@ describe('validation fixed encounters', () => {
 
   it('does not generate Bounty offers in validation', () => {
     const state = freshState();
-    jumpToWave(state, createDefaultConfig(), constRng(0), 7);
+    jumpToWave(state, createDefaultConfig(), constRng(0), 9);
     cfg.bounty.offer.baseChancePerCheck = 1;
     cfg.bounty.offer.maxChancePerCheck = 1;
     tickBountySystem(state, createDefaultConfig(), constRng(0), cfg.bounty.offer.checkIntervalSeconds * 2);
@@ -61,14 +61,14 @@ describe('validation fixed encounters', () => {
   it('restores the legacy linear Budget and no fixed encounter when the rollback switch is off', () => {
     cfg.economy.ordinaryDropRate.enabled = false;
     const state = freshState();
-    jumpToWave(state, createDefaultConfig(), constRng(0.25), 7);
-    expect(state.spawnLeft).toBe(cfg.waves.budget.waveQuota.base + 7 * cfg.waves.budget.waveQuota.perWave);
+    jumpToWave(state, createDefaultConfig(), constRng(0.25), 9);
+    expect(state.spawnLeft).toBe(cfg.waves.budget.waveQuota.base + 9 * cfg.waves.budget.waveQuota.perWave);
     expect(state.enemies).toHaveLength(0);
   });
 
   it('creates exactly 2 + 3 secure pickups with the configured star/count composition', () => {
     const runtime = createDefaultConfig();
-    const rewardsFor = (wave: 7 | 8) => {
+    const rewardsFor = (wave: 9 | 10) => {
       const state = freshState();
       jumpToWave(state, runtime, constRng(0.25), wave);
       for (const elite of [...state.enemies]) {
@@ -81,26 +81,26 @@ describe('validation fixed encounters', () => {
       killEnemy(state, runtime, constRng(0.25), boss);
       return state;
     };
-    const wave7 = rewardsFor(7);
-    const wave8 = rewardsFor(8);
-    expect(wave7.groundDrops).toHaveLength(2);
-    expect(wave8.groundDrops).toHaveLength(3);
-    expect(wave7.groundDrops).toEqual([
-      expect.objectContaining({ kind: 'card', star: 4, validationTypePolicy: 'build', source: 'validationElite' }),
+    const wave9 = rewardsFor(9);
+    const wave10 = rewardsFor(10);
+    expect(wave9.groundDrops).toHaveLength(2);
+    expect(wave10.groundDrops).toHaveLength(3);
+    expect(wave9.groundDrops).toEqual([
+      expect.objectContaining({ kind: 'card', star: 4, validationTypePolicy: 'focusGod', source: 'validationElite' }),
       expect.objectContaining({ kind: 'wildcard', star: 5, count: 1, source: 'bossKill' }),
     ]);
-    expect(wave8.groundDrops).toEqual([
-      expect.objectContaining({ kind: 'card', star: 5, validationTypePolicy: 'build', source: 'validationElite' }),
-      expect.objectContaining({ kind: 'card', star: 3, validationTypePolicy: 'pivot', source: 'validationElite' }),
+    expect(wave10.groundDrops).toEqual([
+      expect.objectContaining({ kind: 'card', star: 5, validationTypePolicy: 'focusGod', source: 'validationElite' }),
+      expect.objectContaining({ kind: 'card', star: 3, validationTypePolicy: 'focusGod', source: 'validationElite' }),
       expect.objectContaining({ kind: 'wildcard', star: 5, count: 1, source: 'bossKill' }),
     ]);
-    expect([...wave7.groundDrops, ...wave8.groundDrops].every(drop => drop.secure)).toBe(true);
+    expect([...wave9.groundDrops, ...wave10.groundDrops].every(drop => drop.secure)).toBe(true);
   });
 
   it('keeps secure rewards forever, lets wildcards bypass a full hand, and holds concrete cards until space exists', () => {
     const state = freshState();
     const runtime = createDefaultConfig();
-    jumpToWave(state, runtime, constRng(0.25), 7);
+    jumpToWave(state, runtime, constRng(0.25), 9);
     const elite = state.enemies.pop()!;
     killEnemy(state, runtime, constRng(0.25), elite);
     const secure = state.groundDrops[0];
@@ -125,10 +125,10 @@ describe('validation fixed encounters', () => {
     expect(advanceWavePhase(state, runtime, constRng(0.25))).toEqual([]);
     state.cards[0] = null;
     expect(collectDrop(state, runtime, constRng(0.25), cardDrop)).toContainEqual(
-      expect.objectContaining({ type: 'collected', star: 4, validationTypePolicy: 'build' }),
+      expect.objectContaining({ type: 'collected', star: 4, validationTypePolicy: 'focusGod' }),
     );
     expect(state.groundDrops).toHaveLength(0);
     expect(state.wildcards[5]).toBe(1);
-    expect(advanceWavePhase(state, runtime, constRng(0.25))).toContainEqual({ type: 'waveCleared', wave: 7 });
+    expect(advanceWavePhase(state, runtime, constRng(0.25))).toContainEqual({ type: 'waveCleared', wave: 9 });
   });
 });

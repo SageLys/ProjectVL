@@ -8,7 +8,9 @@ import { grantWildcards } from './wildcardSystem';
 import {
   getCardPool, getOrCreateCardTypeRunStats, recordCardDropShown, selectNormalEnemyDropType,
 } from './dropTypePolicy';
+import { getActivePool, getRunRoster } from './activePoolSystem';
 import { stageForWave } from '../runStage';
+import { createCardInstance } from '../createInitialState';
 
 const TAU = Math.PI * 2;
 /** 正式卡池（P5 批次1+批次2，共 11 张技能卡）。 */
@@ -157,7 +159,7 @@ export function collectDrop(state: GameState, config: Config, rng: Rng, drop: Gr
     }];
   }
   state.groundDrops = state.groundDrops.filter(d => d.id !== drop.id);
-  const collectedCard = { id: state.nextCardId++, type: drop.type, star: drop.star };
+  const collectedCard = createCardInstance(state.nextCardId++, drop.type, drop.star);
   if (empty >= 0) state.cards[empty] = collectedCard;
   else state.cards.push(collectedCard);
   state.collected++;
@@ -194,9 +196,20 @@ export function collectNearest(state: GameState, config: Config, rng: Rng, x: nu
   return nearest ? collectDrop(state, config, rng, nearest) : [];
 }
 
-/** 调试用：在固定位置生成 4 份同类型 1 星掉落，类型按已合成次数轮换。 */
-export function spawnTestDrops(state: GameState, config: Config, rng: Rng): GameEvent[] {
-  const cardPool = getCardPool();
+export type DebugCardPool = 'global' | 'run' | 'active';
+
+/** 调试用：显式选择池档；默认遵守正常玩法的活跃池。 */
+export function spawnTestDrops(
+  state: GameState,
+  config: Config,
+  rng: Rng,
+  pool: DebugCardPool = 'active',
+): GameEvent[] {
+  const cardPool = pool === 'global'
+    ? getCardPool()
+    : pool === 'run'
+      ? getRunRoster(state)
+      : getActivePool(state);
   const type = cardPool[state.merges % cardPool.length];
   for (const x of [360, 440, 520, 600]) {
     spawnGroundDrop(state, config, rng, x, 370, type, undefined, 'debug');

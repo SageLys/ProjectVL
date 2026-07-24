@@ -441,7 +441,7 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
       star = Math.min(star, cfg.economy.dropStarPolicy.bountyBossMax);
       const x = base.x + (ctx.rng() - 0.5) * 60;
       const y = base.y + (ctx.rng() - 0.5) * 60;
-      const type = selectUniformCardType(ctx.rng);
+      const type = selectUniformCardType(ctx.state, ctx.rng);
       spawnGroundDrop(ctx.state, ctx.config, ctx.rng, x, y, type, star, 'skillExtra');
       recordCardDropShown(ctx.state, type, 'skillExtra');
     }

@@ -1,0 +1,45 @@
+{
+  "version": "0.1.0",
+  "gods": [
+    {
+      "id": "storm",
+      "textKey": "gods.storm",
+      "anchorCardIds": ["chainLightning", "pierce"],
+      "variableCardIds": [],
+      "mainRosterSize": 5,
+      "subRosterSize": 3
+    },
+    {
+      "id": "winter",
+      "textKey": "gods.winter",
+      "anchorCardIds": ["frost", "impact"],
+      "variableCardIds": [],
+      "mainRosterSize": 5,
+      "subRosterSize": 3
+    },
+    {
+      "id": "inferno",
+      "textKey": "gods.inferno",
+      "anchorCardIds": ["scorch", "splitBlast"],
+      "variableCardIds": [],
+      "mainRosterSize": 5,
+      "subRosterSize": 3
+    },
+    {
+      "id": "bulwark",
+      "textKey": "gods.bulwark",
+      "anchorCardIds": ["aegis", "thorns"],
+      "variableCardIds": ["decoy", "sanctum"],
+      "mainRosterSize": 5,
+      "subRosterSize": 3
+    },
+    {
+      "id": "plenty",
+      "textKey": "gods.plenty",
+      "anchorCardIds": ["harvest"],
+      "variableCardIds": [],
+      "mainRosterSize": 5,
+      "subRosterSize": 3
+    }
+  ]
+}

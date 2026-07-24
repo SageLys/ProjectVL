@@ -11,12 +11,31 @@ import bounty from './base/bounty.json';
 import tuner from './base/tuner.json';
 import input from './base/input.json';
 import devShort from '../config/variants/dev-short.json';
-import validation10 from '../config/variants/validation-10.json';
 import type { DeepPartial, GameConfig } from './types';
 import { validateSkillsConfig } from './skillValidator';
 import { validateProgressionConfig } from './progressionValidator';
 import { validateDifficultyConfig } from './difficultyValidator';
-import { validateStagePlanConfig } from './stagePlanValidator';
+import { validateIntermissionConfig, validateStagePlanConfig } from './stagePlanValidator';
+import { validateGodConfig } from './godValidator';
+
+const optionalBaseModules = import.meta.glob<{ default: unknown }>(
+  './base/{gods,relics,evolutionRecipes,waveRewards}.json',
+  { eager: true },
+);
+
+function optionalBaseConfig<K extends 'gods' | 'relics' | 'evolutionRecipes' | 'waveRewards'>(
+  fileName: string,
+  fallback: GameConfig[K],
+): GameConfig[K] {
+  const loaded = optionalBaseModules[`./base/${fileName}`];
+  return (loaded?.default ?? fallback) as GameConfig[K];
+}
+
+// C0 兼容层：新文件尚未部署时回落为空域，旧战斗路径仍可启动。
+const gods = optionalBaseConfig('gods.json', { version: '0.1.0', gods: [] });
+const relics = optionalBaseConfig('relics.json', { version: '0.1.0', relics: [] });
+const evolutionRecipes = optionalBaseConfig('evolutionRecipes.json', { version: '0.1.0', recipes: [] });
+const waveRewards = optionalBaseConfig('waveRewards.json', { version: '0.1.0', rewards: [] });
 
 function normalizeValidationRewards(config: GameConfig): void {
   for (const wave of config.waves.stagePlan.validation) {
@@ -60,7 +79,6 @@ export function parseBossWavesInput(input: string, totalWaves: number): BossWave
 /** 已注册 variant。新增覆盖文件后在此登记（key = URL 参数名）。 */
 export const VARIANTS: Record<string, DeepPartial<GameConfig>> = {
   'dev-short': devShort as DeepPartial<GameConfig>,
-  'validation-10': validation10 as DeepPartial<GameConfig>,
 };
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
@@ -90,6 +108,10 @@ function assembleBase(): GameConfig {
     enemies,
     difficulty,
     skills,
+    gods,
+    relics,
+    evolutionRecipes,
+    waveRewards,
     progression,
     economy,
     bounty,
@@ -98,6 +120,8 @@ function assembleBase(): GameConfig {
     tuner,
   }) as unknown as GameConfig;
   normalizeValidationRewards(config);
+  validateGodConfig(config);
+  validateIntermissionConfig(config.waves.intermission);
   validateStagePlanConfig(config.waves.stagePlan, config.waves.totalWaves, config.economy.maxStar, config.waves.waveBoss.reward);
   return config;
 }
@@ -115,6 +139,9 @@ export function buildConfig(variantNames: string[] = []): GameConfig {
   }
   cfg.waves.bossWaves = normalizeBossWaves(cfg.waves.bossWaves, cfg.waves.totalWaves);
   normalizeValidationRewards(cfg);
+  validateSkillsConfig(cfg.skills);
+  validateGodConfig(cfg);
+  validateIntermissionConfig(cfg.waves.intermission);
   validateProgressionConfig(cfg.progression);
   validateDifficultyConfig(cfg.difficulty);
   validateStagePlanConfig(cfg.waves.stagePlan, cfg.waves.totalWaves, cfg.economy.maxStar, cfg.waves.waveBoss.reward);

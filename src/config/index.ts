@@ -3,7 +3,23 @@
 import { buildConfig, variantsFromSearch } from './loader';
 import type { GameConfig } from './types';
 
-export type { GameConfig } from './types';
+export type {
+  CardAffixCandidateDef,
+  CardAffixPoolDef,
+  CardStatKind,
+  EvolutionRecipeDef,
+  EvolutionRecipesConfig,
+  EvolutionTreeDef,
+  GameConfig,
+  GodDef,
+  GodId,
+  GodsConfig,
+  RelicDef,
+  RelicsConfig,
+  RunBaseStatKind,
+  WaveRewardDef,
+  WaveRewardsConfig,
+} from './types';
 export { buildConfig, deepMerge, normalizeBossWaves, parseBossWavesInput, variantsFromSearch, VARIANTS } from './loader';
 
 /** 当前生效的 variant 名单（浏览器读 URL；node/vitest 下为空 = 纯 base）。 */
