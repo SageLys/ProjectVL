@@ -1,6 +1,5 @@
 import { cfg } from '../../config';
 import { getSkillDef } from '../effects/interpreter';
-import type { BuildTag } from '../effects/defs';
 import type { CardDropSource, CardType, GameState, NormalDropRole, Rng } from '../types';
 import { cardGodInRun, getActivePool, isCardFromSelectedGod } from './activePoolSystem';
 import {
@@ -53,14 +52,12 @@ function withoutTypeIfPossible(values: CardType[], excludedType?: CardType): Car
   return filtered.length ? filtered : values;
 }
 
-/** 流派倾向只叠加到 build 位；utility 不参与卡型导流。 */
+/** Relic affinity is god-scoped and only contributes to build-role scoring. */
 export function calculateAffinityScore(state: GameState, type: CardType): number {
   const def = getSkillDef(type);
-  if (!def) return 0;
-  const affinity = cfg.economy.normalDropTypePolicy.affinity;
-  const raw = def.synergyTags
-    .filter(tag => tag !== 'utility')
-    .reduce((sum, tag) => sum + state.buildState.affinity[tag], 0);
+  if (!def?.god) return 0;
+  const affinity = cfg.economy.normalDropTypePolicy.godAffinity;
+  const raw = state.buildState.godAffinity[def.god] ?? 0;
   return Math.min(affinity.scoreCap, raw * affinity.scorePerStack);
 }
 
@@ -212,11 +209,11 @@ function selectBuildTypeBase(state: GameState, rng: Rng, excludedType?: CardType
   return weightedBuildChoice(state, candidates, rng);
 }
 
-function hasSynergyTag(type: CardType, lane: BuildTag): boolean {
-  return getSkillDef(type)?.synergyTags.includes(lane) ?? false;
+function hasGod(type: CardType, god: string): boolean {
+  return getSkillDef(type)?.god === god;
 }
 
-function applyBuildPity(
+function applyGodPity(
   state: GameState,
   selectedType: CardType,
   rng: Rng,
@@ -224,14 +221,14 @@ function applyBuildPity(
 ): CardType {
   const pity = state.buildState.dropPity;
   if (!pity) return selectedType;
-  if (hasSynergyTag(selectedType, pity.lane)) {
+  if (hasGod(selectedType, pity.god)) {
     state.buildState.dropPity = undefined;
     return selectedType;
   }
   pity.remaining--;
   if (pity.remaining > 0) return selectedType;
 
-  const matching = buildCandidatesForBuildRole(state).filter(entry => hasSynergyTag(entry.type, pity.lane));
+  const matching = buildCandidatesForBuildRole(state).filter(entry => hasGod(entry.type, pity.god));
   if (!matching.length) {
     state.buildState.dropPity = undefined;
     return selectedType;
@@ -245,7 +242,7 @@ function applyBuildPity(
 }
 
 export function selectBuildType(state: GameState, rng: Rng, excludedType?: CardType): CardType {
-  return applyBuildPity(state, selectBuildTypeBase(state, rng, excludedType), rng, excludedType);
+  return applyGodPity(state, selectBuildTypeBase(state, rng, excludedType), rng, excludedType);
 }
 
 export function selectPivotType(state: GameState, rng: Rng, excludedType?: CardType): CardType {
@@ -318,13 +315,11 @@ export function selectNormalEnemyDropType(state: GameState, rng: Rng): CardType 
     && recent.slice(-streakLimit).every(recentType => recentType === type)) {
     type = selectForRole(type);
   }
-  if (role === 'build') {
-    const streakExcludedType = recent.length >= streakLimit
-      && recent.slice(-streakLimit).every(recentType => recentType === recent[recent.length - 1])
-      ? recent[recent.length - 1]
-      : undefined;
-    type = applyBuildPity(state, type, rng, streakExcludedType);
-  }
+  const streakExcludedType = recent.length >= streakLimit
+    && recent.slice(-streakLimit).every(recentType => recentType === recent[recent.length - 1])
+    ? recent[recent.length - 1]
+    : undefined;
+  type = applyGodPity(state, type, rng, streakExcludedType);
   recordCardDropShown(state, type, 'normalKill');
   state.normalDropDirector.ordinaryDropCount++;
   return type;

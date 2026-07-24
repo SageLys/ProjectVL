@@ -3,6 +3,10 @@ import type { GameConfig } from './types';
 const RUN_BASE_STATS = new Set(['damageAdd', 'fireRateAdd', 'rangeAdd', 'multiAdd', 'maxHpAdd', 'heal']);
 const BUILD_TAGS = new Set(['projectile', 'control', 'domain', 'defense', 'utility']);
 const RELIC_RARITIES = new Set(['common', 'rare', 'epic']);
+const BUILD_SCALING_AXES = new Set([
+  'effectDamageMul', 'quantityAdd', 'controlPotencyMul', 'controlledDamageTakenMul',
+  'areaScaleMul', 'dotDamageMul', 'defenseDurabilityMul', 'retaliationMul',
+]);
 const warnedIncompleteRosters = new Set<string>();
 const isTestEnvironment = typeof process !== 'undefined' && process.env.NODE_ENV === 'test';
 
@@ -124,17 +128,48 @@ export function validateGodConfig(
   }
 
   const relics = versionedArray(config.relics, 'relics', '$.relics');
+  const relicIds = new Set<string>();
   for (const [index, raw] of relics.entries()) {
     const path = `$.relics.relics[${index}]`;
     const relic = object(raw, path);
     if (typeof relic.id !== 'string' || !relic.id) fail(`${path}.id`, '必须是非空字符串');
+    if (relicIds.has(relic.id)) fail(`${path}.id`, `重复的遗物 id: ${relic.id}`);
+    relicIds.add(relic.id);
     if (relic.god !== undefined && (!godIds.has(String(relic.god)) || !gods.length)) {
       fail(`${path}.god`, `引用了不存在的神: ${String(relic.god)}`);
     }
     if (!RELIC_RARITIES.has(String(relic.rarity))) fail(`${path}.rarity`, '非法稀有度');
+    if (typeof relic.textKey !== 'string' || !relic.textKey) fail(`${path}.textKey`, '必须是非空字符串');
+    if (typeof relic.title !== 'string' || !relic.title) fail(`${path}.title`, '必须是非空字符串');
+    if (typeof relic.desc !== 'string' || !relic.desc) fail(`${path}.desc`, '必须是非空字符串');
     const targetTags = stringArray(relic.targetTags, `${path}.targetTags`);
+    if (!targetTags.length) fail(`${path}.targetTags`, '不得为空');
     if (targetTags.some(tag => !BUILD_TAGS.has(tag))) fail(`${path}.targetTags`, '包含非法机制标签');
-    if (!Array.isArray(relic.effects)) fail(`${path}.effects`, '必须是数组');
+    const coveredCards = cardDefs.filter(card => card.synergyTags.some(tag => targetTags.includes(tag))).length;
+    if (coveredCards < 3) {
+      fail(`${path}.targetTags`, `全局静态覆盖卡数必须 >=3（当前 ${coveredCards}）`);
+    }
+    if (!Array.isArray(relic.effects) || relic.effects.length < 1) fail(`${path}.effects`, '必须是非空数组');
+    relic.effects.forEach((rawEffect, effectIndex) => {
+      const effectPath = `${path}.effects[${effectIndex}]`;
+      const effect = object(rawEffect, effectPath);
+      if (effect.kind !== 'buildScaling') fail(`${effectPath}.kind`, '遗物只允许 buildScaling');
+      if (!BUILD_SCALING_AXES.has(String(effect.axis))) fail(`${effectPath}.axis`, '非法缩放轴');
+      const effectTags = stringArray(effect.targetTags, `${effectPath}.targetTags`);
+      if (!effectTags.length) fail(`${effectPath}.targetTags`, '不得为空');
+      if (effectTags.some(tag => !BUILD_TAGS.has(tag))) fail(`${effectPath}.targetTags`, '包含非法机制标签');
+      if (typeof effect.value !== 'number' || !Number.isFinite(effect.value)) fail(`${effectPath}.value`, '必须是有限数值');
+    });
+    if (relic.poolInfluence !== undefined) {
+      if (relic.god === undefined) fail(`${path}.poolInfluence`, '中立遗物不得导流');
+      const influence = object(relic.poolInfluence, `${path}.poolInfluence`);
+      if (typeof influence.godWeightAdd !== 'number' || !Number.isFinite(influence.godWeightAdd)
+        || influence.godWeightAdd < 0) fail(`${path}.poolInfluence.godWeightAdd`, '必须是有限非负数');
+      if (influence.pityDrops !== undefined
+        && (!Number.isInteger(influence.pityDrops) || Number(influence.pityDrops) < 0)) {
+        fail(`${path}.poolInfluence.pityDrops`, '必须是非负整数');
+      }
+    }
     if (!Number.isInteger(relic.maxStacks) || Number(relic.maxStacks) < 1) fail(`${path}.maxStacks`, '必须是正整数');
   }
 }

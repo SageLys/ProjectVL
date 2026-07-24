@@ -1,6 +1,5 @@
 import './telemetryHud.css';
 import type { DifficultyId, GameConfig } from '../config/types';
-import type { BuildTag } from '../core/effects/defs';
 import type { Enemy, GameEvent, GameState } from '../core/types';
 import { EVENT_UNIVERSE, OPPORTUNITY_EVENTS, percentile } from './metrics';
 import type { TelemetryEvent, TelemetryInputType, TelemetrySession } from './types';
@@ -137,13 +136,13 @@ export function createDevTelemetry(options: Options): DevTelemetry {
       if ((resultingStar ?? 0) >= 6) pending.telemetry.reached6BeforeFinalBoss = true;
     }
   }
-  function affinityMatch(cardType: string): Pick<TelemetryEvent, 'lane' | 'laneMatch'> {
-    const lanes: BuildTag[] = ['projectile', 'control', 'domain', 'defense'];
-    const max = Math.max(...lanes.map(lane => state().buildState.affinity[lane]));
+  function affinityMatch(cardType: string): Pick<TelemetryEvent, 'godId' | 'laneMatch'> {
+    const gods = options.getConfig().gods.gods.map(god => god.id);
+    const max = Math.max(0, ...gods.map(god => state().buildState.godAffinity[god] ?? 0));
     if (max <= 0) return { laneMatch: undefined };
-    const lane = lanes.find(item => state().buildState.affinity[item] === max)!;
+    const godId = gods.find(god => state().buildState.godAffinity[god] === max);
     const def = options.getConfig().skills.cards.find(card => card.id === cardType);
-    return { lane, laneMatch: def?.synergyTags.includes(lane) ?? false };
+    return { godId, laneMatch: def?.god === godId };
   }
   function add(event: Omit<TelemetryEvent, 'at' | 'wave'> & Partial<Pick<TelemetryEvent, 'at' | 'wave'>>): TelemetryEvent {
     const item = { at: at(), wave: state().wave, ...event } as TelemetryEvent;
@@ -367,7 +366,31 @@ export function createDevTelemetry(options: Options): DevTelemetry {
         });
         shouldExport = true;
       }
-      if (event.type === 'levelUp') add({ type: 'perkPopup' });
+      if (event.type === 'relicOffered') add({
+        type: 'relic_offered',
+        relicIndex: event.relicIndex,
+        candidates: [...event.options],
+      });
+      if (event.type === 'relicSelected') add({
+        type: 'relic_selected',
+        relicId: event.relicId,
+        rarity: event.rarity,
+        godId: event.god,
+      });
+      if (event.type === 'evolutionBranchOffered') add({
+        type: 'evolution_branch_offered',
+        cardType: event.cardType,
+        checkpointStar: event.checkpointStar,
+        candidates: [...event.options],
+        provisionalCardId: event.provisionalCardId,
+      });
+      if (event.type === 'evolutionBranchSelected') add({
+        type: 'evolution_branch_selected',
+        cardType: event.cardType,
+        checkpointStar: event.checkpointStar,
+        optionId: event.optionId,
+        provisionalCardId: event.provisionalCardId,
+      });
       if (event.type === 'decisionOffered') add({
         type: 'decision_offered',
         decisionKind: event.kind,

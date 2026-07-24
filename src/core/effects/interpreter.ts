@@ -125,7 +125,7 @@ export function getSkillDef(type: string): CardDef | undefined {
 
 /** 生效装备集：方案 A 独立装备栏。 */
 export function effectiveEquipment(state: GameState): Card[] {
-  return state.equipment.filter((c): c is Card => !!c);
+  return state.equipment.filter((c): c is Card => !!c && !c.provisional);
 }
 
 function clone<T>(value: T): T { return structuredClone(value); }
@@ -145,10 +145,53 @@ function applyAmplify(value: unknown, axes: Record<string, string>, key = ''): u
 }
 
 /** 解析装备态：3/5/6 为锚点；4★ 只能对 3★ 作同构数值放大。 */
-export function resolveEquipBindings(def: CardDef, star: number): BindingDef[] {
+export function legacyResolveEquipBindings(def: CardDef, star: number): BindingDef[] {
   if (star < 3) return [];
   if (star === 4) return applyAmplify(clone(def.stars['3'].equip), def.amplifyAxis.params) as BindingDef[];
   return clone(def.stars[star >= 6 ? '6' : star >= 5 ? '5' : '3'].equip);
+}
+
+/** Backward-compatible public name for callers that explicitly need legacy anchors. */
+export function resolveEquipBindings(def: CardDef, star: number): BindingDef[] {
+  return legacyResolveEquipBindings(def, star);
+}
+
+function selectedEvolutionOption(def: CardDef, checkpointStar: number, evolutionPath: string[]) {
+  const prefix = `${checkpointStar}:`;
+  const optionId = evolutionPath.find(entry => entry.startsWith(prefix))?.slice(prefix.length);
+  return def.evolutionTree?.checkpoints
+    .find(checkpoint => checkpoint.star === checkpointStar)
+    ?.options.find(option => option.id === optionId);
+}
+
+/**
+ * Resolves a migrated card cumulatively: branch 3, shared 4, independent branch
+ * 5, then shared 6. Shared 4 amplification remains active at stars 5 and 6.
+ */
+export function resolveCardBindings(def: CardDef, evolutionPath: string[], star: number): BindingDef[] {
+  if (star < 3) return [];
+  if (!def.evolutionTree) return legacyResolveEquipBindings(def, star);
+  // Compatibility for pre-C5 saves and test/debug cards created without the
+  // factory. Newly upgraded migrated cards always receive a locked path.
+  if (evolutionPath.length === 0) return legacyResolveEquipBindings(def, star);
+
+  const bindings: BindingDef[] = [];
+  const option3 = selectedEvolutionOption(def, 3, evolutionPath);
+  const shared4 = def.evolutionTree.sharedNodes.find(node => node.star === 4);
+  if (option3) {
+    const branch3 = clone(option3.equip);
+    bindings.push(...(star >= 4 && shared4?.amplify
+      ? applyAmplify(branch3, shared4.amplify) as BindingDef[]
+      : branch3));
+  }
+  if (star >= 4 && shared4?.equip) bindings.push(...clone(shared4.equip));
+
+  const option5 = selectedEvolutionOption(def, 5, evolutionPath);
+  if (star >= 5 && option5) bindings.push(...clone(option5.equip));
+
+  const shared6 = def.evolutionTree.sharedNodes.find(node => node.star === 6);
+  if (star >= 6 && shared6?.equip) bindings.push(...clone(shared6.equip));
+  return bindings;
 }
 
 /** 遍历生效装备的全部绑定。 */
@@ -156,7 +199,7 @@ function* equippedBindings(state: GameState): Generator<{ card: Card; def: CardD
   for (const card of effectiveEquipment(state)) {
     const def = DEFS.get(card.type);
     if (!def) continue;
-    const bindings = applyBuildScalingToBindings(state, def, resolveEquipBindings(def, card.star));
+    const bindings = applyBuildScalingToBindings(state, def, resolveCardBindings(def, card.evolutionPath ?? [], card.star));
     for (let i = 0; i < bindings.length; i++) yield { card, def, binding: bindings[i], bindingIndex: i };
   }
 }

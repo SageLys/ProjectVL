@@ -95,8 +95,8 @@ export const DROP_DIRECTOR_TUNER_PARAMS: TunerParam[] = [
   { path: 'economy.normalDropTypePolicy.lateMix.build', label: '掉落导演 · 后期主线位', group: 'drops' },
   { path: 'economy.normalDropTypePolicy.lateMix.pivot', label: '掉落导演 · 后期调整位', group: 'drops' },
   { path: 'economy.normalDropTypePolicy.bootstrapMinDiscovery', label: '掉落导演 · 启动探索保底', group: 'drops' },
-  { path: 'economy.normalDropTypePolicy.affinity.scorePerStack', label: '掉落导演 · 每层倾向分', group: 'drops' },
-  { path: 'economy.normalDropTypePolicy.affinity.scoreCap', label: '掉落导演 · 倾向分封顶', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.godAffinity.scorePerStack', label: '掉落导演 · 每层神倾向分', group: 'drops' },
+  { path: 'economy.normalDropTypePolicy.godAffinity.scoreCap', label: '掉落导演 · 神倾向分封顶', group: 'drops' },
   { path: 'economy.normalDropTypePolicy.maturity.fullMergeOps', label: '掉落导演 · 满成熟合成数', group: 'drops' },
   { path: 'economy.normalDropTypePolicy.maturity.fullHighestStar', label: '掉落导演 · 满成熟最高星', group: 'drops' },
   { path: 'economy.normalDropTypePolicy.maturity.fullEquippedTypes', label: '掉落导演 · 满成熟装备数', group: 'drops' },
@@ -162,10 +162,8 @@ export const TUNER_PARAMS: TunerParam[] = [
   { path: 'economy.defaults.dropChance', label: '基础掉落率', group: 'drops' },
   { path: 'economy.defaults.dropLifetime', label: '掉落存在时间', group: 'drops' },
 
-  { path: 'progression.xpNeedBase', label: '经验 · 首级需求', group: 'progression' },
-  { path: 'progression.xpGrowth', label: '经验 · 每级增长', group: 'progression' },
   { path: 'progression.killXpMul', label: '经验 · 击破倍率', group: 'progression' },
-  { path: 'progression.perkChoices', label: '升级 · 候选数量', group: 'progression' },
+  { path: 'progression.relicChoices', label: '遗物 · 候选数量', group: 'progression' },
 
   { path: 'combat.bullet.radius', label: 'P2 · 弹丸半径', group: 'p2' },
   { path: 'combat.bullet.muzzleOffset', label: 'P2 · 炮口偏移', group: 'p2' },

@@ -250,10 +250,6 @@ export interface DifficultyConfig {
   profiles: Record<DifficultyId, DifficultyProfile>;
 }
 
-export type PerkStatKind = 'damagePct' | 'fireRatePct' | 'heal' | 'maxHp' | 'xpGainPct' | 'rangePct';
-
-export interface PerkStatEffect { kind: 'stat'; stat: PerkStatKind; value: number; }
-
 export type BuildScalingAxis =
   | 'effectDamageMul'
   | 'quantityAdd'
@@ -264,22 +260,22 @@ export type BuildScalingAxis =
   | 'defenseDurabilityMul'
   | 'retaliationMul';
 
-export interface PerkBuildEffect {
+export interface RelicBuildEffect {
   kind: 'buildScaling';
   targetTags: BuildTag[];
   axis: BuildScalingAxis;
   value: number;
 }
 
-export type PerkEffect = PerkStatEffect | PerkBuildEffect;
-
 export interface RelicDef {
   id: string;
   god?: GodId;
   rarity: 'common' | 'rare' | 'epic';
   textKey: string;
+  title: string;
+  desc: string;
   targetTags: BuildTag[];
-  effects: PerkEffect[];
+  effects: RelicBuildEffect[];
   poolInfluence?: { godWeightAdd: number; pityDrops?: number };
   maxStacks: number;
 }
@@ -359,24 +355,12 @@ export interface CardAffixPoolDef {
   candidates: CardAffixCandidateDef[];
 }
 
-export interface PerkDef {
-  id: string;
-  title: string;
-  desc: string;
-  lane: BuildTag;
-  affinityGain: number;
-  effects: PerkEffect[];
-  offerRole: 'route' | 'bridge' | 'utility';
-  weight: number;
-  maxStacks: number;
-}
-
 export interface ProgressionConfig {
-  xpNeedBase: number;
-  xpGrowth: number;
   killXpMul: number;
-  perkChoices: number;
-  perks: PerkDef[];
+  relicChoices: number;
+  targetRelics: { min: number; max: number };
+  xpThresholds: number[];
+  rarityByRelicIndex: Array<Partial<Record<RelicDef['rarity'], number>>>;
   settlement: {
     winBonus: number;
     perWaveCleared: number;
@@ -393,7 +377,7 @@ export interface NormalDropTypePolicyConfig {
   earlyMix: { discovery: number; build: number; pivot: number };
   lateMix: { discovery: number; build: number; pivot: number };
   bootstrapMinDiscovery: number;
-  affinity: { scorePerStack: number; scoreCap: number; pityWindow: number };
+  godAffinity: { scorePerStack: number; scoreCap: number };
   maturity: {
     fullMergeOps: number;
     fullHighestStar: number;

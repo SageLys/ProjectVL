@@ -1,22 +1,14 @@
 {
-  "xpNeedBase": 10,
-  "xpGrowth": 2,
   "killXpMul": 1,
-  "perkChoices": 3,
-  "perks": [
-    { "id": "proj_damage", "title": "超压弹道", "desc": "弹道类技能的衍生伤害提高 15%", "lane": "projectile", "affinityGain": 1, "effects": [{ "kind": "buildScaling", "targetTags": ["projectile"], "axis": "effectDamageMul", "value": 0.15 }], "offerRole": "route", "weight": 1, "maxStacks": 5 },
-    { "id": "proj_quantity", "title": "增殖弹药", "desc": "穿透 / 弹跳 / 分裂数量 +1", "lane": "projectile", "affinityGain": 1, "effects": [{ "kind": "buildScaling", "targetTags": ["projectile"], "axis": "quantityAdd", "value": 1 }], "offerRole": "route", "weight": 1, "maxStacks": 3 },
-    { "id": "ctrl_potency", "title": "凝滞力场", "desc": "减速、冻结、眩晕、击退效果增强 20%", "lane": "control", "affinityGain": 1, "effects": [{ "kind": "buildScaling", "targetTags": ["control"], "axis": "controlPotencyMul", "value": 0.2 }], "offerRole": "route", "weight": 1, "maxStacks": 5 },
-    { "id": "ctrl_bridge", "title": "乘虚而入", "desc": "处于减速 / 冻结 / 眩晕的追求者承受伤害 +10%", "lane": "control", "affinityGain": 1, "effects": [{ "kind": "buildScaling", "targetTags": ["control"], "axis": "controlledDamageTakenMul", "value": 0.1 }], "offerRole": "bridge", "weight": 1, "maxStacks": 5 },
-    { "id": "domain_area", "title": "领域扩张", "desc": "区域与光环的半径和持续时间提高 15%", "lane": "domain", "affinityGain": 1, "effects": [{ "kind": "buildScaling", "targetTags": ["domain"], "axis": "areaScaleMul", "value": 0.15 }], "offerRole": "route", "weight": 1, "maxStacks": 5 },
-    { "id": "domain_dot", "title": "余烬灼心", "desc": "持续伤害提高 20%", "lane": "domain", "affinityGain": 1, "effects": [{ "kind": "buildScaling", "targetTags": ["domain"], "axis": "dotDamageMul", "value": 0.2 }], "offerRole": "route", "weight": 1, "maxStacks": 5 },
-    { "id": "def_durability", "title": "加固壁垒", "desc": "护盾吸收次数与召唤物耐久提高 25%", "lane": "defense", "affinityGain": 1, "effects": [{ "kind": "buildScaling", "targetTags": ["defense"], "axis": "defenseDurabilityMul", "value": 0.25 }], "offerRole": "route", "weight": 1, "maxStacks": 4 },
-    { "id": "def_bridge", "title": "荆棘反击", "desc": "破盾新星、反噬与突破反击伤害提高 25%", "lane": "defense", "affinityGain": 1, "effects": [{ "kind": "buildScaling", "targetTags": ["defense"], "axis": "retaliationMul", "value": 0.25 }], "offerRole": "bridge", "weight": 1, "maxStacks": 4 },
-    { "id": "damage", "title": "高能弹芯", "desc": "基础伤害 +15%", "lane": "utility", "affinityGain": 0, "effects": [{ "kind": "stat", "stat": "damagePct", "value": 0.15 }], "offerRole": "utility", "weight": 0.7, "maxStacks": 99 },
-    { "id": "rate", "title": "过载供能", "desc": "射速 +12%", "lane": "utility", "affinityGain": 0, "effects": [{ "kind": "stat", "stat": "fireRatePct", "value": 0.12 }], "offerRole": "utility", "weight": 0.7, "maxStacks": 99 },
-    { "id": "repair", "title": "重整心防", "desc": "私人空间恢复 20 点", "lane": "utility", "affinityGain": 0, "effects": [{ "kind": "stat", "stat": "heal", "value": 20 }], "offerRole": "utility", "weight": 0.8, "maxStacks": 99 },
-    { "id": "maxhp", "title": "扩容心防", "desc": "心防上限 +15", "lane": "utility", "affinityGain": 0, "effects": [{ "kind": "stat", "stat": "maxHp", "value": 15 }], "offerRole": "utility", "weight": 0.6, "maxStacks": 99 },
-    { "id": "xpgain", "title": "洞悉弱点", "desc": "击破经验 +12%", "lane": "utility", "affinityGain": 0, "effects": [{ "kind": "stat", "stat": "xpGainPct", "value": 0.12 }], "offerRole": "utility", "weight": 0.5, "maxStacks": 6 }
+  "relicChoices": 3,
+  "targetRelics": { "min": 5, "max": 8 },
+  "xpThresholds": [10, 22, 38, 62, 95, 140, 200, 280],
+  "rarityByRelicIndex": [
+    { "common": 1.0 },
+    { "common": 0.9, "rare": 0.1 },
+    { "common": 0.75, "rare": 0.25 },
+    { "common": 0.55, "rare": 0.4, "epic": 0.05 },
+    { "common": 0.3, "rare": 0.55, "epic": 0.15 }
   ],
   "settlement": {
     "winBonus": 500,

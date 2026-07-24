@@ -4,7 +4,7 @@ import type { BindingDef, BuildTag, CardDef, ConsumableTierDef, EffectDef, Trigg
 import type { GameState } from '../types';
 
 export interface BuildScalingTotals {
-  /** axis -> target tag -> additive perk total. Multiplicative axes consume this as (1 + total). */
+  /** axis -> target tag -> additive relic total. Multiplicative axes consume this as (1 + total). */
   byAxis: Partial<Record<BuildScalingAxis, Partial<Record<BuildTag, number>>>>;
 }
 
@@ -64,11 +64,10 @@ const cache = new WeakMap<GameState, { version: number; totals: BuildScalingTota
 
 export function aggregateBuildScaling(state: GameState): BuildScalingTotals {
   const totals: BuildScalingTotals = { byAxis: {} };
-  for (const perk of cfg.progression.perks) {
-    const stacks = state.perkStacks[perk.id] ?? 0;
+  for (const relic of cfg.relics.relics) {
+    const stacks = state.relicStacks[relic.id] ?? 0;
     if (!(stacks > 0)) continue;
-    for (const effect of perk.effects) {
-      if (effect.kind !== 'buildScaling') continue;
+    for (const effect of relic.effects) {
       const axisTotals = totals.byAxis[effect.axis] ?? (totals.byAxis[effect.axis] = {});
       for (const tag of effect.targetTags) {
         axisTotals[tag] = (axisTotals[tag] ?? 0) + effect.value * stacks;

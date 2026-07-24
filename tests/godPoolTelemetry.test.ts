@@ -41,6 +41,8 @@ describe('god pool telemetry', () => {
         focusGod: 'storm',
         cardTypes: [...state.godPool.activePool],
       },
+      { type: 'relicOffered', relicIndex: 0, options: ['proj_damage', 'neutral_calibrator'] },
+      { type: 'relicSelected', relicId: 'proj_damage', title: '超压弹道', rarity: 'common', god: 'storm' },
     ]);
     spawnGroundDrop(state, createDefaultConfig(), constRng(0), 10, 10, 'pierce', 1, 'normalKill');
     telemetry.beforeUpdate();
@@ -60,6 +62,8 @@ describe('god pool telemetry', () => {
       'active_pool_created',
       'card_shown_by_god',
       'card_collected_by_god',
+      'relic_offered',
+      'relic_selected',
     ]));
   });
 });

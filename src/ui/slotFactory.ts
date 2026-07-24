@@ -1,6 +1,7 @@
 import type { Card } from '../core/types';
+import { texts } from '../data';
 import { glyphToSvg } from '../presentation/skillGeometry';
-import { resolveCardMeta, type CardCopyContext } from './cardMeta';
+import { evolutionChoiceCopy, resolveCardMeta, type CardCopyContext } from './cardMeta';
 
 export type SlotSource = 'cards' | 'equipment' | 'wildcard';
 
@@ -15,11 +16,22 @@ export function createCardElement(card: Card, source: SlotSource, index: number,
   const meta = resolveCardMeta(card.type, card.star, context);
   const el = document.createElement('button');
   el.type = 'button';
-  el.className = source === 'equipment' ? 'card equipped' : 'card';
+  el.className = `${source === 'equipment' ? 'card equipped' : 'card'}${card.provisional ? ' provisional' : ''}`;
   el.draggable = false;
   el.dataset.id = String(card.id);
   el.dataset.testid = source === 'cards' ? 'upgrade-card' : 'equipped-card';
-  el.setAttribute('aria-label', `${source === 'equipment' ? '已装备' : ''}${card.star}星${meta.name}。${source === 'equipment' ? '常驻效果' : '手牌效果'}：${meta.desc}`);
+  if (card.provisional) el.dataset.provisional = 'true';
+  const routeBadges = (card.evolutionPath ?? []).map(entry => {
+    const separator = entry.indexOf(':');
+    const star = entry.slice(0, separator);
+    const optionId = entry.slice(separator + 1);
+    return `${star}★ ${evolutionChoiceCopy(card.type, optionId)?.name ?? optionId}`;
+  });
+  const pendingCopy = card.provisional ? texts.evolution.pending : '';
+  el.setAttribute(
+    'aria-label',
+    `${source === 'equipment' ? '已装备' : ''}${card.star}星${meta.name}。${pendingCopy} ${routeBadges.join(' / ')} ${meta.desc}`,
+  );
   el.style.setProperty('--card', meta.accent);
   el.innerHTML =
     `<span class="card-head">` +
@@ -27,6 +39,8 @@ export function createCardElement(card: Card, source: SlotSource, index: number,
       `<strong class="card-name">${meta.name}</strong>` +
     `</span>` +
     `<span class="card-stars" aria-hidden="true">${'★'.repeat(card.star)}</span>` +
+    (routeBadges.length ? `<span class="card-evolution-route">${routeBadges.join(' · ')}</span>` : '') +
+    (card.provisional ? `<span class="card-evolution-pending">${texts.evolution.pending}</span>` : '') +
     `<span class="card-desc">${meta.desc}</span>`;
   el.addEventListener('pointerdown', e => handlers.dragStart(e, source, index, el));
   return el;

@@ -44,7 +44,7 @@ export function enqueueDecision(state: GameState, decision: RunDecision): GameEv
   return [{ type: 'decisionOffered', kind: decision.kind }];
 }
 
-/** 解析当前选择并顺序弹出下一项；升级选择始终保有更高的暂停优先级。 */
+/** Resolves the current choice and advances exactly one queued decision. */
 export function resolveCurrentDecision(
   state: GameState,
   config: Config,
@@ -54,8 +54,6 @@ export function resolveCurrentDecision(
   const decision = state.decisions.current;
   if (
     !decision
-    || state.pendingLevelUps > 0
-    || state.offeredPerks.length > 0
     || !validChoices(decision).includes(choice)
   ) return [];
 
@@ -66,7 +64,7 @@ export function resolveCurrentDecision(
     state.paused = true;
     events.push({ type: 'decisionOffered', kind: state.decisions.current.kind });
   } else {
-    state.paused = state.pendingLevelUps > 0 || state.offeredPerks.length > 0;
+    state.paused = false;
   }
   return events;
 }

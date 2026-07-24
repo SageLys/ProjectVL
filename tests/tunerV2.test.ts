@@ -29,7 +29,7 @@ describe('stage director tuner controls', () => {
 
 describe('调参面板 v2 · 参数与派生指标', () => {
   it('§2 A/B/C/D 每个暴露参数都在 tuner.json 有 min/max/step', () => {
-    expect(TUNER_PARAMS.length).toBe(68);
+    expect(TUNER_PARAMS.length).toBe(66);
     for (const param of TUNER_PARAMS) {
       const range = cfg.tuner[param.path];
       expect(range, param.path).toBeDefined();
@@ -52,10 +52,8 @@ describe('调参面板 v2 · 参数与派生指标', () => {
 
   it('round-trips all progression controls through numeric path accessors', () => {
     const paths = [
-      'progression.xpNeedBase',
-      'progression.xpGrowth',
       'progression.killXpMul',
-      'progression.perkChoices',
+      'progression.relicChoices',
     ];
     for (const [index, path] of paths.entries()) {
       const value = index + 2.25;

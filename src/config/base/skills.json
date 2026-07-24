@@ -9,6 +9,33 @@
         "6": { "tier": "transform", "equip": [{ "trigger": "passive", "effects": [{ "atom": "beamMorph", "params": { "interval": 0.9, "width": 32, "damageRatio": 1.0 } }] }] }
       },
       "amplifyAxis": { "description": "穿透数 +1、伤害保留 +10pt", "params": { "count": "+1", "damageRetention": "+0.1" } },
+      "evolutionTree": {
+        "checkpoints": [
+          {
+            "star": 3,
+            "options": [
+              { "id": "pierceA", "textKey": "evolution.pierce.pierceA", "equip": [{ "trigger": "onFire", "effects": [{ "atom": "pierce", "params": { "count": 2, "damageRetention": 0.8, "rampPerPierce": 0.1 } }] }] },
+              { "id": "pierceB", "textKey": "evolution.pierce.pierceB", "equip": [{ "trigger": "onFire", "effects": [{ "atom": "pierce", "params": { "count": 1, "damageRetention": 0.9, "rampPerPierce": 0.3 } }] }] },
+              { "id": "pierceC", "textKey": "evolution.pierce.pierceC", "equip": [
+                { "trigger": "onFire", "effects": [{ "atom": "pierce", "params": { "count": 2, "damageRetention": 0.75, "rampPerPierce": 0.1 } }] },
+                { "trigger": "onHit", "effects": [{ "atom": "vulnerable", "params": { "ratio": 0.12, "duration": 2 } }] }
+              ] }
+            ]
+          },
+          {
+            "star": 5,
+            "options": [
+              { "id": "pierceA2", "textKey": "evolution.pierce.pierceA2", "equip": [{ "trigger": "onFire", "effects": [{ "atom": "ricochet", "params": { "bounces": 1 } }] }] },
+              { "id": "pierceB2", "textKey": "evolution.pierce.pierceB2", "equip": [{ "trigger": "onFire", "effects": [{ "atom": "pierce", "params": { "count": 1, "damageRetention": 1, "rampPerPierce": 0.25 } }] }] },
+              { "id": "pierceC2", "textKey": "evolution.pierce.pierceC2", "equip": [{ "trigger": "onFire", "effects": [{ "atom": "split", "params": { "count": 2, "damageRatio": 0.6, "maxDepth": 1 } }] }] }
+            ]
+          }
+        ],
+        "sharedNodes": [
+          { "star": 4, "amplify": { "count": "+1", "damageRetention": "+0.1" } },
+          { "star": 6, "equip": [{ "trigger": "passive", "effects": [{ "atom": "beamMorph", "params": { "interval": 0.9, "width": 32, "damageRatio": 1.0 } }] }] }
+        ]
+      },
       "consumable": { "placement": "point", "interpolation": "linear", "anchors": {
         "1": { "radius": 40, "effects": [{ "atom": "pierce", "params": { "damageMul": 3, "width": 10, "damageRetention": 1 } }] },
         "3": { "radius": 70, "effects": [{ "atom": "pierce", "params": { "damageMul": 5, "width": 16, "damageRetention": 1 } }] },

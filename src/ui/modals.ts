@@ -1,13 +1,12 @@
 import { texts } from '../data';
 import { cfg } from '../config';
 import type { GameState, RunDecision } from '../core/types';
-import type { PerkDef } from '../config/types';
 import type { DomRefs } from './domRefs';
-import { cardDisplayName } from './cardMeta';
+import { cardDisplayName, evolutionChoiceCopy } from './cardMeta';
 import { fmt } from './format';
 
 /** 升级三选一 / 结算 / 中心引导文案的显隐控制。 */
-export function createModals(refs: DomRefs, hooks: { onPerk(id: string): void; onDecision(choice: string): void; onRestart(): void }) {
+export function createModals(refs: DomRefs, hooks: { onDecision(choice: string): void; onRestart(): void }) {
   const decisionModal = document.createElement('div');
   const decisionCard = document.createElement('div');
   const decisionTitle = document.createElement('h2');
@@ -22,11 +21,6 @@ export function createModals(refs: DomRefs, hooks: { onPerk(id: string): void; o
   decisionModal.append(decisionCard);
   document.body.append(decisionModal);
 
-  refs.perkChoices.addEventListener('click', event => {
-    const button = (event.target as Element).closest<HTMLButtonElement>('[data-perk]');
-    const id = button?.dataset.perk;
-    if (id) hooks.onPerk(id);
-  });
   decisionChoices.addEventListener('click', event => {
     const button = (event.target as Element).closest<HTMLButtonElement>('[data-decision-choice]');
     const choice = button?.dataset.decisionChoice;
@@ -40,43 +34,6 @@ export function createModals(refs: DomRefs, hooks: { onPerk(id: string): void; o
       refs.centerMsg.innerHTML = `<h2>${title}</h2><p>${body}</p>`;
       refs.centerMsg.style.display = show ? 'block' : 'none';
     },
-    showLevel(perks: PerkDef[], state: GameState): void {
-      refs.perkChoices.replaceChildren(...perks.map(perk => {
-        const button = document.createElement('button');
-        const heading = document.createElement('span');
-        const title = document.createElement('b');
-        const desc = document.createElement('span');
-        button.className = 'choice';
-        button.dataset.perk = perk.id;
-        heading.className = 'choice-heading';
-        title.textContent = perk.title;
-        desc.className = 'choice-desc';
-        desc.textContent = perk.desc;
-        heading.append(title);
-        if (perk.lane !== 'utility') {
-          const chip = document.createElement('span');
-          chip.className = `lane-chip lane-${perk.lane}`;
-          chip.textContent = texts.lanes[perk.lane];
-          heading.append(chip);
-        }
-        button.append(heading, desc);
-        if (perk.offerRole !== 'utility') {
-          const heldTypes = new Set([...state.cards, ...state.equipment].filter(card => card !== null).map(card => card.type));
-          const names = cfg.skills.cards
-            .filter(card => heldTypes.has(card.id) && card.synergyTags.includes(perk.lane))
-            .map(card => cardDisplayName(card.id));
-          if (names.length) {
-            const benefits = document.createElement('span');
-            benefits.className = 'choice-benefits';
-            benefits.textContent = fmt(texts.levelup.benefits, { names: [...new Set(names)].join('、') });
-            button.append(benefits);
-          }
-        }
-        return button;
-      }));
-      refs.levelModal.classList.add('show');
-    },
-    hideLevel(): void { refs.levelModal.classList.remove('show'); },
     showDecision(decision: RunDecision, state?: GameState): void {
       // dispatch() synchronizes this modal every animation frame. Replacing a
       // button between pointerdown and pointerup suppresses the browser click.
@@ -88,7 +45,9 @@ export function createModals(refs: DomRefs, hooks: { onPerk(id: string): void; o
             ? decision.options
             : [decision.recipeId];
         decisionTitle.textContent = copy.title;
-        decisionBody.textContent = copy.body;
+        decisionBody.textContent = decision.kind === 'evolutionBranch'
+          ? `${copy.body} ${texts.evolution.lockNotice}`
+          : copy.body;
         decisionChoices.replaceChildren(...options.map(option => {
           const button = document.createElement('button');
           button.type = 'button';
@@ -109,6 +68,45 @@ export function createModals(refs: DomRefs, hooks: { onPerk(id: string): void; o
                 .map(cardDisplayName)
                 .join(' · ');
               button.append(preview);
+            }
+          } else if (decision.kind === 'evolutionBranch') {
+            const optionDef = cfg.skills.cards
+              .find(card => card.id === decision.cardType)?.evolutionTree?.checkpoints
+              .find(checkpoint => checkpoint.star === decision.checkpointStar)?.options
+              .find(item => item.id === option);
+            const optionCopy = (texts.evolution as unknown as Record<string, Record<string, { name: string; summary: string }>>)
+              [decision.cardType]?.[option];
+            label.textContent = optionCopy?.name ?? optionDef?.textKey ?? option;
+            const desc = document.createElement('span');
+            desc.className = 'choice-desc';
+            desc.textContent = optionCopy?.summary ?? '';
+            button.append(label, desc);
+          } else if (decision.kind === 'relic') {
+            const relic = cfg.relics.relics.find(item => item.id === option);
+            label.textContent = relic?.title ?? option;
+            const meta = document.createElement('span');
+            meta.className = 'choice-desc';
+            const godName = relic?.god
+              ? (texts.gods as Record<string, { name: string }>)[relic.god]?.name ?? relic.god
+              : '中立';
+            meta.textContent = `${godName} · ${relic?.rarity ?? ''}`;
+            const desc = document.createElement('span');
+            desc.className = 'choice-desc';
+            desc.textContent = relic?.desc ?? '';
+            button.append(label, meta, desc);
+            if (relic && state) {
+              const heldTypes = new Set([...state.cards, ...state.equipment]
+                .filter(card => card !== null).map(card => card.type));
+              const names = cfg.skills.cards
+                .filter(card => heldTypes.has(card.id)
+                  && card.synergyTags.some(tag => relic.targetTags.includes(tag)))
+                .map(card => cardDisplayName(card.id));
+              if (names.length) {
+                const benefits = document.createElement('span');
+                benefits.className = 'choice-benefits';
+                benefits.textContent = fmt(texts.levelup.benefits, { names: [...new Set(names)].join('、') });
+                button.append(benefits);
+              }
             }
           } else {
             label.textContent = option;
@@ -158,6 +156,18 @@ export function createModals(refs: DomRefs, hooks: { onPerk(id: string): void; o
           const highest = document.createElement('span');
           highest.textContent = fmt(texts.result.highestCard, { star: summary.highestCard.star, name: cardDisplayName(summary.highestCard.type) });
           refs.resultBuildMeta.append(highest);
+        }
+        const relics = document.createElement('span');
+        relics.textContent = `遗物 ${summary.relics.count} · 普通 ${summary.relics.rarity.common} / 稀有 ${summary.relics.rarity.rare} / 史诗 ${summary.relics.rarity.epic}`;
+        refs.resultBuildMeta.append(relics);
+        for (const card of summary.cardEvolutions.filter(item => item.path.length > 0)) {
+          const route = document.createElement('span');
+          const names = card.path.map(entry => {
+            const optionId = entry.slice(entry.indexOf(':') + 1);
+            return evolutionChoiceCopy(card.type, optionId)?.name ?? optionId;
+          });
+          route.textContent = `${cardDisplayName(card.type)} ${card.highestStar}★ · ${names.join(' → ')}`;
+          refs.resultBuildMeta.append(route);
         }
       }
       refs.resultModal.classList.add('show');

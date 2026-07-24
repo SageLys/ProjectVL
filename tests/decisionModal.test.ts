@@ -12,17 +12,12 @@ afterEach(() => {
 describe('decision modal', () => {
   it('keeps choice buttons stable across frame-by-frame UI synchronization', () => {
     document.body.innerHTML = [
-      '<div id="perkChoices"></div>',
       '<button id="restartBtn"></button>',
-      '<div id="levelModal"></div>',
     ].join('');
     const onDecision = vi.fn();
     const modals = createModals({
-      perkChoices: document.querySelector('#perkChoices'),
       restartBtn: document.querySelector('#restartBtn'),
-      levelModal: document.querySelector('#levelModal'),
     } as never, {
-      onPerk: vi.fn(),
       onDecision,
       onRestart: vi.fn(),
     });

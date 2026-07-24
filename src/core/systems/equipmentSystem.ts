@@ -2,6 +2,7 @@ import { cfg } from '../../config';
 import type { Card, Config, GameEvent, GameState, Rng, SlotKind } from '../types';
 import { autoMergeCards, commitMerge } from './cardSystem';
 import { getSkillDef, reconcileEquipmentPassives, releaseConsumable } from '../effects/interpreter';
+import { finalizeEvolutionUpgrade } from './evolutionTreeSystem';
 
 function collectionFor(state: GameState, kind: SlotKind): (Card | null)[] {
   return kind === 'cards' ? state.cards : state.equipment;
@@ -12,7 +13,9 @@ function feed(state: GameState, config: Config, rng: Rng, source: (Card | null)[
   source[sourceIndex] = null;
   state.equipOps++;
   const events: GameEvent[] = [{ type: 'fed', cardType: target.type, resultStar: target.star, slotIndex: targetIndex, targetCardId: target.id }];
+  const evolutionEvents = finalizeEvolutionUpgrade(state, target);
   events.push(...commitMerge(state, config, rng, target.type, target.star));
+  events.push(...evolutionEvents);
   events.push(...reconcileEquipmentPassives(state, config, rng));
   return events;
 }
@@ -38,6 +41,10 @@ export function moveOrSwap(state: GameState, config: Config, rng: Rng, sourceKin
   const moving = source[sourceIndex];
   if (!moving) return [];
   const replaced = target[targetIndex];
+  if (
+    (moving.provisional || replaced?.provisional)
+    && (sourceKind === 'equipment' || targetKind === 'equipment')
+  ) return [{ type: 'equipRejected', reason: 'provisional' }];
 
   if (cfg.economy.placeholderAssumptions.feedEquipped && cfg.economy.feedEquipped && replaced && targetKind === 'equipment' && replaced.type === moving.type && replaced.star === moving.star && replaced.star < cfg.economy.maxStar) {
     return feed(state, config, rng, source, sourceIndex, replaced, targetIndex);
@@ -79,7 +86,7 @@ export function moveOrSwap(state: GameState, config: Config, rng: Rng, sourceKin
 export function consumeCard(state: GameState, config: Config, rng: Rng, sourceIndex: number, x: number, y: number, sourceKind: SlotKind = 'cards'): GameEvent[] {
   const source = collectionFor(state, sourceKind);
   const card = source[sourceIndex];
-  if (!card) return [];
+  if (!card || card.provisional) return [];
   source[sourceIndex] = null;
   state.consumes++;
   const events: GameEvent[] = [{ type: 'skillConsumed', cardType: card.type, star: card.star, x, y }];

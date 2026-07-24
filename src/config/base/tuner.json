@@ -159,8 +159,8 @@
   "economy.normalDropTypePolicy.lateMix.build": { "min": 0, "max": 10, "step": 1 },
   "economy.normalDropTypePolicy.lateMix.pivot": { "min": 0, "max": 10, "step": 1 },
   "economy.normalDropTypePolicy.bootstrapMinDiscovery": { "min": 0, "max": 10, "step": 1 },
-  "economy.normalDropTypePolicy.affinity.scorePerStack": { "min": 0, "max": 6, "step": 0.5 },
-  "economy.normalDropTypePolicy.affinity.scoreCap": { "min": 0, "max": 12, "step": 1 },
+  "economy.normalDropTypePolicy.godAffinity.scorePerStack": { "min": 0, "max": 6, "step": 0.5 },
+  "economy.normalDropTypePolicy.godAffinity.scoreCap": { "min": 0, "max": 12, "step": 1 },
   "economy.normalDropTypePolicy.maturity.fullMergeOps": { "min": 1, "max": 40, "step": 1 },
   "economy.normalDropTypePolicy.maturity.fullHighestStar": { "min": 2, "max": 6, "step": 1 },
   "economy.normalDropTypePolicy.maturity.fullEquippedTypes": { "min": 1, "max": 3, "step": 1 },
@@ -179,8 +179,6 @@
   "economy.normalDropTypePolicy.pivot.candidateFraction": { "min": 0.1, "max": 1, "step": 0.05 },
   "economy.normalDropTypePolicy.maxSameTypeStreak": { "min": 1, "max": 5, "step": 1 },
 
-  "progression.xpNeedBase": { "min": 1, "max": 60, "step": 1 },
-  "progression.xpGrowth": { "min": 1, "max": 2, "step": 0.01 },
   "progression.killXpMul": { "min": 0, "max": 5, "step": 0.05 },
-  "progression.perkChoices": { "min": 2, "max": 5, "step": 1 }
+  "progression.relicChoices": { "min": 2, "max": 5, "step": 1 }
 }

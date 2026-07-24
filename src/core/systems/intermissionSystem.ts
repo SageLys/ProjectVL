@@ -86,7 +86,7 @@ export function tickIntermission(
   if (intermission.step === 'decide') {
     const godEvents = enqueueGodPoolDecisionForIntermission(state, rng);
     if (godEvents.length) return { events: godEvents, complete: false };
-    if (state.pendingLevelUps > 0 || state.offeredPerks.length > 0 || state.decisions.current || state.decisions.pending.length) {
+    if (state.decisions.current || state.decisions.pending.length) {
       return { events: [], complete: false };
     }
     // 开局只含 decide，不进入自由整备。

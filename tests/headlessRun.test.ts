@@ -6,7 +6,6 @@ import { registerSkillDefs } from '../src/core/effects/interpreter';
 import { updateGame } from '../src/core/updateGame';
 import { collectNearest } from '../src/core/systems/dropSystem';
 import { consumeCard, moveOrSwap } from '../src/core/systems/equipmentSystem';
-import { applyPerk } from '../src/core/systems/progressionSystem';
 import { resolveCurrentDecision } from '../src/core/systems/decisionQueueSystem';
 import { beginOpeningIntermission, confirmIntermissionReady } from '../src/core/systems/intermissionSystem';
 import type { Config, GameState, Rng } from '../src/core/types';
@@ -27,7 +26,7 @@ function seeded(seed: number): Rng {
   };
 }
 
-/** 简单 bot：点掉落、装备 3★、手牌将满时消耗释放、升级即选 perk。 */
+/** 简单 bot：点掉落、装备 3★、手牌将满时消耗释放、决策即选择。 */
 interface ValidationEntrySnapshot { wave: number; maturity: number; highestStar: number; equippedCount: number }
 
 function runBotGame(s: GameState, config: Config, rng: Rng): ValidationEntrySnapshot | undefined {
@@ -45,8 +44,7 @@ function runBotGame(s: GameState, config: Config, rng: Rng): ValidationEntrySnap
         equippedCount: s.equipment.filter(card => card !== null).length,
       };
     }
-    if (s.paused && s.offeredPerks.length) applyPerk(s, config, s.offeredPerks[frame % s.offeredPerks.length], rng);
-    if (s.decisions.current && s.pendingLevelUps === 0 && s.offeredPerks.length === 0) {
+    if (s.decisions.current) {
       const decision = s.decisions.current;
       const choice = decision.kind === 'godDraft' || decision.kind === 'godFocus'
         ? decision.candidates[0]
@@ -100,6 +98,13 @@ describe('整局冒烟（占位技能卡=配置数据，经通用解释器结算
       .filter(([, stats]) => stats.totalShown > 0)
       .map(([type]) => type);
     expect(shownTypes.every(type => s.godPool.runRoster.includes(type))).toBe(true);
+    expect(s.runSummary?.relics.count).toBeGreaterThanOrEqual(5);
+    expect(s.runSummary?.relics.count).toBeLessThanOrEqual(8);
+    const firstTwoRarities = s.buildState.relicHistory.slice(0, 2).map(
+      id => cfg.relics.relics.find(relic => relic.id === id)?.rarity,
+    );
+    expect(firstTwoRarities).toEqual(['common', 'common']);
+    expect(cfg.progression.rarityByRelicIndex[cfg.progression.rarityByRelicIndex.length - 1]?.epic).toBeGreaterThan(0);
   });
 
   it('dev-short variant：3 波短局可跑', () => {

@@ -12,7 +12,7 @@ describe('神池构筑 C0 数据契约', () => {
     expect(config.gods.gods).toHaveLength(5);
     expect(config.skills.cards).toHaveLength(11);
     expect(config.skills.cards.every(card => card.god !== undefined && godIds.has(card.god))).toBe(true);
-    expect(config.relics.relics).toEqual([]);
+    expect(config.relics.relics.length).toBeGreaterThanOrEqual(20);
     expect(config.evolutionRecipes.recipes).toEqual([]);
     expect(config.waveRewards.rewards).toHaveLength(6);
   });

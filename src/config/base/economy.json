@@ -44,7 +44,7 @@
     "earlyMix": { "discovery": 6, "build": 3, "pivot": 1 },
     "lateMix": { "discovery": 1, "build": 7, "pivot": 2 },
     "bootstrapMinDiscovery": 6,
-    "affinity": { "scorePerStack": 2.5, "scoreCap": 6, "pityWindow": 2 },
+    "godAffinity": { "scorePerStack": 2.5, "scoreCap": 6 },
     "maturity": {
       "fullMergeOps": 10,
       "fullHighestStar": 4,

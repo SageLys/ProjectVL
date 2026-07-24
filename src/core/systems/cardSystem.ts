@@ -3,6 +3,7 @@ import type { CardType, Config, GameEvent, GameState, Rng } from '../types';
 import { fireTrigger } from '../effects/interpreter';
 import { getOrCreateCardTypeRunStats } from './dropTypePolicy';
 import { createCardInstance } from '../createInitialState';
+import { finalizeEvolutionUpgrade, inheritEvolutionPath } from './evolutionTreeSystem';
 
 export function getActiveMergeCopies(): number {
   return cfg.economy.placeholderAssumptions.twoCopyMerge ? 2 : cfg.economy.mergeCopiesWhenTwoCopyDisabled;
@@ -28,22 +29,31 @@ export function autoMergeCards(state: GameState, config: Config, rng: Rng): { me
   let changed = true;
   while (changed) {
     changed = false;
+    const blockedTypes = new Set(
+      [...state.cards, ...state.equipment]
+        .filter(card => card?.provisional)
+        .map(card => card!.type),
+    );
     outer: for (let i = 0; i < state.cards.length; i++) {
       const a = state.cards[i];
-      if (!a || a.star >= maxStar) continue;
+      if (!a || a.provisional || blockedTypes.has(a.type) || a.star >= maxStar) continue;
       const partners: number[] = [];
       for (let j = i + 1; j < state.cards.length && partners.length < mergeCopies - 1; j++) {
         const b = state.cards[j];
-        if (b && a.type === b.type && a.star === b.star) partners.push(j);
+        if (b && !b.provisional && a.type === b.type && a.star === b.star) partners.push(j);
       }
       if (partners.length === mergeCopies - 1) {
         const resultStar = a.star + 1;
+        const materials = [a, ...partners.map(index => state.cards[index]!)];
         const resultCard = createCardInstance(state.nextCardId++, a.type, resultStar);
+        inheritEvolutionPath(state, resultCard, materials);
         state.cards[i] = resultCard;
         for (const j of partners) state.cards[j] = null;
         merged++;
         events.push({ type: 'merged', cardType: a.type, resultStar, resultCardId: resultCard.id });
+        const evolutionEvents = finalizeEvolutionUpgrade(state, resultCard);
         events.push(...commitMerge(state, config, rng, a.type, resultStar));
+        events.push(...evolutionEvents);
         changed = true;
         break outer;
       }

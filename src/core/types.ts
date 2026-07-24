@@ -105,6 +105,8 @@ export interface Card {
   type: CardType;
   star: number;
   evolutionPath?: string[];
+  /** Checkpoint merge product waiting for a run-locked branch choice. */
+  provisional?: boolean;
   affixes?: CardAffixRoll[];
 }
 
@@ -113,7 +115,7 @@ export type RunDecision =
   | { kind: 'godFocus'; wave: number; candidates: GodId[] }
   | { kind: 'evolutionBranch'; cardType: CardType; checkpointStar: number; options: string[]; provisionalCardId: number }
   | { kind: 'recipeEvolution'; recipeId: string }
-  | { kind: 'relic'; options: string[] };
+  | { kind: 'relic'; relicIndex: number; options: string[] };
 
 export interface DecisionQueueState {
   current: RunDecision | null;
@@ -443,14 +445,20 @@ export interface Config {
 }
 
 export interface BuildState {
-  /** 玩家通过升级主动表达的流派倾向；不锁流派，只表达意图。 */
+  /** BuildTag affinity is retained as a read-only compatibility snapshot for one release. */
   affinity: Record<BuildTag, number>;
-  /** 依次记录已选 perk id。 */
-  perkHistory: string[];
-  /** Incremented whenever a perk is applied, invalidating cached build-scaling totals. */
+  /** Relic routing affinity is god-scoped; neutral relics never increment it. */
+  godAffinity: Record<GodId, number>;
+  /** Relics in selection order. */
+  relicHistory: string[];
+  /** Incremented whenever a relic is applied, invalidating cached build-scaling totals. */
   scalingVersion: number;
-  /** 只由后续 build 位消费的流派命中保底。 */
-  dropPity?: { lane: BuildTag; remaining: number };
+  /** Forces a card from the selected god within this many build-role drops. */
+  dropPity?: { god: GodId; remaining: number };
+}
+
+export interface RunBuildState {
+  evolutionChoices: Partial<Record<CardType, Record<number, string>>>;
 }
 
 export interface GameState {
@@ -462,6 +470,8 @@ export interface GameState {
   maxHp: number;
   wave: number;
   decisions: DecisionQueueState;
+  /** Choices that are locked for the current run, shared by every copy of a card family. */
+  runBuild: RunBuildState;
   godPool: GodPoolState;
   intermission: IntermissionState;
   enemies: Enemy[];
@@ -514,9 +524,7 @@ export interface GameState {
   xp: number;
   xpNeed: number;
   level: number;
-  pendingLevelUps: number;
-  offeredPerks: string[];
-  perkStacks: Record<string, number>;
+  relicStacks: Record<string, number>;
   buildState: BuildState;
   xpGainBonus: number;
   /** Legacy perk percentage source; C2 wave growth is pixel-based runBaseStats.rangeAdd. */
@@ -562,6 +570,10 @@ export type GameEvent =
   | { type: 'waveRewardsGranted'; wave: number; granted: WaveRewardGrant[] }
   | { type: 'bossRewardGranted'; wave: number; grants: Array<{ star: number; count: number }> }
   | { type: 'levelUp' }
+  | { type: 'relicOffered'; relicIndex: number; options: string[] }
+  | { type: 'relicSelected'; relicId: string; title: string; rarity: 'common' | 'rare' | 'epic'; god?: GodId }
+  | { type: 'evolutionBranchOffered'; cardType: CardType; checkpointStar: number; options: string[]; provisionalCardId: number }
+  | { type: 'evolutionBranchSelected'; cardType: CardType; checkpointStar: number; optionId: string; provisionalCardId: number }
   | { type: 'gameEnd'; win: boolean }
   | { type: 'breakthrough'; damage: number }
   | { type: 'bossContactStarted'; enemyId: number }
@@ -570,7 +582,7 @@ export type GameEvent =
   | { type: 'cardsFull'; dropId?: number; source?: CardDropSource; star?: number; secure?: boolean }
   | { type: 'collected'; cardType: CardType; merges: number; bountyEncounterId?: number; dropId?: number; source?: CardDropSource; star?: number; secure?: boolean; validationRewardWave?: number; validationTypePolicy?: ValidationRewardTypePolicy }
   | { type: 'equipFull' }
-  | { type: 'equipRejected'; reason: 'star' | 'duplicate' }
+  | { type: 'equipRejected'; reason: 'star' | 'duplicate' | 'provisional' }
   | { type: 'moved'; cardType: CardType; merges: number }
   | { type: 'swapped'; a: CardType; b: CardType }
   | { type: 'merged'; cardType: CardType; resultStar: number; resultCardId?: number }
@@ -588,7 +600,7 @@ export type GameEvent =
       targetIndex: number;
       targetCardId: number;
     }
-  | { type: 'wildcardMergeRejected'; reason: 'emptyTarget' | 'maxStar' | 'missingWildcard'; requiredStar?: number }
+  | { type: 'wildcardMergeRejected'; reason: 'emptyTarget' | 'maxStar' | 'missingWildcard' | 'provisional'; requiredStar?: number }
   | { type: 'bountyOfferSpawned'; offerId: number; rewardCardType: CardType; guaranteed: boolean }
   | { type: 'bountyOfferExpired'; offerId: number }
   | { type: 'bountyAccepted'; offerId: number; encounterId: number; rewardCardType: CardType; side: BountySide; decisionSeconds: number; memberCount: number }
@@ -597,5 +609,4 @@ export type GameEvent =
   | { type: 'bountyFailed'; encounterId: number }
   | { type: 'bountyRewardDropped'; encounterId: number; rewardCardType: CardType }
   | { type: 'shieldBroken' }
-  | { type: 'testDrops'; cardType: CardType }
-  | { type: 'perkApplied'; title: string; lane: BuildTag };
+  | { type: 'testDrops'; cardType: CardType };

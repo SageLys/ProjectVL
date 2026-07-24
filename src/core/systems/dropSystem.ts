@@ -11,6 +11,7 @@ import {
 import { getActivePool, getRunRoster } from './activePoolSystem';
 import { stageForWave } from '../runStage';
 import { createCardInstance } from '../createInitialState';
+import { finalizeEvolutionUpgrade } from './evolutionTreeSystem';
 
 const TAU = Math.PI * 2;
 /** 正式卡池（P5 批次1+批次2，共 11 张技能卡）。 */
@@ -152,7 +153,11 @@ export function collectDrop(state: GameState, config: Config, rng: Rng, drop: Gr
   const empty = state.cards.findIndex(card => card === null);
   const originalLength = state.cards.length;
   if (empty < 0) {
+    const unresolvedCheckpoint = cfg.skills.cards.find(card => card.id === drop.type)?.evolutionTree?.checkpoints
+      .some(checkpoint => checkpoint.star <= drop.star
+        && !state.runBuild.evolutionChoices[drop.type]?.[checkpoint.star]);
     const canMergeImmediately = drop.star < cfg.economy.maxStar
+      && !unresolvedCheckpoint
       && state.cards.filter(card => card?.type === drop.type && card.star === drop.star).length >= getActiveMergeCopies() - 1;
     if (!canMergeImmediately) return [{
       type: 'cardsFull', dropId: drop.id, source: drop.source, star: drop.star, secure: drop.secure,
@@ -166,6 +171,7 @@ export function collectDrop(state: GameState, config: Config, rng: Rng, drop: Gr
   const stats = getOrCreateCardTypeRunStats(state, drop.type);
   stats.collected++;
   stats.highestStarReached = Math.max(stats.highestStarReached, drop.star);
+  const evolutionEvents = finalizeEvolutionUpgrade(state, collectedCard);
   const { merged, events: mergeEvents } = autoMergeCards(state, config, rng);
   while (state.cards.length > originalLength) {
     const removableNullIndex = state.cards.lastIndexOf(null);
@@ -180,6 +186,7 @@ export function collectDrop(state: GameState, config: Config, rng: Rng, drop: Gr
   };
   if (drop.bountyEncounterId !== undefined) collected.bountyEncounterId = drop.bountyEncounterId;
   const events: GameEvent[] = [collected];
+  events.push(...evolutionEvents);
   events.push(...mergeEvents);
   events.push(...fireTrigger(state, config, rng, 'onPickup', { drop, point: { x: drop.x, y: drop.y } }));
   return events;

@@ -31,6 +31,16 @@ export function cardDisplayName(cardType: CardType): string {
   return cardTexts?.[cardType]?.name ?? cardType;
 }
 
+export function evolutionChoiceCopy(
+  cardType: CardType,
+  optionId: string,
+): { name: string; summary: string } | undefined {
+  const evolution = (texts as unknown as {
+    evolution?: Record<string, Record<string, { name: string; summary: string }>>;
+  }).evolution;
+  return evolution?.[cardType]?.[optionId];
+}
+
 export function resolveCardMeta(cardType: CardType, star: number, context: CardCopyContext): CardMeta {
   const def = getSkillDef(cardType);
   const cardTexts = (texts as { cards?: Record<string, CardCopyEntry> }).cards;

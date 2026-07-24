@@ -46,14 +46,12 @@ describe('config · 方案A base', () => {
   it('applyVariants 就地替换单例', () => { const ref=cfg; applyVariants(['dev-short']); expect(ref.waves.totalWaves).toBe(3); applyVariants([]); expect(ref.waves.totalWaves).toBe(10); });
 });
 
-describe('config · data-driven perks', () => {
-  it('rejects duplicate ids and illegal lanes, roles, effect kinds, and scaling axes', () => {
+describe('config · relic progression', () => {
+  it('rejects non-increasing thresholds, invalid rarity weights, and mismatched cap', () => {
     const cases: Array<(value: ReturnType<typeof buildConfig>['progression']) => void> = [
-      value => { value.perks[1].id = value.perks[0].id; },
-      value => { value.perks[0].lane = 'bad' as never; },
-      value => { value.perks[0].offerRole = 'bad' as never; },
-      value => { value.perks[0].effects[0].kind = 'bad' as never; },
-      value => { const effect = value.perks[0].effects[0]; if (effect.kind === 'buildScaling') effect.axis = 'bad' as never; },
+      value => { value.xpThresholds[1] = value.xpThresholds[0]; },
+      value => { value.rarityByRelicIndex[0] = { common: 0 }; },
+      value => { value.targetRelics.max = 7; },
     ];
     for (const mutate of cases) {
       const progression = structuredClone(buildConfig().progression);

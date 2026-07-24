@@ -58,6 +58,9 @@ function evolutionTree(value: unknown, path: string): void {
       bindings(option.equip, `${optionPath}.equip`);
     });
   });
+  for (const star of [3, 5]) {
+    if (!checkpointStars.has(star)) fail(`${path}.checkpoints`, `必须包含 ${star} 星检查点`);
+  }
 
   if (!Array.isArray(tree.sharedNodes)) fail(`${path}.sharedNodes`, '必须是数组');
   const sharedStars = new Set<number>();
@@ -73,6 +76,9 @@ function evolutionTree(value: unknown, path: string): void {
       if (Object.values(amplify).some(item => typeof item !== 'string')) fail(`${nodePath}.amplify`, '值必须为字符串');
     }
   });
+  for (const star of [4, 6]) {
+    if (!sharedStars.has(star)) fail(`${path}.sharedNodes`, `必须包含 ${star} 星公共节点`);
+  }
 }
 function affixPool(value: unknown, path: string): void {
   const pool = object(value, path);

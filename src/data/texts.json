@@ -36,6 +36,19 @@
     "recipeEvolution": { "title": "卡间进化", "body": "确认要完成的进化配方。" },
     "relic": { "title": "选择遗物", "body": "选择一件遗物强化本局构筑。" }
   },
+  "evolution": {
+    "lockNotice": "本局同一卡族将锁定此路线。",
+    "pending": "待选择进化路线",
+    "nextCheckpoint": "下一星将触发路线选择",
+    "pierce": {
+      "pierceA": { "name": "贯影", "summary": "稳定贯穿整列敌人。" },
+      "pierceB": { "name": "重击", "summary": "减少贯穿数，显著提高贯穿递增伤害。" },
+      "pierceC": { "name": "破甲", "summary": "贯穿命中使敌人进入易伤。" },
+      "pierceA2": { "name": "回返", "summary": "贯穿弹额外弹射一次。" },
+      "pierceB2": { "name": "贯序", "summary": "进一步提高逐次贯穿伤害。" },
+      "pierceC2": { "name": "裂流", "summary": "贯穿弹分裂为两枚子弹。" }
+    }
+  },
   "intermission": {
     "title": "第 {wave} 波结束",
     "steps": {

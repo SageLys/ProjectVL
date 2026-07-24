@@ -44,8 +44,6 @@ export function getDomRefs() {
     testCardBtn: el<HTMLButtonElement>('#testCardBtn'),
     testWildcardBtn: el<HTMLButtonElement>('#testWildcardBtn'),
     restartBtn: el<HTMLButtonElement>('#restartBtn'),
-    levelModal: el<HTMLElement>('#levelModal'),
-    perkChoices: el<HTMLElement>('#perkChoices'),
     resultModal: el<HTMLElement>('#resultModal'),
     resultTitle: el<HTMLElement>('#resultTitle'),
     resultDesc: el<HTMLElement>('#resultDesc'),

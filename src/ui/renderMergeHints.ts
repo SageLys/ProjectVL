@@ -15,7 +15,7 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
 export function findMergeHintPairs(state: Pick<GameState, 'cards' | 'equipment'>): MergeHintPair[] {
   const groups = new Map<string, HintCard[]>();
   const add = (card: Card | null, source: HintCard['source']) => {
-    if (!card || card.star >= cfg.economy.maxStar) return;
+    if (!card || card.provisional || card.star >= cfg.economy.maxStar) return;
     const key = `${card.type}:${card.star}`;
     const group = groups.get(key) ?? [];
     group.push({ ...card, source });
@@ -71,7 +71,7 @@ function appendPath(svg: SVGSVGElement, d: string, className: string, pair: Merg
 }
 
 /** Draws non-interactive links between matching cards without changing card behavior. */
-export function renderMergeHints(dock: HTMLElement, state: Pick<GameState, 'cards' | 'equipment'>): void {
+export function renderMergeHints(dock: HTMLElement, state: Pick<GameState, 'cards' | 'equipment' | 'runBuild'>): void {
   dock.querySelector('.merge-hints')?.remove();
   const pairs = findMergeHintPairs(state);
   if (!pairs.length) return;
@@ -104,6 +104,23 @@ export function renderMergeHints(dock: HTMLElement, state: Pick<GameState, 'card
     const d = `M ${start.x} ${start.y} Q ${controlX} ${controlY} ${end.x} ${end.y}`;
     appendPath(svg, d, 'merge-hint-glow', pair);
     appendPath(svg, d, 'merge-hint-line', pair);
+
+    const sourceCard = [...state.cards, ...state.equipment].find(card => card?.id === pair.fromCardId);
+    const resultStar = (sourceCard?.star ?? 0) + 1;
+    const triggersChoice = sourceCard
+      ? cfg.skills.cards.find(card => card.id === sourceCard.type)?.evolutionTree?.checkpoints
+        .some(checkpoint => checkpoint.star === resultStar)
+        && !state.runBuild.evolutionChoices[sourceCard.type]?.[resultStar]
+      : false;
+    if (triggersChoice) {
+      const label = document.createElementNS(SVG_NS, 'text');
+      label.setAttribute('class', 'merge-hint-label');
+      label.setAttribute('x', String((start.x + end.x) / 2));
+      label.setAttribute('y', String((start.y + end.y) / 2 - 7));
+      label.setAttribute('text-anchor', 'middle');
+      label.textContent = '下一星选择路线';
+      svg.append(label);
+    }
 
     for (const point of [start, end]) {
       const dot = document.createElementNS(SVG_NS, 'circle');

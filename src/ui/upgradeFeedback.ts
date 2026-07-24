@@ -137,7 +137,7 @@ export function createUpgradeFeedback(refs: DomRefs) {
 
   return {
     handle(events: GameEvent[]): void {
-      const suppressCelebration = events.some(event => event.type === 'levelUp') || refs.levelModal.classList.contains('show');
+      const suppressCelebration = events.some(event => event.type === 'levelUp');
       const candidates = resolveUpgradeCandidates(events).map(candidate => ({ ...candidate, suppressCelebration }));
       if (!candidates.length) return;
       if (!active) {

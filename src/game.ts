@@ -14,7 +14,6 @@ import { moveOrSwap, consumeCard } from './core/systems/equipmentSystem';
 import { collectNearest, spawnTestDrops, spawnGroundDrop } from './core/systems/dropSystem';
 import { recordCardDropShown, selectUniformCardType } from './core/systems/dropTypePolicy';
 import { acceptBountyOfferAt, calculateOfferChance } from './core/systems/bountySystem';
-import { applyPerk } from './core/systems/progressionSystem';
 import { resolveCurrentDecision } from './core/systems/decisionQueueSystem';
 import { beginOpeningIntermission, confirmIntermissionReady } from './core/systems/intermissionSystem';
 import { checkWildcardTarget, grantWildcards, useWildcardOnSlot, type WildcardGrant } from './core/systems/wildcardSystem';
@@ -36,7 +35,6 @@ import { createKeyboard } from './input/keyboard';
 import { createIntermissionPanel } from './ui/intermissionPanel';
 import { formatPlaySpeed, nextPlaySpeed } from './ui/gameSpeed';
 import type { DevTelemetry } from './telemetry/devTelemetry';
-import type { PerkDef } from './config/types';
 import type { DifficultyId } from './config/types';
 import { resyncEnemyStats, type EnemyStatConfigKey } from './core/systems/enemySystem';
 import { DEV_TOOLS_ENABLED } from './debug/devToolsMode';
@@ -87,7 +85,6 @@ function dispatch(events: GameEvent[]): void {
   for (const ev of events) {
     const text = formatToast(ev);
     if (text) toast(text);
-    if (ev.type === 'levelUp') modals.showLevel(resolveOfferedPerks(state), state);
     if (ev.type === 'gameEnd') {
       refs.pauseBtn.disabled = true;
       refs.speedBtn.disabled = true;
@@ -101,12 +98,6 @@ function dispatch(events: GameEvent[]): void {
   intermissionPanel.render(state);
 }
 
-function resolveOfferedPerks(currentState: GameState): PerkDef[] {
-  return currentState.offeredPerks
-    .map(id => cfg.progression.perks.find(perk => perk.id === id))
-    .filter((perk): perk is PerkDef => perk !== undefined);
-}
-
 function refreshSlots(): void {
   renderCards(refs, state, slotHandlers);
   renderEquipment(refs, state, slotHandlers);
@@ -114,10 +105,6 @@ function refreshSlots(): void {
 }
 
 function syncDecisionUi(): void {
-  if (state.pendingLevelUps > 0 || state.offeredPerks.length > 0) {
-    modals.hideDecision();
-    return;
-  }
   if (state.decisions.current) modals.showDecision(state.decisions.current, state);
   else modals.hideDecision();
 }
@@ -131,15 +118,6 @@ const slotHandlers: SlotHandlers = {
 };
 
 const modals = createModals(refs, {
-  onPerk(id) {
-    const events = applyPerk(state, config, id, rng);
-    dispatch(events);
-    const applied = events.find(event => event.type === 'perkApplied');
-    if (DEV_TOOLS_ENABLED && applied?.type === 'perkApplied') telemetry?.recordInput('perkSelect', `${id}:${applied.lane}`);
-    if (!events.some(event => event.type === 'levelUp')) modals.hideLevel();
-    syncDecisionUi();
-    renderHud(refs, state, config);
-  },
   onDecision(choice) {
     dispatch(resolveCurrentDecision(state, config, rng, choice));
     syncDecisionUi();
@@ -221,7 +199,6 @@ function reset(): void {
     state.cards[1] = createCardInstance(state.nextCardId++, 'frost', 1);
   }
   modals.hideResult();
-  modals.hideLevel();
   modals.hideDecision();
   refs.startBtn.textContent = texts.buttons.start;
   refs.startBtn.parentElement?.removeAttribute('hidden');
@@ -252,7 +229,7 @@ function start(): void {
 }
 
 function togglePause(): void {
-  if (state.mode !== 'playing' || state.intermission.active || state.decisions.current || state.pendingLevelUps > 0) return;
+  if (state.mode !== 'playing' || state.intermission.active || state.decisions.current) return;
   state.paused = !state.paused;
   refs.pauseBtn.textContent = state.paused ? texts.buttons.resume : texts.buttons.pause;
   refs.pauseBtn.setAttribute('aria-pressed', String(state.paused));
@@ -352,8 +329,8 @@ if (DEV_TOOLS_ENABLED) void Promise.all([import('./debug/exposeDebugApi'), impor
       setTimeScale,
       getInvincible: () => devInvincible,
       setInvincible(value) { devInvincible = value; },
-      jumpToWave(wave) { dispatch(jumpToWave(state, config, rng, wave)); modals.hideResult(); modals.hideLevel(); modals.message('', '', false); },
-      restartWave() { dispatch(restartWave(state, config, rng)); modals.hideResult(); modals.hideLevel(); modals.message('', '', false); },
+      jumpToWave(wave) { dispatch(jumpToWave(state, config, rng, wave)); modals.hideResult(); modals.message('', '', false); },
+      restartWave() { dispatch(restartWave(state, config, rng)); modals.hideResult(); modals.message('', '', false); },
       getSpawnTelemetry() { const admission = budgetAdmission(resolveActiveWavePlan(cfg, state.wave), state.spawnLeft, state.enemies.length); return { wave: state.wave, spawnLeft: state.spawnLeft, alive: state.enemies.length, spawnTimer: state.spawnTimer, lastSpawnCheckCount: state.lastSpawnCheckCount, normalTarget: admission.normalTarget, effectiveTarget: admission.effectiveTarget, inEndSprint: admission.inEndSprint }; },
       getBountyTelemetry,
       getDifficultyId: () => state.difficultyId,

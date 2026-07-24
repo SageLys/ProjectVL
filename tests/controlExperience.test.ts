@@ -152,7 +152,7 @@ describe('全局控制预算', () => {
 describe('群体高潜力控制回归', () => {
   it('持续保有射程内目标，并让自由推进者向炮台靠近', () => {
     const state = freshState();
-    state.perkStacks.ctrl_potency = 5;
+    state.relicStacks.ctrl_potency = 5;
     state.buildState.scalingVersion++;
     const frostDef = cfg.skills.cards.find(def => def.id === 'frost')!;
     const impactDef = cfg.skills.cards.find(def => def.id === 'impact')!;

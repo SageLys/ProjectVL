@@ -10,6 +10,7 @@ const T = texts.toast;
 export const SLOT_CHANGING = new Set<GameEvent['type']>([
   'collected', 'moved', 'swapped', 'merged', 'fed', 'skillConsumed', 'equipped',
   'wildcardsGranted', 'wildcardMerged',
+  'evolutionBranchSelected',
   'bossRewardGranted',
 ]);
 
@@ -31,6 +32,8 @@ export function formatToast(ev: GameEvent): string | null {
     case 'activePoolCreated':
     case 'intermissionReady':
     case 'waveRewardsGranted':
+    case 'relicOffered':
+    case 'evolutionBranchOffered':
       return null;
     case 'bossRewardGranted': return fmt(T.bossReward, { desc: wildcardGrantDescription(ev.grants) });
     case 'breakthrough': return fmt(T.breakthrough, { damage: Math.round(ev.damage) });
@@ -42,7 +45,11 @@ export function formatToast(ev: GameEvent): string | null {
     case 'collected': return ev.merges ? fmt(T.collectMerged, { count: ev.merges }) : fmt(T.collect, { name: name(ev.cardType) });
     case 'equipFull': return T.equipFull;
     case 'equipRejected':
-      return ev.reason === 'duplicate' ? T.equipRejectedDuplicate : fmt(T.equipRejectedStar, { threshold: cfg.economy.equipThreshold });
+      return ev.reason === 'provisional'
+        ? texts.evolution.pending
+        : ev.reason === 'duplicate'
+          ? T.equipRejectedDuplicate
+          : fmt(T.equipRejectedStar, { threshold: cfg.economy.equipThreshold });
     case 'moved': return fmt(T.moved, { name: name(ev.cardType), mergeSuffix: ev.merges ? fmt(T.mergeSuffix, { count: ev.merges }) : '' });
     case 'swapped': return fmt(T.swapped, { a: name(ev.a), b: name(ev.b) });
     case 'merged': return null; // 合成提示已并入 collected/moved 的 mergeSuffix
@@ -55,7 +62,8 @@ export function formatToast(ev: GameEvent): string | null {
     case 'equipped': return fmt(T.equipped, { name: name(ev.cardType), star: ev.star });
     case 'shieldBroken': return T.shieldBroken;
     case 'testDrops': return fmt(T.testDrops, { name: name(ev.cardType) });
-    case 'perkApplied': return fmt(T.perkApplied, { title: ev.title });
+    case 'relicSelected': return fmt(T.perkApplied, { title: ev.title });
+    case 'evolutionBranchSelected': return `${name(ev.cardType)}：路线已锁定`;
     case 'bountyAccepted': return fmt(T.bountyAccepted, { name: name(ev.rewardCardType) });
     case 'bountyCompleted': return fmt(T.bountyCompleted, { name: name(ev.rewardCardType) });
     case 'bountyFailed': return T.bountyFailed;

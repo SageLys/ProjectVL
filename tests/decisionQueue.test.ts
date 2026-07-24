@@ -7,7 +7,7 @@ import {
   registerDecisionResolver,
   resolveCurrentDecision,
 } from '../src/core/systems/decisionQueueSystem';
-import { applyPerk } from '../src/core/systems/progressionSystem';
+import { addXp } from '../src/core/systems/progressionSystem';
 import { constRng, createDefaultConfig, freshState, resetTestEnv } from './helpers';
 
 beforeEach(() => {
@@ -18,7 +18,7 @@ beforeEach(() => {
 describe('统一构筑决策队列', () => {
   it('入队即暂停，后续决策排队且 resolve 后自动弹出下一项', () => {
     const state = freshState();
-    expect(enqueueDecision(state, { kind: 'relic', options: ['r1', 'r2'] })).toEqual([
+    expect(enqueueDecision(state, { kind: 'relic', relicIndex: 0, options: ['r1', 'r2'] })).toEqual([
       { type: 'decisionOffered', kind: 'relic' },
     ]);
     expect(enqueueDecision(state, { kind: 'recipeEvolution', recipeId: 'recipe1' })).toEqual([]);
@@ -58,7 +58,7 @@ describe('统一构筑决策队列', () => {
       sampled = injectedRng();
       return [];
     });
-    enqueueDecision(state, { kind: 'relic', options: ['valid'] });
+    enqueueDecision(state, { kind: 'relic', relicIndex: 0, options: ['valid'] });
 
     expect(resolveCurrentDecision(state, createDefaultConfig(), rng, 'invalid')).toEqual([]);
     expect(sampled).toBe(-1);
@@ -68,23 +68,22 @@ describe('统一构筑决策队列', () => {
     expect(sampled).toBe(0.375);
   });
 
-  it('升级三选一优先清空，随后保留决策暂停且不死锁', () => {
+  it('多次升级直接进入统一队列，逐个处理且不覆盖', () => {
     const state = freshState();
-    const perkId = cfg.progression.perks[0].id;
-    state.pendingLevelUps = 1;
-    state.offeredPerks = [perkId];
-    state.paused = true;
-    enqueueDecision(state, { kind: 'relic', options: ['afterUpgrade'] });
+    state.godPool.mainGod = 'storm';
+    state.godPool.subGods = ['winter', 'inferno'];
+    state.godPool.focusGod = 'storm';
+    addXp(state, cfg.progression.xpThresholds[1], constRng(0));
+    const first = state.decisions.current;
+    const second = state.decisions.pending[0];
+    expect(first?.kind).toBe('relic');
+    expect(second?.kind).toBe('relic');
+    if (first?.kind !== 'relic' || second?.kind !== 'relic') throw new Error('expected relic decisions');
 
-    expect(resolveCurrentDecision(state, createDefaultConfig(), constRng(0), 'afterUpgrade')).toEqual([]);
-    expect(state.decisions.current).toMatchObject({ kind: 'relic' });
-    applyPerk(state, createDefaultConfig(), perkId, constRng(0));
-    expect(state.pendingLevelUps).toBe(0);
-    expect(state.offeredPerks).toEqual([]);
-    expect(state.decisions.current).toMatchObject({ kind: 'relic' });
+    resolveCurrentDecision(state, createDefaultConfig(), constRng(0), first.options[0]);
+    expect(state.decisions.current).toEqual(second);
     expect(state.paused).toBe(true);
-
-    resolveCurrentDecision(state, createDefaultConfig(), constRng(0), 'afterUpgrade');
+    resolveCurrentDecision(state, createDefaultConfig(), constRng(0), second.options[0]);
     expect(state.paused).toBe(false);
     expect(state.decisions.current).toBeNull();
   });

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { cfg } from '../src/config';
-import type { PerkDef } from '../src/config/types';
+import type { RelicDef } from '../src/config/types';
 import type { BindingDef, CardDef, ConsumableTierDef, EffectDef } from '../src/core/effects/defs';
 import {
   getModifiers,
@@ -32,8 +32,8 @@ function skill(id: string): CardDef {
   return cfg.skills.cards.find(def => def.id === id)!;
 }
 
-function activate(state: GameState, perkId: string, stacks = 1): void {
-  state.perkStacks[perkId] = stacks;
+function activate(state: GameState, relicId: string, stacks = 1): void {
+  state.relicStacks[relicId] = stacks;
   state.buildState.scalingVersion++;
 }
 
@@ -144,15 +144,16 @@ describe('buildModifierSystem aggregation and explicit mapping', () => {
     expect(numberParam(findAtom(effectsIn(bindings), 'slow')[0], 'ratio')).toBeCloseTo(0.24);
   });
 
-  it('applies a future multi-target perk only once to a dual-tag card', () => {
-    const fixturePerk: PerkDef = {
-      id: 'fixture_both', title: '', desc: '', lane: 'projectile', affinityGain: 1,
+  it('applies a future multi-target relic only once to a dual-tag card', () => {
+    const fixtureRelic: RelicDef = {
+      id: 'fixture_both', title: 'fixture', desc: 'fixture', textKey: 'fixture',
+      rarity: 'common', targetTags: ['projectile', 'control'],
       effects: [{ kind: 'buildScaling', targetTags: ['projectile', 'control'], axis: 'effectDamageMul', value: 0.15 }],
-      offerRole: 'route', weight: 1, maxStacks: 1,
+      maxStacks: 1,
     };
-    cfg.progression.perks.push(fixturePerk);
+    cfg.relics.relics.push(fixtureRelic);
     const state = freshState();
-    activate(state, fixturePerk.id);
+    activate(state, fixtureRelic.id);
     const def: CardDef = {
       ...skill('splitBlast'), id: 'fixture', synergyTags: ['projectile', 'control'],
     };
@@ -186,15 +187,14 @@ describe('buildModifierSystem aggregation and explicit mapping', () => {
     expect(numberParam(findAtom(effectsIn(thorns), 'dot')[0], 'damageRatio')).toBe(0.1);
   });
 
-  it('invalidates cached totals immediately when progression applies a perk', async () => {
+  it('invalidates cached totals immediately when progression applies a relic', async () => {
     registerSkillDefs(cfg.skills.cards);
     const state = freshState();
     state.equipment[0] = card('aegis', 5);
     expect(getModifiers(state).novaOnBreak?.damage).toBe(30);
-    state.offeredPerks = ['def_bridge'];
-    state.pendingLevelUps = 1;
-    const { applyPerk } = await import('../src/core/systems/progressionSystem');
-    applyPerk(state, config, 'def_bridge', rng);
+    state.decisions.current = { kind: 'relic', relicIndex: 0, options: ['def_bridge'] };
+    const { applyRelic } = await import('../src/core/systems/progressionSystem');
+    applyRelic(state, 'def_bridge');
     expect(getModifiers(state).novaOnBreak?.damage).toBeCloseTo(37.5);
   });
 });
