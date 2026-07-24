@@ -18,7 +18,7 @@ import { tickDrops, spawnGroundDrop } from '../src/core/systems/dropSystem';
 import { totalDropChance, totalDropLifetime, totalFireRate } from '../src/core/stats';
 import { speedMultiplier } from '../src/core/effects/statusSystem';
 import type { CardType, GameState } from '../src/core/types';
-import { card, enemy, freshState, createDefaultConfig, constRng, resetTestEnv } from './helpers';
+import { card, enemy, fixtureEvolutionTree, freshState, createDefaultConfig, constRng, resetTestEnv } from './helpers';
 
 const config = createDefaultConfig();
 const rng = constRng(0.99); // 高 roll：默认不掉落，便于断言
@@ -33,6 +33,7 @@ function def(id: CardType, equip: BindingDef[], consumeEffects: BindingDef['effe
     id, category: 'projectile', synergyTags: ['projectile'], textKey: `t.${id}`, teaching: false,
     stars: { '3': { tier: 'core', equip }, '5': { tier: 'dual', equip }, '6': { tier: 'transform', equip } },
     amplifyAxis: { params: { damageMul: '+1' } },
+    evolutionTree: fixtureEvolutionTree(id, equip),
     consumable: { placement: 'point', anchors: { '1': tier, '3': tier, '6': tier } },
   };
 }
@@ -126,6 +127,11 @@ describe('解释器 · 装备态触发绑定', () => {
         '6': { tier: 'transform', equip: [{ trigger: 'passive', effects: [{ atom: 'beamMorph', params: { interval: 0.9 } }] }] },
       },
       amplifyAxis: { params: { count: '+1' } },
+      evolutionTree: fixtureEvolutionTree(
+        'pierce',
+        [{ trigger: 'onFire', effects: [{ atom: 'pierce', params: { count: 1 } }] }],
+        [{ trigger: 'passive', effects: [{ atom: 'beamMorph', params: { interval: 0.9 } }] }],
+      ),
       consumable: { placement: 'point', anchors: { '1': { effects: [{ atom: 'burstDamage' }] }, '3': { effects: [{ atom: 'burstDamage' }] }, '6': { effects: [{ atom: 'burstDamage' }] } } },
     }]);
     const s = freshState();

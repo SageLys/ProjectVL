@@ -1,6 +1,7 @@
 import { describe, expect, it, beforeEach, afterEach } from 'vitest';
 import { cfg, applyConfig, buildConfig } from '../src/config';
-import { resolveConsumableTier, resolveEquipBindings, registerSkillDefs } from '../src/core/effects/interpreter';
+import { resolveCardBindings, resolveConsumableTier, registerSkillDefs } from '../src/core/effects/interpreter';
+import type { BindingDef, CardDef } from '../src/core/effects/defs';
 import { validateSkillsConfig } from '../src/config/skillValidator';
 import { consumeCard, moveOrSwap } from '../src/core/systems/equipmentSystem';
 import { autoMergeCards } from '../src/core/systems/cardSystem';
@@ -10,28 +11,43 @@ import { card, constRng, createDefaultConfig, freshState, resetTestEnv } from '.
 const config = createDefaultConfig();
 const rng = constRng(0.01);
 const get = (id: string) => cfg.skills.cards.find(c => c.id === id)!;
-const param = (bindings: ReturnType<typeof resolveEquipBindings>, key: string) =>
+const pathFor = (def: CardDef, star: number) => def.evolutionTree?.checkpoints
+  .filter(checkpoint => checkpoint.star <= star)
+  .map(checkpoint => `${checkpoint.star}:${checkpoint.options[0].id}`) ?? [];
+const bindingsFor = (def: CardDef, star: number): BindingDef[] =>
+  resolveCardBindings(def, pathFor(def, star), star);
+const param = (bindings: BindingDef[], key: string) =>
   bindings.flatMap(b => b.effects).map(e => e.params?.[key]).find(v => typeof v === 'number') as number;
 
 beforeEach(() => { resetTestEnv(); registerSkillDefs(cfg.skills.cards); });
 afterEach(resetTestEnv);
 
-describe('schema v0.4.0 · 解释器星级规则', () => {
-  it('3/5/6 装备锚点：pierce 与 frost 均按 core/dual/transform 取整组定义', () => {
-    for (const id of ['pierce', 'frost']) {
-      const d = get(id);
-      expect(resolveEquipBindings(d, 3)).toEqual(d.stars['3'].equip);
-      expect(resolveEquipBindings(d, 5)).toEqual(d.stars['5'].equip);
-      expect(resolveEquipBindings(d, 6)).toEqual(d.stars['6'].equip);
+describe('schema v0.4.0 · 进化树解释规则', () => {
+  it('35 张正式卡都有 3/5 三分支与 4/6 公共节点', () => {
+    const formal = cfg.skills.cards.filter(card => !card.recipeOnly);
+    expect(formal).toHaveLength(35);
+    for (const d of formal) {
+      expect(d.evolutionTree?.checkpoints.map(checkpoint => [checkpoint.star, checkpoint.options.length]))
+        .toEqual([[3, 3], [5, 3]]);
+      expect(d.evolutionTree?.sharedNodes.map(node => node.star)).toEqual([4, 6]);
     }
   });
 
-  it('4★ amplify：整数增量与百分比增量均只放大 3★ 参数且结构不变', () => {
+  it('3/5/6 累加分支与公共终态', () => {
+    for (const id of ['pierce', 'frost']) {
+      const d = get(id);
+      expect(bindingsFor(d, 3).length).toBeGreaterThan(0);
+      expect(bindingsFor(d, 5).length).toBeGreaterThan(bindingsFor(d, 3).length);
+      expect(bindingsFor(d, 6).length).toBeGreaterThan(bindingsFor(d, 5).length);
+    }
+  });
+
+  it('4★ amplify 持续放大 3★ 分支', () => {
     const pierce = get('pierce');
-    expect(param(resolveEquipBindings(pierce, 4), 'count')).toBe(param(resolveEquipBindings(pierce, 3), 'count') + 1);
-    expect(resolveEquipBindings(pierce, 4).map(b => b.trigger)).toEqual(resolveEquipBindings(pierce, 3).map(b => b.trigger));
+    expect(param(bindingsFor(pierce, 4), 'count')).toBe(param(bindingsFor(pierce, 3), 'count') + 1);
+    expect(bindingsFor(pierce, 4).map(b => b.trigger)).toEqual(bindingsFor(pierce, 3).map(b => b.trigger));
     const harvest = get('harvest');
-    expect(param(resolveEquipBindings(harvest, 4), 'mul')).toBeCloseTo(param(resolveEquipBindings(harvest, 3), 'mul') * 1.1);
+    expect(param(bindingsFor(harvest, 4), 'mul')).toBeCloseTo(param(bindingsFor(harvest, 3), 'mul') * 1.1);
   });
 
   it('消耗态内插：2★ 位于 1/3 中点，5★ 位于 3/6 的加权中点且不提前引入 6★-only 新原子', () => {
@@ -44,11 +60,15 @@ describe('schema v0.4.0 · 解释器星级规则', () => {
     expect(resolveConsumableTier(aegis, 5).effects.map(e => e.atom)).not.toContain('burstDamage');
   });
 
-  it('6★ transform：pierce 与 harvest 可替换整个效果集，不继承 core 触发/原子', () => {
-    expect(resolveEquipBindings(get('pierce'), 6)[0]).toMatchObject({ trigger: 'passive', effects: [{ atom: 'beamMorph' }] });
-    expect(resolveEquipBindings(get('pierce'), 6)[0].effects.map(e => e.atom)).not.toContain('pierce');
-    expect(resolveEquipBindings(get('harvest'), 6)[0]).toMatchObject({ trigger: 'onWaveStart', effects: [{ atom: 'extraDrop' }] });
-    expect(resolveEquipBindings(get('harvest'), 6)[0].effects.map(e => e.atom)).not.toContain('dropRateMul');
+  it('6 张 recipeOnly 产物无树且只声明 6★ 终态', () => {
+    const recipes = cfg.skills.cards.filter(card => card.recipeOnly);
+    expect(recipes).toHaveLength(6);
+    for (const recipe of recipes) {
+      expect(recipe.evolutionTree).toBeUndefined();
+      expect(Object.keys(recipe.stars)).toEqual(['6']);
+      expect(resolveCardBindings(recipe, [], 5)).toEqual([]);
+      expect(resolveCardBindings(recipe, [], 6)).toEqual(recipe.stars['6'].equip);
+    }
   });
 });
 
@@ -59,7 +79,7 @@ describe('全部正式卡 · 1–6★ 无头冒烟', () => {
       const tier = resolveConsumableTier(def, star);
       const s = freshState(); s.cards[0] = card(def.id as never, star);
       expect(consumeCard(s, config, rng, 0, 300, 300)[0]).toMatchObject({ type: 'skillConsumed', star });
-      if (star >= 3) {
+      if (star >= 3 && !def.recipeOnly || star === 6) {
         const e = freshState(); e.cards[0] = card(def.id as never, star);
         expect(moveOrSwap(e, config, rng, 'cards', 0, 'equipment', 0).some(v => v.type === 'equipped')).toBe(true);
       }
@@ -109,6 +129,6 @@ describe('v0.4.0 加载校验', () => {
   it('故意缺少 5★ 锚点的坏 JSON 立即报错', () => {
     const bad = structuredClone(cfg.skills) as unknown as Record<string, unknown>;
     delete ((bad.cards as Record<string, unknown>[])[0].stars as Record<string, unknown>)['5'];
-    expect(() => validateSkillsConfig(bad)).toThrow(/必须且只能定义 3\/5\/6 锚点/);
+    expect(() => validateSkillsConfig(bad)).toThrow(/正式卡必须且只能定义 3\/5\/6 迁移锚点/);
   });
 });

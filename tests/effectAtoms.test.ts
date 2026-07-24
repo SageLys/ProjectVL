@@ -8,6 +8,8 @@ import {
 import { dealDamage } from '../src/core/systems/damageSystem';
 import { cfg } from '../src/config';
 import type { GameState } from '../src/core/types';
+import { totalDamage, totalFireRate } from '../src/core/stats';
+import { getCardPool } from '../src/core/systems/dropTypePolicy';
 import { card, enemy, freshState, createDefaultConfig, constRng, resetTestEnv } from './helpers';
 
 const config = createDefaultConfig();
@@ -43,6 +45,12 @@ describe('状态系统 · 冲突仲裁表', () => {
     applyVulnerable(e, 0.2, 1);
     applyVulnerable(e, 0.4, 1);
     expect(damageTakenMultiplier(e)).toBeCloseTo(1.4);
+  });
+
+  it('易伤层按 maxStacks 累加并在上限封顶', () => {
+    const e = enemy();
+    for (let i = 0; i < 8; i++) applyVulnerable(e, 0.05, 2, 4);
+    expect(e.status.vulnerable).toMatchObject({ ratio: 0.2, remaining: 2 });
   });
 
   it('冻结中击退无效（规则2）', () => {
@@ -359,7 +367,10 @@ describe('领域/经济/防御/共用原子', () => {
     const s = freshState();
     s.equipment[0] = card('pierce', 6);
     ATOMS.extraDrop(ctxFor(s, { rng: constRng(0.99) }), { count: 1, starWeights: { '1': 1 } });
-    expect(s.groundDrops[0]).toEqual(expect.objectContaining({ type: 'thorns', star: 1 }));
+    expect(s.groundDrops[0]).toEqual(expect.objectContaining({
+      type: getCardPool()[getCardPool().length - 1],
+      star: 1,
+    }));
     expect(s.normalDropDirector.ordinaryDropCount).toBe(0);
   });
 
@@ -406,5 +417,33 @@ describe('领域/经济/防御/共用原子', () => {
     s.enemies = [e];
     ATOMS.mergePulse(ctxFor(s, { merge: { cardType: 'damage', resultStar: 3 } }), { damagePerMergeCount: 5, radius: 'all' });
     expect(e.hp).toBe(85); // 5 × 3
+  });
+
+  it('restore：固定值与最大生命比例相加，且不超过 maxHp', () => {
+    const s = freshState();
+    s.hp = 40;
+    s.maxHp = 100;
+    ATOMS.restore(ctxFor(s), { amount: 15, amountRatio: 0.2 });
+    expect(s.hp).toBe(75);
+    ATOMS.restore(ctxFor(s), { amount: 999 });
+    expect(s.hp).toBe(100);
+  });
+
+  it('statBuff：压入限时属性、限制同来源层数并在满层时刷新', () => {
+    const s = freshState();
+    const ctx = ctxFor(s, { sourceCardId: 7 });
+    ATOMS.statBuff(ctx, { stat: 'fireRate', operation: 'mul', value: 1.2, duration: 3, maxStacks: 2 });
+    ATOMS.statBuff(ctx, { stat: 'fireRate', operation: 'mul', value: 1.2, duration: 3, maxStacks: 2 });
+    expect(s.statModifiers).toHaveLength(2);
+    expect(totalFireRate(s, config)).toBeCloseTo(config.fireRate * 1.44);
+    s.statModifiers[0].remaining = 0.5;
+    ATOMS.statBuff(ctx, { stat: 'fireRate', operation: 'mul', value: 1.25, duration: 4, maxStacks: 2 });
+    expect(s.statModifiers).toHaveLength(2);
+    expect(s.statModifiers.some(modifier => modifier.value === 1.25 && modifier.remaining === 4)).toBe(true);
+
+    ATOMS.statBuff(ctxFor(s, { sourceCardId: 8 }), {
+      stat: 'damageAdd', operation: 'add', value: 5, duration: 2, maxStacks: 1,
+    });
+    expect(totalDamage(s, config)).toBe(config.damage + 5);
   });
 });

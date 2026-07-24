@@ -150,8 +150,7 @@ describe('scorch · 灼痕', () => {
     const target = enemy({ x: 300, y: 300, hp: 100, maxHp: 100 });
     s.enemies = [target];
     fireTrigger(s, config, rng, 'onHit', { bullet: { x: 300, y: 300, damage: 10 } as never, enemy: target, point: { x: 300, y: 300 } });
-    const zone = s.zones[0];
-    expect(zone.effects.map(e => e.atom)).toContain('vulnerable');
+    expect(s.zones.flatMap(zone => zone.effects.map(e => e.atom))).toContain('vulnerable');
   });
   it('1★消耗：落点燃海持续 DoT', () => {
     const s = freshState(); s.cards[0] = card('scorch', 1);

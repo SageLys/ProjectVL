@@ -109,10 +109,13 @@ export function applyStun(e: Enemy, duration: number): void {
 }
 
 /** 施加易伤：取最强（仲裁规则 4）。 */
-export function applyVulnerable(e: Enemy, ratio: number, duration: number): void {
+export function applyVulnerable(e: Enemy, ratio: number, duration: number, maxStacks = 1): void {
   const cur = e.status.vulnerable;
+  const stackedRatio = maxStacks > 1
+    ? Math.min(ratio * maxStacks, (cur?.ratio ?? 0) + ratio)
+    : ratio;
   e.status.vulnerable = {
-    ratio: Math.max(cur?.ratio ?? 0, ratio),
+    ratio: Math.max(cur?.ratio ?? 0, stackedRatio),
     remaining: Math.max(cur?.remaining ?? 0, duration),
   };
 }

@@ -59,6 +59,9 @@ export const BUILD_SCALING_RULES: Partial<Record<BuildScalingAxis, readonly Scal
     { atom: 'novaOnBreak', param: 'damage' },
     { atom: 'thorns', param: 'ratio' },
   ],
+  dropRateMul: [{ atom: 'dropRateMul', param: 'mul' }],
+  dropLifetimeMul: [{ atom: 'dropLifetimeMul', param: 'mul' }],
+  xpMul: [{ atom: 'xpMul', param: 'mul' }],
 };
 
 const EMPTY_TOTALS: BuildScalingTotals = { byAxis: {} };

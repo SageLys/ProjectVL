@@ -4,7 +4,7 @@
   "title": "ProjectVL 技能卡数据模型",
   "version": "0.4.0",
   "date": "2026-07-12",
-  "description": "P2 交付：功能型技能卡的数据模型。技能 = 数据(本模型的实例 JSON) + 通用解释器(触发器→效果原子)，实现解释器时禁止每张卡硬编码 if。设计说明与首批 12 张卡见 docs/P2_技能体系框架与首批卡牌设计表.md（v2.0）。当前规则：6★ 上限 / 3★ 入装（1–2★ 无装备态）/ 装备卡可拖到战场消耗释放 / 方案A独立装备格；装备态锚点 3★/5★/6★（4★ 由 amplifyAxis 生成），消耗态锚点 1★/3★/6★（余档内插）。原 D 系列仿真结论作废，沿用项一律标【占位】。",
+  "description": "v0.4.0 技能卡数据模型。35 张正式卡全部通过 evolutionTree 解析 3/4/5/6★；recipeOnly 产物没有进化树，只声明 6★ 终态。技能行为只由 JSON 触发器与效果原子组成。",
   "type": "object",
   "required": [
     "version",
@@ -107,7 +107,9 @@
         "novaOnBreak",
         "execute",
         "burstDamage",
-        "focusPriority"
+        "focusPriority",
+        "restore",
+        "statBuff"
       ]
     },
     "atomCatalog": {
@@ -206,9 +208,10 @@
         "vulnerable": {
           "params": [
             "ratio",
-            "duration"
+            "duration",
+            "maxStacks?"
           ],
-          "note": "易伤：受到伤害提高"
+          "note": "易伤：受到伤害提高；maxStacks>1 时按 ratio 逐次叠加并封顶"
         }
       },
       "domain": {
@@ -244,9 +247,10 @@
             "count",
             "hp",
             "duration?",
-            "behaviors[]"
+            "behaviors[]",
+            "replacesEarlier?"
           ],
-          "note": "召唤物：诱饵图腾/镜像炮台/环绕球"
+          "note": "召唤物：诱饵图腾/镜像炮台/环绕球；进化变形可声明替换同卡更早召唤"
         }
       },
       "economy": {
@@ -345,6 +349,23 @@
             "priorityWeight"
           ],
           "note": "改变炮台索敌优先级（bounty/烙印联动）"
+        },
+        "restore": {
+          "params": [
+            "amount?",
+            "amountRatio?"
+          ],
+          "note": "回复炮台 HP，amount 与 maxHp×amountRatio 相加并封顶 maxHp"
+        },
+        "statBuff": {
+          "params": [
+            "stat",
+            "operation(add|mul)",
+            "value",
+            "duration",
+            "maxStacks?"
+          ],
+          "note": "压入限时 RuntimeStatModifier；同来源同属性按 maxStacks 限制层数"
         }
       }
     },
@@ -470,13 +491,9 @@
           "description": "教学卡标记（硬规则 R7）：true 的卡 3★ 装备态只允许 1 个核心原子（修饰可省），1★ 消耗态效果因果必须一眼可见。"
         },
         "stars": {
-          "description": "装备态锚点：仅 3★/5★/6★ 单独设计（R1）。1–2★ 无装备态（不可装备）；4★ 不在此定义，由 amplifyAxis 对 3★ 结构应用放大轴生成。",
+          "description": "正式卡保留 3★/5★/6★ 迁移锚点并由 evolutionTree 实际解析；recipeOnly 产物只声明 6★ 终态。",
           "type": "object",
-          "required": [
-            "3",
-            "5",
-            "6"
-          ],
+          "required": ["6"],
           "properties": {
             "3": {
               "$ref": "#/definitions/starTier"

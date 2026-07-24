@@ -38,12 +38,12 @@ describe('splitBlast · 分裂爆破', () => {
     const target = enemy({ x: 300, y: 300, hp: 999, maxHp: 999 });
     s.enemies = [target];
     fireTrigger(s, config, rng, 'onHit', { bullet: { x: 300, y: 300, damage: 20 } as never, enemy: target, point: { x: 300, y: 300 } });
-    expect(s.bullets).toHaveLength(2);
-    const fragment = s.bullets[0];
+    expect(s.bullets).toHaveLength(5);
+    const fragment = s.bullets[s.bullets.length - 1];
     const target2 = enemy({ x: 320, y: 300, hp: 999, maxHp: 999 });
     s.enemies = [target2];
     fireTrigger(s, config, rng, 'onHit', { bullet: fragment as never, enemy: target2, point: { x: 320, y: 300 } });
-    expect(s.bullets).toHaveLength(4); // 原 2 片 + 第二代 2 片
+    expect(s.bullets).toHaveLength(7); // 首次 3+2 片，第二代再生成 2 片。
   });
 
   it('1★消耗：落点爆炸造成范围伤害', () => {

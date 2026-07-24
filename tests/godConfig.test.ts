@@ -5,18 +5,21 @@ import { validateSkillsConfig } from '../src/config/skillValidator';
 import { createCardInstance } from '../src/core/createInitialState';
 
 describe('神池构筑 C0 数据契约', () => {
-  it('加载 5 个神，且 11 张旧卡都有合法神归属', () => {
+  it('加载 5 个神、35 张正式卡与 6 张配方终态，且神归属完整', () => {
     const config = buildConfig();
     const godIds = new Set(config.gods.gods.map(god => god.id));
 
     expect(config.gods.gods).toHaveLength(5);
-    expect(config.skills.cards).toHaveLength(12);
+    expect(config.skills.cards).toHaveLength(41);
+    expect(config.skills.cards.filter(card => !card.recipeOnly)).toHaveLength(35);
+    expect(config.skills.cards.filter(card => card.recipeOnly)).toHaveLength(6);
     expect(config.skills.cards.every(card => card.god !== undefined && godIds.has(card.god))).toBe(true);
     expect(config.relics.relics.length).toBeGreaterThanOrEqual(20);
-    expect(config.skills.cards.filter(card => !card.recipeOnly)).toHaveLength(11);
-    expect(config.evolutionRecipes.recipes).toEqual([
+    expect(config.evolutionRecipes.recipes).toHaveLength(6);
+    expect(config.evolutionRecipes.recipes).toEqual(expect.arrayContaining([
       expect.objectContaining({ id: 'frozenThunder', outputCardId: 'frozenThunder', outputStar: 6 }),
-    ]);
+      expect.objectContaining({ id: 'goldenIdol', outputCardId: 'goldenIdol', outputStar: 6 }),
+    ]));
     expect(config.waveRewards.floor).toHaveLength(3);
     expect(config.waveRewards.choice).toHaveLength(5);
   });
@@ -30,14 +33,14 @@ describe('神池构筑 C0 数据契约', () => {
 
   it('拒绝神配置引用不存在的卡', () => {
     const invalid = structuredClone(buildConfig());
-    invalid.gods.gods[0].variableCardIds.push('missingCard');
+    invalid.gods.gods[0].variableCardIds[0] = 'missingCard';
 
     expect(() => validateGodConfig(invalid)).toThrow(/不存在的卡: missingCard/);
   });
 
   it('拒绝 2 星进化检查点', () => {
     const invalid = structuredClone(buildConfig().skills);
-    const equip = structuredClone(invalid.cards[0].stars['3'].equip);
+    const equip = structuredClone(invalid.cards[0].stars['3']!.equip);
     invalid.cards[0].evolutionTree = {
       checkpoints: [{
         star: 2,

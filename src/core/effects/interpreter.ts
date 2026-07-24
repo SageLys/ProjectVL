@@ -16,6 +16,8 @@ import { totalDamage } from '../stats';
 import { applyBuildScalingToBindings, applyBuildScalingToTier } from '../systems/buildModifierSystem';
 import { recordCardImpact, recordCardTrigger, totalEnemyHp } from '../../telemetry/combatCounters';
 import { activateConsumableAffixes, equipmentAffixAdd } from '../systems/cardAffixSystem';
+import { modifierTotal } from '../systems/runtimeStatModifierSystem';
+import { isControlled } from './statusSystem';
 
 export const FUSION_RULES = [
   '数值乘数(dropRateMul/dropLifetimeMul/xpMul): 乘法叠加',
@@ -146,18 +148,6 @@ function applyAmplify(value: unknown, axes: Record<string, string>, key = ''): u
   return value;
 }
 
-/** 解析装备态：3/5/6 为锚点；4★ 只能对 3★ 作同构数值放大。 */
-export function legacyResolveEquipBindings(def: CardDef, star: number): BindingDef[] {
-  if (star < 3) return [];
-  if (star === 4) return applyAmplify(clone(def.stars['3'].equip), def.amplifyAxis.params) as BindingDef[];
-  return clone(def.stars[star >= 6 ? '6' : star >= 5 ? '5' : '3'].equip);
-}
-
-/** Backward-compatible public name for callers that explicitly need legacy anchors. */
-export function resolveEquipBindings(def: CardDef, star: number): BindingDef[] {
-  return legacyResolveEquipBindings(def, star);
-}
-
 function selectedEvolutionOption(def: CardDef, checkpointStar: number, evolutionPath: string[]) {
   const prefix = `${checkpointStar}:`;
   const optionId = evolutionPath.find(entry => entry.startsWith(prefix))?.slice(prefix.length);
@@ -172,10 +162,10 @@ function selectedEvolutionOption(def: CardDef, checkpointStar: number, evolution
  */
 export function resolveCardBindings(def: CardDef, evolutionPath: string[], star: number): BindingDef[] {
   if (star < 3) return [];
-  if (!def.evolutionTree) return legacyResolveEquipBindings(def, star);
-  // Compatibility for pre-C5 saves and test/debug cards created without the
-  // factory. Newly upgraded migrated cards always receive a locked path.
-  if (evolutionPath.length === 0) return legacyResolveEquipBindings(def, star);
+  if (!def.evolutionTree) {
+    return def.recipeOnly && star >= 6 ? clone(def.stars['6'].equip) : [];
+  }
+  if (evolutionPath.length === 0) return [];
 
   const bindings: BindingDef[] = [];
   const option3 = selectedEvolutionOption(def, 3, evolutionPath);
@@ -230,6 +220,9 @@ function enemyHasStatus(enemy: Enemy | undefined, status: string): boolean {
   if (!enemy) return false;
   if (status === 'frozen') return enemy.status.frozen > 0;
   if (status === 'dot') return enemy.status.dots.length > 0;
+  if (status === 'controlled') return isControlled(enemy);
+  if (status === 'brand') return enemy.status.brand !== null;
+  if (status === 'vulnerable') return enemy.status.vulnerable !== null;
   return false;
 }
 
@@ -366,8 +359,13 @@ const num = (p: Record<string, unknown> | undefined, k: string, d: number): numb
   p && typeof p[k] === 'number' ? (p[k] as number) : d;
 
 export function getModifiers(state: GameState): Modifiers {
+  const runtimeDropRate = modifierTotal(state, 'dropRateMul');
+  const runtimeDropLifetime = modifierTotal(state, 'dropLifetimeMul');
+  const runtimeXp = modifierTotal(state, 'xpMul');
   const m: Modifiers = {
-    dropRateMul: 1, dropLifetimeMul: 1, xpMul: 1,
+    dropRateMul: runtimeDropRate.mul + runtimeDropRate.add,
+    dropLifetimeMul: runtimeDropLifetime.mul + runtimeDropLifetime.add,
+    xpMul: runtimeXp.mul + runtimeXp.add,
     thornsRatio: 0, breachReduction: 0, executeThreshold: 0,
     novaOnBreak: null, mergeRules: [], expiryConvert: null,
     weaponForms: [],
@@ -463,7 +461,13 @@ export function reconcileEquipmentPassives(state: GameState, config: Config, rng
   const expected = new Map<string, ExpectedEquipmentSummon>();
   for (const { card, binding, bindingIndex } of equippedBindings(state)) {
     const summonEffect = binding.effects.find(effect => effect.atom === 'summon');
-    if (summonEffect) expected.set(`${card.id}:${bindingIndex}`, { card, bindingIndex, effect: summonEffect });
+    if (!summonEffect) continue;
+    if (summonEffect.params?.replacesEarlier === true) {
+      for (const [key, item] of expected) {
+        if (item.card.id === card.id) expected.delete(key);
+      }
+    }
+    expected.set(`${card.id}:${bindingIndex}`, { card, bindingIndex, effect: summonEffect });
   }
 
   const kept = new Set<string>();

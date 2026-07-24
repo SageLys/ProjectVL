@@ -137,7 +137,7 @@ describe('渲染冒烟 · 手牌/装备卡面', () => {
     const { resolveCardMeta } = await import('../src/ui/cardMeta');
     expect(resolveCardMeta('pierce', 3, 'hand').desc).not.toBe(resolveCardMeta('pierce', 3, 'equipment').desc);
     expect(resolveCardMeta('pierce', 4, 'equipment').desc).toBe(resolveCardMeta('pierce', 3, 'equipment').desc);
-    expect(resolveCardMeta('pierce', 5, 'equipment').desc).toBe('贯穿弹碰边折返');
-    expect(resolveCardMeta('pierce', 6, 'equipment').desc).toBe('主炮化为持续光束');
+    expect(resolveCardMeta('pierce', 5, 'equipment').desc).toBe('雷霆贯枪第二分支叠加');
+    expect(resolveCardMeta('pierce', 6, 'equipment').desc).toBe('雷霆贯枪公共终态');
   });
 });

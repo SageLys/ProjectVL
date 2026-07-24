@@ -4,7 +4,7 @@ import { registerSkillDefs } from '../src/core/effects/interpreter';
 import { autoMergeCards } from '../src/core/systems/cardSystem';
 import { grantWildcards, useWildcardOnSlot } from '../src/core/systems/wildcardSystem';
 import type { CardType, GameState } from '../src/core/types';
-import { card, constRng, createDefaultConfig, enemy, freshState, resetTestEnv } from './helpers';
+import { card, constRng, createDefaultConfig, enemy, fixtureEvolutionTree, freshState, resetTestEnv } from './helpers';
 
 const config = createDefaultConfig();
 const rng = constRng(0.99);
@@ -18,6 +18,7 @@ function def(id: CardType, equip: BindingDef[]): CardDef {
     id, category: 'projectile', synergyTags: ['projectile'], textKey: `t.${id}`, teaching: false,
     stars: { '3': { tier: 'core', equip }, '5': { tier: 'dual', equip }, '6': { tier: 'transform', equip } },
     amplifyAxis: { params: {} },
+    evolutionTree: fixtureEvolutionTree(id, equip),
     consumable: { placement: 'point', anchors: { '1': tier, '3': tier, '6': tier } },
   };
 }

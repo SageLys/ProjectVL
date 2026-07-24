@@ -8,6 +8,7 @@ const RELIC_RARITIES = new Set(['common', 'rare', 'epic']);
 const BUILD_SCALING_AXES = new Set([
   'effectDamageMul', 'quantityAdd', 'controlPotencyMul', 'controlledDamageTakenMul',
   'areaScaleMul', 'dotDamageMul', 'defenseDurabilityMul', 'retaliationMul',
+  'dropRateMul', 'dropLifetimeMul', 'xpMul',
 ]);
 const warnedIncompleteRosters = new Set<string>();
 const isTestEnvironment = typeof process !== 'undefined' && process.env.NODE_ENV === 'test';

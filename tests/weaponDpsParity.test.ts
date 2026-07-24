@@ -32,7 +32,11 @@ function simulate({
   config.fireRate = fireRate;
   const state = freshState();
   state.multi = multi;
-  if (beam) state.equipment[0] = card('pierce', 6);
+  if (beam) {
+    const terminal = card('pierce', 6);
+    terminal.evolutionPath = ['6:terminal'];
+    state.equipment[0] = terminal;
+  }
 
   const targets: Enemy[] = targetXs.map(x => enemy({
     x,

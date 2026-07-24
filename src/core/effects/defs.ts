@@ -22,7 +22,7 @@ export type Trigger =
   | 'onMerge'
   | 'passive';
 
-/** 效果原子（31 个，见 docs/P2_技能体系框架与首批卡牌设计表.md §2）。 */
+/** 效果原子（33 个，见 docs/skills-schema.json atomCatalog）。 */
 export type AtomName =
   // 弹道
   | 'pierce' | 'chain' | 'split' | 'ricochet' | 'aoeOnHit' | 'beamMorph' | 'mortarMorph'
@@ -35,7 +35,7 @@ export type AtomName =
   // 防御
   | 'shield' | 'thorns' | 'breachReduction' | 'novaOnBreak' | 'execute'
   // 共用
-  | 'burstDamage' | 'focusPriority';
+  | 'burstDamage' | 'focusPriority' | 'restore' | 'statBuff';
 
 /** 单条效果：原子 + 参数。参数键名约定见 skills-schema atomCatalog；数值占位，P4 标定。 */
 export interface EffectDef {
@@ -75,7 +75,8 @@ export interface CardDef {
   synergyTags: BuildTag[];
   textKey: string;
   teaching: boolean;
-  stars: { '3': StarTierDef; '5': StarTierDef; '6': StarTierDef };
+  /** 正式卡含 3/5/6 迁移锚点；recipeOnly 终态只含 6★。 */
+  stars: { '3'?: StarTierDef; '5'?: StarTierDef; '6': StarTierDef };
   amplifyAxis: { description?: string; params: Record<string, string> };
   consumable: {
     placement: 'point';

@@ -49,6 +49,19 @@ function mergePulseDef(): CardDef {
       placement: 'point',
       anchors: { '1': consumable, '3': consumable, '6': consumable },
     },
+    evolutionTree: {
+      checkpoints: [
+        {
+          star: 3,
+          options: ['testA', 'testB', 'testC'].map(id => ({ id, textKey: id, equip })),
+        },
+        {
+          star: 5,
+          options: ['testA2', 'testB2', 'testC2'].map(id => ({ id, textKey: id, equip })),
+        },
+      ],
+      sharedNodes: [{ star: 4, amplify: { damageMul: '+1' } }, { star: 6, equip }],
+    },
   };
 }
 
@@ -180,7 +193,7 @@ describe('fixed recipe card evolution', () => {
     const state = enterFreeIntermission();
     state.cards[0] = card('chainLightning', 5);
     state.cards[1] = card('frost', 5);
-    state.equipment[0] = card('aegis', 3);
+    state.equipment[0] = { ...card('aegis', 3), evolutionPath: ['3:testA'] };
     state.enemies.push(enemy({ hp: 100, maxHp: 100 }));
     const telemetry = createDevTelemetry({
       getState: () => state,

@@ -1,24 +1,278 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "families": {
-    "projectile": { "hue": 350, "saturation": 82, "lightness": 64 },
-    "control": { "hue": 210, "saturation": 78, "lightness": 66 },
-    "domain": { "hue": 36, "saturation": 86, "lightness": 63 },
-    "economy": { "hue": 82, "saturation": 65, "lightness": 60 },
-    "defense": { "hue": 148, "saturation": 60, "lightness": 58 }
+    "projectile": {
+      "hue": 350,
+      "saturation": 82,
+      "lightness": 64
+    },
+    "control": {
+      "hue": 210,
+      "saturation": 78,
+      "lightness": 66
+    },
+    "domain": {
+      "hue": 36,
+      "saturation": 86,
+      "lightness": 63
+    },
+    "economy": {
+      "hue": 82,
+      "saturation": 65,
+      "lightness": 60
+    },
+    "defense": {
+      "hue": 148,
+      "saturation": 60,
+      "lightness": 58
+    }
   },
   "cards": {
-    "pierce": { "hueOffset": -12, "accent": "#ED5C86", "shape": "diamond", "glyph": "pierce" },
-    "chainLightning": { "hueOffset": 6, "accent": "#F06478", "shape": "hexagon", "glyph": "zigzag" },
-    "splitBlast": { "hueOffset": 18, "accent": "#F47759", "shape": "triangle", "glyph": "split" },
-    "frost": { "hueOffset": -8, "accent": "#58D8EA", "shape": "circle", "glyph": "snow" },
-    "decoy": { "hueOffset": 10, "accent": "#6A9DE8", "shape": "square", "glyph": "target" },
-    "impact": { "hueOffset": 24, "accent": "#8C8FE3", "shape": "octagon", "glyph": "impact" },
-    "scorch": { "hueOffset": -6, "accent": "#F05252", "shape": "pentagon", "glyph": "ember" },
-    "sanctum": { "hueOffset": 14, "accent": "#EFCB59", "shape": "ring", "glyph": "crosshair" },
-    "harvest": { "hueOffset": 0, "accent": "#B4D75B", "shape": "capsule", "glyph": "harvest" },
-    "aegis": { "hueOffset": -10, "accent": "#60D3A8", "shape": "verticalHexagon", "glyph": "barrier" },
-    "thorns": { "hueOffset": 12, "accent": "#49B962", "shape": "star8", "glyph": "thorn" },
-    "frozenThunder": { "hueOffset": 16, "accent": "#82D9FF", "shape": "hexagon", "glyph": "snow" }
+    "chainLightning": {
+      "hueOffset": -20,
+      "accent": "#32A5EB",
+      "shape": "diamond",
+      "glyph": "pierce"
+    },
+    "pierce": {
+      "hueOffset": -19,
+      "accent": "#33A6EC",
+      "shape": "triangle",
+      "glyph": "snow"
+    },
+    "staticSurge": {
+      "hueOffset": -18,
+      "accent": "#34A7ED",
+      "shape": "square",
+      "glyph": "ember"
+    },
+    "stormcall": {
+      "hueOffset": -17,
+      "accent": "#35A8EE",
+      "shape": "ring",
+      "glyph": "barrier"
+    },
+    "arcSplitter": {
+      "hueOffset": -16,
+      "accent": "#36A9EF",
+      "shape": "triangle",
+      "glyph": "pierce"
+    },
+    "galvanicWard": {
+      "hueOffset": -15,
+      "accent": "#37AAF0",
+      "shape": "octagon",
+      "glyph": "snow"
+    },
+    "overcharge": {
+      "hueOffset": -14,
+      "accent": "#38ABF1",
+      "shape": "capsule",
+      "glyph": "ember"
+    },
+    "frost": {
+      "hueOffset": -13,
+      "accent": "#52CFDE",
+      "shape": "octagon",
+      "glyph": "barrier"
+    },
+    "impact": {
+      "hueOffset": -12,
+      "accent": "#53D0DF",
+      "shape": "square",
+      "glyph": "pierce"
+    },
+    "glacialSpike": {
+      "hueOffset": -11,
+      "accent": "#54D1E0",
+      "shape": "diamond",
+      "glyph": "snow"
+    },
+    "permafrost": {
+      "hueOffset": -10,
+      "accent": "#55D2E1",
+      "shape": "pentagon",
+      "glyph": "ember"
+    },
+    "iceTomb": {
+      "hueOffset": -9,
+      "accent": "#56D3E2",
+      "shape": "square",
+      "glyph": "barrier"
+    },
+    "frozenBulwark": {
+      "hueOffset": -8,
+      "accent": "#57D4E3",
+      "shape": "verticalHexagon",
+      "glyph": "pierce"
+    },
+    "hoarfrostTithe": {
+      "hueOffset": -7,
+      "accent": "#58D5E4",
+      "shape": "star8",
+      "glyph": "snow"
+    },
+    "scorch": {
+      "hueOffset": -6,
+      "accent": "#EE563C",
+      "shape": "star8",
+      "glyph": "ember"
+    },
+    "splitBlast": {
+      "hueOffset": -5,
+      "accent": "#EF573D",
+      "shape": "diamond",
+      "glyph": "barrier"
+    },
+    "meteor": {
+      "hueOffset": -4,
+      "accent": "#F0583E",
+      "shape": "hexagon",
+      "glyph": "zigzag"
+    },
+    "magmaPool": {
+      "hueOffset": -3,
+      "accent": "#F1593F",
+      "shape": "ring",
+      "glyph": "target"
+    },
+    "flashfire": {
+      "hueOffset": -2,
+      "accent": "#F25A40",
+      "shape": "circle",
+      "glyph": "ember"
+    },
+    "cinderheart": {
+      "hueOffset": -1,
+      "accent": "#F35B41",
+      "shape": "octagon",
+      "glyph": "thorn"
+    },
+    "ashHarvest": {
+      "hueOffset": 0,
+      "accent": "#F45C42",
+      "shape": "capsule",
+      "glyph": "zigzag"
+    },
+    "aegis": {
+      "hueOffset": 1,
+      "accent": "#50BF85",
+      "shape": "verticalHexagon",
+      "glyph": "snow"
+    },
+    "thorns": {
+      "hueOffset": 2,
+      "accent": "#51C086",
+      "shape": "octagon",
+      "glyph": "crosshair"
+    },
+    "decoy": {
+      "hueOffset": 3,
+      "accent": "#52C187",
+      "shape": "circle",
+      "glyph": "thorn"
+    },
+    "sanctum": {
+      "hueOffset": 4,
+      "accent": "#53C288",
+      "shape": "ring",
+      "glyph": "pierce"
+    },
+    "sentinel": {
+      "hueOffset": 5,
+      "accent": "#54C389",
+      "shape": "hexagon",
+      "glyph": "target"
+    },
+    "retribution": {
+      "hueOffset": 6,
+      "accent": "#55C48A",
+      "shape": "circle",
+      "glyph": "crosshair"
+    },
+    "ironvine": {
+      "hueOffset": 7,
+      "accent": "#56C58B",
+      "shape": "capsule",
+      "glyph": "barrier"
+    },
+    "harvest": {
+      "hueOffset": 8,
+      "accent": "#D5BC4C",
+      "shape": "star8",
+      "glyph": "pierce"
+    },
+    "fateLoom": {
+      "hueOffset": 9,
+      "accent": "#D6BD4D",
+      "shape": "capsule",
+      "glyph": "target"
+    },
+    "goldenVolley": {
+      "hueOffset": 10,
+      "accent": "#D7BE4E",
+      "shape": "diamond",
+      "glyph": "ember"
+    },
+    "bountyCall": {
+      "hueOffset": 11,
+      "accent": "#D8BF4F",
+      "shape": "square",
+      "glyph": "thorn"
+    },
+    "overgrowth": {
+      "hueOffset": 12,
+      "accent": "#D9C050",
+      "shape": "ring",
+      "glyph": "zigzag"
+    },
+    "springOfLife": {
+      "hueOffset": 13,
+      "accent": "#DAC151",
+      "shape": "square",
+      "glyph": "target"
+    },
+    "luckyStar": {
+      "hueOffset": 14,
+      "accent": "#DBC252",
+      "shape": "verticalHexagon",
+      "glyph": "crosshair"
+    },
+    "frozenThunder": {
+      "hueOffset": 15,
+      "accent": "#55C8FF",
+      "shape": "hexagon",
+      "glyph": "barrier"
+    },
+    "solarLance": {
+      "hueOffset": 16,
+      "accent": "#56C9FF",
+      "shape": "triangle",
+      "glyph": "zigzag"
+    },
+    "avalanche": {
+      "hueOffset": 17,
+      "accent": "#70EDFC",
+      "shape": "circle",
+      "glyph": "impact"
+    },
+    "pyrestorm": {
+      "hueOffset": 18,
+      "accent": "#FF6E54",
+      "shape": "ring",
+      "glyph": "crosshair"
+    },
+    "crownOfThorns": {
+      "hueOffset": 19,
+      "accent": "#62D197",
+      "shape": "verticalHexagon",
+      "glyph": "barrier"
+    },
+    "goldenIdol": {
+      "hueOffset": 20,
+      "accent": "#E1C858",
+      "shape": "verticalHexagon",
+      "glyph": "zigzag"
+    }
   }
 }

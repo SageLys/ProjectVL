@@ -36,14 +36,15 @@ describe('NormalDropDirector · card pool and discovery', () => {
     expect(shown.every(type => state.godPool.activePool.includes(type))).toBe(true);
   });
 
-  it('reads the active configured pool and automatically includes a twelfth card', () => {
-    expect(getCardPool()).toHaveLength(11);
+  it('reads the active configured pool and automatically includes another formal card', () => {
+    const initialSize = getCardPool().length;
+    expect(initialSize).toBe(35);
     const state = freshState();
     for (const type of getCardPool()) state.normalDropDirector.typeStats[type].ordinaryShown = 1;
     const twelfth = structuredClone(cfg.skills.cards[0]);
     twelfth.id = 'testTwelfth';
     cfg.skills.cards.push(twelfth);
-    expect(getCardPool()).toHaveLength(12);
+    expect(getCardPool()).toHaveLength(initialSize + 1);
     expect(getCardPool()).toContain('testTwelfth');
     expect(selectDiscoveryType(state, constRng(0.5))).toBe('testTwelfth');
     expect(state.normalDropDirector.typeStats.testTwelfth).toBeDefined();
@@ -56,11 +57,11 @@ describe('NormalDropDirector · card pool and discovery', () => {
     expect(selectDiscoveryType(state, constRng(0.5))).toBe('frost');
   });
 
-  it('covers all eleven types within the first twenty ordinary drops', () => {
+  it('covers all formal types within the first one hundred ordinary drops', () => {
     const state = freshState();
-    const types = Array.from({ length: 20 }, () => selectNormalEnemyDropType(state, constRng(0.37)));
+    const types = Array.from({ length: 100 }, () => selectNormalEnemyDropType(state, constRng(0.37)));
     expect(new Set(types)).toEqual(new Set(getCardPool()));
-    expect(state.normalDropDirector.ordinaryDropCount).toBe(20);
+    expect(state.normalDropDirector.ordinaryDropCount).toBe(100);
   });
 });
 

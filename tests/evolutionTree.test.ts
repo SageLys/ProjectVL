@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { cfg } from '../src/config';
 import { buildRunSummary } from '../src/core/settlement';
-import { legacyResolveEquipBindings, resolveCardBindings } from '../src/core/effects/interpreter';
+import { resolveCardBindings } from '../src/core/effects/interpreter';
 import { autoMergeCards } from '../src/core/systems/cardSystem';
 import { clearDecisionResolvers, enqueueDecision, resolveCurrentDecision } from '../src/core/systems/decisionQueueSystem';
 import { consumeCard, moveOrSwap } from '../src/core/systems/equipmentSystem';
@@ -190,11 +190,12 @@ describe('single-card evolution tree', () => {
     expect(state.decisions.current).toBeNull();
   });
 
-  it('legacy cards retain the original 3/4/5/6 binding behavior', () => {
-    const legacy = cfg.skills.cards.find(item => item.id === 'frost')!;
-    for (const star of [1, 2, 3, 4, 5, 6]) {
-      expect(resolveCardBindings(legacy, [], star)).toEqual(legacyResolveEquipBindings(legacy, star));
-    }
+  it('正式卡不再走空路径兼容解析，配方卡只在 6★ 解析终态', () => {
+    const formal = cfg.skills.cards.find(item => item.id === 'frost')!;
+    expect(resolveCardBindings(formal, [], 6)).toEqual([]);
+    const recipe = cfg.skills.cards.find(item => item.id === 'frozenThunder')!;
+    expect(resolveCardBindings(recipe, [], 5)).toEqual([]);
+    expect(resolveCardBindings(recipe, [], 6)).toEqual(recipe.stars['6'].equip);
   });
 
   it('jumpToWave preserves run-locked choices and settlement records every family path', () => {
@@ -207,7 +208,7 @@ describe('single-card evolution tree', () => {
     expect(state.runBuild.evolutionChoices.pierce).toEqual({ 3: 'pierceA', 5: 'pierceC2' });
     expect(buildRunSummary(state, false).cardEvolutions).toEqual(expect.arrayContaining([
       { type: 'pierce', highestStar: 5, path: ['3:pierceA', '5:pierceC2'] },
-      { type: 'frost', highestStar: 3, path: [] },
+      { type: 'frost', highestStar: 3, path: ['3:frostA'] },
     ]));
   });
 });

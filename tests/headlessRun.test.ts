@@ -105,7 +105,7 @@ describe('整局冒烟（占位技能卡=配置数据，经通用解释器结算
     const firstTwoRarities = s.buildState.relicHistory.slice(0, 2).map(
       id => cfg.relics.relics.find(relic => relic.id === id)?.rarity,
     );
-    expect(firstTwoRarities).toEqual(['common', 'common']);
+    expect(firstTwoRarities).toEqual(['common', 'rare']);
     expect(cfg.progression.rarityByRelicIndex[cfg.progression.rarityByRelicIndex.length - 1]?.epic).toBeGreaterThan(0);
   });
 

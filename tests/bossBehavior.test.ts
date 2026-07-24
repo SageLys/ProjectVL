@@ -11,7 +11,7 @@ import { collectDrop } from '../src/core/systems/dropSystem';
 import { moveEnemies, spawnWaveBoss } from '../src/core/systems/enemySystem';
 import { advanceWavePhase } from '../src/core/systems/waveSystem';
 import type { Enemy, GameState } from '../src/core/types';
-import { card, constRng, createDefaultConfig, enemy, freshState, resetTestEnv } from './helpers';
+import { card, constRng, createDefaultConfig, enemy, fixtureEvolutionTree, freshState, resetTestEnv } from './helpers';
 
 const config = createDefaultConfig();
 const rng = constRng(0.99);
@@ -45,6 +45,7 @@ function triggerDef(id: string, atom: 'groundZone' | 'novaOnBreak', params: Reco
       '6': { tier: 'transform', equip },
     },
     amplifyAxis: { params: {} },
+    evolutionTree: fixtureEvolutionTree(id, equip),
     consumable: { placement: 'point', anchors: { '1': tier, '3': tier, '6': tier } },
   };
 }
@@ -226,7 +227,8 @@ describe('wave Boss approach and contact behavior', () => {
 
   it('uses pulse damage for thorns and routes a reflected Boss death through the reward pipeline', () => {
     const thorns = triggerDef('pulseThorns', 'novaOnBreak', { damage: 0, knockbackDistance: 0 });
-    thorns.stars['3'].equip = [{ trigger: 'passive', effects: [{ atom: 'thorns', params: { ratio: 1 } }] }];
+    thorns.stars['3']!.equip = [{ trigger: 'passive', effects: [{ atom: 'thorns', params: { ratio: 1 } }] }];
+    thorns.evolutionTree = fixtureEvolutionTree('pulseThorns', thorns.stars['3']!.equip);
     registerSkillDefs([thorns]);
     const state = freshState();
     state.wave = 1;

@@ -258,7 +258,10 @@ export type BuildScalingAxis =
   | 'areaScaleMul'
   | 'dotDamageMul'
   | 'defenseDurabilityMul'
-  | 'retaliationMul';
+  | 'retaliationMul'
+  | 'dropRateMul'
+  | 'dropLifetimeMul'
+  | 'xpMul';
 
 export interface RelicBuildEffect {
   kind: 'buildScaling';

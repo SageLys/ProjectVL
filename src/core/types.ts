@@ -437,7 +437,7 @@ export interface ShieldState {
 /** Generic runtime stat modifier. Consumable affixes always set remaining. */
 export interface RuntimeStatModifier {
   sourceId: string;
-  stat: CardStatKind | 'damage' | 'fireRate';
+  stat: CardStatKind | 'damage' | 'fireRate' | 'dropRateMul' | 'dropLifetimeMul' | 'xpMul';
   operation: 'add' | 'mul';
   value: number;
   remaining?: number;

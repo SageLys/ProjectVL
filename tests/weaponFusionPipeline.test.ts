@@ -7,7 +7,7 @@ import { tickEffects } from '../src/core/effects/runtime';
 import { dealDamage } from '../src/core/systems/damageSystem';
 import { shoot, updateBullets, updateTurret } from '../src/core/systems/combatSystem';
 import type { CardType, GameState } from '../src/core/types';
-import { card, constRng, createDefaultConfig, enemy, freshState, resetTestEnv } from './helpers';
+import { card, constRng, createDefaultConfig, enemy, fixtureEvolutionTree, freshState, resetTestEnv } from './helpers';
 
 const config = createDefaultConfig();
 const rng = constRng(0.5);
@@ -24,6 +24,7 @@ function skill(id: CardType, bindings: BindingDef[]): CardDef {
       '6': { tier: 'transform', equip: structuredClone(bindings) },
     },
     amplifyAxis: { params: { damageRatio: '+0' } },
+    evolutionTree: fixtureEvolutionTree(id, bindings),
     consumable: { placement: 'point', anchors: {
       '1': { effects: consume }, '3': { effects: consume }, '6': { effects: consume },
     } },
@@ -226,12 +227,12 @@ describe('DOT 击杀来源', () => {
   it('正式 scorch 3★/5★ 使用 requiresSource=dot，frost frozen 条件保持不变', () => {
     const scorch = cfg.skills.cards.find(def => def.id === 'scorch')!;
     for (const star of ['3', '5'] as const) {
-      const kill = scorch.stars[star].equip.find(binding => binding.trigger === 'onKill')!;
+      const kill = scorch.stars[star]!.equip.find(binding => binding.trigger === 'onKill')!;
       expect(kill.triggerParams).toMatchObject({ requiresSource: 'dot' });
       expect(kill.triggerParams?.requiresStatus).toBeUndefined();
     }
     const frost = cfg.skills.cards.find(def => def.id === 'frost')!;
-    expect(frost.stars['5'].equip.find(binding => binding.trigger === 'onKill')?.triggerParams)
+    expect(frost.stars['5']!.equip.find(binding => binding.trigger === 'onKill')?.triggerParams)
       .toMatchObject({ requiresStatus: 'frozen' });
   });
 });

@@ -42,23 +42,59 @@
       "areaScaleMul": "范围",
       "dotDamageMul": "持续伤害",
       "defenseDurabilityMul": "防御耐久",
-      "retaliationMul": "反击"
+      "retaliationMul": "反击",
+      "dropRateMul": "掉落率",
+      "dropLifetimeMul": "掉落时限",
+      "xpMul": "经验"
     }
   },
   "gods": {
-    "storm": { "name": "风暴", "theme": "连锁、穿透与高速投射" },
-    "winter": { "name": "凛冬", "theme": "冻结、减速与阵地控制" },
-    "inferno": { "name": "炼狱", "theme": "灼烧、爆裂与持续压制" },
-    "bulwark": { "name": "壁垒", "theme": "护盾、反击与召唤防线" },
-    "plenty": { "name": "丰饶", "theme": "收获、资源与成长循环" }
+    "storm": {
+      "name": "迅霆",
+      "theme": "雷霆与速度：连锁、穿透、攻速与易伤叠层"
+    },
+    "winter": {
+      "name": "凛冬",
+      "theme": "冰封与迟滞：减速、冻结、击退与受控增伤"
+    },
+    "inferno": {
+      "name": "焚狱",
+      "theme": "烈焰与蔓延：持续灼烧、区域与爆炸"
+    },
+    "bulwark": {
+      "name": "磐垒",
+      "theme": "壁垒与反击：护盾、反伤、召唤与嘲讽"
+    },
+    "plenty": {
+      "name": "丰饶",
+      "theme": "收获与命运：掉落、经验、合成与标记"
+    }
   },
   "decisions": {
-    "godDraft": { "title": "选择神祇", "body": "主神决定 5 张核心名册，副神各带来 3 张支援卡。" },
-    "godFocus": { "title": "选择本波重点", "body": "重点神将在下一波活跃池中占据更多位置。" },
-    "evolutionBranch": { "title": "选择进化分支", "body": "为这张卡选择一条进化路线。" },
-    "recipeEvolution": { "title": "卡间进化", "body": "确认要完成的进化配方。" },
-    "relic": { "title": "选择遗物", "body": "选择一件遗物强化本局构筑。" },
-    "waveBaseReward": { "title": "强化炮台", "body": "从下列 5 项中选择 1 项强化。" }
+    "godDraft": {
+      "title": "选择神祇",
+      "body": "主神决定 5 张核心名册，副神各带来 3 张支援卡。"
+    },
+    "godFocus": {
+      "title": "选择本波重点",
+      "body": "重点神将在下一波活跃池中占据更多位置。"
+    },
+    "evolutionBranch": {
+      "title": "选择进化分支",
+      "body": "为这张卡选择一条进化路线。"
+    },
+    "recipeEvolution": {
+      "title": "卡间进化",
+      "body": "确认要完成的进化配方。"
+    },
+    "relic": {
+      "title": "选择遗物",
+      "body": "选择一件遗物强化本局构筑。"
+    },
+    "waveBaseReward": {
+      "title": "强化炮台",
+      "body": "从下列 5 项中选择 1 项强化。"
+    }
   },
   "waveRewardStats": {
     "damageAdd": "基础伤害",
@@ -72,13 +108,915 @@
     "lockNotice": "本局同一卡族将锁定此路线。",
     "pending": "待选择进化路线",
     "nextCheckpoint": "下一星将触发路线选择",
+    "chainLightning": {
+      "chainLightningA": {
+        "name": "长链",
+        "summary": "长链分支。"
+      },
+      "chainLightningB": {
+        "name": "高压",
+        "summary": "高压分支。"
+      },
+      "chainLightningC": {
+        "name": "感电",
+        "summary": "感电分支。"
+      },
+      "chainLightningA2": {
+        "name": "断链重引",
+        "summary": "断链重引分支。"
+      },
+      "chainLightningB2": {
+        "name": "感电灼流",
+        "summary": "感电灼流分支。"
+      },
+      "chainLightningC2": {
+        "name": "链末爆",
+        "summary": "链末爆分支。"
+      }
+    },
     "pierce": {
-      "pierceA": { "name": "贯影", "summary": "稳定贯穿整列敌人。" },
-      "pierceB": { "name": "重击", "summary": "减少贯穿数，显著提高贯穿递增伤害。" },
-      "pierceC": { "name": "破甲", "summary": "贯穿命中使敌人进入易伤。" },
-      "pierceA2": { "name": "回返", "summary": "贯穿弹额外弹射一次。" },
-      "pierceB2": { "name": "贯序", "summary": "进一步提高逐次贯穿伤害。" },
-      "pierceC2": { "name": "裂流", "summary": "贯穿弹分裂为两枚子弹。" }
+      "pierceA": {
+        "name": "贯影",
+        "summary": "贯影分支。"
+      },
+      "pierceB": {
+        "name": "重击",
+        "summary": "重击分支。"
+      },
+      "pierceC": {
+        "name": "破甲",
+        "summary": "破甲分支。"
+      },
+      "pierceA2": {
+        "name": "弹射",
+        "summary": "弹射分支。"
+      },
+      "pierceB2": {
+        "name": "贯序增伤",
+        "summary": "贯序增伤分支。"
+      },
+      "pierceC2": {
+        "name": "穿透分裂",
+        "summary": "穿透分裂分支。"
+      }
+    },
+    "staticSurge": {
+      "staticSurgeA": {
+        "name": "层容扩展",
+        "summary": "层容扩展分支。"
+      },
+      "staticSurgeB": {
+        "name": "高压感电",
+        "summary": "高压感电分支。"
+      },
+      "staticSurgeC": {
+        "name": "满载震慑",
+        "summary": "满载震慑分支。"
+      },
+      "staticSurgeA2": {
+        "name": "电荷传染",
+        "summary": "电荷传染分支。"
+      },
+      "staticSurgeB2": {
+        "name": "静电引爆",
+        "summary": "静电引爆分支。"
+      },
+      "staticSurgeC2": {
+        "name": "长效蓄电",
+        "summary": "长效蓄电分支。"
+      }
+    },
+    "stormcall": {
+      "stormcallA": {
+        "name": "疾雷",
+        "summary": "疾雷分支。"
+      },
+      "stormcallB": {
+        "name": "重雷",
+        "summary": "重雷分支。"
+      },
+      "stormcallC": {
+        "name": "静电余场",
+        "summary": "静电余场分支。"
+      },
+      "stormcallA2": {
+        "name": "双雷",
+        "summary": "双雷分支。"
+      },
+      "stormcallB2": {
+        "name": "裁决高血",
+        "summary": "裁决高血分支。"
+      },
+      "stormcallC2": {
+        "name": "雷附感电",
+        "summary": "雷附感电分支。"
+      }
+    },
+    "arcSplitter": {
+      "arcSplitterA": {
+        "name": "多重裂片",
+        "summary": "多重裂片分支。"
+      },
+      "arcSplitterB": {
+        "name": "高能裂片",
+        "summary": "高能裂片分支。"
+      },
+      "arcSplitterC": {
+        "name": "感电裂片",
+        "summary": "感电裂片分支。"
+      },
+      "arcSplitterA2": {
+        "name": "二次分裂",
+        "summary": "二次分裂分支。"
+      },
+      "arcSplitterB2": {
+        "name": "折返裂片",
+        "summary": "折返裂片分支。"
+      },
+      "arcSplitterC2": {
+        "name": "充能裂片",
+        "summary": "充能裂片分支。"
+      }
+    },
+    "galvanicWard": {
+      "galvanicWardA": {
+        "name": "增层矩阵",
+        "summary": "增层矩阵分支。"
+      },
+      "galvanicWardB": {
+        "name": "爆裂矩阵",
+        "summary": "爆裂矩阵分支。"
+      },
+      "galvanicWardC": {
+        "name": "感电矩阵",
+        "summary": "感电矩阵分支。"
+      },
+      "galvanicWardA2": {
+        "name": "快速再生",
+        "summary": "快速再生分支。"
+      },
+      "galvanicWardB2": {
+        "name": "满盾超频",
+        "summary": "满盾超频分支。"
+      },
+      "galvanicWardC2": {
+        "name": "破盾过压",
+        "summary": "破盾过压分支。"
+      }
+    },
+    "overcharge": {
+      "overchargeA": {
+        "name": "长效过载",
+        "summary": "长效过载分支。"
+      },
+      "overchargeB": {
+        "name": "强效过载",
+        "summary": "强效过载分支。"
+      },
+      "overchargeC": {
+        "name": "连杀电池",
+        "summary": "连杀电池分支。"
+      },
+      "overchargeA2": {
+        "name": "满载放电",
+        "summary": "满载放电分支。"
+      },
+      "overchargeB2": {
+        "name": "击杀回流",
+        "summary": "击杀回流分支。"
+      },
+      "overchargeC2": {
+        "name": "磁暴丰收",
+        "summary": "磁暴丰收分支。"
+      }
+    },
+    "frost": {
+      "frostA": {
+        "name": "凝霜",
+        "summary": "凝霜分支。"
+      },
+      "frostB": {
+        "name": "速冻",
+        "summary": "速冻分支。"
+      },
+      "frostC": {
+        "name": "冰痕",
+        "summary": "冰痕分支。"
+      },
+      "frostA2": {
+        "name": "碎冰",
+        "summary": "碎冰分支。"
+      },
+      "frostB2": {
+        "name": "寒创",
+        "summary": "寒创分支。"
+      },
+      "frostC2": {
+        "name": "冻伤易感",
+        "summary": "冻伤易感分支。"
+      }
+    },
+    "impact": {
+      "impactA": {
+        "name": "重锤",
+        "summary": "重锤分支。"
+      },
+      "impactB": {
+        "name": "寒锤",
+        "summary": "寒锤分支。"
+      },
+      "impactC": {
+        "name": "撞击",
+        "summary": "撞击分支。"
+      },
+      "impactA2": {
+        "name": "破门反制",
+        "summary": "破门反制分支。"
+      },
+      "impactB2": {
+        "name": "冲击波",
+        "summary": "冲击波分支。"
+      },
+      "impactC2": {
+        "name": "撞晕",
+        "summary": "撞晕分支。"
+      }
+    },
+    "glacialSpike": {
+      "glacialSpikeA": {
+        "name": "长锥",
+        "summary": "长锥分支。"
+      },
+      "glacialSpikeB": {
+        "name": "深冻",
+        "summary": "深冻分支。"
+      },
+      "glacialSpikeC": {
+        "name": "冻创",
+        "summary": "冻创分支。"
+      },
+      "glacialSpikeA2": {
+        "name": "冰爆",
+        "summary": "冰爆分支。"
+      },
+      "glacialSpikeB2": {
+        "name": "寒链",
+        "summary": "寒链分支。"
+      },
+      "glacialSpikeC2": {
+        "name": "碎冰处决",
+        "summary": "碎冰处决分支。"
+      }
+    },
+    "permafrost": {
+      "permafrostA": {
+        "name": "广域冻土",
+        "summary": "广域冻土分支。"
+      },
+      "permafrostB": {
+        "name": "酷寒冻土",
+        "summary": "酷寒冻土分支。"
+      },
+      "permafrostC": {
+        "name": "积霜冻土",
+        "summary": "积霜冻土分支。"
+      },
+      "permafrostA2": {
+        "name": "双生冻土",
+        "summary": "双生冻土分支。"
+      },
+      "permafrostB2": {
+        "name": "冻土易感",
+        "summary": "冻土易感分支。"
+      },
+      "permafrostC2": {
+        "name": "余寒",
+        "summary": "余寒分支。"
+      }
+    },
+    "iceTomb": {
+      "iceTombA": {
+        "name": "速封",
+        "summary": "速封分支。"
+      },
+      "iceTombB": {
+        "name": "深封",
+        "summary": "深封分支。"
+      },
+      "iceTombC": {
+        "name": "冰棺反噬",
+        "summary": "冰棺反噬分支。"
+      },
+      "iceTombA2": {
+        "name": "爆棺",
+        "summary": "爆棺分支。"
+      },
+      "iceTombB2": {
+        "name": "冰封传染",
+        "summary": "冰封传染分支。"
+      },
+      "iceTombC2": {
+        "name": "棺中易感",
+        "summary": "棺中易感分支。"
+      }
+    },
+    "frozenBulwark": {
+      "frozenBulwarkA": {
+        "name": "厚冰",
+        "summary": "厚冰分支。"
+      },
+      "frozenBulwarkB": {
+        "name": "广寒碎裂",
+        "summary": "广寒碎裂分支。"
+      },
+      "frozenBulwarkC": {
+        "name": "冰镜远射",
+        "summary": "冰镜远射分支。"
+      },
+      "frozenBulwarkA2": {
+        "name": "冰盾再生",
+        "summary": "冰盾再生分支。"
+      },
+      "frozenBulwarkB2": {
+        "name": "碎冰新星",
+        "summary": "碎冰新星分支。"
+      },
+      "frozenBulwarkC2": {
+        "name": "控场增幅",
+        "summary": "控场增幅分支。"
+      }
+    },
+    "hoarfrostTithe": {
+      "hoarfrostTitheA": {
+        "name": "寒获经验",
+        "summary": "寒获经验分支。"
+      },
+      "hoarfrostTitheB": {
+        "name": "寒获掉落",
+        "summary": "寒获掉落分支。"
+      },
+      "hoarfrostTitheC": {
+        "name": "冬藏延时",
+        "summary": "冬藏延时分支。"
+      },
+      "hoarfrostTitheA2": {
+        "name": "冻杀回春",
+        "summary": "冻杀回春分支。"
+      },
+      "hoarfrostTitheB2": {
+        "name": "冻杀合鸣",
+        "summary": "冻杀合鸣分支。"
+      },
+      "hoarfrostTitheC2": {
+        "name": "霜税加征",
+        "summary": "霜税加征分支。"
+      }
+    },
+    "scorch": {
+      "scorchA": {
+        "name": "灼心",
+        "summary": "灼心分支。"
+      },
+      "scorchB": {
+        "name": "长燃",
+        "summary": "长燃分支。"
+      },
+      "scorchC": {
+        "name": "灼缓",
+        "summary": "灼缓分支。"
+      },
+      "scorchA2": {
+        "name": "蔓延",
+        "summary": "蔓延分支。"
+      },
+      "scorchB2": {
+        "name": "灼烧易感",
+        "summary": "灼烧易感分支。"
+      },
+      "scorchC2": {
+        "name": "速燃",
+        "summary": "速燃分支。"
+      }
+    },
+    "splitBlast": {
+      "splitBlastA": {
+        "name": "爆裂",
+        "summary": "爆裂分支。"
+      },
+      "splitBlastB": {
+        "name": "重爆",
+        "summary": "重爆分支。"
+      },
+      "splitBlastC": {
+        "name": "燃片",
+        "summary": "燃片分支。"
+      },
+      "splitBlastA2": {
+        "name": "连环裂变",
+        "summary": "连环裂变分支。"
+      },
+      "splitBlastB2": {
+        "name": "大爆心",
+        "summary": "大爆心分支。"
+      },
+      "splitBlastC2": {
+        "name": "爆炸推拒",
+        "summary": "爆炸推拒分支。"
+      }
+    },
+    "meteor": {
+      "meteorA": {
+        "name": "广域陨星",
+        "summary": "广域陨星分支。"
+      },
+      "meteorB": {
+        "name": "重陨",
+        "summary": "重陨分支。"
+      },
+      "meteorC": {
+        "name": "熔痕",
+        "summary": "熔痕分支。"
+      },
+      "meteorA2": {
+        "name": "三连陨",
+        "summary": "三连陨分支。"
+      },
+      "meteorB2": {
+        "name": "震地陨星",
+        "summary": "震地陨星分支。"
+      },
+      "meteorC2": {
+        "name": "长燃熔痕",
+        "summary": "长燃熔痕分支。"
+      }
+    },
+    "magmaPool": {
+      "magmaPoolA": {
+        "name": "广域熔岩",
+        "summary": "广域熔岩分支。"
+      },
+      "magmaPoolB": {
+        "name": "炽烈熔岩",
+        "summary": "炽烈熔岩分支。"
+      },
+      "magmaPoolC": {
+        "name": "熔岩易感",
+        "summary": "熔岩易感分支。"
+      },
+      "magmaPoolA2": {
+        "name": "双池",
+        "summary": "双池分支。"
+      },
+      "magmaPoolB2": {
+        "name": "迟滞池缘",
+        "summary": "迟滞池缘分支。"
+      },
+      "magmaPoolC2": {
+        "name": "熔亡爆裂",
+        "summary": "熔亡爆裂分支。"
+      }
+    },
+    "flashfire": {
+      "flashfireA": {
+        "name": "强震",
+        "summary": "强震分支。"
+      },
+      "flashfireB": {
+        "name": "烈燃",
+        "summary": "烈燃分支。"
+      },
+      "flashfireC": {
+        "name": "广域冲击",
+        "summary": "广域冲击分支。"
+      },
+      "flashfireA2": {
+        "name": "燃烧撞击",
+        "summary": "燃烧撞击分支。"
+      },
+      "flashfireB2": {
+        "name": "爆燃眩晕",
+        "summary": "爆燃眩晕分支。"
+      },
+      "flashfireC2": {
+        "name": "火线",
+        "summary": "火线分支。"
+      }
+    },
+    "cinderheart": {
+      "cinderheartA": {
+        "name": "烈焰反噬",
+        "summary": "烈焰反噬分支。"
+      },
+      "cinderheartB": {
+        "name": "耐火心防",
+        "summary": "耐火心防分支。"
+      },
+      "cinderheartC": {
+        "name": "余烬护盾",
+        "summary": "余烬护盾分支。"
+      },
+      "cinderheartA2": {
+        "name": "爆心",
+        "summary": "爆心分支。"
+      },
+      "cinderheartB2": {
+        "name": "近身灼环",
+        "summary": "近身灼环分支。"
+      },
+      "cinderheartC2": {
+        "name": "突破重灼",
+        "summary": "突破重灼分支。"
+      }
+    },
+    "ashHarvest": {
+      "ashHarvestA": {
+        "name": "灰烬经验",
+        "summary": "灰烬经验分支。"
+      },
+      "ashHarvestB": {
+        "name": "灰烬掉落",
+        "summary": "灰烬掉落分支。"
+      },
+      "ashHarvestC": {
+        "name": "余烬延时",
+        "summary": "余烬延时分支。"
+      },
+      "ashHarvestA2": {
+        "name": "灰烬转化",
+        "summary": "灰烬转化分支。"
+      },
+      "ashHarvestB2": {
+        "name": "焚杀振奋",
+        "summary": "焚杀振奋分支。"
+      },
+      "ashHarvestC2": {
+        "name": "焚杀回春",
+        "summary": "焚杀回春分支。"
+      }
+    },
+    "aegis": {
+      "aegisA": {
+        "name": "增层",
+        "summary": "增层分支。"
+      },
+      "aegisB": {
+        "name": "速生",
+        "summary": "速生分支。"
+      },
+      "aegisC": {
+        "name": "碎盾新星",
+        "summary": "碎盾新星分支。"
+      },
+      "aegisA2": {
+        "name": "碎盾反制",
+        "summary": "碎盾反制分支。"
+      },
+      "aegisB2": {
+        "name": "壁垒减伤",
+        "summary": "壁垒减伤分支。"
+      },
+      "aegisC2": {
+        "name": "震退新星",
+        "summary": "震退新星分支。"
+      }
+    },
+    "thorns": {
+      "thornsA": {
+        "name": "反噬",
+        "summary": "反噬分支。"
+      },
+      "thornsB": {
+        "name": "广域荆棘",
+        "summary": "广域荆棘分支。"
+      },
+      "thornsC": {
+        "name": "迟滞荆棘",
+        "summary": "迟滞荆棘分支。"
+      },
+      "thornsA2": {
+        "name": "荆棘领域",
+        "summary": "荆棘领域分支。"
+      },
+      "thornsB2": {
+        "name": "刺伤易感",
+        "summary": "刺伤易感分支。"
+      },
+      "thornsC2": {
+        "name": "残血处决",
+        "summary": "残血处决分支。"
+      }
+    },
+    "decoy": {
+      "decoyA": {
+        "name": "坚固图腾",
+        "summary": "坚固图腾分支。"
+      },
+      "decoyB": {
+        "name": "广域嘲讽",
+        "summary": "广域嘲讽分支。"
+      },
+      "decoyC": {
+        "name": "亡语爆裂",
+        "summary": "亡语爆裂分支。"
+      },
+      "decoyA2": {
+        "name": "重生图腾",
+        "summary": "重生图腾分支。"
+      },
+      "decoyB2": {
+        "name": "双图腾",
+        "summary": "双图腾分支。"
+      },
+      "decoyC2": {
+        "name": "寒意图腾",
+        "summary": "寒意图腾分支。"
+      }
+    },
+    "sanctum": {
+      "sanctumA": {
+        "name": "审判圣域",
+        "summary": "审判圣域分支。"
+      },
+      "sanctumB": {
+        "name": "迟滞圣域",
+        "summary": "迟滞圣域分支。"
+      },
+      "sanctumC": {
+        "name": "迅捷圣域",
+        "summary": "迅捷圣域分支。"
+      },
+      "sanctumA2": {
+        "name": "处刑印记",
+        "summary": "处刑印记分支。"
+      },
+      "sanctumB2": {
+        "name": "易感圣域",
+        "summary": "易感圣域分支。"
+      },
+      "sanctumC2": {
+        "name": "双重圣域",
+        "summary": "双重圣域分支。"
+      }
+    },
+    "sentinel": {
+      "sentinelA": {
+        "name": "重炮哨戒",
+        "summary": "重炮哨戒分支。"
+      },
+      "sentinelB": {
+        "name": "速射哨戒",
+        "summary": "速射哨戒分支。"
+      },
+      "sentinelC": {
+        "name": "加固哨戒",
+        "summary": "加固哨戒分支。"
+      },
+      "sentinelA2": {
+        "name": "双哨戒",
+        "summary": "双哨戒分支。"
+      },
+      "sentinelB2": {
+        "name": "寒弹哨戒",
+        "summary": "寒弹哨戒分支。"
+      },
+      "sentinelC2": {
+        "name": "亡语哨戒",
+        "summary": "亡语哨戒分支。"
+      }
+    },
+    "retribution": {
+      "retributionA": {
+        "name": "长晕反制",
+        "summary": "长晕反制分支。"
+      },
+      "retributionB": {
+        "name": "重罚反制",
+        "summary": "重罚反制分支。"
+      },
+      "retributionC": {
+        "name": "迅捷反制",
+        "summary": "迅捷反制分支。"
+      },
+      "retributionA2": {
+        "name": "易感审判",
+        "summary": "易感审判分支。"
+      },
+      "retributionB2": {
+        "name": "反制回盾",
+        "summary": "反制回盾分支。"
+      },
+      "retributionC2": {
+        "name": "全向震退",
+        "summary": "全向震退分支。"
+      }
+    },
+    "ironvine": {
+      "ironvineA": {
+        "name": "守成丰收",
+        "summary": "守成丰收分支。"
+      },
+      "ironvineB": {
+        "name": "守成延时",
+        "summary": "守成延时分支。"
+      },
+      "ironvineC": {
+        "name": "铁蔓转化",
+        "summary": "铁蔓转化分支。"
+      },
+      "ironvineA2": {
+        "name": "守成经验",
+        "summary": "守成经验分支。"
+      },
+      "ironvineB2": {
+        "name": "壁垒回春",
+        "summary": "壁垒回春分支。"
+      },
+      "ironvineC2": {
+        "name": "反击战利",
+        "summary": "反击战利分支。"
+      }
+    },
+    "harvest": {
+      "harvestA": {
+        "name": "丰收",
+        "summary": "丰收分支。"
+      },
+      "harvestB": {
+        "name": "长留",
+        "summary": "长留分支。"
+      },
+      "harvestC": {
+        "name": "拾取回春",
+        "summary": "拾取回春分支。"
+      },
+      "harvestA2": {
+        "name": "过期转化",
+        "summary": "过期转化分支。"
+      },
+      "harvestB2": {
+        "name": "智慧收获",
+        "summary": "智慧收获分支。"
+      },
+      "harvestC2": {
+        "name": "合成脉冲",
+        "summary": "合成脉冲分支。"
+      }
+    },
+    "fateLoom": {
+      "fateLoomA": {
+        "name": "强命脉冲",
+        "summary": "强命脉冲分支。"
+      },
+      "fateLoomB": {
+        "name": "迅捷织命",
+        "summary": "迅捷织命分支。"
+      },
+      "fateLoomC": {
+        "name": "迟滞织命",
+        "summary": "迟滞织命分支。"
+      },
+      "fateLoomA2": {
+        "name": "易感命纹",
+        "summary": "易感命纹分支。"
+      },
+      "fateLoomB2": {
+        "name": "合成回春",
+        "summary": "合成回春分支。"
+      },
+      "fateLoomC2": {
+        "name": "合成振奋",
+        "summary": "合成振奋分支。"
+      }
+    },
+    "goldenVolley": {
+      "goldenVolleyA": {
+        "name": "吉运连发",
+        "summary": "吉运连发分支。"
+      },
+      "goldenVolleyB": {
+        "name": "重金追加",
+        "summary": "重金追加分支。"
+      },
+      "goldenVolleyC": {
+        "name": "鎏金烙印",
+        "summary": "鎏金烙印分支。"
+      },
+      "goldenVolleyA2": {
+        "name": "烙印增伤",
+        "summary": "烙印增伤分支。"
+      },
+      "goldenVolleyB2": {
+        "name": "赏金标记",
+        "summary": "赏金标记分支。"
+      },
+      "goldenVolleyC2": {
+        "name": "金弹裂变",
+        "summary": "金弹裂变分支。"
+      }
+    },
+    "bountyCall": {
+      "bountyCallA": {
+        "name": "重赏标记",
+        "summary": "重赏标记分支。"
+      },
+      "bountyCallB": {
+        "name": "易感号令",
+        "summary": "易感号令分支。"
+      },
+      "bountyCallC": {
+        "name": "迟滞号令",
+        "summary": "迟滞号令分支。"
+      },
+      "bountyCallA2": {
+        "name": "标记传染",
+        "summary": "标记传染分支。"
+      },
+      "bountyCallB2": {
+        "name": "富集经验",
+        "summary": "富集经验分支。"
+      },
+      "bountyCallC2": {
+        "name": "双重号令",
+        "summary": "双重号令分支。"
+      }
+    },
+    "overgrowth": {
+      "overgrowthA": {
+        "name": "广域蔓生",
+        "summary": "广域蔓生分支。"
+      },
+      "overgrowthB": {
+        "name": "缠足蔓生",
+        "summary": "缠足蔓生分支。"
+      },
+      "overgrowthC": {
+        "name": "易感蔓生",
+        "summary": "易感蔓生分支。"
+      },
+      "overgrowthA2": {
+        "name": "入域缠绕",
+        "summary": "入域缠绕分支。"
+      },
+      "overgrowthB2": {
+        "name": "沃土经验",
+        "summary": "沃土经验分支。"
+      },
+      "overgrowthC2": {
+        "name": "双生藤域",
+        "summary": "双生藤域分支。"
+      }
+    },
+    "springOfLife": {
+      "springOfLifeA": {
+        "name": "丰沛涌泉",
+        "summary": "丰沛涌泉分支。"
+      },
+      "springOfLifeB": {
+        "name": "急流涌泉",
+        "summary": "急流涌泉分支。"
+      },
+      "springOfLifeC": {
+        "name": "溢流护盾",
+        "summary": "溢流护盾分支。"
+      },
+      "springOfLifeA2": {
+        "name": "应急回春",
+        "summary": "应急回春分支。"
+      },
+      "springOfLifeB2": {
+        "name": "生命脉冲",
+        "summary": "生命脉冲分支。"
+      },
+      "springOfLifeC2": {
+        "name": "茁壮心防",
+        "summary": "茁壮心防分支。"
+      }
+    },
+    "luckyStar": {
+      "luckyStarA": {
+        "name": "旺运",
+        "summary": "旺运分支。"
+      },
+      "luckyStarB": {
+        "name": "长运",
+        "summary": "长运分支。"
+      },
+      "luckyStarC": {
+        "name": "慧运",
+        "summary": "慧运分支。"
+      },
+      "luckyStarA2": {
+        "name": "福运掉落",
+        "summary": "福运掉落分支。"
+      },
+      "luckyStarB2": {
+        "name": "惜福转化",
+        "summary": "惜福转化分支。"
+      },
+      "luckyStarC2": {
+        "name": "合福脉冲",
+        "summary": "合福脉冲分支。"
+      }
     }
   },
   "intermission": {
@@ -153,482 +1091,1611 @@
     "highestCard": "最高成就：{star}★{name}"
   },
   "cards": {
-    "fusion": {
-      "name": "形态融合",
-      "beamMortar": "已融合：光束轰击",
-      "hand": { "shortByTier": { "1": "形态融合" }, "milestones": {} },
-      "equip": { "shortByTier": { "1": "形态融合" }, "milestones": {} }
-    },
-    "pierce": {
-      "name": "直球拒绝",
+    "chainLightning": {
+      "name": "连环闪电",
       "hand": {
         "shortByTier": {
-          "1": "直线贯穿一整列",
-          "6": "贯穿并击退整列"
+          "1": "连环闪电的即时释放",
+          "3": "连环闪电强化释放",
+          "6": "连环闪电终极释放"
         },
         "milestones": {
+          "3": {
+            "title": "连环闪电强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
           "6": {
-            "title": "拒绝附带清场",
-            "detail": "贯穿结束后，还会把整列追求者推远。",
+            "title": "连环闪电终态",
+            "detail": "释放完整终态效果。",
             "fx": "transform"
           }
         }
       },
       "equip": {
         "shortByTier": {
-          "3": "子弹贯穿，越穿越痛",
-          "5": "贯穿弹碰边折返",
-          "6": "主炮化为持续光束"
+          "3": "连环闪电分支成形",
+          "5": "连环闪电第二分支叠加",
+          "6": "连环闪电公共终态"
         },
         "milestones": {
           "3": {
-            "title": "常驻生效：直球拒绝",
-            "detail": "子弹会贯穿一整列追求者，穿得越多越痛。",
+            "title": "常驻生效：连环闪电",
+            "detail": "选择一条 3★ 进化分支。",
             "fx": "core"
           },
           "5": {
-            "title": "回头再拒绝一次",
-            "detail": "贯穿弹碰到场边会折返，再清一遍整条路线。",
+            "title": "连环闪电再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
             "fx": "major"
           },
           "6": {
-            "title": "拒绝方式全面升级",
-            "detail": "主炮变成持续光束，自动横扫射程内的追求者。",
+            "title": "连环闪电终态",
+            "detail": "解锁公共 6★ 终态。",
             "fx": "transform"
           }
         }
       }
     },
-    "chainLightning": {
-      "name": "心跳连锁",
+    "pierce": {
+      "name": "雷霆贯枪",
       "hand": {
         "shortByTier": {
-          "1": "连锁电击附近敌群",
-          "3": "连锁电击并减速",
-          "6": "连锁电击并眩晕"
+          "1": "雷霆贯枪的即时释放",
+          "3": "雷霆贯枪强化释放",
+          "6": "雷霆贯枪终极释放"
         },
         "milestones": {
           "3": {
-            "title": "电得腿软了",
-            "detail": "连锁电击现在会附带减速。",
+            "title": "雷霆贯枪强化",
+            "detail": "效果范围与强度提升。",
             "fx": "major"
           },
           "6": {
-            "title": "心跳暂时失控",
-            "detail": "连锁电击现在会让目标短暂眩晕。",
+            "title": "雷霆贯枪终态",
+            "detail": "释放完整终态效果。",
             "fx": "transform"
           }
         }
       },
       "equip": {
         "shortByTier": {
-          "3": "命中连锁并减速",
-          "5": "电死目标重新起链",
-          "6": "定时雷暴多点连锁"
+          "3": "雷霆贯枪分支成形",
+          "5": "雷霆贯枪第二分支叠加",
+          "6": "雷霆贯枪公共终态"
         },
         "milestones": {
           "3": {
-            "title": "常驻生效：心跳连锁",
-            "detail": "命中会在附近追求者间连锁跳电，并附带减速。",
+            "title": "常驻生效：雷霆贯枪",
+            "detail": "选择一条 3★ 进化分支。",
             "fx": "core"
           },
           "5": {
-            "title": "电完还能续上",
-            "detail": "被电倒的追求者会从原地重新放出连锁电弧。",
+            "title": "雷霆贯枪再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
             "fx": "major"
           },
           "6": {
-            "title": "全场心跳管理",
-            "detail": "炮台会周期性召来雷暴，同时电击多名追求者。",
+            "title": "雷霆贯枪终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "staticSurge": {
+      "name": "静电充能",
+      "hand": {
+        "shortByTier": {
+          "1": "静电充能的即时释放",
+          "3": "静电充能强化释放",
+          "6": "静电充能终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "静电充能强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "静电充能终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "静电充能分支成形",
+          "5": "静电充能第二分支叠加",
+          "6": "静电充能公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：静电充能",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "静电充能再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "静电充能终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "stormcall": {
+      "name": "唤雷",
+      "hand": {
+        "shortByTier": {
+          "1": "唤雷的即时释放",
+          "3": "唤雷强化释放",
+          "6": "唤雷终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "唤雷强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "唤雷终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "唤雷分支成形",
+          "5": "唤雷第二分支叠加",
+          "6": "唤雷公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：唤雷",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "唤雷再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "唤雷终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "arcSplitter": {
+      "name": "弧光裂片",
+      "hand": {
+        "shortByTier": {
+          "1": "弧光裂片的即时释放",
+          "3": "弧光裂片强化释放",
+          "6": "弧光裂片终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "弧光裂片强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "弧光裂片终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "弧光裂片分支成形",
+          "5": "弧光裂片第二分支叠加",
+          "6": "弧光裂片公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：弧光裂片",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "弧光裂片再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "弧光裂片终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "galvanicWard": {
+      "name": "电磁壁垒",
+      "hand": {
+        "shortByTier": {
+          "1": "电磁壁垒的即时释放",
+          "3": "电磁壁垒强化释放",
+          "6": "电磁壁垒终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "电磁壁垒强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "电磁壁垒终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "电磁壁垒分支成形",
+          "5": "电磁壁垒第二分支叠加",
+          "6": "电磁壁垒公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：电磁壁垒",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "电磁壁垒再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "电磁壁垒终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "overcharge": {
+      "name": "过载核心",
+      "hand": {
+        "shortByTier": {
+          "1": "过载核心的即时释放",
+          "3": "过载核心强化释放",
+          "6": "过载核心终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "过载核心强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "过载核心终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "过载核心分支成形",
+          "5": "过载核心第二分支叠加",
+          "6": "过载核心公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：过载核心",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "过载核心再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "过载核心终态",
+            "detail": "解锁公共 6★ 终态。",
             "fx": "transform"
           }
         }
       }
     },
     "frost": {
-      "name": "冷淡处理",
+      "name": "霜寒",
       "hand": {
         "shortByTier": {
-          "1": "冻结落点追求者",
-          "3": "冻结后继续减速",
-          "6": "冻结并使其易伤"
+          "1": "霜寒的即时释放",
+          "3": "霜寒强化释放",
+          "6": "霜寒终极释放"
         },
         "milestones": {
           "3": {
-            "title": "冷脸之后还有余寒",
-            "detail": "冻结结束后，追求者仍会持续减速。",
+            "title": "霜寒强化",
+            "detail": "效果范围与强度提升。",
             "fx": "major"
           },
           "6": {
-            "title": "冷到开始反省",
-            "detail": "被冻结的目标现在会承受更多伤害。",
+            "title": "霜寒终态",
+            "detail": "释放完整终态效果。",
             "fx": "transform"
           }
         }
       },
       "equip": {
         "shortByTier": {
-          "3": "子弹减速叠满冻结",
-          "5": "冻死碎裂波及周围",
-          "6": "常驻极寒定时冻结"
+          "3": "霜寒分支成形",
+          "5": "霜寒第二分支叠加",
+          "6": "霜寒公共终态"
         },
         "milestones": {
           "3": {
-            "title": "常驻生效：冷淡处理",
-            "detail": "子弹持续减速追求者，叠满后将其冻结。",
+            "title": "常驻生效：霜寒",
+            "detail": "选择一条 3★ 进化分支。",
             "fx": "core"
           },
           "5": {
-            "title": "冷场也会碎一地",
-            "detail": "冻结中的追求者被击倒时会碎裂，并波及周围。",
+            "title": "霜寒再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
             "fx": "major"
           },
           "6": {
-            "title": "这里常年零下",
-            "detail": "炮台周围形成极寒领域，并定时冻结一片追求者。",
-            "fx": "transform"
-          }
-        }
-      }
-    },
-    "decoy": {
-      "name": "暧昧诱饵",
-      "hand": {
-        "shortByTier": {
-          "1": "放诱饵引走追求者",
-          "3": "诱饵被毁时爆炸",
-          "6": "召出会开火的分身"
-        },
-        "milestones": {
-          "3": {
-            "title": "暧昧信号会爆炸",
-            "detail": "诱饵被摧毁时会炸开附近追求者。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "分身亲自下场",
-            "detail": "诱饵升级为会自动开火的分身。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "每波放爆炸诱饵",
-          "5": "诱饵被毁重生一次",
-          "6": "每波召会开火分身"
-        },
-        "milestones": {
-          "3": {
-            "title": "常驻生效：暧昧诱饵",
-            "detail": "每波放下一个诱饵，被摧毁时会炸开附近追求者。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "备胎还有备胎",
-            "detail": "诱饵被摧毁后，会换个位置再出现一次。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "分身开始营业",
-            "detail": "每波召出会吸引火力、也会自动开火的分身。",
-            "fx": "transform"
-          }
-        }
-      }
-    },
-    "scorch": {
-      "name": "热情退烧",
-      "hand": {
-        "shortByTier": {
-          "1": "落点留持续火区",
-          "3": "火区还叠加易伤"
-        },
-        "milestones": {
-          "3": {
-            "title": "热情使人失去防备",
-            "detail": "火区中的目标现在会承受更多伤害。",
-            "fx": "major"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "命中留火烧死蔓延",
-          "5": "火中目标更易受伤",
-          "6": "身边常驻灼烧环"
-        },
-        "milestones": {
-          "3": {
-            "title": "常驻生效：热情退烧",
-            "detail": "命中处留下火区，追求者死在其中会蔓延新火。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "越热情，越没防备",
-            "detail": "火区中的追求者会承受更多伤害。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "拒绝靠近明火",
-            "detail": "炮台周围常驻灼烧环，靠近者持续受伤并减速。",
-            "fx": "transform"
-          }
-        }
-      }
-    },
-    "harvest": {
-      "name": "桃花丰收",
-      "hand": {
-        "shortByTier": {
-          "1": "落点掉出几张卡",
-          "3": "有机会掉高星卡",
-          "6": "必掉高星并空投"
-        },
-        "milestones": {
-          "3": {
-            "title": "桃花里混进了优质货",
-            "detail": "空投现在可能出现高星卡。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "桃花运开始包邮",
-            "detail": "空投必有高星卡，并额外掉落更多卡。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "掉落更多停留更久",
-          "5": "过期掉落折成经验",
-          "6": "每波空投过期转经验"
-        },
-        "milestones": {
-          "3": {
-            "title": "常驻生效：桃花丰收",
-            "detail": "提高掉落数量并延长地面停留时间。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "过期心意也能变现",
-            "detail": "没捡到的掉落会转成经验，不再完全浪费。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "桃花运自动送货",
-            "detail": "每波开局直接空投卡牌，过期掉落全部转经验。",
-            "fx": "transform"
-          }
-        }
-      }
-    },
-    "aegis": {
-      "name": "私人领域",
-      "hand": {
-        "shortByTier": {
-          "1": "加盾并推开近敌",
-          "6": "加盾爆发并击退"
-        },
-        "milestones": {
-          "6": {
-            "title": "私人空间带反击",
-            "detail": "获得护盾时还会爆发伤害并强力击退。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "波初加盾降突破伤",
-          "5": "碎盾时爆发击退",
-          "6": "护盾快速再生更强"
-        },
-        "milestones": {
-          "3": {
-            "title": "常驻生效：私人领域",
-            "detail": "每波开局获得护盾，降低被突破时的伤害。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "碎盾也要体面退场",
-            "detail": "护盾破裂时爆发冲击，把附近追求者震开。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "私人空间自动续费",
-            "detail": "护盾更快重生，每次碎裂释放更强反击。",
-            "fx": "transform"
-          }
-        }
-      }
-    },
-    "splitBlast": {
-      "name": "群发拒绝",
-      "hand": {
-        "shortByTier": {
-          "1": "落点爆炸清一片",
-          "3": "爆炸飞出追击碎片",
-          "6": "碎片命中再分裂"
-        },
-        "milestones": {
-          "3": {
-            "title": "拒绝开始群发",
-            "detail": "爆炸后会飞出子弹片继续追击。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "群发还能转发",
-            "detail": "子弹片命中后还能再次分裂。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "命中分裂小范围爆",
-          "5": "碎片再裂一次",
-          "6": "主炮改为范围榴弹"
-        },
-        "milestones": {
-          "3": {
-            "title": "常驻生效：群发拒绝",
-            "detail": "命中会分裂出子弹片，并炸开一小片范围。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "拒绝开始二次传播",
-            "detail": "子弹片命中后还能再分裂一次，爆破更密集。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "主炮改发榴弹",
-            "detail": "普通射击变为范围榴弹，落点炸开一大片。",
+            "title": "霜寒终态",
+            "detail": "解锁公共 6★ 终态。",
             "fx": "transform"
           }
         }
       }
     },
     "impact": {
-      "name": "保持距离",
+      "name": "凛冬重锤",
       "hand": {
         "shortByTier": {
-          "1": "推开一片追求者",
-          "3": "推远并短暂眩晕",
-          "6": "撞到同伴也受伤"
+          "1": "凛冬重锤的即时释放",
+          "3": "凛冬重锤强化释放",
+          "6": "凛冬重锤终极释放"
         },
         "milestones": {
           "3": {
-            "title": "请退后，并冷静一下",
-            "detail": "冲击现在会附带短暂眩晕。",
+            "title": "凛冬重锤强化",
+            "detail": "效果范围与强度提升。",
             "fx": "major"
           },
           "6": {
-            "title": "挤作一团也会受伤",
-            "detail": "被推飞的追求者撞到同伴会造成额外伤害。",
+            "title": "凛冬重锤终态",
+            "detail": "释放完整终态效果。",
             "fx": "transform"
           }
         }
       },
       "equip": {
         "shortByTier": {
-          "3": "每发子弹都击退",
-          "5": "被突破自动全向震退",
-          "6": "定时释放全向冲击"
+          "3": "凛冬重锤分支成形",
+          "5": "凛冬重锤第二分支叠加",
+          "6": "凛冬重锤公共终态"
         },
         "milestones": {
           "3": {
-            "title": "常驻生效：保持距离",
-            "detail": "每发子弹都带击退，把追求者推离炮台。",
+            "title": "常驻生效：凛冬重锤",
+            "detail": "选择一条 3★ 进化分支。",
             "fx": "core"
           },
           "5": {
-            "title": "贴脸行为触发报警",
-            "detail": "有人突破时自动释放冲击波，震退并打断周围。",
+            "title": "凛冬重锤再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
             "fx": "major"
           },
           "6": {
-            "title": "定期清理安全距离",
-            "detail": "炮台周期性释放全向冲击，把近处追求者推开。",
+            "title": "凛冬重锤终态",
+            "detail": "解锁公共 6★ 终态。",
             "fx": "transform"
           }
         }
       }
     },
-    "sanctum": {
-      "name": "禁入红线",
+    "glacialSpike": {
+      "name": "冰锥",
       "hand": {
         "shortByTier": {
-          "1": "使一片追求者易伤"
-        },
-        "milestones": {}
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "红线内减速并易伤",
-          "5": "残血目标优先补刀",
-          "6": "定时全领域强易伤"
+          "1": "冰锥的即时释放",
+          "3": "冰锥强化释放",
+          "6": "冰锥终极释放"
         },
         "milestones": {
           "3": {
-            "title": "常驻生效：禁入红线",
-            "detail": "以炮台为中心布下红线，圈内追求者减速并易伤。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "红线内优先清退",
-            "detail": "领域内的残血追求者会被炮台优先补刀。",
+            "title": "冰锥强化",
+            "detail": "效果范围与强度提升。",
             "fx": "major"
           },
           "6": {
-            "title": "审判改为定时群发",
-            "detail": "炮台周期性让整个领域内的追求者大幅易伤。",
+            "title": "冰锥终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "冰锥分支成形",
+          "5": "冰锥第二分支叠加",
+          "6": "冰锥公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：冰锥",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "冰锥再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "冰锥终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "permafrost": {
+      "name": "冻土",
+      "hand": {
+        "shortByTier": {
+          "1": "冻土的即时释放",
+          "3": "冻土强化释放",
+          "6": "冻土终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "冻土强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "冻土终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "冻土分支成形",
+          "5": "冻土第二分支叠加",
+          "6": "冻土公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：冻土",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "冻土再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "冻土终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "iceTomb": {
+      "name": "冰棺",
+      "hand": {
+        "shortByTier": {
+          "1": "冰棺的即时释放",
+          "3": "冰棺强化释放",
+          "6": "冰棺终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "冰棺强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "冰棺终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "冰棺分支成形",
+          "5": "冰棺第二分支叠加",
+          "6": "冰棺公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：冰棺",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "冰棺再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "冰棺终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "frozenBulwark": {
+      "name": "冰晶壁垒",
+      "hand": {
+        "shortByTier": {
+          "1": "冰晶壁垒的即时释放",
+          "3": "冰晶壁垒强化释放",
+          "6": "冰晶壁垒终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "冰晶壁垒强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "冰晶壁垒终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "冰晶壁垒分支成形",
+          "5": "冰晶壁垒第二分支叠加",
+          "6": "冰晶壁垒公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：冰晶壁垒",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "冰晶壁垒再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "冰晶壁垒终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "hoarfrostTithe": {
+      "name": "霜税",
+      "hand": {
+        "shortByTier": {
+          "1": "霜税的即时释放",
+          "3": "霜税强化释放",
+          "6": "霜税终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "霜税强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "霜税终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "霜税分支成形",
+          "5": "霜税第二分支叠加",
+          "6": "霜税公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：霜税",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "霜税再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "霜税终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "scorch": {
+      "name": "灼心",
+      "hand": {
+        "shortByTier": {
+          "1": "灼心的即时释放",
+          "3": "灼心强化释放",
+          "6": "灼心终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "灼心强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "灼心终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "灼心分支成形",
+          "5": "灼心第二分支叠加",
+          "6": "灼心公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：灼心",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "灼心再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "灼心终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "splitBlast": {
+      "name": "爆裂弹",
+      "hand": {
+        "shortByTier": {
+          "1": "爆裂弹的即时释放",
+          "3": "爆裂弹强化释放",
+          "6": "爆裂弹终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "爆裂弹强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "爆裂弹终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "爆裂弹分支成形",
+          "5": "爆裂弹第二分支叠加",
+          "6": "爆裂弹公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：爆裂弹",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "爆裂弹再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "爆裂弹终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "meteor": {
+      "name": "陨星",
+      "hand": {
+        "shortByTier": {
+          "1": "陨星的即时释放",
+          "3": "陨星强化释放",
+          "6": "陨星终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "陨星强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "陨星终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "陨星分支成形",
+          "5": "陨星第二分支叠加",
+          "6": "陨星公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：陨星",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "陨星再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "陨星终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "magmaPool": {
+      "name": "熔岩池",
+      "hand": {
+        "shortByTier": {
+          "1": "熔岩池的即时释放",
+          "3": "熔岩池强化释放",
+          "6": "熔岩池终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "熔岩池强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "熔岩池终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "熔岩池分支成形",
+          "5": "熔岩池第二分支叠加",
+          "6": "熔岩池公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：熔岩池",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "熔岩池再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "熔岩池终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "flashfire": {
+      "name": "爆燃冲击",
+      "hand": {
+        "shortByTier": {
+          "1": "爆燃冲击的即时释放",
+          "3": "爆燃冲击强化释放",
+          "6": "爆燃冲击终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "爆燃冲击强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "爆燃冲击终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "爆燃冲击分支成形",
+          "5": "爆燃冲击第二分支叠加",
+          "6": "爆燃冲击公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：爆燃冲击",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "爆燃冲击再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "爆燃冲击终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "cinderheart": {
+      "name": "烬心",
+      "hand": {
+        "shortByTier": {
+          "1": "烬心的即时释放",
+          "3": "烬心强化释放",
+          "6": "烬心终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "烬心强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "烬心终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "烬心分支成形",
+          "5": "烬心第二分支叠加",
+          "6": "烬心公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：烬心",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "烬心再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "烬心终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "ashHarvest": {
+      "name": "燃灰",
+      "hand": {
+        "shortByTier": {
+          "1": "燃灰的即时释放",
+          "3": "燃灰强化释放",
+          "6": "燃灰终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "燃灰强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "燃灰终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "燃灰分支成形",
+          "5": "燃灰第二分支叠加",
+          "6": "燃灰公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：燃灰",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "燃灰再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "燃灰终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "aegis": {
+      "name": "神盾",
+      "hand": {
+        "shortByTier": {
+          "1": "神盾的即时释放",
+          "3": "神盾强化释放",
+          "6": "神盾终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "神盾强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "神盾终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "神盾分支成形",
+          "5": "神盾第二分支叠加",
+          "6": "神盾公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：神盾",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "神盾再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "神盾终态",
+            "detail": "解锁公共 6★ 终态。",
             "fx": "transform"
           }
         }
       }
     },
     "thorns": {
-      "name": "带刺玫瑰",
+      "name": "荆棘",
       "hand": {
         "shortByTier": {
-          "1": "减速区持续掉血",
-          "3": "伤害区并标记目标",
-          "6": "伤害区处决残血"
+          "1": "荆棘的即时释放",
+          "3": "荆棘强化释放",
+          "6": "荆棘终极释放"
         },
         "milestones": {
           "3": {
-            "title": "刺里还带点眼神",
-            "detail": "荆棘中的目标会被炮台优先照顾。",
+            "title": "荆棘强化",
+            "detail": "效果范围与强度提升。",
             "fx": "major"
           },
           "6": {
-            "title": "越纠缠，退场越快",
-            "detail": "低血量目标会被直接处决。",
+            "title": "荆棘终态",
+            "detail": "释放完整终态效果。",
             "fx": "transform"
           }
         }
       },
       "equip": {
         "shortByTier": {
-          "3": "减伤并反噬突破者",
-          "5": "身边常驻荆棘",
-          "6": "荆棘扩大处决残血"
+          "3": "荆棘分支成形",
+          "5": "荆棘第二分支叠加",
+          "6": "荆棘公共终态"
         },
         "milestones": {
           "3": {
-            "title": "常驻生效：带刺玫瑰",
-            "detail": "大幅减免突破伤害，并反噬突破点附近的追求者。",
+            "title": "常驻生效：荆棘",
+            "detail": "选择一条 3★ 进化分支。",
             "fx": "core"
           },
           "5": {
-            "title": "玫瑰开始主动扎人",
-            "detail": "炮台周围常驻荆棘，靠近者持续受伤。",
+            "title": "荆棘再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
             "fx": "major"
           },
           "6": {
-            "title": "纠缠过久，直接退场",
-            "detail": "荆棘范围扩大，低血量追求者被直接处决。",
+            "title": "荆棘终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "decoy": {
+      "name": "磐垒图腾",
+      "hand": {
+        "shortByTier": {
+          "1": "磐垒图腾的即时释放",
+          "3": "磐垒图腾强化释放",
+          "6": "磐垒图腾终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "磐垒图腾强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "磐垒图腾终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "磐垒图腾分支成形",
+          "5": "磐垒图腾第二分支叠加",
+          "6": "磐垒图腾公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：磐垒图腾",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "磐垒图腾再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "磐垒图腾终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "sanctum": {
+      "name": "圣域",
+      "hand": {
+        "shortByTier": {
+          "1": "圣域的即时释放",
+          "3": "圣域强化释放",
+          "6": "圣域终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "圣域强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "圣域终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "圣域分支成形",
+          "5": "圣域第二分支叠加",
+          "6": "圣域公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：圣域",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "圣域再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "圣域终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "sentinel": {
+      "name": "哨戒炮塔",
+      "hand": {
+        "shortByTier": {
+          "1": "哨戒炮塔的即时释放",
+          "3": "哨戒炮塔强化释放",
+          "6": "哨戒炮塔终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "哨戒炮塔强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "哨戒炮塔终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "哨戒炮塔分支成形",
+          "5": "哨戒炮塔第二分支叠加",
+          "6": "哨戒炮塔公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：哨戒炮塔",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "哨戒炮塔再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "哨戒炮塔终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "retribution": {
+      "name": "天罚",
+      "hand": {
+        "shortByTier": {
+          "1": "天罚的即时释放",
+          "3": "天罚强化释放",
+          "6": "天罚终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "天罚强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "天罚终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "天罚分支成形",
+          "5": "天罚第二分支叠加",
+          "6": "天罚公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：天罚",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "天罚再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "天罚终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "ironvine": {
+      "name": "铁蔓",
+      "hand": {
+        "shortByTier": {
+          "1": "铁蔓的即时释放",
+          "3": "铁蔓强化释放",
+          "6": "铁蔓终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "铁蔓强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "铁蔓终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "铁蔓分支成形",
+          "5": "铁蔓第二分支叠加",
+          "6": "铁蔓公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：铁蔓",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "铁蔓再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "铁蔓终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "harvest": {
+      "name": "眷恋",
+      "hand": {
+        "shortByTier": {
+          "1": "眷恋的即时释放",
+          "3": "眷恋强化释放",
+          "6": "眷恋终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "眷恋强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "眷恋终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "眷恋分支成形",
+          "5": "眷恋第二分支叠加",
+          "6": "眷恋公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：眷恋",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "眷恋再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "眷恋终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "fateLoom": {
+      "name": "命运织机",
+      "hand": {
+        "shortByTier": {
+          "1": "命运织机的即时释放",
+          "3": "命运织机强化释放",
+          "6": "命运织机终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "命运织机强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "命运织机终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "命运织机分支成形",
+          "5": "命运织机第二分支叠加",
+          "6": "命运织机公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：命运织机",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "命运织机再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "命运织机终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "goldenVolley": {
+      "name": "鎏金弹",
+      "hand": {
+        "shortByTier": {
+          "1": "鎏金弹的即时释放",
+          "3": "鎏金弹强化释放",
+          "6": "鎏金弹终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "鎏金弹强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "鎏金弹终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "鎏金弹分支成形",
+          "5": "鎏金弹第二分支叠加",
+          "6": "鎏金弹公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：鎏金弹",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "鎏金弹再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "鎏金弹终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "bountyCall": {
+      "name": "富集号令",
+      "hand": {
+        "shortByTier": {
+          "1": "富集号令的即时释放",
+          "3": "富集号令强化释放",
+          "6": "富集号令终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "富集号令强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "富集号令终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "富集号令分支成形",
+          "5": "富集号令第二分支叠加",
+          "6": "富集号令公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：富集号令",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "富集号令再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "富集号令终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "overgrowth": {
+      "name": "蔓生",
+      "hand": {
+        "shortByTier": {
+          "1": "蔓生的即时释放",
+          "3": "蔓生强化释放",
+          "6": "蔓生终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "蔓生强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "蔓生终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "蔓生分支成形",
+          "5": "蔓生第二分支叠加",
+          "6": "蔓生公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：蔓生",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "蔓生再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "蔓生终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "springOfLife": {
+      "name": "生命涌泉",
+      "hand": {
+        "shortByTier": {
+          "1": "生命涌泉的即时释放",
+          "3": "生命涌泉强化释放",
+          "6": "生命涌泉终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "生命涌泉强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "生命涌泉终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "生命涌泉分支成形",
+          "5": "生命涌泉第二分支叠加",
+          "6": "生命涌泉公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：生命涌泉",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "生命涌泉再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "生命涌泉终态",
+            "detail": "解锁公共 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "luckyStar": {
+      "name": "吉星",
+      "hand": {
+        "shortByTier": {
+          "1": "吉星的即时释放",
+          "3": "吉星强化释放",
+          "6": "吉星终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "吉星强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "吉星终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "吉星分支成形",
+          "5": "吉星第二分支叠加",
+          "6": "吉星公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：吉星",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "吉星再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "吉星终态",
+            "detail": "解锁公共 6★ 终态。",
             "fx": "transform"
           }
         }
@@ -638,25 +2705,292 @@
       "name": "霜雷",
       "hand": {
         "shortByTier": {
-          "1": "连锁霜雷冻结并爆碎敌群",
-          "3": "强化连锁与冻结范围",
-          "6": "霜雷席卷并引爆冻结目标"
+          "1": "霜雷的即时释放",
+          "3": "霜雷强化释放",
+          "6": "霜雷终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "霜雷强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "霜雷终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "霜雷分支成形",
+          "5": "霜雷第二分支叠加",
+          "6": "霜雷公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：霜雷",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "霜雷再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "霜雷终态",
+            "detail": "固定配方产物的 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "solarLance": {
+      "name": "日炙长枪",
+      "hand": {
+        "shortByTier": {
+          "1": "日炙长枪的即时释放",
+          "3": "日炙长枪强化释放",
+          "6": "日炙长枪终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "日炙长枪强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "日炙长枪终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "日炙长枪分支成形",
+          "5": "日炙长枪第二分支叠加",
+          "6": "日炙长枪公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：日炙长枪",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "日炙长枪再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "日炙长枪终态",
+            "detail": "固定配方产物的 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "avalanche": {
+      "name": "雪崩",
+      "hand": {
+        "shortByTier": {
+          "1": "雪崩的即时释放",
+          "3": "雪崩强化释放",
+          "6": "雪崩终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "雪崩强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "雪崩终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "雪崩分支成形",
+          "5": "雪崩第二分支叠加",
+          "6": "雪崩公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：雪崩",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "雪崩再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "雪崩终态",
+            "detail": "固定配方产物的 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "pyrestorm": {
+      "name": "焚风暴",
+      "hand": {
+        "shortByTier": {
+          "1": "焚风暴的即时释放",
+          "3": "焚风暴强化释放",
+          "6": "焚风暴终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "焚风暴强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "焚风暴终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "焚风暴分支成形",
+          "5": "焚风暴第二分支叠加",
+          "6": "焚风暴公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：焚风暴",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "焚风暴再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "焚风暴终态",
+            "detail": "固定配方产物的 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "crownOfThorns": {
+      "name": "荆棘王冠",
+      "hand": {
+        "shortByTier": {
+          "1": "荆棘王冠的即时释放",
+          "3": "荆棘王冠强化释放",
+          "6": "荆棘王冠终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "荆棘王冠强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "荆棘王冠终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "荆棘王冠分支成形",
+          "5": "荆棘王冠第二分支叠加",
+          "6": "荆棘王冠公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：荆棘王冠",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "荆棘王冠再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "荆棘王冠终态",
+            "detail": "固定配方产物的 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "goldenIdol": {
+      "name": "黄金偶像",
+      "hand": {
+        "shortByTier": {
+          "1": "黄金偶像的即时释放",
+          "3": "黄金偶像强化释放",
+          "6": "黄金偶像终极释放"
+        },
+        "milestones": {
+          "3": {
+            "title": "黄金偶像强化",
+            "detail": "效果范围与强度提升。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "黄金偶像终态",
+            "detail": "释放完整终态效果。",
+            "fx": "transform"
+          }
+        }
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "黄金偶像分支成形",
+          "5": "黄金偶像第二分支叠加",
+          "6": "黄金偶像公共终态"
+        },
+        "milestones": {
+          "3": {
+            "title": "常驻生效：黄金偶像",
+            "detail": "选择一条 3★ 进化分支。",
+            "fx": "core"
+          },
+          "5": {
+            "title": "黄金偶像再进化",
+            "detail": "独立选择并叠加一条 5★ 分支。",
+            "fx": "major"
+          },
+          "6": {
+            "title": "黄金偶像终态",
+            "detail": "固定配方产物的 6★ 终态。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "fusion": {
+      "name": "形态融合",
+      "beamMortar": "已融合：光束轰击",
+      "hand": {
+        "shortByTier": {
+          "1": "形态融合"
         },
         "milestones": {}
       },
       "equip": {
         "shortByTier": {
-          "3": "命中连锁并传导冻结",
-          "5": "冻结目标死亡时爆碎",
-          "6": "长链霜雷连续冻结爆碎"
+          "1": "形态融合"
         },
-        "milestones": {
-          "6": {
-            "title": "终态进化：霜雷",
-            "detail": "连锁闪电传导冻结，冻结目标死亡时引发范围爆碎。",
-            "fx": "transform"
-          }
-        }
+        "milestones": {}
       }
     }
   }

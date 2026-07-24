@@ -33,6 +33,6 @@ describe('skill-colored area effects', () => {
   );
 
   it('keeps the burning accent red', () => {
-    expect(resolveCardVisual('scorch').accent).toBe('#F05252');
+    expect(resolveCardVisual('scorch').accent).toBe('#EE563C');
   });
 });

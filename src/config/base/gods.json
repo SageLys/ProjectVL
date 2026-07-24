@@ -4,40 +4,85 @@
     {
       "id": "storm",
       "textKey": "gods.storm",
-      "anchorCardIds": ["chainLightning", "pierce"],
-      "variableCardIds": [],
+      "anchorCardIds": [
+        "chainLightning",
+        "pierce"
+      ],
+      "variableCardIds": [
+        "staticSurge",
+        "stormcall",
+        "arcSplitter",
+        "galvanicWard",
+        "overcharge"
+      ],
       "mainRosterSize": 5,
       "subRosterSize": 3
     },
     {
       "id": "winter",
       "textKey": "gods.winter",
-      "anchorCardIds": ["frost", "impact"],
-      "variableCardIds": [],
+      "anchorCardIds": [
+        "frost",
+        "impact"
+      ],
+      "variableCardIds": [
+        "glacialSpike",
+        "permafrost",
+        "iceTomb",
+        "frozenBulwark",
+        "hoarfrostTithe"
+      ],
       "mainRosterSize": 5,
       "subRosterSize": 3
     },
     {
       "id": "inferno",
       "textKey": "gods.inferno",
-      "anchorCardIds": ["scorch", "splitBlast"],
-      "variableCardIds": [],
+      "anchorCardIds": [
+        "scorch",
+        "splitBlast"
+      ],
+      "variableCardIds": [
+        "meteor",
+        "magmaPool",
+        "flashfire",
+        "cinderheart",
+        "ashHarvest"
+      ],
       "mainRosterSize": 5,
       "subRosterSize": 3
     },
     {
       "id": "bulwark",
       "textKey": "gods.bulwark",
-      "anchorCardIds": ["aegis", "thorns"],
-      "variableCardIds": ["decoy", "sanctum"],
+      "anchorCardIds": [
+        "aegis",
+        "thorns"
+      ],
+      "variableCardIds": [
+        "decoy",
+        "sanctum",
+        "sentinel",
+        "retribution",
+        "ironvine"
+      ],
       "mainRosterSize": 5,
       "subRosterSize": 3
     },
     {
       "id": "plenty",
       "textKey": "gods.plenty",
-      "anchorCardIds": ["harvest"],
-      "variableCardIds": [],
+      "anchorCardIds": [
+        "harvest",
+        "fateLoom"
+      ],
+      "variableCardIds": [
+        "goldenVolley",
+        "bountyCall",
+        "overgrowth",
+        "springOfLife",
+        "luckyStar"
+      ],
       "mainRosterSize": 5,
       "subRosterSize": 3
     }

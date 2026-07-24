@@ -102,14 +102,14 @@
     },
     {
       "id": "plenty_harvest_hymn", "god": "plenty", "rarity": "common", "textKey": "relics.plenty_harvest_hymn",
-      "title": "丰收颂歌", "desc": "资源、领域与弹道技能的衍生伤害提高 10%。", "targetTags": ["utility", "domain", "projectile"],
-      "effects": [{ "kind": "buildScaling", "targetTags": ["utility", "domain", "projectile"], "axis": "effectDamageMul", "value": 0.1 }],
+      "title": "丰收颂歌", "desc": "辅助技能提供的掉落率提高 10%。", "targetTags": ["utility"],
+      "effects": [{ "kind": "buildScaling", "targetTags": ["utility"], "axis": "dropRateMul", "value": 0.1 }],
       "poolInfluence": { "godWeightAdd": 1, "pityDrops": 2 }, "maxStacks": 5
     },
     {
       "id": "plenty_wisdom_crystal", "god": "plenty", "rarity": "rare", "textKey": "relics.plenty_wisdom_crystal",
-      "title": "智慧结晶", "desc": "资源、控制与领域技能的范围提高 15%。", "targetTags": ["utility", "control", "domain"],
-      "effects": [{ "kind": "buildScaling", "targetTags": ["utility", "control", "domain"], "axis": "areaScaleMul", "value": 0.15 }],
+      "title": "智慧结晶", "desc": "辅助技能提供的经验倍率提高 15%。", "targetTags": ["utility"],
+      "effects": [{ "kind": "buildScaling", "targetTags": ["utility"], "axis": "xpMul", "value": 0.15 }],
       "poolInfluence": { "godWeightAdd": 1, "pityDrops": 2 }, "maxStacks": 4
     },
     {
@@ -126,8 +126,8 @@
     },
     {
       "id": "neutral_scavenger", "rarity": "common", "textKey": "relics.neutral_scavenger",
-      "title": "拾荒者", "desc": "资源与领域机制的持续收益提高。", "targetTags": ["utility", "domain"],
-      "effects": [{ "kind": "buildScaling", "targetTags": ["utility", "domain"], "axis": "dotDamageMul", "value": 0.12 }],
+      "title": "拾荒者", "desc": "辅助技能提供的掉落存留时间提高 12%。", "targetTags": ["utility"],
+      "effects": [{ "kind": "buildScaling", "targetTags": ["utility"], "axis": "dropLifetimeMul", "value": 0.12 }],
       "maxStacks": 5
     },
     {

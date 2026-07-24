@@ -1,4 +1,4 @@
-// 效果原子注册表：31 个原子的通用实现。
+// 效果原子注册表：33 个原子的通用实现。
 // 原子只描述「做什么」，由 EffectCtx 决定「何时何地」：
 //   - 装备态：触发器载荷（bullet/enemy/drop/merge）进入 ctx；
 //   - 消耗态：origin=落点、radius/duration=档位参数、consume=true；
@@ -363,7 +363,10 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
   },
   vulnerable(ctx, p) {
     if (attachRider(ctx, 'vulnerable', p)) return;
-    for (const e of targets(ctx, p)) applyVulnerable(e, num(p, 'ratio', 0.2), num(p, 'duration', 2));
+    const maxStacks = Math.max(1, Math.trunc(num(p, 'maxStacks', 1)));
+    for (const e of targets(ctx, p)) {
+      applyVulnerable(e, num(p, 'ratio', 0.2), num(p, 'duration', 2), maxStacks);
+    }
   },
 
   // —— 领域 ——
@@ -391,6 +394,15 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
   summon(ctx, p) {
     const kind = str(p, 'kind', 'decoy') as 'decoy' | 'mirrorTurret' | 'orbital';
     if (ctx.sourceCardId != null && ctx.sourceBindingIndex != null) {
+      if (p.replacesEarlier === true) {
+        for (let i = ctx.state.summons.length - 1; i >= 0; i--) {
+          const existing = ctx.state.summons[i];
+          if (existing.sourceCardId === ctx.sourceCardId
+            && existing.sourceBindingIndex !== ctx.sourceBindingIndex) {
+            ctx.state.summons.splice(i, 1);
+          }
+        }
+      }
       const matches = ctx.state.summons.filter(s =>
         s.sourceCardId === ctx.sourceCardId && s.sourceBindingIndex === ctx.sourceBindingIndex);
       const summon = matches[0] ?? {
@@ -500,6 +512,34 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
       applyBrand(e, weight, duration);
     }
   },
+  restore(ctx, p) {
+    const amount = num(p, 'amount', 0);
+    const amountRatio = num(p, 'amountRatio', 0);
+    ctx.state.hp = Math.min(ctx.state.maxHp, ctx.state.hp + amount + ctx.state.maxHp * amountRatio);
+  },
+  statBuff(ctx, p) {
+    const stat = str(p, 'stat', 'damage');
+    const operation = str(p, 'operation', 'mul') as 'add' | 'mul';
+    const value = num(p, 'value', operation === 'mul' ? 1 : 0);
+    const duration = cappedDuration(ctx, num(p, 'duration', ctx.duration ?? 3));
+    const maxStacks = Math.max(1, Math.trunc(num(p, 'maxStacks', 1)));
+    const sourceId = `statBuff:${ctx.sourceCardId ?? ctx.sourceCardType ?? 'anonymous'}:${stat}:${operation}`;
+    const matching = ctx.state.statModifiers.filter(modifier => modifier.sourceId === sourceId);
+    if (matching.length >= maxStacks) {
+      const refresh = matching.reduce((shortest, modifier) =>
+        (modifier.remaining ?? Infinity) < (shortest.remaining ?? Infinity) ? modifier : shortest);
+      refresh.value = value;
+      refresh.remaining = duration;
+      return;
+    }
+    ctx.state.statModifiers.push({
+      sourceId,
+      stat: stat as GameState['statModifiers'][number]['stat'],
+      operation,
+      value,
+      remaining: duration,
+    });
+  },
 };
 
 /** 依序执行一组效果。 */
@@ -507,6 +547,8 @@ export function runEffects(ctx: EffectCtx, effects: EffectDef[]): void {
   for (const ef of effects) {
     const handler = ATOMS[ef.atom];
     if (!handler) continue;
-    handler(ctx, ef.params ?? {});
+    const params = ef.params ?? {};
+    if (ef.atom !== 'stun' && typeof params.chance === 'number' && ctx.rng() >= params.chance) continue;
+    handler(ctx, params);
   }
 }

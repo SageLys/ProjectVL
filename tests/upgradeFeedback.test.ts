@@ -31,8 +31,9 @@ describe('upgradeFeedback · milestone selection', () => {
     ]);
   });
 
-  it('keeps sanctum hand milestones empty', () => {
-    expect(resolveUpgradeCandidates([{ type: 'merged', cardType: 'sanctum', resultStar: 6, resultCardId: 50 }])).toEqual([]);
+  it('provides the completed sanctum terminal hand milestone', () => {
+    expect(resolveUpgradeCandidates([{ type: 'merged', cardType: 'sanctum', resultStar: 6, resultCardId: 50 }]))
+      .toMatchObject([{ cardType: 'sanctum', fx: 'transform', source: 'hand', targetCardId: 50 }]);
   });
 
   it('reuses hand and equipment milestones for wildcard merges', () => {

@@ -2,12 +2,15 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { cfg } from '../src/config';
 import type { BindingDef, CardDef, EffectDef } from '../src/core/effects/defs';
 import {
-  MODIFIER_ATOMS_HANDLED, registerSkillDefs,
+  fireTrigger, getModifiers, MODIFIER_ATOMS_HANDLED, reconcileEquipmentPassives,
+  registerSkillDefs, tickIntervalBindings,
 } from '../src/core/effects/interpreter';
 import { ATOMS, NOOP_MODIFIER_ATOMS } from '../src/core/effects/registry';
 import { tickEffects } from '../src/core/effects/runtime';
 import { shoot, updateBullets, updateTurret } from '../src/core/systems/combatSystem';
+import { dealDamage } from '../src/core/systems/damageSystem';
 import { startNextWave } from '../src/core/systems/waveSystem';
+import { totalFireRate } from '../src/core/stats';
 import type { CardType, GameState } from '../src/core/types';
 import { card, constRng, createDefaultConfig, enemy, freshState, resetTestEnv } from './helpers';
 
@@ -28,6 +31,12 @@ function walkEffects(effects: readonly EffectDef[]): EffectDef[] {
 
 function equip(state: GameState, entries: ReadonlyArray<readonly [CardType, number]>): void {
   entries.forEach(([type, star], index) => { state.equipment[index] = card(type, star); });
+}
+
+function equipPath(state: GameState, slot: number, type: CardType, star: number, path: string[]): void {
+  const instance = card(type, star);
+  instance.evolutionPath = path;
+  state.equipment[slot] = instance;
 }
 
 function beamResult(entries: ReadonlyArray<readonly [CardType, number]>) {
@@ -54,9 +63,10 @@ function splitFixture(): CardDef {
   const binding: BindingDef = {
     trigger: 'onHit', effects: [{ atom: 'split', params: { count: 2, damageRatio: 0.5, maxDepth: 1 } }],
   };
-  source.stars['3'].equip = [binding];
-  source.stars['5'].equip = [structuredClone(binding)];
+  source.stars['3']!.equip = [binding];
+  source.stars['5']!.equip = [structuredClone(binding)];
   source.stars['6'].equip = [structuredClone(binding)];
+  source.evolutionTree!.checkpoints[0].options[0].equip = [structuredClone(binding)];
   return source;
 }
 
@@ -76,8 +86,8 @@ describe('全卡牌配置自动审计', () => {
 
   it('纯修饰原子必须由 getModifiers 聚合，过滤值必须有运行时生产路径', () => {
     expect(new Set(MODIFIER_ATOMS_HANDLED)).toEqual(new Set(NOOP_MODIFIER_ATOMS));
-    const legalStatuses = new Set(['frozen', 'dot']);
-    const legalSources = new Set(['weapon', 'chain', 'dot']);
+    const legalStatuses = new Set(['frozen', 'dot', 'controlled', 'brand', 'vulnerable']);
+    const legalSources = new Set(['weapon', 'chain', 'dot', 'retaliation']);
     for (const def of cfg.skills.cards) for (const tier of Object.values(def.stars)) {
       for (const binding of tier.equip) {
         const params = binding.triggerParams;
@@ -165,6 +175,7 @@ describe('长跑泄漏锚点', () => {
       updateTurret(state, config, rng, 0);
       for (let tick = 0; tick < 8; tick++) {
         updateTurret(state, config, rng, 0.1);
+        updateBullets(state, config, rng, 0.1);
         tickEffects(state, config, rng, 0.1);
       }
       state.enemies.length = 0;
@@ -174,5 +185,86 @@ describe('长跑泄漏锚点', () => {
     expect(state.beams.length).toBeLessThanOrEqual(1);
     expect(state.vfx.length).toBeLessThanOrEqual(2);
     expect(state.bullets.length).toBeLessThanOrEqual(2);
+  });
+});
+
+describe('C8 cross-god multiplicative interfaces', () => {
+  it('plenty vulnerable amplifies storm chain damage', () => {
+    const state = freshState();
+    equipPath(state, 0, 'bountyCall', 3, ['3:bountyCallB']);
+    equipPath(state, 1, 'chainLightning', 3, ['3:chainLightningA']);
+    const primary = enemy({ x: 300, y: 300, hp: 100, maxHp: 100 });
+    const chained = enemy({ x: 340, y: 300, hp: 100, maxHp: 100 });
+    state.enemies = [primary, chained];
+
+    tickIntervalBindings(state, config, rng, 4.1);
+    fireTrigger(state, config, rng, 'onHit', {
+      bullet: { x: 300, y: 300, damage: 20 } as never,
+      enemy: primary,
+      point: { x: 300, y: 300 },
+    });
+
+    expect(chained.status.vulnerable).not.toBeNull();
+    expect(chained.hp).toBeLessThan(86);
+  });
+
+  it('winter controlled-damage buff multiplies inferno dot damage', () => {
+    const state = freshState();
+    equipPath(state, 0, 'frozenBulwark', 5, ['3:frozenBulwarkA', '5:frozenBulwarkC2']);
+    equipPath(state, 1, 'scorch', 3, ['3:scorchA']);
+    const target = enemy({ hp: 100, maxHp: 100 });
+    target.status.frozen = 1;
+    state.enemies = [target];
+
+    fireTrigger(state, config, rng, 'onWaveStart', { wave: 1 });
+    dealDamage(state, config, rng, target, 10, 'dot');
+
+    expect(target.hp).toBeCloseTo(88.8);
+  });
+
+  it('bulwark taunt coexists with inferno area damage on a clustered target', () => {
+    const state = freshState();
+    equipPath(state, 0, 'decoy', 3, ['3:decoyA']);
+    equipPath(state, 1, 'splitBlast', 3, ['3:splitBlastA']);
+    reconcileEquipmentPassives(state, config, rng);
+    const origin = state.summons[0];
+    const primary = enemy({ x: origin.x, y: origin.y, hp: 100, maxHp: 100 });
+    const neighbor = enemy({ x: origin.x + 20, y: origin.y, hp: 100, maxHp: 100 });
+    state.enemies = [primary, neighbor];
+
+    fireTrigger(state, config, rng, 'onHit', {
+      bullet: { x: origin.x, y: origin.y, damage: 20 } as never,
+      enemy: primary,
+      point: { x: origin.x, y: origin.y },
+    });
+
+    expect(origin.tauntRadius).toBeGreaterThan(0);
+    expect(neighbor.hp).toBeLessThan(100);
+  });
+
+  it('storm attack-speed buff accelerates winter onFire riders without replacing them', () => {
+    const state = freshState();
+    equipPath(state, 0, 'overcharge', 3, ['3:overchargeA']);
+    equipPath(state, 1, 'frost', 3, ['3:frostA']);
+    const before = totalFireRate(state, config);
+    fireTrigger(state, config, rng, 'onKill', { enemy: enemy(), point: { x: 300, y: 300 } });
+    const after = totalFireRate(state, config);
+    shoot(state, config, rng, enemy({ x: 600, y: 300 }));
+
+    expect(after).toBeGreaterThan(before);
+    expect(state.bullets[0].riders?.map(rider => rider.atom))
+      .toEqual(expect.arrayContaining(['slow', 'freeze']));
+  });
+
+  it('plenty global economy modifiers coexist with an arbitrary storm weapon', () => {
+    const state = freshState();
+    equipPath(state, 0, 'luckyStar', 3, ['3:luckyStarA']);
+    equipPath(state, 1, 'pierce', 3, ['3:pierceA']);
+    const modifiers = getModifiers(state);
+    shoot(state, config, rng, enemy({ x: 600, y: 300 }));
+
+    expect(modifiers.dropRateMul).toBeGreaterThan(1);
+    expect(modifiers.xpMul).toBeGreaterThan(1);
+    expect(state.bullets[0].pierceLeft).toBeGreaterThan(0);
   });
 });

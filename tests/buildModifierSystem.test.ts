@@ -6,8 +6,8 @@ import {
   getModifiers,
   registerSkillDefs,
   releaseConsumable,
+  resolveCardBindings,
   resolveConsumableTier,
-  resolveEquipBindings,
 } from '../src/core/effects/interpreter';
 import { applySlow, applyVulnerable } from '../src/core/effects/statusSystem';
 import {
@@ -39,7 +39,14 @@ function activate(state: GameState, relicId: string, stacks = 1): void {
 
 function scaledBindings(state: GameState, id: string, star: number): BindingDef[] {
   const def = skill(id);
-  return applyBuildScalingToBindings(state, def, resolveEquipBindings(def, star));
+  return applyBuildScalingToBindings(state, def, rawBindings(def, star));
+}
+
+function rawBindings(def: CardDef, star: number): BindingDef[] {
+  const path = def.evolutionTree?.checkpoints
+    .filter(checkpoint => checkpoint.star <= star)
+    .map(checkpoint => `${checkpoint.star}:${checkpoint.options[0].id}`) ?? [];
+  return resolveCardBindings(def, path, star);
 }
 
 function scaledTier(state: GameState, id: string, star: number): ConsumableTierDef {
@@ -70,7 +77,7 @@ describe('buildModifierSystem aggregation and explicit mapping', () => {
     const state = freshState();
     for (const def of cfg.skills.cards) {
       for (const star of [3, 4, 5, 6]) {
-        const raw = resolveEquipBindings(def, star);
+        const raw = rawBindings(def, star);
         expect(applyBuildScalingToBindings(state, def, structuredClone(raw))).toEqual(raw);
       }
       for (const star of [1, 2, 3, 4, 5, 6]) {
@@ -102,12 +109,12 @@ describe('buildModifierSystem aggregation and explicit mapping', () => {
     expect(numberParam(findAtom(effectsIn(split), 'split')[0], 'count')).toBe(3);
 
     const pierce = scaledBindings(state, 'pierce', 5);
-    expect(numberParam(findAtom(effectsIn(pierce), 'pierce')[0], 'count')).toBe(3);
+    expect(numberParam(findAtom(effectsIn(pierce), 'pierce')[0], 'count')).toBe(4);
     expect(numberParam(findAtom(effectsIn(pierce), 'pierce')[0], 'damageRetention')).toBe(1);
     expect(numberParam(findAtom(effectsIn(pierce), 'ricochet')[0], 'bounces')).toBe(2);
 
-    expect(scaledBindings(state, 'aegis', 6)).toEqual(resolveEquipBindings(skill('aegis'), 6));
-    expect(scaledBindings(state, 'harvest', 6)).toEqual(resolveEquipBindings(skill('harvest'), 6));
+    expect(scaledBindings(state, 'aegis', 6)).toEqual(rawBindings(skill('aegis'), 6));
+    expect(scaledBindings(state, 'harvest', 6)).toEqual(rawBindings(skill('harvest'), 6));
   });
 
   it('scales only the allowlisted control parameters and preserves stacksToTrigger', () => {
@@ -129,7 +136,7 @@ describe('buildModifierSystem aggregation and explicit mapping', () => {
   it('rounds defensive durability upward without changing the source binding', () => {
     const state = freshState();
     activate(state, 'def_durability');
-    const raw = resolveEquipBindings(skill('aegis'), 3);
+    const raw = rawBindings(skill('aegis'), 3);
     const scaled = applyBuildScalingToBindings(state, skill('aegis'), structuredClone(raw));
     expect(numberParam(findAtom(effectsIn(scaled), 'shield')[0], 'absorbHits')).toBe(3);
     expect(numberParam(findAtom(effectsIn(raw), 'shield')[0], 'absorbHits')).toBe(2);
@@ -183,14 +190,17 @@ describe('buildModifierSystem aggregation and explicit mapping', () => {
     const state = freshState();
     activate(state, 'def_bridge');
     const thorns = scaledBindings(state, 'thorns', 5);
-    expect(numberParam(findAtom(effectsIn(thorns), 'burstDamage')[0], 'damageMul')).toBeCloseTo(1.875);
+    expect(numberParam(findAtom(effectsIn(thorns), 'burstDamage')[0], 'damageMul')).toBeCloseTo(2.5);
     expect(numberParam(findAtom(effectsIn(thorns), 'dot')[0], 'damageRatio')).toBe(0.1);
   });
 
   it('invalidates cached totals immediately when progression applies a relic', async () => {
     registerSkillDefs(cfg.skills.cards);
     const state = freshState();
-    state.equipment[0] = card('aegis', 5);
+    state.equipment[0] = {
+      ...card('aegis', 5),
+      evolutionPath: ['3:aegisA', '5:aegisA2'],
+    };
     expect(getModifiers(state).novaOnBreak?.damage).toBe(30);
     state.decisions.current = { kind: 'relic', relicIndex: 0, options: ['def_bridge'] };
     const { applyRelic } = await import('../src/core/systems/progressionSystem');
