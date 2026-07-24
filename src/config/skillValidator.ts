@@ -1,4 +1,5 @@
-import type { SkillsConfig } from './types';
+import type { CardAffixCandidateDef, SkillsConfig } from './types';
+import { AFFIX_SINKS, type AffixScalingTarget } from './affixSinks';
 
 const CATEGORIES = new Set(['projectile', 'control', 'domain', 'economy', 'defense']);
 const BUILD_TAGS = new Set(['projectile', 'control', 'domain', 'defense', 'utility']);
@@ -130,7 +131,74 @@ function evolutionTree(value: unknown, path: string): void {
     if (!sharedStars.has(star)) fail(`${path}.sharedNodes`, `必须包含 ${star} 星公共节点`);
   }
 }
-function affixPool(value: unknown, path: string): void {
+function matchingSinkValues(
+  value: unknown,
+  target: AffixScalingTarget,
+  inheritedTrigger?: string,
+  out: number[] = [],
+): number[] {
+  if (Array.isArray(value)) {
+    for (const item of value) matchingSinkValues(item, target, inheritedTrigger, out);
+    return out;
+  }
+  if (!value || typeof value !== 'object') return out;
+  const item = value as Record<string, unknown>;
+  const trigger = typeof item.trigger === 'string' ? item.trigger : inheritedTrigger;
+  if (item.atom === target.atom && (!target.trigger || trigger === target.trigger)) {
+    const params = item.params;
+    if (params && typeof params === 'object' && !Array.isArray(params)) {
+      const original = (params as Record<string, unknown>)[target.param];
+      if (typeof original === 'number' && Number.isFinite(original)) out.push(original);
+    }
+  }
+  for (const child of Object.values(item)) matchingSinkValues(child, target, trigger, out);
+  return out;
+}
+
+function producesObservableChange(
+  original: number,
+  value: number,
+  target: AffixScalingTarget,
+): boolean {
+  let next = target.mode === 'add' ? original + value : original * (1 + value);
+  if (target.integer) next = Math.max(original, value > 0 ? Math.ceil(next) : Math.round(next));
+  if (target.cap !== undefined) next = Math.min(target.cap, next);
+  return target.integer ? next - original >= 1 : Math.abs(next - original) > 1e-9;
+}
+
+function validateAffixSink(
+  card: Record<string, unknown>,
+  candidate: CardAffixCandidateDef,
+  path: string,
+): void {
+  const contract = AFFIX_SINKS[candidate.stat];
+  if (contract.equipment === 'unsupported') {
+    fail(`${path}.stat`, `${candidate.stat} does not support persistent equipment settlement`);
+  }
+  if (contract.equipment === 'global') {
+    if (!contract.globalConsumer) fail(`${path}.stat`, `${candidate.stat} has no global consumer`);
+    if (!(candidate.min > 0)) fail(`${path}.min`, `${candidate.stat} must produce a positive observable change`);
+    return;
+  }
+
+  const equipmentData = card.recipeOnly === true ? card.stars : card.evolutionTree;
+  const targets = contract.scalingTargets ?? [];
+  const observable = targets.some(target => matchingSinkValues(equipmentData, target)
+    .some(original => producesObservableChange(original, candidate.min, target)));
+  if (!observable) {
+    fail(
+      `${path}.stat`,
+      `${candidate.stat} has no reachable equipment atom/parameter sink with an observable minimum roll`,
+    );
+  }
+
+  const consumableSink = targets.some(target => matchingSinkValues(card.consumable, target).length > 0);
+  if (!consumableSink && !contract.globalConsumer) {
+    fail(`${path}.stat`, `${candidate.stat} has no consumable anchor or global runtime sink`);
+  }
+}
+
+function affixPool(value: unknown, path: string, card: Record<string, unknown>): void {
   const pool = object(value, path);
   if (!Number.isInteger(pool.count) || Number(pool.count) < 0) fail(`${path}.count`, '必须是非负整数');
   if (!Array.isArray(pool.candidates)) fail(`${path}.candidates`, '必须是数组');
@@ -146,6 +214,7 @@ function affixPool(value: unknown, path: string): void {
     if (Number(candidate.step) <= 0) fail(`${candidatePath}.step`, '必须大于 0');
     if (Number(candidate.max) < Number(candidate.min)) fail(candidatePath, 'max 不得小于 min');
     if (Number(candidate.consumableDuration) < 0) fail(`${candidatePath}.consumableDuration`, '不得小于 0');
+    validateAffixSink(card, candidate as unknown as CardAffixCandidateDef, candidatePath);
   });
 }
 
@@ -191,6 +260,6 @@ export function validateSkillsConfig(value: unknown): asserts value is SkillsCon
     if (!recipeOnly && card.evolutionTree === undefined) fail(`${path}.evolutionTree`, '正式卡必须有完整进化树');
     if (card.evolutionTree !== undefined) evolutionTree(card.evolutionTree, `${path}.evolutionTree`);
     if (card.affixPool === undefined) fail(`${path}.affixPool`, '每张卡必须声明词条池');
-    affixPool(card.affixPool, `${path}.affixPool`);
+    affixPool(card.affixPool, `${path}.affixPool`, card);
   });
 }

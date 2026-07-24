@@ -41,6 +41,7 @@ export function createInitialState(difficultyId: DifficultyId = 'hell'): GameSta
     paused: false,
     time: 0,
     hp: cfg.combat.hp.max,
+    baseMaxHp: cfg.combat.hp.max,
     maxHp: cfg.combat.hp.max,
     wave: 0,
     decisions: { current: null, pending: [] },

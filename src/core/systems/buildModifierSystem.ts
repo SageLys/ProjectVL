@@ -1,5 +1,6 @@
 import { cfg } from '../../config';
 import type { BuildScalingAxis } from '../../config/types';
+import { AFFIX_SINKS, type AffixScalingTarget } from '../../config/affixSinks';
 import type { BindingDef, BuildTag, CardDef, ConsumableTierDef, EffectDef, Trigger } from '../effects/defs';
 import type { GameState } from '../types';
 import { cardAffixScaling } from './cardAffixSystem';
@@ -10,59 +11,18 @@ export interface BuildScalingTotals {
   byAxis: Partial<Record<BuildScalingAxis, Partial<Record<BuildTag, number>>>>;
 }
 
-interface ScalingRule {
-  atom: EffectDef['atom'];
-  param: string;
-  mode?: 'mul' | 'add';
-  integer?: boolean;
-  cap?: number;
-}
+type ScalingRule = AffixScalingTarget;
 
 /** Explicit atom/parameter allowlist. Same-named parameters on other atoms stay untouched. */
-export const BUILD_SCALING_RULES: Partial<Record<BuildScalingAxis, readonly ScalingRule[]>> = {
-  effectDamageMul: [
-    { atom: 'aoeOnHit', param: 'damageRatio' },
-    { atom: 'burstDamage', param: 'damageMul' },
-    { atom: 'split', param: 'damageRatio' },
-    { atom: 'beamMorph', param: 'damageRatio' },
-    { atom: 'mortarMorph', param: 'damageRatio' },
-    { atom: 'summon', param: 'explodeDamageMul' },
-    { atom: 'summon', param: 'damageRatio' },
-    { atom: 'pierce', param: 'damageRetention', cap: 1 },
-    { atom: 'chain', param: 'damageRetention', cap: 1 },
-  ],
-  quantityAdd: [
-    { atom: 'pierce', param: 'count', mode: 'add', integer: true },
-    { atom: 'chain', param: 'bounces', mode: 'add', integer: true },
-    { atom: 'split', param: 'count', mode: 'add', integer: true },
-    { atom: 'ricochet', param: 'bounces', mode: 'add', integer: true },
-  ],
-  controlPotencyMul: [
-    { atom: 'slow', param: 'ratio', cap: 0.8 },
-    { atom: 'freeze', param: 'duration' },
-    { atom: 'stun', param: 'duration' },
-    { atom: 'knockback', param: 'distance' },
-    { atom: 'vulnerable', param: 'ratio' },
-  ],
-  areaScaleMul: [
-    { atom: 'aura', param: 'radius' },
-    { atom: 'aura', param: 'radiusRatioOfRange' },
-    { atom: 'groundZone', param: 'radius' },
-    { atom: 'groundZone', param: 'duration' },
-  ],
-  dotDamageMul: [{ atom: 'dot', param: 'damageRatio' }],
-  defenseDurabilityMul: [
-    { atom: 'shield', param: 'absorbHits', integer: true },
-    { atom: 'summon', param: 'hp' },
-  ],
-  retaliationMul: [
-    { atom: 'novaOnBreak', param: 'damage' },
-    { atom: 'thorns', param: 'ratio' },
-  ],
-  dropRateMul: [{ atom: 'dropRateMul', param: 'mul' }],
-  dropLifetimeMul: [{ atom: 'dropLifetimeMul', param: 'mul' }],
-  xpMul: [{ atom: 'xpMul', param: 'mul' }],
-};
+export const BUILD_SCALING_RULES: Partial<Record<BuildScalingAxis, readonly ScalingRule[]>> =
+  Object.fromEntries(
+    Object.entries(AFFIX_SINKS)
+      .filter(([, contract]) => contract.scalingTargets?.some(target => target.trigger === undefined))
+      .map(([axis, contract]) => [
+        axis,
+        contract.scalingTargets?.filter(target => target.trigger === undefined) ?? [],
+      ]),
+  ) as Partial<Record<BuildScalingAxis, readonly ScalingRule[]>>;
 
 const EMPTY_TOTALS: BuildScalingTotals = { byAxis: {} };
 const cache = new WeakMap<GameState, { version: number; totals: BuildScalingTotals }>();
@@ -109,7 +69,7 @@ export function scalingFor(totals: BuildScalingTotals, def: CardDef, axis: Build
 
 function scaleNumber(original: number, value: number, rule: ScalingRule): number {
   let next = rule.mode === 'add' ? original + value : original * (1 + value);
-  if (rule.integer) next = Math.max(original, Math.round(next));
+  if (rule.integer) next = Math.max(original, value > 0 ? Math.ceil(next) : Math.round(next));
   if (rule.cap !== undefined) next = Math.min(rule.cap, next);
   return next;
 }

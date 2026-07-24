@@ -1,6 +1,7 @@
 import { cfg } from '../../config';
 import type { EvolutionRecipeDef } from '../../config/types';
 import { reconcileEquipmentPassives } from '../effects/interpreter';
+import { reconcileMaxHp } from '../stats';
 import type { Card, CardRef, Config, GameEvent, GameState, Rng, SlotKind } from '../types';
 import { autoMergeCards, commitMerge } from './cardSystem';
 import { createCardWithAffixes } from './cardAffixSystem';
@@ -121,6 +122,7 @@ export function confirmRecipe(
   events.push(...created.events);
   events.push(...commitMerge(state, config, rng, output.type, output.star));
   events.push(...autoMergeCards(state, config, rng).events);
+  reconcileMaxHp(state);
   events.push(...reconcileEquipmentPassives(state, config, rng));
   return events;
 }

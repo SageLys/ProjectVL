@@ -1,7 +1,9 @@
 import { cfg } from '../../config';
+import { AFFIX_SINKS } from '../../config/affixSinks';
 import type { BuildScalingAxis, CardAffixCandidateDef, CardStatKind, RunBaseStatKind } from '../../config/types';
 import { createCardInstance } from '../createInitialState';
 import type { Card, CardAffixRoll, CardType, GameEvent, GameState, Rng, RuntimeStatModifier } from '../types';
+import { reconcileMaxHp } from '../stats';
 
 export type { CardAffixRoll } from '../types';
 
@@ -125,21 +127,33 @@ export function cardAffixScaling(
 }
 
 export function affixOperation(stat: CardStatKind): RuntimeStatModifier['operation'] {
-  return stat.endsWith('Add') ? 'add' : 'mul';
+  return AFFIX_SINKS[stat].operation;
 }
 
 /** Activates the run template as global, time-limited modifiers after consumption. */
 export function activateConsumableAffixes(state: GameState, type: CardType): RuntimeStatModifier[] {
-  const activated = affixTemplateFor(state, type).map<RuntimeStatModifier>(roll => {
-    const operation = affixOperation(roll.stat);
-    return {
+  const template = affixTemplateFor(state, type);
+  const activated: RuntimeStatModifier[] = [];
+  let maxHpChanged = false;
+  for (const roll of template) {
+    const contract = AFFIX_SINKS[roll.stat];
+    if (contract.settlement === 'instant') continue;
+    activated.push({
       sourceId: `affix:${type}`,
       stat: roll.stat,
-      operation,
-      value: operation === 'mul' ? 1 + roll.value : roll.value,
+      operation: contract.operation,
+      value: contract.operation === 'mul' ? 1 + roll.value : roll.value,
       remaining: roll.consumableDuration,
-    };
-  });
+    });
+    if (roll.stat === 'maxHpAdd') maxHpChanged = true;
+  }
   state.statModifiers.push(...activated);
+  if (maxHpChanged) reconcileMaxHp(state);
+
+  // Instant affixes settle after timed maximum-HP modifiers so their cap is current.
+  for (const roll of template) {
+    if (AFFIX_SINKS[roll.stat].settlement !== 'instant') continue;
+    if (roll.stat === 'heal') state.hp = Math.min(state.maxHp, state.hp + roll.value);
+  }
   return activated;
 }

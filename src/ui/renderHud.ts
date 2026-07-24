@@ -7,6 +7,7 @@ import { formatRuntimeModifier } from './cardMeta';
 /** 刷新 HUD：血/经验/等级/波次/实时数值 + 调参回显 + 当前可执行操作提示。 */
 export function renderHud(refs: DomRefs, state: GameState, config: Config): void {
   refs.hpText.textContent = String(Math.max(0, Math.round(state.hp)));
+  refs.maxHpText.textContent = String(Math.round(state.maxHp));
   refs.hpBar.style.width = `${Math.max(0, (state.hp / state.maxHp) * 100)}%`;
   refs.xpText.textContent = String(state.xp);
   refs.xpNeed.textContent = String(state.xpNeed);

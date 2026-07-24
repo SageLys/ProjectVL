@@ -18,6 +18,7 @@ export function getDomRefs() {
     aimPreview: el<HTMLElement>('#aimPreview'),
     screenPreview: el<HTMLElement>('#screenPreview'),
     hpText: el<HTMLElement>('#hpText'),
+    maxHpText: el<HTMLElement>('#maxHpText'),
     hpBar: el<HTMLElement>('#hpBar'),
     xpText: el<HTMLElement>('#xpText'),
     xpNeed: el<HTMLElement>('#xpNeed'),

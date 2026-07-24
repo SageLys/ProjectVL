@@ -43,6 +43,29 @@ export function totalMulti(state: GameState): number {
   ) * modifier.mul;
 }
 
+/** Permanent base plus equipped and time-limited maximum-HP affixes. */
+export function totalMaxHp(state: GameState): number {
+  return Math.max(
+    0,
+    state.baseMaxHp
+      + getModifiers(state).equipmentAffixAdd.maxHpAdd
+      + modifierTotal(state, 'maxHpAdd').add,
+  );
+}
+
+/**
+ * Rebuilds the derived maximum while preserving damage already taken.
+ * Playing runs retain at least one HP so equipment changes cannot kill the player.
+ */
+export function reconcileMaxHp(state: GameState): void {
+  const prevMax = state.maxHp;
+  const missing = Math.max(0, prevMax - state.hp);
+  const next = totalMaxHp(state);
+  state.maxHp = next;
+  const floor = state.mode === 'playing' ? Math.min(1, next) : 0;
+  state.hp = Math.min(next, Math.max(floor, next - missing));
+}
+
 /**
  * Largest circular attack range that still leaves a visible anticipation band
  * between the range boundary and every edge of the arena.

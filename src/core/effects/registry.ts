@@ -15,7 +15,7 @@ import { dealDamage, tryExecute } from '../systems/damageSystem';
 import { spawnGroundDrop } from '../systems/dropSystem';
 import { recordCardDropShown, selectUniformCardType } from '../systems/dropTypePolicy';
 import { spawnParticle } from '../systems/particleSystem';
-import { totalRange } from '../stats';
+import { reconcileMaxHp, totalRange } from '../stats';
 import { resolveCardVisual } from '../../presentation/cardVisual';
 
 export interface EffectCtx {
@@ -530,6 +530,7 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
         (modifier.remaining ?? Infinity) < (shortest.remaining ?? Infinity) ? modifier : shortest);
       refresh.value = value;
       refresh.remaining = duration;
+      if (stat === 'maxHpAdd') reconcileMaxHp(ctx.state);
       return;
     }
     ctx.state.statModifiers.push({
@@ -539,6 +540,7 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
       value,
       remaining: duration,
     });
+    if (stat === 'maxHpAdd') reconcileMaxHp(ctx.state);
   },
 };
 

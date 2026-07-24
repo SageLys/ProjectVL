@@ -3,6 +3,7 @@ import type { Card, CardType, GameEvent, GameState, RunDecision } from '../types
 import { reconcileEquipmentPassives } from '../effects/interpreter';
 import { autoMergeCards } from './cardSystem';
 import { enqueueDecision, registerDecisionResolver } from './decisionQueueSystem';
+import { reconcileMaxHp } from '../stats';
 
 function pathToken(checkpointStar: number, optionId: string): string {
   return `${checkpointStar}:${optionId}`;
@@ -66,6 +67,7 @@ function applyEvolutionChoice(
     provisionalCardId: decision.provisionalCardId,
   }];
   events.push(...continuedEvolutionEvents);
+  reconcileMaxHp(state);
   events.push(...reconcileEquipmentPassives(state, config, rng));
   events.push(...autoMergeCards(state, config, rng).events);
   return events;

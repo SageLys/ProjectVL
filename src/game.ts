@@ -5,6 +5,7 @@ import { activeVariants, cfg } from './config';
 import { texts } from './data';
 import type { GameEvent, GameState, Rng } from './core/types';
 import { createInitialState, createDefaultConfig } from './core/createInitialState';
+import { reconcileMaxHp } from './core/stats';
 import { updateGame } from './core/updateGame';
 import { registerSkillDefs, resolveConsumableTier } from './core/effects/interpreter';
 import { jumpToWave, restartWave } from './core/systems/waveSystem';
@@ -322,7 +323,10 @@ if (DEV_TOOLS_ENABLED) void Promise.all([import('./debug/exposeDebugApi'), impor
   tuner = tunerModule.createTunerPanel(devTools, config, {
     isWaveActive: () => state.mode === 'playing',
     onImmediateChange(path) {
-      if (path === 'combat.hp.max') { state.maxHp = cfg.combat.hp.max; state.hp = Math.min(state.hp, state.maxHp); }
+      if (path === 'combat.hp.max') {
+        state.baseMaxHp = cfg.combat.hp.max;
+        reconcileMaxHp(state);
+      }
       if (path === 'economy.defaults.dropLifetime') for (const drop of state.groundDrops) {
         const ratio = drop.maxLife > 0 ? drop.life / drop.maxLife : 1;
         drop.maxLife = config.dropLifetime; drop.life = config.dropLifetime * ratio;

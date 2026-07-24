@@ -3,6 +3,7 @@ import type { Card, Config, GameEvent, GameState, Rng, SlotKind } from '../types
 import { autoMergeCards, commitMerge } from './cardSystem';
 import { reconcileEquipmentPassives } from '../effects/interpreter';
 import { finalizeEvolutionUpgrade } from './evolutionTreeSystem';
+import { reconcileMaxHp } from '../stats';
 
 export type WildcardUseFailure = 'emptyTarget' | 'maxStar' | 'missingWildcard' | 'provisional';
 export type WildcardUseCheck =
@@ -53,6 +54,9 @@ export function useWildcardOnSlot(state: GameState, config: Config, rng: Rng, ta
   events.push(...commitMerge(state, config, rng, target.type, target.star));
   events.push(...evolutionEvents);
   if (targetKind === 'cards') events.push(...autoMergeCards(state, config, rng).events);
-  else events.push(...reconcileEquipmentPassives(state, config, rng));
+  else {
+    reconcileMaxHp(state);
+    events.push(...reconcileEquipmentPassives(state, config, rng));
+  }
   return events;
 }

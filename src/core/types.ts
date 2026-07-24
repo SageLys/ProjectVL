@@ -476,6 +476,9 @@ export interface GameState {
   paused: boolean;
   time: number;
   hp: number;
+  /** Permanent maximum HP: initial config plus run-wide permanent rewards. */
+  baseMaxHp: number;
+  /** Derived cache. Only reconcileMaxHp should update this value. */
   maxHp: number;
   wave: number;
   decisions: DecisionQueueState;

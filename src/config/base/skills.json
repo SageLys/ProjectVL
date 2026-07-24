@@ -2618,7 +2618,7 @@
             "consumableDuration": 5
           },
           {
-            "stat": "xpMul",
+            "stat": "effectDamageMul",
             "weight": 1,
             "min": 0.05,
             "max": 0.1,
@@ -3336,7 +3336,7 @@
             "consumableDuration": 5
           },
           {
-            "stat": "retaliationMul",
+            "stat": "areaScaleMul",
             "weight": 1,
             "min": 0.1,
             "max": 0.2,
@@ -5591,7 +5591,15 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "xpMul",
+            "stat": "damageAdd",
+            "weight": 1,
+            "min": 1,
+            "max": 3,
+            "step": 1,
+            "consumableDuration": 5
+          },
+          {
+            "stat": "fireRateAdd",
             "weight": 1,
             "min": 0.05,
             "max": 0.15,
@@ -5599,19 +5607,11 @@
             "consumableDuration": 5
           },
           {
-            "stat": "dropRateMul",
+            "stat": "rangeAdd",
             "weight": 1,
-            "min": 0.05,
-            "max": 0.15,
-            "step": 0.05,
-            "consumableDuration": 5
-          },
-          {
-            "stat": "dropLifetimeMul",
-            "weight": 1,
-            "min": 0.05,
-            "max": 0.15,
-            "step": 0.05,
+            "min": 5,
+            "max": 15,
+            "step": 5,
             "consumableDuration": 5
           }
         ]
@@ -5963,7 +5963,7 @@
             "consumableDuration": 5
           },
           {
-            "stat": "effectDamageMul",
+            "stat": "areaScaleMul",
             "weight": 1,
             "min": 0.05,
             "max": 0.15,
@@ -6401,7 +6401,7 @@
             "consumableDuration": 5
           },
           {
-            "stat": "areaScaleMul",
+            "stat": "effectDamageMul",
             "weight": 1,
             "min": 0.05,
             "max": 0.15,
@@ -8743,7 +8743,15 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "xpMul",
+            "stat": "damageAdd",
+            "weight": 1,
+            "min": 1,
+            "max": 3,
+            "step": 1,
+            "consumableDuration": 5
+          },
+          {
+            "stat": "fireRateAdd",
             "weight": 1,
             "min": 0.05,
             "max": 0.15,
@@ -8751,19 +8759,11 @@
             "consumableDuration": 5
           },
           {
-            "stat": "dropRateMul",
+            "stat": "rangeAdd",
             "weight": 1,
-            "min": 0.05,
-            "max": 0.15,
-            "step": 0.05,
-            "consumableDuration": 5
-          },
-          {
-            "stat": "dotDamageMul",
-            "weight": 1,
-            "min": 0.05,
-            "max": 0.1,
-            "step": 0.05,
+            "min": 5,
+            "max": 10,
+            "step": 5,
             "consumableDuration": 5
           }
         ]
@@ -9514,7 +9514,7 @@
             "consumableDuration": 5
           },
           {
-            "stat": "defenseDurabilityMul",
+            "stat": "areaScaleMul",
             "weight": 1,
             "min": 0.05,
             "max": 0.15,
@@ -12422,7 +12422,7 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "effectDamageMul",
+            "stat": "controlPotencyMul",
             "weight": 1,
             "min": 0.05,
             "max": 0.15,
@@ -12430,11 +12430,11 @@
             "consumableDuration": 5
           },
           {
-            "stat": "xpMul",
+            "stat": "damageAdd",
             "weight": 1,
-            "min": 0.05,
-            "max": 0.1,
-            "step": 0.05,
+            "min": 1,
+            "max": 2,
+            "step": 1,
             "consumableDuration": 5
           },
           {
@@ -12816,7 +12816,7 @@
             "consumableDuration": 5
           },
           {
-            "stat": "dropRateMul",
+            "stat": "quantityAdd",
             "weight": 1,
             "min": 0.05,
             "max": 0.1,
@@ -13268,7 +13268,7 @@
             "consumableDuration": 5
           },
           {
-            "stat": "xpMul",
+            "stat": "areaScaleMul",
             "weight": 1,
             "min": 0.05,
             "max": 0.15,
@@ -13276,11 +13276,11 @@
             "consumableDuration": 5
           },
           {
-            "stat": "effectDamageMul",
+            "stat": "damageAdd",
             "weight": 1,
-            "min": 0.05,
-            "max": 0.1,
-            "step": 0.05,
+            "min": 1,
+            "max": 2,
+            "step": 1,
             "consumableDuration": 5
           }
         ]
@@ -13800,11 +13800,11 @@
             "consumableDuration": 5
           },
           {
-            "stat": "xpMul",
+            "stat": "damageAdd",
             "weight": 1,
-            "min": 0.05,
-            "max": 0.1,
-            "step": 0.05,
+            "min": 1,
+            "max": 2,
+            "step": 1,
             "consumableDuration": 5
           }
         ]
@@ -14269,7 +14269,7 @@
             "consumableDuration": 5
           },
           {
-            "stat": "xpMul",
+            "stat": "effectDamageMul",
             "weight": 1,
             "min": 0.05,
             "max": 0.1,
@@ -15135,7 +15135,7 @@
             "consumableDuration": 5
           },
           {
-            "stat": "retaliationMul",
+            "stat": "effectDamageMul",
             "weight": 1,
             "min": 0.1,
             "max": 0.2,
@@ -15744,11 +15744,11 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "dropRateMul",
+            "stat": "damageAdd",
             "weight": 1,
-            "min": 0.1,
-            "max": 0.2,
-            "step": 0.05,
+            "min": 1,
+            "max": 3,
+            "step": 1,
             "consumableDuration": 5
           },
           {
@@ -15760,10 +15760,10 @@
             "consumableDuration": 5
           },
           {
-            "stat": "xpMul",
+            "stat": "fireRateAdd",
             "weight": 1,
-            "min": 0.05,
-            "max": 0.15,
+            "min": 0.1,
+            "max": 0.3,
             "step": 0.05,
             "consumableDuration": 5
           }

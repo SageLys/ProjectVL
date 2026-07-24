@@ -7,7 +7,7 @@ import { fireTrigger, getModifiers, tickIntervalBindings } from './interpreter';
 import { tickStatusTimers, applyKnockback } from './statusSystem';
 import { dealDamage } from '../systems/damageSystem';
 import { spawnParticle } from '../systems/particleSystem';
-import { totalDamage, totalRange } from '../stats';
+import { reconcileMaxHp, totalDamage, totalRange } from '../stats';
 import { recordCardImpact } from '../../telemetry/combatCounters';
 
 function insideZone(zone: Zone, x: number, y: number, r: number): boolean {
@@ -175,12 +175,17 @@ function tickShield(state: GameState, dt: number): void {
 }
 
 function tickStatModifiers(state: GameState, dt: number): void {
+  let maxHpChanged = false;
   for (let i = state.statModifiers.length - 1; i >= 0; i--) {
     const modifier = state.statModifiers[i];
     if (modifier.remaining === undefined) continue;
     modifier.remaining -= dt;
-    if (modifier.remaining <= 0) state.statModifiers.splice(i, 1);
+    if (modifier.remaining <= 0) {
+      if (modifier.stat === 'maxHpAdd') maxHpChanged = true;
+      state.statModifiers.splice(i, 1);
+    }
   }
+  if (maxHpChanged) reconcileMaxHp(state);
 }
 
 function tickVfx(state: GameState, dt: number): void {

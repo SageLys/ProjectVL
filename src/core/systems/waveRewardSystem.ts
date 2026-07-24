@@ -1,6 +1,6 @@
 import { cfg } from '../../config';
 import type { WaveChoiceStatKind } from '../../config/types';
-import { maxAttackRange, totalRange } from '../stats';
+import { maxAttackRange, reconcileMaxHp, totalRange } from '../stats';
 import type { Config, GameEvent, GameState, RunDecision, WaveRewardGrant } from '../types';
 import { enqueueDecision, registerDecisionResolver } from './decisionQueueSystem';
 
@@ -27,8 +27,8 @@ export function applyRunBaseReward(
       state.runBaseStats.multiAdd += effect.add;
       break;
     case 'maxHpAdd':
-      state.maxHp += effect.add;
-      state.hp += effect.add;
+      state.baseMaxHp += effect.add;
+      reconcileMaxHp(state);
       break;
     case 'heal':
       state.hp = Math.min(state.maxHp, state.hp + effect.add);
