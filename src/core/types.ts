@@ -110,6 +110,12 @@ export interface Card {
   affixes?: CardAffixRoll[];
 }
 
+export interface CardRef {
+  slotKind: 'cards' | 'equipment';
+  index: number;
+  cardId: number;
+}
+
 export type RunDecision =
   | { kind: 'godDraft'; wave: number; candidates: GodId[]; role: 'main' | 'sub' }
   | { kind: 'godFocus'; wave: number; candidates: GodId[] }
@@ -428,11 +434,13 @@ export interface ShieldState {
   regenSeconds: number | null;
 }
 
-/** 限时全局增益（如技能触发后的射速 buff）。 */
-export interface Buff {
-  kind: 'fireRateMul' | 'damageMul';
-  mul: number;
-  remaining: number;
+/** Generic runtime stat modifier. Consumable affixes always set remaining. */
+export interface RuntimeStatModifier {
+  sourceId: string;
+  stat: CardStatKind | 'damage' | 'fireRate';
+  operation: 'add' | 'mul';
+  value: number;
+  remaining?: number;
 }
 
 /** 运行期可调参数（对应调参面板；由 cfg 各域 defaults 组装）。 */
@@ -460,6 +468,7 @@ export interface BuildState {
 
 export interface RunBuildState {
   evolutionChoices: Partial<Record<CardType, Record<number, string>>>;
+  cardAffixRolls: Record<CardType, CardAffixRoll[]>;
 }
 
 export interface GameState {
@@ -489,7 +498,7 @@ export interface GameState {
   zones: Zone[];
   summons: Summon[];
   shield: ShieldState | null;
-  buffs: Buff[];
+  statModifiers: RuntimeStatModifier[];
   /** interval 装备态绑定的计时器（key = 卡id:绑定序号）。 */
   intervalClocks: Record<string, number>;
   /** 任意触发器绑定的冷却截止时刻（state.time 基准；key = cd:卡id:绑定序号），供 triggerParams.cooldownSeconds 使用。 */
@@ -534,6 +543,8 @@ export interface GameState {
   rangeBonus: number;
   kills: number;
   merges: number;
+  /** Fixed recipes completed during this run, in completion order. */
+  completedRecipes: string[];
   /** 遥测拆分（原 uses）：consumes=消耗释放次数；equipOps=装备操作次数。 */
   consumes: number;
   equipOps: number;
@@ -579,6 +590,10 @@ export type GameEvent =
   | { type: 'relicSelected'; relicId: string; title: string; rarity: 'common' | 'rare' | 'epic'; god?: GodId }
   | { type: 'evolutionBranchOffered'; cardType: CardType; checkpointStar: number; options: string[]; provisionalCardId: number }
   | { type: 'evolutionBranchSelected'; cardType: CardType; checkpointStar: number; optionId: string; provisionalCardId: number }
+  | { type: 'recipeAvailable'; recipeIds: string[] }
+  | { type: 'recipeCompleted'; recipeId: string; outputCardType: CardType; outputStar: number }
+  | { type: 'recipeRejected'; recipeId: string; reason: 'phase' | 'materials' | 'slots' }
+  | { type: 'affixRolled'; cardType: CardType; affixes: CardAffixRoll[] }
   | { type: 'gameEnd'; win: boolean }
   | { type: 'breakthrough'; damage: number }
   | { type: 'bossContactStarted'; enemyId: number }

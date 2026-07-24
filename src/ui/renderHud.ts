@@ -2,6 +2,7 @@ import type { Config, GameState } from '../core/types';
 import { totalDamage, totalFireRate, totalMulti } from '../core/stats';
 import type { DomRefs } from './domRefs';
 import { texts } from '../data';
+import { formatRuntimeModifier } from './cardMeta';
 
 /** 刷新 HUD：血/经验/等级/波次/实时数值 + 调参回显 + 当前可执行操作提示。 */
 export function renderHud(refs: DomRefs, state: GameState, config: Config): void {
@@ -23,6 +24,15 @@ export function renderHud(refs: DomRefs, state: GameState, config: Config): void
         ? ` ｜重点 ${godCopy[state.godPool.focusGod]?.name ?? state.godPool.focusGod}`
         : '')
     : '';
+  if (refs.statModifierText) {
+    const timed = state.statModifiers.filter(modifier => modifier.remaining !== undefined);
+    refs.statModifierText.hidden = timed.length === 0;
+    refs.statModifierText.textContent = timed.length
+      ? `${texts.affixes.activeTitle}：${timed.map(modifier => (
+        `${formatRuntimeModifier(modifier)} ${Math.max(0, modifier.remaining ?? 0).toFixed(1)}s`
+      )).join(' · ')}`
+      : '';
+  }
   if (refs.damageStat) refs.damageStat.textContent = String(Math.round(totalDamage(state, config)));
   if (refs.rateStat) refs.rateStat.textContent = `${totalFireRate(state, config).toFixed(1)}/s`;
   if (refs.multiStat) refs.multiStat.textContent = String(totalMulti(state));

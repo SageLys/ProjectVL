@@ -2,8 +2,8 @@ import { cfg } from '../../config';
 import type { CardType, Config, GameEvent, GameState, Rng } from '../types';
 import { fireTrigger } from '../effects/interpreter';
 import { getOrCreateCardTypeRunStats } from './dropTypePolicy';
-import { createCardInstance } from '../createInitialState';
 import { finalizeEvolutionUpgrade, inheritEvolutionPath } from './evolutionTreeSystem';
+import { createCardWithAffixes } from './cardAffixSystem';
 
 export function getActiveMergeCopies(): number {
   return cfg.economy.placeholderAssumptions.twoCopyMerge ? 2 : cfg.economy.mergeCopiesWhenTwoCopyDisabled;
@@ -45,11 +45,13 @@ export function autoMergeCards(state: GameState, config: Config, rng: Rng): { me
       if (partners.length === mergeCopies - 1) {
         const resultStar = a.star + 1;
         const materials = [a, ...partners.map(index => state.cards[index]!)];
-        const resultCard = createCardInstance(state.nextCardId++, a.type, resultStar);
+        const created = createCardWithAffixes(state, rng, a.type, resultStar);
+        const resultCard = created.card;
         inheritEvolutionPath(state, resultCard, materials);
         state.cards[i] = resultCard;
         for (const j of partners) state.cards[j] = null;
         merged++;
+        events.push(...created.events);
         events.push({ type: 'merged', cardType: a.type, resultStar, resultCardId: resultCard.id });
         const evolutionEvents = finalizeEvolutionUpgrade(state, resultCard);
         events.push(...commitMerge(state, config, rng, a.type, resultStar));

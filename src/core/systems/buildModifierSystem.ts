@@ -2,6 +2,8 @@ import { cfg } from '../../config';
 import type { BuildScalingAxis } from '../../config/types';
 import type { BindingDef, BuildTag, CardDef, ConsumableTierDef, EffectDef, Trigger } from '../effects/defs';
 import type { GameState } from '../types';
+import { cardAffixScaling } from './cardAffixSystem';
+import { modifierTotal } from './runtimeStatModifierSystem';
 
 export interface BuildScalingTotals {
   /** axis -> target tag -> additive relic total. Multiplicative axes consume this as (1 + total). */
@@ -90,6 +92,11 @@ function hasScaling(totals: BuildScalingTotals): boolean {
   return Object.keys(totals.byAxis).length > 0;
 }
 
+function runtimeScalingFor(state: GameState, axis: BuildScalingAxis): number {
+  const total = modifierTotal(state, axis);
+  return total.add + (total.mul - 1);
+}
+
 /** A multi-tag card takes the strongest matching tag total for an axis, never their sum. */
 export function scalingFor(totals: BuildScalingTotals, def: CardDef, axis: BuildScalingAxis): number {
   const byTag = totals.byAxis[axis];
@@ -104,12 +111,21 @@ function scaleNumber(original: number, value: number, rule: ScalingRule): number
   return next;
 }
 
-function scaleEffects(effects: EffectDef[], trigger: Trigger | undefined, totals: BuildScalingTotals, def: CardDef): void {
+function scaleEffects(
+  state: GameState,
+  effects: EffectDef[],
+  trigger: Trigger | undefined,
+  totals: BuildScalingTotals,
+  def: CardDef,
+  affixScaling: Partial<Record<BuildScalingAxis, number>>,
+): void {
   for (const effect of effects) {
     const params = effect.params;
     if (!params) continue;
     for (const [axis, rules] of Object.entries(BUILD_SCALING_RULES) as [BuildScalingAxis, readonly ScalingRule[]][]) {
-      const value = scalingFor(totals, def, axis);
+      const value = scalingFor(totals, def, axis)
+        + runtimeScalingFor(state, axis)
+        + (affixScaling[axis] ?? 0);
       if (value === 0) continue;
       for (const rule of rules) {
         if (rule.atom !== effect.atom || typeof params[rule.param] !== 'number') continue;
@@ -119,35 +135,57 @@ function scaleEffects(effects: EffectDef[], trigger: Trigger | undefined, totals
 
     // This exception is scoped by binding trigger, not by the generic burstDamage parameter name.
     if (trigger === 'onBreach' && effect.atom === 'burstDamage' && typeof params.damageMul === 'number') {
-      const value = scalingFor(totals, def, 'retaliationMul');
+      const value = scalingFor(totals, def, 'retaliationMul')
+        + runtimeScalingFor(state, 'retaliationMul')
+        + (affixScaling.retaliationMul ?? 0);
       if (value !== 0) params.damageMul = (params.damageMul as number) * (1 + value);
     }
 
-    if (Array.isArray(params.effects)) scaleEffects(params.effects as EffectDef[], trigger, totals, def);
+    if (Array.isArray(params.effects)) {
+      scaleEffects(state, params.effects as EffectDef[], trigger, totals, def, affixScaling);
+    }
   }
 }
 
-export function applyBuildScalingToBindings(state: GameState, def: CardDef, bindings: BindingDef[]): BindingDef[] {
+export function applyBuildScalingToBindings(
+  state: GameState,
+  def: CardDef,
+  bindings: BindingDef[],
+  affixCardType?: string,
+): BindingDef[] {
   const totals = currentTotals(state);
-  if (!hasScaling(totals)) return bindings;
-  for (const binding of bindings) scaleEffects(binding.effects, binding.trigger, totals, def);
+  const affixScaling = affixCardType ? cardAffixScaling(state, affixCardType) : {};
+  const hasRuntimeScaling = Object.keys(BUILD_SCALING_RULES)
+    .some(axis => runtimeScalingFor(state, axis as BuildScalingAxis) !== 0);
+  if (!hasScaling(totals) && !hasRuntimeScaling && Object.keys(affixScaling).length === 0) return bindings;
+  for (const binding of bindings) {
+    scaleEffects(state, binding.effects, binding.trigger, totals, def, affixScaling);
+  }
   return bindings;
 }
 
 export function applyBuildScalingToTier(state: GameState, def: CardDef, tier: ConsumableTierDef): ConsumableTierDef {
   const totals = currentTotals(state);
-  if (!hasScaling(totals)) return tier;
-  const areaValue = scalingFor(totals, def, 'areaScaleMul');
+  const hasRuntimeScaling = Object.keys(BUILD_SCALING_RULES)
+    .some(axis => runtimeScalingFor(state, axis as BuildScalingAxis) !== 0);
+  if (!hasScaling(totals) && !hasRuntimeScaling) return tier;
+  const areaValue = scalingFor(totals, def, 'areaScaleMul') + runtimeScalingFor(state, 'areaScaleMul');
   if (areaValue !== 0) {
     if (typeof tier.radius === 'number') tier.radius *= 1 + areaValue;
     if (typeof tier.duration === 'number') tier.duration *= 1 + areaValue;
   }
-  scaleEffects(tier.effects, undefined, totals, def);
+  scaleEffects(state, tier.effects, undefined, totals, def, {});
   return tier;
 }
 
 /** Global bridge multiplier: the strongest tagged total applies once to every damage source. */
 export function controlledDamageTakenBonus(state: GameState): number {
   const byTag = currentTotals(state).byAxis.controlledDamageTakenMul;
-  return byTag ? Math.max(0, ...Object.values(byTag).map(value => value ?? 0)) : 0;
+  const relic = byTag ? Math.max(0, ...Object.values(byTag).map(value => value ?? 0)) : 0;
+  const equippedAffix = state.equipment.reduce((sum, card) => (
+    card && !card.provisional
+      ? sum + (cardAffixScaling(state, card.type).controlledDamageTakenMul ?? 0)
+      : sum
+  ), 0);
+  return relic + equippedAffix + runtimeScalingFor(state, 'controlledDamageTakenMul');
 }

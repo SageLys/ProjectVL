@@ -11,6 +11,7 @@ export interface RunSummary {
   highestCard: { type: CardType; star: number } | null;
   relics: { count: number; rarity: Record<RelicDef['rarity'], number> };
   cardEvolutions: Array<{ type: CardType; highestStar: number; path: string[] }>;
+  completedRecipes: string[];
 }
 
 const BUILD_TAGS: BuildTag[] = ['projectile', 'control', 'domain', 'defense', 'utility'];
@@ -87,5 +88,6 @@ export function buildRunSummary(state: GameState, win: boolean): RunSummary {
     relics: { count: state.buildState.relicHistory.length, rarity },
     cardEvolutions: [...cardEvolutions.values()]
       .sort((a, b) => a.type.localeCompare(b.type)),
+    completedRecipes: [...state.completedRecipes],
   };
 }

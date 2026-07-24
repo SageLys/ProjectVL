@@ -10,7 +10,7 @@ import {
 } from './dropTypePolicy';
 import { getActivePool, getRunRoster } from './activePoolSystem';
 import { stageForWave } from '../runStage';
-import { createCardInstance } from '../createInitialState';
+import { createCardWithAffixes } from './cardAffixSystem';
 import { finalizeEvolutionUpgrade } from './evolutionTreeSystem';
 
 const TAU = Math.PI * 2;
@@ -164,7 +164,8 @@ export function collectDrop(state: GameState, config: Config, rng: Rng, drop: Gr
     }];
   }
   state.groundDrops = state.groundDrops.filter(d => d.id !== drop.id);
-  const collectedCard = createCardInstance(state.nextCardId++, drop.type, drop.star);
+  const created = createCardWithAffixes(state, rng, drop.type, drop.star);
+  const collectedCard = created.card;
   if (empty >= 0) state.cards[empty] = collectedCard;
   else state.cards.push(collectedCard);
   state.collected++;
@@ -186,6 +187,7 @@ export function collectDrop(state: GameState, config: Config, rng: Rng, drop: Gr
   };
   if (drop.bountyEncounterId !== undefined) collected.bountyEncounterId = drop.bountyEncounterId;
   const events: GameEvent[] = [collected];
+  events.push(...created.events);
   events.push(...evolutionEvents);
   events.push(...mergeEvents);
   events.push(...fireTrigger(state, config, rng, 'onPickup', { drop, point: { x: drop.x, y: drop.y } }));

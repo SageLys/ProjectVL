@@ -1,11 +1,37 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { findTarget, shoot, updateBullets } from '../src/core/systems/combatSystem';
-import { maxAttackRange, totalMulti, totalRange } from '../src/core/stats';
+import { maxAttackRange, totalDamage, totalFireRate, totalMulti, totalRange } from '../src/core/stats';
 import { applyBrand } from '../src/core/effects/statusSystem';
 import type { BountyEncounter } from '../src/core/types';
-import { enemy, freshState, createDefaultConfig, constRng, resetTestEnv } from './helpers';
+import { card, enemy, freshState, createDefaultConfig, constRng, resetTestEnv } from './helpers';
 
 beforeEach(resetTestEnv);
+
+describe('affix combat stats', () => {
+  it('applies equipped adds and runtime modifiers immediately', () => {
+    const state = freshState();
+    const config = createDefaultConfig();
+    state.runBuild.cardAffixRolls.pierce = [
+      { stat: 'damageAdd', value: 2, consumableDuration: 5 },
+      { stat: 'fireRateAdd', value: 0.2, consumableDuration: 5 },
+    ];
+    state.equipment[0] = card('pierce', 1);
+    state.statModifiers.push({
+      sourceId: 'skill:test',
+      stat: 'damage',
+      operation: 'mul',
+      value: 1.5,
+      remaining: 1,
+    });
+
+    expect(totalDamage(state, config)).toBeCloseTo((config.damage + 2) * 1.5);
+    expect(totalFireRate(state, config)).toBeCloseTo(config.fireRate + 0.2);
+
+    state.equipment[0] = null;
+    expect(totalDamage(state, config)).toBeCloseTo(config.damage * 1.5);
+    expect(totalFireRate(state, config)).toBeCloseTo(config.fireRate);
+  });
+});
 
 describe('combatSystem · 锁定', () => {
   it('锁定射程内最近的敌人', () => {

@@ -4,7 +4,7 @@ import './styles/app.css';
 import { activeVariants, cfg } from './config';
 import { texts } from './data';
 import type { GameEvent, GameState, Rng } from './core/types';
-import { createCardInstance, createInitialState, createDefaultConfig } from './core/createInitialState';
+import { createInitialState, createDefaultConfig } from './core/createInitialState';
 import { updateGame } from './core/updateGame';
 import { registerSkillDefs, resolveConsumableTier } from './core/effects/interpreter';
 import { jumpToWave, restartWave } from './core/systems/waveSystem';
@@ -17,6 +17,8 @@ import { acceptBountyOfferAt, calculateOfferChance } from './core/systems/bounty
 import { resolveCurrentDecision } from './core/systems/decisionQueueSystem';
 import { beginOpeningIntermission, confirmIntermissionReady } from './core/systems/intermissionSystem';
 import { checkWildcardTarget, grantWildcards, useWildcardOnSlot, type WildcardGrant } from './core/systems/wildcardSystem';
+import { confirmRecipe } from './core/systems/recipeEvolutionSystem';
+import { createCardWithAffixes } from './core/systems/cardAffixSystem';
 import { totalRange } from './core/stats';
 import { createRenderer } from './render/canvasRenderer';
 import { getDomRefs } from './ui/domRefs';
@@ -132,6 +134,9 @@ const intermissionPanel = createIntermissionPanel(refs.arena, {
   onReady() {
     dispatch(confirmIntermissionReady(state));
   },
+  onRecipe(recipeId, aCardId, bCardId) {
+    dispatch(confirmRecipe(state, config, rng, recipeId, aCardId, bCardId));
+  },
 });
 
 function previewFor(source: SlotSource, index: number): PreviewSpec {
@@ -190,13 +195,18 @@ refs.testWildcardBtn.addEventListener('click', () => {
 function reset(): void {
   state = createInitialState(selectedDifficulty);
   if (DEV_TOOLS_ENABLED) telemetry?.reset();
+  const createEvidenceCard = (type: string, star: number) => {
+    const created = createCardWithAffixes(state, rng, type, star);
+    if (DEV_TOOLS_ENABLED) telemetry?.recordGameEvents(created.events);
+    return created.card;
+  };
   if (evidenceMode === 'equip') {
-    state.cards[0] = createCardInstance(state.nextCardId++, 'pierce', 4);
+    state.cards[0] = createEvidenceCard('pierce', 4);
   } else if (evidenceMode === 'upgrade4' || evidenceMode === 'upgrade5' || evidenceMode === 'upgrade6') {
     const sourceStar = Number(evidenceMode.charAt(evidenceMode.length - 1)) - 1;
-    state.equipment[0] = createCardInstance(state.nextCardId++, 'pierce', sourceStar);
-    state.cards[0] = createCardInstance(state.nextCardId++, 'pierce', sourceStar);
-    state.cards[1] = createCardInstance(state.nextCardId++, 'frost', 1);
+    state.equipment[0] = createEvidenceCard('pierce', sourceStar);
+    state.cards[0] = createEvidenceCard('pierce', sourceStar);
+    state.cards[1] = createEvidenceCard('frost', 1);
   }
   modals.hideResult();
   modals.hideDecision();

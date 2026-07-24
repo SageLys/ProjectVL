@@ -3,6 +3,7 @@ import type { GameEvent, GameState, Rng } from '../types';
 import { stageForWave } from '../runStage';
 import { enqueueWaveBaseRewardDecision, grantFloorRewards } from './waveRewardSystem';
 import { enqueueGodPoolDecisionForIntermission } from './godPoolSystem';
+import { availableRecipes } from './recipeEvolutionSystem';
 
 export interface IntermissionTickResult {
   events: GameEvent[];
@@ -98,7 +99,11 @@ export function tickIntermission(
     if (intermission.afterWave === 0) return { events: [], complete: true };
     intermission.step = 'free';
     intermission.freeRemaining = Math.max(0, freeSecondsFor(intermission.afterWave));
-    return { events: [], complete: false };
+    const recipeIds = availableRecipes(state).map(recipe => recipe.recipeId);
+    return {
+      events: recipeIds.length ? [{ type: 'recipeAvailable', recipeIds }] : [],
+      complete: false,
+    };
   }
 
   if (!intermission.readyConfirmed) {

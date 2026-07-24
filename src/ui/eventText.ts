@@ -12,6 +12,7 @@ export const SLOT_CHANGING = new Set<GameEvent['type']>([
   'wildcardsGranted', 'wildcardMerged',
   'evolutionBranchSelected',
   'bossRewardGranted',
+  'recipeCompleted',
 ]);
 
 function wildcardGrantDescription(grants: Array<{ star: number; count: number }>): string {
@@ -35,6 +36,8 @@ export function formatToast(ev: GameEvent): string | null {
     case 'waveBaseRewardOffered':
     case 'relicOffered':
     case 'evolutionBranchOffered':
+    case 'recipeAvailable':
+    case 'affixRolled':
       return null;
     case 'bossRewardGranted': return fmt(T.bossReward, { desc: wildcardGrantDescription(ev.grants) });
     case 'breakthrough': return fmt(T.breakthrough, { damage: Math.round(ev.damage) });
@@ -70,6 +73,12 @@ export function formatToast(ev: GameEvent): string | null {
       return fmt(T.waveBaseRewardChosen, { stat, add });
     }
     case 'evolutionBranchSelected': return `${name(ev.cardType)}：路线已锁定`;
+    case 'recipeCompleted': return `卡间进化完成：${name(ev.outputCardType)} ${ev.outputStar}★`;
+    case 'recipeRejected': return ev.reason === 'phase'
+      ? '卡间进化只能在波间完成'
+      : ev.reason === 'materials'
+        ? '进化材料已变化，请重新选择'
+        : '没有可放置进化产物的槽位';
     case 'bountyAccepted': return fmt(T.bountyAccepted, { name: name(ev.rewardCardType) });
     case 'bountyCompleted': return fmt(T.bountyCompleted, { name: name(ev.rewardCardType) });
     case 'bountyFailed': return T.bountyFailed;

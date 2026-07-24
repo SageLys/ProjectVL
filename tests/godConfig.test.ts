@@ -10,10 +10,13 @@ describe('神池构筑 C0 数据契约', () => {
     const godIds = new Set(config.gods.gods.map(god => god.id));
 
     expect(config.gods.gods).toHaveLength(5);
-    expect(config.skills.cards).toHaveLength(11);
+    expect(config.skills.cards).toHaveLength(12);
     expect(config.skills.cards.every(card => card.god !== undefined && godIds.has(card.god))).toBe(true);
     expect(config.relics.relics.length).toBeGreaterThanOrEqual(20);
-    expect(config.evolutionRecipes.recipes).toEqual([]);
+    expect(config.skills.cards.filter(card => !card.recipeOnly)).toHaveLength(11);
+    expect(config.evolutionRecipes.recipes).toEqual([
+      expect.objectContaining({ id: 'frozenThunder', outputCardId: 'frozenThunder', outputStar: 6 }),
+    ]);
     expect(config.waveRewards.floor).toHaveLength(3);
     expect(config.waveRewards.choice).toHaveLength(5);
   });

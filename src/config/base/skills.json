@@ -3,6 +3,11 @@
   "cards": [
     {
       "id": "pierce", "god": "storm", "category": "projectile", "synergyTags": ["projectile"], "textKey": "cards.pierce", "teaching": true, "implementationBatch": 1,
+      "affixPool": { "count": 2, "candidates": [
+        { "stat": "damageAdd", "weight": 1, "min": 1, "max": 3, "step": 1, "consumableDuration": 5 },
+        { "stat": "fireRateAdd", "weight": 1, "min": 0.1, "max": 0.25, "step": 0.05, "consumableDuration": 5 },
+        { "stat": "effectDamageMul", "weight": 1, "min": 0.05, "max": 0.15, "step": 0.05, "consumableDuration": 5 }
+      ] },
       "stars": {
         "3": { "tier": "core", "equip": [{ "trigger": "onFire", "effects": [{ "atom": "pierce", "params": { "count": 2, "damageRetention": 0.8, "rampPerPierce": 0.1 } }] }] },
         "5": { "tier": "dual", "equip": [{ "trigger": "onFire", "effects": [{ "atom": "pierce", "params": { "count": 2, "damageRetention": 0.8, "rampPerPierce": 0.1 } }, { "atom": "ricochet", "params": { "bounces": 1 } }] }] },
@@ -81,6 +86,11 @@
     },
     {
       "id": "frost", "god": "winter", "category": "control", "synergyTags": ["control", "domain"], "textKey": "cards.frost", "teaching": false, "implementationBatch": 1,
+      "affixPool": { "count": 2, "candidates": [
+        { "stat": "controlPotencyMul", "weight": 1, "min": 0.05, "max": 0.2, "step": 0.05, "consumableDuration": 5 },
+        { "stat": "controlledDamageTakenMul", "weight": 1, "min": 0.05, "max": 0.1, "step": 0.05, "consumableDuration": 5 },
+        { "stat": "damageAdd", "weight": 1, "min": 1, "max": 2, "step": 1, "consumableDuration": 5 }
+      ] },
       "stars": {
         "3": { "tier": "core", "equip": [
           { "trigger": "onFire", "effects": [
@@ -318,6 +328,54 @@
           { "atom": "execute", "params": { "hpThresholdRatio": 0.15 } }
         ] } }] }
       } }, "designNotes": "碰我者死。突破反噬用近瞬时 groundZone 包裹 burstDamage/knockback，命中突破点附近的存活敌人（突破的敌人本身已在结算前移出场，直接反噬它没有意义）。6★ 处决不计入突破惩罚（execute 走击杀结算，非突破结算，天然满足）。"
+    },
+    {
+      "id": "frozenThunder", "god": "storm", "category": "projectile", "synergyTags": ["projectile", "control"], "textKey": "cards.frozenThunder", "teaching": false, "recipeOnly": true, "implementationBatch": 1,
+      "stars": {
+        "3": { "tier": "core", "equip": [
+          { "trigger": "onHit", "effects": [
+            { "atom": "chain", "params": { "bounces": 3, "damageRetention": 0.75, "searchRange": 150 } },
+            { "atom": "freeze", "params": { "duration": 0.8, "stacksToTrigger": 2 } }
+          ] }
+        ] },
+        "5": { "tier": "dual", "equip": [
+          { "trigger": "onHit", "effects": [
+            { "atom": "chain", "params": { "bounces": 5, "damageRetention": 0.8, "searchRange": 170 } },
+            { "atom": "freeze", "params": { "duration": 1, "stacksToTrigger": 2 } }
+          ] },
+          { "trigger": "onKill", "triggerParams": { "requiresStatus": "frozen" }, "effects": [
+            { "atom": "aoeOnHit", "params": { "radius": 90, "damageRatio": 0.8, "falloff": 0.4 } }
+          ] }
+        ] },
+        "6": { "tier": "transform", "equip": [
+          { "trigger": "onHit", "effects": [
+            { "atom": "chain", "params": { "bounces": 7, "damageRetention": 0.85, "searchRange": 190 } },
+            { "atom": "freeze", "params": { "duration": 1.2, "stacksToTrigger": 1 } }
+          ] },
+          { "trigger": "onKill", "triggerParams": { "requiresStatus": "frozen" }, "effects": [
+            { "atom": "aoeOnHit", "params": { "radius": 120, "damageRatio": 1.2, "falloff": 0.25 } },
+            { "atom": "freeze", "params": { "duration": 0.7, "radius": 120 } }
+          ] }
+        ] }
+      },
+      "amplifyAxis": { "description": "弹跳 +1、冻结爆碎范围 +15", "params": { "bounces": "+1", "radius": "+15" } },
+      "consumable": { "placement": "point", "interpolation": "linear", "anchors": {
+        "1": { "radius": 110, "effects": [
+          { "atom": "chain", "params": { "bounces": 4, "damageRetention": 0.8, "searchRange": 150 } },
+          { "atom": "freeze", "params": { "duration": 1.2 } }
+        ] },
+        "3": { "radius": 150, "effects": [
+          { "atom": "chain", "params": { "bounces": 8, "damageRetention": 0.85, "searchRange": 170 } },
+          { "atom": "freeze", "params": { "duration": 1.8 } },
+          { "atom": "burstDamage", "params": { "damageMul": 2, "radius": 90 } }
+        ] },
+        "6": { "radius": 190, "effects": [
+          { "atom": "chain", "params": { "bounces": 14, "damageRetention": 0.9, "searchRange": 190 } },
+          { "atom": "freeze", "params": { "duration": 2.5 } },
+          { "atom": "burstDamage", "params": { "damageMul": 3.5, "radius": 120 } }
+        ] }
+      } },
+      "designNotes": "固定配方终态：连锁闪电传导冻结，冻结目标死亡时爆碎。仅可由卡间进化生成。"
     }
   ]
 }

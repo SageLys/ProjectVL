@@ -1,7 +1,7 @@
 import type { Card } from '../core/types';
 import { texts } from '../data';
 import { glyphToSvg } from '../presentation/skillGeometry';
-import { evolutionChoiceCopy, resolveCardMeta, type CardCopyContext } from './cardMeta';
+import { evolutionChoiceCopy, formatAffixRoll, resolveCardMeta, type CardCopyContext } from './cardMeta';
 
 export type SlotSource = 'cards' | 'equipment' | 'wildcard';
 
@@ -28,9 +28,10 @@ export function createCardElement(card: Card, source: SlotSource, index: number,
     return `${star}★ ${evolutionChoiceCopy(card.type, optionId)?.name ?? optionId}`;
   });
   const pendingCopy = card.provisional ? texts.evolution.pending : '';
+  const affixLabels = (card.affixes ?? []).map(formatAffixRoll);
   el.setAttribute(
     'aria-label',
-    `${source === 'equipment' ? '已装备' : ''}${card.star}星${meta.name}。${pendingCopy} ${routeBadges.join(' / ')} ${meta.desc}`,
+    `${source === 'equipment' ? '已装备' : ''}${card.star}星${meta.name}。${pendingCopy} ${routeBadges.join(' / ')} ${meta.desc}。${affixLabels.join('，')}`,
   );
   el.style.setProperty('--card', meta.accent);
   el.innerHTML =
@@ -41,7 +42,12 @@ export function createCardElement(card: Card, source: SlotSource, index: number,
     `<span class="card-stars" aria-hidden="true">${'★'.repeat(card.star)}</span>` +
     (routeBadges.length ? `<span class="card-evolution-route">${routeBadges.join(' · ')}</span>` : '') +
     (card.provisional ? `<span class="card-evolution-pending">${texts.evolution.pending}</span>` : '') +
-    `<span class="card-desc">${meta.desc}</span>`;
+    `<span class="card-skill-section"><small>${texts.affixes.skillTitle}</small><span class="card-desc">${meta.desc}</span></span>` +
+    `<span class="card-affix-section"><small>${texts.affixes.slotTitle}</small>` +
+      (affixLabels.length
+        ? affixLabels.map(label => `<span class="card-affix"><i aria-hidden="true">◆</i>${label}</span>`).join('')
+        : '<span class="card-affix empty">—</span>') +
+    `</span>`;
   el.addEventListener('pointerdown', e => handlers.dragStart(e, source, index, el));
   return el;
 }

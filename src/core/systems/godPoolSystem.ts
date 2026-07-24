@@ -5,6 +5,7 @@ import {
   enqueueDecision,
   registerDecisionResolver,
 } from './decisionQueueSystem';
+import { getDroppableCardTypes, isDroppableCardType } from './cardPoolEligibility';
 
 function randomIndex(length: number, rng: Rng): number {
   return Math.min(length - 1, Math.floor(rng() * length));
@@ -47,21 +48,22 @@ function drawRoster(state: GameState, id: GodId, role: 'main' | 'sub', rng: Rng)
   const def = godDef(id);
   if (!def) return [];
   const target = role === 'main' ? def.mainRosterSize : def.subRosterSize;
-  const anchors = unique(def.anchorCardIds);
+  const anchors = unique(def.anchorCardIds).filter(isDroppableCardType);
   const variableCount = Math.max(0, target - anchors.length);
   const variables = shuffle(
-    unique(def.variableCardIds).filter(card => !anchors.includes(card)),
+    unique(def.variableCardIds).filter(card => isDroppableCardType(card) && !anchors.includes(card)),
     rng,
   ).slice(0, variableCount);
   const roster = unique([...anchors, ...variables]);
   if (roster.length < target) {
-    const unclaimed = cfg.skills.cards.map(card => card.id).filter(
+    const droppableCards = getDroppableCardTypes();
+    const unclaimed = droppableCards.filter(
       card => !roster.includes(card) && !state.godPool.runRoster.includes(card),
     );
     const fallback = shuffle(
       unclaimed.length >= target - roster.length
         ? unclaimed
-        : cfg.skills.cards.map(card => card.id).filter(card => !roster.includes(card)),
+        : droppableCards.filter(card => !roster.includes(card)),
       rng,
     );
     roster.push(...fallback.slice(0, target - roster.length));
@@ -119,10 +121,10 @@ function updateIncrementalRoster(state: GameState): void {
 
 function lockRunRoster(state: GameState): CardType[] {
   updateIncrementalRoster(state);
-  const target = Math.min(11, cfg.skills.cards.length);
+  const droppableCards = getDroppableCardTypes();
+  const target = Math.min(11, droppableCards.length);
   if (state.godPool.runRoster.length < target) {
-    const remaining = cfg.skills.cards
-      .map(card => card.id)
+    const remaining = droppableCards
       .filter(card => !state.godPool.runRoster.includes(card));
     state.godPool.runRoster.push(...remaining.slice(0, target - state.godPool.runRoster.length));
   }

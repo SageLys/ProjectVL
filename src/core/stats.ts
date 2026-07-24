@@ -1,23 +1,46 @@
 import { cfg } from '../config';
+import type { CardStatKind } from '../config/types';
 import type { Config, GameState } from './types';
 import { getModifiers } from './effects/interpreter';
+import { modifierTotal } from './systems/runtimeStatModifierSystem';
+export { modifierTotal } from './systems/runtimeStatModifierSystem';
 
-function buffMul(state: GameState, kind: 'fireRateMul' | 'damageMul'): number {
-  let mul = 1;
-  for (const b of state.buffs) if (b.kind === kind) mul *= b.mul;
-  return mul;
+function combinedTotal(state: GameState, baseStat: 'damage' | 'fireRate', addStat: CardStatKind) {
+  const base = modifierTotal(state, baseStat);
+  const add = modifierTotal(state, addStat);
+  return { add: base.add + add.add, mul: base.mul * add.mul };
 }
 
 export function totalDamage(state: GameState, config: Config): number {
-  return (config.damage + state.damageBonus + state.runBaseStats.damageAdd) * buffMul(state, 'damageMul');
+  const modifier = combinedTotal(state, 'damage', 'damageAdd');
+  return (
+    config.damage
+    + state.damageBonus
+    + state.runBaseStats.damageAdd
+    + getModifiers(state).equipmentAffixAdd.damageAdd
+    + modifier.add
+  ) * modifier.mul;
 }
 
 export function totalFireRate(state: GameState, config: Config): number {
-  return (config.fireRate + state.fireRateBonus + state.runBaseStats.fireRateAdd) * buffMul(state, 'fireRateMul');
+  const modifier = combinedTotal(state, 'fireRate', 'fireRateAdd');
+  return (
+    config.fireRate
+    + state.fireRateBonus
+    + state.runBaseStats.fireRateAdd
+    + getModifiers(state).equipmentAffixAdd.fireRateAdd
+    + modifier.add
+  ) * modifier.mul;
 }
 
 export function totalMulti(state: GameState): number {
-  return state.multi + state.runBaseStats.multiAdd;
+  const modifier = modifierTotal(state, 'multiAdd');
+  return (
+    state.multi
+    + state.runBaseStats.multiAdd
+    + getModifiers(state).equipmentAffixAdd.multiAdd
+    + modifier.add
+  ) * modifier.mul;
 }
 
 /**
@@ -32,8 +55,15 @@ export function maxAttackRange(): number {
 }
 
 export function totalRange(state: GameState, config: Config): number {
+  const modifier = modifierTotal(state, 'rangeAdd');
   return Math.min(
-    config.range + config.range * state.rangeBonus + state.runBaseStats.rangeAdd,
+    (
+      config.range
+      + config.range * state.rangeBonus
+      + state.runBaseStats.rangeAdd
+      + getModifiers(state).equipmentAffixAdd.rangeAdd
+      + modifier.add
+    ) * modifier.mul,
     maxAttackRange(),
   );
 }

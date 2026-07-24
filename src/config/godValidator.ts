@@ -89,9 +89,14 @@ export function validateGodConfig(
   }
 
   const recipes = versionedArray(config.evolutionRecipes, 'recipes', '$.evolutionRecipes');
+  const recipeIds = new Set<string>();
   for (const [index, raw] of recipes.entries()) {
     const path = `$.evolutionRecipes.recipes[${index}]`;
     const recipe = object(raw, path);
+    if (typeof recipe.id === 'string' && recipeIds.has(recipe.id)) {
+      fail(`${path}.id`, `duplicate recipe id: ${recipe.id}`);
+    }
+    if (typeof recipe.id === 'string') recipeIds.add(recipe.id);
     if (typeof recipe.id !== 'string' || !recipe.id) fail(`${path}.id`, '必须是非空字符串');
     for (const ingredientKey of ['ingredientA', 'ingredientB'] as const) {
       const ingredient = object(recipe[ingredientKey], `${path}.${ingredientKey}`);
@@ -104,6 +109,9 @@ export function validateGodConfig(
     }
     if (typeof recipe.outputCardId !== 'string' || !cardIds.has(recipe.outputCardId)) {
       fail(`${path}.outputCardId`, `引用了不存在的卡: ${String(recipe.outputCardId)}`);
+    }
+    if (!cardDefs.find(card => card.id === recipe.outputCardId)?.recipeOnly) {
+      fail(`${path}.outputCardId`, 'recipe output must set recipeOnly: true');
     }
     if (!Number.isInteger(recipe.outputStar) || Number(recipe.outputStar) < 1) fail(`${path}.outputStar`, '必须是正整数');
     if (recipe.allowedPhase !== 'intermission') fail(`${path}.allowedPhase`, '必须为 intermission');

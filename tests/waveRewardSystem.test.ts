@@ -129,9 +129,9 @@ describe('waveRewardSystem floor', () => {
       rangeAdd: 8,
       multiAdd: 1,
     };
-    state.buffs = [
-      { kind: 'damageMul', mul: 2, remaining: 10 },
-      { kind: 'fireRateMul', mul: 1.5, remaining: 10 },
+    state.statModifiers = [
+      { sourceId: 'skill:damage', stat: 'damage', operation: 'mul', value: 2, remaining: 10 },
+      { sourceId: 'skill:rate', stat: 'fireRate', operation: 'mul', value: 1.5, remaining: 10 },
     ];
 
     expect(totalDamage(state, runtime)).toBe(36);

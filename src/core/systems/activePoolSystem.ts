@@ -3,6 +3,7 @@ import type { GodId } from '../../config/types';
 import type { CardType, GameState, Rng } from '../types';
 import { calculateCommitmentScore, getOrCreateCardTypeRunStats } from './dropCommitment';
 import { getSelectedGods } from './godPoolSystem';
+import { getDroppableCardTypes, isDroppableCardType } from './cardPoolEligibility';
 
 function unique(values: readonly CardType[]): CardType[] {
   return [...new Set(values)];
@@ -18,21 +19,23 @@ function shuffle<T>(values: readonly T[], rng: Rng): T[] {
 }
 
 export function getRunRoster(state: GameState): CardType[] {
-  if (state.godPool.runRoster.length) return [...state.godPool.runRoster];
+  if (state.godPool.runRoster.length) {
+    const roster = state.godPool.runRoster.filter(isDroppableCardType);
+    if (roster.length) return roster;
+  }
   const selectedRoster = unique(
     getSelectedGods(state).flatMap(id => state.godPool.rosterByGod[id] ?? []),
-  );
-  return selectedRoster.length ? selectedRoster : cfg.skills.cards.map(card => card.id);
+  ).filter(isDroppableCardType);
+  return selectedRoster.length ? selectedRoster : getDroppableCardTypes();
 }
 
 export function getActivePool(state: GameState): CardType[] {
-  return state.godPool.activePool.length
-    ? [...state.godPool.activePool]
-    : getRunRoster(state);
+  const active = state.godPool.activePool.filter(isDroppableCardType);
+  return active.length ? active : getRunRoster(state);
 }
 
 export function getGodRoster(state: GameState, god: GodId | null): CardType[] {
-  return god ? [...(state.godPool.rosterByGod[god] ?? [])] : [];
+  return god ? (state.godPool.rosterByGod[god] ?? []).filter(isDroppableCardType) : [];
 }
 
 export function cardGodInRun(state: GameState, type: CardType): GodId | null {
@@ -160,7 +163,7 @@ export function generateActivePool(state: GameState, wave: number, rng: Rng): Ca
   if (!main) {
     // Headless/debug compatibility: normal game flow always drafts before wave 1.
     state.godPool.previousActivePool = [...state.godPool.activePool];
-    state.godPool.activePool = cfg.skills.cards.map(card => card.id);
+    state.godPool.activePool = getDroppableCardTypes();
     state.godPool.activePoolHistory = unique([
       ...state.godPool.activePoolHistory,
       ...state.godPool.activePool,

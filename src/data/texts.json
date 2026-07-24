@@ -22,6 +22,29 @@
   "levelup": {
     "benefits": "生效中：{names}"
   },
+  "affixes": {
+    "skillTitle": "技能效果",
+    "slotTitle": "数值词条",
+    "activeTitle": "限时词条",
+    "stats": {
+      "damage": "伤害",
+      "fireRate": "射速",
+      "damageAdd": "伤害",
+      "fireRateAdd": "射速",
+      "rangeAdd": "射程",
+      "multiAdd": "同发",
+      "maxHpAdd": "心防上限",
+      "heal": "回复",
+      "effectDamageMul": "效果伤害",
+      "quantityAdd": "效果数量",
+      "controlPotencyMul": "控制强度",
+      "controlledDamageTakenMul": "受控增伤",
+      "areaScaleMul": "范围",
+      "dotDamageMul": "持续伤害",
+      "defenseDurabilityMul": "防御耐久",
+      "retaliationMul": "反击"
+    }
+  },
   "gods": {
     "storm": { "name": "风暴", "theme": "连锁、穿透与高速投射" },
     "winter": { "name": "凛冬", "theme": "冻结、减速与阵地控制" },
@@ -606,6 +629,31 @@
           "6": {
             "title": "纠缠过久，直接退场",
             "detail": "荆棘范围扩大，低血量追求者被直接处决。",
+            "fx": "transform"
+          }
+        }
+      }
+    },
+    "frozenThunder": {
+      "name": "霜雷",
+      "hand": {
+        "shortByTier": {
+          "1": "连锁霜雷冻结并爆碎敌群",
+          "3": "强化连锁与冻结范围",
+          "6": "霜雷席卷并引爆冻结目标"
+        },
+        "milestones": {}
+      },
+      "equip": {
+        "shortByTier": {
+          "3": "命中连锁并传导冻结",
+          "5": "冻结目标死亡时爆碎",
+          "6": "长链霜雷连续冻结爆碎"
+        },
+        "milestones": {
+          "6": {
+            "title": "终态进化：霜雷",
+            "detail": "连锁闪电传导冻结，冻结目标死亡时引发范围爆碎。",
             "fx": "transform"
           }
         }

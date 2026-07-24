@@ -41,7 +41,10 @@ export type TelemetryEventType =
   | 'relic_offered'
   | 'relic_selected'
   | 'evolution_branch_offered'
-  | 'evolution_branch_selected';
+  | 'evolution_branch_selected'
+  | 'recipe_available'
+  | 'recipe_completed'
+  | 'affix_rolled';
 
 export interface TelemetryEvent {
   type: TelemetryEventType;
@@ -104,6 +107,12 @@ export interface TelemetryEvent {
   checkpointStar?: number;
   optionId?: string;
   provisionalCardId?: number;
+  recipeId?: string;
+  recipeIds?: string[];
+  outputStar?: number;
+  affixStat?: string;
+  affixValue?: number;
+  consumableDuration?: number;
 }
 
 export interface TelemetrySample {

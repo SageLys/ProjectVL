@@ -1,4 +1,13 @@
 {
   "version": "0.1.0",
-  "recipes": []
+  "recipes": [
+    {
+      "id": "frozenThunder",
+      "ingredientA": { "cardId": "chainLightning", "minStar": 5 },
+      "ingredientB": { "cardId": "frost", "minStar": 5 },
+      "outputCardId": "frozenThunder",
+      "outputStar": 6,
+      "allowedPhase": "intermission"
+    }
+  ]
 }

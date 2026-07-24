@@ -174,10 +174,12 @@ function tickShield(state: GameState, dt: number): void {
   }
 }
 
-function tickBuffs(state: GameState, dt: number): void {
-  for (let i = state.buffs.length - 1; i >= 0; i--) {
-    state.buffs[i].remaining -= dt;
-    if (state.buffs[i].remaining <= 0) state.buffs.splice(i, 1);
+function tickStatModifiers(state: GameState, dt: number): void {
+  for (let i = state.statModifiers.length - 1; i >= 0; i--) {
+    const modifier = state.statModifiers[i];
+    if (modifier.remaining === undefined) continue;
+    modifier.remaining -= dt;
+    if (modifier.remaining <= 0) state.statModifiers.splice(i, 1);
   }
 }
 
@@ -207,7 +209,7 @@ export function tickEffects(state: GameState, config: Config, rng: Rng, dt: numb
   tickZones(state, config, rng, dt, events);
   tickSummons(state, config, rng, dt, events);
   tickShield(state, dt);
-  tickBuffs(state, dt);
+  tickStatModifiers(state, dt);
   tickDots(state, config, rng, dt, events);
   tickVfx(state, dt);
   return events;

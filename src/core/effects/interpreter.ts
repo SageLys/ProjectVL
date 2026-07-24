@@ -8,12 +8,14 @@
 //   所有触发绑定独立触发且所有攻击形态必须经过统一攻击管线；summon 每(卡,绑定)单实例（B2）；
 //   shield 的 absorbHits 取最大、regenSeconds 取最小；weaponForm 按正交轴确定性融合。
 import { cfg } from '../../config';
+import type { RunBaseStatKind } from '../../config/types';
 import type { AttackInstance, Bullet, Card, CardType, Config, Enemy, GameEvent, GameState, GroundDrop, Rng, Summon, WeaponImpactSpec } from '../types';
 import type { BindingDef, CardDef, EffectDef, Trigger } from './defs';
 import { ATOMS, runEffects, type EffectCtx } from './registry';
 import { totalDamage } from '../stats';
 import { applyBuildScalingToBindings, applyBuildScalingToTier } from '../systems/buildModifierSystem';
 import { recordCardImpact, recordCardTrigger, totalEnemyHp } from '../../telemetry/combatCounters';
+import { activateConsumableAffixes, equipmentAffixAdd } from '../systems/cardAffixSystem';
 
 export const FUSION_RULES = [
   '数值乘数(dropRateMul/dropLifetimeMul/xpMul): 乘法叠加',
@@ -199,7 +201,12 @@ function* equippedBindings(state: GameState): Generator<{ card: Card; def: CardD
   for (const card of effectiveEquipment(state)) {
     const def = DEFS.get(card.type);
     if (!def) continue;
-    const bindings = applyBuildScalingToBindings(state, def, resolveCardBindings(def, card.evolutionPath ?? [], card.star));
+    const bindings = applyBuildScalingToBindings(
+      state,
+      def,
+      resolveCardBindings(def, card.evolutionPath ?? [], card.star),
+      card.type,
+    );
     for (let i = 0; i < bindings.length; i++) yield { card, def, binding: bindings[i], bindingIndex: i };
   }
 }
@@ -352,6 +359,7 @@ export interface Modifiers {
   expiryConvert: { ratio: number } | null;
   weaponForms: WeaponFormContribution[];
   auras: { key: string; sourceCardType: CardType; radius: number | null; radiusRatioOfRange: number | null; tickInterval: number; effects: EffectDef[]; star: number }[];
+  equipmentAffixAdd: Record<RunBaseStatKind, number>;
 }
 
 const num = (p: Record<string, unknown> | undefined, k: string, d: number): number =>
@@ -364,6 +372,14 @@ export function getModifiers(state: GameState): Modifiers {
     novaOnBreak: null, mergeRules: [], expiryConvert: null,
     weaponForms: [],
     auras: [],
+    equipmentAffixAdd: {
+      damageAdd: equipmentAffixAdd(state, 'damageAdd'),
+      fireRateAdd: equipmentAffixAdd(state, 'fireRateAdd'),
+      rangeAdd: equipmentAffixAdd(state, 'rangeAdd'),
+      multiAdd: equipmentAffixAdd(state, 'multiAdd'),
+      maxHpAdd: equipmentAffixAdd(state, 'maxHpAdd'),
+      heal: equipmentAffixAdd(state, 'heal'),
+    },
   };
   for (const { card, binding, bindingIndex } of equippedBindings(state)) {
     for (const ef of binding.effects) {
@@ -481,6 +497,7 @@ export function reconcileEquipmentPassives(state: GameState, config: Config, rng
 export function releaseConsumable(state: GameState, config: Config, rng: Rng, cardType: string, star: number, x: number, y: number): GameEvent[] {
   const def = DEFS.get(cardType);
   if (!def) return [];
+  activateConsumableAffixes(state, cardType);
   const tier = applyBuildScalingToTier(state, def, resolveConsumableTier(def, star));
   const ctx: EffectCtx = {
     state, config, rng,

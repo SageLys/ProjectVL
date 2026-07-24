@@ -318,10 +318,16 @@ describe('运行时 · 区域/光环/召唤物/护盾', () => {
 
   it('buff：限时射速增益经 stats 生效并随 tick 过期', () => {
     const s = freshState();
-    s.buffs.push({ kind: 'fireRateMul', mul: 1.3, remaining: 1 });
+    s.statModifiers.push({
+      sourceId: 'skill:test',
+      stat: 'fireRate',
+      operation: 'mul',
+      value: 1.3,
+      remaining: 1,
+    });
     expect(totalFireRate(s, config)).toBeCloseTo(config.fireRate * 1.3);
     tickEffects(s, config, rng, 1.1);
-    expect(s.buffs).toHaveLength(0);
+    expect(s.statModifiers).toHaveLength(0);
     expect(totalFireRate(s, config)).toBeCloseTo(config.fireRate);
   });
 

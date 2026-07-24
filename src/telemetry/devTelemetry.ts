@@ -391,6 +391,25 @@ export function createDevTelemetry(options: Options): DevTelemetry {
         optionId: event.optionId,
         provisionalCardId: event.provisionalCardId,
       });
+      if (event.type === 'recipeAvailable') add({
+        type: 'recipe_available',
+        recipeIds: [...event.recipeIds],
+      });
+      if (event.type === 'recipeCompleted') add({
+        type: 'recipe_completed',
+        recipeId: event.recipeId,
+        cardType: event.outputCardType,
+        outputStar: event.outputStar,
+      });
+      if (event.type === 'affixRolled') {
+        for (const affix of event.affixes) add({
+          type: 'affix_rolled',
+          cardType: event.cardType,
+          affixStat: affix.stat,
+          affixValue: affix.value,
+          consumableDuration: affix.consumableDuration,
+        });
+      }
       if (event.type === 'decisionOffered') add({
         type: 'decision_offered',
         decisionKind: event.kind,

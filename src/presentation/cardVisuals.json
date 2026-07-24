@@ -18,6 +18,7 @@
     "sanctum": { "hueOffset": 14, "accent": "#EFCB59", "shape": "ring", "glyph": "crosshair" },
     "harvest": { "hueOffset": 0, "accent": "#B4D75B", "shape": "capsule", "glyph": "harvest" },
     "aegis": { "hueOffset": -10, "accent": "#60D3A8", "shape": "verticalHexagon", "glyph": "barrier" },
-    "thorns": { "hueOffset": 12, "accent": "#49B962", "shape": "star8", "glyph": "thorn" }
+    "thorns": { "hueOffset": 12, "accent": "#49B962", "shape": "star8", "glyph": "thorn" },
+    "frozenThunder": { "hueOffset": 16, "accent": "#82D9FF", "shape": "hexagon", "glyph": "snow" }
   }
 }

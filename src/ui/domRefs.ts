@@ -26,6 +26,7 @@ export function getDomRefs() {
     waveText: el<HTMLElement>('#waveText'),
     totalWavesText: el<HTMLElement>('#totalWavesText'),
     godPoolText: el<HTMLElement>('#godPoolText'),
+    statModifierText: maybeEl<HTMLElement>('#statModifierText'),
     damageStat: maybeEl<HTMLElement>('#damageStat'),
     rateStat: maybeEl<HTMLElement>('#rateStat'),
     multiStat: maybeEl<HTMLElement>('#multiStat'),

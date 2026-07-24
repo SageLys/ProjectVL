@@ -7,6 +7,7 @@ import {
   calculateCommitmentScore,
   getOrCreateCardTypeRunStats,
 } from './dropCommitment';
+import { getDroppableCardTypes } from './cardPoolEligibility';
 export {
   calculateBuildMaturity,
   calculateCommitmentScore,
@@ -18,7 +19,7 @@ const clamp01 = (value: number): number => clamp(value, 0, 1);
 
 /** Return the currently active skill card pool without caching variant-dependent config. */
 export function getCardPool(): CardType[] {
-  return cfg.skills.cards.map(card => card.id);
+  return getDroppableCardTypes();
 }
 
 /** Legacy one-argument form is global/debug-only; runtime callers pass state. */

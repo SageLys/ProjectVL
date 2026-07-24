@@ -53,7 +53,7 @@ describe('card visual registry', () => {
     expect(resolveCardVisual('unknownSkill')).toEqual({ accent: '#8793a3', shape: 'circle', glyph: 'fallback' });
   });
 
-  it('draws all eleven skill drops without throwing', () => {
+  it('draws all skill drops without throwing', () => {
     const state = freshState();
     state.groundDrops = cfg.skills.cards.map((card, index) => ({
       id: index, kind: 'card' as const, x: 100 + index, y: 100, type: card.id, star: 1, life: 8, maxLife: 10, pulse: 0,

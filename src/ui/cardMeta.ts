@@ -1,5 +1,5 @@
 import { texts } from '../data';
-import type { CardType } from '../core/types';
+import type { CardAffixRoll, CardType, RuntimeStatModifier } from '../core/types';
 import { getSkillDef } from '../core/effects/interpreter';
 import { resolveCardVisual } from '../presentation/cardVisual';
 import type { SkillGlyph, SkillShape } from '../presentation/skillGeometry';
@@ -29,6 +29,27 @@ export function resolveTierCopy(shortByTier: Record<string, string>, star: numbe
 export function cardDisplayName(cardType: CardType): string {
   const cardTexts = (texts as { cards?: Record<string, { name: string }> }).cards;
   return cardTexts?.[cardType]?.name ?? cardType;
+}
+
+function statLabel(stat: string): string {
+  const labels = (texts as unknown as { affixes?: { stats?: Record<string, string> } }).affixes?.stats;
+  return labels?.[stat] ?? stat;
+}
+
+function compactNumber(value: number): string {
+  return Number(value.toFixed(4)).toString();
+}
+
+export function formatAffixRoll(roll: CardAffixRoll): string {
+  const percentage = roll.stat.endsWith('Mul');
+  const value = percentage ? `${compactNumber(roll.value * 100)}%` : compactNumber(roll.value);
+  return `${statLabel(roll.stat)} +${value}`;
+}
+
+export function formatRuntimeModifier(modifier: RuntimeStatModifier): string {
+  const raw = modifier.operation === 'mul' ? (modifier.value - 1) * 100 : modifier.value;
+  const suffix = modifier.operation === 'mul' ? '%' : '';
+  return `${statLabel(modifier.stat)} +${compactNumber(raw)}${suffix}`;
 }
 
 export function evolutionChoiceCopy(

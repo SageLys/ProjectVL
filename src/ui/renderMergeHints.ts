@@ -1,6 +1,7 @@
 import { cfg } from '../config';
 import { getActiveMergeCopies } from '../core/systems/cardSystem';
 import type { Card, GameState } from '../core/types';
+import { availableRecipes } from '../core/systems/recipeEvolutionSystem';
 
 type HintCard = Card & { source: 'cards' | 'equipment' };
 
@@ -71,8 +72,17 @@ function appendPath(svg: SVGSVGElement, d: string, className: string, pair: Merg
 }
 
 /** Draws non-interactive links between matching cards without changing card behavior. */
-export function renderMergeHints(dock: HTMLElement, state: Pick<GameState, 'cards' | 'equipment' | 'runBuild'>): void {
+export function renderMergeHints(dock: HTMLElement, state: GameState): void {
   dock.querySelector('.merge-hints')?.remove();
+  dock.querySelector('.recipe-evolution-hint')?.remove();
+  const recipes = availableRecipes(state);
+  if (state.mode === 'playing' && state.wavePhase !== 'between' && recipes.length) {
+    const hint = document.createElement('p');
+    hint.className = 'recipe-evolution-hint';
+    hint.setAttribute('aria-live', 'polite');
+    hint.textContent = `存在可进化配方：${recipes.length}`;
+    dock.append(hint);
+  }
   const pairs = findMergeHintPairs(state);
   if (!pairs.length) return;
 
