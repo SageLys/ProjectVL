@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { cfg } from '../src/config';
-import { findMergeHintPairs, renderMergeHints } from '../src/ui/renderMergeHints';
+import { findMergeHintPairs, findRecipeHintPairs, renderMergeHints } from '../src/ui/renderMergeHints';
 import { card, freshState, resetTestEnv } from './helpers';
 
 function rect(left: number, top: number, width: number, height: number): DOMRect {
@@ -66,5 +66,42 @@ describe('merge hint links', () => {
     state.cards[0]!.star = 4;
     renderMergeHints(dock, state);
     expect(dock.querySelector('.merge-hints')).toBeNull();
+  });
+
+  it('renders an independent recipe link between the exact selected materials with full copy', () => {
+    const state = freshState();
+    const chain = card('chainLightning', 5);
+    const frost = card('frost', 5);
+    state.cards[0] = chain;
+    state.equipment[0] = frost;
+    document.body.innerHTML = `<section id="dock"><button class="card" data-id="${chain.id}"></button><button class="card" data-id="${frost.id}"></button></section>`;
+    const dock = document.querySelector<HTMLElement>('#dock')!;
+    const cards = dock.querySelectorAll<HTMLElement>('.card');
+    vi.spyOn(dock, 'getBoundingClientRect').mockReturnValue(rect(10, 20, 500, 220));
+    vi.spyOn(cards[0], 'getBoundingClientRect').mockReturnValue(rect(30, 50, 100, 70));
+    vi.spyOn(cards[1], 'getBoundingClientRect').mockReturnValue(rect(300, 120, 100, 70));
+
+    expect(findRecipeHintPairs(state)).toEqual([{
+      recipeId: 'frozenThunder',
+      aCardId: chain.id,
+      bCardId: frost.id,
+      outputCardId: 'frozenThunder',
+      outputStar: 6,
+    }]);
+    renderMergeHints(dock, state);
+
+    const svg = dock.querySelector<SVGElement>('.recipe-hints');
+    const line = svg?.querySelector<SVGElement>('.recipe-hint-line');
+    expect(svg?.getAttribute('aria-hidden')).toBe('true');
+    expect(line?.classList.contains('merge-hint-line')).toBe(false);
+    expect(line?.dataset).toMatchObject({
+      recipeId: 'frozenThunder',
+      aCardId: String(chain.id),
+      bCardId: String(frost.id),
+    });
+    expect(cards[0].classList.contains('recipe-ready')).toBe(true);
+    expect(cards[1].classList.contains('recipe-ready')).toBe(true);
+    expect(dock.querySelector('.recipe-evolution-hint')?.textContent)
+      .toContain('连环闪电 5★ ＋ 霜寒 5★ → 霜雷 6★');
   });
 });

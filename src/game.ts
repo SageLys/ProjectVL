@@ -33,7 +33,7 @@ import type { TunerPanel } from './ui/tunerPanel';
 import { createModals } from './ui/modals';
 import { createCardDetailModal } from './ui/cardDetailModal';
 import { resolvePauseState } from './ui/pauseState';
-import { formatToast, SLOT_CHANGING } from './ui/eventText';
+import { formatToast, resetToastDedupe, SLOT_CHANGING } from './ui/eventText';
 import type { SlotHandlers, SlotSource } from './ui/slotFactory';
 import { createPointerRouter, type PreviewSpec } from './input/pointerRouter';
 import { createKeyboard } from './input/keyboard';
@@ -214,6 +214,7 @@ refs.testWildcardBtn.addEventListener('click', () => {
 
 function reset(): void {
   cardDetail.close();
+  resetToastDedupe();
   manualPaused = false;
   uiPauseReasons.clear();
   state = createInitialState(selectedDifficulty);

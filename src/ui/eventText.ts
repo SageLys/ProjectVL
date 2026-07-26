@@ -5,6 +5,12 @@ import { fmt } from './format';
 import { cardDisplayName as name } from './cardMeta';
 
 const T = texts.toast;
+const shownRecipeAvailability = new Set<string>();
+
+/** Clears run-scoped presentation dedupe without changing recipe events or telemetry. */
+export function resetToastDedupe(): void {
+  shownRecipeAvailability.clear();
+}
 
 /** 事件类型中会改变卡槽/装备内容、需要重绘槽位的集合。 */
 export const SLOT_CHANGING = new Set<GameEvent['type']>([
@@ -36,9 +42,14 @@ export function formatToast(ev: GameEvent): string | null {
     case 'waveBaseRewardOffered':
     case 'relicOffered':
     case 'evolutionBranchOffered':
-    case 'recipeAvailable':
     case 'affixRolled':
       return null;
+    case 'recipeAvailable': {
+      const signature = [...new Set(ev.recipeIds)].sort().join('|');
+      if (!signature || shownRecipeAvailability.has(signature)) return null;
+      shownRecipeAvailability.add(signature);
+      return T.recipeAvailable;
+    }
     case 'bossRewardGranted': return fmt(T.bossReward, { desc: wildcardGrantDescription(ev.grants) });
     case 'breakthrough': return fmt(T.breakthrough, { damage: Math.round(ev.damage) });
     case 'bossContactStarted': return T.bossContactStarted;

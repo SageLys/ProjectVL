@@ -14,6 +14,7 @@ import { availableRecipes, confirmRecipe } from '../src/core/systems/recipeEvolu
 import { createDevTelemetry } from '../src/telemetry/devTelemetry';
 import { createIntermissionPanel } from '../src/ui/intermissionPanel';
 import { renderMergeHints } from '../src/ui/renderMergeHints';
+import { formatToast, resetToastDedupe } from '../src/ui/eventText';
 import { card, constRng, createDefaultConfig, enemy, freshState, resetTestEnv } from './helpers';
 
 const config = createDefaultConfig();
@@ -67,6 +68,7 @@ function mergePulseDef(): CardDef {
 
 beforeEach(() => {
   resetTestEnv();
+  resetToastDedupe();
   document.body.innerHTML = '';
 });
 afterEach(() => {
@@ -218,7 +220,7 @@ describe('fixed recipe card evolution', () => {
     ]));
   });
 
-  it('emits recipe availability at decide-to-free and shows only a silent combat hint', () => {
+  it('emits recipe availability at decide-to-free and shows a dedicated combat recipe link with full copy', () => {
     const state = freshState();
     state.cards[0] = card('chainLightning', 5);
     state.cards[1] = card('frost', 5);
@@ -233,9 +235,28 @@ describe('fixed recipe card evolution', () => {
     state.intermission.active = false;
     state.wavePhase = 'regular';
     const dock = document.createElement('div');
+    dock.innerHTML = `<button class="card" data-id="${state.cards[0]!.id}"></button><button class="card" data-id="${state.cards[1]!.id}"></button>`;
+    document.body.append(dock);
+    const rect = (left: number, top: number, width: number, height: number): DOMRect => ({
+      left, top, width, height, right: left + width, bottom: top + height, x: left, y: top, toJSON: () => ({}),
+    });
+    vi.spyOn(dock, 'getBoundingClientRect').mockReturnValue(rect(0, 0, 400, 180));
+    dock.querySelectorAll<HTMLElement>('.card').forEach((element, index) => {
+      vi.spyOn(element, 'getBoundingClientRect').mockReturnValue(rect(20 + index * 220, 50, 100, 70));
+    });
     renderMergeHints(dock, state);
-    expect(dock.querySelector('.recipe-evolution-hint')?.textContent).toContain('存在可进化配方');
+    expect(dock.querySelectorAll('.recipe-hints .recipe-hint-line')).toHaveLength(1);
+    expect(dock.querySelector('.recipe-evolution-hint')?.textContent).toContain('连环闪电');
+    expect(dock.querySelector('.recipe-evolution-hint')?.textContent).toContain('霜寒');
+    expect(dock.querySelector('.recipe-evolution-hint')?.textContent).toContain('霜雷');
     expect(dock.querySelector('.recipe-evolution-hint button')).toBeNull();
+  });
+
+  it('formats recipe availability once per recipe signature without changing the event', () => {
+    const event = { type: 'recipeAvailable' as const, recipeIds: ['frozenThunder'] };
+    expect(formatToast(event)).toBe('已凑齐卡间进化材料，本波结束后可在波间完成进化。');
+    expect(formatToast(event)).toBeNull();
+    expect(event).toEqual({ type: 'recipeAvailable', recipeIds: ['frozenThunder'] });
   });
 
   it('exports only fixed-recipe APIs, never an arbitrary fusion entrypoint', async () => {

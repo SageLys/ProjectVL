@@ -182,8 +182,19 @@ export function createCardDetailModal(hooks: CardDetailModalHooks): CardDetailMo
     const tree = document.createElement('section');
     tree.className = 'card-detail-group';
     const treeTitle = document.createElement('h3');
-    treeTitle.textContent = '完整技能树';
+    treeTitle.textContent = '完整技能树与进化配方';
     tree.append(treeTitle);
+    for (const ingredient of model.tree.asIngredient) {
+      const preview = document.createElement('article');
+      preview.className = 'skill-recipe-ingredient';
+      preview.dataset.recipeId = ingredient.recipeId;
+      const heading = document.createElement('h4');
+      heading.textContent = '进化配方（作为材料）';
+      const notice = document.createElement('p');
+      notice.textContent = ingredient.notice;
+      preview.append(heading, notice);
+      tree.append(preview);
+    }
     if (model.tree.recipe) {
       const recipe = document.createElement('article');
       recipe.className = 'skill-recipe';

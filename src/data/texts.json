@@ -108,6 +108,8 @@
     "lockNotice": "此路线仅对当前卡牌生效。",
     "pending": "待选择进化路线",
     "nextCheckpoint": "下一星将触发路线选择",
+    "recipeCombatHint": "卡间进化就绪：{a} {aStar}★ ＋ {b} {bStar}★ → {output} {outputStar}★（波间可确认）",
+    "recipeAsIngredient": "进化配方：本卡达到 {selfStar}★ 后，可在波间与「{partner} {partnerStar}★」进化为「{output} {outputStar}★」。",
     "chainLightning": {
       "chainLightningA": {
         "name": "长链",
@@ -2151,6 +2153,7 @@
     "waveStart": "第 {wave} 波追求者开始",
     "waveClear": "第 {wave} 波完成 · 整理卡槽",
     "waveBoss": "命定追求者现身——击败它获取万能卡",
+    "recipeAvailable": "已凑齐卡间进化材料，本波结束后可在波间完成进化。",
     "bossContactStarted": "命定追求者已突破防线，正在持续侵蚀",
     "bossReward": "击败 Boss：获得 {desc}",
     "testDrops": "地面生成四份{name}测试掉落，可合成3星",

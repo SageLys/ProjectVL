@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { cfg } from '../src/config';
 import { buildCardDetailViewModel } from '../src/ui/cardDetailModel';
+import { cardDisplayName } from '../src/ui/cardMeta';
 
 describe('card detail view model', () => {
   it('uses resolved current effects and marks the selected 3★/5★ routes', () => {
@@ -42,5 +44,28 @@ describe('card detail view model', () => {
     expect(model.tree.nodes).toHaveLength(0);
     expect(model.tree.recipe?.notice).toContain('不可通过普通合成');
     expect(model.tree.recipe?.ingredientA).toContain('≥5★');
+  });
+
+  it('previews both ingredient sides of all six fixed recipes from 1★', () => {
+    expect(cfg.evolutionRecipes.recipes).toHaveLength(6);
+    for (const recipe of cfg.evolutionRecipes.recipes) {
+      for (const [self, partner] of [
+        [recipe.ingredientA, recipe.ingredientB],
+        [recipe.ingredientB, recipe.ingredientA],
+      ] as const) {
+        const model = buildCardDetailViewModel({ id: 100, type: self.cardId, star: 1 }, 'cards');
+        const preview = model.tree.asIngredient.find(item => item.recipeId === recipe.id);
+        expect(preview).toMatchObject({
+          selfMinStar: self.minStar,
+          partnerCardId: partner.cardId,
+          partnerMinStar: partner.minStar,
+          outputCardId: recipe.outputCardId,
+          outputStar: recipe.outputStar,
+        });
+        expect(preview?.notice).toContain(`本卡达到 ${self.minStar}★ 后`);
+        expect(preview?.notice).toContain(cardDisplayName(partner.cardId));
+        expect(preview?.notice).toContain(cardDisplayName(recipe.outputCardId));
+      }
+    }
   });
 });

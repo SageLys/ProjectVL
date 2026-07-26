@@ -2,12 +2,23 @@ import { cfg } from '../config';
 import { getActiveMergeCopies } from '../core/systems/cardSystem';
 import type { Card, GameState } from '../core/types';
 import { availableRecipes } from '../core/systems/recipeEvolutionSystem';
+import { texts } from '../data';
+import { cardDisplayName } from './cardMeta';
+import { fmt } from './format';
 
 type HintCard = Card & { source: 'cards' | 'equipment' };
 
 export interface MergeHintPair {
   fromCardId: number;
   toCardId: number;
+}
+
+export interface RecipeHintPair {
+  recipeId: string;
+  aCardId: number;
+  bCardId: number;
+  outputCardId: string;
+  outputStar: number;
 }
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -46,6 +57,20 @@ export function findMergeHintPairs(state: Pick<GameState, 'cards' | 'equipment'>
   return pairs;
 }
 
+/** Resolves the exact material instances selected by each currently available fixed recipe. */
+export function findRecipeHintPairs(state: GameState): RecipeHintPair[] {
+  return availableRecipes(state).flatMap(available => {
+    const recipe = cfg.evolutionRecipes.recipes.find(item => item.id === available.recipeId);
+    return recipe ? [{
+      recipeId: recipe.id,
+      aCardId: available.a.cardId,
+      bCardId: available.b.cardId,
+      outputCardId: recipe.outputCardId,
+      outputStar: recipe.outputStar,
+    }] : [];
+  });
+}
+
 function cardBoundaryPoint(from: DOMRect, toward: DOMRect, gap: number): { x: number; y: number } {
   const x = from.left + from.width / 2;
   const y = from.top + from.height / 2;
@@ -71,18 +96,101 @@ function appendPath(svg: SVGSVGElement, d: string, className: string, pair: Merg
   svg.append(path);
 }
 
+function appendRecipePath(svg: SVGSVGElement, d: string, className: string, pair: RecipeHintPair): void {
+  const path = document.createElementNS(SVG_NS, 'path');
+  path.setAttribute('d', d);
+  path.setAttribute('class', className);
+  path.dataset.recipeId = pair.recipeId;
+  path.dataset.aCardId = String(pair.aCardId);
+  path.dataset.bCardId = String(pair.bCardId);
+  svg.append(path);
+}
+
+function recipeHintText(pair: RecipeHintPair): string {
+  const recipe = cfg.evolutionRecipes.recipes.find(item => item.id === pair.recipeId)!;
+  return fmt(texts.evolution.recipeCombatHint, {
+    a: cardDisplayName(recipe.ingredientA.cardId),
+    aStar: recipe.ingredientA.minStar,
+    b: cardDisplayName(recipe.ingredientB.cardId),
+    bStar: recipe.ingredientB.minStar,
+    output: cardDisplayName(pair.outputCardId),
+    outputStar: pair.outputStar,
+  });
+}
+
+function renderRecipeHints(dock: HTMLElement, pairs: RecipeHintPair[]): void {
+  if (!pairs.length) return;
+
+  const copy = document.createElement('div');
+  copy.className = 'recipe-evolution-hints';
+  copy.setAttribute('aria-live', 'polite');
+  for (const pair of pairs) {
+    const hint = document.createElement('p');
+    hint.className = 'recipe-evolution-hint';
+    hint.dataset.recipeId = pair.recipeId;
+    hint.textContent = recipeHintText(pair);
+    copy.append(hint);
+  }
+  dock.append(copy);
+
+  const dockRect = dock.getBoundingClientRect();
+  if (!dockRect.width || !dockRect.height) return;
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('class', 'recipe-hints');
+  svg.setAttribute('viewBox', `0 0 ${dockRect.width} ${dockRect.height}`);
+  svg.setAttribute('aria-hidden', 'true');
+
+  const defs = document.createElementNS(SVG_NS, 'defs');
+  const gradient = document.createElementNS(SVG_NS, 'linearGradient');
+  gradient.id = 'recipe-hint-gradient';
+  const cyan = document.createElementNS(SVG_NS, 'stop');
+  cyan.setAttribute('offset', '0');
+  cyan.setAttribute('stop-color', '#4deaff');
+  const purple = document.createElementNS(SVG_NS, 'stop');
+  purple.setAttribute('offset', '1');
+  purple.setAttribute('stop-color', '#a56dff');
+  gradient.append(cyan, purple);
+  defs.append(gradient);
+  svg.append(defs);
+
+  for (const pair of pairs) {
+    const from = dock.querySelector<HTMLElement>(`.card[data-id="${pair.aCardId}"]`);
+    const to = dock.querySelector<HTMLElement>(`.card[data-id="${pair.bCardId}"]`);
+    if (!from || !to) continue;
+    from.classList.add('recipe-ready');
+    to.classList.add('recipe-ready');
+    const fromRect = from.getBoundingClientRect();
+    const toRect = to.getBoundingClientRect();
+    const start = cardBoundaryPoint(fromRect, toRect, 4);
+    const end = cardBoundaryPoint(toRect, fromRect, 4);
+    start.x -= dockRect.left;
+    start.y -= dockRect.top;
+    end.x -= dockRect.left;
+    end.y -= dockRect.top;
+    const d = `M ${start.x} ${start.y} L ${end.x} ${end.y}`;
+    appendRecipePath(svg, d, 'recipe-hint-glow', pair);
+    appendRecipePath(svg, d, 'recipe-hint-line', pair);
+
+    const core = document.createElementNS(SVG_NS, 'polygon');
+    const centerX = (start.x + end.x) / 2;
+    const centerY = (start.y + end.y) / 2;
+    core.setAttribute('class', 'recipe-hint-core');
+    core.setAttribute('points', `${centerX},${centerY - 8} ${centerX + 8},${centerY} ${centerX},${centerY + 8} ${centerX - 8},${centerY}`);
+    core.dataset.recipeId = pair.recipeId;
+    svg.append(core);
+  }
+
+  if (svg.querySelector('.recipe-hint-line')) dock.append(svg);
+}
+
 /** Draws non-interactive links between matching cards without changing card behavior. */
 export function renderMergeHints(dock: HTMLElement, state: GameState): void {
   dock.querySelector('.merge-hints')?.remove();
-  dock.querySelector('.recipe-evolution-hint')?.remove();
-  const recipes = availableRecipes(state);
-  if (state.mode === 'playing' && state.wavePhase !== 'between' && recipes.length) {
-    const hint = document.createElement('p');
-    hint.className = 'recipe-evolution-hint';
-    hint.setAttribute('aria-live', 'polite');
-    hint.textContent = `存在可进化配方：${recipes.length}`;
-    dock.append(hint);
-  }
+  dock.querySelector('.recipe-hints')?.remove();
+  dock.querySelector('.recipe-evolution-hints')?.remove();
+  dock.querySelectorAll('.card.recipe-ready').forEach(card => card.classList.remove('recipe-ready'));
+  const recipePairs = findRecipeHintPairs(state);
+  if (state.mode === 'playing' && state.wavePhase !== 'between') renderRecipeHints(dock, recipePairs);
   const pairs = findMergeHintPairs(state);
   if (!pairs.length) return;
 

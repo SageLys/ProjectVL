@@ -9,6 +9,7 @@ import { resolveCardVisual } from '../presentation/cardVisual';
 import { glyphToSvg } from '../presentation/skillGeometry';
 import { cardDisplayName, formatAffixRoll } from './cardMeta';
 import { ATOM_LABELS, formatBinding, formatEffect, type EffectTextBlock, type EffectTextLine } from './effectText';
+import { fmt } from './format';
 
 export interface EffectSection {
   title: string;
@@ -59,9 +60,22 @@ export interface RecipeViewModel {
   notice: string;
 }
 
+export interface RecipeIngredientViewModel {
+  recipeId: string;
+  selfMinStar: number;
+  partnerCardId: string;
+  partner: string;
+  partnerMinStar: number;
+  outputCardId: string;
+  output: string;
+  outputStar: number;
+  notice: string;
+}
+
 export interface SkillTreeViewModel {
   nodes: SkillTreeNode[];
   recipe?: RecipeViewModel;
+  asIngredient: RecipeIngredientViewModel[];
 }
 
 export interface CardDetailViewModel {
@@ -250,13 +264,44 @@ function syntheticBlock(trigger: string, lines: EffectTextLine[]): EffectTextBlo
   return { trigger, lines, keywords: [...new Set(lines.flatMap(line => line.keywords))] };
 }
 
+function ingredientRecipeViewModels(cardType: string): RecipeIngredientViewModel[] {
+  return cfg.evolutionRecipes.recipes.flatMap(recipe => {
+    const isIngredientA = recipe.ingredientA.cardId === cardType;
+    const isIngredientB = recipe.ingredientB.cardId === cardType;
+    if (!isIngredientA && !isIngredientB) return [];
+    const self = isIngredientA ? recipe.ingredientA : recipe.ingredientB;
+    const partner = isIngredientA ? recipe.ingredientB : recipe.ingredientA;
+    const partnerName = cardDisplayName(partner.cardId);
+    const outputName = cardDisplayName(recipe.outputCardId);
+    return [{
+      recipeId: recipe.id,
+      selfMinStar: self.minStar,
+      partnerCardId: partner.cardId,
+      partner: partnerName,
+      partnerMinStar: partner.minStar,
+      outputCardId: recipe.outputCardId,
+      output: outputName,
+      outputStar: recipe.outputStar,
+      notice: fmt(texts.evolution.recipeAsIngredient, {
+        selfStar: self.minStar,
+        partner: partnerName,
+        partnerStar: partner.minStar,
+        output: outputName,
+        outputStar: recipe.outputStar,
+      }),
+    }];
+  });
+}
+
 export function buildSkillTreeViewModel(card: Card, def = getDef(card.type)): SkillTreeViewModel {
-  if (!def) return { nodes: [] };
+  const asIngredient = ingredientRecipeViewModels(card.type);
+  if (!def) return { nodes: [], asIngredient };
   if (def.recipeOnly && !def.evolutionTree) {
     const recipe = cfg.evolutionRecipes.recipes.find(item => item.outputCardId === card.type);
     const bindings = resolveCardBindings(def, card.evolutionPath ?? [], 6);
     return {
       nodes: [],
+      asIngredient,
       recipe: recipe ? {
         ingredientA: `${cardDisplayName(recipe.ingredientA.cardId)} ≥${recipe.ingredientA.minStar}★`,
         ingredientB: `${cardDisplayName(recipe.ingredientB.cardId)} ≥${recipe.ingredientB.minStar}★`,
@@ -305,7 +350,7 @@ export function buildSkillTreeViewModel(card: Card, def = getDef(card.type)): Sk
       locked: card.star < star,
     });
   }
-  return { nodes };
+  return { nodes, asIngredient };
 }
 
 function glossaryFor(atoms: string[]): GlossaryEntry[] {
@@ -336,7 +381,7 @@ export function buildCardDetailViewModel(
       currentRoute: '尚未选择路线',
       consume: { title: '消耗释放效果', hint: '', blocks: [], empty: '暂无可用效果。' },
       equip: { title: '装备持续效果', hint: '', blocks: [], empty: '暂无可用效果。' },
-      affixes: [], glossary: [], tree: { nodes: [] },
+      affixes: [], glossary: [], tree: { nodes: [], asIngredient: ingredientRecipeViewModels(card.type) },
     };
   }
   const path = card.evolutionPath ?? [];
