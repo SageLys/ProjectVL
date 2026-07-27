@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "urn:projectvl:skills-schema",
   "title": "ProjectVL 技能卡数据模型",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "date": "2026-07-12",
   "description": "v0.4.0 技能卡数据模型。35 张正式卡全部通过 evolutionTree 解析 3/4/5/6★；recipeOnly 产物没有进化树，只声明 6★ 终态。技能行为只由 JSON 触发器与效果原子组成。",
   "type": "object",
@@ -571,6 +571,9 @@
           },
           "additionalProperties": false
         },
+        "fusionPolicy": {
+          "$ref": "#/definitions/fusionPolicy"
+        },
         "implementationBatch": {
           "type": "integer",
           "enum": [
@@ -581,6 +584,28 @@
         },
         "designNotes": {
           "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "fusionPolicy": {
+      "description": "（v0.4.1 新增）D2 预留结构位：卡间融合时数值词条如何传递。**占位契约，运行时无效果**——loader 与解释器一律忽略，实现见 Stage 5。缺省即当前行为（融合产物按自身 affixPool 重新掷点）。",
+      "type": "object",
+      "properties": {
+        "affixTransferPolicy": {
+          "type": "string",
+          "enum": ["none", "strongest", "sum", "average"],
+          "description": "源卡词条如何合并进产物。"
+        },
+        "conflictResolution": {
+          "type": "string",
+          "enum": ["keepHigher", "keepNewer", "reject"],
+          "description": "同属性词条冲突时的取舍。"
+        },
+        "sourceCardIds": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "允许作为融合来源的卡 id；缺省 = 由 evolutionRecipes 决定。"
         }
       },
       "additionalProperties": false

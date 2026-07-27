@@ -4269,5 +4269,299 @@
     "dropRateMul": "提高本卡提供的掉落概率。",
     "dropLifetimeMul": "延长本卡影响的掉落物存在时间。",
     "xpMul": "提高本卡提供的经验获取倍率。"
+  },
+  "relics": {
+    "proj_damage": {
+      "name": "超压弹道",
+      "desc": "弹道类技能的衍生伤害提高 15%。"
+    },
+    "proj_quantity": {
+      "name": "增殖弹药",
+      "desc": "穿透、弹跳与分裂数量 +1。"
+    },
+    "storm_judgment": {
+      "name": "雷罚印记",
+      "desc": "弹道与控制技能的衍生伤害提高 18%。"
+    },
+    "storm_overload_coil": {
+      "name": "过载线圈",
+      "desc": "弹道派生数量 +1。"
+    },
+    "ctrl_potency": {
+      "name": "凝滞力场",
+      "desc": "减速、冻结、眩晕与击退效果增强 20%。"
+    },
+    "ctrl_bridge": {
+      "name": "乘虚而入",
+      "desc": "受控敌人承受的伤害提高 10%。"
+    },
+    "winter_frozen_marrow": {
+      "name": "冻髓",
+      "desc": "受控敌人承受的伤害提高 15%。"
+    },
+    "winter_deep_reach": {
+      "name": "极寒延展",
+      "desc": "控制与领域范围扩大，控制强度同步提高。"
+    },
+    "domain_area": {
+      "name": "领域扩张",
+      "desc": "区域与光环的范围和持续时间提高 15%。"
+    },
+    "domain_dot": {
+      "name": "余烬灼心",
+      "desc": "持续伤害提高 20%。"
+    },
+    "inferno_wildfire": {
+      "name": "燎原",
+      "desc": "领域持续伤害提高 30%。"
+    },
+    "inferno_detonation": {
+      "name": "爆轰理论",
+      "desc": "弹道与领域技能的衍生伤害提高 25%。"
+    },
+    "def_durability": {
+      "name": "加固壁垒",
+      "desc": "护盾与召唤物耐久提高 25%。"
+    },
+    "def_bridge": {
+      "name": "荆棘反击",
+      "desc": "破盾新星、反噬与反击伤害提高 25%。"
+    },
+    "bulwark_wall_doctrine": {
+      "name": "城墙学说",
+      "desc": "防御耐久提高 35%。"
+    },
+    "bulwark_revenge_edict": {
+      "name": "复仇律令",
+      "desc": "反击伤害提高 40%。"
+    },
+    "plenty_harvest_hymn": {
+      "name": "丰收颂歌",
+      "desc": "辅助技能提供的掉落率提高 10%。"
+    },
+    "plenty_wisdom_crystal": {
+      "name": "智慧结晶",
+      "desc": "辅助技能提供的经验倍率提高 15%。"
+    },
+    "neutral_calibrator": {
+      "name": "校准仪",
+      "desc": "所有机制标签的衍生伤害提高 8%。"
+    },
+    "neutral_redundant_armor": {
+      "name": "冗余装甲",
+      "desc": "防御耐久提高 15%。"
+    },
+    "neutral_scavenger": {
+      "name": "拾荒者",
+      "desc": "辅助技能提供的掉落存留时间提高 12%。"
+    },
+    "neutral_focused_training": {
+      "name": "集中训练",
+      "desc": "所有机制标签的衍生伤害提高 12%。"
+    }
+  },
+  "tuner": {
+    "groups": {
+      "waves": {
+        "title": "A · 出怪节奏与波结构",
+        "note": "下波生效"
+      },
+      "combat": {
+        "title": "B · 炮台与弹道"
+      },
+      "enemies": {
+        "title": "C · 敌人数值"
+      },
+      "drops": {
+        "title": "D · 掉落与拾取"
+      },
+      "progression": {
+        "title": "经验与升级"
+      },
+      "bounty": {
+        "title": "E · 精英 Bounty"
+      },
+      "p2": {
+        "title": "P2 · 默认冻结"
+      }
+    },
+    "params": {
+      "waves.spawnMode": "出怪模式",
+      "waves.bossWaves": "波末 Boss 波次",
+      "bounty.enabled": "机制启用",
+      "waves.enemyCountBase": "基础出怪数",
+      "waves.enemyCountPerWave": "每波追加数",
+      "waves.spawnInterval.base": "出怪间隔 · 基础",
+      "waves.spawnInterval.perWave": "出怪间隔 · 每波缩短",
+      "waves.spawnInterval.min": "出怪间隔 · 下限",
+      "waves.firstSpawnDelay": "首怪延迟",
+      "waves.intermission.settleSeconds": "波间结算展示",
+      "waves.intermission.freeSeconds.selection": "波间整备 · 招募",
+      "waves.intermission.freeSeconds.buildEarly": "波间整备 · 收敛前期",
+      "waves.intermission.freeSeconds.buildLate": "波间整备 · 收敛后期",
+      "waves.intermission.freeSeconds.validation": "波间整备 · 兑现",
+      "waves.totalWaves": "总波数",
+      "waves.spawnMargin": "出生边距",
+      "waves.typeRoll.tankBase": "重装概率 · 基础",
+      "waves.typeRoll.tankPerWave": "重装概率 · 每波",
+      "waves.typeRoll.fastThreshold": "高速阈值",
+      "combat.defaults.damage": "基础伤害",
+      "combat.defaults.fireRate": "每秒攻击",
+      "combat.defaults.range": "攻击射程",
+      "combat.bullet.speed": "弹速",
+      "combat.bullet.life": "弹丸寿命",
+      "combat.bullet.spread": "散布（弧度）",
+      "combat.hp.max": "心防上限",
+      "combat.breakthroughDist": "突破线距离",
+      "combat.dangerZoneWidth": "危险区宽度",
+      "enemies.defaults.enemySpeed": "全局敌人速度倍率",
+      "enemies.types.normal.hpBase": "普通 · 基础 HP",
+      "enemies.types.normal.hpPerWave": "普通 · 每波 HP",
+      "enemies.types.normal.speedBase": "普通 · 基础速度",
+      "enemies.types.normal.speedPerWave": "普通 · 每波速度",
+      "enemies.types.normal.damage": "普通 · 突破伤害",
+      "enemies.types.normal.r": "普通 · 半径",
+      "enemies.types.normal.xp": "普通 · 经验",
+      "enemies.types.fast.hpBase": "高速 · 基础 HP",
+      "enemies.types.fast.hpPerWave": "高速 · 每波 HP",
+      "enemies.types.fast.speedBase": "高速 · 基础速度",
+      "enemies.types.fast.speedPerWave": "高速 · 每波速度",
+      "enemies.types.fast.damage": "高速 · 突破伤害",
+      "enemies.types.fast.r": "高速 · 半径",
+      "enemies.types.fast.xp": "高速 · 经验",
+      "enemies.types.tank.hpBase": "重装 · 基础 HP",
+      "enemies.types.tank.hpPerWave": "重装 · 每波 HP",
+      "enemies.types.tank.speedBase": "重装 · 基础速度",
+      "enemies.types.tank.speedPerWave": "重装 · 每波速度",
+      "enemies.types.tank.damage": "重装 · 突破伤害",
+      "enemies.types.tank.r": "重装 · 半径",
+      "enemies.types.tank.xp": "重装 · 经验",
+      "enemies.types.boss.hpBase": "Boss · 基础 HP",
+      "enemies.types.boss.hpPerWave": "Boss · 每波 HP",
+      "enemies.types.boss.speedBase": "Boss · 基础速度",
+      "enemies.types.boss.speedPerWave": "Boss · 每波速度",
+      "enemies.types.boss.damage": "Boss · 突破伤害",
+      "enemies.types.boss.r": "Boss · 半径",
+      "enemies.types.boss.xp": "Boss · 经验",
+      "economy.defaults.dropChance": "基础掉落率",
+      "economy.defaults.dropLifetime": "掉落存在时间",
+      "progression.killXpMul": "经验 · 击破倍率",
+      "progression.relicChoices": "遗物 · 候选数量",
+      "combat.bullet.radius": "P2 · 弹丸半径",
+      "combat.bullet.muzzleOffset": "P2 · 炮口偏移",
+      "combat.vfx.shootParticles": "P2 · 开火粒子数",
+      "combat.vfx.killParticles": "P2 · 击杀粒子数",
+      "combat.vfx.breakthroughParticles": "P2 · 突破粒子数",
+      "economy.drops.pickupRadius": "P2 · 拾取半径",
+      "economy.drops.chanceCap": "P2 · 掉率上限",
+      "economy.dropStarPolicy.star2Share": "P2 · 二星掉落占比",
+      "waves.budget.waveQuota.base": "Budget · 总配额基础",
+      "waves.budget.waveQuota.perWave": "Budget · 总配额每波",
+      "waves.budget.targetOnScreen.base": "Budget · 目标同屏基础",
+      "waves.budget.targetOnScreen.perWave": "Budget · 目标同屏每波",
+      "waves.budget.checkInterval": "Budget · 检查间隔",
+      "waves.budget.batchMax": "Budget · 单次补怪上限",
+      "waves.budget.waveEndSprint.window": "Budget · 波末窗口",
+      "waves.budget.waveEndSprint.multiplier": "Budget · 波末目标倍率",
+      "waves.budget.maxAlive": "Budget · 同屏硬上限",
+      "waves.stagePlan.selectionWaves": "阶段导演 · 选择期波数",
+      "waves.stagePlan.validationWaves": "阶段导演 · 验证期波数",
+      "waves.stagePlan.selection.waveQuota.start": "选择期 · 配额起点",
+      "waves.stagePlan.selection.waveQuota.end": "选择期 · 配额终点",
+      "waves.stagePlan.selection.targetOnScreen.start": "选择期 · 同屏起点",
+      "waves.stagePlan.selection.targetOnScreen.end": "选择期 · 同屏终点",
+      "waves.stagePlan.selection.maxAlive": "选择期 · 同屏硬上限",
+      "waves.stagePlan.build.waveQuota.start": "构筑期 · 配额起点",
+      "waves.stagePlan.build.waveQuota.end": "构筑期 · 配额终点",
+      "waves.stagePlan.build.targetOnScreen.start": "构筑期 · 同屏起点",
+      "waves.stagePlan.build.targetOnScreen.end": "构筑期 · 同屏终点",
+      "waves.stagePlan.build.maxAlive": "构筑期 · 同屏硬上限",
+      "economy.ordinaryDropRate.selectionPerMinute": "普通掉落 · 选择期每分钟",
+      "economy.ordinaryDropRate.buildPerMinute": "普通掉落 · 构筑期每分钟",
+      "economy.ordinaryDropRate.buildTransitionSeconds": "普通掉落 · 构筑过渡秒数",
+      "economy.ordinaryDropRate.carryCap": "普通掉落 · 额度积压上限",
+      "bounty.offer.enabledFromWave": "报价 · 起始波次",
+      "bounty.offer.checkIntervalSeconds": "报价 · 检查间隔（秒）",
+      "bounty.offer.baseChancePerCheck": "报价 · 基础概率",
+      "bounty.offer.minChancePerCheck": "报价 · 概率下限",
+      "bounty.offer.maxChancePerCheck": "报价 · 概率上限",
+      "bounty.offer.noDamageRampSeconds": "报价 · 无伤爬坡时长",
+      "bounty.offer.noDamageBonusMax": "报价 · 无伤加成上限",
+      "bounty.offer.healthyHpThreshold": "报价 · 健康血量阈值",
+      "bounty.offer.healthyHpBonusMax": "报价 · 健康血量加成",
+      "bounty.offer.recentDamagePenalty": "报价 · 近期受伤惩罚",
+      "bounty.offer.recentDamagePenaltySeconds": "报价 · 近期受伤窗口",
+      "bounty.offer.markWindowSeconds": "报价 · 接受窗口",
+      "bounty.offer.cooldownSeconds": "报价 · 冷却时间",
+      "bounty.offer.minOffersPerWave": "报价 · 每波保底次数",
+      "bounty.offer.maxOffersPerWave": "报价 · 每波上限",
+      "bounty.offer.guaranteeAtWaveProgress": "报价 · 保底进度阈值",
+      "bounty.offer.maxConcurrentOffers": "报价 · 同时存在上限",
+      "bounty.offer.maxConcurrentEncounters": "报价 · 未结算敌群上限",
+      "bounty.encounter.enemyCountBase": "敌群 · 基础数量",
+      "bounty.encounter.enemyCountPerWave": "敌群 · 每波追加数量",
+      "bounty.encounter.enemyCountMax": "敌群 · 数量上限",
+      "bounty.encounter.hpMul": "敌群 · 生命倍率",
+      "bounty.encounter.speedMul": "敌群 · 速度倍率",
+      "bounty.encounter.damageMul": "敌群 · 伤害倍率",
+      "bounty.encounter.spawnIntervalSeconds": "敌群 · 分批生成间隔",
+      "bounty.encounter.spawnSpread": "敌群 · 出生散布",
+      "bounty.encounter.emergencyOverrideDistance": "敌群 · 紧急覆盖距离",
+      "bounty.encounter.composition.normalWeight": "敌群 · 普通权重",
+      "bounty.encounter.composition.fastWeight": "敌群 · 高速权重",
+      "bounty.encounter.composition.tankWeight": "敌群 · 重装权重",
+      "bounty.reward.cardCount": "奖励 · 指定卡数量",
+      "bounty.reward.cardStarMax": "奖励 · 指定卡星级上限",
+      "bounty.reward.wildcardCount": "奖励 · 万能卡数量",
+      "bounty.reward.wildcardStarMax": "奖励 · 万能卡星级上限",
+      "bounty.reward.dropLifetimeSeconds": "奖励 · 地面寿命",
+      "bounty.reward.repeatProtection": "奖励 · 重复保护",
+      "bounty.rewardBias.primaryShare": "奖励倾向 · 主流派占比",
+      "bounty.rewardBias.secondaryShare": "奖励倾向 · 次流派占比",
+      "bounty.visual.offerRadius": "视觉 · 报价半径",
+      "bounty.visual.offerEdgeInset": "视觉 · 边缘内缩",
+      "bounty.visual.enemyGlowRadius": "视觉 · 敌群光晕半径",
+      "bounty.visual.enemyPulseSpeed": "视觉 · 敌群脉冲速度",
+      "economy.normalDropTypePolicy.roleBagSize": "掉落导演 · 角色袋长度",
+      "economy.normalDropTypePolicy.earlyMix.discovery": "掉落导演 · 前期探索位",
+      "economy.normalDropTypePolicy.earlyMix.build": "掉落导演 · 前期主线位",
+      "economy.normalDropTypePolicy.earlyMix.pivot": "掉落导演 · 前期调整位",
+      "economy.normalDropTypePolicy.lateMix.discovery": "掉落导演 · 后期探索位",
+      "economy.normalDropTypePolicy.lateMix.build": "掉落导演 · 后期主线位",
+      "economy.normalDropTypePolicy.lateMix.pivot": "掉落导演 · 后期调整位",
+      "economy.normalDropTypePolicy.bootstrapMinDiscovery": "掉落导演 · 启动探索保底",
+      "economy.normalDropTypePolicy.godAffinity.scorePerStack": "掉落导演 · 每层神倾向分",
+      "economy.normalDropTypePolicy.godAffinity.scoreCap": "掉落导演 · 神倾向分封顶",
+      "economy.normalDropTypePolicy.maturity.fullMergeOps": "掉落导演 · 满成熟合成数",
+      "economy.normalDropTypePolicy.maturity.fullHighestStar": "掉落导演 · 满成熟最高星",
+      "economy.normalDropTypePolicy.maturity.fullEquippedTypes": "掉落导演 · 满成熟装备数",
+      "economy.normalDropTypePolicy.maturity.mergeWeight": "掉落导演 · 合成成熟权重",
+      "economy.normalDropTypePolicy.maturity.starWeight": "掉落导演 · 星级成熟权重",
+      "economy.normalDropTypePolicy.maturity.equipWeight": "掉落导演 · 装备成熟权重",
+      "economy.normalDropTypePolicy.build.topK": "掉落导演 · 主线候选数",
+      "economy.normalDropTypePolicy.build.scorePower": "掉落导演 · 投入分指数",
+      "economy.normalDropTypePolicy.build.mergeReadyMultiplier": "掉落导演 · 可合成倍率",
+      "economy.normalDropTypePolicy.build.equippedBaseBonus": "掉落导演 · 装备基础加分",
+      "economy.normalDropTypePolicy.build.equippedStarBonus": "掉落导演 · 装备星级加分",
+      "economy.normalDropTypePolicy.build.historicalMergeWeight": "掉落导演 · 历史合成权重",
+      "economy.normalDropTypePolicy.build.historicalMergeCap": "掉落导演 · 历史合成封顶",
+      "economy.normalDropTypePolicy.build.maxWeightRatio": "掉落导演 · 最大权重比",
+      "economy.normalDropTypePolicy.pivot.excludeTopK": "掉落导演 · 调整排除头部",
+      "economy.normalDropTypePolicy.pivot.candidateFraction": "掉落导演 · 调整候选比例",
+      "economy.normalDropTypePolicy.maxSameTypeStreak": "掉落导演 · 同型连抽上限",
+      "combat.controlCeiling.freezeSeconds": "控制上限 · 冻结秒数",
+      "combat.controlCeiling.stunSeconds": "控制上限 · 眩晕秒数",
+      "combat.controlCeiling.knockbackDistance": "控制上限 · 击退距离",
+      "combat.controlBudget.maxControlledRatio": "控制预算 · 受控比例上限",
+      "combat.controlBudget.minFreeAdvancers": "控制预算 · 最少自由推进数",
+      "enemies.types.normal.knockbackResist": "普通 · 击退抗性",
+      "enemies.types.normal.ccResist": "普通 · 控制抗性",
+      "enemies.types.fast.knockbackResist": "高速 · 击退抗性",
+      "enemies.types.fast.ccResist": "高速 · 控制抗性",
+      "enemies.types.tank.knockbackResist": "重装 · 击退抗性",
+      "enemies.types.tank.ccResist": "重装 · 控制抗性",
+      "enemies.types.boss.knockbackResist": "Boss · 击退抗性",
+      "enemies.types.boss.ccResist": "Boss · 控制抗性"
+    }
   }
 }

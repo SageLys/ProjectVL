@@ -159,7 +159,8 @@ export function validateGodConfig(
     if (!choiceStats.has(stat)) fail('$.waveRewards.choice', `固定菜单缺少属性: ${stat}`);
   }
 
-  const relics = versionedArray(config.relics, 'relics', '$.relics');
+  // relics v0.2.0：内联 title/desc 迁往 texts.json，配置只留 textKey。
+  const relics = versionedArray(config.relics, 'relics', '$.relics', '0.2.0');
   const relicIds = new Set<string>();
   for (const [index, raw] of relics.entries()) {
     const path = `$.relics.relics[${index}]`;
@@ -171,9 +172,9 @@ export function validateGodConfig(
       fail(`${path}.god`, `引用了不存在的神: ${String(relic.god)}`);
     }
     if (!RELIC_RARITIES.has(String(relic.rarity))) fail(`${path}.rarity`, '非法稀有度');
-    if (typeof relic.textKey !== 'string' || !relic.textKey) fail(`${path}.textKey`, '必须是非空字符串');
-    if (typeof relic.title !== 'string' || !relic.title) fail(`${path}.title`, '必须是非空字符串');
-    if (typeof relic.desc !== 'string' || !relic.desc) fail(`${path}.desc`, '必须是非空字符串');
+    // 文案只留 key：`${textKey}.name` / `.desc` 的命中由 tests/textsCompleteness 保证。
+    if (relic.textKey !== `relics.${relic.id}`) fail(`${path}.textKey`, `必须等于 relics.${relic.id}`);
+    if ('title' in relic || 'desc' in relic) fail(`${path}.title`, 'v0.2.0 起不得内联文案，改用 texts.json');
     const targetTags = stringArray(relic.targetTags, `${path}.targetTags`);
     if (!targetTags.length) fail(`${path}.targetTags`, '不得为空');
     if (targetTags.some(tag => !BUILD_TAGS.has(tag))) fail(`${path}.targetTags`, '包含非法机制标签');

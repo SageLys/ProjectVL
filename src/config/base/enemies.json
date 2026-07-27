@@ -62,7 +62,7 @@
     }
   },
   "bossBehavior": {
-    "orbitStartRangeRatio": 1.0,
+    "orbitStartRangeRatio": 1,
     "orbitStartMaxDistance": 180,
     "curveStrength": 0.65,
     "contactDistance": 48,

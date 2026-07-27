@@ -17,6 +17,7 @@ import { validateProgressionConfig } from './progressionValidator';
 import { validateDifficultyConfig } from './difficultyValidator';
 import { validateIntermissionConfig, validateStagePlanConfig } from './stagePlanValidator';
 import { validateGodConfig } from './godValidator';
+import { validateTunerConfig } from './tunerMeta';
 
 const optionalBaseModules = import.meta.glob<{ default: unknown }>(
   './base/{gods,relics,evolutionRecipes,waveRewards}.json',
@@ -33,7 +34,7 @@ function optionalBaseConfig<K extends 'gods' | 'relics' | 'evolutionRecipes' | '
 
 // C0 兼容层：新文件尚未部署时回落为空域，旧战斗路径仍可启动。
 const gods = optionalBaseConfig('gods.json', { version: '0.1.0', gods: [] });
-const relics = optionalBaseConfig('relics.json', { version: '0.1.0', relics: [] });
+const relics = optionalBaseConfig('relics.json', { version: '0.2.0', relics: [] });
 const evolutionRecipes = optionalBaseConfig('evolutionRecipes.json', { version: '0.1.0', recipes: [] });
 const waveRewards = optionalBaseConfig('waveRewards.json', { version: '0.2.0', floor: [], choice: [] });
 
@@ -121,6 +122,7 @@ function assembleBase(): GameConfig {
   }) as unknown as GameConfig;
   normalizeValidationRewards(config);
   validateGodConfig(config);
+  validateTunerConfig(config);
   validateIntermissionConfig(config.waves.intermission);
   validateStagePlanConfig(config.waves.stagePlan, config.waves.totalWaves, config.economy.maxStar, config.waves.waveBoss.reward);
   return config;
@@ -141,6 +143,7 @@ export function buildConfig(variantNames: string[] = []): GameConfig {
   normalizeValidationRewards(cfg);
   validateSkillsConfig(cfg.skills);
   validateGodConfig(cfg);
+  validateTunerConfig(cfg);
   validateIntermissionConfig(cfg.waves.intermission);
   validateProgressionConfig(cfg.progression);
   validateDifficultyConfig(cfg.difficulty);

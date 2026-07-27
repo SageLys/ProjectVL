@@ -1,0 +1,11 @@
+{
+  "id": "01-slice-combat",
+  "description": "纵向切片①：第 1 波纯战斗 16 秒。出怪 → 自动索敌 → 开火 → 伤害结算 → 击杀掉落 → 掉落过期。无玩家输入、无任何决策（帧数刻意停在首次升级之前），Unity 一期只需实现战斗与掉落即可复刻。",
+  "seed": 42,
+  "variants": [],
+  "dt": 0.03333333333333333,
+  "frames": 480,
+  "start": "wave1",
+  "decisionPolicy": "firstCandidate",
+  "inputs": []
+}

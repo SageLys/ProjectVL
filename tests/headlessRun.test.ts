@@ -4,6 +4,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { cfg } from '../src/config';
 import { registerSkillDefs } from '../src/core/effects/interpreter';
 import { updateGame } from '../src/core/updateGame';
+import { makeRng } from '../src/core/rng';
 import { collectNearest } from '../src/core/systems/dropSystem';
 import { consumeCard, moveOrSwap } from '../src/core/systems/equipmentSystem';
 import { resolveCurrentDecision } from '../src/core/systems/decisionQueueSystem';
@@ -15,16 +16,8 @@ import { calculateBuildMaturity } from '../src/core/systems/dropTypePolicy';
 
 beforeEach(resetTestEnv);
 
-/** 确定性伪随机（mulberry32）。 */
-function seeded(seed: number): Rng {
-  let a = seed >>> 0;
-  return () => {
-    a |= 0; a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
+/** 确定性伪随机（mulberry32）：与黄金回放共用 core/rng.ts 的唯一实现。 */
+const seeded = (seed: number): Rng => makeRng(seed);
 
 /** 简单 bot：点掉落、装备 3★、手牌将满时消耗释放、决策即选择。 */
 interface ValidationEntrySnapshot { wave: number; maturity: number; highestStar: number; equippedCount: number }

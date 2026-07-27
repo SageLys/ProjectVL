@@ -3,6 +3,7 @@ import { cfg } from '../config';
 import type { GameState, RunDecision } from '../core/types';
 import type { DomRefs } from './domRefs';
 import { cardDisplayName, evolutionChoiceCopy } from './cardMeta';
+import { relicCopy } from './relicMeta';
 import { fmt } from './format';
 import { buildEvolutionOptionViewModel } from './cardDetailModel';
 
@@ -108,7 +109,8 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
             button.append(label, desc, effects, fit);
           } else if (decision.kind === 'relic') {
             const relic = cfg.relics.relics.find(item => item.id === option);
-            label.textContent = relic?.title ?? option;
+            const copy = relic ? relicCopy(relic) : null;
+            label.textContent = copy?.name ?? option;
             const meta = document.createElement('span');
             meta.className = 'choice-desc';
             const godName = relic?.god
@@ -117,7 +119,7 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
             meta.textContent = `${godName} · ${relic?.rarity ?? ''}`;
             const desc = document.createElement('span');
             desc.className = 'choice-desc';
-            desc.textContent = relic?.desc ?? '';
+            desc.textContent = copy?.desc ?? '';
             button.append(label, meta, desc);
             if (relic && state) {
               const heldTypes = new Set([...state.cards, ...state.equipment]

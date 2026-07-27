@@ -2,6 +2,7 @@ import { cfg } from '../config';
 import { AFFIX_SINKS } from '../config/affixSinks';
 import type { CardStatKind, EvolutionOptionDef } from '../config/types';
 import type { BindingDef, CardDef, EffectDef } from '../core/effects/defs';
+import { nestedEffectsOf } from '../core/effects/atomContract';
 import { getSkillDef, resolveCardBindings, resolveConsumableTier } from '../core/effects/interpreter';
 import type { Card, CardAffixRoll } from '../core/types';
 import { texts } from '../data';
@@ -187,8 +188,7 @@ function effectAtoms(effects: EffectDef[]): string[] {
   const result: string[] = [];
   for (const effect of effects) {
     result.push(effect.atom);
-    const nested = effect.params?.effects;
-    if (Array.isArray(nested)) result.push(...effectAtoms(nested.filter(
+    result.push(...effectAtoms(nestedEffectsOf(effect).filter(
       item => item && typeof item === 'object' && 'atom' in item,
     ) as EffectDef[]));
   }

@@ -1,0 +1,22 @@
+{
+  "id": "04-run-victory",
+  "description": "整局④：dev-short 三波通关。走完整开局链路（神池抽选 → 波间决策 → 波末 Boss → 结算），决策一律取第一候选。高伤害 + 高心防保证确定性通关。",
+  "seed": 3,
+  "variants": [
+    "dev-short"
+  ],
+  "dt": 0.03333333333333333,
+  "frames": 12000,
+  "start": "run",
+  "decisionPolicy": "firstCandidate",
+  "overrides": {
+    "hp": 1000000,
+    "maxHp": 1000000,
+    "damage": 200
+  },
+  "inputs": [
+    { "frame": 30, "kind": "collectFirstDrop", "repeatEvery": 15 },
+    { "frame": 40, "kind": "confirmIntermission", "repeatEvery": 30 },
+    { "frame": 50, "kind": "consumeAt", "index": 6, "x": 480, "y": 300, "repeatEvery": 30 }
+  ]
+}

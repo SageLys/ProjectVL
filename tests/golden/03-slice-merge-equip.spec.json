@@ -1,0 +1,21 @@
+{
+  "id": "03-slice-merge-equip",
+  "description": "纵向切片③：合成升星 + 装备态。四枚 1★ frost 依次拾取自动二合到 3★ → 拖入装备栏 → onHit 绑定在后续命中中持续生效。",
+  "seed": 11,
+  "variants": [],
+  "dt": 0.03333333333333333,
+  "frames": 900,
+  "start": "wave1",
+  "decisionPolicy": "firstCandidate",
+  "inputs": [
+    { "frame": 60, "kind": "spawnDrop", "x": 400, "y": 300, "cardType": "frost", "star": 1 },
+    { "frame": 65, "kind": "collectAt", "x": 400, "y": 300 },
+    { "frame": 70, "kind": "spawnDrop", "x": 400, "y": 300, "cardType": "frost", "star": 1 },
+    { "frame": 75, "kind": "collectAt", "x": 400, "y": 300 },
+    { "frame": 80, "kind": "spawnDrop", "x": 400, "y": 300, "cardType": "frost", "star": 1 },
+    { "frame": 85, "kind": "collectAt", "x": 400, "y": 300 },
+    { "frame": 90, "kind": "spawnDrop", "x": 400, "y": 300, "cardType": "frost", "star": 1 },
+    { "frame": 95, "kind": "collectAt", "x": 400, "y": 300 },
+    { "frame": 120, "kind": "moveOrSwap", "source": "cards", "index": 0, "targetKind": "equipment", "targetIndex": 0 }
+  ]
+}

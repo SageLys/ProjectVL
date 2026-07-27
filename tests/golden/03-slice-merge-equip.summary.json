@@ -1,0 +1,425 @@
+{
+  "spec": {
+    "id": "03-slice-merge-equip",
+    "seed": 11,
+    "variants": [],
+    "dt": 0.03333333333333333,
+    "frames": 900,
+    "start": "wave1"
+  },
+  "framesRun": 900,
+  "mode": "playing",
+  "win": null,
+  "hp": 100,
+  "maxHp": 100,
+  "wave": {
+    "wave": 1,
+    "phase": "regular",
+    "spawnLeft": 38,
+    "waveSpawnQuota": 60,
+    "intermission": {
+      "active": false,
+      "step": "decide",
+      "afterWave": 0
+    }
+  },
+  "enemiesRemaining": 7,
+  "cumulativeDamageDealt": 836.9999999999995,
+  "cumulativeDamageTaken": 0,
+  "counters": {
+    "kills": 15,
+    "collected": 4,
+    "expired": 8,
+    "merges": 3,
+    "consumes": 0,
+    "equipOps": 1,
+    "xp": 19,
+    "level": 2
+  },
+  "cards": [],
+  "equipment": [
+    {
+      "slot": 0,
+      "cardType": "frost",
+      "star": 3,
+      "affixes": [
+        "controlledDamageTakenMul:0.1",
+        "controlPotencyMul:0.15"
+      ],
+      "evolutionPath": [
+        "3:frostA"
+      ]
+    }
+  ],
+  "wildcards": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "4": 0,
+    "5": 0
+  },
+  "relics": [
+    "neutral_calibrator"
+  ],
+  "dropSequence": [
+    {
+      "frame": 60,
+      "action": "spawned",
+      "dropId": 1,
+      "kind": "card",
+      "cardType": "frost",
+      "star": 1
+    },
+    {
+      "frame": 65,
+      "action": "collected",
+      "dropId": 1,
+      "kind": "card",
+      "cardType": "frost",
+      "star": 1
+    },
+    {
+      "frame": 70,
+      "action": "spawned",
+      "dropId": 2,
+      "kind": "card",
+      "cardType": "frost",
+      "star": 1
+    },
+    {
+      "frame": 75,
+      "action": "collected",
+      "dropId": 2,
+      "kind": "card",
+      "cardType": "frost",
+      "star": 1
+    },
+    {
+      "frame": 80,
+      "action": "spawned",
+      "dropId": 3,
+      "kind": "card",
+      "cardType": "frost",
+      "star": 1
+    },
+    {
+      "frame": 85,
+      "action": "collected",
+      "dropId": 3,
+      "kind": "card",
+      "cardType": "frost",
+      "star": 1
+    },
+    {
+      "frame": 90,
+      "action": "spawned",
+      "dropId": 4,
+      "kind": "card",
+      "cardType": "frost",
+      "star": 1
+    },
+    {
+      "frame": 95,
+      "action": "collected",
+      "dropId": 4,
+      "kind": "card",
+      "cardType": "frost",
+      "star": 1
+    },
+    {
+      "frame": 175,
+      "action": "spawned",
+      "dropId": 5,
+      "kind": "card",
+      "cardType": "meteor",
+      "star": 1
+    },
+    {
+      "frame": 216,
+      "action": "spawned",
+      "dropId": 6,
+      "kind": "card",
+      "cardType": "pierce",
+      "star": 1
+    },
+    {
+      "frame": 323,
+      "action": "spawned",
+      "dropId": 7,
+      "kind": "card",
+      "cardType": "luckyStar",
+      "star": 1
+    },
+    {
+      "frame": 325,
+      "action": "expired",
+      "dropId": 5,
+      "kind": "card",
+      "cardType": null,
+      "star": 1
+    },
+    {
+      "frame": 366,
+      "action": "expired",
+      "dropId": 6,
+      "kind": "card",
+      "cardType": null,
+      "star": 1
+    },
+    {
+      "frame": 446,
+      "action": "spawned",
+      "dropId": 8,
+      "kind": "card",
+      "cardType": "iceTomb",
+      "star": 1
+    },
+    {
+      "frame": 473,
+      "action": "expired",
+      "dropId": 7,
+      "kind": "card",
+      "cardType": null,
+      "star": 1
+    },
+    {
+      "frame": 495,
+      "action": "spawned",
+      "dropId": 9,
+      "kind": "card",
+      "cardType": "aegis",
+      "star": 1
+    },
+    {
+      "frame": 560,
+      "action": "spawned",
+      "dropId": 10,
+      "kind": "card",
+      "cardType": "bountyCall",
+      "star": 1
+    },
+    {
+      "frame": 596,
+      "action": "expired",
+      "dropId": 8,
+      "kind": "card",
+      "cardType": null,
+      "star": 1
+    },
+    {
+      "frame": 645,
+      "action": "expired",
+      "dropId": 9,
+      "kind": "card",
+      "cardType": null,
+      "star": 1
+    },
+    {
+      "frame": 671,
+      "action": "spawned",
+      "dropId": 11,
+      "kind": "card",
+      "cardType": "hoarfrostTithe",
+      "star": 1
+    },
+    {
+      "frame": 710,
+      "action": "expired",
+      "dropId": 10,
+      "kind": "card",
+      "cardType": null,
+      "star": 1
+    },
+    {
+      "frame": 718,
+      "action": "spawned",
+      "dropId": 12,
+      "kind": "card",
+      "cardType": "frost",
+      "star": 1
+    },
+    {
+      "frame": 789,
+      "action": "spawned",
+      "dropId": 13,
+      "kind": "card",
+      "cardType": "chainLightning",
+      "star": 1
+    },
+    {
+      "frame": 821,
+      "action": "expired",
+      "dropId": 11,
+      "kind": "card",
+      "cardType": null,
+      "star": 1
+    },
+    {
+      "frame": 824,
+      "action": "spawned",
+      "dropId": 14,
+      "kind": "card",
+      "cardType": "ashHarvest",
+      "star": 1
+    },
+    {
+      "frame": 868,
+      "action": "expired",
+      "dropId": 12,
+      "kind": "card",
+      "cardType": null,
+      "star": 1
+    },
+    {
+      "frame": 890,
+      "action": "spawned",
+      "dropId": 15,
+      "kind": "card",
+      "cardType": "decoy",
+      "star": 1
+    }
+  ],
+  "eventSequence": [
+    {
+      "frame": 0,
+      "type": "waveStart"
+    },
+    {
+      "frame": 65,
+      "type": "collected"
+    },
+    {
+      "frame": 65,
+      "type": "affixRolled"
+    },
+    {
+      "frame": 75,
+      "type": "collected"
+    },
+    {
+      "frame": 75,
+      "type": "merged"
+    },
+    {
+      "frame": 85,
+      "type": "collected"
+    },
+    {
+      "frame": 95,
+      "type": "collected"
+    },
+    {
+      "frame": 95,
+      "type": "merged"
+    },
+    {
+      "frame": 95,
+      "type": "merged"
+    },
+    {
+      "frame": 95,
+      "type": "evolutionBranchOffered"
+    },
+    {
+      "frame": 95,
+      "type": "decisionOffered"
+    },
+    {
+      "frame": 96,
+      "type": "evolutionBranchSelected"
+    },
+    {
+      "frame": 96,
+      "type": "decisionResolved"
+    },
+    {
+      "frame": 120,
+      "type": "equipped"
+    },
+    {
+      "frame": 325,
+      "type": "dropExpired"
+    },
+    {
+      "frame": 362,
+      "type": "bountyOfferSpawned"
+    },
+    {
+      "frame": 366,
+      "type": "dropExpired"
+    },
+    {
+      "frame": 473,
+      "type": "dropExpired"
+    },
+    {
+      "frame": 572,
+      "type": "levelUp"
+    },
+    {
+      "frame": 572,
+      "type": "relicOffered"
+    },
+    {
+      "frame": 572,
+      "type": "decisionOffered"
+    },
+    {
+      "frame": 572,
+      "type": "relicSelected"
+    },
+    {
+      "frame": 572,
+      "type": "decisionResolved"
+    },
+    {
+      "frame": 596,
+      "type": "dropExpired"
+    },
+    {
+      "frame": 603,
+      "type": "bountyOfferExpired"
+    },
+    {
+      "frame": 645,
+      "type": "dropExpired"
+    },
+    {
+      "frame": 710,
+      "type": "dropExpired"
+    },
+    {
+      "frame": 821,
+      "type": "dropExpired"
+    },
+    {
+      "frame": 842,
+      "type": "bountyOfferSpawned"
+    },
+    {
+      "frame": 868,
+      "type": "dropExpired"
+    }
+  ],
+  "eventCounts": {
+    "waveStart": 1,
+    "collected": 4,
+    "affixRolled": 1,
+    "merged": 3,
+    "evolutionBranchOffered": 1,
+    "decisionOffered": 2,
+    "evolutionBranchSelected": 1,
+    "decisionResolved": 2,
+    "equipped": 1,
+    "dropExpired": 8,
+    "bountyOfferSpawned": 2,
+    "levelUp": 1,
+    "relicOffered": 1,
+    "relicSelected": 1,
+    "bountyOfferExpired": 1
+  },
+  "rng": {
+    "draws": 2154,
+    "last": 0.3501579868607223
+  }
+}

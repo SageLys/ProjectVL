@@ -1,0 +1,185 @@
+{
+  "spec": {
+    "id": "05-run-defeat",
+    "seed": 5,
+    "variants": [
+      "dev-short"
+    ],
+    "dt": 0.03333333333333333,
+    "frames": 9000,
+    "start": "wave1"
+  },
+  "framesRun": 625,
+  "mode": "ended",
+  "win": false,
+  "hp": -8,
+  "maxHp": 60,
+  "wave": {
+    "wave": 1,
+    "phase": "regular",
+    "spawnLeft": 54,
+    "waveSpawnQuota": 75,
+    "intermission": {
+      "active": false,
+      "step": "decide",
+      "afterWave": 0
+    }
+  },
+  "enemiesRemaining": 9,
+  "cumulativeDamageDealt": 438,
+  "cumulativeDamageTaken": 68,
+  "counters": {
+    "kills": 4,
+    "collected": 0,
+    "expired": 4,
+    "merges": 0,
+    "consumes": 0,
+    "equipOps": 0,
+    "xp": 4,
+    "level": 1
+  },
+  "cards": [],
+  "equipment": [],
+  "wildcards": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "4": 0,
+    "5": 0
+  },
+  "relics": [],
+  "dropSequence": [
+    {
+      "frame": 164,
+      "action": "spawned",
+      "dropId": 1,
+      "kind": "card",
+      "cardType": "decoy",
+      "star": 1
+    },
+    {
+      "frame": 198,
+      "action": "spawned",
+      "dropId": 2,
+      "kind": "card",
+      "cardType": "pierce",
+      "star": 1
+    },
+    {
+      "frame": 266,
+      "action": "spawned",
+      "dropId": 3,
+      "kind": "card",
+      "cardType": "stormcall",
+      "star": 1
+    },
+    {
+      "frame": 314,
+      "action": "expired",
+      "dropId": 1,
+      "kind": "card",
+      "cardType": null,
+      "star": 1
+    },
+    {
+      "frame": 319,
+      "action": "spawned",
+      "dropId": 4,
+      "kind": "card",
+      "cardType": "bountyCall",
+      "star": 1
+    },
+    {
+      "frame": 348,
+      "action": "expired",
+      "dropId": 2,
+      "kind": "card",
+      "cardType": null,
+      "star": 1
+    },
+    {
+      "frame": 416,
+      "action": "expired",
+      "dropId": 3,
+      "kind": "card",
+      "cardType": null,
+      "star": 1
+    },
+    {
+      "frame": 469,
+      "action": "expired",
+      "dropId": 4,
+      "kind": "card",
+      "cardType": null,
+      "star": 1
+    }
+  ],
+  "eventSequence": [
+    {
+      "frame": 0,
+      "type": "waveStart"
+    },
+    {
+      "frame": 314,
+      "type": "dropExpired"
+    },
+    {
+      "frame": 348,
+      "type": "dropExpired"
+    },
+    {
+      "frame": 408,
+      "type": "breakthrough"
+    },
+    {
+      "frame": 410,
+      "type": "breakthrough"
+    },
+    {
+      "frame": 416,
+      "type": "dropExpired"
+    },
+    {
+      "frame": 417,
+      "type": "breakthrough"
+    },
+    {
+      "frame": 437,
+      "type": "breakthrough"
+    },
+    {
+      "frame": 469,
+      "type": "dropExpired"
+    },
+    {
+      "frame": 486,
+      "type": "breakthrough"
+    },
+    {
+      "frame": 520,
+      "type": "breakthrough"
+    },
+    {
+      "frame": 546,
+      "type": "breakthrough"
+    },
+    {
+      "frame": 625,
+      "type": "breakthrough"
+    },
+    {
+      "frame": 625,
+      "type": "gameEnd"
+    }
+  ],
+  "eventCounts": {
+    "waveStart": 1,
+    "dropExpired": 4,
+    "breakthrough": 8,
+    "gameEnd": 1
+  },
+  "rng": {
+    "draws": 2164,
+    "last": 0.2340710514690727
+  }
+}

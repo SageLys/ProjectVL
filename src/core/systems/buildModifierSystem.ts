@@ -2,6 +2,7 @@ import { cfg } from '../../config';
 import type { BuildScalingAxis } from '../../config/types';
 import { AFFIX_SINKS, type AffixScalingTarget } from '../../config/affixSinks';
 import type { BindingDef, BuildTag, CardDef, ConsumableTierDef, EffectDef, Trigger } from '../effects/defs';
+import { effectParams } from '../effects/atomContract';
 import type { GameState } from '../types';
 import { cardAffixScaling } from './cardAffixSystem';
 import { modifierTotal } from './runtimeStatModifierSystem';
@@ -83,8 +84,10 @@ function scaleEffects(
   affixScaling: Partial<Record<BuildScalingAxis, number>>,
 ): void {
   for (const effect of effects) {
-    const params = effect.params;
-    if (!params) continue;
+    // 词条/遗物缩放按 (atom, param) 规则原地改写数值，天然是跨原子的泛型遍历——
+    // 这里取契约参数的松散视图，改写的仍是同一个对象引用。
+    if (!effect.params) continue;
+    const params = effectParams(effect);
     for (const [axis, rules] of Object.entries(BUILD_SCALING_RULES) as [BuildScalingAxis, readonly ScalingRule[]][]) {
       const value = scalingFor(totals, def, axis)
         + runtimeScalingFor(state, axis)

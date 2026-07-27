@@ -1,0 +1,18 @@
+{
+  "id": "05-run-defeat",
+  "description": "整局⑤：低心防 + 极低伤害，敌人突破防线直至心防归零。覆盖 breakthrough 承伤链路与失败结算。",
+  "seed": 5,
+  "variants": [
+    "dev-short"
+  ],
+  "dt": 0.03333333333333333,
+  "frames": 9000,
+  "start": "wave1",
+  "decisionPolicy": "firstCandidate",
+  "overrides": {
+    "hp": 60,
+    "maxHp": 60,
+    "damage": 6
+  },
+  "inputs": []
+}

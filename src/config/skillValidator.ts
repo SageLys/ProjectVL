@@ -1,88 +1,117 @@
 import type { CardAffixCandidateDef, SkillsConfig } from './types';
 import { AFFIX_SINKS, type AffixScalingTarget } from './affixSinks';
+import type { AtomName } from '../core/effects/defs';
+import { ATOM_CONTRACT, TRIGGER_NAMES, atomContract, type AtomParamSpec } from '../core/effects/atomContract';
 
 const CATEGORIES = new Set(['projectile', 'control', 'domain', 'economy', 'defense']);
 const BUILD_TAGS = new Set(['projectile', 'control', 'domain', 'defense', 'utility']);
-const ATOMS = new Set([
-  'pierce', 'chain', 'split', 'ricochet', 'aoeOnHit', 'beamMorph', 'mortarMorph',
-  'slow', 'freeze', 'stun', 'knockback', 'taunt', 'vulnerable',
-  'aura', 'groundZone', 'dot', 'summon',
-  'dropRateMul', 'dropLifetimeMul', 'xpMul', 'extraDrop', 'expiryConvert', 'mergeRule', 'mergePulse',
-  'shield', 'thorns', 'breachReduction', 'novaOnBreak', 'execute',
-  'burstDamage', 'focusPriority', 'restore', 'statBuff',
-]);
-const RUNTIME_STATS = new Set([
-  'damage', 'fireRate',
-  'dropRateMul', 'dropLifetimeMul', 'xpMul',
-  'damageAdd', 'fireRateAdd', 'rangeAdd', 'multiAdd', 'maxHpAdd', 'heal',
-  'effectDamageMul', 'quantityAdd', 'controlPotencyMul', 'controlledDamageTakenMul',
-  'areaScaleMul', 'dotDamageMul', 'defenseDurabilityMul', 'retaliationMul',
-]);
-const CARD_STATS = new Set([
-  'damageAdd', 'fireRateAdd', 'rangeAdd', 'multiAdd', 'maxHpAdd', 'heal',
-  'effectDamageMul', 'quantityAdd', 'controlPotencyMul', 'controlledDamageTakenMul',
-  'areaScaleMul', 'dotDamageMul', 'defenseDurabilityMul', 'retaliationMul',
-  'dropRateMul', 'dropLifetimeMul', 'xpMul',
-]);
+/** 原子清单与参数契约的唯一来源：core/effects/atomContract.ts。此处不得再手抄。 */
+const ATOMS = new Set<string>(Object.keys(ATOM_CONTRACT));
+const TRIGGERS = new Set<string>(TRIGGER_NAMES);
+/** 词条属性同理派生自 AFFIX_SINKS（`Record<CardStatKind, …>`），不再手抄第二份。 */
+const CARD_STATS = new Set<string>(Object.keys(AFFIX_SINKS));
 const TIERS: Record<string, string> = { '3': 'core', '5': 'dual', '6': 'transform' };
 const CARD_KEYS = new Set([
   'id', 'god', 'category', 'synergyTags', 'textKey', 'teaching', 'stars', 'amplifyAxis',
-  'consumable', 'evolutionTree', 'affixPool', 'recipeOnly', 'implementationBatch', 'designNotes',
+  'consumable', 'evolutionTree', 'affixPool', 'fusionPolicy', 'recipeOnly', 'implementationBatch', 'designNotes',
 ]);
+/** D2 预留字段的合法值域；字段本身可选，缺省即今日行为。 */
+const FUSION_TRANSFER = new Set(['none', 'strongest', 'sum', 'average']);
+const FUSION_CONFLICT = new Set(['keepHigher', 'keepNewer', 'reject']);
 
-function fail(path: string, message: string): never { throw new Error(`[skills-schema v0.4.0] ${path}: ${message}`); }
+const SKILLS_SCHEMA_VERSION = '0.4.1';
+
+function fail(path: string, message: string): never {
+  throw new Error(`[skills-schema v${SKILLS_SCHEMA_VERSION}] ${path}: ${message}`);
+}
 function object(value: unknown, path: string): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) fail(path, '必须是对象');
   return value as Record<string, unknown>;
 }
-function effects(value: unknown, path: string): void {
+/** 效果所处的结算场景：装备态绑定（带触发器）或消耗态落点释放。 */
+type EffectScope = { kind: 'equip'; trigger: string } | { kind: 'consume' };
+
+function typeMatches(type: AtomParamSpec['type'], value: unknown, spec: AtomParamSpec): boolean {
+  const types = Array.isArray(type) ? type : [type];
+  return types.some(t => {
+    switch (t) {
+      case 'number': return typeof value === 'number' && Number.isFinite(value);
+      case 'integer': return typeof value === 'number' && Number.isInteger(value);
+      case 'string': return typeof value === 'string';
+      case 'boolean': return typeof value === 'boolean';
+      case 'enum': return typeof value === 'string' && !!spec.enum?.includes(value);
+      case 'effects': return Array.isArray(value);
+      case 'record': return !!value && typeof value === 'object' && !Array.isArray(value);
+      default: return false;
+    }
+  });
+}
+
+function typeLabel(type: AtomParamSpec['type'], spec: AtomParamSpec): string {
+  const types = Array.isArray(type) ? type : [type];
+  return types.map(t => (t === 'enum' ? `enum(${spec.enum?.join('|') ?? ''})` : t)).join(' | ');
+}
+
+function effectParam(spec: AtomParamSpec, value: unknown, path: string): void {
+  if (!typeMatches(spec.type, value, spec)) fail(path, `必须是 ${typeLabel(spec.type, spec)}`);
+  if (typeof value === 'number') {
+    if (spec.min !== undefined && value < spec.min) fail(path, `不得小于 ${spec.min}`);
+    if (spec.max !== undefined && value > spec.max) fail(path, `不得大于 ${spec.max}`);
+  }
+}
+
+/** 按 ATOM_CONTRACT 逐条校验：非法原子/未声明参数/必填缺失/类型不符/超范围/非法触发器/装备态·消耗态支持。 */
+function effects(value: unknown, path: string, scope: EffectScope): void {
   if (!Array.isArray(value) || value.length < 1) fail(path, '必须是非空效果数组');
   value.forEach((item, i) => {
-    const e = object(item, `${path}[${i}]`);
-    if (typeof e.atom !== 'string' || !ATOMS.has(e.atom)) fail(`${path}[${i}].atom`, '非法效果原子');
-    for (const key of Object.keys(e)) if (key !== 'atom' && key !== 'params') fail(`${path}[${i}].${key}`, '不允许的字段');
-    if (e.params !== undefined) {
-      const params = object(e.params, `${path}[${i}].params`);
-      if (e.atom === 'restore') {
-        if (typeof params.amount !== 'number' && typeof params.amountRatio !== 'number') {
-          fail(`${path}[${i}].params`, 'restore 必须声明 amount 或 amountRatio');
-        }
-        for (const key of ['amount', 'amountRatio']) {
-          if (params[key] !== undefined
-            && (typeof params[key] !== 'number' || !Number.isFinite(params[key]) || Number(params[key]) < 0)) {
-            fail(`${path}[${i}].params.${key}`, '必须是非负有限数值');
-          }
-        }
+    const at = `${path}[${i}]`;
+    const e = object(item, at);
+    if (typeof e.atom !== 'string' || !ATOMS.has(e.atom)) fail(`${at}.atom`, '非法效果原子');
+    for (const key of Object.keys(e)) if (key !== 'atom' && key !== 'params') fail(`${at}.${key}`, '不允许的字段');
+    const atom = e.atom as AtomName;
+    const contract = atomContract(atom);
+    if (scope.kind === 'equip') {
+      if (!contract.supports.equip) fail(`${at}.atom`, `${atom} 不支持装备态`);
+      if (contract.allowedTriggers !== 'any'
+        && !(contract.allowedTriggers as readonly string[]).includes(scope.trigger)) {
+        fail(`${at}.atom`, `${atom} 不允许绑定到 ${scope.trigger}（允许：${contract.allowedTriggers.join('/')}）`);
       }
-      if (e.atom === 'statBuff') {
-        if (!RUNTIME_STATS.has(String(params.stat))) fail(`${path}[${i}].params.stat`, '非法运行时属性');
-        if (params.operation !== 'add' && params.operation !== 'mul') {
-          fail(`${path}[${i}].params.operation`, '必须为 add 或 mul');
-        }
-        for (const key of ['value', 'duration']) {
-          if (typeof params[key] !== 'number' || !Number.isFinite(params[key])) {
-            fail(`${path}[${i}].params.${key}`, '必须是有限数值');
-          }
-        }
-        if (Number(params.duration) <= 0) fail(`${path}[${i}].params.duration`, '必须大于 0');
-        if (params.operation === 'mul' && Number(params.value) <= 0) {
-          fail(`${path}[${i}].params.value`, '乘法值必须大于 0');
-        }
-        if (params.maxStacks !== undefined
-          && (!Number.isInteger(params.maxStacks) || Number(params.maxStacks) < 1)) {
-          fail(`${path}[${i}].params.maxStacks`, '必须是正整数');
-        }
-      }
-      if (Array.isArray(params.effects)) effects(params.effects, `${path}[${i}].params.effects`);
+    } else if (!contract.supports.consume) {
+      fail(`${at}.atom`, `${atom} 不支持消耗态`);
     }
+
+    const params = e.params === undefined ? {} : object(e.params, `${at}.params`);
+    for (const key of Object.keys(params)) {
+      if (!contract.params[key]) fail(`${at}.params.${key}`, `${atom} 契约未声明该参数`);
+    }
+    for (const [key, spec] of Object.entries(contract.params)) {
+      const raw = params[key];
+      if (raw === undefined) {
+        if (spec.required) fail(`${at}.params.${key}`, `${atom} 必填参数缺失`);
+        continue;
+      }
+      effectParam(spec, raw, `${at}.params.${key}`);
+    }
+
+    // 少数原子的跨参数约束，无法由单参数契约表达。
+    if (atom === 'restore' && typeof params.amount !== 'number' && typeof params.amountRatio !== 'number') {
+      fail(`${at}.params`, 'restore 必须声明 amount 或 amountRatio');
+    }
+    if (atom === 'statBuff') {
+      if (Number(params.duration) <= 0) fail(`${at}.params.duration`, '必须大于 0');
+      if (params.operation === 'mul' && Number(params.value) <= 0) fail(`${at}.params.value`, '乘法值必须大于 0');
+    }
+    if (Array.isArray(params.effects)) effects(params.effects, `${at}.params.effects`, scope);
   });
 }
 function bindings(value: unknown, path: string): void {
   if (!Array.isArray(value) || value.length < 1) fail(path, '必须是非空绑定数组');
   value.forEach((rawBinding, i) => {
     const binding = object(rawBinding, `${path}[${i}]`);
-    if (typeof binding.trigger !== 'string') fail(`${path}[${i}].trigger`, '缺少触发器');
-    effects(binding.effects, `${path}[${i}].effects`);
+    if (typeof binding.trigger !== 'string' || !TRIGGERS.has(binding.trigger)) {
+      fail(`${path}[${i}].trigger`, '缺少或非法触发器');
+    }
+    effects(binding.effects, `${path}[${i}].effects`, { kind: 'equip', trigger: binding.trigger });
   });
 }
 function evolutionTree(value: unknown, path: string): void {
@@ -218,10 +247,34 @@ function affixPool(value: unknown, path: string, card: Record<string, unknown>):
   });
 }
 
+/**
+ * D2 预留字段校验：只保证「声明了就得合法」，字段本身可选且运行时无消费者（Stage 5 实现）。
+ * 现有 skills.json 一张卡都没声明——这是有意的，缺省即今日行为。
+ */
+function fusionPolicy(value: unknown, path: string): void {
+  const policy = object(value, path);
+  for (const key of Object.keys(policy)) {
+    if (!['affixTransferPolicy', 'conflictResolution', 'sourceCardIds'].includes(key)) {
+      fail(`${path}.${key}`, '不允许的字段');
+    }
+  }
+  if (policy.affixTransferPolicy !== undefined && !FUSION_TRANSFER.has(String(policy.affixTransferPolicy))) {
+    fail(`${path}.affixTransferPolicy`, `必须是 ${[...FUSION_TRANSFER].join('/')}`);
+  }
+  if (policy.conflictResolution !== undefined && !FUSION_CONFLICT.has(String(policy.conflictResolution))) {
+    fail(`${path}.conflictResolution`, `必须是 ${[...FUSION_CONFLICT].join('/')}`);
+  }
+  if (policy.sourceCardIds !== undefined) {
+    if (!Array.isArray(policy.sourceCardIds) || policy.sourceCardIds.some(id => typeof id !== 'string' || !id)) {
+      fail(`${path}.sourceCardIds`, '必须是非空字符串数组');
+    }
+  }
+}
+
 /** 启动/构建共用的严格 v0.4.0 卡牌结构校验；失败即抛错，绝不降级。 */
 export function validateSkillsConfig(value: unknown): asserts value is SkillsConfig {
   const root = object(value, '$');
-  if (root.version !== '0.4.0') fail('$.version', '必须等于 0.4.0');
+  if (root.version !== SKILLS_SCHEMA_VERSION) fail('$.version', `必须等于 ${SKILLS_SCHEMA_VERSION}`);
   if (!Array.isArray(root.cards)) fail('$.cards', '必须是数组');
   root.cards.forEach((raw, index) => {
     const path = `$.cards[${index}]`; const card = object(raw, path);
@@ -255,11 +308,18 @@ export function validateSkillsConfig(value: unknown): asserts value is SkillsCon
     if (consumable.placement !== 'point') fail(`${path}.consumable.placement`, '必须为 point');
     const anchors = object(consumable.anchors, `${path}.consumable.anchors`);
     if (Object.keys(anchors).sort().join(',') !== '1,3,6') fail(`${path}.consumable.anchors`, '必须且只能定义 1/3/6 锚点');
-    for (const star of ['1', '3', '6']) effects(object(anchors[star], `${path}.consumable.anchors.${star}`).effects, `${path}.consumable.anchors.${star}.effects`);
+    for (const star of ['1', '3', '6']) {
+      effects(
+        object(anchors[star], `${path}.consumable.anchors.${star}`).effects,
+        `${path}.consumable.anchors.${star}.effects`,
+        { kind: 'consume' },
+      );
+    }
     if (recipeOnly && card.evolutionTree !== undefined) fail(`${path}.evolutionTree`, '配方终态不得再有进化树');
     if (!recipeOnly && card.evolutionTree === undefined) fail(`${path}.evolutionTree`, '正式卡必须有完整进化树');
     if (card.evolutionTree !== undefined) evolutionTree(card.evolutionTree, `${path}.evolutionTree`);
     if (card.affixPool === undefined) fail(`${path}.affixPool`, '每张卡必须声明词条池');
     affixPool(card.affixPool, `${path}.affixPool`, card);
+    if (card.fusionPolicy !== undefined) fusionPolicy(card.fusionPolicy, `${path}.fusionPolicy`);
   });
 }

@@ -1,4 +1,5 @@
 import type { AtomName, BindingDef, EffectDef, Trigger } from '../core/effects/defs';
+import { effectParams, nestedEffectsOf } from '../core/effects/atomContract';
 import { texts } from '../data';
 
 export interface EffectTextLine {
@@ -122,9 +123,7 @@ export function formatTrigger(trigger: Trigger, params?: BindingDef['triggerPara
 }
 
 function nestedEffects(effect: EffectDef, depth: number): EffectTextLine[] {
-  const nested = effect.params?.effects;
-  if (!Array.isArray(nested)) return [];
-  return nested.flatMap(item =>
+  return nestedEffectsOf(effect).flatMap(item =>
     item && typeof item === 'object' && 'atom' in item
       ? formatEffect(item as EffectDef, depth + 1)
       : []);
@@ -132,7 +131,9 @@ function nestedEffects(effect: EffectDef, depth: number): EffectTextLine[] {
 
 /** 把一个配置原子翻译成玩家可读机制句；所有数值都来自传入配置。 */
 export function formatEffect(effect: EffectDef, depth = 0): EffectTextLine[] {
-  const p = effect.params ?? {};
+  // 文案层对全部原子做同构取值，走契约的松散视图而非逐原子窄化。
+  const p = effectParams(effect);
+  const atom: AtomName = effect.atom;
   let text: string;
   switch (effect.atom) {
     case 'pierce':
@@ -290,9 +291,9 @@ export function formatEffect(effect: EffectDef, depth = 0): EffectTextLine[] {
       if (p.maxStacks != null) text += `，最多 ${shown(p.maxStacks)} 层`;
       break;
     default:
-      text = `产生${atomLabel(effect.atom)}效果`;
+      text = `产生${atomLabel(atom)}效果`;
   }
-  return [keywordLine(effect.atom, text, depth), ...nestedEffects(effect, depth)];
+  return [keywordLine(atom, text, depth), ...nestedEffects(effect, depth)];
 }
 
 export function formatBinding(binding: BindingDef): EffectTextBlock {

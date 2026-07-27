@@ -3,6 +3,7 @@ import { texts } from '../data';
 import type { GameEvent } from '../core/types';
 import { fmt } from './format';
 import { cardDisplayName as name } from './cardMeta';
+import { relicDisplayName } from './relicMeta';
 
 const T = texts.toast;
 const shownRecipeAvailability = new Set<string>();
@@ -78,7 +79,7 @@ export function formatToast(ev: GameEvent): string | null {
     case 'shieldBroken': return T.shieldBroken;
     case 'shieldRestored': return T.shieldRestored;
     case 'testDrops': return fmt(T.testDrops, { name: name(ev.cardType) });
-    case 'relicSelected': return fmt(T.perkApplied, { title: ev.title });
+    case 'relicSelected': return fmt(T.perkApplied, { title: relicDisplayName(ev.relicId) });
     case 'waveBaseRewardChosen': {
       const add = ev.stat === 'xpGainPct' ? `${ev.add * 100}%` : String(ev.add);
       const stat = (texts.waveRewardStats as Record<string, string>)[ev.stat] ?? ev.stat;

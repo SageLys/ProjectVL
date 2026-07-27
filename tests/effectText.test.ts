@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { AtomName, Trigger } from '../src/core/effects/defs';
+import type { AtomName, EffectDef, Trigger } from '../src/core/effects/defs';
 import { ATOM_LABELS, formatEffect, formatTrigger } from '../src/ui/effectText';
 
 const atoms = Object.keys(ATOM_LABELS) as AtomName[];
@@ -10,6 +10,7 @@ const triggers: Trigger[] = [
 
 describe('effect text coverage', () => {
   it.each(atoms)('formats %s as a Chinese mechanism sentence', atom => {
+    // 故意用「全参数」超集喂给每个原子，验证文案层对任意原子都能成句；判别联合在此需显式放宽。
     const text = formatEffect({
       atom,
       params: {
@@ -18,7 +19,7 @@ describe('effect text coverage', () => {
         radius: 65, falloff: 0.5, distance: 30, mul: 1.2, amount: 10,
         damageMul: 1.5, absorbHits: 2, regenSeconds: 4, hpThresholdRatio: 0.2,
       },
-    }).map(line => line.text).join(' ');
+    } as unknown as EffectDef).map(line => line.text).join(' ');
     expect(text).toMatch(/[\u4e00-\u9fff]/);
     expect(text).not.toContain('damageRetention');
     expect(text).not.toContain('tickInterval');

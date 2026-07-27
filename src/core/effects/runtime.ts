@@ -2,6 +2,7 @@
 // updateGame 在各系统推进后统一调用 tickEffects。
 import { cfg } from '../../config';
 import type { Config, GameEvent, GameState, Rng, Summon, Zone } from '../types';
+import { atomNumberDefault } from './atomContract';
 import { runEffects, threatDirectionSummonPosition, type EffectCtx } from './registry';
 import { fireTrigger, getModifiers, tickIntervalBindings } from './interpreter';
 import { tickStatusTimers, applyKnockback } from './statusSystem';
@@ -50,7 +51,8 @@ function tickAuras(state: GameState, config: Config, rng: Rng, dt: number, event
     const clock = (state.intervalClocks[aura.key] ?? aura.tickInterval) - dt;
     if (clock <= 0) {
       state.intervalClocks[aura.key] = aura.tickInterval;
-      const radius = aura.radius ?? (aura.radiusRatioOfRange ?? 0.5) * totalRange(state, config);
+      const ratioOfRange = aura.radiusRatioOfRange ?? atomNumberDefault('aura', 'radiusRatioOfRange');
+      const radius = aura.radius ?? ratioOfRange * totalRange(state, config);
       const t = cfg.combat.turret;
       for (const enemy of [...state.enemies]) {
         if (Math.hypot(enemy.x - t.x, enemy.y - t.y) > radius + enemy.r) continue;

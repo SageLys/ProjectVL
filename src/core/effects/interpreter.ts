@@ -10,7 +10,8 @@
 import { cfg } from '../../config';
 import type { RunBaseStatKind } from '../../config/types';
 import type { AttackInstance, Bullet, Card, CardType, Config, Enemy, GameEvent, GameState, GroundDrop, Rng, Summon, WeaponImpactSpec } from '../types';
-import type { BindingDef, CardDef, EffectDef, Trigger } from './defs';
+import type { AtomName, BindingDef, CardDef, EffectDef, Trigger } from './defs';
+import { atomBooleanDefault, atomNumberDefault, atomStringDefault, effectParams } from './atomContract';
 import { ATOMS, runEffects, type EffectCtx } from './registry';
 import { totalDamage } from '../stats';
 import { applyBuildScalingToBindings, applyBuildScalingToTier } from '../systems/buildModifierSystem';
@@ -60,6 +61,9 @@ export interface WeaponFormSpec {
 
 const formNumber = (p: Record<string, unknown>, key: string, fallback: number): number =>
   typeof p[key] === 'number' ? (p[key] as number) : fallback;
+/** 换形参数的兜底同样取自 ATOM_CONTRACT，保证 passive 聚合与触发式调用同源。 */
+const formParam = (p: Record<string, unknown>, atom: 'beamMorph' | 'mortarMorph', key: string): number =>
+  formNumber(p, key, atomNumberDefault(atom, key));
 
 /**
  * 主炮形态正交融合：先按 cardType（再按 id）排序，再独立选择 delivery 与叠加 impact。
@@ -70,10 +74,10 @@ export function composeWeaponForm(forms: WeaponFormContribution[]): WeaponFormSp
     a.sourceCardType.localeCompare(b.sourceCardType) || a.sourceCardId - b.sourceCardId);
   let delivery: WeaponFormSpec['delivery'] = 'projectile';
   let deliveryDamageRatio = 1;
-  let interval = 0.9;
-  let duration = 0.6;
-  let tickInterval = 0.1;
-  let width = 26;
+  let interval = atomNumberDefault('beamMorph', 'interval');
+  let duration = atomNumberDefault('beamMorph', 'duration');
+  let tickInterval = atomNumberDefault('beamMorph', 'tickInterval');
+  let width = atomNumberDefault('beamMorph', 'width');
   let sourceStar = 0;
   let sourceCardType: CardType | undefined;
   const suppressedSourceCardTypes: CardType[] = [];
@@ -85,11 +89,11 @@ export function composeWeaponForm(forms: WeaponFormContribution[]): WeaponFormSp
     if (form.kind === 'beam') {
       // line 的 delivery 优先级最高；其 damageRatio 属于投递轴本体。
       delivery = 'line';
-      deliveryDamageRatio = formNumber(form.params, 'damageRatio', 1) * damping;
-      interval = formNumber(form.params, 'interval', 0.9);
-      duration = formNumber(form.params, 'duration', 0.6);
-      tickInterval = formNumber(form.params, 'tickInterval', 0.1);
-      width = formNumber(form.params, 'width', 26);
+      deliveryDamageRatio = formParam(form.params, 'beamMorph', 'damageRatio') * damping;
+      interval = formParam(form.params, 'beamMorph', 'interval');
+      duration = formParam(form.params, 'beamMorph', 'duration');
+      tickInterval = formParam(form.params, 'beamMorph', 'tickInterval');
+      width = formParam(form.params, 'beamMorph', 'width');
       sourceStar = form.star;
       sourceCardType = form.sourceCardType;
     } else {
@@ -103,9 +107,9 @@ export function composeWeaponForm(forms: WeaponFormContribution[]): WeaponFormSp
         kind: 'aoe',
         sourceCardType: form.sourceCardType,
         sourceStar: form.star,
-        damageRatio: formNumber(form.params, 'damageRatio', 1.2) * damping,
-        radius: formNumber(form.params, 'radius', 90) * (index === 0 ? 1 : cfg.combat.weaponFusion.radiusMul),
-        falloff: formNumber(form.params, 'falloff', 0.5),
+        damageRatio: formParam(form.params, 'mortarMorph', 'damageRatio') * damping,
+        radius: formParam(form.params, 'mortarMorph', 'radius') * (index === 0 ? 1 : cfg.combat.weaponFusion.radiusMul),
+        falloff: formParam(form.params, 'mortarMorph', 'falloff'),
       });
     }
   });
@@ -357,6 +361,14 @@ export interface Modifiers {
 
 const num = (p: Record<string, unknown> | undefined, k: string, d: number): number =>
   p && typeof p[k] === 'number' ? (p[k] as number) : d;
+const str = (p: Record<string, unknown>, k: string, d: string): string =>
+  typeof p[k] === 'string' ? (p[k] as string) : d;
+/** passive 聚合路径的兜底：同样只认 ATOM_CONTRACT（scope='passive' 覆盖触发路径的默认值）。 */
+const passiveNum = (p: Record<string, unknown>, atom: AtomName, k: string): number =>
+  num(p, k, atomNumberDefault(atom, k, { scope: 'passive' }));
+
+/** 融合契约常量（非原子参数）：突破减免加法叠加后的硬上限。 */
+const BREACH_REDUCTION_CAP = 0.9;
 
 export function getModifiers(state: GameState): Modifiers {
   const runtimeDropRate = modifierTotal(state, 'dropRateMul');
@@ -381,22 +393,32 @@ export function getModifiers(state: GameState): Modifiers {
   };
   for (const { card, binding, bindingIndex } of equippedBindings(state)) {
     for (const ef of binding.effects) {
-      const p = ef.params ?? {};
+      const p = effectParams(ef);
       switch (ef.atom) {
-        case 'dropRateMul': m.dropRateMul *= num(p, 'mul', 1); break;
-        case 'dropLifetimeMul': m.dropLifetimeMul *= num(p, 'mul', 1); break;
-        case 'xpMul': m.xpMul *= num(p, 'mul', 1); break;
-        case 'thorns': m.thornsRatio += num(p, 'ratio', 0); break;
-        case 'breachReduction': m.breachReduction = Math.min(0.9, m.breachReduction + num(p, 'ratio', 0)); break;
-        case 'execute': m.executeThreshold = Math.max(m.executeThreshold, num(p, 'hpThresholdRatio', 0)); break;
+        case 'dropRateMul': m.dropRateMul *= passiveNum(p, 'dropRateMul', 'mul'); break;
+        case 'dropLifetimeMul': m.dropLifetimeMul *= passiveNum(p, 'dropLifetimeMul', 'mul'); break;
+        case 'xpMul': m.xpMul *= passiveNum(p, 'xpMul', 'mul'); break;
+        case 'thorns': m.thornsRatio += passiveNum(p, 'thorns', 'ratio'); break;
+        case 'breachReduction':
+          m.breachReduction = Math.min(BREACH_REDUCTION_CAP, m.breachReduction + passiveNum(p, 'breachReduction', 'ratio'));
+          break;
+        case 'execute':
+          m.executeThreshold = Math.max(m.executeThreshold, passiveNum(p, 'execute', 'hpThresholdRatio'));
+          break;
         case 'novaOnBreak':
-          m.novaOnBreak = { damage: num(p, 'damage', 20), knockbackDistance: num(p, 'knockbackDistance', 80) };
+          m.novaOnBreak = {
+            damage: passiveNum(p, 'novaOnBreak', 'damage'),
+            knockbackDistance: passiveNum(p, 'novaOnBreak', 'knockbackDistance'),
+          };
           break;
         case 'mergeRule':
-          m.mergeRules.push({ rule: String(p.rule ?? ''), value: num(p, 'value', 0) });
+          m.mergeRules.push({
+            rule: str(p, 'rule', atomStringDefault('mergeRule', 'rule')),
+            value: passiveNum(p, 'mergeRule', 'value'),
+          });
           break;
         case 'expiryConvert':
-          m.expiryConvert = { ratio: num(p, 'ratio', 0.5) };
+          m.expiryConvert = { ratio: passiveNum(p, 'expiryConvert', 'ratio') };
           break;
         case 'beamMorph':
           if (binding.trigger === 'passive') m.weaponForms.push({
@@ -415,7 +437,7 @@ export function getModifiers(state: GameState): Modifiers {
               sourceCardType: card.type,
               radius: typeof p.radius === 'number' ? (p.radius as number) : null,
               radiusRatioOfRange: typeof p.radiusRatioOfRange === 'number' ? (p.radiusRatioOfRange as number) : null,
-              tickInterval: num(p, 'tickInterval', 1),
+              tickInterval: passiveNum(p, 'aura', 'tickInterval'),
               effects: Array.isArray(p.effects) ? (p.effects as EffectDef[]) : [],
               star: card.star,
             });
@@ -435,21 +457,23 @@ interface ExpectedEquipmentSummon {
 }
 
 function equipmentSummonMatches(summon: Summon, expected: ExpectedEquipmentSummon, baseDamage: number): boolean {
-  const p = expected.effect.params ?? {};
-  const kind = String(p.kind ?? 'decoy');
-  const hp = num(p, 'hp', 40);
-  const tauntRadius = num(p, 'tauntRadius', kind === 'orbital' ? 0 : 140);
-  const explode = p.explode === true;
+  const p = effectParams(expected.effect);
+  const summonNum = (key: string, variant?: string): number =>
+    num(p, key, atomNumberDefault('summon', key, { variant }));
+  const summonBool = (key: string): boolean =>
+    typeof p[key] === 'boolean' ? (p[key] as boolean) : atomBooleanDefault('summon', key);
+  const kind = str(p, 'kind', atomStringDefault('summon', 'kind'));
+  const explode = summonBool('explode');
   return summon.kind === kind
-    && summon.maxHp === hp
+    && summon.maxHp === summonNum('hp')
     && summon.remaining === undefined
-    && summon.tauntRadius === tauntRadius
-    && summon.priorityWeight === num(p, 'priorityWeight', 1)
-    && summon.damageRatio === num(p, 'damageRatio', 0.3)
+    && summon.tauntRadius === summonNum('tauntRadius', kind)
+    && summon.priorityWeight === summonNum('priorityWeight')
+    && summon.damageRatio === summonNum('damageRatio')
     && !!summon.explodeOnDeath === explode
-    && (!explode || (summon.explodeOnDeath?.damage === baseDamage * num(p, 'explodeDamageMul', 1.5)
-      && summon.explodeOnDeath.knockbackDistance === num(p, 'knockbackDistance', 80)))
-    && !!summon.respawnOnce === (p.respawnOnce === true);
+    && (!explode || (summon.explodeOnDeath?.damage === baseDamage * summonNum('explodeDamageMul')
+      && summon.explodeOnDeath.knockbackDistance === summonNum('knockbackDistance')))
+    && !!summon.respawnOnce === summonBool('respawnOnce');
 }
 
 /**
@@ -462,7 +486,7 @@ export function reconcileEquipmentPassives(state: GameState, config: Config, rng
   for (const { card, binding, bindingIndex } of equippedBindings(state)) {
     const summonEffect = binding.effects.find(effect => effect.atom === 'summon');
     if (!summonEffect) continue;
-    if (summonEffect.params?.replacesEarlier === true) {
+    if (effectParams(summonEffect).replacesEarlier === true) {
       for (const [key, item] of expected) {
         if (item.card.id === card.id) expected.delete(key);
       }

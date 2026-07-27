@@ -5,6 +5,7 @@ import {
   fireTrigger, getModifiers, MODIFIER_ATOMS_HANDLED, reconcileEquipmentPassives,
   registerSkillDefs, tickIntervalBindings,
 } from '../src/core/effects/interpreter';
+import { nestedEffectsOf } from '../src/core/effects/atomContract';
 import { ATOMS, NOOP_MODIFIER_ATOMS } from '../src/core/effects/registry';
 import { tickEffects } from '../src/core/effects/runtime';
 import { shoot, updateBullets, updateTurret } from '../src/core/systems/combatSystem';
@@ -23,10 +24,7 @@ beforeEach(() => {
 });
 
 function walkEffects(effects: readonly EffectDef[]): EffectDef[] {
-  return effects.flatMap(effect => {
-    const nested = Array.isArray(effect.params?.effects) ? effect.params.effects as EffectDef[] : [];
-    return [effect, ...walkEffects(nested)];
-  });
+  return effects.flatMap(effect => [effect, ...walkEffects(nestedEffectsOf(effect) as EffectDef[])]);
 }
 
 function equip(state: GameState, entries: ReadonlyArray<readonly [CardType, number]>): void {

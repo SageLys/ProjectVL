@@ -42,7 +42,7 @@ describe('god pool telemetry', () => {
         cardTypes: [...state.godPool.activePool],
       },
       { type: 'relicOffered', relicIndex: 0, options: ['proj_damage', 'neutral_calibrator'] },
-      { type: 'relicSelected', relicId: 'proj_damage', title: '超压弹道', rarity: 'common', god: 'storm' },
+      { type: 'relicSelected', relicId: 'proj_damage', rarity: 'common', god: 'storm' },
     ]);
     spawnGroundDrop(state, createDefaultConfig(), constRng(0), 10, 10, 'pierce', 1, 'normalKill');
     telemetry.beforeUpdate();

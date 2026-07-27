@@ -1,5 +1,5 @@
 // 纯规则层类型定义。core/ 内禁止出现 DOM / Canvas / 浏览器 API。（P3 重构版）
-import type { BuildTag, EffectDef } from './effects/defs';
+import type { BuildTag, EffectDef, RuntimeStatKind } from './effects/defs';
 import type { RunSummary } from './settlement';
 import type { CardStatKind, DifficultyId, GodId, RunBaseStatKind, WaveChoiceStatKind } from '../config/types';
 import type { ValidationRewardSpec, ValidationRewardTypePolicy } from '../config/types';
@@ -233,10 +233,11 @@ export interface Enemy {
   bossRuntime?: BossRuntimeState;
 }
 
-export interface AttackRider extends EffectDef {
+/** EffectDef 是判别联合，故用交叉类型扩展而非 interface extends。 */
+export type AttackRider = EffectDef & {
   /** Equipment card that attached this rider, for DEV attribution only. */
   sourceCardId?: number;
-}
+};
 
 export interface Bullet {
   x: number;
@@ -443,7 +444,7 @@ export interface ShieldState {
 /** Generic runtime stat modifier. Consumable affixes always set remaining. */
 export interface RuntimeStatModifier {
   sourceId: string;
-  stat: CardStatKind | 'damage' | 'fireRate' | 'dropRateMul' | 'dropLifetimeMul' | 'xpMul';
+  stat: RuntimeStatKind;
   operation: 'add' | 'mul';
   value: number;
   remaining?: number;
@@ -595,7 +596,8 @@ export type GameEvent =
   | { type: 'bossRewardGranted'; wave: number; grants: Array<{ star: number; count: number }> }
   | { type: 'levelUp' }
   | { type: 'relicOffered'; relicIndex: number; options: string[] }
-  | { type: 'relicSelected'; relicId: string; title: string; rarity: 'common' | 'rare' | 'epic'; god?: GodId }
+  // 只带 id：显示名属皮肤层，由 ui/relicMeta 依 textKey 解析（core 不得依赖 texts）。
+  | { type: 'relicSelected'; relicId: string; rarity: 'common' | 'rare' | 'epic'; god?: GodId }
   | { type: 'evolutionBranchOffered'; cardType: CardType; checkpointStar: number; options: string[]; provisionalCardId: number }
   | { type: 'evolutionBranchSelected'; cardType: CardType; checkpointStar: number; optionId: string; provisionalCardId: number }
   | { type: 'recipeAvailable'; recipeIds: string[] }

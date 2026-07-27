@@ -1,0 +1,151 @@
+{
+  "spec": {
+    "id": "01-slice-combat",
+    "seed": 42,
+    "variants": [],
+    "dt": 0.03333333333333333,
+    "frames": 480,
+    "start": "wave1"
+  },
+  "framesRun": 480,
+  "mode": "playing",
+  "win": null,
+  "hp": 100,
+  "maxHp": 100,
+  "wave": {
+    "wave": 1,
+    "phase": "regular",
+    "spawnLeft": 47,
+    "waveSpawnQuota": 60,
+    "intermission": {
+      "active": false,
+      "step": "decide",
+      "afterWave": 0
+    }
+  },
+  "enemiesRemaining": 6,
+  "cumulativeDamageDealt": 234,
+  "cumulativeDamageTaken": 0,
+  "counters": {
+    "kills": 7,
+    "collected": 0,
+    "expired": 3,
+    "merges": 0,
+    "consumes": 0,
+    "equipOps": 0,
+    "xp": 7,
+    "level": 1
+  },
+  "cards": [],
+  "equipment": [],
+  "wildcards": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "4": 0,
+    "5": 0
+  },
+  "relics": [],
+  "dropSequence": [
+    {
+      "frame": 209,
+      "action": "spawned",
+      "dropId": 1,
+      "kind": "card",
+      "cardType": "galvanicWard",
+      "star": 1
+    },
+    {
+      "frame": 269,
+      "action": "spawned",
+      "dropId": 2,
+      "kind": "card",
+      "cardType": "stormcall",
+      "star": 1
+    },
+    {
+      "frame": 309,
+      "action": "spawned",
+      "dropId": 3,
+      "kind": "card",
+      "cardType": "magmaPool",
+      "star": 1
+    },
+    {
+      "frame": 353,
+      "action": "spawned",
+      "dropId": 4,
+      "kind": "card",
+      "cardType": "sentinel",
+      "star": 1
+    },
+    {
+      "frame": 359,
+      "action": "expired",
+      "dropId": 1,
+      "kind": "card",
+      "cardType": null,
+      "star": 1
+    },
+    {
+      "frame": 419,
+      "action": "expired",
+      "dropId": 2,
+      "kind": "card",
+      "cardType": null,
+      "star": 1
+    },
+    {
+      "frame": 427,
+      "action": "spawned",
+      "dropId": 5,
+      "kind": "card",
+      "cardType": "impact",
+      "star": 1
+    },
+    {
+      "frame": 459,
+      "action": "expired",
+      "dropId": 3,
+      "kind": "card",
+      "cardType": null,
+      "star": 1
+    }
+  ],
+  "eventSequence": [
+    {
+      "frame": 0,
+      "type": "waveStart"
+    },
+    {
+      "frame": 121,
+      "type": "bountyOfferSpawned"
+    },
+    {
+      "frame": 359,
+      "type": "dropExpired"
+    },
+    {
+      "frame": 362,
+      "type": "bountyOfferExpired"
+    },
+    {
+      "frame": 419,
+      "type": "dropExpired"
+    },
+    {
+      "frame": 459,
+      "type": "dropExpired"
+    }
+  ],
+  "eventCounts": {
+    "waveStart": 1,
+    "bountyOfferSpawned": 1,
+    "dropExpired": 3,
+    "bountyOfferExpired": 1
+  },
+  "rng": {
+    "draws": 854,
+    "last": 0.724326335825026
+  }
+}

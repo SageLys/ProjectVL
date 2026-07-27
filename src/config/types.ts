@@ -274,9 +274,8 @@ export interface RelicDef {
   id: string;
   god?: GodId;
   rarity: 'common' | 'rare' | 'epic';
+  /** 文案唯一入口：`${textKey}.name` / `${textKey}.desc` 落在 texts.json（配置层不再内联文本）。 */
   textKey: string;
-  title: string;
-  desc: string;
   targetTags: BuildTag[];
   effects: RelicBuildEffect[];
   poolInfluence?: { godWeightAdd: number; pityDrops?: number };
@@ -363,6 +362,20 @@ export interface CardAffixCandidateDef {
   consumableDuration: number;
 }
 
+/**
+ * D2 预留：卡间融合（配方进化）时数值词条如何传递。**占位契约，运行时无效果**——
+ * loader / 校验器只检查类型合法，解释器与词条系统一律忽略；实现见 Stage 5。
+ * 缺省（不声明本字段）时行为与今日完全一致：融合产物按自身 affixPool 重新掷点。
+ */
+export interface CardFusionPolicyDef {
+  /** 源卡词条如何合并进产物：none=不继承（当前实际行为）。 */
+  affixTransferPolicy?: 'none' | 'strongest' | 'sum' | 'average';
+  /** 同属性词条冲突时的取舍。 */
+  conflictResolution?: 'keepHigher' | 'keepNewer' | 'reject';
+  /** 允许作为融合来源的卡 id；缺省 = 由 evolutionRecipes 决定。 */
+  sourceCardIds?: string[];
+}
+
 export interface CardAffixPoolDef {
   count: number;
   candidates: CardAffixCandidateDef[];
@@ -439,14 +452,40 @@ export interface EconomyConfig {
   ordinaryDropRate: OrdinaryDropRateConfig;
 }
 
-export interface TunerRange {
-  min: number;
-  max: number;
-  step: number;
+export type TunerGroup = 'waves' | 'combat' | 'enemies' | 'drops' | 'progression' | 'bounty' | 'p2';
+
+/** 控件形态：number=滑杆、boolean=复选、enum=下拉、text=自由文本（当前仅 Boss 波次列表）。 */
+export type TunerParamType = 'number' | 'boolean' | 'enum' | 'text';
+
+/**
+ * 调参元数据的**唯一来源**（范围 + 标签键 + 分组 + 生效策略 + 控件形态合一）。
+ * 迁移前分散在 tuner.json（min/max/step）、ui/tunerSchema.ts（label/group/waveDeferred）
+ * 与 ui/tunerPanel.ts（专用控件的内联 HTML）三处。
+ */
+export interface TunerParamMeta {
+  /** 完整配置路径，例如 `combat.defaults.damage`；同时是本表的主键。 */
+  path: string;
+  type: TunerParamType;
+  /** texts.json 中的文案键（`tuner.params.<path>`）。 */
+  labelKey: string;
+  group: TunerGroup;
+  min?: number;
+  max?: number;
+  step?: number;
+  /** waveDeferred = 战斗中改动排队到下一波生效。 */
+  applyPolicy: 'immediate' | 'waveDeferred';
+  /** 预留：单位标注（数值标定阶段填写，当前一律缺省）。 */
+  unit?: string;
+  /** type='enum' 的候选值。 */
+  options?: readonly string[];
+  /** false = 已声明范围但当前不在面板暴露；缺省视为 true。 */
+  exposed?: boolean;
 }
 
-/** key 为面板参数的完整配置路径（例如 `combat.defaults.damage`）。 */
-export type TunerConfig = Record<string, TunerRange>;
+export interface TunerConfig {
+  version: string;
+  params: TunerParamMeta[];
+}
 
 export type ConfirmStyle = 'bubble' | 'hold-ring';
 export type HoldOrDbl = 'double-tap' | 'long-press';

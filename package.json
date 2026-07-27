@@ -10,7 +10,10 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "metrics": "node scripts/computeExperienceMetrics.ts"
+    "metrics": "node scripts/computeExperienceMetrics.ts",
+    "replay:record": "vite-node scripts/recordGoldenReplay.ts",
+    "validate": "vite-node scripts/validateConfig.ts",
+    "format:config": "vite-node scripts/formatConfig.ts"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",

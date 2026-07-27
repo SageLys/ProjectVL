@@ -30,34 +30,103 @@
     "selectionWaves": 3,
     "validationWaves": 2,
     "selection": {
-      "waveQuota": { "start": 60, "end": 75, "power": 1 },
-      "targetOnScreen": { "start": 7, "end": 10, "power": 1 },
+      "waveQuota": {
+        "start": 60,
+        "end": 75,
+        "power": 1
+      },
+      "targetOnScreen": {
+        "start": 7,
+        "end": 10,
+        "power": 1
+      },
       "checkInterval": 1.95,
       "batchMax": 6,
       "maxAlive": 24,
-      "waveEndSprint": { "window": 0, "multiplier": 1 }
+      "waveEndSprint": {
+        "window": 0,
+        "multiplier": 1
+      }
     },
     "build": {
-      "waveQuota": { "start": 95, "end": 170, "power": 1 },
-      "targetOnScreen": { "start": 14, "end": 28, "power": 1 },
+      "waveQuota": {
+        "start": 95,
+        "end": 170,
+        "power": 1
+      },
+      "targetOnScreen": {
+        "start": 14,
+        "end": 28,
+        "power": 1
+      },
       "checkInterval": 1.95,
       "batchMax": 10,
       "maxAlive": 40,
-      "waveEndSprint": { "window": 5, "multiplier": 1.5 }
+      "waveEndSprint": {
+        "window": 5,
+        "multiplier": 1.5
+      }
     },
     "validation": [
       {
         "enemies": [
-          { "type": "tank", "hpMul": 14, "damageMul": 2, "speedMul": 0.75, "ccResistOverride": 0.7, "knockbackResistOverride": 0.8, "reward": { "kind": "card", "star": 4, "count": 1, "typePolicy": "focusGod" } }
+          {
+            "type": "tank",
+            "hpMul": 14,
+            "damageMul": 2,
+            "speedMul": 0.75,
+            "ccResistOverride": 0.7,
+            "knockbackResistOverride": 0.8,
+            "reward": {
+              "kind": "card",
+              "star": 4,
+              "count": 1,
+              "typePolicy": "focusGod"
+            }
+          }
         ],
-        "bossReward": { "kind": "wildcard", "star": 5, "count": 1 }
+        "bossReward": {
+          "kind": "wildcard",
+          "star": 5,
+          "count": 1
+        }
       },
       {
         "enemies": [
-          { "type": "tank", "hpMul": 20, "damageMul": 2.5, "speedMul": 0.7, "ccResistOverride": 0.7, "knockbackResistOverride": 0.8, "reward": { "kind": "card", "star": 5, "count": 1, "typePolicy": "focusGod" } },
-          { "type": "fast", "hpMul": 10, "damageMul": 2, "speedMul": 1.1, "ccResistOverride": 0.5, "knockbackResistOverride": 0.6, "reward": { "kind": "card", "star": 3, "count": 1, "typePolicy": "focusGod" } }
+          {
+            "type": "tank",
+            "hpMul": 20,
+            "damageMul": 2.5,
+            "speedMul": 0.7,
+            "ccResistOverride": 0.7,
+            "knockbackResistOverride": 0.8,
+            "reward": {
+              "kind": "card",
+              "star": 5,
+              "count": 1,
+              "typePolicy": "focusGod"
+            }
+          },
+          {
+            "type": "fast",
+            "hpMul": 10,
+            "damageMul": 2,
+            "speedMul": 1.1,
+            "ccResistOverride": 0.5,
+            "knockbackResistOverride": 0.6,
+            "reward": {
+              "kind": "card",
+              "star": 3,
+              "count": 1,
+              "typePolicy": "focusGod"
+            }
+          }
         ],
-        "bossReward": { "kind": "wildcard", "star": 5, "count": 1 }
+        "bossReward": {
+          "kind": "wildcard",
+          "star": 5,
+          "count": 1
+        }
       }
     ]
   },
@@ -78,14 +147,36 @@
     "fastThreshold": 0.47
   },
   "bossWaves": [
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
   ],
   "waveBoss": {
     "reward": {
       "schedule": {
-        "selection": [1, 1, 1],
-        "build": [2, 2, 3, 4, 4],
-        "validation": [5, 5]
+        "selection": [
+          1,
+          1,
+          1
+        ],
+        "build": [
+          2,
+          2,
+          3,
+          4,
+          4
+        ],
+        "validation": [
+          5,
+          5
+        ]
       },
       "count": 1
     }

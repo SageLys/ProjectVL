@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { cfg } from '../src/config';
 import type { RelicDef } from '../src/config/types';
 import type { BindingDef, CardDef, ConsumableTierDef, EffectDef } from '../src/core/effects/defs';
+import { effectParams, nestedEffectsOf } from '../src/core/effects/atomContract';
 import {
   getModifiers,
   registerSkillDefs,
@@ -62,14 +63,13 @@ function findAtom(effects: EffectDef[], atom: EffectDef['atom']): EffectDef[] {
   const found: EffectDef[] = [];
   for (const effect of effects) {
     if (effect.atom === atom) found.push(effect);
-    const nested = effect.params?.effects;
-    if (Array.isArray(nested)) found.push(...findAtom(nested as EffectDef[], atom));
+    found.push(...findAtom(nestedEffectsOf(effect) as EffectDef[], atom));
   }
   return found;
 }
 
 function numberParam(effect: EffectDef, key: string): number {
-  return effect.params?.[key] as number;
+  return effectParams(effect)[key] as number;
 }
 
 describe('buildModifierSystem aggregation and explicit mapping', () => {
@@ -153,7 +153,7 @@ describe('buildModifierSystem aggregation and explicit mapping', () => {
 
   it('applies a future multi-target relic only once to a dual-tag card', () => {
     const fixtureRelic: RelicDef = {
-      id: 'fixture_both', title: 'fixture', desc: 'fixture', textKey: 'fixture',
+      id: 'fixture_both', textKey: 'relics.fixture_both',
       rarity: 'common', targetTags: ['projectile', 'control'],
       effects: [{ kind: 'buildScaling', targetTags: ['projectile', 'control'], axis: 'effectDamageMul', value: 0.15 }],
       maxStacks: 1,

@@ -41,17 +41,28 @@
   "normalDropTypePolicy": {
     "enabled": true,
     "roleBagSize": 10,
-    "earlyMix": { "discovery": 6, "build": 3, "pivot": 1 },
-    "lateMix": { "discovery": 1, "build": 7, "pivot": 2 },
+    "earlyMix": {
+      "discovery": 6,
+      "build": 3,
+      "pivot": 1
+    },
+    "lateMix": {
+      "discovery": 1,
+      "build": 7,
+      "pivot": 2
+    },
     "bootstrapMinDiscovery": 6,
-    "godAffinity": { "scorePerStack": 2.5, "scoreCap": 6 },
+    "godAffinity": {
+      "scorePerStack": 2.5,
+      "scoreCap": 6
+    },
     "maturity": {
       "fullMergeOps": 10,
       "fullHighestStar": 4,
       "fullEquippedTypes": 2,
       "mergeWeight": 0.25,
       "starWeight": 0.35,
-      "equipWeight": 0.40
+      "equipWeight": 0.4
     },
     "build": {
       "topK": 3,
@@ -63,7 +74,10 @@
       "historicalMergeCap": 8,
       "maxWeightRatio": 6
     },
-    "pivot": { "excludeTopK": 2, "candidateFraction": 0.5 },
+    "pivot": {
+      "excludeTopK": 2,
+      "candidateFraction": 0.5
+    },
     "maxSameTypeStreak": 2
   }
 }

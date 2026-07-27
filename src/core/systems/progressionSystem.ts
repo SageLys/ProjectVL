@@ -145,7 +145,6 @@ export function applyRelic(state: GameState, relicId: string): GameEvent[] {
   return [{
     type: 'relicSelected',
     relicId,
-    title: relic.title,
     rarity: relic.rarity,
     ...(relic.god === undefined ? {} : { god: relic.god }),
   }];
