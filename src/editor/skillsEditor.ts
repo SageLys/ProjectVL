@@ -2,14 +2,17 @@ import { TRIGGER_NAMES } from '../core/effects/atomContract';
 import type { BindingDef, CardDef, StarTierDef, Trigger } from '../core/effects/defs';
 import type { SkillsConfig } from '../config/types';
 import { button, el, labeled, selectControl } from './dom';
+import { entityTextTitle, renderEntityTextSection } from './entityTextEditor';
 import { allowedTriggersForEffects, renderEffectsEditor } from './effectEditor';
-import { cardLabel, describeLabel, labelWithKey } from './labels';
+import { describeLabel, labelWithKey } from './labels';
 import type { ReferenceCatalog } from './references';
 import { renderTreeEditor } from './treeEditor';
 
 interface SkillsEditorOptions {
+  texts: Record<string, unknown>;
   references: ReferenceCatalog;
   onChange: () => void;
+  onTextsChange: () => void;
 }
 
 const CATEGORIES = ['projectile', 'control', 'domain', 'economy', 'defense'] as const;
@@ -18,9 +21,8 @@ const TIERS: Array<keyof CardDef['stars']> = ['3', '5', '6'];
 const enumOption = (group: string) => (value: string): string => labelWithKey('enumValue', `${group}.${value}`, value);
 const fieldLabel = (field: string): string => labelWithKey('domainField', `skills.${field}`, field);
 /** 卡片显示名：有中文文案就用「中文（id）」，否则退回 id。 */
-function cardTitle(id: string): string {
-  const { label } = cardLabel(id);
-  return label === id ? id : `${label}（${id}）`;
+function cardTitle(texts: Record<string, unknown>, card: CardDef): string {
+  return entityTextTitle(texts, card.textKey, card.id);
 }
 
 function inputField(
@@ -187,7 +189,7 @@ function renderCard(container: HTMLElement, card: CardDef, cardIndex: number, op
   const header = el('div', 'detail-heading');
   const godName = card.god ? describeLabel('enumValue', `god.${card.god}`).label : '无神';
   header.append(
-    el('div', '', cardTitle(card.id)),
+    el('div', '', cardTitle(options.texts, card)),
     el('span', 'status-badge', `${describeLabel('enumValue', `category.${card.category}`).label} · ${godName}`),
   );
   container.append(header);
@@ -229,6 +231,12 @@ function renderCard(container: HTMLElement, card: CardDef, cardIndex: number, op
   const tagField = labeled(fieldLabel('synergyTags'), tags, `${path}.synergyTags`);
   basics.append(tagField);
   container.append(basics);
+
+  renderEntityTextSection(container, {
+    texts: options.texts,
+    textKey: card.textKey,
+    onChange: options.onTextsChange,
+  });
 
   const stars = el('div');
   renderStars(stars, card, path, options);
@@ -292,7 +300,7 @@ export function renderSkillsEditor(container: HTMLElement, config: SkillsConfig,
     list.replaceChildren();
     const needle = query.value.trim().toLowerCase();
     config.cards.forEach((card, index) => {
-      const name = cardLabel(card.id).label;
+      const name = cardTitle(options.texts, card);
       const haystack = [name, card.id, card.god, card.category, ...card.synergyTags].join(' ').toLowerCase();
       if (needle && !haystack.includes(needle)) return;
       if (god.value && card.god !== god.value) return;

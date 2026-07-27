@@ -10,6 +10,11 @@ export interface SaveCandidate {
   original: unknown;
 }
 
+export interface EntityTextSaveBatch {
+  entity: SaveCandidate & { domain: 'skills' | 'gods' | 'relics' };
+  texts: SaveCandidate & { domain: 'texts' };
+}
+
 export interface SaveFlowResult {
   ok: boolean;
   stage: 'validate' | 'write' | 'done';
@@ -55,6 +60,11 @@ export class ConfigSaveFlow {
       committed.push(candidate);
     }
     return { ok: true, stage: 'done', reports, writes };
+  }
+
+  /** 卡 / 神 / 遗物的唯一双域保存入口；底层仍复用同一批次预检、写回与补偿逻辑。 */
+  async saveEntityWithTexts(batch: EntityTextSaveBatch): Promise<SaveFlowResult> {
+    return await this.save([batch.entity, batch.texts]);
   }
 
   static canSave(reports: Iterable<ValidationReportDto>): boolean {

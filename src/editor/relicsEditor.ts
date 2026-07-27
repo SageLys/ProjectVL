@@ -1,5 +1,6 @@
 import type { BuildScalingAxis, RelicDef, RelicsConfig } from '../config/types';
 import { button, el, labeled, numberControl, selectControl } from './dom';
+import { entityTextTitle, renderEntityTextSection } from './entityTextEditor';
 import { describeLabel, labelWithKey } from './labels';
 import type { ReferenceCatalog } from './references';
 
@@ -15,24 +16,8 @@ const RARITIES = ['common', 'rare', 'epic'] as const;
 const enumOption = (group: string) => (value: string): string => labelWithKey('enumValue', `${group}.${value}`, value);
 const fieldLabel = (field: string): string => labelWithKey('domainField', `relics.${field}`, field);
 
-/** 遗物显示名取未保存态的 texts（与下方名称编辑框同源），缺名回退 id。只读，不建节点。 */
 function relicTitle(texts: Record<string, unknown>, relic: RelicDef): string {
-  const key = relic.textKey.startsWith('relics.') ? relic.textKey.slice('relics.'.length) : relic.textKey;
-  const entry = (texts.relics as Record<string, { name?: unknown } | undefined> | undefined)?.[key];
-  const name = entry?.name;
-  return typeof name === 'string' && name ? `${name}（${relic.id}）` : relic.id;
-}
-
-function relicTextNode(texts: Record<string, unknown>, textKey: string): Record<string, unknown> {
-  const key = textKey.startsWith('relics.') ? textKey.slice('relics.'.length) : textKey;
-  const relics = texts.relics && typeof texts.relics === 'object' && !Array.isArray(texts.relics)
-    ? texts.relics as Record<string, unknown>
-    : (texts.relics = {}) as Record<string, unknown>;
-  const current = relics[key];
-  if (current && typeof current === 'object' && !Array.isArray(current)) return current as Record<string, unknown>;
-  const created: Record<string, unknown> = { name: '', desc: '' };
-  relics[key] = created;
-  return created;
+  return entityTextTitle(texts, relic.textKey, relic.id);
 }
 
 function tagChoices(tags: readonly string[], current: string[], onChange: (tags: string[]) => void): HTMLElement {
@@ -78,7 +63,6 @@ function renderRelic(
   heading.append(remove);
   container.append(heading);
 
-  const text = relicTextNode(options.texts, relic.textKey);
   const grid = el('div', 'field-grid');
   const id = el('input');
   id.value = relic.id;
@@ -98,17 +82,11 @@ function renderRelic(
   grid.append(labeled(fieldLabel('maxStacks'), stacks, `${path}.maxStacks`));
   container.append(grid);
 
-  const copy = el('section', 'form-section');
-  copy.append(el('h3', '', '名称与描述 · 写入 texts 域'));
-  const name = el('input');
-  name.value = typeof text.name === 'string' ? text.name : '';
-  name.addEventListener('input', () => { text.name = name.value; options.onTextsChange(); });
-  const desc = el('textarea');
-  desc.rows = 3;
-  desc.value = typeof text.desc === 'string' ? text.desc : '';
-  desc.addEventListener('input', () => { text.desc = desc.value; options.onTextsChange(); });
-  copy.append(labeled('名称', name, `$.texts.${relic.textKey}.name`), labeled('描述', desc, `$.texts.${relic.textKey}.desc`));
-  container.append(copy);
+  renderEntityTextSection(container, {
+    texts: options.texts,
+    textKey: relic.textKey,
+    onChange: options.onTextsChange,
+  });
 
   const target = el('section', 'form-section');
   target.append(el('h3', '', '目标标签'));

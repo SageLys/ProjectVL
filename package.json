@@ -13,11 +13,15 @@
     "metrics": "node scripts/computeExperienceMetrics.ts",
     "replay:record": "vite-node scripts/recordGoldenReplay.ts",
     "validate": "vite-node scripts/validateConfig.ts",
-    "format:config": "vite-node scripts/formatConfig.ts"
+    "format:config": "vite-node scripts/formatConfig.ts",
+    "config:export-xlsx": "vite-node scripts/exportConfigXlsx.ts",
+    "config:import-xlsx": "vite-node scripts/importConfigXlsx.ts"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",
     "@types/qrcode-terminal": "^0.12.2",
+    "exceljs": "^4.4.0",
+    "happy-dom": "^20.10.6",
     "qrcode-terminal": "^0.12.0",
     "typescript": "^5.6.3",
     "vite": "^5.4.10",

@@ -1,15 +1,18 @@
-import type { RelicsConfig, SkillsConfig, TunerConfig } from '../config/types';
+import type { GodsConfig, RelicsConfig, SkillsConfig, TunerConfig } from '../config/types';
 import { ConfigApi } from './api';
 import {
   EDITOR_DOMAINS, reportHasErrors,
   type EditorDomain, type ValidationReportDto,
 } from './contracts';
 import { button, deepClone, el } from './dom';
+import { entityTextChangeHandlers, type EntityTextDomain } from './entityTextEditor';
+import { renderGodsEditor } from './godsEditor';
 import { buildReferenceCatalog } from './references';
 import { renderRelicsEditor } from './relicsEditor';
 import { ConfigSaveFlow } from './saveFlow';
 import { renderSkillsEditor } from './skillsEditor';
 import { renderTreeEditor } from './treeEditor';
+import { renderTextsEditor } from './textsEditor';
 import { renderTunerEditor } from './tunerEditor';
 import { renderValidationPanel } from './validationPanel';
 
@@ -22,7 +25,8 @@ const DOMAIN_LABELS: Record<EditorDomain, string> = {
   progression: '成长', economy: '经济', bounty: 'Bounty', input: '输入', tuner: '调参', texts: '文案',
 };
 
-const SPECIAL_DOMAINS = new Set<EditorDomain>(['skills', 'tuner', 'relics']);
+const FORM_DOMAINS = new Set<EditorDomain>(['skills', 'gods', 'tuner', 'relics', 'texts']);
+const TREE_TOGGLE_DOMAINS = new Set<EditorDomain>(['skills', 'gods', 'tuner', 'relics']);
 
 export class ConfigEditorApp {
   private readonly api = new ConfigApi();
@@ -122,7 +126,7 @@ export class ConfigEditorApp {
     this.content.dataset.configPath = `$.${domain}`;
     const references = buildReferenceCatalog(this.data);
     const onChange = (changedDomain = domain): void => this.changed(changedDomain);
-    if (this.structuredMode || !SPECIAL_DOMAINS.has(domain)) {
+    if (this.structuredMode || !FORM_DOMAINS.has(domain)) {
       const tree = el('div', 'tree-editor');
       renderTreeEditor(tree, this.data[domain], {
         path: `$.${domain}`,
@@ -131,7 +135,20 @@ export class ConfigEditorApp {
       });
       this.content.append(tree);
     } else if (domain === 'skills') {
-      renderSkillsEditor(this.content, this.data.skills as SkillsConfig, { references, onChange: () => onChange('skills') });
+      const changes = entityTextChangeHandlers('skills', onChange);
+      renderSkillsEditor(this.content, this.data.skills as SkillsConfig, {
+        texts: this.data.texts as Record<string, unknown>,
+        references,
+        onChange: changes.onEntityChange,
+        onTextsChange: changes.onTextsChange,
+      });
+    } else if (domain === 'gods') {
+      const changes = entityTextChangeHandlers('gods', onChange);
+      renderGodsEditor(this.content, this.data.gods as GodsConfig, {
+        texts: this.data.texts as Record<string, unknown>,
+        references,
+        ...changes,
+      });
     } else if (domain === 'tuner') {
       renderTunerEditor(this.content, this.data.tuner as TunerConfig, {
         configRoot: this.data,
@@ -141,18 +158,18 @@ export class ConfigEditorApp {
           onChange('tuner');
         },
       });
-    } else {
+    } else if (domain === 'relics') {
+      const changes = entityTextChangeHandlers('relics', onChange);
       renderRelicsEditor(this.content, this.data.relics as RelicsConfig, {
         texts: this.data.texts as Record<string, unknown>,
         references,
-        onRelicsChange: () => {
-          onChange('relics');
-          onChange('texts');
-        },
-        onTextsChange: () => {
-          onChange('texts');
-          onChange('relics');
-        },
+        onRelicsChange: changes.onEntityChange,
+        onTextsChange: changes.onTextsChange,
+      });
+    } else {
+      renderTextsEditor(this.content, this.data.texts as Record<string, unknown>, {
+        references,
+        onChange: () => onChange('texts'),
       });
     }
     this.updateChrome();
@@ -229,7 +246,7 @@ export class ConfigEditorApp {
     this.pathLabel.textContent = this.selected === 'tuner' && !this.structuredMode
       ? 'tuner.json 元数据驱动 · 数值写回 path 所属域'
       : `/${this.selected}`;
-    const hasSpecial = SPECIAL_DOMAINS.has(this.selected);
+    const hasSpecial = TREE_TOGGLE_DOMAINS.has(this.selected);
     this.modeButton.hidden = !hasSpecial;
     this.modeButton.textContent = this.structuredMode ? '返回专用表单' : '查看结构树';
     const dirtyReports = [...this.dirty].map(domain => this.reports[domain]);
@@ -253,11 +270,25 @@ export class ConfigEditorApp {
     this.updateChrome();
     const domains = [...this.dirty];
     try {
-      const result = await this.saveFlow.save(domains.map(domain => ({
-        domain,
-        data: this.data?.[domain],
-        original: this.originals?.[domain],
-      })));
+      const entityDomains = domains.filter((domain): domain is EntityTextDomain =>
+        domain === 'skills' || domain === 'gods' || domain === 'relics');
+      const pairedEntity = domains.length === 2 && domains.includes('texts') && entityDomains.length === 1
+        ? entityDomains[0]
+        : undefined;
+      const result = pairedEntity
+        ? await this.saveFlow.saveEntityWithTexts({
+          entity: {
+            domain: pairedEntity,
+            data: this.data[pairedEntity],
+            original: this.originals[pairedEntity],
+          },
+          texts: { domain: 'texts', data: this.data.texts, original: this.originals.texts },
+        })
+        : await this.saveFlow.save(domains.map(domain => ({
+          domain,
+          data: this.data?.[domain],
+          original: this.originals?.[domain],
+        })));
       this.reports = { ...this.reports, ...result.reports };
       if (!result.ok) {
         this.message = result.error ?? '保存失败，本地未保存态已保留。';

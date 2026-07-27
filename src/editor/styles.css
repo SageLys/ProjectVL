@@ -77,6 +77,10 @@ code { color: #a8bdca; font-family: "SFMono-Regular", Consolas, monospace; font-
 .form-section__heading, .binding-card__heading, .effect-card__header, .detail-heading, .validation-group__heading, .validation-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .form-section__heading h3, .binding-card__heading h4, .validation-title h2, .validation-group__heading h3 { margin: 0; }
 .form-section--compact { background: #0e1317; }
+.entity-copy__fields, .entity-copy-group__body, .global-copy-sections { display: grid; gap: 12px; }
+.entity-copy-group { border: 1px solid var(--line); border-radius: 8px; background: #0e1317; }
+.entity-copy-group > summary { cursor: pointer; padding: 10px 12px; color: #cfe1ec; font-size: 13px; font-weight: 700; }
+.entity-copy-group__body { padding: 0 12px 12px; }
 .major-section { padding: 0; overflow: hidden; }
 .major-section > summary, .tuner-group > summary { cursor: pointer; padding: 15px 16px; font-weight: 750; }
 .major-section__body, .tuner-group__body { padding: 0 16px 16px; }
