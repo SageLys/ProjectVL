@@ -20,7 +20,7 @@ namespace ProjectVL.Systems
             int nextWave = state.Wave + 1;
             if (nextWave > _waves.totalWaves)
             {
-                state.EndRun();
+                state.EndRun(true);
                 return;
             }
 

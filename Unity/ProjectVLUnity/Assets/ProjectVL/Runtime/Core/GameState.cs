@@ -14,6 +14,7 @@ namespace ProjectVL.Core
         public float BaseMaxHp { get; private set; }
         public float MaxHp { get; private set; }
         public int Wave { get; private set; }
+        public bool? Won { get; private set; }
         public float ShotCooldown { get; set; }
         public float TurretAngleRadians { get; set; }
         public int SpawnLeft { get; internal set; }
@@ -77,10 +78,11 @@ namespace ProjectVL.Core
             IntermissionActive = false;
         }
 
-        public void EndRun()
+        public void EndRun(bool won = false)
         {
             Mode = GameMode.Ended;
             Paused = false;
+            Won = won;
         }
 
         internal int TakeNextEnemyId()
@@ -98,7 +100,7 @@ namespace ProjectVL.Core
             Hp = Math.Max(0f, Hp - Math.Max(0f, damage));
             if (Hp <= 0f)
             {
-                EndRun();
+                EndRun(false);
             }
         }
 

@@ -27,6 +27,7 @@ namespace ProjectVL.Presentation
 
             CreateCamera();
             CreateArenaBorder();
+            CreateAttackRange();
             CreateTurret();
         }
 
@@ -82,6 +83,31 @@ namespace ProjectVL.Presentation
                 PixelToWorld(new Float2(_combat.canvas.width, _combat.canvas.height)),
                 PixelToWorld(new Float2(0f, _combat.canvas.height))
             });
+        }
+
+        private void CreateAttackRange()
+        {
+            const int segments = 96;
+            var rangeObject = new GameObject("Attack Range");
+            rangeObject.transform.SetParent(transform, false);
+            var line = rangeObject.AddComponent<LineRenderer>();
+            line.loop = true;
+            line.useWorldSpace = true;
+            line.positionCount = segments;
+            line.startWidth = 1.5f;
+            line.endWidth = 1.5f;
+            line.material = new Material(Shader.Find("Sprites/Default"));
+            line.startColor = new Color(0.25f, 0.8f, 1f, 0.28f);
+            line.endColor = line.startColor;
+
+            for (int index = 0; index < segments; index++)
+            {
+                float angle = index * Mathf.PI * 2f / segments;
+                var point = new Float2(
+                    _combat.turret.x + Mathf.Cos(angle) * _combat.defaults.range,
+                    _combat.turret.y + Mathf.Sin(angle) * _combat.defaults.range);
+                line.SetPosition(index, PixelToWorld(point));
+            }
         }
 
         private void CreateTurret()

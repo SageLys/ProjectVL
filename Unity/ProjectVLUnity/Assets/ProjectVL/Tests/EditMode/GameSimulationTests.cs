@@ -80,5 +80,17 @@ namespace ProjectVL.Tests
             _simulation.SetTimeScale(0f);
             Assert.That(_simulation.TimeScale, Is.EqualTo(0.25f));
         }
+
+        [Test]
+        public void EndRunRecordsOutcome()
+        {
+            _state.StartRun();
+
+            _state.EndRun(true);
+
+            Assert.That(_state.Mode, Is.EqualTo(GameMode.Ended));
+            Assert.That(_state.Won, Is.True);
+            Assert.That(_state.Paused, Is.False);
+        }
     }
 }
