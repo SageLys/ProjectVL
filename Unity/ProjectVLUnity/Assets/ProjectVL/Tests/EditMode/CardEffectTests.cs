@@ -103,6 +103,247 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void PierceFiveStarRoutesExposeWebParameters()
+        {
+            EquipResolved(
+                "pierce",
+                5,
+                "3:pierceA",
+                "5:pierceA2");
+            CardCombatProfile ricochet =
+                CardEffectResolver.Resolve(_state);
+
+            Assert.That(ricochet.PierceCount, Is.EqualTo(3));
+            Assert.That(
+                ricochet.PierceDamageRetention,
+                Is.EqualTo(0.9f).Within(0.001f));
+            Assert.That(ricochet.RicochetBounces, Is.EqualTo(1));
+
+            EquipResolved(
+                "pierce",
+                5,
+                "3:pierceB",
+                "5:pierceB2");
+            CardCombatProfile ramp =
+                CardEffectResolver.Resolve(_state);
+
+            Assert.That(ramp.PierceCount, Is.EqualTo(3));
+            Assert.That(ramp.PierceDamageRetention, Is.EqualTo(1f));
+            Assert.That(
+                ramp.RampPerPierce,
+                Is.EqualTo(0.55f).Within(0.001f));
+
+            EquipResolved(
+                "pierce",
+                5,
+                "3:pierceC",
+                "5:pierceC2");
+            CardCombatProfile split =
+                CardEffectResolver.Resolve(_state);
+
+            Assert.That(split.SplitCount, Is.EqualTo(2));
+            Assert.That(split.SplitDamageRatio, Is.EqualTo(0.6f));
+        }
+
+        [Test]
+        public void PierceRicochetRetargetsAfterFinalPenetration()
+        {
+            EquipResolved(
+                "pierce",
+                5,
+                "3:pierceA",
+                "5:pierceA2");
+            CardCombatProfile profile =
+                CardEffectResolver.Resolve(_state);
+            EnemyState primary = AddEnemy(
+                new Float2(200f, 200f),
+                100f);
+            EnemyState secondary = AddEnemy(
+                new Float2(260f, 200f),
+                100f);
+            var bullet = new BulletState(
+                _nextBulletId++,
+                primary.Position,
+                new Float2(100f, 0f),
+                5f,
+                2f,
+                10f,
+                profile);
+            bullet.PierceRemaining = 0;
+            _state.Bullets.Add(bullet);
+
+            _system.StepBullets(_state, 0f);
+            _system.StepBullets(_state, 0.6f);
+
+            Assert.That(primary.Hp, Is.EqualTo(90f));
+            Assert.That(secondary.Hp, Is.EqualTo(90f));
+            Assert.That(bullet.RicochetRemaining, Is.Zero);
+        }
+
+        [Test]
+        public void ChainFiveStarRoutesExposeWebParameters()
+        {
+            EquipResolved(
+                "chainLightning",
+                5,
+                "3:chainLightningA",
+                "5:chainLightningA2");
+            CardCombatProfile killArc =
+                CardEffectResolver.Resolve(_state);
+
+            Assert.That(killArc.ChainBounces, Is.EqualTo(3));
+            Assert.That(killArc.ChainSearchRange, Is.EqualTo(140f));
+            Assert.That(killArc.ChainKillBounces, Is.EqualTo(2));
+            Assert.That(
+                killArc.ChainKillDamageRetention,
+                Is.EqualTo(0.5f));
+
+            EquipResolved(
+                "chainLightning",
+                5,
+                "3:chainLightningB",
+                "5:chainLightningB2");
+            CardCombatProfile charged =
+                CardEffectResolver.Resolve(_state);
+            Assert.That(charged.DotDamageRatio, Is.EqualTo(0.08f));
+            Assert.That(charged.DotDuration, Is.EqualTo(2f));
+
+            EquipResolved(
+                "chainLightning",
+                5,
+                "3:chainLightningC",
+                "5:chainLightningC2");
+            CardCombatProfile burst =
+                CardEffectResolver.Resolve(_state);
+            Assert.That(burst.SplashRadius, Is.EqualTo(65f));
+            Assert.That(burst.SplashDamageRatio, Is.EqualTo(0.65f));
+        }
+
+        [Test]
+        public void ChainKillArcDamagesTargetsBeyondOriginalChain()
+        {
+            var profile = new CardCombatProfile
+            {
+                ChainBounces = 1,
+                ChainDamageRetention = 1f,
+                ChainSearchRange = 120f,
+                ChainKillBounces = 2,
+                ChainKillDamageRetention = 0.5f,
+                ChainKillSearchRange = 140f
+            };
+            EnemyState primary = AddEnemy(
+                new Float2(200f, 200f),
+                100f);
+            AddEnemy(new Float2(240f, 200f), 5f);
+            EnemyState extra = AddEnemy(
+                new Float2(280f, 200f),
+                100f);
+
+            HitWithProfile(primary.Position, profile);
+
+            Assert.That(extra.Hp, Is.EqualTo(95f).Within(0.001f));
+        }
+
+        [Test]
+        public void FrostFiveStarRoutesExposeWebParameters()
+        {
+            EquipResolved(
+                "frost",
+                5,
+                "3:frostA",
+                "5:frostA2");
+            CardCombatProfile shards =
+                CardEffectResolver.Resolve(_state);
+
+            Assert.That(shards.SlowRatio, Is.EqualTo(0.4f));
+            Assert.That(shards.FreezeStacksToTrigger, Is.EqualTo(2));
+            Assert.That(shards.FrozenKillSplashRadius, Is.EqualTo(80f));
+            Assert.That(
+                shards.FrozenKillSplashDamageRatio,
+                Is.EqualTo(0.5f));
+            Assert.That(shards.FrozenKillSlowRatio, Is.EqualTo(0.3f));
+
+            EquipResolved(
+                "frost",
+                5,
+                "3:frostB",
+                "5:frostB2");
+            CardCombatProfile burst =
+                CardEffectResolver.Resolve(_state);
+
+            Assert.That(burst.FreezeStacksToTrigger, Is.EqualTo(1));
+            Assert.That(burst.FrozenKillSplashRadius, Is.EqualTo(90f));
+            Assert.That(
+                burst.FrozenKillSplashDamageRatio,
+                Is.EqualTo(0.8f));
+
+            EquipResolved(
+                "frost",
+                5,
+                "3:frostC",
+                "5:frostC2");
+            CardCombatProfile brittle =
+                CardEffectResolver.Resolve(_state);
+            Assert.That(
+                brittle.FrozenHitVulnerableRatio,
+                Is.EqualTo(0.16f));
+            Assert.That(
+                brittle.FrozenHitVulnerableDuration,
+                Is.EqualTo(2f));
+        }
+
+        [Test]
+        public void FrozenKillShattersAndDamagesNearbyEnemies()
+        {
+            EquipResolved(
+                "frost",
+                5,
+                "3:frostB",
+                "5:frostB2");
+            CardCombatProfile profile =
+                CardEffectResolver.Resolve(_state);
+            EnemyState frozen = AddEnemy(
+                new Float2(200f, 200f),
+                5f);
+            frozen.FrozenRemaining = 1f;
+            EnemyState nearby = AddEnemy(
+                new Float2(250f, 200f),
+                100f);
+
+            HitWithProfile(frozen.Position, profile);
+
+            Assert.That(_state.Enemies.Contains(frozen), Is.False);
+            Assert.That(
+                nearby.Hp,
+                Is.EqualTo(
+                    100f - _combat.defaults.damage * 0.8f)
+                    .Within(0.001f));
+        }
+
+        [Test]
+        public void FrostBrittleAppliesVulnerabilityOnlyAfterFreeze()
+        {
+            EquipResolved(
+                "frost",
+                5,
+                "3:frostC",
+                "5:frostC2");
+            CardCombatProfile profile =
+                CardEffectResolver.Resolve(_state);
+            EnemyState enemy = AddEnemy(
+                new Float2(200f, 200f),
+                100f);
+
+            HitWithProfile(enemy.Position, profile);
+            Assert.That(enemy.VulnerableRatio, Is.Zero);
+
+            HitWithProfile(enemy.Position, profile);
+            Assert.That(enemy.FrozenRemaining, Is.EqualTo(0.8f));
+            Assert.That(enemy.VulnerableRatio, Is.EqualTo(0.16f));
+            Assert.That(enemy.VulnerableRemaining, Is.EqualTo(2f));
+        }
+
+        [Test]
         public void SlowReducesEnemyMovementUntilItExpires()
         {
             EnemyState enemy = AddEnemy(new Float2(100f, 100f), 100f);

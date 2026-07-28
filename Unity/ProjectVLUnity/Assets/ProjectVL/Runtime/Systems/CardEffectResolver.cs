@@ -86,11 +86,31 @@ namespace ProjectVL.Systems
                 }
             }
 
-            if (RouteAt(card, 5) == "pierceB2")
+            if (card.Star >= 4)
+            {
+                profile.PierceCount += 1;
+                profile.PierceDamageRetention =
+                    System.Math.Min(
+                        1f,
+                        profile.PierceDamageRetention + 0.1f);
+            }
+
+            string advancedRoute = RouteAt(card, 5);
+            if (advancedRoute == "pierceA2")
+            {
+                profile.RicochetBounces += 1;
+            }
+            else if (advancedRoute == "pierceB2")
             {
                 profile.PierceCount += 1;
                 profile.PierceDamageRetention = 1f;
                 profile.RampPerPierce += 0.25f;
+            }
+            else if (advancedRoute == "pierceC2")
+            {
+                profile.SplitCount += 2;
+                profile.SplitDamageRatio =
+                    Max(profile.SplitDamageRatio, 0.6f);
             }
         }
 
@@ -116,6 +136,35 @@ namespace ProjectVL.Systems
                 profile.SlowRatio = Max(profile.SlowRatio, 0.2f);
                 profile.SlowDuration = Max(profile.SlowDuration, 1.2f);
             }
+
+            if (card.Star >= 4)
+            {
+                profile.ChainBounces += 1;
+                profile.ChainSearchRange += 20f;
+            }
+
+            string advancedRoute = RouteAt(card, 5);
+            if (advancedRoute == "chainLightningA2")
+            {
+                profile.ChainKillBounces = 2;
+                profile.ChainKillDamageRetention = 0.5f;
+                profile.ChainKillSearchRange = 140f;
+            }
+            else if (advancedRoute == "chainLightningB2")
+            {
+                profile.DotDamageRatio =
+                    Max(profile.DotDamageRatio, 0.08f);
+                profile.DotDuration =
+                    Max(profile.DotDuration, 2f);
+                profile.DotTickInterval = 0.5f;
+            }
+            else if (advancedRoute == "chainLightningC2")
+            {
+                profile.SplashRadius =
+                    Max(profile.SplashRadius, 65f);
+                profile.SplashDamageRatio =
+                    Max(profile.SplashDamageRatio, 0.65f);
+            }
         }
 
         private static void ApplyFrost(
@@ -128,12 +177,33 @@ namespace ProjectVL.Systems
             profile.FreezeDuration = Max(profile.FreezeDuration, 0.8f);
             profile.FreezeStacksToTrigger =
                 route == "frostB" ? 2 : 3;
-            if (RouteAt(card, 5) == "frostC2")
+            if (card.Star >= 4)
             {
-                profile.VulnerableRatio =
-                    Max(profile.VulnerableRatio, 0.16f);
-                profile.VulnerableDuration =
-                    Max(profile.VulnerableDuration, 2f);
+                profile.SlowRatio =
+                    Max(profile.SlowRatio, 0.4f);
+                profile.FreezeStacksToTrigger =
+                    System.Math.Max(
+                        1,
+                        profile.FreezeStacksToTrigger - 1);
+            }
+
+            string advancedRoute = RouteAt(card, 5);
+            if (advancedRoute == "frostA2")
+            {
+                profile.FrozenKillSplashRadius = 80f;
+                profile.FrozenKillSplashDamageRatio = 0.5f;
+                profile.FrozenKillSlowRatio = 0.3f;
+                profile.FrozenKillSlowDuration = 1.5f;
+            }
+            else if (advancedRoute == "frostB2")
+            {
+                profile.FrozenKillSplashRadius = 90f;
+                profile.FrozenKillSplashDamageRatio = 0.8f;
+            }
+            else if (advancedRoute == "frostC2")
+            {
+                profile.FrozenHitVulnerableRatio = 0.16f;
+                profile.FrozenHitVulnerableDuration = 2f;
             }
         }
 

@@ -18,6 +18,7 @@ namespace ProjectVL.Presentation
         private CardSlotKind? _selectedSlotKind;
         private int _selectedSlotIndex = -1;
         private int _effectDemoIndex;
+        private int _advancedDemoIndex;
         private static readonly string[] EffectDemoTypes =
         {
             "scorch",
@@ -28,6 +29,30 @@ namespace ProjectVL.Presentation
             "thorns",
             "decoy",
             "harvest"
+        };
+        private static readonly string[] AdvancedDemoTypes =
+        {
+            "pierce",
+            "pierce",
+            "pierce",
+            "chainLightning",
+            "chainLightning",
+            "chainLightning",
+            "frost",
+            "frost",
+            "frost"
+        };
+        private static readonly string[] AdvancedDemoBranches =
+        {
+            "A",
+            "B",
+            "C",
+            "A",
+            "B",
+            "C",
+            "A",
+            "B",
+            "C"
         };
 
         public GameState State => _simulation?.State;
@@ -283,6 +308,28 @@ namespace ProjectVL.Presentation
                 : "Free hand slots, then press B for more effect cards.";
         }
 
+        public void GrantAdvancedEffectDemo()
+        {
+            int added = 0;
+            while (_advancedDemoIndex < AdvancedDemoTypes.Length)
+            {
+                string type = AdvancedDemoTypes[_advancedDemoIndex];
+                string branch =
+                    AdvancedDemoBranches[_advancedDemoIndex];
+                if (!AddAdvancedDemoCard(type, branch))
+                {
+                    break;
+                }
+
+                _advancedDemoIndex++;
+                added++;
+            }
+
+            LastCardAction = added > 0
+                ? $"Added {added} five-star advanced effect cards."
+                : "Free hand slots, then press N for more advanced cards.";
+        }
+
         public void CraftAvailableRecipe()
         {
             string recipeId = AvailableRecipeId;
@@ -360,6 +407,11 @@ namespace ProjectVL.Presentation
                 SpawnDropDemo();
             }
 
+            if (Input.GetKeyDown(KeyCode.N))
+            {
+                GrantAdvancedEffectDemo();
+            }
+
             for (int i = 0; i < State.Hand.Length && i < 7; i++)
             {
                 if (Input.GetKeyDown((KeyCode)((int)KeyCode.Alpha1 + i)))
@@ -429,6 +481,29 @@ namespace ProjectVL.Presentation
                 {
                     card.EvolutionPath.Add($"5:{type}A2");
                 }
+                State.Hand[i] = card;
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool AddAdvancedDemoCard(
+            string type,
+            string branch)
+        {
+            for (int i = 0; i < State.Hand.Length; i++)
+            {
+                if (State.Hand[i] != null)
+                {
+                    continue;
+                }
+
+                CardState card = State.CreateCard(type, 5);
+                card.EvolutionPath.Add(
+                    $"3:{type}{branch}");
+                card.EvolutionPath.Add(
+                    $"5:{type}{branch}2");
                 State.Hand[i] = card;
                 return true;
             }

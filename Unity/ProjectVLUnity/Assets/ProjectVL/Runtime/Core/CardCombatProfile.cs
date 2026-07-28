@@ -5,15 +5,25 @@ namespace ProjectVL.Core
         public int PierceCount { get; set; }
         public float PierceDamageRetention { get; set; } = 1f;
         public float RampPerPierce { get; set; }
+        public int RicochetBounces { get; set; }
         public int ChainBounces { get; set; }
         public float ChainDamageRetention { get; set; } = 1f;
         public float ChainSearchRange { get; set; }
+        public int ChainKillBounces { get; set; }
+        public float ChainKillDamageRetention { get; set; }
+        public float ChainKillSearchRange { get; set; }
         public float SlowRatio { get; set; }
         public float SlowDuration { get; set; }
         public int FreezeStacksToTrigger { get; set; }
         public float FreezeDuration { get; set; }
         public float VulnerableRatio { get; set; }
         public float VulnerableDuration { get; set; }
+        public float FrozenHitVulnerableRatio { get; set; }
+        public float FrozenHitVulnerableDuration { get; set; }
+        public float FrozenKillSplashRadius { get; set; }
+        public float FrozenKillSplashDamageRatio { get; set; }
+        public float FrozenKillSlowRatio { get; set; }
+        public float FrozenKillSlowDuration { get; set; }
         public float DotDamageRatio { get; set; }
         public float DotDuration { get; set; }
         public float DotTickInterval { get; set; }

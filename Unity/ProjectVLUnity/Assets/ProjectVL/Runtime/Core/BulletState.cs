@@ -6,22 +6,28 @@ namespace ProjectVL.Core
     {
         public int Id { get; }
         public Float2 Position { get; set; }
-        public Float2 Velocity { get; }
+        public Float2 Velocity { get; set; }
         public float Radius { get; }
         public float LifeRemaining { get; set; }
         public float Damage { get; set; }
         public int PierceRemaining { get; set; }
         public float PierceDamageRetention { get; }
         public float RampPerPierce { get; }
+        public int RicochetRemaining { get; set; }
         public int ChainBounces { get; }
         public float ChainDamageRetention { get; }
         public float ChainSearchRange { get; }
+        public int ChainKillBounces { get; }
+        public float ChainKillDamageRetention { get; }
+        public float ChainKillSearchRange { get; }
         public float SlowRatio { get; }
         public float SlowDuration { get; }
         public int FreezeStacksToTrigger { get; }
         public float FreezeDuration { get; }
         public float VulnerableRatio { get; }
         public float VulnerableDuration { get; }
+        public float FrozenHitVulnerableRatio { get; }
+        public float FrozenHitVulnerableDuration { get; }
         public float DotDamageRatio { get; }
         public float DotDuration { get; }
         public float DotTickInterval { get; }
@@ -51,15 +57,24 @@ namespace ProjectVL.Core
             PierceRemaining = profile.PierceCount;
             PierceDamageRetention = profile.PierceDamageRetention;
             RampPerPierce = profile.RampPerPierce;
+            RicochetRemaining = profile.RicochetBounces;
             ChainBounces = profile.ChainBounces;
             ChainDamageRetention = profile.ChainDamageRetention;
             ChainSearchRange = profile.ChainSearchRange;
+            ChainKillBounces = profile.ChainKillBounces;
+            ChainKillDamageRetention =
+                profile.ChainKillDamageRetention;
+            ChainKillSearchRange = profile.ChainKillSearchRange;
             SlowRatio = profile.SlowRatio;
             SlowDuration = profile.SlowDuration;
             FreezeStacksToTrigger = profile.FreezeStacksToTrigger;
             FreezeDuration = profile.FreezeDuration;
             VulnerableRatio = profile.VulnerableRatio;
             VulnerableDuration = profile.VulnerableDuration;
+            FrozenHitVulnerableRatio =
+                profile.FrozenHitVulnerableRatio;
+            FrozenHitVulnerableDuration =
+                profile.FrozenHitVulnerableDuration;
             DotDamageRatio = profile.DotDamageRatio;
             DotDuration = profile.DotDuration;
             DotTickInterval = profile.DotTickInterval;

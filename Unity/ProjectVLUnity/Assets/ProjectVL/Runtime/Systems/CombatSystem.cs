@@ -133,6 +133,13 @@ namespace ProjectVL.Systems
                         bullet.Damage *= bullet.PierceDamageRetention
                             * (1f + bullet.RampPerPierce);
                     }
+                    else if (TryRicochet(
+                        state,
+                        bullet,
+                        hitPosition))
+                    {
+                        consumed = false;
+                    }
                     else
                     {
                         consumed = true;
@@ -211,6 +218,7 @@ namespace ProjectVL.Systems
             EnemyState enemy,
             float damage)
         {
+            bool killedWhileFrozen = enemy.FrozenRemaining > 0f;
             float vulnerability = enemy.VulnerableRemaining > 0f
                 ? enemy.VulnerableRatio
                 : 0f;
@@ -225,11 +233,26 @@ namespace ProjectVL.Systems
                 state.Kills++;
                 _drops?.TrySpawnOnKill(state, enemy);
                 state.GrantReward(enemy.Reward);
+                CardCombatProfile profile =
+                    CardEffectResolver.Resolve(state);
                 if (enemy.Reward != null)
                 {
-                    CardCombatProfile profile =
-                        CardEffectResolver.Resolve(state);
                     state.RestoreHp(profile.PickupRestore);
+                }
+
+                if (killedWhileFrozen
+                    && profile.FrozenKillSplashRadius > 0f)
+                {
+                    DamageArea(
+                        state,
+                        enemy.Position,
+                        profile.FrozenKillSplashRadius,
+                        _combat.defaults.damage
+                            * profile.FrozenKillSplashDamageRatio,
+                        enemy.Id,
+                        0f,
+                        profile.FrozenKillSlowRatio,
+                        profile.FrozenKillSlowDuration);
                 }
             }
         }
@@ -273,6 +296,17 @@ namespace ProjectVL.Systems
                 enemy.VulnerableRemaining = Math.Max(
                     enemy.VulnerableRemaining,
                     bullet.VulnerableDuration);
+            }
+
+            if (enemy.FrozenRemaining > 0f
+                && bullet.FrozenHitVulnerableRatio > 0f)
+            {
+                enemy.VulnerableRatio = Math.Max(
+                    enemy.VulnerableRatio,
+                    bullet.FrozenHitVulnerableRatio);
+                enemy.VulnerableRemaining = Math.Max(
+                    enemy.VulnerableRemaining,
+                    bullet.FrozenHitVulnerableDuration);
             }
 
             if (bullet.DotDamageRatio > 0f)
@@ -394,8 +428,86 @@ namespace ProjectVL.Systems
                 currentOrigin = next.Position;
                 damage *= bullet.ChainDamageRetention;
                 DamageEnemy(state, next, damage);
+                bool killedByChain = !state.Enemies.Contains(next);
                 ApplyStatusEffects(next, bullet);
+                if (killedByChain)
+                {
+                    ApplyChainKillArc(
+                        state,
+                        bullet,
+                        currentOrigin,
+                        new System.Collections.Generic.HashSet<int>(
+                            chainedIds));
+                }
             }
+        }
+
+        private void ApplyChainKillArc(
+            GameState state,
+            BulletState bullet,
+            Float2 origin,
+            System.Collections.Generic.HashSet<int> excludedIds)
+        {
+            if (bullet.ChainKillBounces <= 0
+                || bullet.ChainKillSearchRange <= 0f)
+            {
+                return;
+            }
+
+            float damage = bullet.Damage;
+            Float2 currentOrigin = origin;
+            for (int bounce = 0;
+                bounce < bullet.ChainKillBounces;
+                bounce++)
+            {
+                EnemyState target = FindClosestChainTarget(
+                    state,
+                    currentOrigin,
+                    bullet.ChainKillSearchRange,
+                    excludedIds);
+                if (target == null)
+                {
+                    break;
+                }
+
+                excludedIds.Add(target.Id);
+                bullet.HitEnemyIds.Add(target.Id);
+                currentOrigin = target.Position;
+                damage *= bullet.ChainKillDamageRetention;
+                DamageEnemy(state, target, damage);
+            }
+        }
+
+        private bool TryRicochet(
+            GameState state,
+            BulletState bullet,
+            Float2 origin)
+        {
+            if (bullet.RicochetRemaining <= 0)
+            {
+                return false;
+            }
+
+            EnemyState target = FindClosestChainTarget(
+                state,
+                origin,
+                140f,
+                bullet.HitEnemyIds);
+            if (target == null)
+            {
+                return false;
+            }
+
+            float speed = bullet.Velocity.Length;
+            if (speed <= 0.000001f)
+            {
+                speed = _combat.bullet.speed;
+            }
+
+            bullet.Velocity =
+                (target.Position - origin).Normalized() * speed;
+            bullet.RicochetRemaining--;
+            return true;
         }
 
         private static EnemyState FindClosestChainTarget(
@@ -628,7 +740,8 @@ namespace ProjectVL.Systems
             float damage,
             int excludedEnemyId,
             float knockback,
-            float slowRatio)
+            float slowRatio,
+            float slowDuration = 0f)
         {
             var targets = new System.Collections.Generic.List<EnemyState>();
             foreach (EnemyState enemy in state.Enemies)
@@ -659,6 +772,9 @@ namespace ProjectVL.Systems
                     enemy.SlowRatio = Math.Max(
                         enemy.SlowRatio,
                         slowRatio);
+                    enemy.SlowRemaining = Math.Max(
+                        enemy.SlowRemaining,
+                        slowDuration);
                 }
             }
         }
