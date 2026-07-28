@@ -7,3 +7,16 @@ presets/
 
 scripts/_s4a_calc.ts
 vitest.config.ts.timestamp-*.mjs
+
+# Tuanjie / Unity generated files
+Unity/ProjectVLUnity/[Ll]ibrary/
+Unity/ProjectVLUnity/[Tt]emp/
+Unity/ProjectVLUnity/[Oo]bj/
+Unity/ProjectVLUnity/[Bb]uild/
+Unity/ProjectVLUnity/[Bb]uilds/
+Unity/ProjectVLUnity/[Ll]ogs/
+Unity/ProjectVLUnity/[Uu]ser[Ss]ettings/
+Unity/ProjectVLUnity/.vs/
+Unity/ProjectVLUnity/*.csproj
+Unity/ProjectVLUnity/*.sln
+Unity/ProjectVLUnity/*.user
