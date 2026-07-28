@@ -30,6 +30,21 @@ namespace ProjectVL.Core
         public int Merges { get; internal set; }
         public EvolutionChoice PendingEvolution { get; internal set; }
         public List<string> CompletedRecipes { get; } = new List<string>();
+        public int EquipmentEffectWave { get; internal set; }
+        public int ShieldHits { get; internal set; }
+        public int ShieldMaxHits { get; internal set; }
+        public float ShieldRegenRemaining { get; internal set; }
+        public float FireRateMultiplier { get; internal set; } = 1f;
+        public float FireRateBuffRemaining { get; internal set; }
+        public float DropRateMultiplier { get; internal set; } = 1f;
+        public float DropLifetimeMultiplier { get; internal set; } = 1f;
+        public bool DecoyActive { get; internal set; }
+        public Float2 DecoyPosition { get; internal set; }
+        public float DecoyHp { get; internal set; }
+        public float DecoyMaxHp { get; internal set; }
+        public float DecoyTauntRadius { get; internal set; }
+        public float DecoyExplodeDamageMultiplier { get; internal set; }
+        public float DecoyExplodeKnockback { get; internal set; }
         public float IntermissionRemaining { get; internal set; }
         public bool IntermissionReady { get; internal set; }
         public float ShotCooldown { get; set; }
@@ -148,6 +163,11 @@ namespace ProjectVL.Core
             {
                 EndRun(false);
             }
+        }
+
+        internal void RestoreHp(float amount)
+        {
+            Hp = Math.Min(MaxHp, Hp + Math.Max(0f, amount));
         }
 
         internal void GrantReward(RunReward reward)

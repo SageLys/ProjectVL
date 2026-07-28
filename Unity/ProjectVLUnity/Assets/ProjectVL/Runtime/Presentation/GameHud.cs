@@ -39,7 +39,8 @@ namespace ProjectVL.Presentation
                 new Rect(24f, 49f, 410f, 26f),
                 $"HP {state.Hp:0}/{state.MaxHp:0}   WAVE {state.Wave} "
                 + $"{state.WavePhase.ToString().ToUpperInvariant()}   "
-                + $"KILLS {state.Kills}   MERGES {state.Merges}",
+                + $"KILLS {state.Kills}   MERGES {state.Merges}   "
+                + $"SHIELD {state.ShieldHits}",
                 _hudStyle);
         }
 
@@ -301,7 +302,7 @@ namespace ProjectVL.Presentation
                 _hudStyle);
             GUI.Label(
                 new Rect(actionX + 10f, 341f, 226f, 34f),
-                "RECIPE DEMO [H]  ·  CRAFT [F]",
+                "EFFECT CARDS [B]  ·  RECIPE [H/F]",
                 _hudStyle);
         }
 

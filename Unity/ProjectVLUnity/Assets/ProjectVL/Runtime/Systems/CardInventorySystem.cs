@@ -176,6 +176,10 @@ namespace ProjectVL.Systems
             {
                 AutoMergeHand(state);
             }
+            else
+            {
+                state.EquipmentEffectWave = 0;
+            }
 
             return WildcardUseResult.Upgraded;
         }
@@ -209,6 +213,7 @@ namespace ProjectVL.Systems
             card.Provisional = false;
             state.PendingEvolution = null;
             state.SetDecisionLocked(false);
+            state.EquipmentEffectWave = 0;
 
             QueueNextEvolutionChoice(state);
             AutoMergeHand(state);
@@ -267,6 +272,7 @@ namespace ProjectVL.Systems
                 source[sourceIndex] = null;
                 state.Merges++;
                 QueueEvolutionChoice(state, replaced);
+                state.EquipmentEffectWave = 0;
                 return CardMoveResult.Fed;
             }
 
@@ -318,6 +324,11 @@ namespace ProjectVL.Systems
             {
                 AutoMergeHand(state);
             }
+            if (sourceKind == CardSlotKind.Equipment
+                || targetKind == CardSlotKind.Equipment)
+            {
+                state.EquipmentEffectWave = 0;
+            }
 
             return result;
         }
@@ -337,6 +348,10 @@ namespace ProjectVL.Systems
 
             slots[index] = null;
             state.ConsumedCards++;
+            if (kind == CardSlotKind.Equipment)
+            {
+                state.EquipmentEffectWave = 0;
+            }
             return true;
         }
 

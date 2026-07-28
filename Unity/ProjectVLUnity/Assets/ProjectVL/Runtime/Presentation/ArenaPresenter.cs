@@ -17,6 +17,7 @@ namespace ProjectVL.Presentation
         private Sprite _circleSprite;
         private Sprite _squareSprite;
         private Transform _turret;
+        private SpriteRenderer _decoyView;
 
         public void Initialize(CombatConfig combat, GameState state)
         {
@@ -44,6 +45,7 @@ namespace ProjectVL.Presentation
                 -_state.TurretAngleRadians * Mathf.Rad2Deg);
             SyncEnemies();
             SyncBullets();
+            SyncDecoy();
         }
 
         private void CreateCamera()
@@ -195,6 +197,39 @@ namespace ProjectVL.Presentation
             RemoveMissingViews(_bulletViews, activeIds);
         }
 
+        private void SyncDecoy()
+        {
+            if (!_state.DecoyActive)
+            {
+                if (_decoyView != null)
+                {
+                    Destroy(_decoyView.gameObject);
+                    _decoyView = null;
+                }
+
+                return;
+            }
+
+            if (_decoyView == null)
+            {
+                _decoyView = CreateSpriteView(
+                    "Decoy",
+                    _squareSprite,
+                    new Color(1f, 0.65f, 0.2f));
+                _decoyView.transform.SetParent(transform, false);
+                _decoyView.transform.localScale =
+                    new Vector3(24f, 24f, 1f);
+                _decoyView.sortingOrder = 14;
+            }
+
+            _decoyView.transform.position =
+                PixelToWorld(_state.DecoyPosition);
+            _decoyView.color = Color.Lerp(
+                new Color(0.4f, 0.15f, 0.05f),
+                new Color(1f, 0.65f, 0.2f),
+                Mathf.Clamp01(_state.DecoyHp / _state.DecoyMaxHp));
+        }
+
         private static void RemoveMissingViews(
             Dictionary<int, SpriteRenderer> views,
             HashSet<int> activeIds)
@@ -228,6 +263,11 @@ namespace ProjectVL.Presentation
             if (enemy.FrozenRemaining > 0f)
             {
                 return new Color(0.45f, 0.95f, 1f);
+            }
+
+            if (enemy.DotRemaining > 0f)
+            {
+                return new Color(1f, 0.35f, 0.15f);
             }
 
             if (enemy.SlowRemaining > 0f)

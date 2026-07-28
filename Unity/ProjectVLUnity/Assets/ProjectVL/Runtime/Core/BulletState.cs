@@ -22,6 +22,14 @@ namespace ProjectVL.Core
         public float FreezeDuration { get; }
         public float VulnerableRatio { get; }
         public float VulnerableDuration { get; }
+        public float DotDamageRatio { get; }
+        public float DotDuration { get; }
+        public float DotTickInterval { get; }
+        public int SplitCount { get; }
+        public float SplitDamageRatio { get; }
+        public float SplashRadius { get; }
+        public float SplashDamageRatio { get; }
+        public float KnockbackDistance { get; }
         public HashSet<int> HitEnemyIds { get; } = new HashSet<int>();
 
         public BulletState(
@@ -52,6 +60,14 @@ namespace ProjectVL.Core
             FreezeDuration = profile.FreezeDuration;
             VulnerableRatio = profile.VulnerableRatio;
             VulnerableDuration = profile.VulnerableDuration;
+            DotDamageRatio = profile.DotDamageRatio;
+            DotDuration = profile.DotDuration;
+            DotTickInterval = profile.DotTickInterval;
+            SplitCount = profile.SplitCount;
+            SplitDamageRatio = profile.SplitDamageRatio;
+            SplashRadius = profile.SplashRadius;
+            SplashDamageRatio = profile.SplashDamageRatio;
+            KnockbackDistance = profile.KnockbackDistance;
         }
     }
 }

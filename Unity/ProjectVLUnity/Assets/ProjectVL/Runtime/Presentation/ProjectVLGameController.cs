@@ -16,6 +16,18 @@ namespace ProjectVL.Presentation
         private RecipeSystem _recipeSystem;
         private CardSlotKind? _selectedSlotKind;
         private int _selectedSlotIndex = -1;
+        private int _effectDemoIndex;
+        private static readonly string[] EffectDemoTypes =
+        {
+            "scorch",
+            "splitBlast",
+            "impact",
+            "sanctum",
+            "aegis",
+            "thorns",
+            "decoy",
+            "harvest"
+        };
 
         public GameState State => _simulation?.State;
         public float TimeScale => _simulation?.TimeScale ?? 1f;
@@ -233,6 +245,26 @@ namespace ProjectVL.Presentation
             }
         }
 
+        public void GrantEffectDemo()
+        {
+            int added = 0;
+            while (_effectDemoIndex < EffectDemoTypes.Length)
+            {
+                string type = EffectDemoTypes[_effectDemoIndex];
+                if (!AddResolvedDemoCard(type, 3))
+                {
+                    break;
+                }
+
+                _effectDemoIndex++;
+                added++;
+            }
+
+            LastCardAction = added > 0
+                ? $"Added {added} resolved effect test cards."
+                : "Free hand slots, then press B for more effect cards.";
+        }
+
         public void CraftAvailableRecipe()
         {
             string recipeId = AvailableRecipeId;
@@ -300,6 +332,11 @@ namespace ProjectVL.Presentation
                 CraftAvailableRecipe();
             }
 
+            if (Input.GetKeyDown(KeyCode.B))
+            {
+                GrantEffectDemo();
+            }
+
             for (int i = 0; i < State.Hand.Length && i < 7; i++)
             {
                 if (Input.GetKeyDown((KeyCode)((int)KeyCode.Alpha1 + i)))
@@ -330,7 +367,7 @@ namespace ProjectVL.Presentation
             return index >= 0 && index < slots.Length ? slots[index] : null;
         }
 
-        private bool AddResolvedDemoCard(string type)
+        private bool AddResolvedDemoCard(string type, int star = 5)
         {
             for (int i = 0; i < State.Hand.Length; i++)
             {
@@ -339,9 +376,12 @@ namespace ProjectVL.Presentation
                     continue;
                 }
 
-                CardState card = State.CreateCard(type, 5);
+                CardState card = State.CreateCard(type, star);
                 card.EvolutionPath.Add($"3:{type}A");
-                card.EvolutionPath.Add($"5:{type}A2");
+                if (star >= 5)
+                {
+                    card.EvolutionPath.Add($"5:{type}A2");
+                }
                 State.Hand[i] = card;
                 return true;
             }

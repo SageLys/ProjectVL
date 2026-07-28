@@ -21,6 +21,7 @@ namespace ProjectVL.Systems
                 return;
             }
 
+            _combat.StepPassives(state, deltaTime);
             _combat.StepTurret(state, deltaTime);
             _waves.Step(state, deltaTime);
             _combat.StepBullets(state, deltaTime);

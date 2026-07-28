@@ -43,7 +43,45 @@ namespace ProjectVL.Systems
                 _combat.bullet.life,
                 _combat.defaults.damage,
                 profile));
-            state.ShotCooldown = 1f / _combat.defaults.fireRate;
+            state.ShotCooldown = 1f
+                / (_combat.defaults.fireRate * state.FireRateMultiplier);
+        }
+
+        public void StepPassives(GameState state, float deltaTime)
+        {
+            CardCombatProfile profile = CardEffectResolver.Resolve(state);
+            state.DropRateMultiplier = profile.DropRateMultiplier;
+            state.DropLifetimeMultiplier = profile.DropLifetimeMultiplier;
+            if (state.Wave > 0 && state.EquipmentEffectWave != state.Wave)
+            {
+                InitializeWaveEffects(state, profile);
+            }
+
+            if (state.FireRateBuffRemaining > 0f)
+            {
+                state.FireRateBuffRemaining = Math.Max(
+                    0f,
+                    state.FireRateBuffRemaining - deltaTime);
+                if (state.FireRateBuffRemaining <= 0f)
+                {
+                    state.FireRateMultiplier = 1f;
+                }
+            }
+
+            if (state.ShieldMaxHits > 0
+                && state.ShieldHits <= 0
+                && state.ShieldRegenRemaining > 0f)
+            {
+                state.ShieldRegenRemaining = Math.Max(
+                    0f,
+                    state.ShieldRegenRemaining - deltaTime);
+                if (state.ShieldRegenRemaining <= 0f)
+                {
+                    state.ShieldHits = state.ShieldMaxHits;
+                }
+            }
+
+            ApplySanctumAura(state, profile);
         }
 
         public void StepBullets(GameState state, float deltaTime)
@@ -73,6 +111,11 @@ namespace ProjectVL.Systems
                     Float2 hitPosition = enemy.Position;
                     DamageEnemy(state, enemy, bullet.Damage);
                     ApplyStatusEffects(enemy, bullet);
+                    ApplyImpactAndSplitEffects(
+                        state,
+                        bullet,
+                        hitPosition,
+                        enemy.Id);
                     ApplyChainLightning(
                         state,
                         bullet,
@@ -103,10 +146,15 @@ namespace ProjectVL.Systems
         public void StepEnemies(GameState state, float deltaTime)
         {
             Float2 turret = TurretPosition;
+            CardCombatProfile profile = CardEffectResolver.Resolve(state);
             for (int index = state.Enemies.Count - 1; index >= 0; index--)
             {
                 EnemyState enemy = state.Enemies[index];
-                UpdateStatuses(enemy, deltaTime);
+                if (!UpdateStatuses(state, enemy, deltaTime))
+                {
+                    continue;
+                }
+
                 if (enemy.FrozenRemaining > 0f)
                 {
                     continue;
@@ -114,23 +162,42 @@ namespace ProjectVL.Systems
 
                 if (enemy.SpawnKind == EnemySpawnKind.WaveBoss)
                 {
-                    StepBoss(state, enemy, deltaTime);
+                    StepBoss(state, enemy, profile, deltaTime);
                     continue;
                 }
 
-                Float2 toTurret = turret - enemy.Position;
-                enemy.Position += toTurret.Normalized()
+                bool targetingDecoy = state.DecoyActive
+                    && Float2.Distance(
+                        enemy.Position,
+                        state.DecoyPosition) <= state.DecoyTauntRadius;
+                Float2 destination = targetingDecoy
+                    ? state.DecoyPosition
+                    : turret;
+                Float2 toDestination = destination - enemy.Position;
+                enemy.Position += toDestination.Normalized()
                     * enemy.Speed
                     * (1f - enemy.SlowRatio)
                     * deltaTime;
 
-                if (Float2.Distance(enemy.Position, turret) >= _combat.breakthroughDist)
+                if (state.DecoyActive
+                    && targetingDecoy
+                    && Float2.Distance(
+                        enemy.Position,
+                        state.DecoyPosition) < enemy.Radius + 12f)
+                {
+                    state.Enemies.RemoveAt(index);
+                    DamageDecoy(state, profile, enemy.Damage);
+                    continue;
+                }
+
+                if (Float2.Distance(enemy.Position, turret)
+                    >= _combat.breakthroughDist)
                 {
                     continue;
                 }
 
                 state.Enemies.RemoveAt(index);
-                state.ApplyDamage(enemy.Damage);
+                HandleBreach(state, profile, enemy.Damage);
             }
         }
 
@@ -152,6 +219,12 @@ namespace ProjectVL.Systems
             {
                 state.Kills++;
                 state.GrantReward(enemy.Reward);
+                if (enemy.Reward != null)
+                {
+                    CardCombatProfile profile =
+                        CardEffectResolver.Resolve(state);
+                    state.RestoreHp(profile.PickupRestore);
+                }
             }
         }
 
@@ -195,6 +268,89 @@ namespace ProjectVL.Systems
                     enemy.VulnerableRemaining,
                     bullet.VulnerableDuration);
             }
+
+            if (bullet.DotDamageRatio > 0f)
+            {
+                enemy.DotDamagePerTick = Math.Max(
+                    enemy.DotDamagePerTick,
+                    bullet.Damage * bullet.DotDamageRatio);
+                enemy.DotTickInterval = bullet.DotTickInterval;
+                enemy.DotTickRemaining = bullet.DotTickInterval;
+                enemy.DotRemaining = Math.Max(
+                    enemy.DotRemaining,
+                    bullet.DotDuration);
+            }
+        }
+
+        private void ApplyImpactAndSplitEffects(
+            GameState state,
+            BulletState bullet,
+            Float2 hitPosition,
+            int primaryEnemyId)
+        {
+            EnemyState primary = FindEnemyById(state, primaryEnemyId);
+            if (primary != null && bullet.KnockbackDistance > 0f)
+            {
+                Float2 direction =
+                    (primary.Position - TurretPosition).Normalized();
+                primary.Position += direction * bullet.KnockbackDistance;
+            }
+
+            if (bullet.SplashRadius > 0f
+                && bullet.SplashDamageRatio > 0f)
+            {
+                DamageArea(
+                    state,
+                    hitPosition,
+                    bullet.SplashRadius,
+                    bullet.Damage * bullet.SplashDamageRatio,
+                    primaryEnemyId,
+                    0f,
+                    0f);
+            }
+
+            if (bullet.SplitCount <= 0 || bullet.SplitDamageRatio <= 0f)
+            {
+                return;
+            }
+
+            var excluded = new System.Collections.Generic.HashSet<int>
+            {
+                primaryEnemyId
+            };
+            for (int i = 0; i < bullet.SplitCount; i++)
+            {
+                EnemyState target = FindClosestChainTarget(
+                    state,
+                    hitPosition,
+                    140f,
+                    excluded);
+                if (target == null)
+                {
+                    break;
+                }
+
+                excluded.Add(target.Id);
+                DamageEnemy(
+                    state,
+                    target,
+                    bullet.Damage * bullet.SplitDamageRatio);
+            }
+        }
+
+        private static EnemyState FindEnemyById(
+            GameState state,
+            int enemyId)
+        {
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                if (enemy.Id == enemyId)
+                {
+                    return enemy;
+                }
+            }
+
+            return null;
         }
 
         private static void ApplyChainLightning(
@@ -262,7 +418,8 @@ namespace ProjectVL.Systems
             return closest;
         }
 
-        private static void UpdateStatuses(
+        private static bool UpdateStatuses(
+            GameState state,
             EnemyState enemy,
             float deltaTime)
         {
@@ -284,13 +441,231 @@ namespace ProjectVL.Systems
             {
                 enemy.VulnerableRatio = 0f;
             }
+
+            if (enemy.DotRemaining > 0f)
+            {
+                enemy.DotRemaining = Math.Max(
+                    0f,
+                    enemy.DotRemaining - deltaTime);
+                enemy.DotTickRemaining -= deltaTime;
+                while (enemy.DotTickRemaining <= 0f
+                    && enemy.DotRemaining > 0f
+                    && enemy.Hp > 0f)
+                {
+                    enemy.DotTickRemaining += Math.Max(
+                        0.01f,
+                        enemy.DotTickInterval);
+                    DamageEnemy(state, enemy, enemy.DotDamagePerTick);
+                }
+            }
+
+            return state.Enemies.Contains(enemy);
         }
 
-        private void StepBoss(GameState state, EnemyState boss, float deltaTime)
+        private void InitializeWaveEffects(
+            GameState state,
+            CardCombatProfile profile)
+        {
+            state.EquipmentEffectWave = state.Wave;
+            state.ShieldMaxHits = profile.ShieldHits;
+            state.ShieldHits = profile.ShieldHits;
+            state.ShieldRegenRemaining = 0f;
+            state.FireRateMultiplier =
+                profile.WaveStartFireRateMultiplier;
+            state.FireRateBuffRemaining =
+                profile.WaveStartFireRateDuration;
+
+            state.DecoyActive = profile.DecoyHp > 0f;
+            state.DecoyMaxHp = profile.DecoyHp;
+            state.DecoyHp = profile.DecoyHp;
+            state.DecoyTauntRadius = profile.DecoyTauntRadius;
+            state.DecoyExplodeDamageMultiplier =
+                profile.DecoyExplodeDamageMultiplier;
+            state.DecoyExplodeKnockback =
+                profile.DecoyExplodeKnockback;
+            state.DecoyPosition = TurretPosition
+                + new Float2(profile.DecoyDistance, 0f);
+        }
+
+        private void ApplySanctumAura(
+            GameState state,
+            CardCombatProfile profile)
+        {
+            if (profile.AuraRadiusRatio <= 0f)
+            {
+                return;
+            }
+
+            float radius =
+                _combat.defaults.range * profile.AuraRadiusRatio;
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                if (Float2.Distance(TurretPosition, enemy.Position) > radius)
+                {
+                    continue;
+                }
+
+                enemy.SlowRatio = Math.Max(
+                    enemy.SlowRatio,
+                    profile.AuraSlowRatio);
+                enemy.SlowRemaining = Math.Max(
+                    enemy.SlowRemaining,
+                    0.6f);
+                enemy.VulnerableRatio = Math.Max(
+                    enemy.VulnerableRatio,
+                    profile.AuraVulnerableRatio);
+                enemy.VulnerableRemaining = Math.Max(
+                    enemy.VulnerableRemaining,
+                    0.6f);
+            }
+        }
+
+        private void HandleBreach(
+            GameState state,
+            CardCombatProfile profile,
+            float incomingDamage)
+        {
+            if (state.ShieldHits > 0)
+            {
+                state.ShieldHits--;
+                if (state.ShieldHits <= 0)
+                {
+                    state.ShieldRegenRemaining =
+                        profile.ShieldRegenSeconds;
+                    if (profile.ShieldBreakDamage > 0f)
+                    {
+                        DamageArea(
+                            state,
+                            TurretPosition,
+                            120f,
+                            profile.ShieldBreakDamage,
+                            -1,
+                            profile.ShieldBreakKnockback,
+                            0f);
+                    }
+                }
+
+                return;
+            }
+
+            state.ApplyDamage(
+                incomingDamage
+                * (1f - profile.BreachReductionRatio));
+            ApplyBreachReaction(state, profile);
+        }
+
+        private void ApplyBreachReaction(
+            GameState state,
+            CardCombatProfile profile)
+        {
+            if (profile.BreachBurstRadius <= 0f)
+            {
+                return;
+            }
+
+            float damage = _combat.defaults.damage
+                * profile.BreachBurstDamageMultiplier;
+            DamageArea(
+                state,
+                TurretPosition,
+                profile.BreachBurstRadius,
+                damage,
+                -1,
+                profile.BreachKnockback,
+                profile.BreachSlowRatio);
+            if (profile.BreachSlowRatio > 0f)
+            {
+                foreach (EnemyState enemy in state.Enemies)
+                {
+                    if (Float2.Distance(
+                        TurretPosition,
+                        enemy.Position) <= profile.BreachBurstRadius)
+                    {
+                        enemy.SlowRemaining = Math.Max(
+                            enemy.SlowRemaining,
+                            profile.BreachSlowDuration);
+                    }
+                }
+            }
+        }
+
+        private void DamageDecoy(
+            GameState state,
+            CardCombatProfile profile,
+            float damage)
+        {
+            state.DecoyHp -= Math.Max(0f, damage);
+            if (state.DecoyHp > 0f)
+            {
+                return;
+            }
+
+            state.DecoyActive = false;
+            if (state.DecoyExplodeDamageMultiplier > 0f)
+            {
+                DamageArea(
+                    state,
+                    state.DecoyPosition,
+                    state.DecoyTauntRadius,
+                    _combat.defaults.damage
+                        * state.DecoyExplodeDamageMultiplier,
+                    -1,
+                    state.DecoyExplodeKnockback,
+                    0f);
+            }
+        }
+
+        private void DamageArea(
+            GameState state,
+            Float2 center,
+            float radius,
+            float damage,
+            int excludedEnemyId,
+            float knockback,
+            float slowRatio)
+        {
+            var targets = new System.Collections.Generic.List<EnemyState>();
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                if (enemy.Id != excludedEnemyId
+                    && Float2.Distance(center, enemy.Position) <= radius)
+                {
+                    targets.Add(enemy);
+                }
+            }
+
+            foreach (EnemyState enemy in targets)
+            {
+                DamageEnemy(state, enemy, damage);
+                if (!state.Enemies.Contains(enemy))
+                {
+                    continue;
+                }
+
+                if (knockback > 0f)
+                {
+                    enemy.Position +=
+                        (enemy.Position - center).Normalized() * knockback;
+                }
+
+                if (slowRatio > 0f)
+                {
+                    enemy.SlowRatio = Math.Max(
+                        enemy.SlowRatio,
+                        slowRatio);
+                }
+            }
+        }
+
+        private void StepBoss(
+            GameState state,
+            EnemyState boss,
+            CardCombatProfile profile,
+            float deltaTime)
         {
             if (boss.BossPhase == BossPhase.Contact)
             {
-                StepBossContact(state, boss, deltaTime);
+                StepBossContact(state, boss, profile, deltaTime);
                 return;
             }
 
@@ -347,7 +722,11 @@ namespace ProjectVL.Systems
             boss.ContactTickRemaining = behavior.contactWarmup;
         }
 
-        private void StepBossContact(GameState state, EnemyState boss, float deltaTime)
+        private void StepBossContact(
+            GameState state,
+            EnemyState boss,
+            CardCombatProfile profile,
+            float deltaTime)
         {
             BossBehaviorConfig behavior = _enemies.bossBehavior;
             Float2 turret = TurretPosition;
@@ -374,7 +753,20 @@ namespace ProjectVL.Systems
                 && state.Mode == GameMode.Playing)
             {
                 boss.ContactTickRemaining += behavior.contactTickInterval;
-                state.ApplyDamage(boss.ContactDps * behavior.contactTickInterval);
+                float damage =
+                    boss.ContactDps * behavior.contactTickInterval;
+                HandleBreach(state, profile, damage);
+                if (profile.ThornsRatio > 0f)
+                {
+                    DamageEnemy(
+                        state,
+                        boss,
+                        damage * profile.ThornsRatio);
+                    if (!state.Enemies.Contains(boss))
+                    {
+                        break;
+                    }
+                }
             }
         }
 

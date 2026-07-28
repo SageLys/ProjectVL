@@ -23,6 +23,10 @@ namespace ProjectVL.Core
         public float FrozenRemaining { get; set; }
         public float VulnerableRatio { get; set; }
         public float VulnerableRemaining { get; set; }
+        public float DotDamagePerTick { get; set; }
+        public float DotTickInterval { get; set; }
+        public float DotTickRemaining { get; set; }
+        public float DotRemaining { get; set; }
 
         public EnemyState(
             int id,

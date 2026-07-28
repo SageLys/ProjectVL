@@ -30,6 +30,30 @@ namespace ProjectVL.Systems
                     case "frost":
                         ApplyFrost(card, profile);
                         break;
+                    case "scorch":
+                        ApplyScorch(card, profile);
+                        break;
+                    case "splitBlast":
+                        ApplySplitBlast(card, profile);
+                        break;
+                    case "impact":
+                        ApplyImpact(card, profile);
+                        break;
+                    case "sanctum":
+                        ApplySanctum(card, profile);
+                        break;
+                    case "aegis":
+                        ApplyAegis(card, profile);
+                        break;
+                    case "thorns":
+                        ApplyThorns(card, profile);
+                        break;
+                    case "decoy":
+                        ApplyDecoy(card, profile);
+                        break;
+                    case "harvest":
+                        ApplyHarvest(card, profile);
+                        break;
                 }
             }
 
@@ -110,6 +134,184 @@ namespace ProjectVL.Systems
                     Max(profile.VulnerableRatio, 0.16f);
                 profile.VulnerableDuration =
                     Max(profile.VulnerableDuration, 2f);
+            }
+        }
+
+        private static void ApplyScorch(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            string route = RouteAt(card, 3);
+            profile.DotDamageRatio =
+                Max(profile.DotDamageRatio, 0.15f);
+            profile.DotDuration = Max(
+                profile.DotDuration,
+                route == "scorchB" ? 4f : 2.5f);
+            profile.DotTickInterval = 0.5f;
+            if (route == "scorchC")
+            {
+                profile.SlowRatio = Max(profile.SlowRatio, 0.15f);
+                profile.SlowDuration = Max(profile.SlowDuration, 0.6f);
+            }
+        }
+
+        private static void ApplySplitBlast(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            string route = RouteAt(card, 3);
+            profile.SplitCount += 2;
+            profile.SplitDamageRatio = route == "splitBlastB"
+                ? 0.45f
+                : 0.5f;
+            if (route == "splitBlastC")
+            {
+                profile.DotDamageRatio =
+                    Max(profile.DotDamageRatio, 0.08f);
+                profile.DotDuration = Max(profile.DotDuration, 2f);
+                profile.DotTickInterval = 0.5f;
+            }
+            else
+            {
+                profile.SplashRadius = Max(profile.SplashRadius, 40f);
+                profile.SplashDamageRatio = Max(
+                    profile.SplashDamageRatio,
+                    route == "splitBlastB" ? 1f : 0.6f);
+            }
+        }
+
+        private static void ApplyImpact(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            string route = RouteAt(card, 3);
+            profile.KnockbackDistance =
+                Max(profile.KnockbackDistance, 22f);
+            if (route == "impactB")
+            {
+                profile.SlowRatio = Max(profile.SlowRatio, 0.25f);
+                profile.SlowDuration = Max(profile.SlowDuration, 1.2f);
+            }
+            else if (route == "impactC")
+            {
+                profile.SplashRadius = Max(profile.SplashRadius, 35f);
+                profile.SplashDamageRatio =
+                    Max(profile.SplashDamageRatio, 0.4f);
+            }
+        }
+
+        private static void ApplySanctum(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            string route = RouteAt(card, 3);
+            profile.AuraRadiusRatio =
+                Max(profile.AuraRadiusRatio, 0.5f);
+            profile.AuraVulnerableRatio =
+                Max(profile.AuraVulnerableRatio, 0.2f);
+            profile.AuraSlowRatio = Max(
+                profile.AuraSlowRatio,
+                route == "sanctumB" ? 0.25f : 0.1f);
+            if (route == "sanctumC")
+            {
+                profile.WaveStartFireRateMultiplier =
+                    Max(profile.WaveStartFireRateMultiplier, 1.15f);
+                profile.WaveStartFireRateDuration =
+                    Max(profile.WaveStartFireRateDuration, 5f);
+            }
+        }
+
+        private static void ApplyAegis(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            string route = RouteAt(card, 3);
+            profile.ShieldHits = 2;
+            profile.ShieldRegenSeconds =
+                route == "aegisB" ? 7f : 10f;
+            if (route == "aegisC")
+            {
+                profile.ShieldBreakDamage = 28f;
+                profile.ShieldBreakKnockback = 70f;
+            }
+            else
+            {
+                profile.BreachReductionRatio = Max(
+                    profile.BreachReductionRatio,
+                    0.2f);
+            }
+        }
+
+        private static void ApplyThorns(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            string route = RouteAt(card, 3);
+            profile.BreachReductionRatio = Max(
+                profile.BreachReductionRatio,
+                route == "thornsA" ? 0.35f : 0.3f);
+            if (route == "thornsA")
+            {
+                profile.BreachBurstDamageMultiplier = 1.5f;
+                profile.BreachBurstRadius = 100f;
+                profile.BreachKnockback = 90f;
+            }
+            else if (route == "thornsB")
+            {
+                profile.ThornsRatio = 0.3f;
+                profile.BreachBurstDamageMultiplier = 1.2f;
+                profile.BreachBurstRadius = 140f;
+            }
+            else
+            {
+                profile.ThornsRatio = 0.25f;
+                profile.BreachSlowRatio = 0.35f;
+                profile.BreachSlowDuration = 1.5f;
+                profile.BreachBurstRadius = 120f;
+            }
+        }
+
+        private static void ApplyDecoy(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            string route = RouteAt(card, 3);
+            profile.DecoyHp = 60f;
+            profile.DecoyTauntRadius =
+                route == "decoyB" ? 190f : 140f;
+            profile.DecoyDistance = 150f;
+            if (route == "decoyC")
+            {
+                profile.DecoyExplodeDamageMultiplier = 1.2f;
+                profile.DecoyExplodeKnockback = 70f;
+            }
+        }
+
+        private static void ApplyHarvest(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            string route = RouteAt(card, 3);
+            if (route == "harvestA")
+            {
+                profile.DropRateMultiplier =
+                    Max(profile.DropRateMultiplier, 1.25f);
+                profile.DropLifetimeMultiplier =
+                    Max(profile.DropLifetimeMultiplier, 1.25f);
+            }
+            else if (route == "harvestB")
+            {
+                profile.DropRateMultiplier =
+                    Max(profile.DropRateMultiplier, 1.1f);
+                profile.DropLifetimeMultiplier =
+                    Max(profile.DropLifetimeMultiplier, 1.5f);
+            }
+            else
+            {
+                profile.DropRateMultiplier =
+                    Max(profile.DropRateMultiplier, 1.1f);
+                profile.PickupRestore =
+                    Max(profile.PickupRestore, 2f);
             }
         }
 

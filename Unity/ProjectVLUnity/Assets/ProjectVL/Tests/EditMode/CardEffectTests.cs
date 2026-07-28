@@ -118,6 +118,135 @@ namespace ProjectVL.Tests
                 Is.EqualTo(enemy.Speed * 0.7f * 0.1f).Within(0.001f));
         }
 
+        [Test]
+        public void ScorchAppliesDamageOverTime()
+        {
+            EquipResolved("scorch", 3, "3:scorchA");
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+            EnemyState enemy = AddEnemy(new Float2(200f, 200f), 100f);
+
+            HitWithProfile(enemy.Position, profile);
+            _system.StepEnemies(_state, 0.5f);
+
+            Assert.That(enemy.DotRemaining, Is.GreaterThan(0f));
+            Assert.That(enemy.Hp, Is.EqualTo(88.5f).Within(0.001f));
+        }
+
+        [Test]
+        public void SplitBlastDamagesNearbySecondaryTargets()
+        {
+            EquipResolved("splitBlast", 3, "3:splitBlastA");
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+            EnemyState primary = AddEnemy(new Float2(200f, 200f), 100f);
+            EnemyState secondary = AddEnemy(new Float2(225f, 200f), 100f);
+
+            HitWithProfile(primary.Position, profile);
+
+            Assert.That(primary.Hp, Is.EqualTo(90f));
+            Assert.That(secondary.Hp, Is.LessThan(90f));
+        }
+
+        [Test]
+        public void ImpactKnocksTargetAwayFromTurret()
+        {
+            EquipResolved("impact", 3, "3:impactA");
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+            Float2 turret = new Float2(_combat.turret.x, _combat.turret.y);
+            EnemyState enemy = AddEnemy(
+                turret + new Float2(100f, 0f),
+                100f);
+            float before = Float2.Distance(turret, enemy.Position);
+
+            HitWithProfile(enemy.Position, profile);
+
+            Assert.That(
+                Float2.Distance(turret, enemy.Position),
+                Is.EqualTo(before + 22f).Within(0.001f));
+        }
+
+        [Test]
+        public void SanctumAuraSlowsAndExposesNearbyEnemies()
+        {
+            EquipResolved("sanctum", 3, "3:sanctumB");
+            _state.BeginWave(1);
+            EnemyState enemy = AddEnemy(
+                new Float2(_combat.turret.x + 40f, _combat.turret.y),
+                100f);
+
+            _system.StepPassives(_state, 0.1f);
+
+            Assert.That(enemy.SlowRatio, Is.EqualTo(0.25f));
+            Assert.That(enemy.VulnerableRatio, Is.EqualTo(0.2f));
+        }
+
+        [Test]
+        public void AegisShieldAbsorbsConfiguredBreachHits()
+        {
+            EquipResolved("aegis", 3, "3:aegisA");
+            _state.BeginWave(1);
+            _system.StepPassives(_state, 0f);
+            float hpBefore = _state.Hp;
+            AddEnemy(
+                new Float2(_combat.turret.x, _combat.turret.y),
+                100f);
+
+            _system.StepEnemies(_state, 0f);
+
+            Assert.That(_state.Hp, Is.EqualTo(hpBefore));
+            Assert.That(_state.ShieldHits, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void ThornsRouteReducesBreachDamage()
+        {
+            EquipResolved("thorns", 3, "3:thornsA");
+            _state.BeginWave(1);
+            _system.StepPassives(_state, 0f);
+            float hpBefore = _state.Hp;
+            AddEnemy(
+                new Float2(_combat.turret.x, _combat.turret.y),
+                100f,
+                10f);
+
+            _system.StepEnemies(_state, 0f);
+
+            Assert.That(
+                _state.Hp,
+                Is.EqualTo(hpBefore - 6.5f).Within(0.001f));
+        }
+
+        [Test]
+        public void DecoySpawnsAtWaveStartAndTakesEnemyHit()
+        {
+            EquipResolved("decoy", 3, "3:decoyA");
+            _state.BeginWave(1);
+            _system.StepPassives(_state, 0f);
+            EnemyState enemy = AddEnemy(
+                _state.DecoyPosition + new Float2(5f, 0f),
+                100f,
+                12f);
+
+            _system.StepEnemies(_state, 0f);
+
+            Assert.That(_state.DecoyActive, Is.True);
+            Assert.That(_state.DecoyHp, Is.EqualTo(48f));
+            Assert.That(_state.Enemies.Contains(enemy), Is.False);
+        }
+
+        [Test]
+        public void HarvestRouteExposesWebDropMultipliers()
+        {
+            EquipResolved("harvest", 3, "3:harvestA");
+
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+            _system.StepPassives(_state, 0f);
+
+            Assert.That(profile.DropRateMultiplier, Is.EqualTo(1.25f));
+            Assert.That(profile.DropLifetimeMultiplier, Is.EqualTo(1.25f));
+            Assert.That(_state.DropRateMultiplier, Is.EqualTo(1.25f));
+            Assert.That(_state.DropLifetimeMultiplier, Is.EqualTo(1.25f));
+        }
+
         private void EquipResolved(
             string type,
             int star,
@@ -128,7 +257,10 @@ namespace ProjectVL.Tests
             _state.Equipment[0] = card;
         }
 
-        private EnemyState AddEnemy(Float2 position, float hp)
+        private EnemyState AddEnemy(
+            Float2 position,
+            float hp,
+            float damage = 1f)
         {
             var enemy = new EnemyState(
                 _nextEnemyId++,
@@ -137,7 +269,7 @@ namespace ProjectVL.Tests
                 hp,
                 10f,
                 8f,
-                1f);
+                damage);
             _state.Enemies.Add(enemy);
             return enemy;
         }
