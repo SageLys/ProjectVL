@@ -147,7 +147,7 @@ namespace ProjectVL.Presentation
                     view = CreateSpriteView(
                         $"Enemy {enemy.Id}",
                         _circleSprite,
-                        EnemyColor(enemy.Kind));
+                        EnemyColor(enemy));
                     view.transform.SetParent(transform, false);
                     view.transform.localScale = new Vector3(
                         enemy.Radius * 2f,
@@ -161,7 +161,7 @@ namespace ProjectVL.Presentation
                 float healthRatio = Mathf.Clamp01(enemy.Hp / enemy.MaxHp);
                 view.color = Color.Lerp(
                     new Color(0.35f, 0.1f, 0.15f),
-                    EnemyColor(enemy.Kind),
+                    EnemyColor(enemy),
                     healthRatio);
             }
 
@@ -223,9 +223,14 @@ namespace ProjectVL.Presentation
                 0f);
         }
 
-        private static Color EnemyColor(EnemyKind kind)
+        private static Color EnemyColor(EnemyState enemy)
         {
-            switch (kind)
+            if (enemy.SpawnKind == EnemySpawnKind.ValidationElite)
+            {
+                return new Color(1f, 0.78f, 0.22f);
+            }
+
+            switch (enemy.Kind)
             {
                 case EnemyKind.Fast:
                     return new Color(1f, 0.72f, 0.25f);

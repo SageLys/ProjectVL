@@ -10,6 +10,7 @@ namespace ProjectVL.Core
 
         public GameState State { get; }
         public float TimeScale { get; private set; } = 1f;
+        public event Action<GameState, float> SimulationStep;
         public event Action<GameState, float> CombatStep;
 
         public GameSimulation(GameState state, CombatConfig combat)
@@ -44,9 +45,11 @@ namespace ProjectVL.Core
             while (remaining > 0.000001f && steps < MaxStepsPerFrame && State.CanAdvance)
             {
                 float deltaTime = Math.Min(_combat.dtCap, remaining);
+                bool wasCombatActive = State.CanAdvanceCombat;
                 State.AdvanceTime(deltaTime);
+                SimulationStep?.Invoke(State, deltaTime);
 
-                if (State.CanAdvanceCombat)
+                if (wasCombatActive && State.CanAdvanceCombat)
                 {
                     CombatStep?.Invoke(State, deltaTime);
                 }

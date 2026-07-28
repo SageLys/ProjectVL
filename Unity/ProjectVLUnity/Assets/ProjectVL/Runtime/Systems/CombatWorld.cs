@@ -15,6 +15,12 @@ namespace ProjectVL.Systems
 
         public void Step(GameState state, float deltaTime)
         {
+            if (state.IntermissionActive)
+            {
+                _waves.Step(state, deltaTime);
+                return;
+            }
+
             _combat.StepTurret(state, deltaTime);
             _waves.Step(state, deltaTime);
             _combat.StepBullets(state, deltaTime);

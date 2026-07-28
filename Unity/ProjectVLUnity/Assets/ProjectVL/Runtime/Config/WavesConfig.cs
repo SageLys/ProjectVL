@@ -13,9 +13,11 @@ namespace ProjectVL.Config
         public SpawnIntervalConfig spawnInterval = new SpawnIntervalConfig();
         public BudgetConfig budget = new BudgetConfig();
         public StagePlanConfig stagePlan = new StagePlanConfig();
+        public IntermissionConfig intermission = new IntermissionConfig();
         public float spawnMargin;
         public TypeRollConfig typeRoll = new TypeRollConfig();
         public int[] bossWaves = Array.Empty<int>();
+        public WaveBossConfig waveBoss = new WaveBossConfig();
     }
 
     [Serializable]
@@ -85,5 +87,73 @@ namespace ProjectVL.Config
         public int validationWaves;
         public RegularStageConfig selection = new RegularStageConfig();
         public RegularStageConfig build = new RegularStageConfig();
+        public ValidationWaveConfig[] validation = Array.Empty<ValidationWaveConfig>();
+    }
+
+    [Serializable]
+    public sealed class RewardConfig
+    {
+        public string kind;
+        public int star;
+        public int count;
+        public string typePolicy;
+    }
+
+    [Serializable]
+    public sealed class ValidationEnemyConfig
+    {
+        public string type;
+        public float hpMul = 1f;
+        public float damageMul = 1f;
+        public float speedMul = 1f;
+        public float ccResistOverride;
+        public float knockbackResistOverride;
+        public RewardConfig reward = new RewardConfig();
+    }
+
+    [Serializable]
+    public sealed class ValidationWaveConfig
+    {
+        public ValidationEnemyConfig[] enemies = Array.Empty<ValidationEnemyConfig>();
+        public RewardConfig bossReward = new RewardConfig();
+    }
+
+    [Serializable]
+    public sealed class IntermissionFreeSecondsConfig
+    {
+        public float selection;
+        public float buildEarly;
+        public float buildLate;
+        public float validation;
+    }
+
+    [Serializable]
+    public sealed class IntermissionConfig
+    {
+        public IntermissionFreeSecondsConfig freeSeconds =
+            new IntermissionFreeSecondsConfig();
+        public float settleSeconds;
+        public bool autoReadyHighlight;
+    }
+
+    [Serializable]
+    public sealed class BossRewardScheduleConfig
+    {
+        public int[] selection = Array.Empty<int>();
+        public int[] build = Array.Empty<int>();
+        public int[] validation = Array.Empty<int>();
+    }
+
+    [Serializable]
+    public sealed class BossRewardConfig
+    {
+        public BossRewardScheduleConfig schedule = new BossRewardScheduleConfig();
+        public int count = 1;
+    }
+
+    [Serializable]
+    public sealed class WaveBossConfig
+    {
+        public BossRewardConfig reward = new BossRewardConfig();
     }
 }

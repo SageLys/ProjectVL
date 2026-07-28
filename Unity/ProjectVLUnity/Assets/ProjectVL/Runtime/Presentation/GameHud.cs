@@ -48,7 +48,9 @@ namespace ProjectVL.Presentation
 
             GameState state = _controller.State;
             string pauseLabel = state.Paused ? "RESUME [P]" : "PAUSE [P]";
-            GUI.enabled = state.Mode == GameMode.Playing;
+            GUI.enabled = state.Mode == GameMode.Playing
+                && !state.DecisionLocked
+                && !state.IntermissionActive;
             if (GUI.Button(new Rect(panelX + 10f, 24f, 106f, 42f), pauseLabel, _buttonStyle))
             {
                 _controller.TogglePause();
@@ -85,6 +87,18 @@ namespace ProjectVL.Presentation
         private void DrawCenterPanel()
         {
             GameState state = _controller.State;
+            if (state.PendingBossReward != null)
+            {
+                DrawRewardPanel(state.PendingBossReward);
+                return;
+            }
+
+            if (state.IntermissionActive)
+            {
+                DrawIntermissionPanel(state);
+                return;
+            }
+
             if (state.Mode == GameMode.Playing && !state.Paused)
             {
                 return;
@@ -135,6 +149,63 @@ namespace ProjectVL.Presentation
                     _controller.TogglePause();
                 }
             }
+        }
+
+        private void DrawRewardPanel(RunReward reward)
+        {
+            Rect panel = CenterPanelRect();
+            GUI.Box(panel, GUIContent.none);
+            GUI.Label(
+                new Rect(panel.x + 20f, panel.y + 24f, panel.width - 40f, 42f),
+                "BOSS REWARD",
+                _centerStyle);
+            string kind = reward.Kind == RewardKind.Wildcard
+                ? "WILDCARD"
+                : "CARD";
+            GUI.Label(
+                new Rect(panel.x + 20f, panel.y + 70f, panel.width - 40f, 28f),
+                $"{kind}  ·  {reward.Star} STAR  ·  x{reward.Count}",
+                _hudStyle);
+            if (GUI.Button(
+                new Rect(panel.x + 75f, panel.y + 112f, panel.width - 150f, 44f),
+                "CLAIM  [SPACE]",
+                _buttonStyle))
+            {
+                _controller.ClaimBossReward();
+            }
+        }
+
+        private void DrawIntermissionPanel(GameState state)
+        {
+            Rect panel = CenterPanelRect();
+            GUI.Box(panel, GUIContent.none);
+            GUI.Label(
+                new Rect(panel.x + 20f, panel.y + 24f, panel.width - 40f, 42f),
+                "WAVE CLEAR",
+                _centerStyle);
+            GUI.Label(
+                new Rect(panel.x + 20f, panel.y + 70f, panel.width - 40f, 28f),
+                $"Next wave in {state.IntermissionRemaining:0.0}s  ·  "
+                + $"Rewards {state.CollectedRewards.Count}",
+                _hudStyle);
+            if (GUI.Button(
+                new Rect(panel.x + 75f, panel.y + 112f, panel.width - 150f, 44f),
+                "NEXT WAVE  [SPACE]",
+                _buttonStyle))
+            {
+                _controller.ConfirmNextWave();
+            }
+        }
+
+        private static Rect CenterPanelRect()
+        {
+            const float width = 360f;
+            const float height = 180f;
+            return new Rect(
+                (Screen.width - width) / 2f,
+                (Screen.height - height) / 2f,
+                width,
+                height);
         }
 
         private void EnsureStyles()

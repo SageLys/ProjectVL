@@ -20,6 +20,7 @@ namespace ProjectVL.Systems
         public int MaxAlive { get; }
         public float SprintWindow { get; }
         public float SprintMultiplier { get; }
+        public ValidationWaveConfig Validation { get; }
 
         public ResolvedWavePlan(
             RunStage stage,
@@ -29,7 +30,8 @@ namespace ProjectVL.Systems
             int batchMax,
             int maxAlive,
             float sprintWindow,
-            float sprintMultiplier)
+            float sprintMultiplier,
+            ValidationWaveConfig validation = null)
         {
             Stage = stage;
             Quota = Math.Max(0, quota);
@@ -39,6 +41,7 @@ namespace ProjectVL.Systems
             MaxAlive = Math.Max(0, maxAlive);
             SprintWindow = Math.Max(0f, sprintWindow);
             SprintMultiplier = Math.Max(1f, sprintMultiplier);
+            Validation = validation;
         }
     }
 
@@ -56,7 +59,22 @@ namespace ProjectVL.Systems
             RunStage stage = StageForWave(wave);
             if (stage == RunStage.Validation)
             {
-                return new ResolvedWavePlan(stage, 0, 0f, 0f, 1, 0, 0f, 1f);
+                int validationIndex = wave
+                    - (_waves.totalWaves - _waves.stagePlan.validationWaves + 1);
+                ValidationWaveConfig validation = validationIndex >= 0
+                    && validationIndex < _waves.stagePlan.validation.Length
+                    ? _waves.stagePlan.validation[validationIndex]
+                    : null;
+                return new ResolvedWavePlan(
+                    stage,
+                    0,
+                    0f,
+                    0f,
+                    1,
+                    0,
+                    0f,
+                    1f,
+                    validation);
             }
 
             RegularStageConfig config = stage == RunStage.Selection

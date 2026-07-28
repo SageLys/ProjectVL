@@ -8,7 +8,7 @@ namespace ProjectVL.Core
         public GameMode Mode { get; private set; }
         public bool Paused { get; private set; }
         public bool DecisionLocked { get; private set; }
-        public bool IntermissionActive { get; private set; }
+        public bool IntermissionActive { get; internal set; }
         public float Time { get; private set; }
         public float Hp { get; private set; }
         public float BaseMaxHp { get; private set; }
@@ -18,6 +18,10 @@ namespace ProjectVL.Core
         public WavePhase WavePhase { get; internal set; } = WavePhase.Regular;
         public int? BossId { get; internal set; }
         public int LastSpawnCheckCount { get; internal set; }
+        public RunReward PendingBossReward { get; internal set; }
+        public List<RunReward> CollectedRewards { get; } = new List<RunReward>();
+        public float IntermissionRemaining { get; internal set; }
+        public bool IntermissionReady { get; internal set; }
         public float ShotCooldown { get; set; }
         public float TurretAngleRadians { get; set; }
         public int SpawnLeft { get; internal set; }
@@ -82,6 +86,9 @@ namespace ProjectVL.Core
             WavePhase = WavePhase.Regular;
             BossId = null;
             LastSpawnCheckCount = 0;
+            PendingBossReward = null;
+            IntermissionRemaining = 0f;
+            IntermissionReady = false;
         }
 
         public void EndRun(bool won = false)
@@ -107,6 +114,14 @@ namespace ProjectVL.Core
             if (Hp <= 0f)
             {
                 EndRun(false);
+            }
+        }
+
+        internal void GrantReward(RunReward reward)
+        {
+            if (reward != null)
+            {
+                CollectedRewards.Add(reward);
             }
         }
 

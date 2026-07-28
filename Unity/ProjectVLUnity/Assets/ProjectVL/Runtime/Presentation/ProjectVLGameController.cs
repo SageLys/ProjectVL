@@ -30,7 +30,7 @@ namespace ProjectVL.Presentation
 
             _world = new CombatWorld(combatSystem, _waveSystem);
             _simulation = new GameSimulation(state, combat);
-            _simulation.CombatStep += _world.Step;
+            _simulation.SimulationStep += _world.Step;
 
             _presenter = gameObject.AddComponent<ArenaPresenter>();
             _presenter.Initialize(combat, state);
@@ -74,9 +74,27 @@ namespace ProjectVL.Presentation
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 
+        public void ClaimBossReward()
+        {
+            _waveSystem.ClaimBossReward(State);
+        }
+
+        public void ConfirmNextWave()
+        {
+            _waveSystem.ConfirmIntermissionReady(State);
+        }
+
         private void HandleKeyboard()
         {
-            if (Input.GetKeyDown(KeyCode.Space) && State.Mode == GameMode.Ready)
+            if (Input.GetKeyDown(KeyCode.Space) && State.PendingBossReward != null)
+            {
+                ClaimBossReward();
+            }
+            else if (Input.GetKeyDown(KeyCode.Space) && State.IntermissionActive)
+            {
+                ConfirmNextWave();
+            }
+            else if (Input.GetKeyDown(KeyCode.Space) && State.Mode == GameMode.Ready)
             {
                 StartGame();
             }
@@ -97,7 +115,7 @@ namespace ProjectVL.Presentation
         {
             if (_simulation != null && _world != null)
             {
-                _simulation.CombatStep -= _world.Step;
+                _simulation.SimulationStep -= _world.Step;
             }
         }
     }

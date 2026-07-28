@@ -51,6 +51,8 @@ namespace ProjectVL.Tests
             Assert.That(wave8.TargetOnScreen, Is.EqualTo(28f));
             Assert.That(wave9.Stage, Is.EqualTo(RunStage.Validation));
             Assert.That(wave9.Quota, Is.Zero);
+            Assert.That(wave9.Validation, Is.Not.Null);
+            Assert.That(wave9.Validation.enemies, Has.Length.EqualTo(1));
         }
 
         [Test]

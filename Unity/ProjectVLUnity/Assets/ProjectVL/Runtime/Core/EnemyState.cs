@@ -16,6 +16,7 @@ namespace ProjectVL.Core
         public int OrbitDirection { get; }
         public float ContactTickRemaining { get; set; }
         public float ContactAngleRadians { get; set; }
+        public RunReward Reward { get; }
 
         public EnemyState(
             int id,
@@ -26,7 +27,8 @@ namespace ProjectVL.Core
             float radius,
             float damage,
             EnemySpawnKind spawnKind = EnemySpawnKind.Regular,
-            float contactDps = 0f)
+            float contactDps = 0f,
+            RunReward reward = null)
         {
             Id = id;
             Kind = kind;
@@ -38,6 +40,7 @@ namespace ProjectVL.Core
             Damage = damage;
             SpawnKind = spawnKind;
             ContactDps = contactDps;
+            Reward = reward;
             BossPhase = BossPhase.Approach;
             OrbitDirection = id % 2 == 0 ? 1 : -1;
         }

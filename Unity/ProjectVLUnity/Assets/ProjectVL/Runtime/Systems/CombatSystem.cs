@@ -67,6 +67,7 @@ namespace ProjectVL.Systems
                     {
                         state.Enemies.RemoveAt(enemyIndex);
                         state.Kills++;
+                        state.GrantReward(enemy.Reward);
                     }
 
                     consumed = true;

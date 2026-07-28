@@ -76,6 +76,62 @@ namespace ProjectVL.Systems
             return boss;
         }
 
+        public EnemyState SpawnValidationElite(
+            GameState state,
+            ValidationEnemyConfig validation)
+        {
+            EnemyKind kind = ParseKind(validation.type);
+            EnemyTypeConfig definition = _enemies.Get(kind);
+            float hp = (definition.hpBase + state.Wave * definition.hpPerWave)
+                * validation.hpMul;
+            float speed = (definition.speedBase + state.Wave * definition.speedPerWave)
+                * validation.speedMul;
+            var enemy = new EnemyState(
+                state.TakeNextEnemyId(),
+                kind,
+                RandomEdgePosition(),
+                hp,
+                speed,
+                definition.r,
+                definition.damage * validation.damageMul,
+                EnemySpawnKind.ValidationElite,
+                0f,
+                ToRunReward(validation.reward));
+            state.Enemies.Add(enemy);
+            return enemy;
+        }
+
+        public static RunReward ToRunReward(RewardConfig reward)
+        {
+            if (reward == null)
+            {
+                return null;
+            }
+
+            RewardKind kind = string.Equals(
+                reward.kind,
+                "wildcard",
+                StringComparison.OrdinalIgnoreCase)
+                ? RewardKind.Wildcard
+                : RewardKind.Card;
+            return new RunReward(kind, reward.star, reward.count, reward.typePolicy);
+        }
+
+        private static EnemyKind ParseKind(string type)
+        {
+            switch (type)
+            {
+                case "fast":
+                    return EnemyKind.Fast;
+                case "tank":
+                    return EnemyKind.Tank;
+                case "boss":
+                    return EnemyKind.Boss;
+                default:
+                    return EnemyKind.Normal;
+            }
+        }
+
         private Float2 RandomEdgePosition()
         {
             int side = Math.Min(3, (int)(_random.NextFloat() * 4f));
