@@ -34,13 +34,15 @@ namespace ProjectVL.Systems
             }
 
             Float2 muzzle = turret + direction * _combat.bullet.muzzleOffset;
+            CardCombatProfile profile = CardEffectResolver.Resolve(state);
             state.Bullets.Add(new BulletState(
                 state.TakeNextBulletId(),
                 muzzle,
                 direction * _combat.bullet.speed,
                 _combat.bullet.radius,
                 _combat.bullet.life,
-                _combat.defaults.damage));
+                _combat.defaults.damage,
+                profile));
             state.ShotCooldown = 1f / _combat.defaults.fireRate;
         }
 
@@ -56,21 +58,38 @@ namespace ProjectVL.Systems
                 for (int enemyIndex = state.Enemies.Count - 1; enemyIndex >= 0; enemyIndex--)
                 {
                     EnemyState enemy = state.Enemies[enemyIndex];
+                    if (bullet.HitEnemyIds.Contains(enemy.Id))
+                    {
+                        continue;
+                    }
+
                     if (Float2.Distance(bullet.Position, enemy.Position)
                         >= bullet.Radius + enemy.Radius)
                     {
                         continue;
                     }
 
-                    enemy.Hp -= bullet.Damage;
-                    if (enemy.Hp <= 0f)
+                    bullet.HitEnemyIds.Add(enemy.Id);
+                    Float2 hitPosition = enemy.Position;
+                    DamageEnemy(state, enemy, bullet.Damage);
+                    ApplyStatusEffects(enemy, bullet);
+                    ApplyChainLightning(
+                        state,
+                        bullet,
+                        hitPosition,
+                        enemy.Id);
+
+                    if (bullet.PierceRemaining > 0)
                     {
-                        state.Enemies.RemoveAt(enemyIndex);
-                        state.Kills++;
-                        state.GrantReward(enemy.Reward);
+                        bullet.PierceRemaining--;
+                        bullet.Damage *= bullet.PierceDamageRetention
+                            * (1f + bullet.RampPerPierce);
+                    }
+                    else
+                    {
+                        consumed = true;
                     }
 
-                    consumed = true;
                     break;
                 }
 
@@ -87,6 +106,12 @@ namespace ProjectVL.Systems
             for (int index = state.Enemies.Count - 1; index >= 0; index--)
             {
                 EnemyState enemy = state.Enemies[index];
+                UpdateStatuses(enemy, deltaTime);
+                if (enemy.FrozenRemaining > 0f)
+                {
+                    continue;
+                }
+
                 if (enemy.SpawnKind == EnemySpawnKind.WaveBoss)
                 {
                     StepBoss(state, enemy, deltaTime);
@@ -96,6 +121,7 @@ namespace ProjectVL.Systems
                 Float2 toTurret = turret - enemy.Position;
                 enemy.Position += toTurret.Normalized()
                     * enemy.Speed
+                    * (1f - enemy.SlowRatio)
                     * deltaTime;
 
                 if (Float2.Distance(enemy.Position, turret) >= _combat.breakthroughDist)
@@ -105,6 +131,158 @@ namespace ProjectVL.Systems
 
                 state.Enemies.RemoveAt(index);
                 state.ApplyDamage(enemy.Damage);
+            }
+        }
+
+        private static void DamageEnemy(
+            GameState state,
+            EnemyState enemy,
+            float damage)
+        {
+            float vulnerability = enemy.VulnerableRemaining > 0f
+                ? enemy.VulnerableRatio
+                : 0f;
+            enemy.Hp -= damage * (1f + vulnerability);
+            if (enemy.Hp > 0f)
+            {
+                return;
+            }
+
+            if (state.Enemies.Remove(enemy))
+            {
+                state.Kills++;
+                state.GrantReward(enemy.Reward);
+            }
+        }
+
+        private static void ApplyStatusEffects(
+            EnemyState enemy,
+            BulletState bullet)
+        {
+            if (enemy.Hp <= 0f)
+            {
+                return;
+            }
+
+            if (bullet.SlowRatio > 0f)
+            {
+                enemy.SlowRatio = Math.Max(
+                    enemy.SlowRatio,
+                    bullet.SlowRatio);
+                enemy.SlowRemaining = Math.Max(
+                    enemy.SlowRemaining,
+                    bullet.SlowDuration);
+            }
+
+            if (bullet.FreezeStacksToTrigger > 0)
+            {
+                enemy.FreezeStacks++;
+                if (enemy.FreezeStacks >= bullet.FreezeStacksToTrigger)
+                {
+                    enemy.FreezeStacks = 0;
+                    enemy.FrozenRemaining = Math.Max(
+                        enemy.FrozenRemaining,
+                        bullet.FreezeDuration);
+                }
+            }
+
+            if (bullet.VulnerableRatio > 0f)
+            {
+                enemy.VulnerableRatio = Math.Max(
+                    enemy.VulnerableRatio,
+                    bullet.VulnerableRatio);
+                enemy.VulnerableRemaining = Math.Max(
+                    enemy.VulnerableRemaining,
+                    bullet.VulnerableDuration);
+            }
+        }
+
+        private static void ApplyChainLightning(
+            GameState state,
+            BulletState bullet,
+            Float2 origin,
+            int primaryEnemyId)
+        {
+            if (bullet.ChainBounces <= 0
+                || bullet.ChainSearchRange <= 0f)
+            {
+                return;
+            }
+
+            var chainedIds = new System.Collections.Generic.HashSet<int>
+            {
+                primaryEnemyId
+            };
+            float damage = bullet.Damage;
+            Float2 currentOrigin = origin;
+            for (int bounce = 0; bounce < bullet.ChainBounces; bounce++)
+            {
+                EnemyState next = FindClosestChainTarget(
+                    state,
+                    currentOrigin,
+                    bullet.ChainSearchRange,
+                    chainedIds);
+                if (next == null)
+                {
+                    break;
+                }
+
+                chainedIds.Add(next.Id);
+                bullet.HitEnemyIds.Add(next.Id);
+                currentOrigin = next.Position;
+                damage *= bullet.ChainDamageRetention;
+                DamageEnemy(state, next, damage);
+                ApplyStatusEffects(next, bullet);
+            }
+        }
+
+        private static EnemyState FindClosestChainTarget(
+            GameState state,
+            Float2 origin,
+            float searchRange,
+            System.Collections.Generic.HashSet<int> excludedIds)
+        {
+            EnemyState closest = null;
+            float closestDistance = searchRange;
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                if (excludedIds.Contains(enemy.Id))
+                {
+                    continue;
+                }
+
+                float distance = Float2.Distance(origin, enemy.Position);
+                if (distance <= closestDistance)
+                {
+                    closest = enemy;
+                    closestDistance = distance;
+                }
+            }
+
+            return closest;
+        }
+
+        private static void UpdateStatuses(
+            EnemyState enemy,
+            float deltaTime)
+        {
+            enemy.SlowRemaining = Math.Max(
+                0f,
+                enemy.SlowRemaining - deltaTime);
+            if (enemy.SlowRemaining <= 0f)
+            {
+                enemy.SlowRatio = 0f;
+            }
+
+            enemy.FrozenRemaining = Math.Max(
+                0f,
+                enemy.FrozenRemaining - deltaTime);
+            enemy.VulnerableRemaining = Math.Max(
+                0f,
+                enemy.VulnerableRemaining - deltaTime);
+            if (enemy.VulnerableRemaining <= 0f)
+            {
+                enemy.VulnerableRatio = 0f;
             }
         }
 

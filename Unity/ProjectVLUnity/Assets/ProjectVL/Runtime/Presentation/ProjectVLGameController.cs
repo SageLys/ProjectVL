@@ -13,6 +13,7 @@ namespace ProjectVL.Presentation
         private ArenaPresenter _presenter;
         private WaveSystem _waveSystem;
         private CardInventorySystem _cardInventory;
+        private RecipeSystem _recipeSystem;
         private CardSlotKind? _selectedSlotKind;
         private int _selectedSlotIndex = -1;
 
@@ -20,6 +21,8 @@ namespace ProjectVL.Presentation
         public float TimeScale => _simulation?.TimeScale ?? 1f;
         public string LastCardAction { get; private set; } =
             "Click a card, then click a destination slot.";
+        public string AvailableRecipeId =>
+            _recipeSystem?.FirstAvailableRecipe(State);
 
         private void Awake()
         {
@@ -27,9 +30,12 @@ namespace ProjectVL.Presentation
             EnemiesConfig enemies = GameConfigLoader.LoadEnemies();
             WavesConfig waves = GameConfigLoader.LoadWaves();
             EconomyConfig economy = GameConfigLoader.LoadEconomy();
+            EvolutionRecipesConfig recipes =
+                GameConfigLoader.LoadEvolutionRecipes();
 
             GameState state = GameStateFactory.Create(combat, economy);
             _cardInventory = new CardInventorySystem(economy);
+            _recipeSystem = new RecipeSystem(recipes);
             var random = new SystemRandomSource(System.Environment.TickCount);
             var enemyFactory = new EnemyFactory(combat, enemies, waves, random);
             _waveSystem = new WaveSystem(waves, enemyFactory);
@@ -197,6 +203,47 @@ namespace ProjectVL.Presentation
             }
         }
 
+        public void GrantRecipeDemo()
+        {
+            if (State.PendingEvolution != null)
+            {
+                LastCardAction = "Resolve the current evolution choice first.";
+                return;
+            }
+
+            int emptySlots = 0;
+            foreach (CardState card in State.Hand)
+            {
+                if (card == null)
+                {
+                    emptySlots++;
+                }
+            }
+
+            if (emptySlots >= 2)
+            {
+                AddResolvedDemoCard("pierce");
+                AddResolvedDemoCard("scorch");
+                LastCardAction =
+                    "Added 5 STAR PIERCE and SCORCH recipe materials.";
+            }
+            else
+            {
+                LastCardAction = "Two empty hand slots are required.";
+            }
+        }
+
+        public void CraftAvailableRecipe()
+        {
+            string recipeId = AvailableRecipeId;
+            RecipeCraftResult result = _recipeSystem.Craft(
+                State,
+                recipeId);
+            LastCardAction = result == RecipeCraftResult.Crafted
+                ? $"Crafted fixed recipe: {recipeId}."
+                : RecipeActionText(result);
+        }
+
         private void HandleKeyboard()
         {
             if (Input.GetKeyDown(KeyCode.Space) && State.PendingBossReward != null)
@@ -243,6 +290,16 @@ namespace ProjectVL.Presentation
                 UseWildcardOnSelected();
             }
 
+            if (Input.GetKeyDown(KeyCode.H))
+            {
+                GrantRecipeDemo();
+            }
+
+            if (Input.GetKeyDown(KeyCode.F))
+            {
+                CraftAvailableRecipe();
+            }
+
             for (int i = 0; i < State.Hand.Length && i < 7; i++)
             {
                 if (Input.GetKeyDown((KeyCode)((int)KeyCode.Alpha1 + i)))
@@ -271,6 +328,25 @@ namespace ProjectVL.Presentation
                 ? State.Hand
                 : State.Equipment;
             return index >= 0 && index < slots.Length ? slots[index] : null;
+        }
+
+        private bool AddResolvedDemoCard(string type)
+        {
+            for (int i = 0; i < State.Hand.Length; i++)
+            {
+                if (State.Hand[i] != null)
+                {
+                    continue;
+                }
+
+                CardState card = State.CreateCard(type, 5);
+                card.EvolutionPath.Add($"3:{type}A");
+                card.EvolutionPath.Add($"5:{type}A2");
+                State.Hand[i] = card;
+                return true;
+            }
+
+            return false;
         }
 
         private void ClearCardSelection(string message)
@@ -319,6 +395,23 @@ namespace ProjectVL.Presentation
                     return "Choose the pending evolution first.";
                 default:
                     return "Select a non-empty card slot.";
+            }
+        }
+
+        private static string RecipeActionText(RecipeCraftResult result)
+        {
+            switch (result)
+            {
+                case RecipeCraftResult.WrongPhase:
+                    return "Fixed recipes can only be crafted between waves.";
+                case RecipeCraftResult.MissingMaterials:
+                    return "No fixed recipe materials are ready.";
+                case RecipeCraftResult.HandFull:
+                    return "A hand slot is required for the recipe output.";
+                case RecipeCraftResult.AlreadyCompleted:
+                    return "That fixed recipe was already completed.";
+                default:
+                    return "No available fixed recipe.";
             }
         }
 

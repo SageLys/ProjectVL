@@ -225,6 +225,16 @@ namespace ProjectVL.Presentation
 
         private static Color EnemyColor(EnemyState enemy)
         {
+            if (enemy.FrozenRemaining > 0f)
+            {
+                return new Color(0.45f, 0.95f, 1f);
+            }
+
+            if (enemy.SlowRemaining > 0f)
+            {
+                return new Color(0.35f, 0.65f, 1f);
+            }
+
             if (enemy.SpawnKind == EnemySpawnKind.ValidationElite)
             {
                 return new Color(1f, 0.78f, 0.22f);

@@ -33,10 +33,10 @@ namespace ProjectVL.Presentation
         private void DrawTopBar()
         {
             GameState state = _controller.State;
-            GUI.Box(new Rect(12f, 12f, 310f, 72f), GUIContent.none);
-            GUI.Label(new Rect(24f, 19f, 280f, 28f), "PROJECT VL · TUANJIE", _titleStyle);
+            GUI.Box(new Rect(12f, 12f, 440f, 72f), GUIContent.none);
+            GUI.Label(new Rect(24f, 19f, 410f, 28f), "PROJECT VL · TUANJIE", _titleStyle);
             GUI.Label(
-                new Rect(24f, 49f, 285f, 26f),
+                new Rect(24f, 49f, 410f, 26f),
                 $"HP {state.Hp:0}/{state.MaxHp:0}   WAVE {state.Wave} "
                 + $"{state.WavePhase.ToString().ToUpperInvariant()}   "
                 + $"KILLS {state.Kills}   MERGES {state.Merges}",
@@ -258,7 +258,7 @@ namespace ProjectVL.Presentation
             }
 
             float actionX = Screen.width - 258f;
-            GUI.Box(new Rect(actionX, 152f, 246f, 194f), GUIContent.none);
+            GUI.Box(new Rect(actionX, 152f, 246f, 232f), GUIContent.none);
             GUI.Label(
                 new Rect(actionX + 10f, 159f, 226f, 46f),
                 _controller.LastCardAction,
@@ -298,6 +298,10 @@ namespace ProjectVL.Presentation
             GUI.Label(
                 new Rect(actionX + 10f, 298f, 226f, 38f),
                 WildcardText(state),
+                _hudStyle);
+            GUI.Label(
+                new Rect(actionX + 10f, 341f, 226f, 34f),
+                "RECIPE DEMO [H]  ·  CRAFT [F]",
                 _hudStyle);
         }
 
@@ -409,7 +413,13 @@ namespace ProjectVL.Presentation
 
         private void DrawIntermissionPanel(GameState state)
         {
-            Rect panel = CenterPanelRect();
+            const float width = 430f;
+            const float height = 258f;
+            Rect panel = new Rect(
+                (Screen.width - width) / 2f,
+                (Screen.height - height) / 2f,
+                width,
+                height);
             GUI.Box(panel, GUIContent.none);
             GUI.Label(
                 new Rect(panel.x + 20f, panel.y + 24f, panel.width - 40f, 42f),
@@ -421,12 +431,30 @@ namespace ProjectVL.Presentation
                 + $"Rewards {state.CollectedRewards.Count}",
                 _hudStyle);
             if (GUI.Button(
-                new Rect(panel.x + 75f, panel.y + 112f, panel.width - 150f, 44f),
+                new Rect(panel.x + 75f, panel.y + 108f, panel.width - 150f, 42f),
                 "NEXT WAVE  [SPACE]",
                 _buttonStyle))
             {
                 _controller.ConfirmNextWave();
             }
+
+            string recipe = _controller.AvailableRecipeId;
+            GUI.Label(
+                new Rect(panel.x + 20f, panel.y + 160f, panel.width - 40f, 28f),
+                recipe == null
+                    ? "FIXED RECIPE: no matching materials"
+                    : $"FIXED RECIPE READY: {recipe}",
+                _hudStyle);
+            GUI.enabled = recipe != null;
+            if (GUI.Button(
+                new Rect(panel.x + 75f, panel.y + 198f, panel.width - 150f, 42f),
+                "CRAFT RECIPE  [F]",
+                _buttonStyle))
+            {
+                _controller.CraftAvailableRecipe();
+            }
+
+            GUI.enabled = true;
         }
 
         private static Rect CenterPanelRect()

@@ -17,6 +17,12 @@ namespace ProjectVL.Core
         public float ContactTickRemaining { get; set; }
         public float ContactAngleRadians { get; set; }
         public RunReward Reward { get; }
+        public float SlowRatio { get; set; }
+        public float SlowRemaining { get; set; }
+        public int FreezeStacks { get; set; }
+        public float FrozenRemaining { get; set; }
+        public float VulnerableRatio { get; set; }
+        public float VulnerableRemaining { get; set; }
 
         public EnemyState(
             int id,

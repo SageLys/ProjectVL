@@ -1,0 +1,53 @@
+{
+  "version": "0.1.0",
+  "recipes": [
+    {
+      "id": "frozenThunder",
+      "ingredientA": { "cardId": "chainLightning", "minStar": 5 },
+      "ingredientB": { "cardId": "frost", "minStar": 5 },
+      "outputCardId": "frozenThunder",
+      "outputStar": 6,
+      "allowedPhase": "intermission"
+    },
+    {
+      "id": "solarLance",
+      "ingredientA": { "cardId": "pierce", "minStar": 5 },
+      "ingredientB": { "cardId": "scorch", "minStar": 5 },
+      "outputCardId": "solarLance",
+      "outputStar": 6,
+      "allowedPhase": "intermission"
+    },
+    {
+      "id": "avalanche",
+      "ingredientA": { "cardId": "impact", "minStar": 5 },
+      "ingredientB": { "cardId": "glacialSpike", "minStar": 5 },
+      "outputCardId": "avalanche",
+      "outputStar": 6,
+      "allowedPhase": "intermission"
+    },
+    {
+      "id": "pyrestorm",
+      "ingredientA": { "cardId": "meteor", "minStar": 5 },
+      "ingredientB": { "cardId": "stormcall", "minStar": 5 },
+      "outputCardId": "pyrestorm",
+      "outputStar": 6,
+      "allowedPhase": "intermission"
+    },
+    {
+      "id": "crownOfThorns",
+      "ingredientA": { "cardId": "aegis", "minStar": 5 },
+      "ingredientB": { "cardId": "thorns", "minStar": 5 },
+      "outputCardId": "crownOfThorns",
+      "outputStar": 6,
+      "allowedPhase": "intermission"
+    },
+    {
+      "id": "goldenIdol",
+      "ingredientA": { "cardId": "decoy", "minStar": 5 },
+      "ingredientB": { "cardId": "harvest", "minStar": 5 },
+      "outputCardId": "goldenIdol",
+      "outputStar": 6,
+      "allowedPhase": "intermission"
+    }
+  ]
+}

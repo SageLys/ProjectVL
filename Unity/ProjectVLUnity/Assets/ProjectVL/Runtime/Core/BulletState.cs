@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace ProjectVL.Core
 {
     public sealed class BulletState
@@ -7,7 +9,20 @@ namespace ProjectVL.Core
         public Float2 Velocity { get; }
         public float Radius { get; }
         public float LifeRemaining { get; set; }
-        public float Damage { get; }
+        public float Damage { get; set; }
+        public int PierceRemaining { get; set; }
+        public float PierceDamageRetention { get; }
+        public float RampPerPierce { get; }
+        public int ChainBounces { get; }
+        public float ChainDamageRetention { get; }
+        public float ChainSearchRange { get; }
+        public float SlowRatio { get; }
+        public float SlowDuration { get; }
+        public int FreezeStacksToTrigger { get; }
+        public float FreezeDuration { get; }
+        public float VulnerableRatio { get; }
+        public float VulnerableDuration { get; }
+        public HashSet<int> HitEnemyIds { get; } = new HashSet<int>();
 
         public BulletState(
             int id,
@@ -15,7 +30,8 @@ namespace ProjectVL.Core
             Float2 velocity,
             float radius,
             float lifeRemaining,
-            float damage)
+            float damage,
+            CardCombatProfile profile = null)
         {
             Id = id;
             Position = position;
@@ -23,6 +39,19 @@ namespace ProjectVL.Core
             Radius = radius;
             LifeRemaining = lifeRemaining;
             Damage = damage;
+            profile = profile ?? new CardCombatProfile();
+            PierceRemaining = profile.PierceCount;
+            PierceDamageRetention = profile.PierceDamageRetention;
+            RampPerPierce = profile.RampPerPierce;
+            ChainBounces = profile.ChainBounces;
+            ChainDamageRetention = profile.ChainDamageRetention;
+            ChainSearchRange = profile.ChainSearchRange;
+            SlowRatio = profile.SlowRatio;
+            SlowDuration = profile.SlowDuration;
+            FreezeStacksToTrigger = profile.FreezeStacksToTrigger;
+            FreezeDuration = profile.FreezeDuration;
+            VulnerableRatio = profile.VulnerableRatio;
+            VulnerableDuration = profile.VulnerableDuration;
         }
     }
 }

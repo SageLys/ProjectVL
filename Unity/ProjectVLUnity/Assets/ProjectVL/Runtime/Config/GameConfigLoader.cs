@@ -20,6 +20,11 @@ namespace ProjectVL.Config
             return Load<EconomyConfig>("Config/economy");
         }
 
+        public static EvolutionRecipesConfig LoadEvolutionRecipes()
+        {
+            return Load<EvolutionRecipesConfig>("Config/evolutionRecipes");
+        }
+
         private static T Load<T>(string resourcePath)
         {
             TextAsset asset = Resources.Load<TextAsset>(resourcePath);
