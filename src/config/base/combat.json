@@ -25,7 +25,7 @@
   },
   "weaponFusion": {
     "damping": 0.75,
-    "radiusMul": 0.6
+    "areaMul": 0.36
   },
   "breakthroughDist": 48,
   "dangerZoneWidth": 72,

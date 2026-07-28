@@ -153,6 +153,8 @@ const DOMAIN_FIELD_LABELS: Record<EditorDomain, Record<string, string>> = {
   combat: {
     canvas: '画布', turret: '炮台', hp: '生命', defaults: '基础数值',
     attackPreviewMargin: '攻击预览余量', bullet: '子弹', weaponFusion: '武器融合',
+    'weaponFusion.damping': '同类叠加伤害衰减',
+    'weaponFusion.areaMul': '同类叠加范围面积比',
     breakthroughDist: '突破判定距离', dangerZoneWidth: '危险区宽度', dtCap: '单帧步长上限',
     knockbackFatigue: '击退疲劳', ccImmunity: '控制免疫窗', controlCeiling: '控制上限',
     controlBudget: '控制预算', vfx: '特效',
@@ -245,6 +247,7 @@ const COMMON_FIELD_LABELS: Record<string, string> = {
 };
 
 const COMMON_FIELD_HELP: Record<string, string> = {
+  areaMul: '同时装备 2 张以上范围形态卡时，第 2 个及之后的贡献所覆盖的面积占比；半径按本值开平方缩放。当前配置仅 1 张范围形态卡，本值暂不生效',
   bootstrapForcedDrops: '选副神后前 N 次普通掉落按预排队列强制发放，完全绕过角色袋与探索保底',
   bootstrapMinDiscovery: '只要活跃池里还有从未作为普通掉落出现过的卡，就把探索名额抬到这个下限',
   buildTransitionSeconds: '进入构筑期后速率线性爬坡到位所需的有效战斗秒数，跨波累加',
@@ -252,6 +255,7 @@ const COMMON_FIELD_HELP: Record<string, string> = {
   carryCap: '额度池上限，防止长时间不杀敌后攒额度、再一口气爆出大量掉落',
   chanceCap: '仅在 ordinaryDropRate.enabled=false 的回退模式下生效',
   dropChance: '仅在 ordinaryDropRate.enabled=false 的回退模式下生效',
+  damping: '同时装备 2 张以上范围形态卡时，第 2 个及之后的贡献伤害乘本值；固定值、不复利。当前配置仅 1 张范围形态卡，本值暂不生效',
   excludeTopK: '转向角色会先排除承诺分最高的这几张，它们已是主力',
   maxWeightRatio: '最高权重不得超过最低权重的这个倍数，防止单一卡型垄断掉落',
   mergeReadyMultiplier: '手上已有该型 1★（再来一张即可合成）时的权重倍率',

@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { cfg } from '../src/config';
+import type { BindingDef, CardDef, EffectDef } from '../src/core/effects/defs';
 import { composeWeaponForm, getModifiers, registerSkillDefs } from '../src/core/effects/interpreter';
 import type { CardType, GameState } from '../src/core/types';
-import { card, freshState, resetTestEnv } from './helpers';
+import { card, fixtureEvolutionTree, freshState, resetTestEnv } from './helpers';
 
 const beamCardTypes = [
   'glacialSpike',
@@ -27,6 +28,26 @@ function formFor(...types: CardType[]) {
   const state = freshState();
   equip(state, ...types);
   return composeWeaponForm(getModifiers(state).weaponForms);
+}
+
+function mortarFixtureSkill(id: CardType, damageRatio: number, radius: number): CardDef {
+  const bindings: BindingDef[] = [{ trigger: 'passive', effects: [{
+    atom: 'mortarMorph', params: { damageRatio, radius, falloff: 0.5 },
+  }] }];
+  const consume: EffectDef[] = [{ atom: 'burstDamage', params: { damageMul: 1, radius: 10 } }];
+  return {
+    id, category: 'projectile', synergyTags: ['projectile'], textKey: `test.${id}`, teaching: false,
+    stars: {
+      '3': { tier: 'core', equip: structuredClone(bindings) },
+      '5': { tier: 'dual', equip: structuredClone(bindings) },
+      '6': { tier: 'transform', equip: structuredClone(bindings) },
+    },
+    amplifyAxis: { params: { damageRatio: '+0' } },
+    evolutionTree: fixtureEvolutionTree(id, bindings),
+    consumable: { placement: 'point', anchors: {
+      '1': { effects: consume }, '3': { effects: consume }, '6': { effects: consume },
+    } },
+  };
 }
 
 describe('weaponFusion delivery 覆盖轴', () => {
@@ -77,6 +98,24 @@ describe('weaponFusion suppression 归因', () => {
 });
 
 describe('weaponFusion impact 叠加轴', () => {
+  it('mortar 只按组内下标固定衰减，且面积比例开方后作用于半径', () => {
+    registerSkillDefs([
+      mortarFixtureSkill('mortarA', 1, 100),
+      mortarFixtureSkill('mortarB', 2, 80),
+      mortarFixtureSkill('mortarC', 3, 60),
+    ]);
+    const state = freshState();
+    equip(state, 'mortarA', 'mortarB', 'mortarC');
+    const form = composeWeaponForm(getModifiers(state).weaponForms);
+
+    expect(form.impacts).toHaveLength(3);
+    expect(form.impacts[0]).toMatchObject({ damageRatio: 1, radius: 100 });
+    expect(form.impacts[1].damageRatio).toBe(2 * cfg.combat.weaponFusion.damping);
+    expect(form.impacts[1].radius).toBe(80 * Math.sqrt(cfg.combat.weaponFusion.areaMul));
+    expect(form.impacts[2].damageRatio).toBe(3 * cfg.combat.weaponFusion.damping);
+    expect(form.impacts[2].radius).toBe(60 * Math.sqrt(cfg.combat.weaponFusion.areaMul));
+  });
+
   it('单张 mortar 不因 beam 存在而衰减', () => {
     const form = formFor('pierce', 'splitBlast');
 

@@ -65,6 +65,19 @@ const formNumber = (p: Record<string, unknown>, key: string, fallback: number): 
 const formParam = (p: Record<string, unknown>, atom: 'beamMorph' | 'mortarMorph', key: string): number =>
   formNumber(p, key, atomNumberDefault(atom, key));
 
+let cachedFusionAreaMul = Number.NaN;
+let cachedFusionRadiusScale = 1;
+
+/** areaMul 可被 variant 热切换；仅在配置值变化时重算对应的半径倍率。 */
+function fusionRadiusScale(): number {
+  const areaMul = cfg.combat.weaponFusion.areaMul;
+  if (areaMul !== cachedFusionAreaMul) {
+    cachedFusionAreaMul = areaMul;
+    cachedFusionRadiusScale = Math.sqrt(areaMul);
+  }
+  return cachedFusionRadiusScale;
+}
+
 /**
  * 主炮形态正交融合：先按 cardType（再按 id）排序，再独立选择 delivery 与叠加 impact。
  * delivery 覆盖轴由最强 beam 胜出且全额生效；impact 叠加轴仅对第 2 个及之后的 mortar 衰减。
@@ -116,7 +129,7 @@ export function composeWeaponForm(forms: WeaponFormContribution[]): WeaponFormSp
       sourceCardType: form.sourceCardType,
       sourceStar: form.star,
       damageRatio: formParam(form.params, 'mortarMorph', 'damageRatio') * damping,
-      radius: formParam(form.params, 'mortarMorph', 'radius') * (index === 0 ? 1 : cfg.combat.weaponFusion.radiusMul),
+      radius: formParam(form.params, 'mortarMorph', 'radius') * (index === 0 ? 1 : fusionRadiusScale()),
       falloff: formParam(form.params, 'mortarMorph', 'falloff'),
     });
   });

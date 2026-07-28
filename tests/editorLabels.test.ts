@@ -74,6 +74,17 @@ describe('editor human labels', () => {
     expect(untranslated).toEqual([]);
   });
 
+  it('labels weapon fusion controls with their active conditions', () => {
+    expect(lookupLabel('domainField', 'combat.weaponFusion.damping')).toMatchObject({
+      label: '同类叠加伤害衰减',
+      help: expect.stringContaining('当前配置仅 1 张范围形态卡'),
+    });
+    expect(lookupLabel('domainField', 'combat.weaponFusion.areaMul')).toMatchObject({
+      label: '同类叠加范围面积比',
+      help: expect.stringContaining('半径按本值开平方缩放'),
+    });
+  });
+
   it('falls back to the english key instead of throwing', () => {
     expect(describeLabel('domainField', 'combat.没有登记的字段')).toEqual({ label: '没有登记的字段' });
     expect(describeLabel('enumValue', 'rarity.unknownValue')).toEqual({ label: 'unknownValue' });
