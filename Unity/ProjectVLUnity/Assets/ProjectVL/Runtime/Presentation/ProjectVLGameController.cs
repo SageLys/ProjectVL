@@ -49,10 +49,28 @@ namespace ProjectVL.Presentation
             "splitBlast",
             "impact",
             "impact",
-            "impact"
+            "impact",
+            "sanctum",
+            "sanctum",
+            "sanctum",
+            "aegis",
+            "aegis",
+            "aegis",
+            "thorns",
+            "thorns",
+            "thorns"
         };
         private static readonly string[] AdvancedDemoBranches =
         {
+            "A",
+            "B",
+            "C",
+            "A",
+            "B",
+            "C",
+            "A",
+            "B",
+            "C",
             "A",
             "B",
             "C",

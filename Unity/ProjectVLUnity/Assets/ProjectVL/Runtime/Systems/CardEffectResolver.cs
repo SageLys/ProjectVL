@@ -373,6 +373,26 @@ namespace ProjectVL.Systems
                 profile.WaveStartFireRateDuration =
                     Max(profile.WaveStartFireRateDuration, 5f);
             }
+
+            if (card.Star >= 4)
+            {
+                profile.AuraRadiusRatio *= 1.15f;
+                profile.AuraVulnerableRatio += 0.1f;
+                profile.AuraSlowRatio += 0.1f;
+            }
+
+            string advancedRoute = RouteAt(card, 5);
+            if (advancedRoute == "sanctumA2")
+            {
+                profile.AuraFocusPriorityWeight = 3f;
+                profile.AuraFocusHpThresholdRatio = 0.3f;
+            }
+            else if (advancedRoute == "sanctumB2")
+            {
+                profile.AuraVulnerableRatio = Max(
+                    profile.AuraVulnerableRatio,
+                    card.Star >= 4 ? 0.26f : 0.16f);
+            }
         }
 
         private static void ApplyAegis(
@@ -390,9 +410,36 @@ namespace ProjectVL.Systems
             }
             else
             {
-                profile.BreachReductionRatio = Max(
-                    profile.BreachReductionRatio,
-                    0.2f);
+                profile.BreachReductionRatio = System.Math.Min(
+                    0.9f,
+                    profile.BreachReductionRatio + 0.2f);
+            }
+
+            if (card.Star >= 4)
+            {
+                profile.ShieldHits += 1;
+                profile.ShieldRegenSeconds =
+                    System.Math.Max(
+                        0f,
+                        profile.ShieldRegenSeconds - 2f);
+            }
+
+            string advancedRoute = RouteAt(card, 5);
+            if (advancedRoute == "aegisA2")
+            {
+                profile.ShieldBreakDamage = 30f;
+                profile.ShieldBreakKnockback = 100f;
+            }
+            else if (advancedRoute == "aegisB2")
+            {
+                profile.BreachReductionRatio = System.Math.Min(
+                    0.9f,
+                    profile.BreachReductionRatio + 0.18f);
+            }
+            else if (advancedRoute == "aegisC2")
+            {
+                profile.ShieldBreakDamage = 30f;
+                profile.ShieldBreakKnockback = 135f;
             }
         }
 
@@ -401,9 +448,10 @@ namespace ProjectVL.Systems
             CardCombatProfile profile)
         {
             string route = RouteAt(card, 3);
-            profile.BreachReductionRatio = Max(
-                profile.BreachReductionRatio,
-                route == "thornsA" ? 0.35f : 0.3f);
+            profile.BreachReductionRatio = System.Math.Min(
+                0.9f,
+                profile.BreachReductionRatio
+                    + (route == "thornsA" ? 0.35f : 0.3f));
             if (route == "thornsA")
             {
                 profile.BreachBurstDamageMultiplier = 1.5f;
@@ -422,6 +470,45 @@ namespace ProjectVL.Systems
                 profile.BreachSlowRatio = 0.35f;
                 profile.BreachSlowDuration = 1.5f;
                 profile.BreachBurstRadius = 120f;
+            }
+
+            if (card.Star >= 4)
+            {
+                profile.BreachReductionRatio = System.Math.Min(
+                    0.9f,
+                    profile.BreachReductionRatio + 0.1f);
+                profile.ThornsRatio += route == "thornsA"
+                    ? 0f
+                    : 0.1f;
+                if (profile.BreachBurstDamageMultiplier > 0f)
+                {
+                    profile.BreachBurstDamageMultiplier += 0.5f;
+                }
+
+                if (profile.BreachSlowRatio > 0f)
+                {
+                    profile.BreachSlowRatio += 0.1f;
+                }
+            }
+
+            string advancedRoute = RouteAt(card, 5);
+            if (advancedRoute == "thornsA2")
+            {
+                profile.ThornsAuraRadius = 90f;
+                profile.ThornsAuraTickInterval = 0.5f;
+                profile.ThornsAuraDamageRatio = 0.1f;
+            }
+            else if (advancedRoute == "thornsB2")
+            {
+                profile.BreachVulnerableRadius = 120f;
+                profile.BreachVulnerableRatio =
+                    card.Star >= 4 ? 0.28f : 0.18f;
+                profile.BreachVulnerableDuration = 2f;
+            }
+            else if (advancedRoute == "thornsC2")
+            {
+                profile.BreachExecuteRadius = 120f;
+                profile.BreachExecuteThresholdRatio = 0.18f;
             }
         }
 

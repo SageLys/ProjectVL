@@ -59,6 +59,8 @@ namespace ProjectVL.Core
         public float AuraRadiusRatio { get; set; }
         public float AuraSlowRatio { get; set; }
         public float AuraVulnerableRatio { get; set; }
+        public float AuraFocusPriorityWeight { get; set; } = 1f;
+        public float AuraFocusHpThresholdRatio { get; set; }
         public float WaveStartFireRateMultiplier { get; set; } = 1f;
         public float WaveStartFireRateDuration { get; set; }
         public int ShieldHits { get; set; }
@@ -72,6 +74,14 @@ namespace ProjectVL.Core
         public float BreachKnockback { get; set; }
         public float BreachSlowRatio { get; set; }
         public float BreachSlowDuration { get; set; }
+        public float ThornsAuraRadius { get; set; }
+        public float ThornsAuraTickInterval { get; set; }
+        public float ThornsAuraDamageRatio { get; set; }
+        public float BreachVulnerableRadius { get; set; }
+        public float BreachVulnerableRatio { get; set; }
+        public float BreachVulnerableDuration { get; set; }
+        public float BreachExecuteRadius { get; set; }
+        public float BreachExecuteThresholdRatio { get; set; }
         public float DecoyHp { get; set; }
         public float DecoyTauntRadius { get; set; }
         public float DecoyDistance { get; set; }

@@ -710,6 +710,74 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void SanctumFiveStarRoutesExposeWebParameters()
+        {
+            EquipResolved(
+                "sanctum",
+                5,
+                "3:sanctumA",
+                "5:sanctumA2");
+            CardCombatProfile focus =
+                CardEffectResolver.Resolve(_state);
+
+            Assert.That(
+                focus.AuraRadiusRatio,
+                Is.EqualTo(0.575f).Within(0.001f));
+            Assert.That(focus.AuraVulnerableRatio, Is.EqualTo(0.3f));
+            Assert.That(focus.AuraSlowRatio, Is.EqualTo(0.2f));
+            Assert.That(focus.AuraFocusPriorityWeight, Is.EqualTo(3f));
+            Assert.That(
+                focus.AuraFocusHpThresholdRatio,
+                Is.EqualTo(0.3f));
+
+            EquipResolved(
+                "sanctum",
+                5,
+                "3:sanctumB",
+                "5:sanctumB2");
+            CardCombatProfile control =
+                CardEffectResolver.Resolve(_state);
+            Assert.That(control.AuraSlowRatio, Is.EqualTo(0.35f));
+            Assert.That(control.AuraVulnerableRatio, Is.EqualTo(0.3f));
+
+            EquipResolved(
+                "sanctum",
+                5,
+                "3:sanctumC",
+                "5:sanctumC2");
+            CardCombatProfile tempo =
+                CardEffectResolver.Resolve(_state);
+            Assert.That(
+                tempo.WaveStartFireRateMultiplier,
+                Is.EqualTo(1.15f));
+            Assert.That(tempo.WaveStartFireRateDuration, Is.EqualTo(5f));
+        }
+
+        [Test]
+        public void SanctumFocusPrioritizesLowHealthAuraTarget()
+        {
+            EquipResolved(
+                "sanctum",
+                5,
+                "3:sanctumA",
+                "5:sanctumA2");
+            Float2 turret =
+                new Float2(_combat.turret.x, _combat.turret.y);
+            EnemyState nearHealthy = AddEnemy(
+                turret + new Float2(50f, 0f),
+                100f);
+            EnemyState farLow = AddEnemy(
+                turret + new Float2(80f, 0f),
+                100f);
+            farLow.Hp = 20f;
+
+            EnemyState target = _system.FindTarget(_state);
+
+            Assert.That(target, Is.EqualTo(farLow));
+            Assert.That(target, Is.Not.EqualTo(nearHealthy));
+        }
+
+        [Test]
         public void AegisShieldAbsorbsConfiguredBreachHits()
         {
             EquipResolved("aegis", 3, "3:aegisA");
@@ -724,6 +792,47 @@ namespace ProjectVL.Tests
 
             Assert.That(_state.Hp, Is.EqualTo(hpBefore));
             Assert.That(_state.ShieldHits, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void AegisFiveStarRoutesExposeWebParameters()
+        {
+            EquipResolved(
+                "aegis",
+                5,
+                "3:aegisA",
+                "5:aegisA2");
+            CardCombatProfile nova =
+                CardEffectResolver.Resolve(_state);
+
+            Assert.That(nova.ShieldHits, Is.EqualTo(3));
+            Assert.That(nova.ShieldRegenSeconds, Is.EqualTo(8f));
+            Assert.That(nova.BreachReductionRatio, Is.EqualTo(0.2f));
+            Assert.That(nova.ShieldBreakDamage, Is.EqualTo(30f));
+            Assert.That(nova.ShieldBreakKnockback, Is.EqualTo(100f));
+
+            EquipResolved(
+                "aegis",
+                5,
+                "3:aegisB",
+                "5:aegisB2");
+            CardCombatProfile reduction =
+                CardEffectResolver.Resolve(_state);
+            Assert.That(reduction.ShieldHits, Is.EqualTo(3));
+            Assert.That(reduction.ShieldRegenSeconds, Is.EqualTo(5f));
+            Assert.That(
+                reduction.BreachReductionRatio,
+                Is.EqualTo(0.38f).Within(0.001f));
+
+            EquipResolved(
+                "aegis",
+                5,
+                "3:aegisC",
+                "5:aegisC2");
+            CardCombatProfile force =
+                CardEffectResolver.Resolve(_state);
+            Assert.That(force.ShieldBreakDamage, Is.EqualTo(30f));
+            Assert.That(force.ShieldBreakKnockback, Is.EqualTo(135f));
         }
 
         [Test]
@@ -743,6 +852,131 @@ namespace ProjectVL.Tests
             Assert.That(
                 _state.Hp,
                 Is.EqualTo(hpBefore - 6.5f).Within(0.001f));
+        }
+
+        [Test]
+        public void ThornsFiveStarRoutesExposeWebParameters()
+        {
+            EquipResolved(
+                "thorns",
+                5,
+                "3:thornsA",
+                "5:thornsA2");
+            CardCombatProfile aura =
+                CardEffectResolver.Resolve(_state);
+
+            Assert.That(aura.BreachReductionRatio, Is.EqualTo(0.45f));
+            Assert.That(
+                aura.BreachBurstDamageMultiplier,
+                Is.EqualTo(2f));
+            Assert.That(aura.ThornsAuraRadius, Is.EqualTo(90f));
+            Assert.That(aura.ThornsAuraTickInterval, Is.EqualTo(0.5f));
+            Assert.That(aura.ThornsAuraDamageRatio, Is.EqualTo(0.1f));
+
+            EquipResolved(
+                "thorns",
+                5,
+                "3:thornsB",
+                "5:thornsB2");
+            CardCombatProfile expose =
+                CardEffectResolver.Resolve(_state);
+            Assert.That(expose.BreachReductionRatio, Is.EqualTo(0.4f));
+            Assert.That(expose.ThornsRatio, Is.EqualTo(0.4f));
+            Assert.That(
+                expose.BreachBurstDamageMultiplier,
+                Is.EqualTo(1.7f));
+            Assert.That(expose.BreachVulnerableRatio, Is.EqualTo(0.28f));
+
+            EquipResolved(
+                "thorns",
+                5,
+                "3:thornsC",
+                "5:thornsC2");
+            CardCombatProfile execute =
+                CardEffectResolver.Resolve(_state);
+            Assert.That(execute.ThornsRatio, Is.EqualTo(0.35f));
+            Assert.That(execute.BreachSlowRatio, Is.EqualTo(0.45f));
+            Assert.That(
+                execute.BreachExecuteThresholdRatio,
+                Is.EqualTo(0.18f));
+        }
+
+        [Test]
+        public void ThornsAuraDamagesEnemiesOnItsInterval()
+        {
+            EquipResolved(
+                "thorns",
+                5,
+                "3:thornsA",
+                "5:thornsA2");
+            _state.BeginWave(1);
+            EnemyState enemy = AddEnemy(
+                new Float2(
+                    _combat.turret.x + 50f,
+                    _combat.turret.y),
+                100f);
+            _system.StepPassives(_state, 0f);
+
+            _system.StepPassives(_state, 0.5f);
+
+            Assert.That(
+                enemy.Hp,
+                Is.EqualTo(
+                    100f - _combat.defaults.damage * 0.1f)
+                    .Within(0.001f));
+        }
+
+        [Test]
+        public void ThornsBreachAppliesVulnerability()
+        {
+            EquipResolved(
+                "thorns",
+                5,
+                "3:thornsB",
+                "5:thornsB2");
+            EnemyState nearby = AddEnemy(
+                new Float2(
+                    _combat.turret.x + 80f,
+                    _combat.turret.y),
+                100f);
+            AddEnemy(
+                new Float2(
+                    _combat.turret.x + 20f,
+                    _combat.turret.y),
+                100f,
+                5f);
+
+            _system.StepEnemies(_state, 0f);
+
+            Assert.That(nearby.VulnerableRatio, Is.EqualTo(0.28f));
+            Assert.That(nearby.VulnerableRemaining, Is.EqualTo(2f));
+        }
+
+        [Test]
+        public void ThornsBreachExecutesLowHealthNearbyEnemy()
+        {
+            EquipResolved(
+                "thorns",
+                5,
+                "3:thornsC",
+                "5:thornsC2");
+            EnemyState lowHealth = AddEnemy(
+                new Float2(
+                    _combat.turret.x + 80f,
+                    _combat.turret.y),
+                100f);
+            lowHealth.Hp = 18f;
+            AddEnemy(
+                new Float2(
+                    _combat.turret.x + 20f,
+                    _combat.turret.y),
+                100f,
+                5f);
+
+            _system.StepEnemies(_state, 0f);
+
+            Assert.That(_state.Enemies.Contains(lowHealth), Is.False);
+            Assert.That(_state.Kills, Is.EqualTo(1));
         }
 
         [Test]

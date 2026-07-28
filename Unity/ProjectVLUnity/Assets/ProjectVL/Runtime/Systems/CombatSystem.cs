@@ -108,6 +108,25 @@ namespace ProjectVL.Systems
                 }
             }
 
+            if (profile.ThornsAuraTickInterval > 0f)
+            {
+                state.ThornsAuraTickRemaining -= deltaTime;
+                if (state.ThornsAuraTickRemaining <= 0f)
+                {
+                    DamageArea(
+                        state,
+                        TurretPosition,
+                        profile.ThornsAuraRadius,
+                        _combat.defaults.damage
+                            * profile.ThornsAuraDamageRatio,
+                        -1,
+                        0f,
+                        0f);
+                    state.ThornsAuraTickRemaining =
+                        profile.ThornsAuraTickInterval;
+                }
+            }
+
             ApplySanctumAura(state, profile);
         }
 
@@ -184,6 +203,11 @@ namespace ProjectVL.Systems
             CardCombatProfile profile = CardEffectResolver.Resolve(state);
             for (int index = state.Enemies.Count - 1; index >= 0; index--)
             {
+                if (index >= state.Enemies.Count)
+                {
+                    continue;
+                }
+
                 EnemyState enemy = state.Enemies[index];
                 if (!UpdateStatuses(state, enemy, deltaTime))
                 {
@@ -868,6 +892,8 @@ namespace ProjectVL.Systems
             state.ImpactHitCooldownRemaining = 0f;
             state.ImpactPulseRemaining =
                 profile.ImpactPulseInterval;
+            state.ThornsAuraTickRemaining =
+                profile.ThornsAuraTickInterval;
 
             state.DecoyActive = profile.DecoyHp > 0f;
             state.DecoyMaxHp = profile.DecoyHp;
@@ -947,6 +973,56 @@ namespace ProjectVL.Systems
                 * (1f - profile.BreachReductionRatio));
             ApplyBreachReaction(state, profile);
             ApplyImpactBreachReaction(state, profile);
+            ApplyThornsAdvancedBreachEffects(state, profile);
+        }
+
+        private void ApplyThornsAdvancedBreachEffects(
+            GameState state,
+            CardCombatProfile profile)
+        {
+            if (profile.BreachVulnerableRadius > 0f)
+            {
+                foreach (EnemyState enemy in state.Enemies)
+                {
+                    if (Float2.Distance(
+                        TurretPosition,
+                        enemy.Position) > profile.BreachVulnerableRadius)
+                    {
+                        continue;
+                    }
+
+                    enemy.VulnerableRatio = Math.Max(
+                        enemy.VulnerableRatio,
+                        profile.BreachVulnerableRatio);
+                    enemy.VulnerableRemaining = Math.Max(
+                        enemy.VulnerableRemaining,
+                        profile.BreachVulnerableDuration);
+                }
+            }
+
+            if (profile.BreachExecuteRadius <= 0f)
+            {
+                return;
+            }
+
+            var executions =
+                new System.Collections.Generic.List<EnemyState>();
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                if (Float2.Distance(
+                    TurretPosition,
+                    enemy.Position) <= profile.BreachExecuteRadius
+                    && enemy.Hp / enemy.MaxHp
+                        <= profile.BreachExecuteThresholdRatio)
+                {
+                    executions.Add(enemy);
+                }
+            }
+
+            foreach (EnemyState enemy in executions)
+            {
+                DamageEnemy(state, enemy, enemy.Hp);
+            }
         }
 
         private void ApplyImpactBreachReaction(
@@ -1216,15 +1292,30 @@ namespace ProjectVL.Systems
         {
             Float2 turret = TurretPosition;
             EnemyState closest = null;
-            float closestDistance = float.MaxValue;
+            float closestScore = float.MaxValue;
+            CardCombatProfile profile =
+                CardEffectResolver.Resolve(state);
+            float auraRadius =
+                _combat.defaults.range * profile.AuraRadiusRatio;
 
             foreach (EnemyState enemy in state.Enemies)
             {
                 float distance = Float2.Distance(turret, enemy.Position);
-                if (distance <= _combat.defaults.range && distance < closestDistance)
+                float priority = 1f;
+                if (profile.AuraFocusPriorityWeight > 1f
+                    && distance <= auraRadius
+                    && enemy.Hp / enemy.MaxHp
+                        <= profile.AuraFocusHpThresholdRatio)
+                {
+                    priority = profile.AuraFocusPriorityWeight;
+                }
+
+                float score = distance / priority;
+                if (distance <= _combat.defaults.range
+                    && score < closestScore)
                 {
                     closest = enemy;
-                    closestDistance = distance;
+                    closestScore = score;
                 }
             }
 
