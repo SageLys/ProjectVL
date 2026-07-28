@@ -14,6 +14,7 @@ namespace ProjectVL.Presentation
         private WaveSystem _waveSystem;
         private CardInventorySystem _cardInventory;
         private RecipeSystem _recipeSystem;
+        private DropSystem _dropSystem;
         private CardSlotKind? _selectedSlotKind;
         private int _selectedSlotIndex = -1;
         private int _effectDemoIndex;
@@ -51,9 +52,10 @@ namespace ProjectVL.Presentation
             var random = new SystemRandomSource(System.Environment.TickCount);
             var enemyFactory = new EnemyFactory(combat, enemies, waves, random);
             _waveSystem = new WaveSystem(waves, enemyFactory);
-            var combatSystem = new CombatSystem(combat, enemies);
+            _dropSystem = new DropSystem(economy, random);
+            var combatSystem = new CombatSystem(combat, enemies, _dropSystem);
 
-            _world = new CombatWorld(combatSystem, _waveSystem);
+            _world = new CombatWorld(combatSystem, _waveSystem, _dropSystem);
             _simulation = new GameSimulation(state, combat);
             _simulation.SimulationStep += _world.Step;
 
@@ -66,6 +68,7 @@ namespace ProjectVL.Presentation
         private void Update()
         {
             HandleKeyboard();
+            HandleDropPickup();
             _simulation.AdvanceFrame(Time.unscaledDeltaTime);
             _presenter.Sync();
         }
@@ -171,6 +174,21 @@ namespace ProjectVL.Presentation
         {
             State.GrantReward(new RunReward(RewardKind.Card, 3, 3, "debug"));
             LastCardAction = "Added three 3 STAR migration test cards.";
+        }
+
+        public void SpawnDropDemo()
+        {
+            if (_dropSystem == null)
+            {
+                return;
+            }
+
+            var position = new Float2(
+                400f + State.GroundDrops.Count * 36f,
+                260f);
+            _dropSystem.SpawnTestDrop(State, position);
+            LastCardAction =
+                "Spawned a guaranteed card drop. Click it before time runs out.";
         }
 
         public void GrantMergeDemo()
@@ -337,6 +355,11 @@ namespace ProjectVL.Presentation
                 GrantEffectDemo();
             }
 
+            if (Input.GetKeyDown(KeyCode.T))
+            {
+                SpawnDropDemo();
+            }
+
             for (int i = 0; i < State.Hand.Length && i < 7; i++)
             {
                 if (Input.GetKeyDown((KeyCode)((int)KeyCode.Alpha1 + i)))
@@ -356,6 +379,30 @@ namespace ProjectVL.Presentation
             else if (State.Equipment.Length > 2 && Input.GetKeyDown(KeyCode.E))
             {
                 SelectCardSlot(CardSlotKind.Equipment, 2);
+            }
+        }
+
+        private void HandleDropPickup()
+        {
+            if (!Input.GetMouseButtonDown(0)
+                || _dropSystem == null
+                || !_presenter.TryScreenToArenaPoint(
+                    Input.mousePosition,
+                    out Float2 arenaPoint))
+            {
+                return;
+            }
+
+            DropCollectResult result =
+                _dropSystem.CollectNearest(State, arenaPoint);
+            if (result == DropCollectResult.Collected)
+            {
+                LastCardAction = "Card drop collected.";
+            }
+            else if (result == DropCollectResult.HandFull)
+            {
+                LastCardAction =
+                    "Hand full. Free a slot, then click the drop again.";
             }
         }
 

@@ -54,9 +54,12 @@ namespace ProjectVL.Core
         public int Kills { get; internal set; }
         public List<EnemyState> Enemies { get; } = new List<EnemyState>();
         public List<BulletState> Bullets { get; } = new List<BulletState>();
+        public List<GroundDropState> GroundDrops { get; } =
+            new List<GroundDropState>();
 
         private int _nextEnemyId = 1;
         private int _nextBulletId = 1;
+        private int _nextDropId = 1;
         private int _nextCardId = 1;
         private CardInventorySystem _inventory;
 
@@ -156,6 +159,11 @@ namespace ProjectVL.Core
             return _nextBulletId++;
         }
 
+        internal int TakeNextDropId()
+        {
+            return _nextDropId++;
+        }
+
         internal void ApplyDamage(float damage)
         {
             Hp = Math.Max(0f, Hp - Math.Max(0f, damage));
@@ -172,11 +180,36 @@ namespace ProjectVL.Core
 
         internal void GrantReward(RunReward reward)
         {
-            if (reward != null)
+            TryGrantReward(reward);
+        }
+
+        internal bool TryGrantReward(RunReward reward)
+        {
+            if (reward == null || _inventory == null)
+            {
+                return false;
+            }
+
+            bool granted = _inventory.GrantReward(this, reward);
+            if (granted)
             {
                 CollectedRewards.Add(reward);
-                _inventory?.GrantReward(this, reward);
             }
+
+            return granted;
+        }
+
+        internal bool TryGrantCard(string type, int star)
+        {
+            if (_inventory == null
+                || !_inventory.AddCard(this, type, star))
+            {
+                return false;
+            }
+
+            CollectedRewards.Add(
+                new RunReward(RewardKind.Card, star, 1, type));
+            return true;
         }
 
         internal void AdvanceTime(float deltaTime)

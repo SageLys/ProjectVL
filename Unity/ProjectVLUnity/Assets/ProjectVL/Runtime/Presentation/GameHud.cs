@@ -40,7 +40,7 @@ namespace ProjectVL.Presentation
                 $"HP {state.Hp:0}/{state.MaxHp:0}   WAVE {state.Wave} "
                 + $"{state.WavePhase.ToString().ToUpperInvariant()}   "
                 + $"KILLS {state.Kills}   MERGES {state.Merges}   "
-                + $"SHIELD {state.ShieldHits}",
+                + $"DROPS {state.GroundDrops.Count}   SHIELD {state.ShieldHits}",
                 _hudStyle);
         }
 
@@ -302,7 +302,7 @@ namespace ProjectVL.Presentation
                 _hudStyle);
             GUI.Label(
                 new Rect(actionX + 10f, 341f, 226f, 34f),
-                "EFFECT CARDS [B]  ·  RECIPE [H/F]",
+                "DROP TEST [T]  ·  EFFECT [B]  ·  RECIPE [H/F]",
                 _hudStyle);
         }
 

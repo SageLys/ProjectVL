@@ -6,5 +6,13 @@
   "equipSlots": 3,
   "equipSwappable": true,
   "equipDistinctTypes": true,
-  "feedEquipped": true
+  "feedEquipped": true,
+  "drops": {
+    "pickupRadius": 34,
+    "chanceCap": 0.95
+  },
+  "defaults": {
+    "dropChance": 0.27,
+    "dropLifetime": 5
+  }
 }

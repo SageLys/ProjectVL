@@ -8,11 +8,16 @@ namespace ProjectVL.Systems
     {
         private readonly CombatConfig _combat;
         private readonly EnemiesConfig _enemies;
+        private readonly DropSystem _drops;
 
-        public CombatSystem(CombatConfig combat, EnemiesConfig enemies)
+        public CombatSystem(
+            CombatConfig combat,
+            EnemiesConfig enemies,
+            DropSystem drops = null)
         {
             _combat = combat;
             _enemies = enemies;
+            _drops = drops;
         }
 
         public void StepTurret(GameState state, float deltaTime)
@@ -201,7 +206,7 @@ namespace ProjectVL.Systems
             }
         }
 
-        private static void DamageEnemy(
+        private void DamageEnemy(
             GameState state,
             EnemyState enemy,
             float damage)
@@ -218,6 +223,7 @@ namespace ProjectVL.Systems
             if (state.Enemies.Remove(enemy))
             {
                 state.Kills++;
+                _drops?.TrySpawnOnKill(state, enemy);
                 state.GrantReward(enemy.Reward);
                 if (enemy.Reward != null)
                 {
@@ -353,7 +359,7 @@ namespace ProjectVL.Systems
             return null;
         }
 
-        private static void ApplyChainLightning(
+        private void ApplyChainLightning(
             GameState state,
             BulletState bullet,
             Float2 origin,
@@ -418,7 +424,7 @@ namespace ProjectVL.Systems
             return closest;
         }
 
-        private static bool UpdateStatuses(
+        private bool UpdateStatuses(
             GameState state,
             EnemyState enemy,
             float deltaTime)

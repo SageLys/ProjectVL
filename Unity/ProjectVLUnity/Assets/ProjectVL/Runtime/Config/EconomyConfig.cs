@@ -13,5 +13,21 @@ namespace ProjectVL.Config
         public bool equipSwappable = true;
         public bool equipDistinctTypes = true;
         public bool feedEquipped = true;
+        public EconomyDropsConfig drops = new EconomyDropsConfig();
+        public EconomyDefaultsConfig defaults = new EconomyDefaultsConfig();
+    }
+
+    [Serializable]
+    public sealed class EconomyDropsConfig
+    {
+        public float pickupRadius = 34f;
+        public float chanceCap = 0.95f;
+    }
+
+    [Serializable]
+    public sealed class EconomyDefaultsConfig
+    {
+        public float dropChance = 0.27f;
+        public float dropLifetime = 5f;
     }
 }

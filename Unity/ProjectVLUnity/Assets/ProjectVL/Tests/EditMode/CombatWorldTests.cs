@@ -67,6 +67,85 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void RegularEnemyKillCreatesGroundCardWhenDropRollSucceeds()
+        {
+            var economy = new EconomyConfig();
+            var drops = new DropSystem(
+                economy,
+                new ConstantRandomSource(0.1f));
+            var combat = new CombatSystem(_combat, _enemies, drops);
+            EnemyState enemy = CreateEnemy(1, 100f, 0f, hp: 18f);
+            _state.Enemies.Add(enemy);
+
+            combat.StepTurret(_state, 0.01f);
+            combat.StepBullets(_state, 0.17f);
+
+            Assert.That(_state.GroundDrops.Count, Is.EqualTo(1));
+            Assert.That(_state.GroundDrops[0].Position, Is.EqualTo(enemy.Position));
+            Assert.That(_state.GroundDrops[0].Star, Is.EqualTo(1));
+            Assert.That(
+                _state.GroundDrops[0].LifeRemaining,
+                Is.EqualTo(5f));
+        }
+
+        [Test]
+        public void GroundCardCanBeCollectedIntoHand()
+        {
+            var drops = new DropSystem(
+                new EconomyConfig(),
+                new ConstantRandomSource(0.5f));
+            GroundDropState drop = drops.SpawnTestDrop(
+                _state,
+                new Float2(300f, 240f));
+
+            DropCollectResult result = drops.CollectNearest(
+                _state,
+                drop.Position);
+
+            Assert.That(result, Is.EqualTo(DropCollectResult.Collected));
+            Assert.That(_state.GroundDrops, Is.Empty);
+            Assert.That(_state.Hand[0], Is.Not.Null);
+            Assert.That(_state.Hand[0].Star, Is.EqualTo(1));
+            Assert.That(_state.Hand[0].Type, Is.EqualTo(drop.CardType));
+        }
+
+        [Test]
+        public void FullHandKeepsGroundCardAvailable()
+        {
+            var drops = new DropSystem(
+                new EconomyConfig(),
+                new ConstantRandomSource(0.5f));
+            for (int index = 0; index < _state.Hand.Length; index++)
+            {
+                _state.Hand[index] = _state.CreateCard($"full-{index}", 1);
+            }
+
+            GroundDropState drop = drops.SpawnTestDrop(
+                _state,
+                new Float2(300f, 240f));
+
+            DropCollectResult result = drops.CollectNearest(
+                _state,
+                drop.Position);
+
+            Assert.That(result, Is.EqualTo(DropCollectResult.HandFull));
+            Assert.That(_state.GroundDrops.Count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void GroundCardExpiresAfterConfiguredLifetime()
+        {
+            var drops = new DropSystem(
+                new EconomyConfig(),
+                new ConstantRandomSource(0.5f));
+            drops.SpawnTestDrop(_state, new Float2(300f, 240f));
+
+            drops.Step(_state, 5.01f);
+
+            Assert.That(_state.GroundDrops, Is.Empty);
+        }
+
+        [Test]
         public void EnemyBreachReducesPlayerHealth()
         {
             var combat = new CombatSystem(_combat, _enemies);

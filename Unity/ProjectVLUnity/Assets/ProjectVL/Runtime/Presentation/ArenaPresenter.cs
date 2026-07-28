@@ -11,6 +11,8 @@ namespace ProjectVL.Presentation
             new Dictionary<int, SpriteRenderer>();
         private readonly Dictionary<int, SpriteRenderer> _bulletViews =
             new Dictionary<int, SpriteRenderer>();
+        private readonly Dictionary<int, DropView> _dropViews =
+            new Dictionary<int, DropView>();
 
         private CombatConfig _combat;
         private GameState _state;
@@ -45,7 +47,26 @@ namespace ProjectVL.Presentation
                 -_state.TurretAngleRadians * Mathf.Rad2Deg);
             SyncEnemies();
             SyncBullets();
+            SyncDrops();
             SyncDecoy();
+        }
+
+        public bool TryScreenToArenaPoint(
+            Vector3 screenPoint,
+            out Float2 arenaPoint)
+        {
+            Camera camera = Camera.main;
+            if (camera == null)
+            {
+                arenaPoint = new Float2();
+                return false;
+            }
+
+            Vector3 world = camera.ScreenToWorldPoint(screenPoint);
+            arenaPoint = new Float2(
+                world.x + _combat.canvas.width / 2f,
+                _combat.canvas.height / 2f - world.y);
+            return true;
         }
 
         private void CreateCamera()
@@ -197,6 +218,67 @@ namespace ProjectVL.Presentation
             RemoveMissingViews(_bulletViews, activeIds);
         }
 
+        private void SyncDrops()
+        {
+            var activeIds = new HashSet<int>();
+            foreach (GroundDropState drop in _state.GroundDrops)
+            {
+                activeIds.Add(drop.Id);
+                if (!_dropViews.TryGetValue(drop.Id, out DropView view))
+                {
+                    SpriteRenderer renderer = CreateSpriteView(
+                        $"Card Drop {drop.Id}",
+                        _squareSprite,
+                        new Color(0.25f, 0.9f, 0.72f));
+                    renderer.transform.SetParent(transform, false);
+                    renderer.transform.localScale =
+                        new Vector3(30f, 38f, 1f);
+                    renderer.sortingOrder = 16;
+
+                    var labelObject = new GameObject("Drop Label");
+                    labelObject.transform.SetParent(renderer.transform, false);
+                    labelObject.transform.localPosition =
+                        new Vector3(0f, 0f, -0.1f);
+                    labelObject.transform.localScale =
+                        new Vector3(0.035f, 0.035f, 1f);
+                    TextMesh label = labelObject.AddComponent<TextMesh>();
+                    label.anchor = TextAnchor.MiddleCenter;
+                    label.alignment = TextAlignment.Center;
+                    label.fontSize = 32;
+                    label.color = new Color(0.03f, 0.12f, 0.16f);
+                    label.GetComponent<MeshRenderer>().sortingOrder = 17;
+
+                    view = new DropView(renderer, label);
+                    _dropViews.Add(drop.Id, view);
+                }
+
+                view.Renderer.transform.position = PixelToWorld(drop.Position);
+                float lifeRatio = Mathf.Clamp01(
+                    drop.LifeRemaining / drop.MaxLife);
+                view.Renderer.color = Color.Lerp(
+                    new Color(1f, 0.28f, 0.18f),
+                    new Color(0.25f, 0.9f, 0.72f),
+                    lifeRatio);
+                view.Label.text =
+                    $"{drop.Star} STAR\n{drop.LifeRemaining:0.0}s";
+            }
+
+            var removedIds = new List<int>();
+            foreach (KeyValuePair<int, DropView> pair in _dropViews)
+            {
+                if (!activeIds.Contains(pair.Key))
+                {
+                    Destroy(pair.Value.Renderer.gameObject);
+                    removedIds.Add(pair.Key);
+                }
+            }
+
+            foreach (int id in removedIds)
+            {
+                _dropViews.Remove(id);
+            }
+        }
+
         private void SyncDecoy()
         {
             if (!_state.DecoyActive)
@@ -345,6 +427,18 @@ namespace ProjectVL.Presentation
                 new Rect(0f, 0f, size, size),
                 new Vector2(0.5f, 0.5f),
                 size);
+        }
+
+        private sealed class DropView
+        {
+            public SpriteRenderer Renderer { get; }
+            public TextMesh Label { get; }
+
+            public DropView(SpriteRenderer renderer, TextMesh label)
+            {
+                Renderer = renderer;
+                Label = label;
+            }
         }
     }
 }
