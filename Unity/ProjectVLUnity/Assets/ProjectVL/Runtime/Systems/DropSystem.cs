@@ -86,6 +86,13 @@ namespace ProjectVL.Systems
                 if (drop.LifeRemaining <= 0f)
                 {
                     state.GroundDrops.RemoveAt(index);
+                    if (state.ExpiryConvertRatio > 0f
+                        && _random.NextFloat()
+                            < state.ExpiryConvertRatio)
+                    {
+                        state.AddExperience(drop.Star * 4f);
+                        state.ExpiredDropsConverted++;
+                    }
                 }
             }
         }

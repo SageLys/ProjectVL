@@ -58,10 +58,22 @@ namespace ProjectVL.Presentation
             "aegis",
             "thorns",
             "thorns",
-            "thorns"
+            "thorns",
+            "decoy",
+            "decoy",
+            "decoy",
+            "harvest",
+            "harvest",
+            "harvest"
         };
         private static readonly string[] AdvancedDemoBranches =
         {
+            "A",
+            "B",
+            "C",
+            "A",
+            "B",
+            "C",
             "A",
             "B",
             "C",

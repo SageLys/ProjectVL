@@ -57,6 +57,8 @@ namespace ProjectVL.Systems
             CardCombatProfile profile = CardEffectResolver.Resolve(state);
             state.DropRateMultiplier = profile.DropRateMultiplier;
             state.DropLifetimeMultiplier = profile.DropLifetimeMultiplier;
+            state.ExpiryConvertRatio = profile.ExpiryConvertRatio;
+            state.XpMultiplier = profile.XpMultiplier;
             if (state.Wave > 0 && state.EquipmentEffectWave != state.Wave)
             {
                 InitializeWaveEffects(state, profile);
@@ -128,6 +130,8 @@ namespace ProjectVL.Systems
             }
 
             ApplySanctumAura(state, profile);
+            ApplyDecoyAura(state, profile);
+            ApplyHarvestMergePulse(state, profile);
         }
 
         public void StepBullets(GameState state, float deltaTime)
@@ -226,12 +230,29 @@ namespace ProjectVL.Systems
                     continue;
                 }
 
-                bool targetingDecoy = state.DecoyActive
-                    && Float2.Distance(
+                float primaryDistance = state.DecoyActive
+                    ? Float2.Distance(
                         enemy.Position,
-                        state.DecoyPosition) <= state.DecoyTauntRadius;
+                        state.DecoyPosition)
+                    : float.MaxValue;
+                float secondaryDistance = state.SecondaryDecoyActive
+                    ? Float2.Distance(
+                        enemy.Position,
+                        state.SecondaryDecoyPosition)
+                    : float.MaxValue;
+                bool primaryInRange =
+                    primaryDistance <= state.DecoyTauntRadius;
+                bool secondaryInRange =
+                    secondaryDistance <= state.DecoyTauntRadius;
+                bool targetingSecondary = secondaryInRange
+                    && (!primaryInRange
+                        || secondaryDistance < primaryDistance);
+                bool targetingDecoy =
+                    primaryInRange || secondaryInRange;
                 Float2 destination = targetingDecoy
-                    ? state.DecoyPosition
+                    ? targetingSecondary
+                        ? state.SecondaryDecoyPosition
+                        : state.DecoyPosition
                     : turret;
                 Float2 toDestination = destination - enemy.Position;
                 enemy.Position += toDestination.Normalized()
@@ -239,14 +260,17 @@ namespace ProjectVL.Systems
                     * (1f - enemy.SlowRatio)
                     * deltaTime;
 
-                if (state.DecoyActive
-                    && targetingDecoy
+                if (targetingDecoy
                     && Float2.Distance(
                         enemy.Position,
-                        state.DecoyPosition) < enemy.Radius + 12f)
+                        destination) < enemy.Radius + 12f)
                 {
                     state.Enemies.RemoveAt(index);
-                    DamageDecoy(state, profile, enemy.Damage);
+                    DamageDecoy(
+                        state,
+                        profile,
+                        enemy.Damage,
+                        targetingSecondary);
                     continue;
                 }
 
@@ -283,6 +307,7 @@ namespace ProjectVL.Systems
                 state.GrantReward(enemy.Reward);
                 CardCombatProfile profile =
                     CardEffectResolver.Resolve(state);
+                state.AddExperience(profile.XpMultiplier);
                 if (enemy.Reward != null)
                 {
                     state.RestoreHp(profile.PickupRestore);
@@ -903,8 +928,15 @@ namespace ProjectVL.Systems
                 profile.DecoyExplodeDamageMultiplier;
             state.DecoyExplodeKnockback =
                 profile.DecoyExplodeKnockback;
+            state.DecoyRespawnsRemaining =
+                profile.DecoyRespawns;
             state.DecoyPosition = TurretPosition
                 + new Float2(profile.DecoyDistance, 0f);
+            state.SecondaryDecoyActive =
+                profile.DecoyHp > 0f && profile.DecoyCount > 1;
+            state.SecondaryDecoyHp = profile.DecoyHp;
+            state.SecondaryDecoyPosition = TurretPosition
+                + new Float2(profile.SecondaryDecoyDistance, 0f);
         }
 
         private void ApplySanctumAura(
@@ -1083,20 +1115,44 @@ namespace ProjectVL.Systems
         private void DamageDecoy(
             GameState state,
             CardCombatProfile profile,
-            float damage)
+            float damage,
+            bool secondary)
         {
-            state.DecoyHp -= Math.Max(0f, damage);
-            if (state.DecoyHp > 0f)
+            float remainingHp = (secondary
+                    ? state.SecondaryDecoyHp
+                    : state.DecoyHp)
+                - Math.Max(0f, damage);
+            if (secondary)
+            {
+                state.SecondaryDecoyHp = remainingHp;
+            }
+            else
+            {
+                state.DecoyHp = remainingHp;
+            }
+
+            if (remainingHp > 0f)
             {
                 return;
             }
 
-            state.DecoyActive = false;
+            Float2 destroyedPosition = secondary
+                ? state.SecondaryDecoyPosition
+                : state.DecoyPosition;
+            if (secondary)
+            {
+                state.SecondaryDecoyActive = false;
+            }
+            else
+            {
+                state.DecoyActive = false;
+            }
+
             if (state.DecoyExplodeDamageMultiplier > 0f)
             {
                 DamageArea(
                     state,
-                    state.DecoyPosition,
+                    destroyedPosition,
                     state.DecoyTauntRadius,
                     _combat.defaults.damage
                         * state.DecoyExplodeDamageMultiplier,
@@ -1104,6 +1160,73 @@ namespace ProjectVL.Systems
                     state.DecoyExplodeKnockback,
                     0f);
             }
+
+            if (!secondary && state.DecoyRespawnsRemaining > 0)
+            {
+                state.DecoyRespawnsRemaining--;
+                state.DecoyActive = true;
+                state.DecoyHp = state.DecoyMaxHp;
+                state.DecoyPosition = TurretPosition
+                    - new Float2(profile.DecoyDistance, 0f);
+            }
+        }
+
+        private void ApplyDecoyAura(
+            GameState state,
+            CardCombatProfile profile)
+        {
+            if (profile.DecoyAuraRadius <= 0f)
+            {
+                return;
+            }
+
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                bool insidePrimary = state.DecoyActive
+                    && Float2.Distance(
+                        enemy.Position,
+                        state.DecoyPosition) <= profile.DecoyAuraRadius;
+                bool insideSecondary = state.SecondaryDecoyActive
+                    && Float2.Distance(
+                        enemy.Position,
+                        state.SecondaryDecoyPosition) <= profile.DecoyAuraRadius;
+                if (!insidePrimary && !insideSecondary)
+                {
+                    continue;
+                }
+
+                enemy.SlowRatio = Math.Max(
+                    enemy.SlowRatio,
+                    profile.DecoyAuraSlowRatio);
+                enemy.SlowRemaining = Math.Max(
+                    enemy.SlowRemaining,
+                    profile.DecoyAuraSlowDuration);
+            }
+        }
+
+        private void ApplyHarvestMergePulse(
+            GameState state,
+            CardCombatProfile profile)
+        {
+            int pendingMergeStars =
+                state.MergeResultStarTotal
+                - state.HarvestProcessedMergeStars;
+            if (profile.MergePulseDamagePerStar > 0f
+                && pendingMergeStars > 0)
+            {
+                DamageArea(
+                    state,
+                    TurretPosition,
+                    float.MaxValue,
+                    profile.MergePulseDamagePerStar
+                        * pendingMergeStars,
+                    -1,
+                    0f,
+                    0f);
+            }
+
+            state.HarvestProcessedMergeStars =
+                state.MergeResultStarTotal;
         }
 
         private void DamageArea(

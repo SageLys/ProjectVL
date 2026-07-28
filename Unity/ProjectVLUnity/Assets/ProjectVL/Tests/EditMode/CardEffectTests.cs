@@ -1011,6 +1011,164 @@ namespace ProjectVL.Tests
             Assert.That(_state.DropLifetimeMultiplier, Is.EqualTo(1.25f));
         }
 
+        [Test]
+        public void DecoyFourStarAmplifiesDurabilityAndTaunt()
+        {
+            EquipResolved("decoy", 4, "3:decoyB");
+
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+
+            Assert.That(profile.DecoyHp, Is.EqualTo(90f));
+            Assert.That(profile.DecoyTauntRadius, Is.EqualTo(210f));
+        }
+
+        [Test]
+        public void DecoyA2RespawnsOnceAfterBeingDestroyed()
+        {
+            EquipResolved(
+                "decoy",
+                5,
+                "3:decoyA",
+                "5:decoyA2");
+            _state.BeginWave(1);
+            _system.StepPassives(_state, 0f);
+            Float2 firstPosition = _state.DecoyPosition;
+            AddEnemy(firstPosition, 100f, 100f);
+
+            _system.StepEnemies(_state, 0f);
+
+            Assert.That(_state.DecoyActive, Is.True);
+            Assert.That(_state.DecoyHp, Is.EqualTo(90f));
+            Assert.That(_state.DecoyRespawnsRemaining, Is.Zero);
+            Assert.That(_state.DecoyPosition, Is.Not.EqualTo(firstPosition));
+        }
+
+        [Test]
+        public void DecoyB2CreatesTwoIndependentTargets()
+        {
+            EquipResolved(
+                "decoy",
+                5,
+                "3:decoyB",
+                "5:decoyB2");
+            _state.BeginWave(1);
+
+            _system.StepPassives(_state, 0f);
+
+            Assert.That(_state.DecoyActive, Is.True);
+            Assert.That(_state.SecondaryDecoyActive, Is.True);
+            Assert.That(
+                Float2.Distance(
+                    _state.DecoyPosition,
+                    _state.SecondaryDecoyPosition),
+                Is.EqualTo(40f));
+        }
+
+        [Test]
+        public void DecoyC2SlowsEnemiesInsideItsAura()
+        {
+            EquipResolved(
+                "decoy",
+                5,
+                "3:decoyC",
+                "5:decoyC2");
+            _state.BeginWave(1);
+            _system.StepPassives(_state, 0f);
+            EnemyState enemy = AddEnemy(
+                _state.DecoyPosition + new Float2(80f, 0f),
+                100f);
+
+            _system.StepPassives(_state, 0f);
+
+            Assert.That(enemy.SlowRatio, Is.EqualTo(0.3f));
+            Assert.That(enemy.SlowRemaining, Is.EqualTo(0.8f));
+        }
+
+        [Test]
+        public void HarvestFourStarAmplifiesBothDropMultipliers()
+        {
+            EquipResolved(
+                "harvest",
+                5,
+                "3:harvestA",
+                "5:harvestA2");
+
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+
+            Assert.That(
+                profile.DropRateMultiplier,
+                Is.EqualTo(1.375f).Within(0.0001f));
+            Assert.That(
+                profile.DropLifetimeMultiplier,
+                Is.EqualTo(1.375f).Within(0.0001f));
+        }
+
+        [Test]
+        public void HarvestA2ConvertsExpiredDropIntoExperience()
+        {
+            EquipResolved(
+                "harvest",
+                5,
+                "3:harvestA",
+                "5:harvestA2");
+            _system.StepPassives(_state, 0f);
+            var drops = new DropSystem(
+                new EconomyConfig(),
+                new ConstantRandomSource(0.25f));
+            drops.SpawnTestDrop(_state, new Float2(300f, 240f));
+
+            drops.Step(_state, 10f);
+
+            Assert.That(_state.GroundDrops, Is.Empty);
+            Assert.That(_state.Experience, Is.EqualTo(4f));
+            Assert.That(_state.ExpiredDropsConverted, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void HarvestB2MultipliesExperienceFromKills()
+        {
+            EquipResolved(
+                "harvest",
+                5,
+                "3:harvestB",
+                "5:harvestB2");
+            EnemyState enemy = AddEnemy(
+                new Float2(200f, 200f),
+                5f);
+
+            HitWithProfile(
+                enemy.Position,
+                CardEffectResolver.Resolve(_state));
+
+            Assert.That(_state.Experience, Is.EqualTo(1.2f));
+        }
+
+        [Test]
+        public void HarvestC2DamagesAllEnemiesAfterMerge()
+        {
+            EquipResolved(
+                "harvest",
+                5,
+                "3:harvestC",
+                "5:harvestC2");
+            _system.StepPassives(_state, 0f);
+            EnemyState first = AddEnemy(
+                new Float2(200f, 200f),
+                100f);
+            EnemyState second = AddEnemy(
+                new Float2(700f, 500f),
+                100f);
+            var inventory =
+                new CardInventorySystem(new EconomyConfig());
+            inventory.AddCard(_state, "impact", 1);
+            inventory.AddCard(_state, "impact", 1);
+
+            _system.StepPassives(_state, 0f);
+
+            Assert.That(first.Hp, Is.EqualTo(86f));
+            Assert.That(second.Hp, Is.EqualTo(86f));
+        }
+
         private void EquipResolved(
             string type,
             int star,
@@ -1051,6 +1209,21 @@ namespace ProjectVL.Tests
                 10f,
                 profile));
             _system.StepBullets(_state, 0f);
+        }
+
+        private sealed class ConstantRandomSource : IRandomSource
+        {
+            private readonly float _value;
+
+            public ConstantRandomSource(float value)
+            {
+                _value = value;
+            }
+
+            public float NextFloat()
+            {
+                return _value;
+            }
         }
     }
 }

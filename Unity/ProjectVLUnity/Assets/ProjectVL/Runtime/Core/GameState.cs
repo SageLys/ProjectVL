@@ -42,6 +42,12 @@ namespace ProjectVL.Core
         public float ThornsAuraTickRemaining { get; internal set; }
         public float DropRateMultiplier { get; internal set; } = 1f;
         public float DropLifetimeMultiplier { get; internal set; } = 1f;
+        public float ExpiryConvertRatio { get; internal set; }
+        public float XpMultiplier { get; internal set; } = 1f;
+        public float Experience { get; private set; }
+        public int ExpiredDropsConverted { get; internal set; }
+        public int HarvestProcessedMergeStars { get; internal set; }
+        public int MergeResultStarTotal { get; internal set; }
         public bool DecoyActive { get; internal set; }
         public Float2 DecoyPosition { get; internal set; }
         public float DecoyHp { get; internal set; }
@@ -49,6 +55,10 @@ namespace ProjectVL.Core
         public float DecoyTauntRadius { get; internal set; }
         public float DecoyExplodeDamageMultiplier { get; internal set; }
         public float DecoyExplodeKnockback { get; internal set; }
+        public int DecoyRespawnsRemaining { get; internal set; }
+        public bool SecondaryDecoyActive { get; internal set; }
+        public Float2 SecondaryDecoyPosition { get; internal set; }
+        public float SecondaryDecoyHp { get; internal set; }
         public float IntermissionRemaining { get; internal set; }
         public bool IntermissionReady { get; internal set; }
         public float ShotCooldown { get; set; }
@@ -180,6 +190,11 @@ namespace ProjectVL.Core
         internal void RestoreHp(float amount)
         {
             Hp = Math.Min(MaxHp, Hp + Math.Max(0f, amount));
+        }
+
+        internal void AddExperience(float amount)
+        {
+            Experience += Math.Max(0f, amount);
         }
 
         internal void GrantReward(RunReward reward)

@@ -20,6 +20,7 @@ namespace ProjectVL.Presentation
         private Sprite _squareSprite;
         private Transform _turret;
         private SpriteRenderer _decoyView;
+        private SpriteRenderer _secondaryDecoyView;
 
         public void Initialize(CombatConfig combat, GameState state)
         {
@@ -281,35 +282,55 @@ namespace ProjectVL.Presentation
 
         private void SyncDecoy()
         {
-            if (!_state.DecoyActive)
+            SyncDecoyView(
+                ref _decoyView,
+                "Decoy",
+                _state.DecoyActive,
+                _state.DecoyPosition,
+                _state.DecoyHp);
+            SyncDecoyView(
+                ref _secondaryDecoyView,
+                "DecoySecondary",
+                _state.SecondaryDecoyActive,
+                _state.SecondaryDecoyPosition,
+                _state.SecondaryDecoyHp);
+        }
+
+        private void SyncDecoyView(
+            ref SpriteRenderer view,
+            string viewName,
+            bool active,
+            Float2 position,
+            float hp)
+        {
+            if (!active)
             {
-                if (_decoyView != null)
+                if (view != null)
                 {
-                    Destroy(_decoyView.gameObject);
-                    _decoyView = null;
+                    Destroy(view.gameObject);
+                    view = null;
                 }
 
                 return;
             }
 
-            if (_decoyView == null)
+            if (view == null)
             {
-                _decoyView = CreateSpriteView(
-                    "Decoy",
+                view = CreateSpriteView(
+                    viewName,
                     _squareSprite,
                     new Color(1f, 0.65f, 0.2f));
-                _decoyView.transform.SetParent(transform, false);
-                _decoyView.transform.localScale =
+                view.transform.SetParent(transform, false);
+                view.transform.localScale =
                     new Vector3(24f, 24f, 1f);
-                _decoyView.sortingOrder = 14;
+                view.sortingOrder = 14;
             }
 
-            _decoyView.transform.position =
-                PixelToWorld(_state.DecoyPosition);
-            _decoyView.color = Color.Lerp(
+            view.transform.position = PixelToWorld(position);
+            view.color = Color.Lerp(
                 new Color(0.4f, 0.15f, 0.05f),
                 new Color(1f, 0.65f, 0.2f),
-                Mathf.Clamp01(_state.DecoyHp / _state.DecoyMaxHp));
+                Mathf.Clamp01(hp / _state.DecoyMaxHp));
         }
 
         private static void RemoveMissingViews(

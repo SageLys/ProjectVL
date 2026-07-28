@@ -119,6 +119,7 @@ namespace ProjectVL.Systems
                         state.Hand[i] = result;
                         state.Hand[j] = null;
                         state.Merges++;
+                        state.MergeResultStarTotal += result.Star;
                         merged++;
                         QueueEvolutionChoice(state, result);
                         changed = true;
@@ -171,6 +172,7 @@ namespace ProjectVL.Systems
             state.Wildcards[target.Star]--;
             target.Star++;
             state.Merges++;
+            state.MergeResultStarTotal += target.Star;
             QueueEvolutionChoice(state, target);
             if (kind == CardSlotKind.Hand)
             {
@@ -271,6 +273,7 @@ namespace ProjectVL.Systems
                 replaced.Star++;
                 source[sourceIndex] = null;
                 state.Merges++;
+                state.MergeResultStarTotal += replaced.Star;
                 QueueEvolutionChoice(state, replaced);
                 state.EquipmentEffectWave = 0;
                 return CardMoveResult.Fed;

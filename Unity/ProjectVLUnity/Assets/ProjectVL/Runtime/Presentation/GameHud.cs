@@ -40,7 +40,8 @@ namespace ProjectVL.Presentation
                 $"HP {state.Hp:0}/{state.MaxHp:0}   WAVE {state.Wave} "
                 + $"{state.WavePhase.ToString().ToUpperInvariant()}   "
                 + $"KILLS {state.Kills}   MERGES {state.Merges}   "
-                + $"DROPS {state.GroundDrops.Count}   SHIELD {state.ShieldHits}",
+                + $"XP {state.Experience:0.#}   DROPS {state.GroundDrops.Count}   "
+                + $"SHIELD {state.ShieldHits}",
                 _hudStyle);
         }
 

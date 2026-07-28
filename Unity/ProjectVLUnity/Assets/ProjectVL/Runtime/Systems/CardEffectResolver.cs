@@ -521,10 +521,34 @@ namespace ProjectVL.Systems
             profile.DecoyTauntRadius =
                 route == "decoyB" ? 190f : 140f;
             profile.DecoyDistance = 150f;
+            profile.DecoyCount = 1;
             if (route == "decoyC")
             {
                 profile.DecoyExplodeDamageMultiplier = 1.2f;
                 profile.DecoyExplodeKnockback = 70f;
+            }
+
+            if (card.Star >= 4)
+            {
+                profile.DecoyHp *= 1.5f;
+                profile.DecoyTauntRadius += 20f;
+            }
+
+            string advancedRoute = RouteAt(card, 5);
+            if (advancedRoute == "decoyA2")
+            {
+                profile.DecoyRespawns = 1;
+            }
+            else if (advancedRoute == "decoyB2")
+            {
+                profile.DecoyCount = 2;
+                profile.SecondaryDecoyDistance = 190f;
+            }
+            else if (advancedRoute == "decoyC2")
+            {
+                profile.DecoyAuraRadius = 130f;
+                profile.DecoyAuraSlowRatio = 0.3f;
+                profile.DecoyAuraSlowDuration = 0.8f;
             }
         }
 
@@ -553,6 +577,29 @@ namespace ProjectVL.Systems
                     Max(profile.DropRateMultiplier, 1.1f);
                 profile.PickupRestore =
                     Max(profile.PickupRestore, 2f);
+            }
+
+            if (card.Star >= 4)
+            {
+                profile.DropRateMultiplier *= 1.1f;
+                profile.DropLifetimeMultiplier *= 1.1f;
+            }
+
+            string advancedRoute = RouteAt(card, 5);
+            if (advancedRoute == "harvestA2")
+            {
+                profile.ExpiryConvertRatio =
+                    Max(profile.ExpiryConvertRatio, 0.5f);
+            }
+            else if (advancedRoute == "harvestB2")
+            {
+                profile.XpMultiplier =
+                    Max(profile.XpMultiplier, 1.2f);
+            }
+            else if (advancedRoute == "harvestC2")
+            {
+                profile.MergePulseDamagePerStar =
+                    Max(profile.MergePulseDamagePerStar, 7f);
             }
         }
 
