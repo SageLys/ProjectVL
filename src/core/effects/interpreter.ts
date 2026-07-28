@@ -67,11 +67,13 @@ const formParam = (p: Record<string, unknown>, atom: 'beamMorph' | 'mortarMorph'
 
 /**
  * 主炮形态正交融合：先按 cardType（再按 id）排序，再独立选择 delivery 与叠加 impact。
- * line > lob > projectile；第 2 个及之后贡献应用统一衰减，因此装备槽互换不改变输出。
+ * delivery 覆盖轴由最强 beam 胜出且全额生效；impact 叠加轴仅对第 2 个及之后的 mortar 衰减。
  */
 export function composeWeaponForm(forms: WeaponFormContribution[]): WeaponFormSpec {
   const sorted = [...forms].sort((a, b) =>
     a.sourceCardType.localeCompare(b.sourceCardType) || a.sourceCardId - b.sourceCardId);
+  const beams = sorted.filter(form => form.kind === 'beam');
+  const mortars = sorted.filter(form => form.kind === 'mortar');
   let delivery: WeaponFormSpec['delivery'] = 'projectile';
   let deliveryDamageRatio = 1;
   let interval = atomNumberDefault('beamMorph', 'interval');
@@ -83,35 +85,40 @@ export function composeWeaponForm(forms: WeaponFormContribution[]): WeaponFormSp
   const suppressedSourceCardTypes: CardType[] = [];
   const impacts: WeaponImpactSpec[] = [];
 
-  sorted.forEach((form, index) => {
+  const winningBeam = beams.reduce<WeaponFormContribution | undefined>((winner, form) => {
+    if (!winner) return form;
+    return formParam(form.params, 'beamMorph', 'damageRatio')
+      > formParam(winner.params, 'beamMorph', 'damageRatio') ? form : winner;
+  }, undefined);
+  if (winningBeam) {
+    delivery = 'line';
+    deliveryDamageRatio = formParam(winningBeam.params, 'beamMorph', 'damageRatio');
+    interval = formParam(winningBeam.params, 'beamMorph', 'interval');
+    duration = formParam(winningBeam.params, 'beamMorph', 'duration');
+    tickInterval = formParam(winningBeam.params, 'beamMorph', 'tickInterval');
+    width = formParam(winningBeam.params, 'beamMorph', 'width');
+    sourceStar = winningBeam.star;
+    sourceCardType = winningBeam.sourceCardType;
+    suppressedSourceCardTypes.push(...beams
+      .filter(form => form !== winningBeam)
+      .map(form => form.sourceCardType));
+  } else if (mortars.length > 0) {
+    // mortar 的核心轴是 aoe；没有 line 时才用第一个 mortar 作为 lob 投递包装。
+    delivery = 'lob';
+    sourceStar = mortars[0].star;
+    sourceCardType = mortars[0].sourceCardType;
+  }
+
+  mortars.forEach((form, index) => {
     const damping = index === 0 ? 1 : cfg.combat.weaponFusion.damping;
-    if (index > 0) suppressedSourceCardTypes.push(form.sourceCardType);
-    if (form.kind === 'beam') {
-      // line 的 delivery 优先级最高；其 damageRatio 属于投递轴本体。
-      delivery = 'line';
-      deliveryDamageRatio = formParam(form.params, 'beamMorph', 'damageRatio') * damping;
-      interval = formParam(form.params, 'beamMorph', 'interval');
-      duration = formParam(form.params, 'beamMorph', 'duration');
-      tickInterval = formParam(form.params, 'beamMorph', 'tickInterval');
-      width = formParam(form.params, 'beamMorph', 'width');
-      sourceStar = form.star;
-      sourceCardType = form.sourceCardType;
-    } else {
-      // mortar 的核心轴是 aoe；没有 line 时才用 lob 作为默认包装。
-      if (delivery !== 'line') {
-        delivery = 'lob';
-        sourceStar = form.star;
-        sourceCardType = form.sourceCardType;
-      }
-      impacts.push({
-        kind: 'aoe',
-        sourceCardType: form.sourceCardType,
-        sourceStar: form.star,
-        damageRatio: formParam(form.params, 'mortarMorph', 'damageRatio') * damping,
-        radius: formParam(form.params, 'mortarMorph', 'radius') * (index === 0 ? 1 : cfg.combat.weaponFusion.radiusMul),
-        falloff: formParam(form.params, 'mortarMorph', 'falloff'),
-      });
-    }
+    impacts.push({
+      kind: 'aoe',
+      sourceCardType: form.sourceCardType,
+      sourceStar: form.star,
+      damageRatio: formParam(form.params, 'mortarMorph', 'damageRatio') * damping,
+      radius: formParam(form.params, 'mortarMorph', 'radius') * (index === 0 ? 1 : cfg.combat.weaponFusion.radiusMul),
+      falloff: formParam(form.params, 'mortarMorph', 'falloff'),
+    });
   });
 
   return {

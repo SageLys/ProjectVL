@@ -61,8 +61,8 @@ describe('weaponForm 正交融合', () => {
     expect(spec.deliveryDamageRatio).toBe(1);
     expect(spec.impacts[0]).toMatchObject({
       sourceCardType: 'splitBlast', sourceStar: 6,
-      damageRatio: 1.3 * cfg.combat.weaponFusion.damping,
-      radius: 90 * cfg.combat.weaponFusion.radiusMul,
+      damageRatio: 1.3,
+      radius: 90,
     });
   });
 
@@ -80,8 +80,8 @@ describe('weaponForm 正交融合', () => {
     expect(a).toEqual(b);
     expect(a.delivery).toBe('line');
     expect(a.impacts[0]).toMatchObject({
-      kind: 'aoe', damageRatio: cfg.combat.weaponFusion.damping,
-      radius: 80 * cfg.combat.weaponFusion.radiusMul,
+      kind: 'aoe', damageRatio: 1,
+      radius: 80,
     });
   });
 
