@@ -1,0 +1,13 @@
+{
+  "name": "ProjectVL.EditModeTests",
+  "rootNamespace": "ProjectVL.Tests",
+  "references": [
+    "ProjectVL.Runtime"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}
