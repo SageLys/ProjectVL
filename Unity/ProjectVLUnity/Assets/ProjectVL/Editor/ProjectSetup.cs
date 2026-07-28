@@ -13,6 +13,25 @@ namespace ProjectVL.Editor
     {
         private const string MainScenePath = "Assets/ProjectVL/Scenes/Main.unity";
 
+        [InitializeOnLoadMethod]
+        private static void RegisterDefaultScene()
+        {
+            EditorApplication.delayCall += OpenMainSceneWhenUntitled;
+        }
+
+        private static void OpenMainSceneWhenUntitled()
+        {
+            if (Application.isBatchMode
+                || EditorApplication.isPlayingOrWillChangePlaymode
+                || !string.IsNullOrEmpty(SceneManager.GetActiveScene().path)
+                || AssetDatabase.LoadAssetAtPath<SceneAsset>(MainScenePath) == null)
+            {
+                return;
+            }
+
+            EditorSceneManager.OpenScene(MainScenePath, OpenSceneMode.Single);
+        }
+
         [MenuItem("ProjectVL/Rebuild Main Scene")]
         public static void CreateMainScene()
         {
