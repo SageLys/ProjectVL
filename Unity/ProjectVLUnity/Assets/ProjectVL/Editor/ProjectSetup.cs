@@ -1,5 +1,8 @@
+using System;
+using System.IO;
 using ProjectVL.Presentation;
 using UnityEditor;
+using UnityEditor.Build.Reporting;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -33,6 +36,33 @@ namespace ProjectVL.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             Debug.Log($"Created ProjectVL main scene at {MainScenePath}");
+        }
+
+        [MenuItem("ProjectVL/Build Windows")]
+        public static void BuildWindows()
+        {
+            string outputPath = Path.GetFullPath(
+                Path.Combine(Application.dataPath, "../Builds/Windows/ProjectVL.exe"));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            var options = new BuildPlayerOptions
+            {
+                scenes = new[] { MainScenePath },
+                locationPathName = outputPath,
+                target = BuildTarget.StandaloneWindows64,
+                options = BuildOptions.None
+            };
+
+            BuildReport report = BuildPipeline.BuildPlayer(options);
+            if (report.summary.result != BuildResult.Succeeded)
+            {
+                throw new InvalidOperationException(
+                    $"Windows build failed: {report.summary.result}");
+            }
+
+            Debug.Log(
+                $"Built ProjectVL for Windows: {outputPath} "
+                + $"({report.summary.totalSize} bytes)");
         }
     }
 }
