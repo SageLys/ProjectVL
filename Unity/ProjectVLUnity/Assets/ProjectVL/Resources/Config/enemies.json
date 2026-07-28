@@ -1,0 +1,55 @@
+{
+  "defaults": {
+    "enemySpeed": 1
+  },
+  "types": {
+    "normal": {
+      "label": "Normal",
+      "hpBase": 38,
+      "hpPerWave": 12,
+      "speedBase": 24,
+      "speedPerWave": 2,
+      "r": 16,
+      "color": "#8793a3",
+      "damage": 8,
+      "xp": 1,
+      "sides": 4
+    },
+    "fast": {
+      "label": "Fast",
+      "hpBase": 23,
+      "hpPerWave": 10,
+      "speedBase": 42,
+      "speedPerWave": 3,
+      "r": 12,
+      "color": "#8793a3",
+      "damage": 6,
+      "xp": 1,
+      "sides": 3
+    },
+    "tank": {
+      "label": "Tank",
+      "hpBase": 90,
+      "hpPerWave": 45,
+      "speedBase": 15,
+      "speedPerWave": 1.5,
+      "r": 22,
+      "color": "#8793a3",
+      "damage": 14,
+      "xp": 2,
+      "sides": 6
+    },
+    "boss": {
+      "label": "Boss",
+      "hpBase": 300,
+      "hpPerWave": 320,
+      "speedBase": 28,
+      "speedPerWave": 1.5,
+      "r": 35,
+      "color": "#596371",
+      "damage": 28,
+      "xp": 5,
+      "sides": 8
+    }
+  }
+}

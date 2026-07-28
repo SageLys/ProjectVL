@@ -1,0 +1,10 @@
+{
+  "name": "ProjectVL.Editor",
+  "rootNamespace": "ProjectVL.Editor",
+  "references": [
+    "ProjectVL.Runtime"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ]
+}

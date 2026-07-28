@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace ProjectVL.Core
 {
@@ -15,6 +16,14 @@ namespace ProjectVL.Core
         public int Wave { get; private set; }
         public float ShotCooldown { get; set; }
         public float TurretAngleRadians { get; set; }
+        public int SpawnLeft { get; internal set; }
+        public float SpawnTimer { get; internal set; }
+        public int Kills { get; internal set; }
+        public List<EnemyState> Enemies { get; } = new List<EnemyState>();
+        public List<BulletState> Bullets { get; } = new List<BulletState>();
+
+        private int _nextEnemyId = 1;
+        private int _nextBulletId = 1;
 
         public bool CanAdvance =>
             Mode == GameMode.Playing
@@ -72,6 +81,25 @@ namespace ProjectVL.Core
         {
             Mode = GameMode.Ended;
             Paused = false;
+        }
+
+        internal int TakeNextEnemyId()
+        {
+            return _nextEnemyId++;
+        }
+
+        internal int TakeNextBulletId()
+        {
+            return _nextBulletId++;
+        }
+
+        internal void ApplyDamage(float damage)
+        {
+            Hp = Math.Max(0f, Hp - Math.Max(0f, damage));
+            if (Hp <= 0f)
+            {
+                EndRun();
+            }
         }
 
         internal void AdvanceTime(float deltaTime)
