@@ -39,6 +39,11 @@ namespace ProjectVL.Systems
             if (reward.Kind == RewardKind.Wildcard)
             {
                 int star = ClampStar(reward.Star);
+                if (star >= _config.maxStar)
+                {
+                    return false;
+                }
+
                 state.Wildcards[star] += Math.Max(0, reward.Count);
                 return true;
             }
@@ -46,19 +51,168 @@ namespace ProjectVL.Systems
             bool grantedAny = false;
             for (int i = 0; i < Math.Max(0, reward.Count); i++)
             {
-                int slot = FindEmpty(state.Hand);
-                if (slot < 0)
-                {
-                    break;
-                }
-
                 string type = RewardCardTypes[_nextRewardType % RewardCardTypes.Length];
                 _nextRewardType++;
-                state.Hand[slot] = state.CreateCard(type, ClampStar(reward.Star));
-                grantedAny = true;
+                grantedAny |= AddCard(state, type, reward.Star);
             }
 
             return grantedAny;
+        }
+
+        public bool AddCard(GameState state, string type, int star)
+        {
+            if (state == null)
+            {
+                return false;
+            }
+
+            int slot = FindEmpty(state.Hand);
+            if (slot < 0)
+            {
+                return false;
+            }
+
+            CardState card = state.CreateCard(type, ClampStar(star));
+            state.Hand[slot] = card;
+            QueueEvolutionChoice(state, card);
+            AutoMergeHand(state);
+            return true;
+        }
+
+        public int AutoMergeHand(GameState state)
+        {
+            if (state == null || state.PendingEvolution != null)
+            {
+                return 0;
+            }
+
+            int merged = 0;
+            bool changed = true;
+            while (changed && state.PendingEvolution == null)
+            {
+                changed = false;
+                for (int i = 0; i < state.Hand.Length; i++)
+                {
+                    CardState first = state.Hand[i];
+                    if (first == null
+                        || first.Provisional
+                        || first.Star >= _config.maxStar)
+                    {
+                        continue;
+                    }
+
+                    for (int j = i + 1; j < state.Hand.Length; j++)
+                    {
+                        CardState second = state.Hand[j];
+                        if (second == null
+                            || second.Provisional
+                            || first.Type != second.Type
+                            || first.Star != second.Star)
+                        {
+                            continue;
+                        }
+
+                        CardState result = state.CreateCard(
+                            first.Type,
+                            first.Star + 1);
+                        result.EvolutionPath.AddRange(first.EvolutionPath);
+                        state.Hand[i] = result;
+                        state.Hand[j] = null;
+                        state.Merges++;
+                        merged++;
+                        QueueEvolutionChoice(state, result);
+                        changed = true;
+                        break;
+                    }
+
+                    if (changed)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return merged;
+        }
+
+        public WildcardUseResult UseWildcard(
+            GameState state,
+            CardSlotKind kind,
+            int index)
+        {
+            if (!IsValidSlot(state, kind, index))
+            {
+                return WildcardUseResult.EmptyTarget;
+            }
+
+            CardState[] slots = Slots(state, kind);
+            CardState target = slots[index];
+            if (target == null)
+            {
+                return WildcardUseResult.EmptyTarget;
+            }
+
+            if (target.Provisional)
+            {
+                return WildcardUseResult.EvolutionPending;
+            }
+
+            if (target.Star >= _config.maxStar)
+            {
+                return WildcardUseResult.MaxStar;
+            }
+
+            if (!state.Wildcards.TryGetValue(target.Star, out int count)
+                || count <= 0)
+            {
+                return WildcardUseResult.MissingWildcard;
+            }
+
+            state.Wildcards[target.Star]--;
+            target.Star++;
+            state.Merges++;
+            QueueEvolutionChoice(state, target);
+            if (kind == CardSlotKind.Hand)
+            {
+                AutoMergeHand(state);
+            }
+
+            return WildcardUseResult.Upgraded;
+        }
+
+        public bool ResolveEvolutionChoice(GameState state, int optionIndex)
+        {
+            EvolutionChoice choice = state?.PendingEvolution;
+            if (choice == null
+                || optionIndex < 0
+                || optionIndex >= choice.Options.Length)
+            {
+                return false;
+            }
+
+            CardState card = FindCardById(state, choice.CardId);
+            if (card == null || !card.Provisional)
+            {
+                return false;
+            }
+
+            string prefix = choice.CheckpointStar + ":";
+            card.EvolutionPath.RemoveAll(
+                entry => entry.StartsWith(
+                    prefix,
+                    StringComparison.Ordinal));
+            card.EvolutionPath.Add(
+                prefix + choice.Options[optionIndex]);
+            card.EvolutionPath.Sort(
+                (left, right) =>
+                    ParseCheckpoint(left).CompareTo(ParseCheckpoint(right)));
+            card.Provisional = false;
+            state.PendingEvolution = null;
+            state.SetDecisionLocked(false);
+
+            QueueNextEvolutionChoice(state);
+            AutoMergeHand(state);
+            return true;
         }
 
         public CardMoveResult MoveOrSwap(
@@ -95,6 +249,13 @@ namespace ProjectVL.Systems
             }
 
             CardState replaced = target[targetIndex];
+            if ((moving.Provisional || replaced?.Provisional == true)
+                && (sourceKind == CardSlotKind.Equipment
+                    || targetKind == CardSlotKind.Equipment))
+            {
+                return CardMoveResult.EvolutionPending;
+            }
+
             if (_config.feedEquipped
                 && targetKind == CardSlotKind.Equipment
                 && replaced != null
@@ -104,6 +265,8 @@ namespace ProjectVL.Systems
             {
                 replaced.Star++;
                 source[sourceIndex] = null;
+                state.Merges++;
+                QueueEvolutionChoice(state, replaced);
                 return CardMoveResult.Fed;
             }
 
@@ -147,9 +310,16 @@ namespace ProjectVL.Systems
 
             target[targetIndex] = moving;
             source[sourceIndex] = replaced;
-            return replaced == null
+            CardMoveResult result = replaced == null
                 ? CardMoveResult.Moved
                 : CardMoveResult.Swapped;
+            if (sourceKind == CardSlotKind.Hand
+                || targetKind == CardSlotKind.Hand)
+            {
+                AutoMergeHand(state);
+            }
+
+            return result;
         }
 
         public bool Consume(GameState state, CardSlotKind kind, int index)
@@ -160,7 +330,7 @@ namespace ProjectVL.Systems
             }
 
             CardState[] slots = Slots(state, kind);
-            if (slots[index] == null)
+            if (slots[index] == null || slots[index].Provisional)
             {
                 return false;
             }
@@ -173,6 +343,112 @@ namespace ProjectVL.Systems
         private int ClampStar(int star)
         {
             return Math.Max(1, Math.Min(_config.maxStar, star));
+        }
+
+        private void QueueNextEvolutionChoice(GameState state)
+        {
+            if (state.PendingEvolution != null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < state.Hand.Length; i++)
+            {
+                if (QueueEvolutionChoice(state, state.Hand[i]))
+                {
+                    return;
+                }
+            }
+
+            for (int i = 0; i < state.Equipment.Length; i++)
+            {
+                if (QueueEvolutionChoice(state, state.Equipment[i]))
+                {
+                    return;
+                }
+            }
+        }
+
+        private static bool QueueEvolutionChoice(
+            GameState state,
+            CardState card)
+        {
+            if (state.PendingEvolution != null || card == null)
+            {
+                return false;
+            }
+
+            int checkpoint = MissingCheckpoint(card, 3)
+                ? 3
+                : MissingCheckpoint(card, 5)
+                    ? 5
+                    : 0;
+            if (checkpoint == 0)
+            {
+                return false;
+            }
+
+            string suffix = checkpoint == 3 ? "" : "2";
+            string[] options =
+            {
+                card.Type + "A" + suffix,
+                card.Type + "B" + suffix,
+                card.Type + "C" + suffix
+            };
+            card.Provisional = true;
+            state.PendingEvolution = new EvolutionChoice(
+                card.Id,
+                card.Type,
+                checkpoint,
+                options);
+            state.SetDecisionLocked(true);
+            return true;
+        }
+
+        private static bool MissingCheckpoint(CardState card, int checkpoint)
+        {
+            if (card.Star < checkpoint)
+            {
+                return false;
+            }
+
+            string prefix = checkpoint + ":";
+            return !card.EvolutionPath.Exists(
+                entry => entry.StartsWith(
+                    prefix,
+                    StringComparison.Ordinal));
+        }
+
+        private static CardState FindCardById(GameState state, int id)
+        {
+            foreach (CardState card in state.Hand)
+            {
+                if (card?.Id == id)
+                {
+                    return card;
+                }
+            }
+
+            foreach (CardState card in state.Equipment)
+            {
+                if (card?.Id == id)
+                {
+                    return card;
+                }
+            }
+
+            return null;
+        }
+
+        private static int ParseCheckpoint(string entry)
+        {
+            int separator = entry.IndexOf(':');
+            return separator > 0
+                && int.TryParse(
+                    entry.Substring(0, separator),
+                    out int checkpoint)
+                ? checkpoint
+                : int.MaxValue;
         }
 
         private static int FindEmpty(CardState[] cards)

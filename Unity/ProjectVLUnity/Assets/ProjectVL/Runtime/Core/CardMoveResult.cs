@@ -10,6 +10,7 @@ namespace ProjectVL.Core
         InvalidSlot,
         StarTooLow,
         DuplicateType,
-        EquipmentLocked
+        EquipmentLocked,
+        EvolutionPending
     }
 }

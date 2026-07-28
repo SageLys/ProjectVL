@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace ProjectVL.Core
 {
@@ -7,6 +8,9 @@ namespace ProjectVL.Core
         public int Id { get; }
         public string Type { get; }
         public int Star { get; internal set; }
+        public bool Provisional { get; internal set; }
+        public List<string> EvolutionPath { get; } =
+            new List<string>();
 
         public CardState(int id, string type, int star)
         {

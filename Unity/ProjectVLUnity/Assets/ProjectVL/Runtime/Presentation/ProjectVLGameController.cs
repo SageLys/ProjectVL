@@ -155,6 +155,48 @@ namespace ProjectVL.Presentation
             LastCardAction = "Added three 3 STAR migration test cards.";
         }
 
+        public void GrantMergeDemo()
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                _cardInventory.AddCard(State, "impact", 1);
+            }
+
+            for (int star = 1; star <= 5; star++)
+            {
+                State.GrantReward(
+                    new RunReward(RewardKind.Wildcard, star, 1, "debug"));
+            }
+
+            LastCardAction =
+                "Added four IMPACT cards and one wildcard per star.";
+        }
+
+        public void UseWildcardOnSelected()
+        {
+            if (_selectedSlotKind == null)
+            {
+                LastCardAction = "Select a card before using a wildcard.";
+                return;
+            }
+
+            WildcardUseResult result = _cardInventory.UseWildcard(
+                State,
+                _selectedSlotKind.Value,
+                _selectedSlotIndex);
+            ClearCardSelection(WildcardActionText(result));
+        }
+
+        public void ChooseEvolution(int optionIndex)
+        {
+            EvolutionChoice choice = State.PendingEvolution;
+            if (_cardInventory.ResolveEvolutionChoice(State, optionIndex))
+            {
+                LastCardAction =
+                    $"Evolution selected: {choice.Options[optionIndex]}.";
+            }
+        }
+
         private void HandleKeyboard()
         {
             if (Input.GetKeyDown(KeyCode.Space) && State.PendingBossReward != null)
@@ -189,6 +231,16 @@ namespace ProjectVL.Presentation
             if (Input.GetKeyDown(KeyCode.C))
             {
                 ConsumeSelectedCard();
+            }
+
+            if (Input.GetKeyDown(KeyCode.M))
+            {
+                GrantMergeDemo();
+            }
+
+            if (Input.GetKeyDown(KeyCode.V))
+            {
+                UseWildcardOnSelected();
             }
 
             for (int i = 0; i < State.Hand.Length && i < 7; i++)
@@ -244,10 +296,29 @@ namespace ProjectVL.Presentation
                     return "Only one card of each type can be equipped.";
                 case CardMoveResult.EquipmentLocked:
                     return "That equipment move is locked.";
+                case CardMoveResult.EvolutionPending:
+                    return "Choose this card's evolution before equipping it.";
                 case CardMoveResult.EmptySource:
                     return "The selected source is empty.";
                 default:
                     return "No card moved.";
+            }
+        }
+
+        private static string WildcardActionText(WildcardUseResult result)
+        {
+            switch (result)
+            {
+                case WildcardUseResult.Upgraded:
+                    return "Wildcard consumed; card upgraded.";
+                case WildcardUseResult.MaxStar:
+                    return "A 6 STAR card cannot be upgraded.";
+                case WildcardUseResult.MissingWildcard:
+                    return "No wildcard matching the card's current star.";
+                case WildcardUseResult.EvolutionPending:
+                    return "Choose the pending evolution first.";
+                default:
+                    return "Select a non-empty card slot.";
             }
         }
 

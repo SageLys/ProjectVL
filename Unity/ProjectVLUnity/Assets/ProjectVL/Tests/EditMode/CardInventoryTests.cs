@@ -175,6 +175,158 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void MatchingHandCardsMergeAutomatically()
+        {
+            _inventory.AddCard(_state, "pierce", 1);
+
+            bool added = _inventory.AddCard(_state, "pierce", 1);
+
+            Assert.That(added, Is.True);
+            Assert.That(_state.Merges, Is.EqualTo(1));
+            Assert.That(_state.Hand, Has.Exactly(1).Not.Null);
+            Assert.That(_state.Hand[0].Star, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void FourMatchingCardsChainMergeAndOfferEvolution()
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                _inventory.AddCard(_state, "frost", 1);
+            }
+
+            Assert.That(_state.Merges, Is.EqualTo(3));
+            Assert.That(_state.Hand, Has.Exactly(1).Not.Null);
+            Assert.That(_state.Hand[0].Star, Is.EqualTo(3));
+            Assert.That(_state.Hand[0].Provisional, Is.True);
+            Assert.That(_state.PendingEvolution, Is.Not.Null);
+            Assert.That(_state.PendingEvolution.CheckpointStar, Is.EqualTo(3));
+            Assert.That(
+                _state.PendingEvolution.Options,
+                Is.EqualTo(new[] { "frostA", "frostB", "frostC" }));
+            Assert.That(_state.DecisionLocked, Is.True);
+        }
+
+        [Test]
+        public void EvolutionChoiceStaysWithCardInstance()
+        {
+            _inventory.AddCard(_state, "impact", 3);
+            int cardId = _state.Hand[0].Id;
+
+            bool resolved = _inventory.ResolveEvolutionChoice(_state, 1);
+
+            Assert.That(resolved, Is.True);
+            Assert.That(_state.Hand[0].Id, Is.EqualTo(cardId));
+            Assert.That(_state.Hand[0].Provisional, Is.False);
+            Assert.That(
+                _state.Hand[0].EvolutionPath,
+                Is.EqualTo(new[] { "3:impactB" }));
+            Assert.That(_state.PendingEvolution, Is.Null);
+            Assert.That(_state.DecisionLocked, Is.False);
+        }
+
+        [Test]
+        public void FiveStarCardOffersSecondEvolutionCheckpoint()
+        {
+            _inventory.AddCard(_state, "sanctum", 5);
+            _inventory.ResolveEvolutionChoice(_state, 0);
+
+            Assert.That(_state.PendingEvolution, Is.Not.Null);
+            Assert.That(_state.PendingEvolution.CheckpointStar, Is.EqualTo(5));
+            Assert.That(
+                _state.PendingEvolution.Options,
+                Is.EqualTo(
+                    new[] { "sanctumA2", "sanctumB2", "sanctumC2" }));
+
+            _inventory.ResolveEvolutionChoice(_state, 2);
+
+            Assert.That(
+                _state.Hand[0].EvolutionPath,
+                Is.EqualTo(
+                    new[] { "3:sanctumA", "5:sanctumC2" }));
+            Assert.That(_state.PendingEvolution, Is.Null);
+        }
+
+        [Test]
+        public void WildcardMustMatchCurrentCardStar()
+        {
+            _inventory.AddCard(_state, "pierce", 2);
+            _state.Wildcards[1] = 2;
+
+            WildcardUseResult result = _inventory.UseWildcard(
+                _state,
+                CardSlotKind.Hand,
+                0);
+
+            Assert.That(result, Is.EqualTo(WildcardUseResult.MissingWildcard));
+            Assert.That(_state.Hand[0].Star, Is.EqualTo(2));
+            Assert.That(_state.Wildcards[1], Is.EqualTo(2));
+        }
+
+        [Test]
+        public void WildcardUpgradeContinuesOrdinaryHandMerges()
+        {
+            _inventory.AddCard(_state, "pierce", 1);
+            _inventory.AddCard(_state, "pierce", 2);
+            _state.Wildcards[1] = 1;
+
+            WildcardUseResult result = _inventory.UseWildcard(
+                _state,
+                CardSlotKind.Hand,
+                0);
+
+            Assert.That(result, Is.EqualTo(WildcardUseResult.Upgraded));
+            Assert.That(_state.Wildcards[1], Is.Zero);
+            Assert.That(_state.Merges, Is.EqualTo(2));
+            Assert.That(_state.Hand, Has.Exactly(1).Not.Null);
+            Assert.That(_state.Hand[0].Star, Is.EqualTo(3));
+            Assert.That(_state.PendingEvolution, Is.Not.Null);
+        }
+
+        [Test]
+        public void ProvisionalCardCannotEquipOrBeConsumed()
+        {
+            _inventory.AddCard(_state, "aegis", 3);
+
+            CardMoveResult move = _inventory.MoveOrSwap(
+                _state,
+                CardSlotKind.Hand,
+                0,
+                CardSlotKind.Equipment,
+                0);
+            bool consumed = _inventory.Consume(
+                _state,
+                CardSlotKind.Hand,
+                0);
+
+            Assert.That(move, Is.EqualTo(CardMoveResult.EvolutionPending));
+            Assert.That(consumed, Is.False);
+            Assert.That(_state.Hand[0], Is.Not.Null);
+        }
+
+        [Test]
+        public void WildcardRejectsMaxStarWithoutConsumption()
+        {
+            _inventory.AddCard(_state, "thorns", 6);
+            _state.Wildcards[5] = 1;
+
+            WildcardUseResult result = _inventory.UseWildcard(
+                _state,
+                CardSlotKind.Hand,
+                0);
+
+            Assert.That(result, Is.EqualTo(WildcardUseResult.EvolutionPending));
+            _inventory.ResolveEvolutionChoice(_state, 0);
+            _inventory.ResolveEvolutionChoice(_state, 0);
+            result = _inventory.UseWildcard(
+                _state,
+                CardSlotKind.Hand,
+                0);
+            Assert.That(result, Is.EqualTo(WildcardUseResult.MaxStar));
+            Assert.That(_state.Wildcards[5], Is.EqualTo(1));
+        }
+
+        [Test]
         public void FullHandDoesNotOverwriteExistingCards()
         {
             for (int i = 0; i < _state.Hand.Length; i++)

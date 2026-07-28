@@ -27,6 +27,8 @@ namespace ProjectVL.Core
         public Dictionary<int, int> Wildcards { get; } =
             new Dictionary<int, int>();
         public int ConsumedCards { get; internal set; }
+        public int Merges { get; internal set; }
+        public EvolutionChoice PendingEvolution { get; internal set; }
         public float IntermissionRemaining { get; internal set; }
         public bool IntermissionReady { get; internal set; }
         public float ShotCooldown { get; set; }

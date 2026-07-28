@@ -38,7 +38,8 @@ namespace ProjectVL.Presentation
             GUI.Label(
                 new Rect(24f, 49f, 285f, 26f),
                 $"HP {state.Hp:0}/{state.MaxHp:0}   WAVE {state.Wave} "
-                + $"{state.WavePhase.ToString().ToUpperInvariant()}   KILLS {state.Kills}",
+                + $"{state.WavePhase.ToString().ToUpperInvariant()}   "
+                + $"KILLS {state.Kills}   MERGES {state.Merges}",
                 _hudStyle);
         }
 
@@ -88,6 +89,12 @@ namespace ProjectVL.Presentation
         private void DrawCenterPanel()
         {
             GameState state = _controller.State;
+            if (state.PendingEvolution != null)
+            {
+                DrawEvolutionPanel(state.PendingEvolution);
+                return;
+            }
+
             if (state.PendingBossReward != null)
             {
                 DrawRewardPanel(state.PendingBossReward);
@@ -152,6 +159,48 @@ namespace ProjectVL.Presentation
             }
         }
 
+        private void DrawEvolutionPanel(EvolutionChoice choice)
+        {
+            const float width = 560f;
+            const float height = 238f;
+            Rect panel = new Rect(
+                (Screen.width - width) / 2f,
+                (Screen.height - height) / 2f,
+                width,
+                height);
+            GUI.Box(panel, GUIContent.none);
+            GUI.Label(
+                new Rect(panel.x + 20f, panel.y + 18f, panel.width - 40f, 42f),
+                $"{choice.CheckpointStar} STAR EVOLUTION",
+                _centerStyle);
+            GUI.Label(
+                new Rect(panel.x + 20f, panel.y + 62f, panel.width - 40f, 30f),
+                $"Choose a route for {CardDisplayName(choice.CardType)}",
+                _hudStyle);
+
+            float optionWidth = (panel.width - 64f) / 3f;
+            for (int i = 0; i < choice.Options.Length && i < 3; i++)
+            {
+                string label = $"{(char)('A' + i)}\n{RouteLabel(choice.Options[i])}";
+                if (GUI.Button(
+                    new Rect(
+                        panel.x + 20f + i * (optionWidth + 12f),
+                        panel.y + 105f,
+                        optionWidth,
+                        92f),
+                    label,
+                    _buttonStyle))
+                {
+                    _controller.ChooseEvolution(i);
+                }
+            }
+
+            GUI.Label(
+                new Rect(panel.x + 20f, panel.y + 204f, panel.width - 40f, 24f),
+                "The selected route stays with this card instance.",
+                _hudStyle);
+        }
+
         private void DrawCardLoadout()
         {
             GameState state = _controller.State;
@@ -209,7 +258,7 @@ namespace ProjectVL.Presentation
             }
 
             float actionX = Screen.width - 258f;
-            GUI.Box(new Rect(actionX, 152f, 246f, 148f), GUIContent.none);
+            GUI.Box(new Rect(actionX, 152f, 246f, 194f), GUIContent.none);
             GUI.Label(
                 new Rect(actionX + 10f, 159f, 226f, 46f),
                 _controller.LastCardAction,
@@ -230,8 +279,24 @@ namespace ProjectVL.Presentation
                 _controller.GrantTestCards();
             }
 
+            if (GUI.Button(
+                new Rect(actionX + 10f, 253f, 108f, 36f),
+                "WILDCARD [V]",
+                _buttonStyle))
+            {
+                _controller.UseWildcardOnSelected();
+            }
+
+            if (GUI.Button(
+                new Rect(actionX + 128f, 253f, 108f, 36f),
+                "MERGE DEMO [M]",
+                _buttonStyle))
+            {
+                _controller.GrantMergeDemo();
+            }
+
             GUI.Label(
-                new Rect(actionX + 10f, 254f, 226f, 38f),
+                new Rect(actionX + 10f, 298f, 226f, 38f),
                 WildcardText(state),
                 _hudStyle);
         }
@@ -248,7 +313,9 @@ namespace ProjectVL.Presentation
             CardState card = slots[index];
             string text = card == null
                 ? $"{shortcut}\nEMPTY"
-                : $"{shortcut}  {card.Star} STAR\n{CardDisplayName(card.Type)}";
+                : $"{shortcut}  {card.Star} STAR"
+                    + $"{(card.Provisional ? " ?" : "")}\n"
+                    + CardDisplayName(card.Type);
 
             Color previous = GUI.backgroundColor;
             if (_controller.IsCardSlotSelected(kind, index))
@@ -288,6 +355,31 @@ namespace ProjectVL.Presentation
                     return "SPLIT";
                 default:
                     return type.ToUpperInvariant();
+            }
+        }
+
+        private static string RouteLabel(string option)
+        {
+            if (string.IsNullOrEmpty(option))
+            {
+                return "UNKNOWN";
+            }
+
+            char branch = option.EndsWith("A")
+                || option.EndsWith("A2")
+                    ? 'A'
+                    : option.EndsWith("B")
+                        || option.EndsWith("B2")
+                            ? 'B'
+                            : 'C';
+            switch (branch)
+            {
+                case 'A':
+                    return "POWER";
+                case 'B':
+                    return "FOCUS";
+                default:
+                    return "UTILITY";
             }
         }
 
