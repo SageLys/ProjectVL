@@ -49,7 +49,18 @@
       "color": "#596371",
       "damage": 28,
       "xp": 5,
-      "sides": 8
+      "sides": 8,
+      "contactDps": 14
     }
+  },
+  "bossBehavior": {
+    "orbitStartRangeRatio": 1.0,
+    "orbitStartMaxDistance": 180,
+    "curveStrength": 0.65,
+    "contactDistance": 48,
+    "contactExitDistance": 60,
+    "contactWarmup": 0.4,
+    "contactTickInterval": 0.5,
+    "hardControlPausesDamage": true
   }
 }

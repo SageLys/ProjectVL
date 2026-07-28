@@ -35,14 +35,14 @@ namespace ProjectVL.Tests
             waves.StartNextWave(_state);
 
             Assert.That(_state.Wave, Is.EqualTo(1));
-            Assert.That(_state.SpawnLeft, Is.EqualTo(8));
+            Assert.That(_state.SpawnLeft, Is.EqualTo(60));
             Assert.That(_state.SpawnTimer, Is.EqualTo(0.4f).Within(0.00001f));
         }
 
         [Test]
         public void TurretTargetsNearestEnemyInsideRange()
         {
-            var combat = new CombatSystem(_combat);
+            var combat = new CombatSystem(_combat, _enemies);
             _state.Enemies.Add(CreateEnemy(1, 100f, 0f));
             _state.Enemies.Add(CreateEnemy(2, 50f, 0f));
 
@@ -54,7 +54,7 @@ namespace ProjectVL.Tests
         [Test]
         public void ProjectileDamagesAndKillsEnemy()
         {
-            var combat = new CombatSystem(_combat);
+            var combat = new CombatSystem(_combat, _enemies);
             EnemyState enemy = CreateEnemy(1, 100f, 0f, hp: 18f);
             _state.Enemies.Add(enemy);
 
@@ -69,7 +69,7 @@ namespace ProjectVL.Tests
         [Test]
         public void EnemyBreachReducesPlayerHealth()
         {
-            var combat = new CombatSystem(_combat);
+            var combat = new CombatSystem(_combat, _enemies);
             EnemyState enemy = CreateEnemy(1, 49f, 0f, damage: 8f, speed: 26f);
             _state.Enemies.Add(enemy);
 

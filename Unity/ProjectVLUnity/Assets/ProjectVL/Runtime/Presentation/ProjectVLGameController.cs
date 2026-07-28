@@ -26,7 +26,7 @@ namespace ProjectVL.Presentation
             var random = new SystemRandomSource(System.Environment.TickCount);
             var enemyFactory = new EnemyFactory(combat, enemies, waves, random);
             _waveSystem = new WaveSystem(waves, enemyFactory);
-            var combatSystem = new CombatSystem(combat);
+            var combatSystem = new CombatSystem(combat, enemies);
 
             _world = new CombatWorld(combatSystem, _waveSystem);
             _simulation = new GameSimulation(state, combat);

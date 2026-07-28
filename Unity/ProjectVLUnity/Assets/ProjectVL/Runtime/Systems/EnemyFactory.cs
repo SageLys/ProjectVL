@@ -56,6 +56,26 @@ namespace ProjectVL.Systems
             return enemy;
         }
 
+        public EnemyState SpawnWaveBoss(GameState state)
+        {
+            EnemyTypeConfig definition = _enemies.Get(EnemyKind.Boss);
+            float hp = definition.hpBase + state.Wave * definition.hpPerWave;
+            float speed = definition.speedBase + state.Wave * definition.speedPerWave;
+            var boss = new EnemyState(
+                state.TakeNextEnemyId(),
+                EnemyKind.Boss,
+                RandomEdgePosition(),
+                hp,
+                speed,
+                definition.r,
+                definition.damage,
+                EnemySpawnKind.WaveBoss,
+                definition.contactDps);
+            boss.ContactTickRemaining = _enemies.bossBehavior.contactWarmup;
+            state.Enemies.Add(boss);
+            return boss;
+        }
+
         private Float2 RandomEdgePosition()
         {
             int side = Math.Min(3, (int)(_random.NextFloat() * 4f));

@@ -36,7 +36,8 @@ namespace ProjectVL.Presentation
             GUI.Label(new Rect(24f, 19f, 280f, 28f), "PROJECT VL · TUANJIE", _titleStyle);
             GUI.Label(
                 new Rect(24f, 49f, 285f, 26f),
-                $"HP {state.Hp:0}/{state.MaxHp:0}   WAVE {state.Wave}   KILLS {state.Kills}",
+                $"HP {state.Hp:0}/{state.MaxHp:0}   WAVE {state.Wave} "
+                + $"{state.WavePhase.ToString().ToUpperInvariant()}   KILLS {state.Kills}",
                 _hudStyle);
         }
 

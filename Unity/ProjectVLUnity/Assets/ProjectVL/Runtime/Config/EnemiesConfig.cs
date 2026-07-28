@@ -8,6 +8,7 @@ namespace ProjectVL.Config
     {
         public EnemyDefaults defaults = new EnemyDefaults();
         public EnemyTypes types = new EnemyTypes();
+        public BossBehaviorConfig bossBehavior = new BossBehaviorConfig();
 
         public EnemyTypeConfig Get(EnemyKind kind)
         {
@@ -55,5 +56,19 @@ namespace ProjectVL.Config
         public float damage;
         public int xp;
         public int sides;
+        public float contactDps;
+    }
+
+    [Serializable]
+    public sealed class BossBehaviorConfig
+    {
+        public float orbitStartRangeRatio;
+        public float orbitStartMaxDistance;
+        public float curveStrength;
+        public float contactDistance;
+        public float contactExitDistance;
+        public float contactWarmup;
+        public float contactTickInterval;
+        public bool hardControlPausesDamage;
     }
 }

@@ -10,6 +10,12 @@ namespace ProjectVL.Core
         public float Speed { get; }
         public float Radius { get; }
         public float Damage { get; }
+        public float ContactDps { get; }
+        public EnemySpawnKind SpawnKind { get; }
+        public BossPhase BossPhase { get; set; }
+        public int OrbitDirection { get; }
+        public float ContactTickRemaining { get; set; }
+        public float ContactAngleRadians { get; set; }
 
         public EnemyState(
             int id,
@@ -18,7 +24,9 @@ namespace ProjectVL.Core
             float hp,
             float speed,
             float radius,
-            float damage)
+            float damage,
+            EnemySpawnKind spawnKind = EnemySpawnKind.Regular,
+            float contactDps = 0f)
         {
             Id = id;
             Kind = kind;
@@ -28,6 +36,10 @@ namespace ProjectVL.Core
             Speed = speed;
             Radius = radius;
             Damage = damage;
+            SpawnKind = spawnKind;
+            ContactDps = contactDps;
+            BossPhase = BossPhase.Approach;
+            OrbitDirection = id % 2 == 0 ? 1 : -1;
         }
     }
 }

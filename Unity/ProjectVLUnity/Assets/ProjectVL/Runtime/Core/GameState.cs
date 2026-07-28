@@ -15,6 +15,9 @@ namespace ProjectVL.Core
         public float MaxHp { get; private set; }
         public int Wave { get; private set; }
         public bool? Won { get; private set; }
+        public WavePhase WavePhase { get; internal set; } = WavePhase.Regular;
+        public int? BossId { get; internal set; }
+        public int LastSpawnCheckCount { get; internal set; }
         public float ShotCooldown { get; set; }
         public float TurretAngleRadians { get; set; }
         public int SpawnLeft { get; internal set; }
@@ -76,6 +79,9 @@ namespace ProjectVL.Core
 
             Wave = wave;
             IntermissionActive = false;
+            WavePhase = WavePhase.Regular;
+            BossId = null;
+            LastSpawnCheckCount = 0;
         }
 
         public void EndRun(bool won = false)

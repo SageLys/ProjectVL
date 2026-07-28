@@ -7,10 +7,12 @@ namespace ProjectVL.Systems
     public sealed class CombatSystem
     {
         private readonly CombatConfig _combat;
+        private readonly EnemiesConfig _enemies;
 
-        public CombatSystem(CombatConfig combat)
+        public CombatSystem(CombatConfig combat, EnemiesConfig enemies)
         {
             _combat = combat;
+            _enemies = enemies;
         }
 
         public void StepTurret(GameState state, float deltaTime)
@@ -84,6 +86,12 @@ namespace ProjectVL.Systems
             for (int index = state.Enemies.Count - 1; index >= 0; index--)
             {
                 EnemyState enemy = state.Enemies[index];
+                if (enemy.SpawnKind == EnemySpawnKind.WaveBoss)
+                {
+                    StepBoss(state, enemy, deltaTime);
+                    continue;
+                }
+
                 Float2 toTurret = turret - enemy.Position;
                 enemy.Position += toTurret.Normalized()
                     * enemy.Speed
@@ -96,6 +104,98 @@ namespace ProjectVL.Systems
 
                 state.Enemies.RemoveAt(index);
                 state.ApplyDamage(enemy.Damage);
+            }
+        }
+
+        private void StepBoss(GameState state, EnemyState boss, float deltaTime)
+        {
+            if (boss.BossPhase == BossPhase.Contact)
+            {
+                StepBossContact(state, boss, deltaTime);
+                return;
+            }
+
+            BossBehaviorConfig behavior = _enemies.bossBehavior;
+            Float2 turret = TurretPosition;
+            Float2 toTurret = turret - boss.Position;
+            float turretDistance = toTurret.Length;
+            if (turretDistance <= behavior.contactDistance)
+            {
+                EnterBossContact(boss, turret);
+                return;
+            }
+
+            Float2 direction = toTurret.Normalized();
+            float orbitStart = Math.Min(
+                _combat.defaults.range * behavior.orbitStartRangeRatio,
+                behavior.orbitStartMaxDistance);
+            float curveSpan = orbitStart - behavior.contactDistance;
+            if (turretDistance <= orbitStart && curveSpan > 0f)
+            {
+                float progress = Math.Max(
+                    0f,
+                    Math.Min(1f, (turretDistance - behavior.contactDistance) / curveSpan));
+                float curveWeight = (float)Math.Sin(Math.PI * progress)
+                    * behavior.curveStrength;
+                var tangent = new Float2(
+                    -direction.Y * boss.OrbitDirection,
+                    direction.X * boss.OrbitDirection);
+                direction = (direction + tangent * curveWeight).Normalized();
+            }
+
+            float step = boss.Speed * _enemies.defaults.enemySpeed * deltaTime;
+            if (step + 0.000001f >= turretDistance - behavior.contactDistance)
+            {
+                EnterBossContact(boss, turret);
+                return;
+            }
+
+            boss.Position += direction * step;
+        }
+
+        private void EnterBossContact(EnemyState boss, Float2 turret)
+        {
+            BossBehaviorConfig behavior = _enemies.bossBehavior;
+            Float2 fromTurret = boss.Position - turret;
+            boss.ContactAngleRadians = fromTurret.Length > 0f
+                ? (float)Math.Atan2(fromTurret.Y, fromTurret.X)
+                : boss.ContactAngleRadians;
+            boss.Position = turret + new Float2(
+                (float)Math.Cos(boss.ContactAngleRadians),
+                (float)Math.Sin(boss.ContactAngleRadians))
+                * behavior.contactDistance;
+            boss.BossPhase = BossPhase.Contact;
+            boss.ContactTickRemaining = behavior.contactWarmup;
+        }
+
+        private void StepBossContact(GameState state, EnemyState boss, float deltaTime)
+        {
+            BossBehaviorConfig behavior = _enemies.bossBehavior;
+            Float2 turret = TurretPosition;
+            Float2 fromTurret = boss.Position - turret;
+            if (fromTurret.Length > behavior.contactExitDistance)
+            {
+                boss.BossPhase = BossPhase.Approach;
+                return;
+            }
+
+            if (fromTurret.Length > 0f)
+            {
+                boss.ContactAngleRadians = (float)Math.Atan2(
+                    fromTurret.Y,
+                    fromTurret.X);
+            }
+
+            boss.Position = turret + new Float2(
+                (float)Math.Cos(boss.ContactAngleRadians),
+                (float)Math.Sin(boss.ContactAngleRadians))
+                * behavior.contactDistance;
+            boss.ContactTickRemaining -= deltaTime;
+            while (boss.ContactTickRemaining <= 0f
+                && state.Mode == GameMode.Playing)
+            {
+                boss.ContactTickRemaining += behavior.contactTickInterval;
+                state.ApplyDamage(boss.ContactDps * behavior.contactTickInterval);
             }
         }
 

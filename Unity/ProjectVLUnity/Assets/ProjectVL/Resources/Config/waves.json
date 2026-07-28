@@ -1,5 +1,6 @@
 {
   "totalWaves": 10,
+  "spawnMode": "budget",
   "enemyCountBase": 5,
   "enemyCountPerWave": 3,
   "firstSpawnDelay": 0.4,
@@ -8,10 +9,81 @@
     "perWave": 0.05,
     "min": 0.28
   },
+  "budget": {
+    "waveQuota": {
+      "base": 51,
+      "perWave": 52
+    },
+    "targetOnScreen": {
+      "base": 5,
+      "perWave": 10
+    },
+    "checkInterval": 1.95,
+    "batchMax": 10,
+    "waveEndSprint": {
+      "window": 7,
+      "multiplier": 3
+    },
+    "maxAlive": 100
+  },
+  "stagePlan": {
+    "selectionWaves": 3,
+    "validationWaves": 2,
+    "selection": {
+      "waveQuota": {
+        "start": 60,
+        "end": 75,
+        "power": 1
+      },
+      "targetOnScreen": {
+        "start": 7,
+        "end": 10,
+        "power": 1
+      },
+      "checkInterval": 1.95,
+      "batchMax": 6,
+      "maxAlive": 24,
+      "waveEndSprint": {
+        "window": 0,
+        "multiplier": 1
+      }
+    },
+    "build": {
+      "waveQuota": {
+        "start": 95,
+        "end": 170,
+        "power": 1
+      },
+      "targetOnScreen": {
+        "start": 14,
+        "end": 28,
+        "power": 1
+      },
+      "checkInterval": 1.95,
+      "batchMax": 10,
+      "maxAlive": 40,
+      "waveEndSprint": {
+        "window": 5,
+        "multiplier": 1.5
+      }
+    }
+  },
   "spawnMargin": 25,
   "typeRoll": {
     "tankBase": 0.2,
     "tankPerWave": 0.025,
     "fastThreshold": 0.47
-  }
+  },
+  "bossWaves": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ]
 }
