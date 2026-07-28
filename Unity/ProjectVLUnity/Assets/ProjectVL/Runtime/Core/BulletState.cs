@@ -31,11 +31,28 @@ namespace ProjectVL.Core
         public float DotDamageRatio { get; }
         public float DotDuration { get; }
         public float DotTickInterval { get; }
+        public float SecondaryDotDamageRatio { get; }
+        public float SecondaryDotDuration { get; }
+        public float SecondaryDotTickInterval { get; }
+        public float DotAreaRadius { get; }
+        public float DotAreaVulnerableRatio { get; }
+        public float DotAreaVulnerableDuration { get; }
+        public float DotHitVulnerableRatio { get; }
+        public float DotHitVulnerableDuration { get; }
         public int SplitCount { get; }
         public float SplitDamageRatio { get; }
+        public int RecursiveSplitCount { get; }
+        public float RecursiveSplitDamageRatio { get; }
         public float SplashRadius { get; }
         public float SplashDamageRatio { get; }
+        public float SecondarySplashRadius { get; }
+        public float SecondarySplashDamageRatio { get; }
+        public float HitAreaKnockbackRadius { get; }
+        public float HitAreaKnockbackDistance { get; }
         public float KnockbackDistance { get; }
+        public float KnockbackCollisionDamageRatio { get; }
+        public float OnHitStunDuration { get; }
+        public float OnHitStunCooldown { get; }
         public HashSet<int> HitEnemyIds { get; } = new HashSet<int>();
 
         public BulletState(
@@ -78,11 +95,39 @@ namespace ProjectVL.Core
             DotDamageRatio = profile.DotDamageRatio;
             DotDuration = profile.DotDuration;
             DotTickInterval = profile.DotTickInterval;
+            SecondaryDotDamageRatio =
+                profile.SecondaryDotDamageRatio;
+            SecondaryDotDuration = profile.SecondaryDotDuration;
+            SecondaryDotTickInterval =
+                profile.SecondaryDotTickInterval;
+            DotAreaRadius = profile.DotAreaRadius;
+            DotAreaVulnerableRatio =
+                profile.DotAreaVulnerableRatio;
+            DotAreaVulnerableDuration =
+                profile.DotAreaVulnerableDuration;
+            DotHitVulnerableRatio =
+                profile.DotHitVulnerableRatio;
+            DotHitVulnerableDuration =
+                profile.DotHitVulnerableDuration;
             SplitCount = profile.SplitCount;
             SplitDamageRatio = profile.SplitDamageRatio;
+            RecursiveSplitCount = profile.RecursiveSplitCount;
+            RecursiveSplitDamageRatio =
+                profile.RecursiveSplitDamageRatio;
             SplashRadius = profile.SplashRadius;
             SplashDamageRatio = profile.SplashDamageRatio;
+            SecondarySplashRadius = profile.SecondarySplashRadius;
+            SecondarySplashDamageRatio =
+                profile.SecondarySplashDamageRatio;
+            HitAreaKnockbackRadius =
+                profile.HitAreaKnockbackRadius;
+            HitAreaKnockbackDistance =
+                profile.HitAreaKnockbackDistance;
             KnockbackDistance = profile.KnockbackDistance;
+            KnockbackCollisionDamageRatio =
+                profile.KnockbackCollisionDamageRatio;
+            OnHitStunDuration = profile.OnHitStunDuration;
+            OnHitStunCooldown = profile.OnHitStunCooldown;
         }
     }
 }

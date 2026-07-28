@@ -86,6 +86,28 @@ namespace ProjectVL.Systems
                 }
             }
 
+            state.ImpactBreachCooldownRemaining = Math.Max(
+                0f,
+                state.ImpactBreachCooldownRemaining - deltaTime);
+            state.ImpactHitCooldownRemaining = Math.Max(
+                0f,
+                state.ImpactHitCooldownRemaining - deltaTime);
+            if (profile.ImpactPulseInterval > 0f)
+            {
+                state.ImpactPulseRemaining -= deltaTime;
+                if (state.ImpactPulseRemaining <= 0f)
+                {
+                    ApplyAreaKnockback(
+                        state,
+                        TurretPosition,
+                        profile.ImpactPulseRadius,
+                        profile.ImpactPulseKnockback,
+                        0f);
+                    state.ImpactPulseRemaining =
+                        profile.ImpactPulseInterval;
+                }
+            }
+
             ApplySanctumAura(state, profile);
         }
 
@@ -116,6 +138,7 @@ namespace ProjectVL.Systems
                     Float2 hitPosition = enemy.Position;
                     DamageEnemy(state, enemy, bullet.Damage);
                     ApplyStatusEffects(enemy, bullet);
+                    ApplyOnHitStun(state, enemy, bullet);
                     ApplyImpactAndSplitEffects(
                         state,
                         bullet,
@@ -167,7 +190,8 @@ namespace ProjectVL.Systems
                     continue;
                 }
 
-                if (enemy.FrozenRemaining > 0f)
+                if (enemy.FrozenRemaining > 0f
+                    || enemy.StunnedRemaining > 0f)
                 {
                     continue;
                 }
@@ -266,6 +290,8 @@ namespace ProjectVL.Systems
                 return;
             }
 
+            bool hadDot = enemy.DotRemaining > 0f
+                || enemy.SecondaryDotRemaining > 0f;
             if (bullet.SlowRatio > 0f)
             {
                 enemy.SlowRatio = Math.Max(
@@ -309,6 +335,26 @@ namespace ProjectVL.Systems
                     bullet.FrozenHitVulnerableDuration);
             }
 
+            if (bullet.DotAreaVulnerableRatio > 0f)
+            {
+                enemy.VulnerableRatio = Math.Max(
+                    enemy.VulnerableRatio,
+                    bullet.DotAreaVulnerableRatio);
+                enemy.VulnerableRemaining = Math.Max(
+                    enemy.VulnerableRemaining,
+                    bullet.DotAreaVulnerableDuration);
+            }
+
+            if (hadDot && bullet.DotHitVulnerableRatio > 0f)
+            {
+                enemy.VulnerableRatio = Math.Max(
+                    enemy.VulnerableRatio,
+                    bullet.DotHitVulnerableRatio);
+                enemy.VulnerableRemaining = Math.Max(
+                    enemy.VulnerableRemaining,
+                    bullet.DotHitVulnerableDuration);
+            }
+
             if (bullet.DotDamageRatio > 0f)
             {
                 enemy.DotDamagePerTick = Math.Max(
@@ -319,6 +365,20 @@ namespace ProjectVL.Systems
                 enemy.DotRemaining = Math.Max(
                     enemy.DotRemaining,
                     bullet.DotDuration);
+            }
+
+            if (bullet.SecondaryDotDamageRatio > 0f)
+            {
+                enemy.SecondaryDotDamagePerTick = Math.Max(
+                    enemy.SecondaryDotDamagePerTick,
+                    bullet.Damage * bullet.SecondaryDotDamageRatio);
+                enemy.SecondaryDotTickInterval =
+                    bullet.SecondaryDotTickInterval;
+                enemy.SecondaryDotTickRemaining =
+                    bullet.SecondaryDotTickInterval;
+                enemy.SecondaryDotRemaining = Math.Max(
+                    enemy.SecondaryDotRemaining,
+                    bullet.SecondaryDotDuration);
             }
         }
 
@@ -334,6 +394,10 @@ namespace ProjectVL.Systems
                 Float2 direction =
                     (primary.Position - TurretPosition).Normalized();
                 primary.Position += direction * bullet.KnockbackDistance;
+                ApplyKnockbackCollision(
+                    state,
+                    primary,
+                    bullet);
             }
 
             if (bullet.SplashRadius > 0f
@@ -346,6 +410,35 @@ namespace ProjectVL.Systems
                     bullet.Damage * bullet.SplashDamageRatio,
                     primaryEnemyId,
                     0f,
+                    0f);
+            }
+
+            if (bullet.SecondarySplashRadius > 0f
+                && bullet.SecondarySplashDamageRatio > 0f)
+            {
+                DamageArea(
+                    state,
+                    hitPosition,
+                    bullet.SecondarySplashRadius,
+                    bullet.Damage
+                        * bullet.SecondarySplashDamageRatio,
+                    primaryEnemyId,
+                    0f,
+                    0f);
+            }
+
+            ApplyDotArea(
+                state,
+                bullet,
+                hitPosition,
+                primaryEnemyId);
+            if (bullet.HitAreaKnockbackRadius > 0f)
+            {
+                ApplyAreaKnockback(
+                    state,
+                    hitPosition,
+                    bullet.HitAreaKnockbackRadius,
+                    bullet.HitAreaKnockbackDistance,
                     0f);
             }
 
@@ -371,11 +464,167 @@ namespace ProjectVL.Systems
                 }
 
                 excluded.Add(target.Id);
+                Float2 splitOrigin = target.Position;
                 DamageEnemy(
                     state,
                     target,
                     bullet.Damage * bullet.SplitDamageRatio);
+                ApplyRecursiveSplits(
+                    state,
+                    bullet,
+                    splitOrigin,
+                    excluded);
             }
+        }
+
+        private void ApplyRecursiveSplits(
+            GameState state,
+            BulletState bullet,
+            Float2 origin,
+            System.Collections.Generic.HashSet<int> excludedIds)
+        {
+            if (bullet.RecursiveSplitCount <= 0
+                || bullet.RecursiveSplitDamageRatio <= 0f)
+            {
+                return;
+            }
+
+            for (int index = 0;
+                index < bullet.RecursiveSplitCount;
+                index++)
+            {
+                EnemyState target = FindClosestChainTarget(
+                    state,
+                    origin,
+                    140f,
+                    excludedIds);
+                if (target == null)
+                {
+                    break;
+                }
+
+                excludedIds.Add(target.Id);
+                DamageEnemy(
+                    state,
+                    target,
+                    bullet.Damage
+                        * bullet.SplitDamageRatio
+                        * bullet.RecursiveSplitDamageRatio);
+            }
+        }
+
+        private void ApplyDotArea(
+            GameState state,
+            BulletState bullet,
+            Float2 center,
+            int primaryEnemyId)
+        {
+            if (bullet.DotAreaRadius <= 0f)
+            {
+                return;
+            }
+
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                if (enemy.Id == primaryEnemyId
+                    || Float2.Distance(
+                        center,
+                        enemy.Position) > bullet.DotAreaRadius)
+                {
+                    continue;
+                }
+
+                if (bullet.DotDamageRatio > 0f)
+                {
+                    enemy.DotDamagePerTick = Math.Max(
+                        enemy.DotDamagePerTick,
+                        bullet.Damage * bullet.DotDamageRatio);
+                    enemy.DotTickInterval = bullet.DotTickInterval;
+                    enemy.DotTickRemaining = bullet.DotTickInterval;
+                    enemy.DotRemaining = Math.Max(
+                        enemy.DotRemaining,
+                        bullet.DotDuration);
+                }
+
+                if (bullet.SlowRatio > 0f)
+                {
+                    enemy.SlowRatio = Math.Max(
+                        enemy.SlowRatio,
+                        bullet.SlowRatio);
+                    enemy.SlowRemaining = Math.Max(
+                        enemy.SlowRemaining,
+                        bullet.SlowDuration);
+                }
+
+                if (bullet.DotAreaVulnerableRatio > 0f)
+                {
+                    enemy.VulnerableRatio = Math.Max(
+                        enemy.VulnerableRatio,
+                        bullet.DotAreaVulnerableRatio);
+                    enemy.VulnerableRemaining = Math.Max(
+                        enemy.VulnerableRemaining,
+                        bullet.DotAreaVulnerableDuration);
+                }
+            }
+        }
+
+        private void ApplyKnockbackCollision(
+            GameState state,
+            EnemyState primary,
+            BulletState bullet)
+        {
+            if (bullet.KnockbackCollisionDamageRatio <= 0f)
+            {
+                return;
+            }
+
+            EnemyState collided = null;
+            float closestDistance = float.MaxValue;
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                if (enemy.Id == primary.Id)
+                {
+                    continue;
+                }
+
+                float distance = Float2.Distance(
+                    primary.Position,
+                    enemy.Position);
+                if (distance <= primary.Radius + enemy.Radius
+                    && distance < closestDistance)
+                {
+                    collided = enemy;
+                    closestDistance = distance;
+                }
+            }
+
+            if (collided != null)
+            {
+                DamageEnemy(
+                    state,
+                    collided,
+                    bullet.Damage
+                        * bullet.KnockbackCollisionDamageRatio);
+            }
+        }
+
+        private static void ApplyOnHitStun(
+            GameState state,
+            EnemyState enemy,
+            BulletState bullet)
+        {
+            if (enemy.Hp <= 0f
+                || bullet.OnHitStunDuration <= 0f
+                || state.ImpactHitCooldownRemaining > 0f)
+            {
+                return;
+            }
+
+            enemy.StunnedRemaining = Math.Max(
+                enemy.StunnedRemaining,
+                bullet.OnHitStunDuration);
+            state.ImpactHitCooldownRemaining =
+                bullet.OnHitStunCooldown;
         }
 
         private static EnemyState FindEnemyById(
@@ -552,6 +801,9 @@ namespace ProjectVL.Systems
             enemy.FrozenRemaining = Math.Max(
                 0f,
                 enemy.FrozenRemaining - deltaTime);
+            enemy.StunnedRemaining = Math.Max(
+                0f,
+                enemy.StunnedRemaining - deltaTime);
             enemy.VulnerableRemaining = Math.Max(
                 0f,
                 enemy.VulnerableRemaining - deltaTime);
@@ -577,6 +829,26 @@ namespace ProjectVL.Systems
                 }
             }
 
+            if (enemy.SecondaryDotRemaining > 0f)
+            {
+                enemy.SecondaryDotRemaining = Math.Max(
+                    0f,
+                    enemy.SecondaryDotRemaining - deltaTime);
+                enemy.SecondaryDotTickRemaining -= deltaTime;
+                while (enemy.SecondaryDotTickRemaining <= 0f
+                    && enemy.SecondaryDotRemaining > 0f
+                    && enemy.Hp > 0f)
+                {
+                    enemy.SecondaryDotTickRemaining += Math.Max(
+                        0.01f,
+                        enemy.SecondaryDotTickInterval);
+                    DamageEnemy(
+                        state,
+                        enemy,
+                        enemy.SecondaryDotDamagePerTick);
+                }
+            }
+
             return state.Enemies.Contains(enemy);
         }
 
@@ -592,6 +864,10 @@ namespace ProjectVL.Systems
                 profile.WaveStartFireRateMultiplier;
             state.FireRateBuffRemaining =
                 profile.WaveStartFireRateDuration;
+            state.ImpactBreachCooldownRemaining = 0f;
+            state.ImpactHitCooldownRemaining = 0f;
+            state.ImpactPulseRemaining =
+                profile.ImpactPulseInterval;
 
             state.DecoyActive = profile.DecoyHp > 0f;
             state.DecoyMaxHp = profile.DecoyHp;
@@ -670,6 +946,27 @@ namespace ProjectVL.Systems
                 incomingDamage
                 * (1f - profile.BreachReductionRatio));
             ApplyBreachReaction(state, profile);
+            ApplyImpactBreachReaction(state, profile);
+        }
+
+        private void ApplyImpactBreachReaction(
+            GameState state,
+            CardCombatProfile profile)
+        {
+            if (profile.ImpactBreachRadius <= 0f
+                || state.ImpactBreachCooldownRemaining > 0f)
+            {
+                return;
+            }
+
+            ApplyAreaKnockback(
+                state,
+                TurretPosition,
+                profile.ImpactBreachRadius,
+                profile.ImpactBreachKnockback,
+                profile.ImpactBreachStunDuration);
+            state.ImpactBreachCooldownRemaining =
+                profile.ImpactBreachCooldown;
         }
 
         private void ApplyBreachReaction(
@@ -776,6 +1073,29 @@ namespace ProjectVL.Systems
                         enemy.SlowRemaining,
                         slowDuration);
                 }
+            }
+        }
+
+        private static void ApplyAreaKnockback(
+            GameState state,
+            Float2 center,
+            float radius,
+            float distance,
+            float stunDuration)
+        {
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                if (Float2.Distance(center, enemy.Position) > radius)
+                {
+                    continue;
+                }
+
+                Float2 direction =
+                    (enemy.Position - center).Normalized();
+                enemy.Position += direction * distance;
+                enemy.StunnedRemaining = Math.Max(
+                    enemy.StunnedRemaining,
+                    stunDuration);
             }
         }
 

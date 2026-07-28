@@ -344,6 +344,295 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void ScorchFiveStarRoutesExposeWebParameters()
+        {
+            EquipResolved(
+                "scorch",
+                5,
+                "3:scorchA",
+                "5:scorchA2");
+            CardCombatProfile area =
+                CardEffectResolver.Resolve(_state);
+
+            Assert.That(area.DotAreaRadius, Is.EqualTo(50f));
+            Assert.That(
+                area.DotDamageRatio,
+                Is.EqualTo(0.195f).Within(0.001f));
+            Assert.That(
+                area.DotAreaVulnerableRatio,
+                Is.EqualTo(0.15f));
+
+            EquipResolved(
+                "scorch",
+                5,
+                "3:scorchB",
+                "5:scorchB2");
+            CardCombatProfile brittle =
+                CardEffectResolver.Resolve(_state);
+            Assert.That(
+                brittle.DotHitVulnerableRatio,
+                Is.EqualTo(0.16f));
+
+            EquipResolved(
+                "scorch",
+                5,
+                "3:scorchC",
+                "5:scorchC2");
+            CardCombatProfile fastBurn =
+                CardEffectResolver.Resolve(_state);
+            Assert.That(
+                fastBurn.SecondaryDotDamageRatio,
+                Is.EqualTo(0.075f));
+            Assert.That(
+                fastBurn.SecondaryDotTickInterval,
+                Is.EqualTo(0.25f));
+            Assert.That(fastBurn.SecondaryDotDuration, Is.EqualTo(2f));
+        }
+
+        [Test]
+        public void ScorchBrittleRequiresAnExistingBurn()
+        {
+            EquipResolved(
+                "scorch",
+                5,
+                "3:scorchB",
+                "5:scorchB2");
+            CardCombatProfile profile =
+                CardEffectResolver.Resolve(_state);
+            EnemyState enemy = AddEnemy(
+                new Float2(200f, 200f),
+                100f);
+
+            HitWithProfile(enemy.Position, profile);
+            Assert.That(enemy.VulnerableRatio, Is.Zero);
+
+            HitWithProfile(enemy.Position, profile);
+            Assert.That(enemy.VulnerableRatio, Is.EqualTo(0.16f));
+            Assert.That(enemy.VulnerableRemaining, Is.EqualTo(2f));
+        }
+
+        [Test]
+        public void ScorchFastBurnTicksIndependently()
+        {
+            EquipResolved(
+                "scorch",
+                5,
+                "3:scorchC",
+                "5:scorchC2");
+            CardCombatProfile profile =
+                CardEffectResolver.Resolve(_state);
+            EnemyState enemy = AddEnemy(
+                new Float2(200f, 200f),
+                100f);
+
+            HitWithProfile(enemy.Position, profile);
+            _system.StepEnemies(_state, 0.25f);
+
+            Assert.That(
+                enemy.Hp,
+                Is.EqualTo(89.25f).Within(0.001f));
+            Assert.That(enemy.DotRemaining, Is.GreaterThan(0f));
+            Assert.That(
+                enemy.SecondaryDotRemaining,
+                Is.GreaterThan(0f));
+        }
+
+        [Test]
+        public void SplitBlastFiveStarRoutesExposeWebParameters()
+        {
+            EquipResolved(
+                "splitBlast",
+                5,
+                "3:splitBlastA",
+                "5:splitBlastA2");
+            CardCombatProfile recursive =
+                CardEffectResolver.Resolve(_state);
+
+            Assert.That(recursive.SplitCount, Is.EqualTo(3));
+            Assert.That(recursive.SplashRadius, Is.EqualTo(50f));
+            Assert.That(recursive.RecursiveSplitCount, Is.EqualTo(2));
+            Assert.That(
+                recursive.RecursiveSplitDamageRatio,
+                Is.EqualTo(0.5f));
+
+            EquipResolved(
+                "splitBlast",
+                5,
+                "3:splitBlastB",
+                "5:splitBlastB2");
+            CardCombatProfile doubleBlast =
+                CardEffectResolver.Resolve(_state);
+            Assert.That(doubleBlast.SecondarySplashRadius, Is.EqualTo(100f));
+            Assert.That(
+                doubleBlast.SecondarySplashDamageRatio,
+                Is.EqualTo(0.65f));
+
+            EquipResolved(
+                "splitBlast",
+                5,
+                "3:splitBlastC",
+                "5:splitBlastC2");
+            CardCombatProfile shock =
+                CardEffectResolver.Resolve(_state);
+            Assert.That(shock.HitAreaKnockbackRadius, Is.EqualTo(87.5f));
+            Assert.That(shock.HitAreaKnockbackDistance, Is.EqualTo(45f));
+        }
+
+        [Test]
+        public void RecursiveSplitReachesASecondGeneration()
+        {
+            var profile = new CardCombatProfile
+            {
+                SplitCount = 1,
+                SplitDamageRatio = 0.5f,
+                RecursiveSplitCount = 1,
+                RecursiveSplitDamageRatio = 0.5f
+            };
+            EnemyState primary = AddEnemy(
+                new Float2(200f, 200f),
+                100f);
+            EnemyState child = AddEnemy(
+                new Float2(240f, 200f),
+                100f);
+            EnemyState grandchild = AddEnemy(
+                new Float2(280f, 200f),
+                100f);
+
+            HitWithProfile(primary.Position, profile);
+
+            Assert.That(child.Hp, Is.EqualTo(95f));
+            Assert.That(grandchild.Hp, Is.EqualTo(97.5f));
+        }
+
+        [Test]
+        public void SecondaryBlastReachesOutsideBaseRadius()
+        {
+            var profile = new CardCombatProfile
+            {
+                SplashRadius = 50f,
+                SplashDamageRatio = 1f,
+                SecondarySplashRadius = 100f,
+                SecondarySplashDamageRatio = 0.65f
+            };
+            EnemyState primary = AddEnemy(
+                new Float2(200f, 200f),
+                100f);
+            EnemyState outer = AddEnemy(
+                new Float2(270f, 200f),
+                100f);
+
+            HitWithProfile(primary.Position, profile);
+
+            Assert.That(outer.Hp, Is.EqualTo(93.5f).Within(0.001f));
+        }
+
+        [Test]
+        public void ImpactFiveStarRoutesExposeWebParameters()
+        {
+            EquipResolved(
+                "impact",
+                5,
+                "3:impactA",
+                "5:impactA2");
+            CardCombatProfile counter =
+                CardEffectResolver.Resolve(_state);
+
+            Assert.That(
+                counter.KnockbackDistance,
+                Is.EqualTo(28.6f).Within(0.001f));
+            Assert.That(
+                counter.KnockbackCollisionDamageRatio,
+                Is.EqualTo(0.45f).Within(0.001f));
+            Assert.That(counter.ImpactBreachRadius, Is.EqualTo(150f));
+            Assert.That(counter.ImpactBreachKnockback, Is.EqualTo(80f));
+            Assert.That(counter.ImpactBreachStunDuration, Is.EqualTo(0.4f));
+            Assert.That(counter.ImpactBreachCooldown, Is.EqualTo(6f));
+
+            EquipResolved(
+                "impact",
+                5,
+                "3:impactB",
+                "5:impactB2");
+            CardCombatProfile pulse =
+                CardEffectResolver.Resolve(_state);
+            Assert.That(pulse.ImpactPulseRadius, Is.EqualTo(140f));
+            Assert.That(pulse.ImpactPulseKnockback, Is.EqualTo(75f));
+            Assert.That(pulse.ImpactPulseInterval, Is.EqualTo(4f));
+
+            EquipResolved(
+                "impact",
+                5,
+                "3:impactC",
+                "5:impactC2");
+            CardCombatProfile stun =
+                CardEffectResolver.Resolve(_state);
+            Assert.That(
+                stun.KnockbackCollisionDamageRatio,
+                Is.EqualTo(0.9f).Within(0.001f));
+            Assert.That(stun.OnHitStunDuration, Is.EqualTo(0.35f));
+            Assert.That(stun.OnHitStunCooldown, Is.EqualTo(1.5f));
+        }
+
+        [Test]
+        public void ImpactBreachCounterPushesAndStunsNearbyEnemies()
+        {
+            EquipResolved(
+                "impact",
+                5,
+                "3:impactA",
+                "5:impactA2");
+            EnemyState nearby = AddEnemy(
+                new Float2(
+                    _combat.turret.x + 100f,
+                    _combat.turret.y),
+                100f);
+            AddEnemy(
+                new Float2(
+                    _combat.turret.x + 20f,
+                    _combat.turret.y),
+                100f,
+                5f);
+            Float2 before = nearby.Position;
+
+            _system.StepEnemies(_state, 0f);
+
+            Assert.That(
+                Float2.Distance(before, nearby.Position),
+                Is.EqualTo(80f).Within(0.001f));
+            Assert.That(nearby.StunnedRemaining, Is.EqualTo(0.4f));
+            Assert.That(
+                _state.ImpactBreachCooldownRemaining,
+                Is.EqualTo(6f));
+        }
+
+        [Test]
+        public void ImpactOnHitStunHonorsSharedCooldown()
+        {
+            EquipResolved(
+                "impact",
+                5,
+                "3:impactC",
+                "5:impactC2");
+            CardCombatProfile profile =
+                CardEffectResolver.Resolve(_state);
+            EnemyState first = AddEnemy(
+                new Float2(200f, 200f),
+                100f);
+            EnemyState second = AddEnemy(
+                new Float2(300f, 200f),
+                100f);
+
+            HitWithProfile(first.Position, profile);
+            HitWithProfile(second.Position, profile);
+
+            Assert.That(first.StunnedRemaining, Is.EqualTo(0.35f));
+            Assert.That(second.StunnedRemaining, Is.Zero);
+            _system.StepPassives(_state, 1.5f);
+            HitWithProfile(second.Position, profile);
+            Assert.That(second.StunnedRemaining, Is.EqualTo(0.35f));
+        }
+
+        [Test]
         public void SlowReducesEnemyMovementUntilItExpires()
         {
             EnemyState enemy = AddEnemy(new Float2(100f, 100f), 100f);

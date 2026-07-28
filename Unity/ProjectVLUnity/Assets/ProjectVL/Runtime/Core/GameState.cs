@@ -36,6 +36,9 @@ namespace ProjectVL.Core
         public float ShieldRegenRemaining { get; internal set; }
         public float FireRateMultiplier { get; internal set; } = 1f;
         public float FireRateBuffRemaining { get; internal set; }
+        public float ImpactBreachCooldownRemaining { get; internal set; }
+        public float ImpactPulseRemaining { get; internal set; }
+        public float ImpactHitCooldownRemaining { get; internal set; }
         public float DropRateMultiplier { get; internal set; } = 1f;
         public float DropLifetimeMultiplier { get; internal set; } = 1f;
         public bool DecoyActive { get; internal set; }

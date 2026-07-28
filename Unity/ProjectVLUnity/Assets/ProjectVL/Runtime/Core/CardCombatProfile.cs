@@ -27,11 +27,35 @@ namespace ProjectVL.Core
         public float DotDamageRatio { get; set; }
         public float DotDuration { get; set; }
         public float DotTickInterval { get; set; }
+        public float SecondaryDotDamageRatio { get; set; }
+        public float SecondaryDotDuration { get; set; }
+        public float SecondaryDotTickInterval { get; set; }
+        public float DotAreaRadius { get; set; }
+        public float DotAreaVulnerableRatio { get; set; }
+        public float DotAreaVulnerableDuration { get; set; }
+        public float DotHitVulnerableRatio { get; set; }
+        public float DotHitVulnerableDuration { get; set; }
         public int SplitCount { get; set; }
         public float SplitDamageRatio { get; set; }
+        public int RecursiveSplitCount { get; set; }
+        public float RecursiveSplitDamageRatio { get; set; }
         public float SplashRadius { get; set; }
         public float SplashDamageRatio { get; set; }
+        public float SecondarySplashRadius { get; set; }
+        public float SecondarySplashDamageRatio { get; set; }
+        public float HitAreaKnockbackRadius { get; set; }
+        public float HitAreaKnockbackDistance { get; set; }
         public float KnockbackDistance { get; set; }
+        public float KnockbackCollisionDamageRatio { get; set; }
+        public float ImpactBreachRadius { get; set; }
+        public float ImpactBreachKnockback { get; set; }
+        public float ImpactBreachStunDuration { get; set; }
+        public float ImpactBreachCooldown { get; set; }
+        public float ImpactPulseRadius { get; set; }
+        public float ImpactPulseKnockback { get; set; }
+        public float ImpactPulseInterval { get; set; }
+        public float OnHitStunDuration { get; set; }
+        public float OnHitStunCooldown { get; set; }
         public float AuraRadiusRatio { get; set; }
         public float AuraSlowRatio { get; set; }
         public float AuraVulnerableRatio { get; set; }

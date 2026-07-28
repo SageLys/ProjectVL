@@ -347,7 +347,8 @@ namespace ProjectVL.Presentation
                 return new Color(0.45f, 0.95f, 1f);
             }
 
-            if (enemy.DotRemaining > 0f)
+            if (enemy.DotRemaining > 0f
+                || enemy.SecondaryDotRemaining > 0f)
             {
                 return new Color(1f, 0.35f, 0.15f);
             }

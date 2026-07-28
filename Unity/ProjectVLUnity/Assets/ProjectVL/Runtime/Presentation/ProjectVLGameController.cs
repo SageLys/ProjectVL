@@ -40,10 +40,28 @@ namespace ProjectVL.Presentation
             "chainLightning",
             "frost",
             "frost",
-            "frost"
+            "frost",
+            "scorch",
+            "scorch",
+            "scorch",
+            "splitBlast",
+            "splitBlast",
+            "splitBlast",
+            "impact",
+            "impact",
+            "impact"
         };
         private static readonly string[] AdvancedDemoBranches =
         {
+            "A",
+            "B",
+            "C",
+            "A",
+            "B",
+            "C",
+            "A",
+            "B",
+            "C",
             "A",
             "B",
             "C",

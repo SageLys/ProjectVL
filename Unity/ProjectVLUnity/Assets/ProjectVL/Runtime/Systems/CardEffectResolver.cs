@@ -218,10 +218,37 @@ namespace ProjectVL.Systems
                 profile.DotDuration,
                 route == "scorchB" ? 4f : 2.5f);
             profile.DotTickInterval = 0.5f;
+            profile.DotAreaRadius =
+                Max(profile.DotAreaRadius, 40f);
             if (route == "scorchC")
             {
                 profile.SlowRatio = Max(profile.SlowRatio, 0.15f);
                 profile.SlowDuration = Max(profile.SlowDuration, 0.6f);
+            }
+
+            if (card.Star >= 4)
+            {
+                profile.DotAreaRadius =
+                    Max(profile.DotAreaRadius, 50f);
+                profile.DotDamageRatio *= 1.3f;
+            }
+
+            string advancedRoute = RouteAt(card, 5);
+            if (advancedRoute == "scorchA2")
+            {
+                profile.DotAreaVulnerableRatio = 0.15f;
+                profile.DotAreaVulnerableDuration = 0.6f;
+            }
+            else if (advancedRoute == "scorchB2")
+            {
+                profile.DotHitVulnerableRatio = 0.16f;
+                profile.DotHitVulnerableDuration = 2f;
+            }
+            else if (advancedRoute == "scorchC2")
+            {
+                profile.SecondaryDotDamageRatio = 0.075f;
+                profile.SecondaryDotTickInterval = 0.25f;
+                profile.SecondaryDotDuration = 2f;
             }
         }
 
@@ -248,6 +275,32 @@ namespace ProjectVL.Systems
                     profile.SplashDamageRatio,
                     route == "splitBlastB" ? 1f : 0.6f);
             }
+
+            if (card.Star >= 4)
+            {
+                profile.SplitCount += 1;
+                if (profile.SplashRadius > 0f)
+                {
+                    profile.SplashRadius *= 1.25f;
+                }
+            }
+
+            string advancedRoute = RouteAt(card, 5);
+            if (advancedRoute == "splitBlastA2")
+            {
+                profile.RecursiveSplitCount = 2;
+                profile.RecursiveSplitDamageRatio = 0.5f;
+            }
+            else if (advancedRoute == "splitBlastB2")
+            {
+                profile.SecondarySplashRadius = 100f;
+                profile.SecondarySplashDamageRatio = 0.65f;
+            }
+            else if (advancedRoute == "splitBlastC2")
+            {
+                profile.HitAreaKnockbackRadius = 87.5f;
+                profile.HitAreaKnockbackDistance = 45f;
+            }
         }
 
         private static void ApplyImpact(
@@ -264,9 +317,40 @@ namespace ProjectVL.Systems
             }
             else if (route == "impactC")
             {
+                profile.KnockbackCollisionDamageRatio = 0.6f;
                 profile.SplashRadius = Max(profile.SplashRadius, 35f);
                 profile.SplashDamageRatio =
                     Max(profile.SplashDamageRatio, 0.4f);
+            }
+            else
+            {
+                profile.KnockbackCollisionDamageRatio = 0.3f;
+            }
+
+            if (card.Star >= 4)
+            {
+                profile.KnockbackDistance *= 1.3f;
+                profile.KnockbackCollisionDamageRatio *= 1.5f;
+            }
+
+            string advancedRoute = RouteAt(card, 5);
+            if (advancedRoute == "impactA2")
+            {
+                profile.ImpactBreachRadius = 150f;
+                profile.ImpactBreachKnockback = 80f;
+                profile.ImpactBreachStunDuration = 0.4f;
+                profile.ImpactBreachCooldown = 6f;
+            }
+            else if (advancedRoute == "impactB2")
+            {
+                profile.ImpactPulseRadius = 140f;
+                profile.ImpactPulseKnockback = 75f;
+                profile.ImpactPulseInterval = 4f;
+            }
+            else if (advancedRoute == "impactC2")
+            {
+                profile.OnHitStunDuration = 0.35f;
+                profile.OnHitStunCooldown = 1.5f;
             }
         }
 

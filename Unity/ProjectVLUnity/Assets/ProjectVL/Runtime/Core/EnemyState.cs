@@ -27,6 +27,11 @@ namespace ProjectVL.Core
         public float DotTickInterval { get; set; }
         public float DotTickRemaining { get; set; }
         public float DotRemaining { get; set; }
+        public float SecondaryDotDamagePerTick { get; set; }
+        public float SecondaryDotTickInterval { get; set; }
+        public float SecondaryDotTickRemaining { get; set; }
+        public float SecondaryDotRemaining { get; set; }
+        public float StunnedRemaining { get; set; }
 
         public EnemyState(
             int id,
