@@ -1437,6 +1437,16 @@
       "applyPolicy": "immediate"
     },
     {
+      "path": "economy.normalDropTypePolicy.bootstrapForcedDrops",
+      "type": "number",
+      "labelKey": "tuner.params.economy.normalDropTypePolicy.bootstrapForcedDrops",
+      "group": "drops",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "applyPolicy": "waveDeferred"
+    },
+    {
       "path": "economy.normalDropTypePolicy.godAffinity.scorePerStack",
       "type": "number",
       "labelKey": "tuner.params.economy.normalDropTypePolicy.godAffinity.scorePerStack",

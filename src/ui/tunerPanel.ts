@@ -188,7 +188,8 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
         <span><b>${n.onScreen.toFixed(2)}</b>理论同屏数（普通·波1）</span>
         <span><b>${metrics.waveDurations.slice(0, 3).map(value => `${value.toFixed(1)}s`).join(' / ')}</b>每波理论时长（前 3 波）</span>
         <span><b>${(metrics.totalDuration / 60).toFixed(2)}min</b>全局理论局长</span>
-        <span><b>${metrics.dropsPerMinute.toFixed(2)}/min</b>每分钟掉落期望（普通·波1）</span>
+        <span><b>${metrics.dropsPerMinute.toFixed(2)}/min</b>每分钟普通掉落期望（全局均值）</span>
+        <span><b>${metrics.waves.slice(0, 3).map(wave => `${wave.ordinaryDropsTargetPerMinute.toFixed(1)}/min`).join(' / ')}</b>阶段目标速率（前 3 波）</span>
       </div><p class="tuner-note">命中率模型：min(1, 敌半径 ÷ [射程 × tan(散布)])；走行距离取四边中点出生距离均值。</p>`;
   }
 

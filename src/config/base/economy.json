@@ -52,6 +52,7 @@
       "pivot": 2
     },
     "bootstrapMinDiscovery": 6,
+    "bootstrapForcedDrops": 9,
     "godAffinity": {
       "scorePerStack": 2.5,
       "scoreCap": 6

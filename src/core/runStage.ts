@@ -58,7 +58,7 @@ export function resolveWavePlan(wave: number, totalWaves: number, plan: StagePla
 
 /** Resolves the stage director, or the untouched legacy linear Budget when the rollback switch is off. */
 export function resolveActiveWavePlan(game: GameConfig, wave: number): ResolvedWavePlan {
-  if (game.economy.ordinaryDropRate.enabled) return resolveWavePlan(wave, game.waves.totalWaves, game.waves.stagePlan);
+  if (game.waves.stagePlan.enabled) return resolveWavePlan(wave, game.waves.totalWaves, game.waves.stagePlan);
   const legacy = game.waves.budget;
   return {
     stage: stageForWave(wave, game.waves.totalWaves, game.waves.stagePlan),

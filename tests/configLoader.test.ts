@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { buildConfig, deepMerge, variantsFromSearch, cfg, applyVariants } from '../src/config';
+import { buildConfig, deepMerge, variantsFromSearch, cfg, applyVariants, VARIANTS } from '../src/config';
 import { resetTestEnv } from './helpers';
 import { validateProgressionConfig } from '../src/config/progressionValidator';
 import { computeWaveBossReward } from '../src/core/systems/waveBossSystem';
@@ -44,6 +44,20 @@ describe('config · 方案A base', () => {
   it('未知 variant 忽略不炸', () => { expect(buildConfig(['nope']).economy.handSlots).toBe(7); });
   it('URL 参数解析', () => { expect(variantsFromSearch('?variant=dev-short')).toEqual(['dev-short']); expect(variantsFromSearch('?variant=a&variant=b')).toEqual(['a','b']); expect(variantsFromSearch('')).toEqual([]); });
   it('applyVariants 就地替换单例', () => { const ref=cfg; applyVariants(['dev-short']); expect(ref.waves.totalWaves).toBe(3); applyVariants([]); expect(ref.waves.totalWaves).toBe(10); });
+  it('旧 variant 缺少导演新字段时由兼容层回填', () => {
+    const name = 'legacy-director-fields';
+    VARIANTS[name] = {
+      waves: { stagePlan: { enabled: undefined } },
+      economy: { normalDropTypePolicy: { bootstrapForcedDrops: undefined } },
+    } as never;
+    try {
+      const legacy = buildConfig([name]);
+      expect(legacy.waves.stagePlan.enabled).toBe(true);
+      expect(legacy.economy.normalDropTypePolicy.bootstrapForcedDrops).toBe(9);
+    } finally {
+      delete VARIANTS[name];
+    }
+  });
 });
 
 describe('config · relic progression', () => {

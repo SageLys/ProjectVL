@@ -49,6 +49,14 @@ function normalizeValidationRewards(config: GameConfig): void {
   }
 }
 
+function normalizeLegacyDirectorConfig(config: GameConfig): void {
+  // Compatibility for variants and presets saved before these director fields were introduced.
+  if (config.waves.stagePlan.enabled === undefined) config.waves.stagePlan.enabled = true;
+  if (config.economy.normalDropTypePolicy.bootstrapForcedDrops === undefined) {
+    config.economy.normalDropTypePolicy.bootstrapForcedDrops = 9;
+  }
+}
+
 /** 将配置中的 Boss 波次限制为可达、唯一且升序的整数列表。 */
 export function normalizeBossWaves(values: readonly number[], totalWaves: number): number[] {
   return [...new Set(values)]
@@ -120,6 +128,7 @@ function assembleBase(): GameConfig {
     // 可玩原型的构建预览也保留调参面板；可在运行时用 ?devtools=0 隐藏。
     tuner,
   }) as unknown as GameConfig;
+  normalizeLegacyDirectorConfig(config);
   normalizeValidationRewards(config);
   validateGodConfig(config);
   validateTunerConfig(config);
@@ -140,6 +149,7 @@ export function buildConfig(variantNames: string[] = []): GameConfig {
     cfg = deepMerge<GameConfig>(cfg, patch);
   }
   cfg.waves.bossWaves = normalizeBossWaves(cfg.waves.bossWaves, cfg.waves.totalWaves);
+  normalizeLegacyDirectorConfig(cfg);
   normalizeValidationRewards(cfg);
   validateSkillsConfig(cfg.skills);
   validateGodConfig(cfg);

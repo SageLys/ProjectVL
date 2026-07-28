@@ -39,6 +39,7 @@ export interface ValidationWaveConfig {
 }
 
 export interface StagePlanConfig {
+  enabled: boolean;
   selectionWaves: number;
   validationWaves: number;
   selection: RegularStageConfig;
@@ -47,6 +48,7 @@ export interface StagePlanConfig {
 }
 
 export interface OrdinaryDropRateConfig {
+  /** Controls only the time-based ordinary-drop cadence; it does not control the wave stage director. */
   enabled: boolean;
   selectionPerMinute: number;
   buildPerMinute: number;
@@ -403,6 +405,7 @@ export interface NormalDropTypePolicyConfig {
   earlyMix: { discovery: number; build: number; pivot: number };
   lateMix: { discovery: number; build: number; pivot: number };
   bootstrapMinDiscovery: number;
+  bootstrapForcedDrops: number;
   godAffinity: { scorePerStack: number; scoreCap: number };
   maturity: {
     fullMergeOps: number;

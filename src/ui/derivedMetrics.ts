@@ -40,9 +40,7 @@ export interface DerivedMetrics {
   cells: Record<EnemyType, DerivedCell[]>;
   waveDurations: number[];
   totalDuration: number;
-  /** @deprecated Legacy fixed-probability/interval-model estimate. */
   dropsPerMinute: number;
-  /** @deprecated Legacy fixed-probability/interval-model estimate. */
   expectedDrops: number;
   waves: DerivedWaveProjection[];
   budget?: {
@@ -53,6 +51,39 @@ export interface DerivedMetrics {
     sprintQuotaThreshold: number[];
     projections: BudgetProjection[];
   };
+}
+
+/**
+ * Static projection intentionally ignores carryCap (short-term burst smoothing) and
+ * dropRateMul (a dynamic in-run modifier that cannot be known by the tuner).
+ */
+function expectedTimeBasedDrops(game: GameConfig, waveDurations: readonly number[]): number {
+  const rate = game.economy.ordinaryDropRate;
+  let buildStageSeconds = 0;
+  let expected = 0;
+  for (let index = 0; index < waveDurations.length; index++) {
+    const duration = waveDurations[index];
+    const stage = stageForWave(index + 1, game.waves.totalWaves, game.waves.stagePlan);
+    if (stage === 'validation') continue;
+    if (stage === 'selection') {
+      expected += rate.selectionPerMinute / 60 * duration;
+      continue;
+    }
+    if (rate.buildTransitionSeconds <= 0) {
+      expected += rate.buildPerMinute / 60 * duration;
+    } else {
+      const transitionStart = Math.min(rate.buildTransitionSeconds, buildStageSeconds);
+      const transitionEnd = Math.min(rate.buildTransitionSeconds, buildStageSeconds + duration);
+      const transitionDuration = Math.max(0, transitionEnd - transitionStart);
+      const transitionArea = rate.selectionPerMinute * transitionDuration
+        + (rate.buildPerMinute - rate.selectionPerMinute)
+          * (transitionEnd ** 2 - transitionStart ** 2)
+          / (2 * rate.buildTransitionSeconds);
+      expected += (transitionArea + rate.buildPerMinute * (duration - transitionDuration)) / 60;
+    }
+    buildStageSeconds += duration;
+  }
+  return expected;
 }
 
 function spawnDistance(game: GameConfig): number {
@@ -146,7 +177,9 @@ export function deriveMetrics(game: GameConfig, runtime: Config, difficultyId: D
   const totalEnemies = waveDurations.reduce((sum, _, i) => sum + (game.waves.spawnMode === 'budget'
     ? budgetWaveQuotaFor(plans[i])
     : game.waves.enemyCountBase + (i + 1) * game.waves.enemyCountPerWave), 0);
-  const expectedDrops = totalEnemies * runtime.dropChance;
+  const expectedDrops = game.economy.ordinaryDropRate.enabled
+    ? expectedTimeBasedDrops(game, waveDurations)
+    : totalEnemies * runtime.dropChance;
   const budget = projections.map(item => item.projection);
   const waveProjections: DerivedWaveProjection[] = plans.map((plan, index) => ({
     wave: index + 1,

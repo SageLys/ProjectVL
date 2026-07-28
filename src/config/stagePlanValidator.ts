@@ -63,6 +63,7 @@ export function validateStagePlanConfig(
   bossReward?: WavesConfig['waveBoss']['reward'],
 ): void {
   if (!plan || typeof plan !== 'object') fail('stagePlan is required');
+  if (typeof plan.enabled !== 'boolean') fail('enabled must be boolean');
   positiveInteger(totalWaves, 'totalWaves');
   positiveInteger(plan.selectionWaves, 'selectionWaves');
   positiveInteger(plan.validationWaves, 'validationWaves');

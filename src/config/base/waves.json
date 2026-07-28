@@ -27,6 +27,7 @@
     "maxAlive": 100
   },
   "stagePlan": {
+    "enabled": true,
     "selectionWaves": 3,
     "validationWaves": 2,
     "selection": {

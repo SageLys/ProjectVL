@@ -52,6 +52,28 @@ describe('editor human labels', () => {
     expect(missing).toEqual([]);
   });
 
+  it('labels drop-director fields and explains non-obvious controls', () => {
+    expect(lookupLabel('domainField', 'economy.ordinaryDropRate')?.label).toBe('普通掉落节奏（每分钟）');
+    expect(lookupLabel('domainField', 'economy.ordinaryDropRate.selectionPerMinute')?.label).toBe('选择期每分钟掉落');
+    expect(lookupLabel('domainField', 'economy.normalDropTypePolicy.roleBagSize')?.label).toBe('角色袋容量');
+    expect(lookupLabel('domainField', 'economy.ordinaryDropRate.carryCap')?.help).toContain('额度池上限');
+    expect(lookupLabel('domainField', 'economy.defaults.dropChance')?.help).toContain('enabled=false');
+
+    const untranslated: string[] = [];
+    const visit = (value: unknown, path: string): void => {
+      if (!value || typeof value !== 'object' || Array.isArray(value)) return;
+      for (const [field, child] of Object.entries(value)) {
+        const nestedPath = `${path}.${field}`;
+        const info = lookupLabel('domainField', `economy.${nestedPath}`);
+        if (!info?.label || info.label === field) untranslated.push(nestedPath);
+        visit(child, nestedPath);
+      }
+    };
+    visit(cfg.economy.ordinaryDropRate, 'ordinaryDropRate');
+    visit(cfg.economy.normalDropTypePolicy, 'normalDropTypePolicy');
+    expect(untranslated).toEqual([]);
+  });
+
   it('falls back to the english key instead of throwing', () => {
     expect(describeLabel('domainField', 'combat.没有登记的字段')).toEqual({ label: '没有登记的字段' });
     expect(describeLabel('enumValue', 'rarity.unknownValue')).toEqual({ label: 'unknownValue' });

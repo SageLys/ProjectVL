@@ -58,8 +58,8 @@ describe('validation fixed encounters', () => {
     expect(state.bountyDirector.offersThisWave).toBe(0);
   });
 
-  it('restores the legacy linear Budget and no fixed encounter when the rollback switch is off', () => {
-    cfg.economy.ordinaryDropRate.enabled = false;
+  it('restores the legacy linear Budget and no fixed encounter when the stage-plan switch is off', () => {
+    cfg.waves.stagePlan.enabled = false;
     const state = freshState();
     jumpToWave(state, createDefaultConfig(), constRng(0.25), 9);
     expect(state.spawnLeft).toBe(cfg.waves.budget.waveQuota.base + 9 * cfg.waves.budget.waveQuota.perWave);

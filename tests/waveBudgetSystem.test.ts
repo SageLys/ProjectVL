@@ -14,7 +14,7 @@ import { resolveActiveWavePlan } from '../src/core/runStage';
 beforeEach(() => {
   resetTestEnv();
   cfg.waves.spawnMode = 'budget';
-  cfg.economy.ordinaryDropRate.enabled = false;
+  cfg.waves.stagePlan.enabled = false;
   cfg.waves.budget.targetOnScreen = { base: 3, perWave: 0 };
   cfg.waves.budget.checkInterval = 1;
   cfg.waves.budget.batchMax = 2;

@@ -181,7 +181,7 @@ const DOMAIN_FIELD_LABELS: Record<EditorDomain, Record<string, string>> = {
     unequipPolicy: '卸下策略', equipSwappable: '装备可替换', inRunSlotExpansion: '局内槽位扩展',
     equipDistinctTypes: '装备类型互斥', feedEquipped: '可喂养已装备卡',
     placeholderAssumptions: '占位假设', dropStarPolicy: '掉落星级策略', drops: '掉落物',
-    defaults: '默认数值', ordinaryDropRate: '普通掉落概率', normalDropTypePolicy: '普通掉落类型策略',
+    defaults: '默认数值', ordinaryDropRate: '普通掉落节奏（每分钟）', normalDropTypePolicy: '普通掉落类型策略',
   },
   bounty: {
     enabled: '启用', rewardBias: '奖励偏置', offer: '委托发放', encounter: '遭遇',
@@ -207,33 +207,56 @@ const COMMON_FIELD_LABELS: Record<string, string> = {
   add: '加值', affixPool: '词条池', allowedPhase: '允许阶段', amplifyAxis: '强化轴',
   anchorCardIds: '锚点卡', anchors: '档位', applyPolicy: '生效策略', axis: '作用轴',
   base: '基准值', batchMax: '单批上限', bindingIndex: '绑定序号', boss: 'Boss', bossReward: 'Boss 奖励', build: '构筑',
+  bootstrapForcedDrops: '开局强制发牌次数', bootstrapMinDiscovery: '冷启动探索保底', buildPerMinute: '构筑期每分钟掉落',
+  buildTransitionSeconds: '构筑期速率过渡秒数', candidateFraction: '候选比例', carryCap: '掉落额度积压上限', chanceCap: '掉落概率封顶',
   candidates: '候选项', cardId: '卡 id', category: '类别', ccResist: '控制抗性',
   ccResistOverride: '控制抗性覆盖', checkInterval: '检查间隔', checkpoints: '进化节点',
   color: '颜色', common: '普通', consumable: '消耗态', cost: '消耗', count: '数量',
-  damage: '伤害', damageMul: '伤害倍率', desc: '描述', description: '说明', duration: '持续时间',
+  damage: '伤害', damageMul: '伤害倍率', desc: '描述', description: '说明', discovery: '探索', dropChance: '基础掉落概率', duration: '持续时间',
   effects: '效果', effectIndex: '效果序号', enabled: '启用', end: '终点值', enemy: '敌人', epic: '史诗', equip: '装备态',
   evolutionTree: '进化树', exposed: '面板可见', fireRate: '攻速', fusionPolicy: '融合策略',
-  god: '神祇', godWeightAdd: '神祇权重加值', group: '分组', hard: '困难', height: '高度',
+  god: '神祇', godAffinity: '神祇亲和', godWeightAdd: '神祇权重加值', group: '分组', hard: '困难', height: '高度',
+  historicalMergeCap: '历史合成封顶', historicalMergeWeight: '历史合成权重',
   hp: '生命', hpBase: '基础生命', hpMul: '生命倍率', hpPerWave: '每波生命增量', id: '标识',
   ingredientA: '材料 A', ingredientB: '材料 B', inputs: '输入', interval: '间隔',
   kind: '种类', knockbackResist: '击退抗性', knockbackResistOverride: '击退抗性覆盖',
   implementationBatch: '实现批次', label: '显示名', labelKey: '文案键', life: '存活时间', mainRosterSize: '主池规模',
-  max: '最大值', maxAlive: '同时存活上限', maxStacks: '最大层数', min: '最小值',
+  max: '最大值', maxAlive: '同时存活上限', maxSameTypeStreak: '同型连发上限', maxStacks: '最大层数', maxWeightRatio: '权重比上限', min: '最小值',
+  maturity: '构筑成熟度', mergeReadyMultiplier: '可合成加权', mergeWeight: '合成权重', modifiersAffectTarget: '词条加成是否影响目标速率',
   minStar: '最低星级', milestones: '里程碑文案', mode: '模式', mul: '乘数', multiplier: '倍率', name: '名称', options: '选项',
   outputCardId: '产出卡', outputStar: '产出星级', overview: '概览', paramName: '参数名', params: '参数', parentEffectPath: '父效果路径', path: '配置路径',
   perWave: '每波增量', pityDrops: '保底掉落次数', pivot: '拐点', poolInfluence: '池影响',
   power: '曲线指数', r: '半径', radius: '半径', range: '射程', rare: '稀有', rarity: '稀有度',
-  ratio: '比例', recipeOnly: '仅配方产物', relaxed: '轻松', reward: '奖励', scale: '缩放', section: '分段', selection: '抽取',
+  ratio: '比例', recipeOnly: '仅配方产物', relaxed: '轻松', reward: '奖励', roleBagSize: '角色袋容量', scale: '缩放', scoreCap: '加分封顶',
+  scorePerStack: '每层加分', scorePower: '承诺分指数', section: '分段', selection: '抽取', selectionPerMinute: '选择期每分钟掉落',
   sides: '边数', speed: '速度', speedBase: '基础速度', speedMul: '速度倍率',
   speedPerWave: '每波速度增量', spread: '散布', standard: '标准', star: '星级',
-  starWeights: '星级权重', stars: '星级形态', start: '起点值', stat: '属性', step: '步进',
+  starWeight: '星级权重', starWeights: '星级权重', stars: '星级形态', start: '起点值', stat: '属性', step: '步进',
   subRosterSize: '副池规模', synergyTags: '协同标签', tags: '标签', targetOnScreen: '在场目标数',
-  targetTags: '目标标签', teaching: '教学卡', textKey: '文案键', theme: '主题', tier: '形态', title: '标题', trigger: '触发器',
+  targetTags: '目标标签', teaching: '教学卡', textKey: '文案键', theme: '主题', tier: '形态', title: '标题', topK: '候选前 N 名', trigger: '触发器',
   triggerParams: '触发参数', type: '类型', typePolicy: '类型策略', types: '类型表',
   validation: '验证局', value: '数值', variableCardIds: '可变卡', version: '版本',
   waveEndSprint: '波末冲刺', waveQuota: '波次配额', weight: '权重', width: '宽度',
   detail: '详情', fx: '演出级别', hand: '手牌态', shortByTier: '分星短文案',
   x: '横坐标', xp: '经验', y: '纵坐标',
+  earlyMix: '局初角色配比', equipWeight: '装备权重', equippedBaseBonus: '装备基础加分', equippedStarBonus: '装备每星加分',
+  excludeTopK: '排除前 N 名', fullEquippedTypes: '满值装备类型数', fullHighestStar: '满值最高星', fullMergeOps: '满值合成次数',
+  lateMix: '局末角色配比',
+};
+
+const COMMON_FIELD_HELP: Record<string, string> = {
+  bootstrapForcedDrops: '选副神后前 N 次普通掉落按预排队列强制发放，完全绕过角色袋与探索保底',
+  bootstrapMinDiscovery: '只要活跃池里还有从未作为普通掉落出现过的卡，就把探索名额抬到这个下限',
+  buildTransitionSeconds: '进入构筑期后速率线性爬坡到位所需的有效战斗秒数，跨波累加',
+  candidateFraction: '排除主力后，按承诺分从低到高取这个比例作为转向候选',
+  carryCap: '额度池上限，防止长时间不杀敌后攒额度、再一口气爆出大量掉落',
+  chanceCap: '仅在 ordinaryDropRate.enabled=false 的回退模式下生效',
+  dropChance: '仅在 ordinaryDropRate.enabled=false 的回退模式下生效',
+  excludeTopK: '转向角色会先排除承诺分最高的这几张，它们已是主力',
+  maxWeightRatio: '最高权重不得超过最低权重的这个倍数，防止单一卡型垄断掉落',
+  mergeReadyMultiplier: '手上已有该型 1★（再来一张即可合成）时的权重倍率',
+  modifiersAffectTarget: '关闭后，所有提升掉落率的遗物/词条对普通掉落完全失效',
+  scorePower: '权重 =（承诺分 + 0.5）的本次方；大于 1 更偏向高分卡，小于 1 更平均',
 };
 
 // —— 枚举取值 ——
@@ -296,8 +319,9 @@ function atomParamInfo(atom: string, param: string): HumanLabel | undefined {
 
 function domainFieldInfo(domain: string, field: string): HumanLabel | undefined {
   const table = (DOMAIN_FIELD_LABELS as Record<string, Record<string, string> | undefined>)[domain];
-  const label = table?.[field] ?? table?.[tailSegment(field)] ?? COMMON_FIELD_LABELS[tailSegment(field)];
-  return label ? { label } : undefined;
+  const tail = tailSegment(field);
+  const label = table?.[field] ?? table?.[tail] ?? COMMON_FIELD_LABELS[tail];
+  return label ? withHelp(label, COMMON_FIELD_HELP[tail]) : undefined;
 }
 
 function enumValueInfo(group: string, value: string): HumanLabel | undefined {
