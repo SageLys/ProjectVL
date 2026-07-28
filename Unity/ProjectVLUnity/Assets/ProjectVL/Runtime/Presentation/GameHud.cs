@@ -26,6 +26,7 @@ namespace ProjectVL.Presentation
             EnsureStyles();
             DrawTopBar();
             DrawControls();
+            DrawCardLoadout();
             DrawCenterPanel();
         }
 
@@ -148,6 +149,145 @@ namespace ProjectVL.Presentation
                 {
                     _controller.TogglePause();
                 }
+            }
+        }
+
+        private void DrawCardLoadout()
+        {
+            GameState state = _controller.State;
+            const float slotWidth = 92f;
+            const float slotHeight = 58f;
+            const float gap = 6f;
+
+            float equipmentX = 12f;
+            float equipmentY = 102f;
+            GUI.Box(
+                new Rect(equipmentX, equipmentY, 132f, 250f),
+                GUIContent.none);
+            GUI.Label(
+                new Rect(equipmentX + 8f, equipmentY + 8f, 116f, 24f),
+                "EQUIPMENT",
+                _hudStyle);
+            for (int i = 0; i < state.Equipment.Length; i++)
+            {
+                string shortcut = i == 0 ? "Q" : i == 1 ? "W" : i == 2 ? "E" : "-";
+                DrawCardSlot(
+                    CardSlotKind.Equipment,
+                    i,
+                    new Rect(
+                        equipmentX + 20f,
+                        equipmentY + 38f + i * (slotHeight + gap),
+                        slotWidth,
+                        slotHeight),
+                    shortcut);
+            }
+
+            float handWidth =
+                state.Hand.Length * slotWidth
+                + (state.Hand.Length - 1) * gap
+                + 24f;
+            float handX = (Screen.width - handWidth) / 2f;
+            float handY = Screen.height - 112f;
+            GUI.Box(
+                new Rect(handX, handY, handWidth, 100f),
+                GUIContent.none);
+            GUI.Label(
+                new Rect(handX + 8f, handY + 3f, handWidth - 16f, 22f),
+                "HAND  -  select source, then destination",
+                _hudStyle);
+            for (int i = 0; i < state.Hand.Length; i++)
+            {
+                DrawCardSlot(
+                    CardSlotKind.Hand,
+                    i,
+                    new Rect(
+                        handX + 12f + i * (slotWidth + gap),
+                        handY + 29f,
+                        slotWidth,
+                        slotHeight),
+                    (i + 1).ToString());
+            }
+
+            float actionX = Screen.width - 258f;
+            GUI.Box(new Rect(actionX, 152f, 246f, 148f), GUIContent.none);
+            GUI.Label(
+                new Rect(actionX + 10f, 159f, 226f, 46f),
+                _controller.LastCardAction,
+                _hudStyle);
+            if (GUI.Button(
+                new Rect(actionX + 10f, 211f, 108f, 36f),
+                "CAST [C]",
+                _buttonStyle))
+            {
+                _controller.ConsumeSelectedCard();
+            }
+
+            if (GUI.Button(
+                new Rect(actionX + 128f, 211f, 108f, 36f),
+                "TEST CARDS [G]",
+                _buttonStyle))
+            {
+                _controller.GrantTestCards();
+            }
+
+            GUI.Label(
+                new Rect(actionX + 10f, 254f, 226f, 38f),
+                WildcardText(state),
+                _hudStyle);
+        }
+
+        private void DrawCardSlot(
+            CardSlotKind kind,
+            int index,
+            Rect rect,
+            string shortcut)
+        {
+            CardState[] slots = kind == CardSlotKind.Hand
+                ? _controller.State.Hand
+                : _controller.State.Equipment;
+            CardState card = slots[index];
+            string text = card == null
+                ? $"{shortcut}\nEMPTY"
+                : $"{shortcut}  {card.Star} STAR\n{CardDisplayName(card.Type)}";
+
+            Color previous = GUI.backgroundColor;
+            if (_controller.IsCardSlotSelected(kind, index))
+            {
+                GUI.backgroundColor = new Color(0.25f, 0.85f, 1f);
+            }
+            else if (kind == CardSlotKind.Equipment)
+            {
+                GUI.backgroundColor = new Color(0.55f, 0.38f, 0.75f);
+            }
+
+            if (GUI.Button(rect, text, _buttonStyle))
+            {
+                _controller.SelectCardSlot(kind, index);
+            }
+
+            GUI.backgroundColor = previous;
+        }
+
+        private static string WildcardText(GameState state)
+        {
+            return "WILDCARDS  "
+                + $"1:{state.Wildcards[1]}  "
+                + $"2:{state.Wildcards[2]}  "
+                + $"3:{state.Wildcards[3]}  "
+                + $"4:{state.Wildcards[4]}  "
+                + $"5:{state.Wildcards[5]}";
+        }
+
+        private static string CardDisplayName(string type)
+        {
+            switch (type)
+            {
+                case "chainLightning":
+                    return "CHAIN";
+                case "splitBlast":
+                    return "SPLIT";
+                default:
+                    return type.ToUpperInvariant();
             }
         }
 

@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using ProjectVL.Config;
+using ProjectVL.Systems;
 
 namespace ProjectVL.Core
 {
@@ -20,6 +22,11 @@ namespace ProjectVL.Core
         public int LastSpawnCheckCount { get; internal set; }
         public RunReward PendingBossReward { get; internal set; }
         public List<RunReward> CollectedRewards { get; } = new List<RunReward>();
+        public CardState[] Hand { get; }
+        public CardState[] Equipment { get; }
+        public Dictionary<int, int> Wildcards { get; } =
+            new Dictionary<int, int>();
+        public int ConsumedCards { get; internal set; }
         public float IntermissionRemaining { get; internal set; }
         public bool IntermissionReady { get; internal set; }
         public float ShotCooldown { get; set; }
@@ -32,6 +39,8 @@ namespace ProjectVL.Core
 
         private int _nextEnemyId = 1;
         private int _nextBulletId = 1;
+        private int _nextCardId = 1;
+        private CardInventorySystem _inventory;
 
         public bool CanAdvance =>
             Mode == GameMode.Playing
@@ -40,13 +49,34 @@ namespace ProjectVL.Core
 
         public bool CanAdvanceCombat => CanAdvance && !IntermissionActive;
 
-        internal GameState(float maxHp)
+        internal GameState(float maxHp, EconomyConfig economy)
         {
+            if (economy == null)
+            {
+                throw new ArgumentNullException(nameof(economy));
+            }
+
             Mode = GameMode.Ready;
             Hp = maxHp;
             BaseMaxHp = maxHp;
             MaxHp = maxHp;
             TurretAngleRadians = -(float)Math.PI / 2f;
+            Hand = new CardState[economy.handSlots];
+            Equipment = new CardState[economy.equipSlots];
+            for (int star = 1; star <= economy.maxStar; star++)
+            {
+                Wildcards[star] = 0;
+            }
+        }
+
+        internal void AttachInventory(CardInventorySystem inventory)
+        {
+            _inventory = inventory;
+        }
+
+        public CardState CreateCard(string type, int star)
+        {
+            return new CardState(_nextCardId++, type, star);
         }
 
         public void StartRun()
@@ -122,6 +152,7 @@ namespace ProjectVL.Core
             if (reward != null)
             {
                 CollectedRewards.Add(reward);
+                _inventory?.GrantReward(this, reward);
             }
         }
 

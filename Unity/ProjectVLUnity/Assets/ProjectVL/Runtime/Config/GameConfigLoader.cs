@@ -15,6 +15,11 @@ namespace ProjectVL.Config
             return Load<WavesConfig>("Config/waves");
         }
 
+        public static EconomyConfig LoadEconomy()
+        {
+            return Load<EconomyConfig>("Config/economy");
+        }
+
         private static T Load<T>(string resourcePath)
         {
             TextAsset asset = Resources.Load<TextAsset>(resourcePath);
