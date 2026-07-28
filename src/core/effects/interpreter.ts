@@ -225,6 +225,19 @@ function* equippedBindings(state: GameState): Generator<{ card: Card; def: CardD
   }
 }
 
+/** 触发执行也遵守槽位无关契约；同卡内仍按原 bindingIndex 顺序。 */
+function orderedEquippedBindings(state: GameState): Array<{
+  card: Card;
+  def: CardDef;
+  binding: BindingDef;
+  bindingIndex: number;
+}> {
+  return [...equippedBindings(state)].sort((a, b) =>
+    a.card.type.localeCompare(b.card.type)
+    || a.card.id - b.card.id
+    || a.bindingIndex - b.bindingIndex);
+}
+
 export interface TriggerPayload {
   attack?: AttackInstance;
   bullet?: Bullet;
@@ -317,7 +330,7 @@ function cooldownReady(state: GameState, cardId: number, bindingIndex: number, b
 
 function fireTriggerBindings(state: GameState, config: Config, rng: Rng, trigger: Trigger, payload: TriggerPayload): GameEvent[] {
   const events: GameEvent[] = [];
-  for (const { card, binding, bindingIndex } of equippedBindings(state)) {
+  for (const { card, binding, bindingIndex } of orderedEquippedBindings(state)) {
     if (binding.trigger !== trigger) continue;
     if (!bindingConditionMet(binding, payload)) continue;
     if (!cooldownReady(state, card.id, bindingIndex, binding)) continue;

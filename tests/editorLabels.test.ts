@@ -83,6 +83,10 @@ describe('editor human labels', () => {
       label: '同类叠加范围面积比',
       help: expect.stringContaining('半径按本值开平方缩放'),
     });
+    expect(lookupLabel('domainField', 'combat.weaponFusion.impactShare')).toMatchObject({
+      label: '融合爆炸预算占比',
+      help: expect.stringContaining('主炮单周期伤害预算'),
+    });
   });
 
   it('falls back to the english key instead of throwing', () => {

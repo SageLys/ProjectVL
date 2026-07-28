@@ -2,7 +2,7 @@ import { cfg } from '../../config';
 import type {
   AttackDelivery, AttackInstance, BeamEntity, Bullet, Config, Enemy, GameEvent, GameState, Rng, WeaponImpactSpec,
 } from '../types';
-import { totalDamage, totalFireRate, totalMulti, totalRange } from '../stats';
+import { baselineDps, totalDamage, totalFireRate, totalMulti, totalRange } from '../stats';
 import { spawnParticle } from './particleSystem';
 import { dealDamage, killEnemy, tryExecute } from './damageSystem';
 import { composeWeaponForm, fireTrigger, getModifiers } from '../effects/interpreter';
@@ -32,11 +32,14 @@ export function beginAttack(
   impacts: WeaponImpactSpec[] = [],
   bullet?: Bullet,
   sourceCardId?: number,
+  impactBudget?: number,
 ): { attack: AttackInstance; events: GameEvent[] } {
   const hitIds = bullet?.hitIds ?? [];
   const riders = bullet?.riders ?? [];
+  const baseDamage = totalDamage(state, config);
   const attack: AttackInstance = {
-    attackId: state.nextAttackId++, delivery, damage, baseDamage: totalDamage(state, config),
+    attackId: state.nextAttackId++, delivery, damage, baseDamage,
+    impactBudget: impactBudget ?? baseDamage,
     riders, hitIds, impacts: impacts.map(impact => ({ ...impact })), sourceStar,
     sourceCardId: sourceCardId ?? bullet?.sourceCardId,
   };
@@ -113,7 +116,7 @@ function resolveAreaImpact(
   for (const enemy of [...state.enemies]) {
     const distance = Math.hypot(enemy.x - point.x, enemy.y - point.y);
     if (distance > impact.radius + enemy.r) continue;
-    const damage = attack.baseDamage * impact.damageRatio
+    const damage = attack.impactBudget * impact.damageRatio
       * (1 - impact.falloff * Math.min(1, distance / impact.radius));
     resolveImpact(
       state, config, rng, attack, enemy, damage, point, events, bullet, false,
@@ -205,6 +208,7 @@ export function shoot(state: GameState, config: Config, rng: Rng, target: Enemy)
     const begun = beginAttack(
       state, config, rng, 'lob', bullet.damage, form.sourceStar, form.impacts, bullet,
       equippedCardId(state, form.sourceCardType),
+      baseDamage * totalMulti(state),
     );
     state.bullets.push(bullet);
     const flightSeconds = Math.hypot(target.x - bullet.x, target.y - bullet.y)
@@ -293,14 +297,13 @@ export function updateTurret(state: GameState, config: Config, rng: Rng, dt: num
     if (target && clock <= 1e-9) {
       const duration = Math.max(form.tickInterval, form.duration);
       const tickCount = Math.max(1, Math.round(duration / form.tickInterval));
-      const baselineDps = totalDamage(state, config)
-        * totalFireRate(state, config)
-        * totalMulti(state);
-      const cycleDamage = baselineDps * form.interval * form.deliveryDamageRatio;
+      const turretBaselineDps = baselineDps(state, config);
+      const cycleDamage = turretBaselineDps * form.interval * form.deliveryDamageRatio;
       const damagePerTick = cycleDamage / tickCount;
       const begun = beginAttack(
         state, config, rng, 'line', damagePerTick, form.sourceStar, form.impacts, undefined,
         equippedCardId(state, form.sourceCardType),
+        turretBaselineDps * form.interval * cfg.combat.weaponFusion.impactShare,
       );
       const beam: BeamEntity = {
         ...begun.attack,

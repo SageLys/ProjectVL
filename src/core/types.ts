@@ -295,8 +295,10 @@ export interface WeaponImpactSpec {
 export interface AttackInstance {
   attackId: number;
   delivery: AttackDelivery;
-  /** 开火时快照的炮台基础伤害，供融合 impact 使用。 */
+  /** 开火时快照的炮台基础伤害，供 riders 与 legacy fallback 使用。 */
   baseDamage: number;
+  /** 按 delivery 分配的单次范围形态预算；不改变 baseDamage 的 legacy 语义。 */
+  impactBudget: number;
   damage: number;
   riders: AttackRider[];
   hitIds: number[];

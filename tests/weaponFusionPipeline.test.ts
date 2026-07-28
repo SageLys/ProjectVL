@@ -51,7 +51,7 @@ function emitBeam(state: GameState): void {
 }
 
 describe('weaponForm 正交融合', () => {
-  it('正式两张 6★ 形态卡融合为 line + 衰减 aoe', () => {
+  it('正式两张 6★ 形态卡融合为 line + aoe', () => {
     registerSkillDefs(cfg.skills.cards);
     const state = freshState();
     equip(state, 'pierce', 6);
@@ -97,7 +97,12 @@ describe('weaponForm 正交融合', () => {
     emitBeam(state);
     updateTurret(state, config, rng, 0.1);
 
+    const cycleBudget = config.damage * config.fireRate * state.multi * 0.9;
+    const directTickDamage = cycleBudget / 6;
+    const impactBudget = cycleBudget * cfg.combat.weaponFusion.impactShare;
     expect(state.beams[0].sourceStar).toBe(6);
+    expect(direct.hp).toBeCloseTo(100 - directTickDamage - impactBudget, 10);
+    expect(splashOnly.hp).toBeCloseTo(100 - impactBudget * (1 - 0.5 * 45 / 80), 10);
     expect(direct.hp).toBeLessThan(splashOnly.hp); // 直伤 + 爆炸
     expect(splashOnly.hp).toBeLessThan(100);      // 仅爆炸
   });

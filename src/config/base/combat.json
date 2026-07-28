@@ -24,6 +24,7 @@
     "muzzleOffset": 24
   },
   "weaponFusion": {
+    "impactShare": 0.41416083945517623,
     "damping": 0.75,
     "areaMul": 0.36
   },

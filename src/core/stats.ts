@@ -43,6 +43,11 @@ export function totalMulti(state: GameState): number {
   ) * modifier.mul;
 }
 
+/** 普通主炮完整继承 damage、fireRate 与 multi 后的每秒输出预算。 */
+export function baselineDps(state: GameState, config: Config): number {
+  return totalDamage(state, config) * totalFireRate(state, config) * totalMulti(state);
+}
+
 /** Permanent base plus equipped and time-limited maximum-HP affixes. */
 export function totalMaxHp(state: GameState): number {
   return Math.max(

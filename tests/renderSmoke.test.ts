@@ -56,7 +56,8 @@ describe('渲染冒烟 · 战斗表现实体', () => {
   it('光束、榴弹弧线、落点/爆炸、嘲讽与召唤事件均可绘制', () => {
     const s = freshState();
     s.beams.push({
-      attackId: 1, delivery: 'line', baseDamage: 10, damage: 2, riders: [], hitIds: [], impacts: [], sourceStar: 6,
+      attackId: 1, delivery: 'line', baseDamage: 10, impactBudget: 10,
+      damage: 2, riders: [], hitIds: [], impacts: [], sourceStar: 6,
       angle: 0, width: 30, range: 250, remaining: 0.4, duration: 0.6, tickTimer: 0.1, tickInterval: 0.1, damagePerTick: 2,
     });
     s.bullets.push({ x: 100, y: 100, vx: 10, vy: 0, r: 8, life: 1, damage: 10, kind: 'mortar', flightProgress: 0.5 });
