@@ -2695,6 +2695,54 @@ namespace ProjectVL.Tests
             Assert.That(_state.DropLifetimeMultiplier, Is.GreaterThan(1.3f));
         }
 
+        [Test]
+        public void IronvineRetaliationDropRequiresRetaliationKill()
+        {
+            CardState ironvine = _state.CreateCard("ironvine", 5);
+            ironvine.EvolutionPath.Add("3:ironvineC");
+            ironvine.EvolutionPath.Add("5:ironvineC2");
+            _state.Equipment[0] = ironvine;
+            CardState thorns = _state.CreateCard("thorns", 3);
+            thorns.EvolutionPath.Add("3:thornsA");
+            _state.Equipment[1] = thorns;
+            var economy = new EconomyConfig();
+            economy.defaults.dropChance = 0f;
+            var drops = new DropSystem(
+                economy,
+                new ConstantRandomSource(0f));
+            var system = new CombatSystem(
+                _combat,
+                _enemies,
+                drops);
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+            EnemyState plain = AddEnemy(
+                new Float2(200f, 200f),
+                1f);
+
+            HitWithSystem(system, plain.Position, profile);
+
+            Assert.That(_state.GroundDrops, Is.Empty);
+            Assert.That(
+                profile.ControlledKillExtraDropChance,
+                Is.Zero);
+            Assert.That(
+                profile.RetaliationKillExtraDropChance,
+                Is.EqualTo(0.2f));
+
+            Float2 turret = new Float2(
+                _combat.turret.x,
+                _combat.turret.y);
+            EnemyState retaliationVictim = AddEnemy(
+                turret + new Float2(60f, 0f),
+                1f);
+            AddEnemy(turret, 100f, 5f);
+
+            system.StepEnemies(_state, 0f);
+
+            Assert.That(_state.Enemies.Contains(retaliationVictim), Is.False);
+            Assert.That(_state.GroundDrops.Count, Is.EqualTo(1));
+        }
+
         [TestCase("fateLoom")]
         [TestCase("goldenVolley")]
         [TestCase("bountyCall")]

@@ -2000,7 +2000,9 @@ namespace ProjectVL.Systems
                         -1,
                         0f,
                         profile.ThornsAuraSlowRatio,
-                        profile.ThornsAuraSlowDuration);
+                        profile.ThornsAuraSlowDuration,
+                        0f,
+                        true);
                     ExecuteLowHealthEnemies(
                         state,
                         TurretPosition,
@@ -2230,7 +2232,8 @@ namespace ProjectVL.Systems
         private void DamageEnemy(
             GameState state,
             EnemyState enemy,
-            float damage)
+            float damage,
+            bool retaliationSource = false)
         {
             bool killedWhileFrozen = enemy.FrozenRemaining > 0f;
             bool killedWhileDot = enemy.DotRemaining > 0f
@@ -2309,6 +2312,13 @@ namespace ProjectVL.Systems
                         state,
                         enemy.Position,
                         profile.KillExtraDropChance);
+                }
+                if (retaliationSource)
+                {
+                    ApplyRetaliationKillCardEffects(
+                        state,
+                        profile,
+                        enemy.Position);
                 }
                 if (killedWhileDot)
                 {
@@ -3826,6 +3836,22 @@ namespace ProjectVL.Systems
             }
         }
 
+        private void ApplyRetaliationKillCardEffects(
+            GameState state,
+            CardCombatProfile profile,
+            Float2 deathPosition)
+        {
+            if (profile.RetaliationKillExtraDropChance <= 0f)
+            {
+                return;
+            }
+
+            _drops?.TrySpawnBonus(
+                state,
+                deathPosition,
+                profile.RetaliationKillExtraDropChance);
+        }
+
         private void ApplyMeteorHit(
             GameState state,
             BulletState bullet,
@@ -4368,7 +4394,10 @@ namespace ProjectVL.Systems
                             profile.ShieldBreakDamage,
                             -1,
                             profile.ShieldBreakKnockback,
-                            0f);
+                            0f,
+                            0f,
+                            0f,
+                            true);
                     }
                 }
 
@@ -4488,7 +4517,10 @@ namespace ProjectVL.Systems
                 damage,
                 -1,
                 profile.BreachKnockback,
-                profile.BreachSlowRatio);
+                profile.BreachSlowRatio,
+                0f,
+                0f,
+                true);
             if (profile.BreachSlowRatio > 0f)
             {
                 foreach (EnemyState enemy in state.Enemies)
@@ -4716,7 +4748,8 @@ namespace ProjectVL.Systems
             float knockback,
             float slowRatio,
             float slowDuration = 0f,
-            float falloff = 0f)
+            float falloff = 0f,
+            bool retaliationSource = false)
         {
             var targets = new System.Collections.Generic.List<EnemyState>();
             foreach (EnemyState enemy in state.Enemies)
@@ -4739,7 +4772,8 @@ namespace ProjectVL.Systems
                 DamageEnemy(
                     state,
                     enemy,
-                    damage * damageMultiplier);
+                    damage * damageMultiplier,
+                    retaliationSource);
                 if (!state.Enemies.Contains(enemy))
                 {
                     continue;
@@ -4890,7 +4924,8 @@ namespace ProjectVL.Systems
                     DamageEnemy(
                         state,
                         boss,
-                        damage * profile.ThornsRatio);
+                        damage * profile.ThornsRatio,
+                        true);
                     if (!state.Enemies.Contains(boss))
                     {
                         break;

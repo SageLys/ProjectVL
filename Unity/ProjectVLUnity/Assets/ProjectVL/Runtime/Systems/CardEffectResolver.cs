@@ -1583,8 +1583,8 @@ namespace ProjectVL.Systems
             }
             else if (advanced == "ironvineC2")
             {
-                profile.ControlledKillExtraDropChance = Max(
-                    profile.ControlledKillExtraDropChance,
+                profile.RetaliationKillExtraDropChance = Max(
+                    profile.RetaliationKillExtraDropChance,
                     0.2f);
             }
         }

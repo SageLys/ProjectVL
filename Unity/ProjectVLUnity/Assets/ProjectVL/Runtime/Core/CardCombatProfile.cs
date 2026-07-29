@@ -192,6 +192,7 @@ namespace ProjectVL.Core
         public float BrandedKillXpDuration { get; set; }
         public int BrandedKillXpMaxStacks { get; set; }
         public float BrandedKillExtraDropChance { get; set; }
+        public float RetaliationKillExtraDropChance { get; set; }
         public float OnHitFireRateMultiplier { get; set; } = 1f;
         public float OnHitFireRateDuration { get; set; }
         public int OnHitFireRateMaxStacks { get; set; }
