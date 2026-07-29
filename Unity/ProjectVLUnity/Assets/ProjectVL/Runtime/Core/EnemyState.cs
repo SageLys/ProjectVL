@@ -12,7 +12,9 @@ namespace ProjectVL.Core
         public float Damage { get; }
         public float ContactDps { get; }
         public float XpReward { get; }
-        public EnemySpawnKind SpawnKind { get; }
+        public EnemySpawnKind SpawnKind { get; internal set; }
+        public int? BountyEncounterId { get; internal set; }
+        public string BountyRewardType { get; internal set; }
         public BossPhase BossPhase { get; set; }
         public int OrbitDirection { get; }
         public float ContactTickRemaining { get; set; }

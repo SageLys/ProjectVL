@@ -13,6 +13,8 @@ namespace ProjectVL.Presentation
             new Dictionary<int, SpriteRenderer>();
         private readonly Dictionary<int, DropView> _dropViews =
             new Dictionary<int, DropView>();
+        private readonly Dictionary<int, DropView> _bountyOfferViews =
+            new Dictionary<int, DropView>();
         private readonly List<SpriteRenderer> _groundZoneViews =
             new List<SpriteRenderer>();
 
@@ -54,6 +56,7 @@ namespace ProjectVL.Presentation
             SyncEnemies();
             SyncBullets();
             SyncDrops();
+            SyncBountyOffers();
             SyncGroundZones();
             SyncDecoy();
             SyncBeam();
@@ -341,6 +344,79 @@ namespace ProjectVL.Presentation
             }
         }
 
+        private void SyncBountyOffers()
+        {
+            var activeIds = new HashSet<int>();
+            foreach (BountyOfferState offer in _state.BountyOffers)
+            {
+                activeIds.Add(offer.Id);
+                if (!_bountyOfferViews.TryGetValue(
+                    offer.Id,
+                    out DropView view))
+                {
+                    SpriteRenderer renderer = CreateSpriteView(
+                        $"Bounty Offer {offer.Id}",
+                        _circleSprite,
+                        new Color(1f, 0.68f, 0.12f, 0.82f));
+                    renderer.transform.SetParent(transform, false);
+                    renderer.transform.localScale =
+                        new Vector3(60f, 60f, 1f);
+                    renderer.sortingOrder = 18;
+
+                    var labelObject = new GameObject("Bounty Label");
+                    labelObject.transform.SetParent(
+                        renderer.transform,
+                        false);
+                    labelObject.transform.localPosition =
+                        new Vector3(0f, 0f, -0.1f);
+                    labelObject.transform.localScale =
+                        new Vector3(0.028f, 0.028f, 1f);
+                    TextMesh label = labelObject.AddComponent<TextMesh>();
+                    label.anchor = TextAnchor.MiddleCenter;
+                    label.alignment = TextAlignment.Center;
+                    label.fontSize = 30;
+                    label.color = new Color(0.15f, 0.07f, 0.01f);
+                    label.GetComponent<MeshRenderer>().sortingOrder = 19;
+
+                    view = new DropView(renderer, label);
+                    _bountyOfferViews.Add(offer.Id, view);
+                }
+
+                view.Renderer.transform.position =
+                    PixelToWorld(offer.Position);
+                float lifeRatio = Mathf.Clamp01(
+                    offer.Remaining / offer.MaxRemaining);
+                float pulse = 1f
+                    + Mathf.Sin(_state.Time * 6f) * 0.08f;
+                view.Renderer.transform.localScale =
+                    new Vector3(60f * pulse, 60f * pulse, 1f);
+                view.Renderer.color = Color.Lerp(
+                    new Color(1f, 0.2f, 0.12f, 0.72f),
+                    offer.Guaranteed
+                        ? new Color(1f, 0.9f, 0.2f, 0.95f)
+                        : new Color(1f, 0.68f, 0.12f, 0.85f),
+                    lifeRatio);
+                view.Label.text =
+                    $"BOUNTY\n{offer.RewardCardStar} STAR\n"
+                    + $"{offer.Remaining:0.0}s";
+            }
+
+            var removedIds = new List<int>();
+            foreach (KeyValuePair<int, DropView> pair in _bountyOfferViews)
+            {
+                if (!activeIds.Contains(pair.Key))
+                {
+                    Destroy(pair.Value.Renderer.gameObject);
+                    removedIds.Add(pair.Key);
+                }
+            }
+
+            foreach (int id in removedIds)
+            {
+                _bountyOfferViews.Remove(id);
+            }
+        }
+
         private void SyncDecoy()
         {
             SyncDecoyView(
@@ -521,6 +597,11 @@ namespace ProjectVL.Presentation
             if (enemy.SpawnKind == EnemySpawnKind.ValidationElite)
             {
                 return new Color(1f, 0.78f, 0.22f);
+            }
+
+            if (enemy.SpawnKind == EnemySpawnKind.Bounty)
+            {
+                return new Color(1f, 0.45f, 0.08f);
             }
 
             switch (enemy.Kind)

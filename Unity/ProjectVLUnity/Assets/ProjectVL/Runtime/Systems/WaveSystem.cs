@@ -11,18 +11,21 @@ namespace ProjectVL.Systems
         private readonly WavePlanResolver _planResolver;
         private readonly GodPoolSystem _godPool;
         private readonly CardPoolSystem _cardPool;
+        private readonly BountySystem _bounties;
         private ResolvedWavePlan _activePlan;
 
         public WaveSystem(
             WavesConfig waves,
             EnemyFactory enemyFactory,
             GodPoolSystem godPool = null,
-            CardPoolSystem cardPool = null)
+            CardPoolSystem cardPool = null,
+            BountySystem bounties = null)
         {
             _waves = waves;
             _enemyFactory = enemyFactory;
             _godPool = godPool;
             _cardPool = cardPool;
+            _bounties = bounties;
             _planResolver = new WavePlanResolver(waves);
         }
 
@@ -39,7 +42,9 @@ namespace ProjectVL.Systems
             _cardPool?.GenerateActivePool(state, nextWave);
             _activePlan = _planResolver.Resolve(nextWave);
             state.SpawnLeft = _activePlan.Quota;
+            state.WaveSpawnQuota = _activePlan.Quota;
             state.SpawnTimer = _waves.firstSpawnDelay;
+            _bounties?.OnWaveStarted(state);
 
             if (_activePlan.Validation != null)
             {
@@ -99,9 +104,13 @@ namespace ProjectVL.Systems
 
             bool hasRegularEnemy = state.Enemies.Exists(
                 enemy => enemy.SpawnKind == EnemySpawnKind.Regular
+                    || enemy.SpawnKind == EnemySpawnKind.Bounty
                     || enemy.SpawnKind == EnemySpawnKind.ValidationElite);
-            if (state.SpawnLeft == 0 && !hasRegularEnemy)
+            if (state.SpawnLeft == 0
+                && !hasRegularEnemy
+                && !(_bounties?.HasBlockingEncounter(state) ?? false))
             {
+                _bounties?.ClearOffers(state);
                 if (IsBossWave(state.Wave))
                 {
                     EnemyState boss = _enemyFactory.SpawnWaveBoss(state);
@@ -192,6 +201,7 @@ namespace ProjectVL.Systems
         private void BeginIntermission(GameState state)
         {
             state.Bullets.Clear();
+            _bounties?.ClearOffers(state);
             state.IntermissionActive = true;
             state.IntermissionReady = false;
             state.IntermissionRemaining = _waves.intermission.settleSeconds

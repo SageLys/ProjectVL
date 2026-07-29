@@ -45,6 +45,11 @@ namespace ProjectVL.Config
             return Load<RelicsConfig>("Config/relics");
         }
 
+        public static BountyConfig LoadBounty()
+        {
+            return Load<BountyConfig>("Config/bounty");
+        }
+
         private static T Load<T>(string resourcePath)
         {
             TextAsset asset = Resources.Load<TextAsset>(resourcePath);

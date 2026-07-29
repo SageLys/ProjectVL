@@ -134,6 +134,31 @@ namespace ProjectVL.Systems
                 false);
         }
 
+        public GroundDropState SpawnSpecificDrop(
+            GameState state,
+            Float2 position,
+            string cardType,
+            int star,
+            float lifetime)
+        {
+            if (state == null
+                || string.IsNullOrEmpty(cardType)
+                || !CardPoolSystem.IsPlayable(cardType))
+            {
+                return null;
+            }
+
+            var drop = new GroundDropState(
+                state.TakeNextDropId(),
+                position,
+                cardType,
+                Math.Max(1, star),
+                Math.Max(0.1f, lifetime));
+            state.GroundDrops.Add(drop);
+            _cardPool?.RecordDropShown(state, cardType, false);
+            return drop;
+        }
+
         public void Step(GameState state, float deltaTime)
         {
             for (int index = state.GroundDrops.Count - 1; index >= 0; index--)

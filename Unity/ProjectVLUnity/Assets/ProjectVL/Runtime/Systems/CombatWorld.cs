@@ -7,20 +7,24 @@ namespace ProjectVL.Systems
         private readonly CombatSystem _combat;
         private readonly WaveSystem _waves;
         private readonly DropSystem _drops;
+        private readonly BountySystem _bounties;
 
         public CombatWorld(
             CombatSystem combat,
             WaveSystem waves,
-            DropSystem drops = null)
+            DropSystem drops = null,
+            BountySystem bounties = null)
         {
             _combat = combat;
             _waves = waves;
             _drops = drops;
+            _bounties = bounties;
         }
 
         public void Step(GameState state, float deltaTime)
         {
             _drops?.Step(state, deltaTime);
+            _bounties?.Step(state, deltaTime);
             if (state.IntermissionActive)
             {
                 _waves.Step(state, deltaTime);

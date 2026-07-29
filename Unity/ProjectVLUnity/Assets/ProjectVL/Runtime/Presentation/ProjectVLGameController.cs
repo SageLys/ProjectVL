@@ -18,6 +18,7 @@ namespace ProjectVL.Presentation
         private CombatSystem _combatSystem;
         private ProgressionSystem _progressionSystem;
         private GodPoolSystem _godPoolSystem;
+        private BountySystem _bountySystem;
         private CardSlotKind? _selectedSlotKind;
         private int _selectedSlotIndex = -1;
         private CardSlotKind? _pendingCastSlotKind;
@@ -159,6 +160,7 @@ namespace ProjectVL.Presentation
             ProgressionConfig progression = GameConfigLoader.LoadProgression();
             GodsConfig gods = GameConfigLoader.LoadGods();
             RelicsConfig relics = GameConfigLoader.LoadRelics();
+            BountyConfig bounty = GameConfigLoader.LoadBounty();
 
             GameState state = GameStateFactory.Create(combat, economy);
             _recipeSystem = new RecipeSystem(recipes);
@@ -177,11 +179,6 @@ namespace ProjectVL.Presentation
                 waves,
                 random,
                 difficultySystem);
-            _waveSystem = new WaveSystem(
-                waves,
-                enemyFactory,
-                _godPoolSystem,
-                cardPoolSystem);
             _progressionSystem = new ProgressionSystem(
                 progression,
                 relics,
@@ -191,16 +188,32 @@ namespace ProjectVL.Presentation
                 random,
                 _progressionSystem,
                 cardPoolSystem);
+            _bountySystem = new BountySystem(
+                bounty,
+                combat,
+                waves,
+                enemyFactory,
+                cardPoolSystem,
+                _dropSystem,
+                random);
+            _waveSystem = new WaveSystem(
+                waves,
+                enemyFactory,
+                _godPoolSystem,
+                cardPoolSystem,
+                _bountySystem);
             _combatSystem = new CombatSystem(
                 combat,
                 enemies,
                 _dropSystem,
-                _progressionSystem);
+                _progressionSystem,
+                _bountySystem);
 
             _world = new CombatWorld(
                 _combatSystem,
                 _waveSystem,
-                _dropSystem);
+                _dropSystem,
+                _bountySystem);
             _simulation = new GameSimulation(state, combat);
             _simulation.SimulationStep += _world.Step;
 
@@ -748,6 +761,13 @@ namespace ProjectVL.Presentation
                         "没有有效目标，请再次点击战场。";
                 }
 
+                return;
+            }
+
+            if (_bountySystem != null
+                && _bountySystem.AcceptAt(State, arenaPoint))
+            {
+                LastCardAction = "已接受悬赏，消灭全部悬赏敌人可获得奖励。";
                 return;
             }
 

@@ -635,7 +635,7 @@ namespace ProjectVL.Systems
             return result;
         }
 
-        private float CalculateAffinityScore(
+        public float CalculateAffinityScore(
             GameState state,
             string cardType)
         {

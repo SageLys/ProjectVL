@@ -119,6 +119,42 @@ namespace ProjectVL.Systems
             return enemy;
         }
 
+        public EnemyState SpawnBountyMember(
+            GameState state,
+            EnemyKind kind,
+            Float2 position,
+            BountyEncounterState encounter,
+            BountyEncounterConfig bounty)
+        {
+            EnemyTypeConfig definition = _enemies.Get(kind);
+            DifficultyMultipliers multipliers = MultipliersFor(state, kind);
+            float hp = (definition.hpBase + state.Wave * definition.hpPerWave)
+                * bounty.hpMul
+                * multipliers.Hp;
+            float speed =
+                (definition.speedBase + state.Wave * definition.speedPerWave)
+                * bounty.speedMul
+                * multipliers.Speed;
+            var enemy = new EnemyState(
+                state.TakeNextEnemyId(),
+                kind,
+                position,
+                hp,
+                speed,
+                definition.r,
+                definition.damage
+                    * bounty.damageMul
+                    * multipliers.Damage,
+                EnemySpawnKind.Bounty,
+                0f,
+                null,
+                definition.xp);
+            enemy.BountyEncounterId = encounter.Id;
+            enemy.BountyRewardType = encounter.RewardCardType;
+            state.Enemies.Add(enemy);
+            return enemy;
+        }
+
         public static RunReward ToRunReward(RewardConfig reward)
         {
             if (reward == null)

@@ -4,6 +4,7 @@ namespace ProjectVL.Core
     {
         Regular,
         WaveBoss,
+        Bounty,
         ValidationElite
     }
 }

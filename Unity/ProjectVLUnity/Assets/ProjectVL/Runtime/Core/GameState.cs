@@ -149,6 +149,7 @@ namespace ProjectVL.Core
         public float ShotCooldown { get; set; }
         public float TurretAngleRadians { get; set; }
         public int SpawnLeft { get; internal set; }
+        public int WaveSpawnQuota { get; internal set; }
         public float SpawnTimer { get; internal set; }
         public int Kills { get; internal set; }
         public List<EnemyState> Enemies { get; } = new List<EnemyState>();
@@ -157,11 +158,25 @@ namespace ProjectVL.Core
             new List<GroundDropState>();
         public List<GroundZoneState> GroundZones { get; } =
             new List<GroundZoneState>();
+        public List<BountyOfferState> BountyOffers { get; } =
+            new List<BountyOfferState>();
+        public List<BountyEncounterState> BountyEncounters { get; } =
+            new List<BountyEncounterState>();
+        public int BountyOffersThisWave { get; internal set; }
+        public int BountiesAcceptedThisWave { get; internal set; }
+        public int BountiesCompletedThisWave { get; internal set; }
+        public float BountyCheckTimer { get; internal set; }
+        public float BountyCooldownRemaining { get; internal set; }
+        public float LastHpLossAt { get; internal set; }
+        public string LastBountyRewardType { get; internal set; }
+        public bool GuaranteedBountyThisWave { get; internal set; }
 
         private int _nextEnemyId = 1;
         private int _nextBulletId = 1;
         private int _nextDropId = 1;
         private int _nextCardId = 1;
+        private int _nextBountyOfferId = 1;
+        private int _nextBountyEncounterId = 1;
         private CardInventorySystem _inventory;
         private readonly List<LevelUpgradeChoice> _pendingLevelUpgrades =
             new List<LevelUpgradeChoice>();
@@ -275,9 +290,25 @@ namespace ProjectVL.Core
             return _nextDropId++;
         }
 
+        internal int TakeNextBountyOfferId()
+        {
+            return _nextBountyOfferId++;
+        }
+
+        internal int TakeNextBountyEncounterId()
+        {
+            return _nextBountyEncounterId++;
+        }
+
         internal void ApplyDamage(float damage)
         {
-            Hp = Math.Max(0f, Hp - Math.Max(0f, damage));
+            float applied = Math.Max(0f, damage);
+            if (applied > 0f)
+            {
+                LastHpLossAt = Time;
+            }
+
+            Hp = Math.Max(0f, Hp - applied);
             if (Hp <= 0f)
             {
                 EndRun(false);

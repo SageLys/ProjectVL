@@ -10,17 +10,20 @@ namespace ProjectVL.Systems
         private readonly EnemiesConfig _enemies;
         private readonly DropSystem _drops;
         private readonly ProgressionSystem _progression;
+        private readonly BountySystem _bounties;
 
         public CombatSystem(
             CombatConfig combat,
             EnemiesConfig enemies,
             DropSystem drops = null,
-            ProgressionSystem progression = null)
+            ProgressionSystem progression = null,
+            BountySystem bounties = null)
         {
             _combat = combat;
             _enemies = enemies;
             _drops = drops;
             _progression = progression;
+            _bounties = bounties;
         }
 
         public bool CastConsumable(
@@ -1332,6 +1335,7 @@ namespace ProjectVL.Systems
                 }
 
                 state.Enemies.RemoveAt(index);
+                _bounties?.NotifyBreached(state, enemy);
                 HandleBreach(state, profile, enemy.Damage);
             }
         }
@@ -1364,6 +1368,7 @@ namespace ProjectVL.Systems
 
             if (state.Enemies.Remove(enemy))
             {
+                _bounties?.NotifyKilled(state, enemy);
                 state.Kills++;
                 _drops?.TrySpawnOnKill(state, enemy);
                 state.GrantReward(enemy.Reward);
@@ -3084,7 +3089,11 @@ namespace ProjectVL.Systems
         {
             Float2 turret = TurretPosition;
             EnemyState closest = null;
+            EnemyState bountyClosest = null;
+            EnemyState emergencyClosest = null;
             float closestScore = float.MaxValue;
+            float bountyDistance = float.MaxValue;
+            float emergencyDistance = float.MaxValue;
             CardCombatProfile profile =
                 CardEffectResolver.Resolve(state);
             float auraRadius =
@@ -3093,6 +3102,26 @@ namespace ProjectVL.Systems
             foreach (EnemyState enemy in state.Enemies)
             {
                 float distance = Float2.Distance(turret, enemy.Position);
+                if (distance > _combat.defaults.range)
+                {
+                    continue;
+                }
+
+                if (_bounties != null
+                    && distance <= _bounties.EmergencyOverrideDistance
+                    && distance < emergencyDistance)
+                {
+                    emergencyClosest = enemy;
+                    emergencyDistance = distance;
+                }
+
+                if (enemy.BountyEncounterId.HasValue
+                    && distance < bountyDistance)
+                {
+                    bountyClosest = enemy;
+                    bountyDistance = distance;
+                }
+
                 float priority = enemy.FocusPriorityRemaining > 0f
                     ? enemy.FocusPriorityWeight
                     : 1f;
@@ -3105,15 +3134,14 @@ namespace ProjectVL.Systems
                 }
 
                 float score = distance / priority;
-                if (distance <= _combat.defaults.range
-                    && score < closestScore)
+                if (score < closestScore)
                 {
                     closest = enemy;
                     closestScore = score;
                 }
             }
 
-            return closest;
+            return emergencyClosest ?? bountyClosest ?? closest;
         }
 
         private Float2 TurretPosition =>
