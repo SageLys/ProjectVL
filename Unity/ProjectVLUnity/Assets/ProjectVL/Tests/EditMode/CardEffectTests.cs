@@ -2507,6 +2507,85 @@ namespace ProjectVL.Tests
             Assert.That(_state.DropRateMultiplier, Is.EqualTo(1.3f));
         }
 
+        [TestCase("sentinel")]
+        [TestCase("retribution")]
+        [TestCase("ironvine")]
+        public void BulwarkRosterCardsArePlayableAndCastable(string type)
+        {
+            CardState card = _state.CreateCard(type, 3);
+
+            Assert.That(CardPoolSystem.IsPlayable(type), Is.True);
+            Assert.That(CombatSystem.SupportsConsumable(card), Is.True);
+        }
+
+        [Test]
+        public void SentinelRouteCreatesMirrorTurretAndConsumable()
+        {
+            EquipResolved(
+                "sentinel",
+                5,
+                "3:sentinelA",
+                "5:sentinelA2");
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+            _system.CastConsumable(
+                _state,
+                _state.CreateCard("sentinel", 6),
+                new Float2(300f, 300f));
+
+            Assert.That(profile.DecoyMirrorTurret, Is.True);
+            Assert.That(profile.DecoyCount, Is.EqualTo(2));
+            Assert.That(_state.DecoyIsMirrorTurret, Is.True);
+            Assert.That(_state.SecondaryDecoyActive, Is.True);
+        }
+
+        [Test]
+        public void RetributionRouteAndConsumableDamageAndStun()
+        {
+            EquipResolved(
+                "retribution",
+                5,
+                "3:retributionB",
+                "5:retributionA2");
+            EnemyState enemy = AddEnemy(
+                new Float2(250f, 250f),
+                200f);
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+
+            _system.CastConsumable(
+                _state,
+                _state.CreateCard("retribution", 3),
+                enemy.Position);
+
+            Assert.That(
+                profile.BreachBurstDamageMultiplier,
+                Is.EqualTo(2.88f).Within(0.001f));
+            Assert.That(profile.BreachVulnerableRatio, Is.EqualTo(0.2f));
+            Assert.That(enemy.Hp, Is.LessThan(200f));
+            Assert.That(enemy.StunnedRemaining, Is.EqualTo(0.6f));
+        }
+
+        [Test]
+        public void IronvineRouteAndConsumableBoostDrops()
+        {
+            EquipResolved(
+                "ironvine",
+                5,
+                "3:ironvineB",
+                "5:ironvineA2");
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+
+            _system.CastConsumable(
+                _state,
+                _state.CreateCard("ironvine", 3),
+                new Float2());
+            _system.StepPassives(_state, 0f);
+
+            Assert.That(profile.DropLifetimeMultiplier, Is.GreaterThan(1.25f));
+            Assert.That(profile.XpMultiplier, Is.EqualTo(1.18f));
+            Assert.That(_state.DropRateMultiplier, Is.GreaterThan(1.3f));
+            Assert.That(_state.DropLifetimeMultiplier, Is.GreaterThan(1.3f));
+        }
+
         private void EquipResolved(
             string type,
             int star,

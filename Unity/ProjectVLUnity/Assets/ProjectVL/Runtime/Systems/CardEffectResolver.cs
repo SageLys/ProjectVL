@@ -117,6 +117,15 @@ namespace ProjectVL.Systems
                     case "ashHarvest":
                         ApplyAshHarvest(card, profile);
                         break;
+                    case "sentinel":
+                        ApplySentinel(card, profile);
+                        break;
+                    case "retribution":
+                        ApplyRetribution(card, profile);
+                        break;
+                    case "ironvine":
+                        ApplyIronvine(card, profile);
+                        break;
                 }
             }
 
@@ -1375,6 +1384,181 @@ namespace ProjectVL.Systems
             else if (advanced == "ashHarvestC2")
             {
                 profile.DotKillRestore = 2f;
+            }
+        }
+
+        private static void ApplySentinel(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            if (card.Star >= 6)
+            {
+                profile.DecoyHp = Max(profile.DecoyHp, 140f);
+                profile.DecoyTauntRadius = Max(
+                    profile.DecoyTauntRadius,
+                    130f);
+                profile.DecoyDistance = 150f;
+                profile.DecoyCount = 1;
+                profile.DecoyMirrorTurret = true;
+                profile.DecoyDamageRatio = 0.65f;
+                profile.DecoyFireInterval = 0.35f;
+                profile.DecoyFireRangeRatio = 1f;
+                return;
+            }
+
+            string route = RouteAt(card, 3);
+            profile.DecoyHp = Max(
+                profile.DecoyHp,
+                route == "sentinelC" ? 100f
+                    : route == "sentinelB" ? 60f : 70f);
+            profile.DecoyTauntRadius = Max(
+                profile.DecoyTauntRadius,
+                100f);
+            profile.DecoyDistance = 145f;
+            profile.DecoyCount = 1;
+            profile.DecoyMirrorTurret = true;
+            profile.DecoyDamageRatio =
+                route == "sentinelA" ? 0.5f : 0.4f;
+            profile.DecoyFireInterval =
+                route == "sentinelB" ? 0.5f : 0.7f;
+            profile.DecoyFireRangeRatio = 1f;
+            if (card.Star >= 4)
+            {
+                profile.DecoyHp *= 1.2f;
+                profile.DecoyDamageRatio *= 1.2f;
+            }
+
+            string advanced = RouteAt(card, 5);
+            if (advanced == "sentinelA2")
+            {
+                profile.DecoyCount = 2;
+                profile.SecondaryDecoyDistance = 190f;
+            }
+            else if (advanced == "sentinelB2")
+            {
+                profile.SlowRatio = Max(profile.SlowRatio, 0.2f);
+                profile.SlowDuration = Max(profile.SlowDuration, 1f);
+            }
+            else if (advanced == "sentinelC2")
+            {
+                profile.ShieldBreakDamage = Max(
+                    profile.ShieldBreakDamage,
+                    35f);
+                profile.ShieldBreakKnockback = Max(
+                    profile.ShieldBreakKnockback,
+                    70f);
+            }
+        }
+
+        private static void ApplyRetribution(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            if (card.Star >= 6)
+            {
+                profile.ImpactBreachRadius = 180f;
+                profile.BreachBurstDamageMultiplier = 3.5f;
+                profile.BreachBurstRadius = 180f;
+                profile.ImpactBreachStunDuration = 0.7f;
+                profile.ImpactBreachCooldown = 4f;
+                profile.BreachSlowRatio = 0.35f;
+                profile.BreachSlowDuration = 2f;
+                return;
+            }
+
+            string route = RouteAt(card, 3);
+            profile.ImpactBreachRadius = 120f;
+            profile.BreachBurstRadius = 120f;
+            profile.BreachBurstDamageMultiplier =
+                route == "retributionB" ? 2.4f : 1.6f;
+            profile.ImpactBreachStunDuration =
+                route == "retributionA" ? 0.7f : 0.4f;
+            profile.ImpactBreachCooldown =
+                route == "retributionC" ? 3.5f : 5f;
+            if (card.Star >= 4)
+            {
+                profile.BreachBurstDamageMultiplier *= 1.2f;
+                profile.ImpactBreachStunDuration *= 1.2f;
+            }
+
+            string advanced = RouteAt(card, 5);
+            if (advanced == "retributionA2")
+            {
+                profile.BreachVulnerableRadius = 130f;
+                profile.BreachVulnerableRatio = 0.2f;
+                profile.BreachVulnerableDuration = 2.5f;
+            }
+            else if (advanced == "retributionB2")
+            {
+                profile.ShieldHits += 1;
+            }
+            else if (advanced == "retributionC2")
+            {
+                profile.BreachKnockback = Max(
+                    profile.BreachKnockback,
+                    100f);
+                profile.BreachBurstRadius = Max(
+                    profile.BreachBurstRadius,
+                    220f);
+            }
+        }
+
+        private static void ApplyIronvine(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            if (card.Star >= 6)
+            {
+                profile.DropRateMultiplier = Max(
+                    profile.DropRateMultiplier,
+                    1.3f);
+                profile.WaveStartDefenseMultiplier = 1.3f;
+                profile.WaveStartDefenseDuration = 5f;
+                return;
+            }
+
+            string route = RouteAt(card, 3);
+            profile.DropRateMultiplier = Max(
+                profile.DropRateMultiplier,
+                route == "ironvineA" ? 1.18f : 1.1f);
+            if (route == "ironvineB")
+            {
+                profile.DropLifetimeMultiplier = Max(
+                    profile.DropLifetimeMultiplier,
+                    1.25f);
+            }
+            else if (route == "ironvineC")
+            {
+                profile.ExpiryConvertRatio = Max(
+                    profile.ExpiryConvertRatio,
+                    0.45f);
+            }
+
+            if (card.Star >= 4)
+            {
+                profile.DropRateMultiplier =
+                    1f + (profile.DropRateMultiplier - 1f) * 1.15f;
+                profile.DropLifetimeMultiplier =
+                    1f + (profile.DropLifetimeMultiplier - 1f) * 1.15f;
+            }
+
+            string advanced = RouteAt(card, 5);
+            if (advanced == "ironvineA2")
+            {
+                profile.XpMultiplier = Max(
+                    profile.XpMultiplier,
+                    1.18f);
+            }
+            else if (advanced == "ironvineB2")
+            {
+                profile.ShieldHits += 1;
+                profile.WaveStartRestoreRatio = 0.05f;
+            }
+            else if (advanced == "ironvineC2")
+            {
+                profile.ControlledKillExtraDropChance = Max(
+                    profile.ControlledKillExtraDropChance,
+                    0.2f);
             }
         }
 

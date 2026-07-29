@@ -34,7 +34,10 @@ namespace ProjectVL.Systems
             "magmaPool",
             "flashfire",
             "cinderheart",
-            "ashHarvest"
+            "ashHarvest",
+            "sentinel",
+            "retribution",
+            "ironvine"
         };
 
         private readonly IRandomSource _random;

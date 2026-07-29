@@ -83,6 +83,7 @@ namespace ProjectVL.Core
         public float EconomyBuffRemaining { get; internal set; }
         public float EconomyXpMultiplier { get; internal set; } = 1f;
         public float EconomyDropRateMultiplier { get; internal set; } = 1f;
+        public float EconomyDropLifetimeMultiplier { get; internal set; } = 1f;
         public float DamageMultiplier { get; internal set; } = 1f;
         public float DamageBuffRemaining { get; internal set; }
         public int DamageBuffStacks { get; internal set; }

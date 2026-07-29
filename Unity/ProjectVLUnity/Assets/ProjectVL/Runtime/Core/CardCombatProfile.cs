@@ -221,5 +221,8 @@ namespace ProjectVL.Core
         public float DotKillRestore { get; set; }
         public float WaveStartDamageMultiplier { get; set; } = 1f;
         public float WaveStartDamageDuration { get; set; }
+        public float WaveStartRestoreRatio { get; set; }
+        public float WaveStartDefenseMultiplier { get; set; } = 1f;
+        public float WaveStartDefenseDuration { get; set; }
     }
 }

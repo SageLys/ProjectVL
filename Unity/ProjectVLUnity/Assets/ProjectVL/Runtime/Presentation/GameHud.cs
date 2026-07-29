@@ -1145,6 +1145,12 @@ namespace ProjectVL.Presentation
                     return "烬心";
                 case "ashHarvest":
                     return "灰烬收割";
+                case "sentinel":
+                    return "哨卫";
+                case "retribution":
+                    return "惩戒反击";
+                case "ironvine":
+                    return "铁藤";
                 default:
                     return type;
             }

@@ -135,6 +135,15 @@ namespace ProjectVL.Systems
                 case "ashHarvest":
                     CastAshHarvest(state, card.Star);
                     return true;
+                case "sentinel":
+                    CastSentinel(state, card.Star, point);
+                    return true;
+                case "retribution":
+                    CastRetribution(state, card.Star, point);
+                    return true;
+                case "ironvine":
+                    CastIronvine(state, card.Star);
+                    return true;
                 default:
                     return false;
             }
@@ -174,7 +183,10 @@ namespace ProjectVL.Systems
                     || card.Type == "magmaPool"
                     || card.Type == "flashfire"
                     || card.Type == "cinderheart"
-                    || card.Type == "ashHarvest");
+                    || card.Type == "ashHarvest"
+                    || card.Type == "sentinel"
+                    || card.Type == "retribution"
+                    || card.Type == "ironvine");
         }
 
         public void StepTurret(GameState state, float deltaTime)
@@ -1528,6 +1540,74 @@ namespace ProjectVL.Systems
                 StarValue(star, 3f, 4f, 5f));
         }
 
+        private void CastSentinel(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            state.DecoyActive = true;
+            state.DecoyIsMirrorTurret = true;
+            state.DecoyPosition = point;
+            state.DecoyHp = StarValue(star, 40f, 70f, 110f);
+            state.DecoyMaxHp = state.DecoyHp;
+            state.DecoyTauntRadius = StarValue(
+                star,
+                80f,
+                120f,
+                170f);
+            state.DecoyDamageRatio = StarValue(
+                star,
+                0.35f,
+                0.5f,
+                0.7f);
+            state.DecoyFireInterval = 0.5f;
+            state.DecoyFireRangeRatio = 1f;
+            state.DecoyFireCooldown = 0f;
+            state.DecoyLifeRemaining = StarValue(
+                star,
+                3f,
+                4f,
+                5f);
+            state.SecondaryDecoyActive = star >= 6;
+            state.SecondaryDecoyHp = state.DecoyHp;
+            state.SecondaryDecoyPosition =
+                point + new Float2(55f, 0f);
+        }
+
+        private void CastRetribution(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            float radius = StarValue(star, 90f, 135f, 185f);
+            DamageArea(
+                state,
+                point,
+                radius,
+                BaseDamage(state)
+                    * StarValue(star, 2f, 3.5f, 5.5f),
+                -1,
+                0f,
+                0f);
+            ApplyAreaKnockback(
+                state,
+                point,
+                radius,
+                StarValue(star, 0f, 70f, 120f),
+                StarValue(star, 0.35f, 0.6f, 1f));
+        }
+
+        private void CastIronvine(GameState state, int star)
+        {
+            state.EconomyDropRateMultiplier =
+                StarValue(star, 1.15f, 1.3f, 1.5f);
+            state.EconomyDropLifetimeMultiplier =
+                state.EconomyDropRateMultiplier;
+            state.EconomyBuffRemaining = Math.Max(
+                state.EconomyBuffRemaining,
+                StarValue(star, 3f, 4f, 5f));
+        }
+
         private float BaseDamage(GameState state)
         {
             return Math.Max(
@@ -1603,6 +1683,7 @@ namespace ProjectVL.Systems
                 {
                     state.EconomyXpMultiplier = 1f;
                     state.EconomyDropRateMultiplier = 1f;
+                    state.EconomyDropLifetimeMultiplier = 1f;
                 }
             }
 
@@ -1631,7 +1712,8 @@ namespace ProjectVL.Systems
 
             state.DropRateMultiplier = profile.DropRateMultiplier
                 * state.EconomyDropRateMultiplier;
-            state.DropLifetimeMultiplier = profile.DropLifetimeMultiplier;
+            state.DropLifetimeMultiplier = profile.DropLifetimeMultiplier
+                * state.EconomyDropLifetimeMultiplier;
             state.ExpiryConvertRatio = profile.ExpiryConvertRatio;
             state.XpMultiplier = profile.XpMultiplier
                 * state.EconomyXpMultiplier;
@@ -2728,6 +2810,18 @@ namespace ProjectVL.Systems
                 state.DamageBuffRemaining =
                     profile.WaveStartDamageDuration;
                 state.DamageBuffStacks = 1;
+            }
+            if (profile.WaveStartDefenseMultiplier > 1f)
+            {
+                state.DefenseDurabilityMultiplier =
+                    profile.WaveStartDefenseMultiplier;
+                state.DefenseBuffRemaining =
+                    profile.WaveStartDefenseDuration;
+            }
+            if (profile.WaveStartRestoreRatio > 0f)
+            {
+                state.RestoreHp(
+                    state.MaxHp * profile.WaveStartRestoreRatio);
             }
 
             state.DecoyActive = profile.DecoyHp > 0f;
