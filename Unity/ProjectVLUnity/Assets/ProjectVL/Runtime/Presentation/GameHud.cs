@@ -8,8 +8,10 @@ namespace ProjectVL.Presentation
         private ProjectVLGameController _controller;
         private GUIStyle _titleStyle;
         private GUIStyle _hudStyle;
+        private GUIStyle _leftStyle;
         private GUIStyle _centerStyle;
         private GUIStyle _buttonStyle;
+        private int _selectedDifficulty = 1;
 
         public void Initialize(ProjectVLGameController controller)
         {
@@ -24,68 +26,101 @@ namespace ProjectVL.Presentation
             }
 
             EnsureStyles();
+            DrawArenaFrame();
             DrawTopBar();
             DrawControls();
             DrawCardLoadout();
             DrawCenterPanel();
+            HandleCardDrag();
+        }
+
+        private void DrawArenaFrame()
+        {
+            Color previous = GUI.backgroundColor;
+            GUI.backgroundColor = new Color(0.05f, 0.18f, 0.27f, 0.34f);
+            GUI.Box(ArenaRect(), GUIContent.none);
+            GUI.backgroundColor = previous;
         }
 
         private void DrawTopBar()
         {
             GameState state = _controller.State;
-            GUI.Box(new Rect(12f, 12f, 440f, 72f), GUIContent.none);
-            GUI.Label(new Rect(24f, 19f, 410f, 28f), "PROJECT VL · TUANJIE", _titleStyle);
+            Rect bar = new Rect(8f, 6f, Screen.width - 16f, 42f);
+            GUI.Box(bar, GUIContent.none);
+
+            float hpWidth = Mathf.Clamp(Screen.width * 0.27f, 108f, 250f);
+            DrawProgressBar(
+                new Rect(12f, 9f, hpWidth, 8f),
+                state.MaxHp <= 0f ? 0f : state.Hp / state.MaxHp,
+                new Color(0.95f, 0.35f, 0.58f));
             GUI.Label(
-                new Rect(24f, 49f, 410f, 26f),
-                $"HP {state.Hp:0}/{state.MaxHp:0}   WAVE {state.Wave} "
-                + $"{state.WavePhase.ToString().ToUpperInvariant()}   "
-                + $"KILLS {state.Kills}   MERGES {state.Merges}   "
-                + $"XP {state.Experience:0.#}   DROPS {state.GroundDrops.Count}   "
-                + $"SHIELD {state.ShieldHits}",
+                new Rect(12f, 18f, hpWidth, 22f),
+                $"生命 {state.Hp:0}/{state.MaxHp:0}",
+                _leftStyle);
+
+            float waveX = hpWidth + 18f;
+            GUI.Label(
+                new Rect(waveX, 6f, 78f, 36f),
+                $"波次 {state.Wave}/{_controller.TotalWaves}",
                 _hudStyle);
+
+            int level = 1 + Mathf.FloorToInt(state.Experience / 10f);
+            float levelXp = state.Experience % 10f;
+            float levelX = waveX + 78f;
+            float levelWidth = Mathf.Clamp(
+                Screen.width - 146f - levelX,
+                72f,
+                112f);
+            GUI.Label(
+                new Rect(levelX, 6f, levelWidth, 20f),
+                $"等级 {level} · {levelXp:0.#}/10",
+                _leftStyle);
+            DrawProgressBar(
+                new Rect(levelX, 29f, levelWidth, 7f),
+                levelXp / 10f,
+                new Color(0.18f, 0.55f, 0.9f));
         }
 
         private void DrawControls()
         {
-            float panelX = Screen.width - 258f;
-            GUI.Box(new Rect(panelX, 12f, 246f, 72f), GUIContent.none);
-
             GameState state = _controller.State;
-            string pauseLabel = state.Paused ? "RESUME [P]" : "PAUSE [P]";
+            float x = Screen.width - 140f;
+            if (GUI.Button(
+                new Rect(x, 11f, 40f, 30f),
+                $"{_controller.TimeScale:0.#}×",
+                _buttonStyle))
+            {
+                float speed = _controller.TimeScale;
+                _controller.SetTimeScale(
+                    speed < 0.75f ? 1f : speed < 1.5f ? 2f : 0.5f);
+            }
+
             GUI.enabled = state.Mode == GameMode.Playing
                 && !state.DecisionLocked
                 && !state.IntermissionActive;
-            if (GUI.Button(new Rect(panelX + 10f, 24f, 106f, 42f), pauseLabel, _buttonStyle))
+            if (GUI.Button(
+                new Rect(x + 44f, 11f, 42f, 30f),
+                state.Paused ? "继续" : "暂停",
+                _buttonStyle))
             {
                 _controller.TogglePause();
             }
 
             GUI.enabled = true;
-            if (GUI.Button(new Rect(panelX + 124f, 24f, 106f, 42f), "RESTART [R]", _buttonStyle))
+            if (GUI.Button(
+                new Rect(x + 90f, 11f, 50f, 30f),
+                state.Mode == GameMode.Ready ? "▶ 开始" : "重开",
+                _buttonStyle))
             {
-                _controller.RestartGame();
+                if (state.Mode == GameMode.Ready)
+                {
+                    _controller.StartGame();
+                }
+                else
+                {
+                    _controller.RestartGame();
+                }
             }
-
-            GUI.Box(new Rect(panelX, 94f, 246f, 48f), GUIContent.none);
-            GUI.Label(new Rect(panelX + 10f, 107f, 72f, 24f), "SPEED", _hudStyle);
-            DrawSpeedButton(panelX + 78f, 103f, 0.5f);
-            DrawSpeedButton(panelX + 128f, 103f, 1f);
-            DrawSpeedButton(panelX + 178f, 103f, 2f);
-        }
-
-        private void DrawSpeedButton(float x, float y, float speed)
-        {
-            bool selected = Mathf.Abs(_controller.TimeScale - speed) < 0.01f;
-            Color previous = GUI.backgroundColor;
-            GUI.backgroundColor = selected
-                ? new Color(0.25f, 0.85f, 1f)
-                : new Color(0.35f, 0.45f, 0.58f);
-            if (GUI.Button(new Rect(x, y, 44f, 30f), $"{speed:0.#}x", _buttonStyle))
-            {
-                _controller.SetTimeScale(speed);
-            }
-
-            GUI.backgroundColor = previous;
         }
 
         private void DrawCenterPanel()
@@ -114,37 +149,58 @@ namespace ProjectVL.Presentation
                 return;
             }
 
-            float width = 360f;
-            float height = 180f;
-            float x = (Screen.width - width) / 2f;
-            float y = (Screen.height - height) / 2f;
-            GUI.Box(new Rect(x, y, width, height), GUIContent.none);
+            Rect arena = ArenaRect();
+            float width = Mathf.Min(390f, arena.width - 28f);
+            float height = state.Mode == GameMode.Ready ? 220f : 180f;
+            Rect panel = new Rect(
+                arena.center.x - width / 2f,
+                arena.center.y - height / 2f,
+                width,
+                height);
+            GUI.Box(panel, GUIContent.none);
 
             string title;
             string subtitle;
             string button;
             if (state.Mode == GameMode.Ready)
             {
-                title = "PROJECT VL";
-                subtitle = "Tuanjie playable migration slice";
-                button = "START  [SPACE]";
+                title = "守住心防";
+                subtitle = "选择难度";
+                button = "开始游戏";
             }
             else if (state.Mode == GameMode.Ended)
             {
-                title = state.Won == true ? "VICTORY" : "RUN ENDED";
-                subtitle = $"Wave {state.Wave} · {state.Kills} kills";
-                button = "RESTART  [R]";
+                title = state.Won == true ? "胜利" : "本局结束";
+                subtitle = $"波次 {state.Wave} · 击败 {state.Kills}";
+                button = "重新开始";
             }
             else
             {
-                title = "PAUSED";
-                subtitle = "Press P or Escape to continue";
-                button = "RESUME  [P]";
+                title = "游戏暂停";
+                subtitle = "按 P 或 Esc 继续";
+                button = "继续游戏";
             }
 
-            GUI.Label(new Rect(x + 20f, y + 25f, width - 40f, 42f), title, _centerStyle);
-            GUI.Label(new Rect(x + 20f, y + 70f, width - 40f, 28f), subtitle, _hudStyle);
-            if (GUI.Button(new Rect(x + 75f, y + 112f, width - 150f, 44f), button, _buttonStyle))
+            GUI.Label(
+                new Rect(panel.x + 20f, panel.y + 18f, panel.width - 40f, 42f),
+                title,
+                _centerStyle);
+            GUI.Label(
+                new Rect(panel.x + 20f, panel.y + 60f, panel.width - 40f, 24f),
+                subtitle,
+                _hudStyle);
+
+            float actionY = panel.y + 112f;
+            if (state.Mode == GameMode.Ready)
+            {
+                DrawDifficultyButtons(panel);
+                actionY = panel.y + 150f;
+            }
+
+            if (GUI.Button(
+                new Rect(panel.x + 75f, actionY, panel.width - 150f, 44f),
+                button,
+                _buttonStyle))
             {
                 if (state.Mode == GameMode.Ready)
                 {
@@ -161,151 +217,102 @@ namespace ProjectVL.Presentation
             }
         }
 
-        private void DrawEvolutionPanel(EvolutionChoice choice)
+        private void DrawDifficultyButtons(Rect panel)
         {
-            const float width = 560f;
-            const float height = 238f;
-            Rect panel = new Rect(
-                (Screen.width - width) / 2f,
-                (Screen.height - height) / 2f,
-                width,
-                height);
-            GUI.Box(panel, GUIContent.none);
-            GUI.Label(
-                new Rect(panel.x + 20f, panel.y + 18f, panel.width - 40f, 42f),
-                $"{choice.CheckpointStar} STAR EVOLUTION",
-                _centerStyle);
-            GUI.Label(
-                new Rect(panel.x + 20f, panel.y + 62f, panel.width - 40f, 30f),
-                $"Choose a route for {CardDisplayName(choice.CardType)}",
-                _hudStyle);
-
-            float optionWidth = (panel.width - 64f) / 3f;
-            for (int i = 0; i < choice.Options.Length && i < 3; i++)
+            string[] labels = { "轻松", "标准", "困难", "地狱" };
+            float width = (panel.width - 52f) / 4f;
+            for (int i = 0; i < labels.Length; i++)
             {
-                string label = $"{(char)('A' + i)}\n{RouteLabel(choice.Options[i])}";
+                Color previous = GUI.backgroundColor;
+                GUI.backgroundColor = i == _selectedDifficulty
+                    ? new Color(0.25f, 0.75f, 1f)
+                    : new Color(0.25f, 0.32f, 0.43f);
                 if (GUI.Button(
                     new Rect(
-                        panel.x + 20f + i * (optionWidth + 12f),
-                        panel.y + 105f,
-                        optionWidth,
-                        92f),
-                    label,
+                        panel.x + 20f + i * (width + 4f),
+                        panel.y + 88f,
+                        width,
+                        30f),
+                    labels[i],
                     _buttonStyle))
                 {
-                    _controller.ChooseEvolution(i);
+                    _selectedDifficulty = i;
                 }
-            }
 
-            GUI.Label(
-                new Rect(panel.x + 20f, panel.y + 204f, panel.width - 40f, 24f),
-                "The selected route stays with this card instance.",
-                _hudStyle);
+                GUI.backgroundColor = previous;
+            }
         }
 
         private void DrawCardLoadout()
         {
             GameState state = _controller.State;
-            const float slotWidth = 92f;
-            const float slotHeight = 58f;
-            const float gap = 6f;
+            Rect panel = LoadoutRect();
+            GUI.Box(panel, GUIContent.none);
 
-            float equipmentX = 12f;
-            float equipmentY = 102f;
-            GUI.Box(
-                new Rect(equipmentX, equipmentY, 132f, 250f),
-                GUIContent.none);
+            float padding = 8f;
+            float gap = 7f;
+            float contentWidth = panel.width - padding * 2f;
+            float equipmentWidth = (contentWidth - gap * 2f) / 3f;
+            float handWidth = (contentWidth - gap * 3f) / 4f;
+
             GUI.Label(
-                new Rect(equipmentX + 8f, equipmentY + 8f, 116f, 24f),
-                "EQUIPMENT",
-                _hudStyle);
-            for (int i = 0; i < state.Equipment.Length; i++)
+                new Rect(panel.x + padding, panel.y + 3f, contentWidth, 20f),
+                "装备  ·  放入 3★ 以上卡牌",
+                _leftStyle);
+            float equipmentY = panel.y + 24f;
+            for (int i = 0; i < state.Equipment.Length && i < 3; i++)
             {
-                string shortcut = i == 0 ? "Q" : i == 1 ? "W" : i == 2 ? "E" : "-";
                 DrawCardSlot(
                     CardSlotKind.Equipment,
                     i,
                     new Rect(
-                        equipmentX + 20f,
-                        equipmentY + 38f + i * (slotHeight + gap),
-                        slotWidth,
-                        slotHeight),
-                    shortcut);
+                        panel.x + padding + i * (equipmentWidth + gap),
+                        equipmentY,
+                        equipmentWidth,
+                        55f),
+                    i == 0 ? "Q" : i == 1 ? "W" : "E");
             }
 
-            float handWidth =
-                state.Hand.Length * slotWidth
-                + (state.Hand.Length - 1) * gap
-                + 24f;
-            float handX = (Screen.width - handWidth) / 2f;
-            float handY = Screen.height - 112f;
-            GUI.Box(
-                new Rect(handX, handY, handWidth, 100f),
-                GUIContent.none);
+            float handLabelY = equipmentY + 59f;
             GUI.Label(
-                new Rect(handX + 8f, handY + 3f, handWidth - 16f, 22f),
-                "HAND  -  select source, then destination",
-                _hudStyle);
-            for (int i = 0; i < state.Hand.Length; i++)
+                new Rect(panel.x + padding, handLabelY, contentWidth, 20f),
+                $"手牌  ·  点击两张卡可移动或交换  ·  {_controller.LastCardAction}",
+                _leftStyle);
+
+            float firstRowY = handLabelY + 21f;
+            for (int i = 0; i < state.Hand.Length && i < 4; i++)
             {
                 DrawCardSlot(
                     CardSlotKind.Hand,
                     i,
                     new Rect(
-                        handX + 12f + i * (slotWidth + gap),
-                        handY + 29f,
-                        slotWidth,
-                        slotHeight),
+                        panel.x + padding + i * (handWidth + gap),
+                        firstRowY,
+                        handWidth,
+                        48f),
                     (i + 1).ToString());
             }
 
-            float actionX = Screen.width - 258f;
-            GUI.Box(new Rect(actionX, 152f, 246f, 232f), GUIContent.none);
-            GUI.Label(
-                new Rect(actionX + 10f, 159f, 226f, 46f),
-                _controller.LastCardAction,
-                _hudStyle);
-            if (GUI.Button(
-                new Rect(actionX + 10f, 211f, 108f, 36f),
-                "CAST [C]",
-                _buttonStyle))
+            float secondRowY = firstRowY + 54f;
+            for (int i = 4; i < state.Hand.Length && i < 7; i++)
             {
-                _controller.ConsumeSelectedCard();
+                DrawCardSlot(
+                    CardSlotKind.Hand,
+                    i,
+                    new Rect(
+                        panel.x + padding + (i - 4) * (handWidth + gap),
+                        secondRowY,
+                        handWidth,
+                        48f),
+                    (i + 1).ToString());
             }
 
-            if (GUI.Button(
-                new Rect(actionX + 128f, 211f, 108f, 36f),
-                "TEST CARDS [G]",
-                _buttonStyle))
-            {
-                _controller.GrantTestCards();
-            }
-
-            if (GUI.Button(
-                new Rect(actionX + 10f, 253f, 108f, 36f),
-                "WILDCARD [V]",
-                _buttonStyle))
-            {
-                _controller.UseWildcardOnSelected();
-            }
-
-            if (GUI.Button(
-                new Rect(actionX + 128f, 253f, 108f, 36f),
-                "MERGE DEMO [M]",
-                _buttonStyle))
-            {
-                _controller.GrantMergeDemo();
-            }
-
-            GUI.Label(
-                new Rect(actionX + 10f, 298f, 226f, 38f),
-                WildcardText(state),
-                _hudStyle);
-            GUI.Label(
-                new Rect(actionX + 10f, 341f, 226f, 34f),
-                "DROP [T] · ADVANCED [N] · 6STAR [U]\n"
-                + "EFFECT [B] · RECIPE [H/F]",
-                _hudStyle);
+            DrawWildcardSlot(
+                new Rect(
+                    panel.x + padding + 3f * (handWidth + gap),
+                    secondRowY,
+                    handWidth,
+                    48f));
         }
 
         private void DrawCardSlot(
@@ -318,11 +325,18 @@ namespace ProjectVL.Presentation
                 ? _controller.State.Hand
                 : _controller.State.Equipment;
             CardState card = slots[index];
-            string text = card == null
-                ? $"{shortcut}\nEMPTY"
-                : $"{shortcut}  {card.Star} STAR"
-                    + $"{(card.Provisional ? " ?" : "")}\n"
+            string text;
+            if (card == null)
+            {
+                text = kind == CardSlotKind.Equipment
+                    ? "3★+\n＋"
+                    : $"＋  [{shortcut}]";
+            }
+            else
+            {
+                text = $"{card.Star}★{(card.Provisional ? " ?" : "")}\n"
                     + CardDisplayName(card.Type);
+            }
 
             Color previous = GUI.backgroundColor;
             if (_controller.IsCardSlotSelected(kind, index))
@@ -333,6 +347,19 @@ namespace ProjectVL.Presentation
             {
                 GUI.backgroundColor = new Color(0.55f, 0.38f, 0.75f);
             }
+            else
+            {
+                GUI.backgroundColor = new Color(0.18f, 0.32f, 0.45f);
+            }
+
+            Event current = Event.current;
+            if (card != null
+                && current.type == EventType.MouseDown
+                && current.button == 0
+                && rect.Contains(current.mousePosition))
+            {
+                _controller.BeginCardDrag(kind, index);
+            }
 
             if (GUI.Button(rect, text, _buttonStyle))
             {
@@ -342,72 +369,106 @@ namespace ProjectVL.Presentation
             GUI.backgroundColor = previous;
         }
 
-        private static string WildcardText(GameState state)
+        private void DrawWildcardSlot(Rect rect)
         {
-            return "WILDCARDS  "
-                + $"1:{state.Wildcards[1]}  "
-                + $"2:{state.Wildcards[2]}  "
-                + $"3:{state.Wildcards[3]}  "
-                + $"4:{state.Wildcards[4]}  "
-                + $"5:{state.Wildcards[5]}";
+            Color previous = GUI.backgroundColor;
+            GUI.backgroundColor = new Color(0.55f, 0.38f, 0.75f);
+            GUI.Box(rect, GUIContent.none);
+            GUI.Label(
+                new Rect(rect.x + 4f, rect.y + 1f, rect.width - 8f, 18f),
+                "万能",
+                _hudStyle);
+            GUI.Label(
+                new Rect(rect.x + 4f, rect.y + 17f, rect.width - 8f, 30f),
+                WildcardText(_controller.State),
+                _hudStyle);
+            GUI.backgroundColor = previous;
         }
 
-        private static string CardDisplayName(string type)
+        private void HandleCardDrag()
         {
-            switch (type)
+            if (!_controller.HasCardDrag)
             {
-                case "chainLightning":
-                    return "CHAIN";
-                case "splitBlast":
-                    return "SPLIT";
-                default:
-                    return type.ToUpperInvariant();
+                return;
             }
+
+            Event current = Event.current;
+            if (current.type == EventType.Repaint)
+            {
+                Vector2 mouse = current.mousePosition;
+                GUI.Label(
+                    new Rect(mouse.x + 18f, mouse.y - 16f, 180f, 32f),
+                    "松开到战场施放",
+                    _hudStyle);
+                return;
+            }
+
+            if (current.type != EventType.MouseUp || current.button != 0)
+            {
+                return;
+            }
+
+            if (!ArenaRect().Contains(current.mousePosition))
+            {
+                _controller.CancelCardDrag();
+                return;
+            }
+
+            _controller.ReleaseCardDrag(current.mousePosition);
+            current.Use();
         }
 
-        private static string RouteLabel(string option)
+        private void DrawEvolutionPanel(EvolutionChoice choice)
         {
-            if (string.IsNullOrEmpty(option))
+            Rect panel = CenterPanelRect(560f, 238f);
+            GUI.Box(panel, GUIContent.none);
+            GUI.Label(
+                new Rect(panel.x + 20f, panel.y + 18f, panel.width - 40f, 42f),
+                $"{choice.CheckpointStar}★ 进化选择",
+                _centerStyle);
+            GUI.Label(
+                new Rect(panel.x + 20f, panel.y + 62f, panel.width - 40f, 30f),
+                $"为 {CardDisplayName(choice.CardType)} 选择路线",
+                _hudStyle);
+
+            float optionWidth = (panel.width - 64f) / 3f;
+            for (int i = 0; i < choice.Options.Length && i < 3; i++)
             {
-                return "UNKNOWN";
+                if (GUI.Button(
+                    new Rect(
+                        panel.x + 20f + i * (optionWidth + 12f),
+                        panel.y + 105f,
+                        optionWidth,
+                        92f),
+                    $"{(char)('A' + i)}\n{RouteLabel(choice.Options[i])}",
+                    _buttonStyle))
+                {
+                    _controller.ChooseEvolution(i);
+                }
             }
 
-            char branch = option.EndsWith("A")
-                || option.EndsWith("A2")
-                    ? 'A'
-                    : option.EndsWith("B")
-                        || option.EndsWith("B2")
-                            ? 'B'
-                            : 'C';
-            switch (branch)
-            {
-                case 'A':
-                    return "POWER";
-                case 'B':
-                    return "FOCUS";
-                default:
-                    return "UTILITY";
-            }
+            GUI.Label(
+                new Rect(panel.x + 20f, panel.y + 204f, panel.width - 40f, 24f),
+                "所选路线将永久保留在这张卡牌上。",
+                _hudStyle);
         }
 
         private void DrawRewardPanel(RunReward reward)
         {
-            Rect panel = CenterPanelRect();
+            Rect panel = CenterPanelRect(360f, 180f);
             GUI.Box(panel, GUIContent.none);
             GUI.Label(
                 new Rect(panel.x + 20f, panel.y + 24f, panel.width - 40f, 42f),
-                "BOSS REWARD",
+                "首领奖励",
                 _centerStyle);
-            string kind = reward.Kind == RewardKind.Wildcard
-                ? "WILDCARD"
-                : "CARD";
+            string kind = reward.Kind == RewardKind.Wildcard ? "万能牌" : "卡牌";
             GUI.Label(
                 new Rect(panel.x + 20f, panel.y + 70f, panel.width - 40f, 28f),
-                $"{kind}  ·  {reward.Star} STAR  ·  x{reward.Count}",
+                $"{kind} · {reward.Star}★ · ×{reward.Count}",
                 _hudStyle);
             if (GUI.Button(
                 new Rect(panel.x + 75f, panel.y + 112f, panel.width - 150f, 44f),
-                "CLAIM  [SPACE]",
+                "领取 [空格]",
                 _buttonStyle))
             {
                 _controller.ClaimBossReward();
@@ -416,26 +477,20 @@ namespace ProjectVL.Presentation
 
         private void DrawIntermissionPanel(GameState state)
         {
-            const float width = 430f;
-            const float height = 258f;
-            Rect panel = new Rect(
-                (Screen.width - width) / 2f,
-                (Screen.height - height) / 2f,
-                width,
-                height);
+            Rect panel = CenterPanelRect(430f, 258f);
             GUI.Box(panel, GUIContent.none);
             GUI.Label(
                 new Rect(panel.x + 20f, panel.y + 24f, panel.width - 40f, 42f),
-                "WAVE CLEAR",
+                "波次完成",
                 _centerStyle);
             GUI.Label(
                 new Rect(panel.x + 20f, panel.y + 70f, panel.width - 40f, 28f),
-                $"Next wave in {state.IntermissionRemaining:0.0}s  ·  "
-                + $"Rewards {state.CollectedRewards.Count}",
+                $"下一波倒计时 {state.IntermissionRemaining:0.0} 秒 · "
+                + $"已获奖励 {state.CollectedRewards.Count}",
                 _hudStyle);
             if (GUI.Button(
                 new Rect(panel.x + 75f, panel.y + 108f, panel.width - 150f, 42f),
-                "NEXT WAVE  [SPACE]",
+                "进入下一波 [空格]",
                 _buttonStyle))
             {
                 _controller.ConfirmNextWave();
@@ -444,14 +499,12 @@ namespace ProjectVL.Presentation
             string recipe = _controller.AvailableRecipeId;
             GUI.Label(
                 new Rect(panel.x + 20f, panel.y + 160f, panel.width - 40f, 28f),
-                recipe == null
-                    ? "FIXED RECIPE: no matching materials"
-                    : $"FIXED RECIPE READY: {recipe}",
+                recipe == null ? "固定配方：材料不足" : $"可合成固定配方：{recipe}",
                 _hudStyle);
             GUI.enabled = recipe != null;
             if (GUI.Button(
                 new Rect(panel.x + 75f, panel.y + 198f, panel.width - 150f, 42f),
-                "CRAFT RECIPE  [F]",
+                "合成配方 [F]",
                 _buttonStyle))
             {
                 _controller.CraftAvailableRecipe();
@@ -460,15 +513,114 @@ namespace ProjectVL.Presentation
             GUI.enabled = true;
         }
 
-        private static Rect CenterPanelRect()
+        private static void DrawProgressBar(Rect rect, float ratio, Color color)
         {
-            const float width = 360f;
-            const float height = 180f;
+            Color previous = GUI.color;
+            GUI.color = new Color(0.08f, 0.16f, 0.24f, 1f);
+            GUI.DrawTexture(rect, Texture2D.whiteTexture);
+            GUI.color = color;
+            GUI.DrawTexture(
+                new Rect(rect.x, rect.y, rect.width * Mathf.Clamp01(ratio), rect.height),
+                Texture2D.whiteTexture);
+            GUI.color = previous;
+        }
+
+        private static Rect ArenaRect()
+        {
+            float bottomHeight = Mathf.Clamp(Screen.height * 0.28f, 215f, 260f);
             return new Rect(
-                (Screen.width - width) / 2f,
-                (Screen.height - height) / 2f,
+                8f,
+                52f,
+                Screen.width - 16f,
+                Mathf.Max(180f, Screen.height - bottomHeight - 58f));
+        }
+
+        private static Rect LoadoutRect()
+        {
+            Rect arena = ArenaRect();
+            float y = arena.yMax + 5f;
+            return new Rect(8f, y, Screen.width - 16f, Screen.height - y - 6f);
+        }
+
+        private static Rect CenterPanelRect(float width, float height)
+        {
+            Rect arena = ArenaRect();
+            width = Mathf.Min(width, arena.width - 28f);
+            return new Rect(
+                arena.center.x - width / 2f,
+                arena.center.y - height / 2f,
                 width,
                 height);
+        }
+
+        private static string WildcardText(GameState state)
+        {
+            return $"1★×{state.Wildcards[1]}  2★×{state.Wildcards[2]}\n"
+                + $"3★×{state.Wildcards[3]}  4★×{state.Wildcards[4]}  "
+                + $"5★×{state.Wildcards[5]}";
+        }
+
+        private static string CardDisplayName(string type)
+        {
+            switch (type)
+            {
+                case "pierce":
+                    return "穿透";
+                case "chainLightning":
+                    return "连锁闪电";
+                case "frost":
+                    return "冰霜";
+                case "scorch":
+                    return "灼烧";
+                case "splitBlast":
+                    return "分裂爆破";
+                case "impact":
+                    return "冲击";
+                case "sanctum":
+                    return "圣域";
+                case "aegis":
+                    return "神盾";
+                case "thorns":
+                    return "荆棘";
+                case "decoy":
+                    return "诱饵";
+                case "harvest":
+                    return "收获";
+                case "frozenThunder":
+                    return "冰封雷霆";
+                case "solarLance":
+                    return "日耀长枪";
+                case "avalanche":
+                    return "雪崩";
+                case "pyrestorm":
+                    return "烈焰风暴";
+                case "crownOfThorns":
+                    return "荆棘王冠";
+                case "goldenIdol":
+                    return "黄金神像";
+                default:
+                    return type;
+            }
+        }
+
+        private static string RouteLabel(string option)
+        {
+            if (string.IsNullOrEmpty(option))
+            {
+                return "未知";
+            }
+
+            if (option.EndsWith("A") || option.EndsWith("A2"))
+            {
+                return "力量";
+            }
+
+            if (option.EndsWith("B") || option.EndsWith("B2"))
+            {
+                return "专注";
+            }
+
+            return "功能";
         }
 
         private void EnsureStyles()
@@ -486,9 +638,14 @@ namespace ProjectVL.Presentation
             };
             _hudStyle = new GUIStyle(GUI.skin.label)
             {
-                fontSize = 14,
+                fontSize = 13,
                 alignment = TextAnchor.MiddleCenter,
+                wordWrap = true,
                 normal = { textColor = new Color(0.85f, 0.92f, 1f) }
+            };
+            _leftStyle = new GUIStyle(_hudStyle)
+            {
+                alignment = TextAnchor.MiddleLeft
             };
             _centerStyle = new GUIStyle(_titleStyle)
             {
