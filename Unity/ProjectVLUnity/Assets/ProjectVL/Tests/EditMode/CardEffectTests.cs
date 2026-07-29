@@ -1209,6 +1209,89 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void SanctumSixStarPeriodicallyMarksNearbyEnemies()
+        {
+            EquipResolved(
+                "sanctum",
+                6,
+                "3:sanctumA",
+                "5:sanctumA2");
+            _state.BeginWave(1);
+            _system.StepPassives(_state, 0f);
+            Float2 turret = new Float2(
+                _combat.turret.x,
+                _combat.turret.y);
+            EnemyState inside = AddEnemy(
+                turret + new Float2(160f, 0f),
+                100f);
+            EnemyState outside = AddEnemy(
+                turret + new Float2(180f, 0f),
+                100f);
+
+            _system.StepPassives(_state, 3f);
+
+            Assert.That(inside.VulnerableRatio, Is.EqualTo(0.4f));
+            Assert.That(inside.VulnerableRemaining, Is.EqualTo(2f));
+            Assert.That(outside.VulnerableRatio, Is.Zero);
+        }
+
+        [Test]
+        public void AegisSixStarBreaksIntoHeavyNova()
+        {
+            EquipResolved(
+                "aegis",
+                6,
+                "3:aegisA",
+                "5:aegisA2");
+            _state.BeginWave(1);
+            _system.StepPassives(_state, 0f);
+            Float2 turret = new Float2(
+                _combat.turret.x,
+                _combat.turret.y);
+            EnemyState spectator = AddEnemy(
+                turret + new Float2(100f, 0f),
+                100f);
+            AddEnemy(turret, 100f);
+            AddEnemy(turret, 100f);
+            AddEnemy(turret, 100f);
+
+            _system.StepEnemies(_state, 0f);
+
+            Assert.That(_state.ShieldHits, Is.Zero);
+            Assert.That(spectator.Hp, Is.EqualTo(50f));
+            Assert.That(
+                Float2.Distance(turret, spectator.Position),
+                Is.EqualTo(230f));
+        }
+
+        [Test]
+        public void ThornsSixStarAuraDamagesAndExecutes()
+        {
+            EquipResolved(
+                "thorns",
+                6,
+                "3:thornsA",
+                "5:thornsA2");
+            _state.BeginWave(1);
+            _system.StepPassives(_state, 0f);
+            Float2 turret = new Float2(
+                _combat.turret.x,
+                _combat.turret.y);
+            EnemyState low = AddEnemy(
+                turret + new Float2(80f, 0f),
+                100f);
+            low.Hp = 20f;
+            EnemyState healthy = AddEnemy(
+                turret + new Float2(100f, 0f),
+                100f);
+
+            _system.StepPassives(_state, 0.4f);
+
+            Assert.That(_state.Enemies.Contains(low), Is.False);
+            Assert.That(healthy.Hp, Is.EqualTo(97.3f).Within(0.001f));
+        }
+
+        [Test]
         public void DecoySpawnsAtWaveStartAndTakesEnemyHit()
         {
             EquipResolved("decoy", 3, "3:decoyA");

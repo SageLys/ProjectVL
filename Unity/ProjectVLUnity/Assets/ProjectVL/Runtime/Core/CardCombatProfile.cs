@@ -83,6 +83,10 @@ namespace ProjectVL.Core
         public float AuraVulnerableRatio { get; set; }
         public float AuraFocusPriorityWeight { get; set; } = 1f;
         public float AuraFocusHpThresholdRatio { get; set; }
+        public float SanctumPulseInterval { get; set; }
+        public float SanctumPulseRadius { get; set; }
+        public float SanctumPulseVulnerableRatio { get; set; }
+        public float SanctumPulseVulnerableDuration { get; set; }
         public float WaveStartFireRateMultiplier { get; set; } = 1f;
         public float WaveStartFireRateDuration { get; set; }
         public int ShieldHits { get; set; }
@@ -99,6 +103,7 @@ namespace ProjectVL.Core
         public float ThornsAuraRadius { get; set; }
         public float ThornsAuraTickInterval { get; set; }
         public float ThornsAuraDamageRatio { get; set; }
+        public float ThornsAuraExecuteThresholdRatio { get; set; }
         public float BreachVulnerableRadius { get; set; }
         public float BreachVulnerableRatio { get; set; }
         public float BreachVulnerableDuration { get; set; }

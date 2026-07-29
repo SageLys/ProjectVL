@@ -415,6 +415,15 @@ namespace ProjectVL.Systems
             CardState card,
             CardCombatProfile profile)
         {
+            if (card.Star >= 6)
+            {
+                profile.SanctumPulseInterval = 3f;
+                profile.SanctumPulseRadius = 170f;
+                profile.SanctumPulseVulnerableRatio = 0.4f;
+                profile.SanctumPulseVulnerableDuration = 2f;
+                return;
+            }
+
             string route = RouteAt(card, 3);
             profile.AuraRadiusRatio =
                 Max(profile.AuraRadiusRatio, 0.5f);
@@ -456,6 +465,15 @@ namespace ProjectVL.Systems
             CardState card,
             CardCombatProfile profile)
         {
+            if (card.Star >= 6)
+            {
+                profile.ShieldHits = 3;
+                profile.ShieldRegenSeconds = 6f;
+                profile.ShieldBreakDamage = 50f;
+                profile.ShieldBreakKnockback = 130f;
+                return;
+            }
+
             string route = RouteAt(card, 3);
             profile.ShieldHits = 2;
             profile.ShieldRegenSeconds =
@@ -504,6 +522,15 @@ namespace ProjectVL.Systems
             CardState card,
             CardCombatProfile profile)
         {
+            if (card.Star >= 6)
+            {
+                profile.ThornsAuraRadius = 130f;
+                profile.ThornsAuraTickInterval = 0.4f;
+                profile.ThornsAuraDamageRatio = 0.15f;
+                profile.ThornsAuraExecuteThresholdRatio = 0.2f;
+                return;
+            }
+
             string route = RouteAt(card, 3);
             profile.BreachReductionRatio = System.Math.Min(
                 0.9f,

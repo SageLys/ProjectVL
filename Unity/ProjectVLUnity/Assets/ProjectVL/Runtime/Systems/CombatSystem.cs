@@ -132,6 +132,11 @@ namespace ProjectVL.Systems
                         -1,
                         0f,
                         0f);
+                    ExecuteLowHealthEnemies(
+                        state,
+                        TurretPosition,
+                        profile.ThornsAuraRadius,
+                        profile.ThornsAuraExecuteThresholdRatio);
                     state.ThornsAuraTickRemaining =
                         profile.ThornsAuraTickInterval;
                 }
@@ -158,6 +163,7 @@ namespace ProjectVL.Systems
             }
 
             ApplySanctumAura(state, profile);
+            ApplySanctumPulse(state, profile, deltaTime);
             ApplyFrostAura(state, profile);
             ApplyBeamPulse(state, profile, deltaTime);
             ApplyChainPulse(state, profile, deltaTime);
@@ -960,6 +966,8 @@ namespace ProjectVL.Systems
                 profile.FrostNovaInterval;
             state.ScorchAuraTickRemaining =
                 profile.ScorchAuraTickInterval;
+            state.SanctumPulseRemaining =
+                profile.SanctumPulseInterval;
             state.BeamVisualRemaining = 0f;
 
             state.DecoyActive = profile.DecoyHp > 0f;
@@ -1011,6 +1019,71 @@ namespace ProjectVL.Systems
                 enemy.VulnerableRemaining = Math.Max(
                     enemy.VulnerableRemaining,
                     0.6f);
+            }
+        }
+
+        private void ApplySanctumPulse(
+            GameState state,
+            CardCombatProfile profile,
+            float deltaTime)
+        {
+            if (profile.SanctumPulseInterval <= 0f)
+            {
+                return;
+            }
+
+            state.SanctumPulseRemaining -= deltaTime;
+            if (state.SanctumPulseRemaining > 0f)
+            {
+                return;
+            }
+
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                if (Float2.Distance(
+                    TurretPosition,
+                    enemy.Position) > profile.SanctumPulseRadius)
+                {
+                    continue;
+                }
+
+                enemy.VulnerableRatio = Math.Max(
+                    enemy.VulnerableRatio,
+                    profile.SanctumPulseVulnerableRatio);
+                enemy.VulnerableRemaining = Math.Max(
+                    enemy.VulnerableRemaining,
+                    profile.SanctumPulseVulnerableDuration);
+            }
+
+            state.SanctumPulseRemaining +=
+                profile.SanctumPulseInterval;
+        }
+
+        private void ExecuteLowHealthEnemies(
+            GameState state,
+            Float2 center,
+            float radius,
+            float thresholdRatio)
+        {
+            if (thresholdRatio <= 0f)
+            {
+                return;
+            }
+
+            var targets =
+                new System.Collections.Generic.List<EnemyState>();
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                if (Float2.Distance(center, enemy.Position) <= radius
+                    && enemy.Hp / enemy.MaxHp <= thresholdRatio)
+                {
+                    targets.Add(enemy);
+                }
+            }
+
+            foreach (EnemyState enemy in targets)
+            {
+                DamageEnemy(state, enemy, enemy.Hp);
             }
         }
 

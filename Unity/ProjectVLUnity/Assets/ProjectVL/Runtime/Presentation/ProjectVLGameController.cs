@@ -110,7 +110,10 @@ namespace ProjectVL.Presentation
             "frost",
             "scorch",
             "splitBlast",
-            "impact"
+            "impact",
+            "sanctum",
+            "aegis",
+            "thorns"
         };
 
         public GameState State => _simulation?.State;
