@@ -63,6 +63,15 @@ namespace ProjectVL.Systems
                     case "avalanche":
                         ApplyAvalanche(profile);
                         break;
+                    case "pyrestorm":
+                        ApplyPyrestorm(profile);
+                        break;
+                    case "crownOfThorns":
+                        ApplyCrownOfThorns(profile);
+                        break;
+                    case "goldenIdol":
+                        ApplyGoldenIdol(profile);
+                        break;
                 }
             }
 
@@ -754,6 +763,48 @@ namespace ProjectVL.Systems
             profile.AvalancheKnockback = 150f;
             profile.AvalancheFreezeDuration = 1.2f;
             profile.AvalancheDamageMultiplier = 2.5f;
+        }
+
+        private static void ApplyPyrestorm(
+            CardCombatProfile profile)
+        {
+            profile.PyrestormInterval = 2.8f;
+            profile.PyrestormRadius = 110f;
+            profile.PyrestormDamageRatio = 2.4f;
+            profile.PyrestormFalloff = 0.35f;
+            profile.PyrestormZoneDuration = 4f;
+            profile.PyrestormZoneTickInterval = 0.5f;
+            profile.PyrestormZoneDamageRatio = 0.24f;
+            profile.PyrestormZoneVulnerableRatio = 0.12f;
+            profile.PyrestormZoneVulnerableDuration = 0.6f;
+        }
+
+        private static void ApplyCrownOfThorns(
+            CardCombatProfile profile)
+        {
+            profile.ShieldHits = 6;
+            profile.ShieldRegenSeconds = 6f;
+            profile.ThornsAuraRadius = 150f;
+            profile.ThornsAuraTickInterval = 0.5f;
+            profile.ThornsAuraDamageRatio = 0.2f;
+            profile.ThornsAuraSlowRatio = 0.2f;
+            profile.ThornsAuraSlowDuration = 0.6f;
+            profile.ThornsRatio = 0.5f;
+            profile.ShieldBreakDamage = 75f;
+            profile.ShieldBreakKnockback = 150f;
+        }
+
+        private static void ApplyGoldenIdol(
+            CardCombatProfile profile)
+        {
+            profile.DecoyHp = 130f;
+            profile.DecoyTauntRadius = 210f;
+            profile.DecoyDistance = 160f;
+            profile.DecoyCount = 1;
+            profile.ControlledKillExtraDropChance = 0.3f;
+            profile.ControlledKillXpMultiplier = 1.25f;
+            profile.ControlledKillXpDuration = 3f;
+            profile.ControlledKillXpMaxStacks = 2;
         }
 
         private static string RouteAt(CardState card, int checkpoint)

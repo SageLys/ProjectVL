@@ -112,6 +112,8 @@ namespace ProjectVL.Core
         public float ThornsAuraTickInterval { get; set; }
         public float ThornsAuraDamageRatio { get; set; }
         public float ThornsAuraExecuteThresholdRatio { get; set; }
+        public float ThornsAuraSlowRatio { get; set; }
+        public float ThornsAuraSlowDuration { get; set; }
         public float BreachVulnerableRadius { get; set; }
         public float BreachVulnerableRatio { get; set; }
         public float BreachVulnerableDuration { get; set; }
@@ -139,5 +141,18 @@ namespace ProjectVL.Core
         public float XpMultiplier { get; set; } = 1f;
         public float MergePulseDamagePerStar { get; set; }
         public int HarvestWaveStartDrops { get; set; }
+        public float PyrestormInterval { get; set; }
+        public float PyrestormRadius { get; set; }
+        public float PyrestormDamageRatio { get; set; }
+        public float PyrestormFalloff { get; set; }
+        public float PyrestormZoneDuration { get; set; }
+        public float PyrestormZoneTickInterval { get; set; }
+        public float PyrestormZoneDamageRatio { get; set; }
+        public float PyrestormZoneVulnerableRatio { get; set; }
+        public float PyrestormZoneVulnerableDuration { get; set; }
+        public float ControlledKillExtraDropChance { get; set; }
+        public float ControlledKillXpMultiplier { get; set; } = 1f;
+        public float ControlledKillXpDuration { get; set; }
+        public int ControlledKillXpMaxStacks { get; set; }
     }
 }

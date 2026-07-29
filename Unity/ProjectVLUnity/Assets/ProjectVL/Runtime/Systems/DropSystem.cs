@@ -77,6 +77,26 @@ namespace ProjectVL.Systems
             return Spawn(state, position, CardTypes[typeIndex], 1);
         }
 
+        public GroundDropState TrySpawnBonus(
+            GameState state,
+            Float2 position,
+            float chance)
+        {
+            if (_random.NextFloat() >= chance)
+            {
+                return null;
+            }
+
+            int typeIndex = Math.Min(
+                CardTypes.Length - 1,
+                (int)(_random.NextFloat() * CardTypes.Length));
+            return Spawn(
+                state,
+                position,
+                CardTypes[typeIndex],
+                1);
+        }
+
         public void Step(GameState state, float deltaTime)
         {
             for (int index = state.GroundDrops.Count - 1; index >= 0; index--)

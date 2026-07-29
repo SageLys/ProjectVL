@@ -13,6 +13,8 @@ namespace ProjectVL.Presentation
             new Dictionary<int, SpriteRenderer>();
         private readonly Dictionary<int, DropView> _dropViews =
             new Dictionary<int, DropView>();
+        private readonly List<SpriteRenderer> _groundZoneViews =
+            new List<SpriteRenderer>();
 
         private CombatConfig _combat;
         private GameState _state;
@@ -50,6 +52,7 @@ namespace ProjectVL.Presentation
             SyncEnemies();
             SyncBullets();
             SyncDrops();
+            SyncGroundZones();
             SyncDecoy();
             SyncBeam();
         }
@@ -298,6 +301,40 @@ namespace ProjectVL.Presentation
                 _state.SecondaryDecoyPosition,
                 _state.SecondaryDecoyHp,
                 false);
+        }
+
+        private void SyncGroundZones()
+        {
+            while (_groundZoneViews.Count < _state.GroundZones.Count)
+            {
+                SpriteRenderer view = CreateSpriteView(
+                    "Burning Ground",
+                    _circleSprite,
+                    new Color(1f, 0.25f, 0.05f, 0.24f));
+                view.transform.SetParent(transform, false);
+                view.sortingOrder = 4;
+                _groundZoneViews.Add(view);
+            }
+
+            while (_groundZoneViews.Count > _state.GroundZones.Count)
+            {
+                int last = _groundZoneViews.Count - 1;
+                Destroy(_groundZoneViews[last].gameObject);
+                _groundZoneViews.RemoveAt(last);
+            }
+
+            for (int index = 0;
+                index < _state.GroundZones.Count;
+                index++)
+            {
+                GroundZoneState zone = _state.GroundZones[index];
+                SpriteRenderer view = _groundZoneViews[index];
+                view.transform.position = PixelToWorld(zone.Position);
+                view.transform.localScale = new Vector3(
+                    zone.Radius * 2f,
+                    zone.Radius * 2f,
+                    1f);
+            }
         }
 
         private void SyncDecoyView(

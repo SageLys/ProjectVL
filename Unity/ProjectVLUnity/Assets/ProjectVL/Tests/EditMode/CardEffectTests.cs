@@ -1448,6 +1448,106 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void PyrestormCreatesADamagingVulnerableGroundZone()
+        {
+            EquipResolved("pyrestorm", 6);
+            _state.BeginWave(1);
+            _system.StepPassives(_state, 0f);
+            Float2 turret = new Float2(
+                _combat.turret.x,
+                _combat.turret.y);
+            EnemyState center = AddEnemy(
+                turret + new Float2(80f, 0f),
+                200f);
+            EnemyState edge = AddEnemy(
+                turret + new Float2(135f, 0f),
+                200f);
+
+            _system.StepPassives(_state, 2.8f);
+
+            Assert.That(center.Hp, Is.EqualTo(156.8f));
+            Assert.That(edge.Hp, Is.EqualTo(164.36f).Within(0.001f));
+            Assert.That(_state.GroundZones, Has.Count.EqualTo(1));
+
+            _system.StepPassives(_state, 0.5f);
+
+            Assert.That(center.Hp, Is.EqualTo(152.48f).Within(0.001f));
+            Assert.That(center.VulnerableRatio, Is.EqualTo(0.12f));
+            Assert.That(center.VulnerableRemaining, Is.EqualTo(0.6f));
+        }
+
+        [Test]
+        public void CrownOfThornsCombinesShieldAuraAndRetaliation()
+        {
+            EquipResolved("crownOfThorns", 6);
+            _state.BeginWave(1);
+            _system.StepPassives(_state, 0f);
+            Float2 turret = new Float2(
+                _combat.turret.x,
+                _combat.turret.y);
+            EnemyState inside = AddEnemy(
+                turret + new Float2(100f, 0f),
+                200f);
+
+            _system.StepPassives(_state, 0.5f);
+            CardCombatProfile profile =
+                CardEffectResolver.Resolve(_state);
+
+            Assert.That(_state.ShieldHits, Is.EqualTo(6));
+            Assert.That(_state.ShieldMaxHits, Is.EqualTo(6));
+            Assert.That(profile.ThornsRatio, Is.EqualTo(0.5f));
+            Assert.That(profile.ShieldBreakDamage, Is.EqualTo(75f));
+            Assert.That(inside.Hp, Is.EqualTo(196.4f));
+            Assert.That(inside.SlowRatio, Is.EqualTo(0.2f));
+            Assert.That(inside.SlowRemaining, Is.EqualTo(0.6f));
+        }
+
+        [Test]
+        public void GoldenIdolRewardsConsecutiveControlledKills()
+        {
+            EquipResolved("goldenIdol", 6);
+            var drops = new DropSystem(
+                new EconomyConfig(),
+                new ConstantRandomSource(0.1f));
+            var system = new CombatSystem(
+                _combat,
+                _enemies,
+                drops);
+            _state.BeginWave(1);
+            system.StepPassives(_state, 0f);
+
+            Assert.That(_state.DecoyActive, Is.True);
+            Assert.That(_state.DecoyHp, Is.EqualTo(130f));
+            Assert.That(_state.DecoyTauntRadius, Is.EqualTo(210f));
+
+            EnemyState first = AddEnemy(
+                new Float2(200f, 200f),
+                5f);
+            first.FrozenRemaining = 1f;
+            HitWithSystem(
+                system,
+                first.Position,
+                CardEffectResolver.Resolve(_state));
+            EnemyState second = AddEnemy(
+                new Float2(250f, 200f),
+                5f);
+            second.SlowRatio = 0.2f;
+            second.SlowRemaining = 1f;
+            HitWithSystem(
+                system,
+                second.Position,
+                CardEffectResolver.Resolve(_state));
+
+            Assert.That(_state.GroundDrops.Count, Is.GreaterThanOrEqualTo(2));
+            Assert.That(_state.Experience, Is.EqualTo(2.25f));
+            Assert.That(_state.KillXpBuffStacks, Is.EqualTo(2));
+            Assert.That(
+                _state.KillXpBuffMultiplier,
+                Is.EqualTo(1.5625f));
+            Assert.That(_state.KillXpBuffRemaining, Is.EqualTo(3f));
+        }
+
+        [Test]
         public void DecoySpawnsAtWaveStartAndTakesEnemyHit()
         {
             EquipResolved("decoy", 3, "3:decoyA");
@@ -1668,6 +1768,14 @@ namespace ProjectVL.Tests
             Float2 position,
             CardCombatProfile profile)
         {
+            HitWithSystem(_system, position, profile);
+        }
+
+        private void HitWithSystem(
+            CombatSystem system,
+            Float2 position,
+            CardCombatProfile profile)
+        {
             _state.Bullets.Add(new BulletState(
                 _nextBulletId++,
                 position,
@@ -1676,7 +1784,7 @@ namespace ProjectVL.Tests
                 1f,
                 10f,
                 profile));
-            _system.StepBullets(_state, 0f);
+            system.StepBullets(_state, 0f);
         }
 
         private sealed class ConstantRandomSource : IRandomSource

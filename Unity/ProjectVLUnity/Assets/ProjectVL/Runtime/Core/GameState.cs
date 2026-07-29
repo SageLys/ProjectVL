@@ -39,6 +39,7 @@ namespace ProjectVL.Core
         public float ImpactBreachCooldownRemaining { get; internal set; }
         public float ImpactPulseRemaining { get; internal set; }
         public float AvalanchePulseRemaining { get; internal set; }
+        public float PyrestormPulseRemaining { get; internal set; }
         public float ImpactHitCooldownRemaining { get; internal set; }
         public float ThornsAuraTickRemaining { get; internal set; }
         public float BeamPulseRemaining { get; internal set; }
@@ -54,6 +55,9 @@ namespace ProjectVL.Core
         public float DropLifetimeMultiplier { get; internal set; } = 1f;
         public float ExpiryConvertRatio { get; internal set; }
         public float XpMultiplier { get; internal set; } = 1f;
+        public float KillXpBuffMultiplier { get; internal set; } = 1f;
+        public float KillXpBuffRemaining { get; internal set; }
+        public int KillXpBuffStacks { get; internal set; }
         public float Experience { get; private set; }
         public int ExpiredDropsConverted { get; internal set; }
         public int HarvestProcessedMergeStars { get; internal set; }
@@ -82,6 +86,8 @@ namespace ProjectVL.Core
         public List<BulletState> Bullets { get; } = new List<BulletState>();
         public List<GroundDropState> GroundDrops { get; } =
             new List<GroundDropState>();
+        public List<GroundZoneState> GroundZones { get; } =
+            new List<GroundZoneState>();
 
         private int _nextEnemyId = 1;
         private int _nextBulletId = 1;
@@ -246,6 +252,37 @@ namespace ProjectVL.Core
         internal void AdvanceTime(float deltaTime)
         {
             Time += deltaTime;
+        }
+    }
+
+    public sealed class GroundZoneState
+    {
+        public Float2 Position { get; }
+        public float Radius { get; }
+        public float LifeRemaining { get; set; }
+        public float TickInterval { get; }
+        public float TickRemaining { get; set; }
+        public float DamagePerTick { get; }
+        public float VulnerableRatio { get; }
+        public float VulnerableDuration { get; }
+
+        public GroundZoneState(
+            Float2 position,
+            float radius,
+            float duration,
+            float tickInterval,
+            float damagePerTick,
+            float vulnerableRatio,
+            float vulnerableDuration)
+        {
+            Position = position;
+            Radius = radius;
+            LifeRemaining = duration;
+            TickInterval = tickInterval;
+            TickRemaining = tickInterval;
+            DamagePerTick = damagePerTick;
+            VulnerableRatio = vulnerableRatio;
+            VulnerableDuration = vulnerableDuration;
         }
     }
 }

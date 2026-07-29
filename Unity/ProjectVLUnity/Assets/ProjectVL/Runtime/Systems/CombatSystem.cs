@@ -83,6 +83,18 @@ namespace ProjectVL.Systems
                 }
             }
 
+            if (state.KillXpBuffRemaining > 0f)
+            {
+                state.KillXpBuffRemaining = Math.Max(
+                    0f,
+                    state.KillXpBuffRemaining - deltaTime);
+                if (state.KillXpBuffRemaining <= 0f)
+                {
+                    state.KillXpBuffMultiplier = 1f;
+                    state.KillXpBuffStacks = 0;
+                }
+            }
+
             if (state.ShieldMaxHits > 0
                 && state.ShieldHits <= 0
                 && state.ShieldRegenRemaining > 0f)
@@ -131,7 +143,8 @@ namespace ProjectVL.Systems
                             * profile.ThornsAuraDamageRatio,
                         -1,
                         0f,
-                        0f);
+                        profile.ThornsAuraSlowRatio,
+                        profile.ThornsAuraSlowDuration);
                     ExecuteLowHealthEnemies(
                         state,
                         TurretPosition,
@@ -169,6 +182,7 @@ namespace ProjectVL.Systems
             ApplyChainPulse(state, profile, deltaTime);
             ApplyFrostNova(state, profile, deltaTime);
             ApplyAvalanchePulse(state, profile, deltaTime);
+            ApplyPyrestorm(state, profile, deltaTime);
             ApplyDecoyAura(state, profile);
             ApplyMirrorTurret(state, profile, deltaTime);
             ApplyHarvestMergePulse(state, profile);
@@ -331,6 +345,10 @@ namespace ProjectVL.Systems
             float damage)
         {
             bool killedWhileFrozen = enemy.FrozenRemaining > 0f;
+            bool killedWhileControlled =
+                enemy.FrozenRemaining > 0f
+                || enemy.StunnedRemaining > 0f
+                || enemy.SlowRemaining > 0f;
             float vulnerability = enemy.VulnerableRemaining > 0f
                 ? enemy.VulnerableRatio
                 : 0f;
@@ -347,7 +365,9 @@ namespace ProjectVL.Systems
                 state.GrantReward(enemy.Reward);
                 CardCombatProfile profile =
                     CardEffectResolver.Resolve(state);
-                state.AddExperience(profile.XpMultiplier);
+                state.AddExperience(
+                    profile.XpMultiplier
+                    * state.KillXpBuffMultiplier);
                 if (enemy.Reward != null)
                 {
                     state.RestoreHp(profile.PickupRestore);
@@ -380,6 +400,29 @@ namespace ProjectVL.Systems
                                     profile.FrozenKillFreezeDuration);
                             }
                         }
+                    }
+                }
+
+                if (killedWhileControlled)
+                {
+                    if (profile.ControlledKillExtraDropChance > 0f)
+                    {
+                        _drops?.TrySpawnBonus(
+                            state,
+                            enemy.Position,
+                            profile.ControlledKillExtraDropChance);
+                    }
+                    if (profile.ControlledKillXpMaxStacks > 0)
+                    {
+                        state.KillXpBuffStacks = Math.Min(
+                            profile.ControlledKillXpMaxStacks,
+                            state.KillXpBuffStacks + 1);
+                        state.KillXpBuffMultiplier =
+                            (float)Math.Pow(
+                                profile.ControlledKillXpMultiplier,
+                                state.KillXpBuffStacks);
+                        state.KillXpBuffRemaining =
+                            profile.ControlledKillXpDuration;
                     }
                 }
             }
@@ -983,6 +1026,9 @@ namespace ProjectVL.Systems
                 profile.FrostNovaInterval;
             state.AvalanchePulseRemaining =
                 profile.AvalancheInterval;
+            state.PyrestormPulseRemaining =
+                profile.PyrestormInterval;
+            state.GroundZones.Clear();
             state.ScorchAuraTickRemaining =
                 profile.ScorchAuraTickInterval;
             state.SanctumPulseRemaining =
@@ -1402,6 +1448,102 @@ namespace ProjectVL.Systems
 
             state.AvalanchePulseRemaining +=
                 profile.AvalancheInterval;
+        }
+
+        private void ApplyPyrestorm(
+            GameState state,
+            CardCombatProfile profile,
+            float deltaTime)
+        {
+            for (int index = state.GroundZones.Count - 1;
+                index >= 0;
+                index--)
+            {
+                GroundZoneState zone = state.GroundZones[index];
+                zone.LifeRemaining -= deltaTime;
+                zone.TickRemaining -= deltaTime;
+                while (zone.TickRemaining <= 0f
+                    && zone.LifeRemaining > 0f)
+                {
+                    zone.TickRemaining += zone.TickInterval;
+                    var targets =
+                        new System.Collections.Generic.List<EnemyState>();
+                    foreach (EnemyState enemy in state.Enemies)
+                    {
+                        if (Float2.Distance(
+                            zone.Position,
+                            enemy.Position) <= zone.Radius)
+                        {
+                            targets.Add(enemy);
+                        }
+                    }
+
+                    foreach (EnemyState enemy in targets)
+                    {
+                        DamageEnemy(
+                            state,
+                            enemy,
+                            zone.DamagePerTick);
+                        if (!state.Enemies.Contains(enemy))
+                        {
+                            continue;
+                        }
+
+                        enemy.VulnerableRatio = Math.Max(
+                            enemy.VulnerableRatio,
+                            zone.VulnerableRatio);
+                        enemy.VulnerableRemaining = Math.Max(
+                            enemy.VulnerableRemaining,
+                            zone.VulnerableDuration);
+                    }
+                }
+
+                if (zone.LifeRemaining <= 0f)
+                {
+                    state.GroundZones.RemoveAt(index);
+                }
+            }
+
+            if (profile.PyrestormInterval <= 0f)
+            {
+                return;
+            }
+
+            state.PyrestormPulseRemaining -= deltaTime;
+            if (state.PyrestormPulseRemaining > 0f)
+            {
+                return;
+            }
+
+            EnemyState target = FindTarget(state);
+            if (target == null)
+            {
+                return;
+            }
+
+            Float2 center = target.Position;
+            DamageArea(
+                state,
+                center,
+                profile.PyrestormRadius,
+                _combat.defaults.damage
+                    * profile.PyrestormDamageRatio,
+                -1,
+                0f,
+                0f,
+                0f,
+                profile.PyrestormFalloff);
+            state.GroundZones.Add(new GroundZoneState(
+                center,
+                profile.PyrestormRadius,
+                profile.PyrestormZoneDuration,
+                profile.PyrestormZoneTickInterval,
+                _combat.defaults.damage
+                    * profile.PyrestormZoneDamageRatio,
+                profile.PyrestormZoneVulnerableRatio,
+                profile.PyrestormZoneVulnerableDuration));
+            state.PyrestormPulseRemaining +=
+                profile.PyrestormInterval;
         }
 
         private void HandleBreach(
