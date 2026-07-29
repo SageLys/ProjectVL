@@ -40,6 +40,13 @@ namespace ProjectVL.Core
         public float ImpactPulseRemaining { get; internal set; }
         public float ImpactHitCooldownRemaining { get; internal set; }
         public float ThornsAuraTickRemaining { get; internal set; }
+        public float BeamPulseRemaining { get; internal set; }
+        public float ChainPulseRemaining { get; internal set; }
+        public float FrostNovaRemaining { get; internal set; }
+        public float BeamVisualRemaining { get; internal set; }
+        public Float2 BeamVisualStart { get; internal set; }
+        public Float2 BeamVisualEnd { get; internal set; }
+        public float BeamVisualWidth { get; internal set; }
         public float DropRateMultiplier { get; internal set; } = 1f;
         public float DropLifetimeMultiplier { get; internal set; } = 1f;
         public float ExpiryConvertRatio { get; internal set; }

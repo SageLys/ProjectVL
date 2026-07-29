@@ -64,6 +64,14 @@ namespace ProjectVL.Systems
             CardState card,
             CardCombatProfile profile)
         {
+            if (card.Star >= 6)
+            {
+                profile.BeamInterval = 0.9f;
+                profile.BeamWidth = 32f;
+                profile.BeamDamageRatio = 1f;
+                return;
+            }
+
             string route = RouteAt(card, 3);
             if (route == "pierceB")
             {
@@ -118,6 +126,16 @@ namespace ProjectVL.Systems
             CardState card,
             CardCombatProfile profile)
         {
+            if (card.Star >= 6)
+            {
+                profile.ChainPulseInterval = 1.2f;
+                profile.ChainPulseTargets = 3;
+                profile.ChainPulseBounces = 2;
+                profile.ChainPulseDamageRetention = 0.8f;
+                profile.ChainPulseSearchRange = 160f;
+                return;
+            }
+
             string route = RouteAt(card, 3);
             profile.ChainBounces += route == "chainLightningB" ? 1 : 2;
             profile.ChainDamageRetention =
@@ -171,6 +189,17 @@ namespace ProjectVL.Systems
             CardState card,
             CardCombatProfile profile)
         {
+            if (card.Star >= 6)
+            {
+                profile.FrostAuraRadiusRatio = 0.6f;
+                profile.FrostAuraSlowRatio = 0.35f;
+                profile.FrostAuraSlowDuration = 1.2f;
+                profile.FrostNovaInterval = 4f;
+                profile.FrostNovaRadius = 150f;
+                profile.FrostNovaDuration = 0.6f;
+                return;
+            }
+
             string route = RouteAt(card, 3);
             profile.SlowRatio = Max(profile.SlowRatio, 0.3f);
             profile.SlowDuration = Max(profile.SlowDuration, 1.5f);

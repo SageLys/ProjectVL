@@ -24,6 +24,20 @@ namespace ProjectVL.Core
         public float FrozenKillSplashDamageRatio { get; set; }
         public float FrozenKillSlowRatio { get; set; }
         public float FrozenKillSlowDuration { get; set; }
+        public float BeamInterval { get; set; }
+        public float BeamWidth { get; set; }
+        public float BeamDamageRatio { get; set; }
+        public float ChainPulseInterval { get; set; }
+        public int ChainPulseTargets { get; set; }
+        public int ChainPulseBounces { get; set; }
+        public float ChainPulseDamageRetention { get; set; }
+        public float ChainPulseSearchRange { get; set; }
+        public float FrostAuraRadiusRatio { get; set; }
+        public float FrostAuraSlowRatio { get; set; }
+        public float FrostAuraSlowDuration { get; set; }
+        public float FrostNovaInterval { get; set; }
+        public float FrostNovaRadius { get; set; }
+        public float FrostNovaDuration { get; set; }
         public float DotDamageRatio { get; set; }
         public float DotDuration { get; set; }
         public float DotTickInterval { get; set; }

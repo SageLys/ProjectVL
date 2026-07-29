@@ -32,6 +32,11 @@ namespace ProjectVL.Systems
             Float2 turret = TurretPosition;
             Float2 direction = (target.Position - turret).Normalized();
             state.TurretAngleRadians = (float)Math.Atan2(direction.Y, direction.X);
+            CardCombatProfile profile = CardEffectResolver.Resolve(state);
+            if (profile.BeamInterval > 0f)
+            {
+                return;
+            }
 
             if (state.ShotCooldown > 0f)
             {
@@ -39,7 +44,6 @@ namespace ProjectVL.Systems
             }
 
             Float2 muzzle = turret + direction * _combat.bullet.muzzleOffset;
-            CardCombatProfile profile = CardEffectResolver.Resolve(state);
             state.Bullets.Add(new BulletState(
                 state.TakeNextBulletId(),
                 muzzle,
@@ -59,6 +63,9 @@ namespace ProjectVL.Systems
             state.DropLifetimeMultiplier = profile.DropLifetimeMultiplier;
             state.ExpiryConvertRatio = profile.ExpiryConvertRatio;
             state.XpMultiplier = profile.XpMultiplier;
+            state.BeamVisualRemaining = Math.Max(
+                0f,
+                state.BeamVisualRemaining - deltaTime);
             if (state.Wave > 0 && state.EquipmentEffectWave != state.Wave)
             {
                 InitializeWaveEffects(state, profile);
@@ -130,6 +137,10 @@ namespace ProjectVL.Systems
             }
 
             ApplySanctumAura(state, profile);
+            ApplyFrostAura(state, profile);
+            ApplyBeamPulse(state, profile, deltaTime);
+            ApplyChainPulse(state, profile, deltaTime);
+            ApplyFrostNova(state, profile, deltaTime);
             ApplyDecoyAura(state, profile);
             ApplyHarvestMergePulse(state, profile);
         }
@@ -919,6 +930,12 @@ namespace ProjectVL.Systems
                 profile.ImpactPulseInterval;
             state.ThornsAuraTickRemaining =
                 profile.ThornsAuraTickInterval;
+            state.BeamPulseRemaining = profile.BeamInterval;
+            state.ChainPulseRemaining =
+                profile.ChainPulseInterval;
+            state.FrostNovaRemaining =
+                profile.FrostNovaInterval;
+            state.BeamVisualRemaining = 0f;
 
             state.DecoyActive = profile.DecoyHp > 0f;
             state.DecoyMaxHp = profile.DecoyHp;
@@ -970,6 +987,202 @@ namespace ProjectVL.Systems
                     enemy.VulnerableRemaining,
                     0.6f);
             }
+        }
+
+        private void ApplyFrostAura(
+            GameState state,
+            CardCombatProfile profile)
+        {
+            if (profile.FrostAuraRadiusRatio <= 0f)
+            {
+                return;
+            }
+
+            float radius =
+                _combat.defaults.range
+                * profile.FrostAuraRadiusRatio;
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                if (Float2.Distance(
+                    TurretPosition,
+                    enemy.Position) > radius)
+                {
+                    continue;
+                }
+
+                enemy.SlowRatio = Math.Max(
+                    enemy.SlowRatio,
+                    profile.FrostAuraSlowRatio);
+                enemy.SlowRemaining = Math.Max(
+                    enemy.SlowRemaining,
+                    profile.FrostAuraSlowDuration);
+            }
+        }
+
+        private void ApplyBeamPulse(
+            GameState state,
+            CardCombatProfile profile,
+            float deltaTime)
+        {
+            if (profile.BeamInterval <= 0f)
+            {
+                return;
+            }
+
+            state.BeamPulseRemaining -= deltaTime;
+            if (state.BeamPulseRemaining > 0f)
+            {
+                return;
+            }
+
+            EnemyState target = FindTarget(state);
+            if (target == null)
+            {
+                return;
+            }
+
+            Float2 direction =
+                (target.Position - TurretPosition).Normalized();
+            state.TurretAngleRadians = (float)Math.Atan2(
+                direction.Y,
+                direction.X);
+            Float2 beamEnd = TurretPosition
+                + direction * _combat.defaults.range;
+            float damage = _combat.defaults.damage
+                * _combat.defaults.fireRate
+                * profile.BeamInterval
+                * profile.BeamDamageRatio;
+            var targets =
+                new System.Collections.Generic.List<EnemyState>();
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                Float2 relative =
+                    enemy.Position - TurretPosition;
+                float along = relative.X * direction.X
+                    + relative.Y * direction.Y;
+                float perpendicular = Math.Abs(
+                    relative.X * direction.Y
+                    - relative.Y * direction.X);
+                if (along >= 0f
+                    && along <= _combat.defaults.range
+                    && perpendicular
+                        <= profile.BeamWidth / 2f
+                            + enemy.Radius)
+                {
+                    targets.Add(enemy);
+                }
+            }
+
+            foreach (EnemyState enemy in targets)
+            {
+                DamageEnemy(state, enemy, damage);
+            }
+
+            state.BeamVisualStart = TurretPosition;
+            state.BeamVisualEnd = beamEnd;
+            state.BeamVisualWidth = profile.BeamWidth;
+            state.BeamVisualRemaining = 0.14f;
+            state.BeamPulseRemaining +=
+                profile.BeamInterval;
+        }
+
+        private void ApplyChainPulse(
+            GameState state,
+            CardCombatProfile profile,
+            float deltaTime)
+        {
+            if (profile.ChainPulseInterval <= 0f)
+            {
+                return;
+            }
+
+            state.ChainPulseRemaining -= deltaTime;
+            if (state.ChainPulseRemaining > 0f)
+            {
+                return;
+            }
+
+            var pickedStarts =
+                new System.Collections.Generic.HashSet<int>();
+            for (int startIndex = 0;
+                startIndex < profile.ChainPulseTargets;
+                startIndex++)
+            {
+                EnemyState start = FindClosestChainTarget(
+                    state,
+                    TurretPosition,
+                    _combat.defaults.range,
+                    pickedStarts);
+                if (start == null)
+                {
+                    break;
+                }
+
+                pickedStarts.Add(start.Id);
+                Float2 currentOrigin = start.Position;
+                float damage = _combat.defaults.damage;
+                var visited =
+                    new System.Collections.Generic.HashSet<int>
+                    {
+                        start.Id
+                    };
+                DamageEnemy(state, start, damage);
+                for (int bounce = 0;
+                    bounce < profile.ChainPulseBounces;
+                    bounce++)
+                {
+                    EnemyState next = FindClosestChainTarget(
+                        state,
+                        currentOrigin,
+                        profile.ChainPulseSearchRange,
+                        visited);
+                    if (next == null)
+                    {
+                        break;
+                    }
+
+                    visited.Add(next.Id);
+                    currentOrigin = next.Position;
+                    damage *=
+                        profile.ChainPulseDamageRetention;
+                    DamageEnemy(state, next, damage);
+                }
+            }
+
+            state.ChainPulseRemaining +=
+                profile.ChainPulseInterval;
+        }
+
+        private void ApplyFrostNova(
+            GameState state,
+            CardCombatProfile profile,
+            float deltaTime)
+        {
+            if (profile.FrostNovaInterval <= 0f)
+            {
+                return;
+            }
+
+            state.FrostNovaRemaining -= deltaTime;
+            if (state.FrostNovaRemaining > 0f)
+            {
+                return;
+            }
+
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                if (Float2.Distance(
+                    TurretPosition,
+                    enemy.Position) <= profile.FrostNovaRadius)
+                {
+                    enemy.FrozenRemaining = Math.Max(
+                        enemy.FrozenRemaining,
+                        profile.FrostNovaDuration);
+                }
+            }
+
+            state.FrostNovaRemaining +=
+                profile.FrostNovaInterval;
         }
 
         private void HandleBreach(

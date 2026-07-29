@@ -303,7 +303,8 @@ namespace ProjectVL.Presentation
                 _hudStyle);
             GUI.Label(
                 new Rect(actionX + 10f, 341f, 226f, 34f),
-                "DROP [T] · ADVANCED [N]\nEFFECT [B] · RECIPE [H/F]",
+                "DROP [T] · ADVANCED [N] · 6STAR [U]\n"
+                + "EFFECT [B] · RECIPE [H/F]",
                 _hudStyle);
         }
 

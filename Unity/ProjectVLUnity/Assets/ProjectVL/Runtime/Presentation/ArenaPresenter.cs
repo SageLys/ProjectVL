@@ -21,6 +21,7 @@ namespace ProjectVL.Presentation
         private Transform _turret;
         private SpriteRenderer _decoyView;
         private SpriteRenderer _secondaryDecoyView;
+        private SpriteRenderer _beamView;
 
         public void Initialize(CombatConfig combat, GameState state)
         {
@@ -50,6 +51,7 @@ namespace ProjectVL.Presentation
             SyncBullets();
             SyncDrops();
             SyncDecoy();
+            SyncBeam();
         }
 
         public bool TryScreenToArenaPoint(
@@ -331,6 +333,41 @@ namespace ProjectVL.Presentation
                 new Color(0.4f, 0.15f, 0.05f),
                 new Color(1f, 0.65f, 0.2f),
                 Mathf.Clamp01(hp / _state.DecoyMaxHp));
+        }
+
+        private void SyncBeam()
+        {
+            if (_state.BeamVisualRemaining <= 0f)
+            {
+                if (_beamView != null)
+                {
+                    Destroy(_beamView.gameObject);
+                    _beamView = null;
+                }
+
+                return;
+            }
+
+            if (_beamView == null)
+            {
+                _beamView = CreateSpriteView(
+                    "PierceBeam",
+                    _squareSprite,
+                    new Color(0.45f, 0.95f, 1f, 0.75f));
+                _beamView.transform.SetParent(transform, false);
+                _beamView.sortingOrder = 13;
+            }
+
+            Vector3 start = PixelToWorld(_state.BeamVisualStart);
+            Vector3 end = PixelToWorld(_state.BeamVisualEnd);
+            Vector3 delta = end - start;
+            _beamView.transform.position = (start + end) * 0.5f;
+            _beamView.transform.rotation =
+                Quaternion.FromToRotation(Vector3.right, delta);
+            _beamView.transform.localScale = new Vector3(
+                delta.magnitude,
+                _state.BeamVisualWidth,
+                1f);
         }
 
         private static void RemoveMissingViews(

@@ -980,6 +980,146 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void PierceSixStarReplacesProjectileWithBeamProfile()
+        {
+            EquipResolved(
+                "pierce",
+                6,
+                "3:pierceA",
+                "5:pierceA2");
+
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+
+            Assert.That(profile.BeamInterval, Is.EqualTo(0.9f));
+            Assert.That(profile.BeamWidth, Is.EqualTo(32f));
+            Assert.That(profile.BeamDamageRatio, Is.EqualTo(1f));
+            Assert.That(profile.PierceCount, Is.Zero);
+            Assert.That(profile.RicochetBounces, Is.Zero);
+        }
+
+        [Test]
+        public void PierceSixStarBeamDamagesEveryEnemyOnItsLine()
+        {
+            EquipResolved(
+                "pierce",
+                6,
+                "3:pierceA",
+                "5:pierceA2");
+            _state.BeginWave(1);
+            _system.StepPassives(_state, 0f);
+            Float2 turret = new Float2(
+                _combat.turret.x,
+                _combat.turret.y);
+            EnemyState near = AddEnemy(
+                turret + new Float2(70f, 0f),
+                200f);
+            EnemyState far = AddEnemy(
+                turret + new Float2(130f, 0f),
+                200f);
+            EnemyState offLine = AddEnemy(
+                turret + new Float2(70f, 60f),
+                200f);
+
+            _system.StepPassives(_state, 0.9f);
+            _system.StepTurret(_state, 0f);
+
+            Assert.That(near.Hp, Is.EqualTo(119f));
+            Assert.That(far.Hp, Is.EqualTo(119f));
+            Assert.That(offLine.Hp, Is.EqualTo(200f));
+            Assert.That(_state.Bullets, Is.Empty);
+            Assert.That(_state.BeamVisualRemaining, Is.GreaterThan(0f));
+        }
+
+        [Test]
+        public void ChainLightningSixStarUsesAutomaticTripleArcProfile()
+        {
+            EquipResolved(
+                "chainLightning",
+                6,
+                "3:chainLightningA",
+                "5:chainLightningA2");
+
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+
+            Assert.That(profile.ChainPulseInterval, Is.EqualTo(1.2f));
+            Assert.That(profile.ChainPulseTargets, Is.EqualTo(3));
+            Assert.That(profile.ChainPulseBounces, Is.EqualTo(2));
+            Assert.That(
+                profile.ChainPulseDamageRetention,
+                Is.EqualTo(0.8f));
+            Assert.That(profile.ChainPulseSearchRange, Is.EqualTo(160f));
+            Assert.That(profile.ChainBounces, Is.Zero);
+        }
+
+        [Test]
+        public void ChainLightningSixStarFiresThreeAutomaticArcs()
+        {
+            EquipResolved(
+                "chainLightning",
+                6,
+                "3:chainLightningA",
+                "5:chainLightningA2");
+            _state.BeginWave(1);
+            _system.StepPassives(_state, 0f);
+            Float2 turret = new Float2(
+                _combat.turret.x,
+                _combat.turret.y);
+            EnemyState first = AddEnemy(
+                turret + new Float2(20f, 0f),
+                200f);
+            EnemyState second = AddEnemy(
+                turret + new Float2(60f, 0f),
+                200f);
+            EnemyState third = AddEnemy(
+                turret + new Float2(100f, 0f),
+                200f);
+
+            _system.StepPassives(_state, 1.2f);
+
+            float totalRemaining =
+                first.Hp + second.Hp + third.Hp;
+            Assert.That(
+                totalRemaining,
+                Is.EqualTo(468.24f).Within(0.01f));
+        }
+
+        [Test]
+        public void FrostSixStarAppliesAuraAndPeriodicNova()
+        {
+            EquipResolved(
+                "frost",
+                6,
+                "3:frostA",
+                "5:frostA2");
+            _state.BeginWave(1);
+            _system.StepPassives(_state, 0f);
+            Float2 turret = new Float2(
+                _combat.turret.x,
+                _combat.turret.y);
+            EnemyState auraTarget = AddEnemy(
+                turret + new Float2(80f, 0f),
+                200f);
+            EnemyState novaOnly = AddEnemy(
+                turret + new Float2(120f, 0f),
+                200f);
+            EnemyState outside = AddEnemy(
+                turret + new Float2(170f, 0f),
+                200f);
+
+            _system.StepPassives(_state, 0f);
+
+            Assert.That(auraTarget.SlowRatio, Is.EqualTo(0.35f));
+            Assert.That(auraTarget.SlowRemaining, Is.EqualTo(1.2f));
+            Assert.That(novaOnly.SlowRatio, Is.Zero);
+
+            _system.StepPassives(_state, 4f);
+
+            Assert.That(auraTarget.FrozenRemaining, Is.EqualTo(0.6f));
+            Assert.That(novaOnly.FrozenRemaining, Is.EqualTo(0.6f));
+            Assert.That(outside.FrozenRemaining, Is.Zero);
+        }
+
+        [Test]
         public void DecoySpawnsAtWaveStartAndTakesEnemyHit()
         {
             EquipResolved("decoy", 3, "3:decoyA");

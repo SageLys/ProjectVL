@@ -19,6 +19,7 @@ namespace ProjectVL.Presentation
         private int _selectedSlotIndex = -1;
         private int _effectDemoIndex;
         private int _advancedDemoIndex;
+        private int _transformDemoIndex;
         private static readonly string[] EffectDemoTypes =
         {
             "scorch",
@@ -101,6 +102,12 @@ namespace ProjectVL.Presentation
             "A",
             "B",
             "C"
+        };
+        private static readonly string[] TransformDemoTypes =
+        {
+            "pierce",
+            "chainLightning",
+            "frost"
         };
 
         public GameState State => _simulation?.State;
@@ -378,6 +385,26 @@ namespace ProjectVL.Presentation
                 : "Free hand slots, then press N for more advanced cards.";
         }
 
+        public void GrantTransformEffectDemo()
+        {
+            int added = 0;
+            while (_transformDemoIndex < TransformDemoTypes.Length)
+            {
+                if (!AddTransformDemoCard(
+                    TransformDemoTypes[_transformDemoIndex]))
+                {
+                    break;
+                }
+
+                _transformDemoIndex++;
+                added++;
+            }
+
+            LastCardAction = added > 0
+                ? $"Added {added} six-star transform cards."
+                : "Free hand slots, then press U for more transforms.";
+        }
+
         public void CraftAvailableRecipe()
         {
             string recipeId = AvailableRecipeId;
@@ -458,6 +485,11 @@ namespace ProjectVL.Presentation
             if (Input.GetKeyDown(KeyCode.N))
             {
                 GrantAdvancedEffectDemo();
+            }
+
+            if (Input.GetKeyDown(KeyCode.U))
+            {
+                GrantTransformEffectDemo();
             }
 
             for (int i = 0; i < State.Hand.Length && i < 7; i++)
@@ -552,6 +584,25 @@ namespace ProjectVL.Presentation
                     $"3:{type}{branch}");
                 card.EvolutionPath.Add(
                     $"5:{type}{branch}2");
+                State.Hand[i] = card;
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool AddTransformDemoCard(string type)
+        {
+            for (int i = 0; i < State.Hand.Length; i++)
+            {
+                if (State.Hand[i] != null)
+                {
+                    continue;
+                }
+
+                CardState card = State.CreateCard(type, 6);
+                card.EvolutionPath.Add($"3:{type}A");
+                card.EvolutionPath.Add($"5:{type}A2");
                 State.Hand[i] = card;
                 return true;
             }
