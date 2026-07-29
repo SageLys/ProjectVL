@@ -178,6 +178,9 @@ namespace ProjectVL.Core
         public float KillVulnerableRadius { get; set; }
         public float KillVulnerableRatio { get; set; }
         public float KillVulnerableDuration { get; set; }
+        public float VulnerableKillZoneRadius { get; set; }
+        public float VulnerableKillZoneRatio { get; set; }
+        public float VulnerableKillZoneDuration { get; set; }
         public float BrandedKillFocusRadius { get; set; }
         public float BrandedKillFocusWeight { get; set; } = 1f;
         public float BrandedKillFocusDuration { get; set; }
@@ -230,6 +233,8 @@ namespace ProjectVL.Core
         public float DotKillDamageMultiplier { get; set; } = 1f;
         public int DotKillDamageMaxStacks { get; set; }
         public float DotKillRestore { get; set; }
+        public float DotKillBurstRadius { get; set; }
+        public float DotKillBurstDamageMultiplier { get; set; }
         public float WaveStartDamageMultiplier { get; set; } = 1f;
         public float WaveStartDamageDuration { get; set; }
         public float WaveStartRestoreRatio { get; set; }

@@ -2201,6 +2201,53 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void StaticSurgePropagationRequiresVulnerableKill()
+        {
+            EquipResolved(
+                "staticSurge",
+                5,
+                "3:staticSurgeA",
+                "5:staticSurgeA2");
+            EnemyState victim = AddEnemy(
+                new Float2(200f, 200f),
+                1f);
+            victim.VulnerableRatio = 0.05f;
+            victim.VulnerableRemaining = 1f;
+            EnemyState nearby = AddEnemy(
+                new Float2(250f, 200f),
+                100f);
+
+            HitWithProfile(
+                victim.Position,
+                CardEffectResolver.Resolve(_state));
+
+            Assert.That(nearby.VulnerableRatio, Is.EqualTo(0.1f));
+            Assert.That(nearby.VulnerableRemaining, Is.EqualTo(3f));
+        }
+
+        [Test]
+        public void StaticSurgePropagationSkipsOrdinaryKill()
+        {
+            EquipResolved(
+                "staticSurge",
+                5,
+                "3:staticSurgeA",
+                "5:staticSurgeA2");
+            EnemyState victim = AddEnemy(
+                new Float2(200f, 200f),
+                1f);
+            EnemyState nearby = AddEnemy(
+                new Float2(250f, 200f),
+                100f);
+
+            HitWithProfile(
+                victim.Position,
+                CardEffectResolver.Resolve(_state));
+
+            Assert.That(nearby.VulnerableRatio, Is.Zero);
+        }
+
+        [Test]
         public void StormcallEquipmentStrikesAtConfiguredInterval()
         {
             EquipResolved(
@@ -2460,6 +2507,51 @@ namespace ProjectVL.Tests
             _system.StepPassives(_state, 4f);
 
             Assert.That(_state.GroundZones, Has.Count.EqualTo(2));
+        }
+
+        [Test]
+        public void MagmaDeathBurstRequiresDotKill()
+        {
+            EquipResolved(
+                "magmaPool",
+                5,
+                "3:magmaPoolA",
+                "5:magmaPoolC2");
+            EnemyState victim = AddEnemy(
+                new Float2(200f, 200f),
+                1f);
+            victim.DotRemaining = 1f;
+            EnemyState nearby = AddEnemy(
+                new Float2(250f, 200f),
+                100f);
+
+            HitWithProfile(
+                victim.Position,
+                CardEffectResolver.Resolve(_state));
+
+            Assert.That(nearby.Hp, Is.EqualTo(82f));
+        }
+
+        [Test]
+        public void MagmaDeathBurstSkipsOrdinaryKill()
+        {
+            EquipResolved(
+                "magmaPool",
+                5,
+                "3:magmaPoolA",
+                "5:magmaPoolC2");
+            EnemyState victim = AddEnemy(
+                new Float2(200f, 200f),
+                1f);
+            EnemyState nearby = AddEnemy(
+                new Float2(250f, 200f),
+                100f);
+
+            HitWithProfile(
+                victim.Position,
+                CardEffectResolver.Resolve(_state));
+
+            Assert.That(nearby.Hp, Is.EqualTo(100f));
         }
 
         [Test]

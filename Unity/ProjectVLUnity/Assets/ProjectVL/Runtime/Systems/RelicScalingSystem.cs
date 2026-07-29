@@ -227,6 +227,7 @@ namespace ProjectVL.Systems
             profile.SplashDamageRatio *= multiplier;
             profile.SecondarySplashDamageRatio *= multiplier;
             profile.DotHitBurstDamageMultiplier *= multiplier;
+            profile.DotKillBurstDamageMultiplier *= multiplier;
             profile.AvalancheDamageMultiplier *= multiplier;
             profile.DecoyExplodeDamageMultiplier *= multiplier;
             profile.DecoyDamageRatio *= multiplier;
@@ -318,6 +319,7 @@ namespace ProjectVL.Systems
             profile.FrostAuraRadiusRatio *= multiplier;
             profile.FrostNovaRadius *= multiplier;
             profile.DotAreaRadius *= multiplier;
+            profile.DotKillBurstRadius *= multiplier;
             profile.SplashRadius *= multiplier;
             profile.SecondarySplashRadius *= multiplier;
             profile.ScorchAuraRadius *= multiplier;

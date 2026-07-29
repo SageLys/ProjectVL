@@ -2238,6 +2238,8 @@ namespace ProjectVL.Systems
                 || enemy.SlowRemaining > 0f;
             bool killedWhileBranded =
                 enemy.FocusPriorityRemaining > 0f;
+            bool killedWhileVulnerable =
+                enemy.VulnerableRemaining > 0f;
             CardCombatProfile profile =
                 CardEffectResolver.Resolve(state);
             float vulnerability = enemy.VulnerableRemaining > 0f
@@ -2287,6 +2289,13 @@ namespace ProjectVL.Systems
                 if (killedWhileBranded)
                 {
                     ApplyBrandedKillCardEffects(
+                        state,
+                        profile,
+                        enemy.Position);
+                }
+                if (killedWhileVulnerable)
+                {
+                    ApplyVulnerableKillCardEffects(
                         state,
                         profile,
                         enemy.Position);
@@ -3703,6 +3712,27 @@ namespace ProjectVL.Systems
                 profile.BrandedKillXpDuration;
         }
 
+        private static void ApplyVulnerableKillCardEffects(
+            GameState state,
+            CardCombatProfile profile,
+            Float2 deathPosition)
+        {
+            if (profile.VulnerableKillZoneRadius <= 0f)
+            {
+                return;
+            }
+
+            MarkArea(
+                state,
+                deathPosition,
+                profile.VulnerableKillZoneRadius,
+                profile.VulnerableKillZoneRatio,
+                profile.VulnerableKillZoneDuration,
+                1f,
+                0f,
+                0f);
+        }
+
         private void ApplyDotKillCardEffects(
             GameState state,
             CardCombatProfile profile,
@@ -3719,6 +3749,20 @@ namespace ProjectVL.Systems
             if (profile.DotKillRestore > 0f)
             {
                 state.RestoreHp(profile.DotKillRestore);
+            }
+
+            if (profile.DotKillBurstRadius > 0f
+                && profile.DotKillBurstDamageMultiplier > 0f)
+            {
+                DamageArea(
+                    state,
+                    deathPosition,
+                    profile.DotKillBurstRadius,
+                    BaseDamage(state)
+                        * profile.DotKillBurstDamageMultiplier,
+                    -1,
+                    0f,
+                    0f);
             }
 
             if (profile.DotKillDamageMultiplier > 1f

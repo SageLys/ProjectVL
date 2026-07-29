@@ -1206,11 +1206,11 @@ namespace ProjectVL.Systems
             }
             else if (advanced == "magmaPoolC2")
             {
-                profile.KillBurstRadius = Max(
-                    profile.KillBurstRadius,
+                profile.DotKillBurstRadius = Max(
+                    profile.DotKillBurstRadius,
                     90f);
-                profile.KillBurstDamageMultiplier = Max(
-                    profile.KillBurstDamageMultiplier,
+                profile.DotKillBurstDamageMultiplier = Max(
+                    profile.DotKillBurstDamageMultiplier,
                     1f);
             }
         }
@@ -1958,9 +1958,9 @@ namespace ProjectVL.Systems
             string advanced = RouteAt(card, 5);
             if (advanced == "staticSurgeA2")
             {
-                profile.KillVulnerableRadius = 90f;
-                profile.KillVulnerableRatio = 0.1f;
-                profile.KillVulnerableDuration = 3f;
+                profile.VulnerableKillZoneRadius = 90f;
+                profile.VulnerableKillZoneRatio = 0.1f;
+                profile.VulnerableKillZoneDuration = 3f;
             }
             else if (advanced == "staticSurgeB2")
             {
