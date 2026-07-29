@@ -120,11 +120,16 @@ namespace ProjectVL.Core
         public float DecoyAuraRadius { get; set; }
         public float DecoyAuraSlowRatio { get; set; }
         public float DecoyAuraSlowDuration { get; set; }
+        public bool DecoyMirrorTurret { get; set; }
+        public float DecoyDamageRatio { get; set; }
+        public float DecoyFireInterval { get; set; }
+        public float DecoyFireRangeRatio { get; set; }
         public float DropRateMultiplier { get; set; } = 1f;
         public float DropLifetimeMultiplier { get; set; } = 1f;
         public float PickupRestore { get; set; }
         public float ExpiryConvertRatio { get; set; }
         public float XpMultiplier { get; set; } = 1f;
         public float MergePulseDamagePerStar { get; set; }
+        public int HarvestWaveStartDrops { get; set; }
     }
 }

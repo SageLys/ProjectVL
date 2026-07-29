@@ -68,6 +68,8 @@ namespace ProjectVL.Core
         public bool SecondaryDecoyActive { get; internal set; }
         public Float2 SecondaryDecoyPosition { get; internal set; }
         public float SecondaryDecoyHp { get; internal set; }
+        public bool DecoyIsMirrorTurret { get; internal set; }
+        public float DecoyFireCooldown { get; internal set; }
         public float IntermissionRemaining { get; internal set; }
         public bool IntermissionReady { get; internal set; }
         public float ShotCooldown { get; set; }

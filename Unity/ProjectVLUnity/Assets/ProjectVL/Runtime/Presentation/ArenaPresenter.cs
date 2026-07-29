@@ -289,13 +289,15 @@ namespace ProjectVL.Presentation
                 "Decoy",
                 _state.DecoyActive,
                 _state.DecoyPosition,
-                _state.DecoyHp);
+                _state.DecoyHp,
+                _state.DecoyIsMirrorTurret);
             SyncDecoyView(
                 ref _secondaryDecoyView,
                 "DecoySecondary",
                 _state.SecondaryDecoyActive,
                 _state.SecondaryDecoyPosition,
-                _state.SecondaryDecoyHp);
+                _state.SecondaryDecoyHp,
+                false);
         }
 
         private void SyncDecoyView(
@@ -303,7 +305,8 @@ namespace ProjectVL.Presentation
             string viewName,
             bool active,
             Float2 position,
-            float hp)
+            float hp,
+            bool mirrorTurret)
         {
             if (!active)
             {
@@ -321,7 +324,9 @@ namespace ProjectVL.Presentation
                 view = CreateSpriteView(
                     viewName,
                     _squareSprite,
-                    new Color(1f, 0.65f, 0.2f));
+                    mirrorTurret
+                        ? new Color(0.78f, 0.54f, 1f)
+                        : new Color(1f, 0.65f, 0.2f));
                 view.transform.SetParent(transform, false);
                 view.transform.localScale =
                     new Vector3(24f, 24f, 1f);
@@ -330,8 +335,12 @@ namespace ProjectVL.Presentation
 
             view.transform.position = PixelToWorld(position);
             view.color = Color.Lerp(
-                new Color(0.4f, 0.15f, 0.05f),
-                new Color(1f, 0.65f, 0.2f),
+                mirrorTurret
+                    ? new Color(0.16f, 0.08f, 0.28f)
+                    : new Color(0.4f, 0.15f, 0.05f),
+                mirrorTurret
+                    ? new Color(0.78f, 0.54f, 1f)
+                    : new Color(1f, 0.65f, 0.2f),
                 Mathf.Clamp01(hp / _state.DecoyMaxHp));
         }
 

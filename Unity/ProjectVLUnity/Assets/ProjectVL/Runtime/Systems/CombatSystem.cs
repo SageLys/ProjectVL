@@ -169,6 +169,7 @@ namespace ProjectVL.Systems
             ApplyChainPulse(state, profile, deltaTime);
             ApplyFrostNova(state, profile, deltaTime);
             ApplyDecoyAura(state, profile);
+            ApplyMirrorTurret(state, profile, deltaTime);
             ApplyHarvestMergePulse(state, profile);
         }
 
@@ -980,6 +981,9 @@ namespace ProjectVL.Systems
                 profile.DecoyExplodeKnockback;
             state.DecoyRespawnsRemaining =
                 profile.DecoyRespawns;
+            state.DecoyIsMirrorTurret =
+                profile.DecoyMirrorTurret;
+            state.DecoyFireCooldown = 0f;
             state.DecoyPosition = TurretPosition
                 + new Float2(profile.DecoyDistance, 0f);
             state.SecondaryDecoyActive =
@@ -987,6 +991,19 @@ namespace ProjectVL.Systems
             state.SecondaryDecoyHp = profile.DecoyHp;
             state.SecondaryDecoyPosition = TurretPosition
                 + new Float2(profile.SecondaryDecoyDistance, 0f);
+
+            for (int index = 0;
+                index < profile.HarvestWaveStartDrops;
+                index++)
+            {
+                float offset = (
+                    index
+                    - (profile.HarvestWaveStartDrops - 1) / 2f)
+                    * 36f;
+                _drops?.SpawnTestDrop(
+                    state,
+                    TurretPosition + new Float2(offset, -55f));
+            }
         }
 
         private void ApplySanctumAura(
@@ -1513,6 +1530,49 @@ namespace ProjectVL.Systems
                     enemy.SlowRemaining,
                     profile.DecoyAuraSlowDuration);
             }
+        }
+
+        private void ApplyMirrorTurret(
+            GameState state,
+            CardCombatProfile profile,
+            float deltaTime)
+        {
+            if (!state.DecoyActive
+                || !profile.DecoyMirrorTurret
+                || profile.DecoyFireInterval <= 0f)
+            {
+                return;
+            }
+
+            state.DecoyFireCooldown -= deltaTime;
+            if (state.DecoyFireCooldown > 0f)
+            {
+                return;
+            }
+
+            EnemyState target = FindClosestChainTarget(
+                state,
+                state.DecoyPosition,
+                _combat.defaults.range
+                    * profile.DecoyFireRangeRatio,
+                new System.Collections.Generic.HashSet<int>());
+            if (target == null)
+            {
+                return;
+            }
+
+            Float2 direction =
+                (target.Position - state.DecoyPosition).Normalized();
+            state.Bullets.Add(new BulletState(
+                state.TakeNextBulletId(),
+                state.DecoyPosition,
+                direction * _combat.bullet.speed,
+                _combat.bullet.radius,
+                _combat.bullet.life,
+                _combat.defaults.damage
+                    * profile.DecoyDamageRatio));
+            state.DecoyFireCooldown +=
+                profile.DecoyFireInterval;
         }
 
         private void ApplyHarvestMergePulse(

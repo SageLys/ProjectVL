@@ -113,7 +113,9 @@ namespace ProjectVL.Presentation
             "impact",
             "sanctum",
             "aegis",
-            "thorns"
+            "thorns",
+            "decoy",
+            "harvest"
         };
 
         public GameState State => _simulation?.State;

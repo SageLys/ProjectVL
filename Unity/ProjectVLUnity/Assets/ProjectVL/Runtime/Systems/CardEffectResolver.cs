@@ -600,6 +600,19 @@ namespace ProjectVL.Systems
             CardState card,
             CardCombatProfile profile)
         {
+            if (card.Star >= 6)
+            {
+                profile.DecoyHp = 80f;
+                profile.DecoyTauntRadius = 2000f;
+                profile.DecoyDistance = 150f;
+                profile.DecoyCount = 1;
+                profile.DecoyMirrorTurret = true;
+                profile.DecoyDamageRatio = 0.3f;
+                profile.DecoyFireInterval = 0.7f;
+                profile.DecoyFireRangeRatio = 0.8f;
+                return;
+            }
+
             string route = RouteAt(card, 3);
             profile.DecoyHp = 60f;
             profile.DecoyTauntRadius =
@@ -640,6 +653,13 @@ namespace ProjectVL.Systems
             CardState card,
             CardCombatProfile profile)
         {
+            if (card.Star >= 6)
+            {
+                profile.HarvestWaveStartDrops = 2;
+                profile.ExpiryConvertRatio = 1f;
+                return;
+            }
+
             string route = RouteAt(card, 3);
             if (route == "harvestA")
             {

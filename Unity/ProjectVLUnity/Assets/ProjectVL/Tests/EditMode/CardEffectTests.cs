@@ -1292,6 +1292,64 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void DecoySixStarBecomesFiringMirrorTurret()
+        {
+            EquipResolved(
+                "decoy",
+                6,
+                "3:decoyA",
+                "5:decoyA2");
+            Float2 turret = new Float2(
+                _combat.turret.x,
+                _combat.turret.y);
+            AddEnemy(
+                turret + new Float2(100f, 0f),
+                100f);
+            _state.BeginWave(1);
+
+            _system.StepPassives(_state, 0f);
+
+            Assert.That(_state.DecoyActive, Is.True);
+            Assert.That(_state.DecoyIsMirrorTurret, Is.True);
+            Assert.That(_state.DecoyHp, Is.EqualTo(80f));
+            Assert.That(_state.DecoyTauntRadius, Is.EqualTo(2000f));
+            Assert.That(_state.Bullets, Has.Count.EqualTo(1));
+            Assert.That(
+                _state.Bullets[0].Position,
+                Is.EqualTo(_state.DecoyPosition));
+            Assert.That(_state.Bullets[0].Damage, Is.EqualTo(5.4f));
+        }
+
+        [Test]
+        public void HarvestSixStarAirdropsAndConvertsEverything()
+        {
+            EquipResolved(
+                "harvest",
+                6,
+                "3:harvestA",
+                "5:harvestA2");
+            var drops = new DropSystem(
+                new EconomyConfig(),
+                new ConstantRandomSource(0.75f));
+            var system = new CombatSystem(
+                _combat,
+                _enemies,
+                drops);
+            _state.BeginWave(1);
+
+            system.StepPassives(_state, 0f);
+
+            Assert.That(_state.GroundDrops, Has.Count.EqualTo(2));
+            Assert.That(_state.ExpiryConvertRatio, Is.EqualTo(1f));
+
+            drops.Step(_state, 10f);
+
+            Assert.That(_state.GroundDrops, Is.Empty);
+            Assert.That(_state.ExpiredDropsConverted, Is.EqualTo(2));
+            Assert.That(_state.Experience, Is.EqualTo(8f));
+        }
+
+        [Test]
         public void DecoySpawnsAtWaveStartAndTakesEnemyHit()
         {
             EquipResolved("decoy", 3, "3:decoyA");
