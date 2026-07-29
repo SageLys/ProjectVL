@@ -168,6 +168,7 @@ namespace ProjectVL.Systems
             ApplyBeamPulse(state, profile, deltaTime);
             ApplyChainPulse(state, profile, deltaTime);
             ApplyFrostNova(state, profile, deltaTime);
+            ApplyAvalanchePulse(state, profile, deltaTime);
             ApplyDecoyAura(state, profile);
             ApplyMirrorTurret(state, profile, deltaTime);
             ApplyHarvestMergePulse(state, profile);
@@ -365,6 +366,21 @@ namespace ProjectVL.Systems
                         0f,
                         profile.FrozenKillSlowRatio,
                         profile.FrozenKillSlowDuration);
+                    if (profile.FrozenKillFreezeDuration > 0f)
+                    {
+                        foreach (EnemyState nearby in state.Enemies)
+                        {
+                            if (Float2.Distance(
+                                enemy.Position,
+                                nearby.Position)
+                                <= profile.FrozenKillSplashRadius)
+                            {
+                                nearby.FrozenRemaining = Math.Max(
+                                    nearby.FrozenRemaining,
+                                    profile.FrozenKillFreezeDuration);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -965,6 +981,8 @@ namespace ProjectVL.Systems
                 profile.ChainPulseInterval;
             state.FrostNovaRemaining =
                 profile.FrostNovaInterval;
+            state.AvalanchePulseRemaining =
+                profile.AvalancheInterval;
             state.ScorchAuraTickRemaining =
                 profile.ScorchAuraTickInterval;
             state.SanctumPulseRemaining =
@@ -1190,7 +1208,41 @@ namespace ProjectVL.Systems
 
             foreach (EnemyState enemy in targets)
             {
+                bool hadDot = enemy.DotRemaining > 0f
+                    || enemy.SecondaryDotRemaining > 0f;
                 DamageEnemy(state, enemy, damage);
+                if (!state.Enemies.Contains(enemy))
+                {
+                    continue;
+                }
+
+                if (profile.DotDamageRatio > 0f)
+                {
+                    enemy.DotDamagePerTick = Math.Max(
+                        enemy.DotDamagePerTick,
+                        damage * profile.DotDamageRatio);
+                    enemy.DotTickInterval =
+                        profile.DotTickInterval;
+                    enemy.DotTickRemaining =
+                        profile.DotTickInterval;
+                    enemy.DotRemaining = Math.Max(
+                        enemy.DotRemaining,
+                        profile.DotDuration);
+                }
+
+                if (hadDot
+                    && profile.DotHitBurstDamageMultiplier > 0f)
+                {
+                    DamageArea(
+                        state,
+                        enemy.Position,
+                        profile.DotHitBurstRadius,
+                        _combat.defaults.damage
+                            * profile.DotHitBurstDamageMultiplier,
+                        enemy.Id,
+                        0f,
+                        0f);
+                }
             }
 
             state.BeamVisualStart = TurretPosition;
@@ -1298,6 +1350,58 @@ namespace ProjectVL.Systems
 
             state.FrostNovaRemaining +=
                 profile.FrostNovaInterval;
+        }
+
+        private void ApplyAvalanchePulse(
+            GameState state,
+            CardCombatProfile profile,
+            float deltaTime)
+        {
+            if (profile.AvalancheInterval <= 0f)
+            {
+                return;
+            }
+
+            state.AvalanchePulseRemaining -= deltaTime;
+            if (state.AvalanchePulseRemaining > 0f)
+            {
+                return;
+            }
+
+            var targets =
+                new System.Collections.Generic.List<EnemyState>();
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                if (Float2.Distance(
+                    TurretPosition,
+                    enemy.Position) <= profile.AvalancheRadius)
+                {
+                    targets.Add(enemy);
+                }
+            }
+
+            foreach (EnemyState enemy in targets)
+            {
+                DamageEnemy(
+                    state,
+                    enemy,
+                    _combat.defaults.damage
+                        * profile.AvalancheDamageMultiplier);
+                if (!state.Enemies.Contains(enemy))
+                {
+                    continue;
+                }
+
+                enemy.FrozenRemaining = Math.Max(
+                    enemy.FrozenRemaining,
+                    profile.AvalancheFreezeDuration);
+                enemy.Position +=
+                    (enemy.Position - TurretPosition).Normalized()
+                    * profile.AvalancheKnockback;
+            }
+
+            state.AvalanchePulseRemaining +=
+                profile.AvalancheInterval;
         }
 
         private void HandleBreach(

@@ -38,6 +38,7 @@ namespace ProjectVL.Core
         public float FireRateBuffRemaining { get; internal set; }
         public float ImpactBreachCooldownRemaining { get; internal set; }
         public float ImpactPulseRemaining { get; internal set; }
+        public float AvalanchePulseRemaining { get; internal set; }
         public float ImpactHitCooldownRemaining { get; internal set; }
         public float ThornsAuraTickRemaining { get; internal set; }
         public float BeamPulseRemaining { get; internal set; }

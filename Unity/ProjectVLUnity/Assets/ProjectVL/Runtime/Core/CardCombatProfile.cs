@@ -24,6 +24,7 @@ namespace ProjectVL.Core
         public float FrozenKillSplashDamageRatio { get; set; }
         public float FrozenKillSlowRatio { get; set; }
         public float FrozenKillSlowDuration { get; set; }
+        public float FrozenKillFreezeDuration { get; set; }
         public float BeamInterval { get; set; }
         public float BeamWidth { get; set; }
         public float BeamDamageRatio { get; set; }
@@ -49,6 +50,8 @@ namespace ProjectVL.Core
         public float DotAreaVulnerableDuration { get; set; }
         public float DotHitVulnerableRatio { get; set; }
         public float DotHitVulnerableDuration { get; set; }
+        public float DotHitBurstDamageMultiplier { get; set; }
+        public float DotHitBurstRadius { get; set; }
         public int SplitCount { get; set; }
         public float SplitDamageRatio { get; set; }
         public int RecursiveSplitCount { get; set; }
@@ -76,6 +79,11 @@ namespace ProjectVL.Core
         public float ImpactPulseKnockback { get; set; }
         public float ImpactPulseInterval { get; set; }
         public float ImpactPulseStunDuration { get; set; }
+        public float AvalancheInterval { get; set; }
+        public float AvalancheRadius { get; set; }
+        public float AvalancheKnockback { get; set; }
+        public float AvalancheFreezeDuration { get; set; }
+        public float AvalancheDamageMultiplier { get; set; }
         public float OnHitStunDuration { get; set; }
         public float OnHitStunCooldown { get; set; }
         public float AuraRadiusRatio { get; set; }

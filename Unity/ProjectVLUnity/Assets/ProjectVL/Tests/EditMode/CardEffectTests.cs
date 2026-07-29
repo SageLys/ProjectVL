@@ -1350,6 +1350,104 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void FrozenThunderUsesRecipeTerminalProfile()
+        {
+            EquipResolved("frozenThunder", 6);
+
+            CardCombatProfile profile =
+                CardEffectResolver.Resolve(_state);
+
+            Assert.That(profile.ChainBounces, Is.EqualTo(7));
+            Assert.That(
+                profile.ChainDamageRetention,
+                Is.EqualTo(0.85f));
+            Assert.That(profile.ChainSearchRange, Is.EqualTo(190f));
+            Assert.That(profile.FreezeStacksToTrigger, Is.EqualTo(2));
+            Assert.That(profile.FreezeDuration, Is.EqualTo(1.2f));
+            Assert.That(
+                profile.FrozenKillSplashDamageRatio,
+                Is.EqualTo(1.2f));
+            Assert.That(
+                profile.FrozenKillFreezeDuration,
+                Is.EqualTo(0.7f));
+        }
+
+        [Test]
+        public void FrozenThunderShatterFreezesNearbyEnemies()
+        {
+            EquipResolved("frozenThunder", 6);
+            CardCombatProfile profile =
+                CardEffectResolver.Resolve(_state);
+            EnemyState frozen = AddEnemy(
+                new Float2(200f, 200f),
+                5f);
+            frozen.FrozenRemaining = 1f;
+            EnemyState nearby = AddEnemy(
+                new Float2(250f, 200f),
+                100f);
+
+            HitWithProfile(frozen.Position, profile);
+
+            Assert.That(_state.Enemies.Contains(frozen), Is.False);
+            Assert.That(
+                nearby.Hp,
+                Is.EqualTo(69.9f).Within(0.001f));
+            Assert.That(nearby.FrozenRemaining, Is.EqualTo(0.7f));
+        }
+
+        [Test]
+        public void SolarLanceBurnsAndBurstsOnRepeatedBeamHit()
+        {
+            EquipResolved("solarLance", 6);
+            _state.BeginWave(1);
+            _system.StepPassives(_state, 0f);
+            Float2 turret = new Float2(
+                _combat.turret.x,
+                _combat.turret.y);
+            EnemyState target = AddEnemy(
+                turret + new Float2(70f, 0f),
+                300f);
+            EnemyState nearby = AddEnemy(
+                turret + new Float2(70f, 20f),
+                300f);
+
+            _system.StepPassives(_state, 0.85f);
+            float nearbyAfterFirstBeam = nearby.Hp;
+            _system.StepPassives(_state, 0.85f);
+
+            Assert.That(target.DotRemaining, Is.EqualTo(3f));
+            Assert.That(
+                nearby.Hp,
+                Is.LessThan(nearbyAfterFirstBeam - 8f));
+        }
+
+        [Test]
+        public void AvalanchePulsesWithDamageFreezeAndKnockback()
+        {
+            EquipResolved("avalanche", 6);
+            _state.BeginWave(1);
+            _system.StepPassives(_state, 0f);
+            Float2 turret = new Float2(
+                _combat.turret.x,
+                _combat.turret.y);
+            EnemyState inside = AddEnemy(
+                turret + new Float2(100f, 0f),
+                100f);
+            EnemyState outside = AddEnemy(
+                turret + new Float2(230f, 0f),
+                100f);
+
+            _system.StepPassives(_state, 5f);
+
+            Assert.That(inside.Hp, Is.EqualTo(55f));
+            Assert.That(inside.FrozenRemaining, Is.EqualTo(1.2f));
+            Assert.That(
+                Float2.Distance(turret, inside.Position),
+                Is.EqualTo(250f));
+            Assert.That(outside.Hp, Is.EqualTo(100f));
+        }
+
+        [Test]
         public void DecoySpawnsAtWaveStartAndTakesEnemyHit()
         {
             EquipResolved("decoy", 3, "3:decoyA");

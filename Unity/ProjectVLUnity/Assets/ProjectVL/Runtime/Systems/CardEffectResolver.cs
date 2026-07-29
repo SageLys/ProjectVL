@@ -54,6 +54,15 @@ namespace ProjectVL.Systems
                     case "harvest":
                         ApplyHarvest(card, profile);
                         break;
+                    case "frozenThunder":
+                        ApplyFrozenThunder(profile);
+                        break;
+                    case "solarLance":
+                        ApplySolarLance(profile);
+                        break;
+                    case "avalanche":
+                        ApplyAvalanche(profile);
+                        break;
                 }
             }
 
@@ -705,6 +714,46 @@ namespace ProjectVL.Systems
                 profile.MergePulseDamagePerStar =
                     Max(profile.MergePulseDamagePerStar, 7f);
             }
+        }
+
+        private static void ApplyFrozenThunder(
+            CardCombatProfile profile)
+        {
+            profile.ChainBounces += 7;
+            profile.ChainDamageRetention = 0.85f;
+            profile.ChainSearchRange =
+                Max(profile.ChainSearchRange, 190f);
+            profile.FreezeStacksToTrigger = 2;
+            profile.FreezeDuration =
+                Max(profile.FreezeDuration, 1.2f);
+            profile.FrozenKillSplashRadius = 120f;
+            profile.FrozenKillSplashDamageRatio = 1.2f;
+            profile.FrozenKillFreezeDuration = 0.7f;
+        }
+
+        private static void ApplySolarLance(
+            CardCombatProfile profile)
+        {
+            profile.BeamInterval = 0.85f;
+            profile.BeamWidth = 34f;
+            profile.BeamDamageRatio = 1.15f;
+            profile.DotDamageRatio =
+                Max(profile.DotDamageRatio, 0.2f);
+            profile.DotTickInterval = 0.5f;
+            profile.DotDuration =
+                Max(profile.DotDuration, 3f);
+            profile.DotHitBurstDamageMultiplier = 0.8f;
+            profile.DotHitBurstRadius = 30f;
+        }
+
+        private static void ApplyAvalanche(
+            CardCombatProfile profile)
+        {
+            profile.AvalancheInterval = 5f;
+            profile.AvalancheRadius = 220f;
+            profile.AvalancheKnockback = 150f;
+            profile.AvalancheFreezeDuration = 1.2f;
+            profile.AvalancheDamageMultiplier = 2.5f;
         }
 
         private static string RouteAt(CardState card, int checkpoint)
