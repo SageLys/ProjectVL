@@ -40,6 +40,11 @@ namespace ProjectVL.Config
             return Load<GodsConfig>("Config/gods");
         }
 
+        public static CardsConfig LoadCards()
+        {
+            return Load<CardsConfig>("Config/cards");
+        }
+
         public static RelicsConfig LoadRelics()
         {
             return Load<RelicsConfig>("Config/relics");
