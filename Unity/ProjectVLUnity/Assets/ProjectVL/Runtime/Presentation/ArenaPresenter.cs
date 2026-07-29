@@ -122,7 +122,7 @@ namespace ProjectVL.Presentation
 
             camera.transform.position = new Vector3(0f, 0f, -10f);
             camera.orthographic = true;
-            camera.orthographicSize = _combat.canvas.height / 2f + 20f;
+            camera.orthographicSize = _combat.canvas.height / 2f + 1f;
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.backgroundColor = new Color(0.02f, 0.055f, 0.10f);
         }

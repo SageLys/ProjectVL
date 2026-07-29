@@ -12,6 +12,8 @@ namespace ProjectVL.Presentation
         private GUIStyle _centerStyle;
         private GUIStyle _buttonStyle;
         private int _selectedDifficulty = 1;
+        private Rect _physicalViewport;
+        private float _uiScale = 1f;
 
         public void Initialize(ProjectVLGameController controller)
         {
@@ -26,12 +28,24 @@ namespace ProjectVL.Presentation
             }
 
             EnsureStyles();
+            _physicalViewport = _controller.MobileViewportRect;
+            _uiScale = Mathf.Max(
+                0.01f,
+                Mathf.Min(
+                    _physicalViewport.width / MobileHudLayout.ReferenceWidth,
+                    _physicalViewport.height / MobileHudLayout.ReferenceHeight));
+            Matrix4x4 previousMatrix = GUI.matrix;
+            GUI.matrix = Matrix4x4.TRS(
+                new Vector3(_physicalViewport.x, _physicalViewport.y, 0f),
+                Quaternion.identity,
+                new Vector3(_uiScale, _uiScale, 1f));
             DrawArenaFrame();
             DrawTopBar();
             DrawControls();
             DrawCardLoadout();
             DrawCenterPanel();
             HandleCardDrag();
+            GUI.matrix = previousMatrix;
         }
 
         private void DrawArenaFrame()
@@ -45,7 +59,7 @@ namespace ProjectVL.Presentation
         private void DrawTopBar()
         {
             GameState state = _controller.State;
-            Rect viewport = ViewportRect();
+            Rect viewport = MobileHudLayout.SafeRect(ViewportRect());
             Rect bar = new Rect(
                 viewport.x + 3f,
                 viewport.y + 3f,
@@ -88,7 +102,7 @@ namespace ProjectVL.Presentation
         private void DrawControls()
         {
             GameState state = _controller.State;
-            Rect viewport = ViewportRect();
+            Rect viewport = MobileHudLayout.SafeRect(ViewportRect());
             float x = viewport.x + viewport.width * 0.65f;
             float width = viewport.xMax - 4f - x;
             float speedWidth = width * 0.28f;
@@ -366,10 +380,11 @@ namespace ProjectVL.Presentation
             }
 
             Event current = Event.current;
+            Vector2 designPointer = ToDesignPoint(current.mousePosition);
             if (card != null
                 && current.type == EventType.MouseDown
                 && current.button == 0
-                && rect.Contains(current.mousePosition))
+                && rect.Contains(designPointer))
             {
                 _controller.BeginCardDrag(kind, index);
             }
@@ -408,7 +423,7 @@ namespace ProjectVL.Presentation
             Event current = Event.current;
             if (current.type == EventType.Repaint)
             {
-                Vector2 mouse = current.mousePosition;
+                Vector2 mouse = ToDesignPoint(current.mousePosition);
                 GUI.Label(
                     new Rect(mouse.x + 18f, mouse.y - 16f, 180f, 32f),
                     "松开到战场施放",
@@ -421,7 +436,7 @@ namespace ProjectVL.Presentation
                 return;
             }
 
-            if (!ArenaRect().Contains(current.mousePosition))
+            if (!ArenaRect().Contains(ToDesignPoint(current.mousePosition)))
             {
                 _controller.CancelCardDrag();
                 return;
@@ -540,7 +555,18 @@ namespace ProjectVL.Presentation
 
         private Rect ViewportRect()
         {
-            return _controller.MobileViewportRect;
+            return new Rect(
+                0f,
+                0f,
+                MobileHudLayout.ReferenceWidth,
+                MobileHudLayout.ReferenceHeight);
+        }
+
+        private Vector2 ToDesignPoint(Vector2 screenPoint)
+        {
+            return new Vector2(
+                (screenPoint.x - _physicalViewport.x) / _uiScale,
+                (screenPoint.y - _physicalViewport.y) / _uiScale);
         }
 
         private Rect ArenaRect()
@@ -673,31 +699,54 @@ namespace ProjectVL.Presentation
 
     internal static class MobileHudLayout
     {
+        public const float ReferenceWidth = 402f;
+        public const float ReferenceHeight = 874f;
+        private const float SafeTop = 62f;
+        private const float SafeBottom = 34f;
+        private const float SafeSide = 8f;
+
+        public static Rect SafeRect(Rect viewport)
+        {
+            float scale = Mathf.Min(
+                viewport.width / ReferenceWidth,
+                viewport.height / ReferenceHeight);
+            return new Rect(
+                viewport.x + SafeSide * scale,
+                viewport.y + SafeTop * scale,
+                viewport.width - SafeSide * 2f * scale,
+                viewport.height - (SafeTop + SafeBottom) * scale);
+        }
+
         public static Rect ArenaRect(Rect viewport)
         {
-            float topHeight = 44f;
-            float loadoutHeight = Mathf.Clamp(
-                viewport.height * 0.34f,
-                170f,
-                188f);
+            Rect safe = SafeRect(viewport);
+            float scale = Mathf.Min(
+                viewport.width / ReferenceWidth,
+                viewport.height / ReferenceHeight);
+            float topHeight = 44f * scale;
+            float loadoutHeight = 188f * scale;
             return new Rect(
-                viewport.x + 3f,
-                viewport.y + topHeight,
-                viewport.width - 6f,
+                safe.x + 3f * scale,
+                safe.y + topHeight,
+                safe.width - 6f * scale,
                 Mathf.Max(
-                    160f,
-                    viewport.height - topHeight - loadoutHeight - 4f));
+                    160f * scale,
+                    safe.height - topHeight - loadoutHeight - 4f * scale));
         }
 
         public static Rect LoadoutRect(Rect viewport)
         {
+            Rect safe = SafeRect(viewport);
+            float scale = Mathf.Min(
+                viewport.width / ReferenceWidth,
+                viewport.height / ReferenceHeight);
             Rect arena = ArenaRect(viewport);
-            float y = arena.yMax + 3f;
+            float y = arena.yMax + 3f * scale;
             return new Rect(
-                viewport.x + 3f,
+                safe.x + 3f * scale,
                 y,
-                viewport.width - 6f,
-                viewport.yMax - y - 3f);
+                safe.width - 6f * scale,
+                safe.yMax - y - 3f * scale);
         }
     }
 }

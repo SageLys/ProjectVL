@@ -10,8 +10,8 @@ namespace ProjectVL.Tests
         {
             CombatConfig config = CombatConfigLoader.LoadDefault();
 
-            Assert.That(config.canvas.width, Is.EqualTo(540f));
-            Assert.That(config.canvas.height, Is.EqualTo(730f));
+            Assert.That(config.canvas.width, Is.EqualTo(402f));
+            Assert.That(config.canvas.height, Is.EqualTo(874f));
             Assert.That(config.hp.max, Is.EqualTo(100f));
             Assert.That(config.defaults.damage, Is.EqualTo(18f));
             Assert.That(config.defaults.fireRate, Is.EqualTo(5f));
