@@ -1526,6 +1526,74 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void SanctumConsumableAppliesAreaVulnerability()
+        {
+            CardState card = _state.CreateCard("sanctum", 6);
+            EnemyState inside = AddEnemy(
+                new Float2(200f, 200f),
+                100f);
+            EnemyState outside = AddEnemy(
+                new Float2(380f, 200f),
+                100f);
+
+            bool cast = _system.CastConsumable(
+                _state,
+                card,
+                new Float2(200f, 200f));
+
+            Assert.That(cast, Is.True);
+            Assert.That(inside.VulnerableRatio, Is.EqualTo(0.5f));
+            Assert.That(inside.VulnerableRemaining, Is.EqualTo(5f));
+            Assert.That(outside.VulnerableRatio, Is.Zero);
+        }
+
+        [Test]
+        public void AegisConsumableGrantsShieldAndExplodesAtSixStars()
+        {
+            CardState card = _state.CreateCard("aegis", 6);
+            Float2 center = new Float2(200f, 200f);
+            EnemyState inside = AddEnemy(
+                center + new Float2(100f, 0f),
+                200f);
+
+            bool cast = _system.CastConsumable(
+                _state,
+                card,
+                center);
+
+            Assert.That(cast, Is.True);
+            Assert.That(_state.ShieldHits, Is.EqualTo(8));
+            Assert.That(_state.ShieldMaxHits, Is.EqualTo(8));
+            Assert.That(inside.Hp, Is.EqualTo(110f));
+            Assert.That(
+                Float2.Distance(center, inside.Position),
+                Is.EqualTo(240f));
+        }
+
+        [Test]
+        public void ThornsConsumableExecutesInsideSixStarZone()
+        {
+            CardState card = _state.CreateCard("thorns", 6);
+            EnemyState low = AddEnemy(
+                new Float2(200f, 200f),
+                200f);
+            low.Hp = 30f;
+            EnemyState healthy = AddEnemy(
+                new Float2(250f, 200f),
+                200f);
+
+            bool cast = _system.CastConsumable(
+                _state,
+                card,
+                new Float2(200f, 200f));
+            _system.StepPassives(_state, 0.5f);
+
+            Assert.That(cast, Is.True);
+            Assert.That(_state.Enemies.Contains(low), Is.False);
+            Assert.That(healthy.Hp, Is.EqualTo(195.5f));
+        }
+
+        [Test]
         public void FrozenThunderShatterFreezesNearbyEnemies()
         {
             EquipResolved("frozenThunder", 6);

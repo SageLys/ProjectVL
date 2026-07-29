@@ -265,6 +265,10 @@ namespace ProjectVL.Core
         public float DamagePerTick { get; }
         public float VulnerableRatio { get; }
         public float VulnerableDuration { get; }
+        public float SlowRatio { get; }
+        public float SlowDuration { get; }
+        public float ExecuteThresholdRatio { get; }
+        public float FocusPriorityWeight { get; }
 
         public GroundZoneState(
             Float2 position,
@@ -273,7 +277,11 @@ namespace ProjectVL.Core
             float tickInterval,
             float damagePerTick,
             float vulnerableRatio,
-            float vulnerableDuration)
+            float vulnerableDuration,
+            float slowRatio = 0f,
+            float slowDuration = 0f,
+            float executeThresholdRatio = 0f,
+            float focusPriorityWeight = 1f)
         {
             Position = position;
             Radius = radius;
@@ -283,6 +291,10 @@ namespace ProjectVL.Core
             DamagePerTick = damagePerTick;
             VulnerableRatio = vulnerableRatio;
             VulnerableDuration = vulnerableDuration;
+            SlowRatio = slowRatio;
+            SlowDuration = slowDuration;
+            ExecuteThresholdRatio = executeThresholdRatio;
+            FocusPriorityWeight = focusPriorityWeight;
         }
     }
 }

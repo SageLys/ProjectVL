@@ -52,6 +52,15 @@ namespace ProjectVL.Systems
                 case "impact":
                     CastImpact(state, card.Star, point);
                     return true;
+                case "sanctum":
+                    CastSanctum(state, card.Star, point);
+                    return true;
+                case "aegis":
+                    CastAegis(state, card.Star, point);
+                    return true;
+                case "thorns":
+                    CastThorns(state, card.Star, point);
+                    return true;
                 default:
                     return false;
             }
@@ -65,7 +74,10 @@ namespace ProjectVL.Systems
                     || card.Type == "frost"
                     || card.Type == "scorch"
                     || card.Type == "splitBlast"
-                    || card.Type == "impact");
+                    || card.Type == "impact"
+                    || card.Type == "sanctum"
+                    || card.Type == "aegis"
+                    || card.Type == "thorns");
         }
 
         public void StepTurret(GameState state, float deltaTime)
@@ -382,6 +394,85 @@ namespace ProjectVL.Systems
                         _combat.defaults.damage * 0.5f);
                 }
             }
+        }
+
+        private void CastSanctum(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            float radius = StarValue(star, 110f, 140f, 170f);
+            float ratio = StarValue(star, 0.3f, 0.4f, 0.5f);
+            float duration = StarValue(star, 4f, 5f, 5f);
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                if (Float2.Distance(point, enemy.Position) > radius)
+                {
+                    continue;
+                }
+
+                enemy.VulnerableRatio = Math.Max(
+                    enemy.VulnerableRatio,
+                    ratio);
+                enemy.VulnerableRemaining = Math.Max(
+                    enemy.VulnerableRemaining,
+                    duration);
+            }
+        }
+
+        private void CastAegis(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            int shieldHits = (int)Math.Round(
+                StarValue(star, 4f, 6f, 8f));
+            state.ShieldMaxHits += shieldHits;
+            state.ShieldHits += shieldHits;
+            float radius = StarValue(star, 90f, 120f, 150f);
+            float knockback = StarValue(star, 70f, 100f, 140f);
+            if (star >= 6)
+            {
+                DamageArea(
+                    state,
+                    point,
+                    radius,
+                    _combat.defaults.damage * 5f,
+                    -1,
+                    knockback,
+                    0f);
+                return;
+            }
+
+            ApplyAreaKnockback(
+                state,
+                point,
+                radius,
+                knockback,
+                0f);
+        }
+
+        private void CastThorns(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            float radius = StarValue(star, 90f, 120f, 150f);
+            float duration = StarValue(star, 4f, 4f, 5f);
+            float damageRatio =
+                StarValue(star, 0.15f, 0.2f, 0.25f);
+            state.GroundZones.Add(new GroundZoneState(
+                point,
+                radius,
+                duration,
+                0.5f,
+                _combat.defaults.damage * damageRatio,
+                0f,
+                0f,
+                star < 3 ? 0.3f : 0f,
+                star < 3 ? 0.6f : 0f,
+                star >= 6 ? 0.15f : 0f,
+                star >= 3 && star < 6 ? 2f : 1f));
         }
 
         private static float StarValue(
@@ -1299,6 +1390,13 @@ namespace ProjectVL.Systems
             enemy.StunnedRemaining = Math.Max(
                 0f,
                 enemy.StunnedRemaining - deltaTime);
+            enemy.FocusPriorityRemaining = Math.Max(
+                0f,
+                enemy.FocusPriorityRemaining - deltaTime);
+            if (enemy.FocusPriorityRemaining <= 0f)
+            {
+                enemy.FocusPriorityWeight = 1f;
+            }
             enemy.VulnerableRemaining = Math.Max(
                 0f,
                 enemy.VulnerableRemaining - deltaTime);
@@ -1841,6 +1939,24 @@ namespace ProjectVL.Systems
                         enemy.VulnerableRemaining = Math.Max(
                             enemy.VulnerableRemaining,
                             zone.VulnerableDuration);
+                        enemy.SlowRatio = Math.Max(
+                            enemy.SlowRatio,
+                            zone.SlowRatio);
+                        enemy.SlowRemaining = Math.Max(
+                            enemy.SlowRemaining,
+                            zone.SlowDuration);
+                        enemy.FocusPriorityWeight = Math.Max(
+                            enemy.FocusPriorityWeight,
+                            zone.FocusPriorityWeight);
+                        enemy.FocusPriorityRemaining = Math.Max(
+                            enemy.FocusPriorityRemaining,
+                            zone.LifeRemaining);
+                        if (zone.ExecuteThresholdRatio > 0f
+                            && enemy.Hp / enemy.MaxHp
+                                <= zone.ExecuteThresholdRatio)
+                        {
+                            DamageEnemy(state, enemy, enemy.Hp);
+                        }
                     }
                 }
 
@@ -2397,7 +2513,9 @@ namespace ProjectVL.Systems
             foreach (EnemyState enemy in state.Enemies)
             {
                 float distance = Float2.Distance(turret, enemy.Position);
-                float priority = 1f;
+                float priority = enemy.FocusPriorityRemaining > 0f
+                    ? enemy.FocusPriorityWeight
+                    : 1f;
                 if (profile.AuraFocusPriorityWeight > 1f
                     && distance <= auraRadius
                     && enemy.Hp / enemy.MaxHp

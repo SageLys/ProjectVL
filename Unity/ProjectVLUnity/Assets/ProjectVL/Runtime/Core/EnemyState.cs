@@ -32,6 +32,8 @@ namespace ProjectVL.Core
         public float SecondaryDotTickRemaining { get; set; }
         public float SecondaryDotRemaining { get; set; }
         public float StunnedRemaining { get; set; }
+        public float FocusPriorityWeight { get; set; } = 1f;
+        public float FocusPriorityRemaining { get; set; }
 
         public EnemyState(
             int id,
