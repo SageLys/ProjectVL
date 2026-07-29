@@ -268,6 +268,12 @@ namespace ProjectVL.Presentation
                 return;
             }
 
+            if (state.PendingWaveReward != null)
+            {
+                DrawWaveRewardPanel(state.PendingWaveReward);
+                return;
+            }
+
             if (state.IntermissionActive)
             {
                 DrawIntermissionPanel(state);
@@ -947,6 +953,61 @@ namespace ProjectVL.Presentation
             }
 
             GUI.enabled = true;
+        }
+
+        private void DrawWaveRewardPanel(WaveRewardChoice choice)
+        {
+            Rect panel = CenterPanelRect(374f, 394f);
+            GUI.Box(panel, GUIContent.none);
+            GUI.Label(
+                new Rect(panel.x + 20f, panel.y + 18f, panel.width - 40f, 38f),
+                "选择波次成长",
+                _centerStyle);
+            GUI.Label(
+                new Rect(panel.x + 20f, panel.y + 57f, panel.width - 40f, 24f),
+                $"第 {choice.AfterWave} 波完成 · 选择一项永久强化",
+                _hudStyle);
+
+            for (int i = 0; i < choice.Options.Count; i++)
+            {
+                WaveRewardEffectConfig option = choice.Options[i];
+                float y = panel.y + 91f + i * 52f;
+                bool capped = choice.IsCapped(option.id);
+                GUI.enabled = !capped;
+                if (GUI.Button(
+                    new Rect(panel.x + 28f, y, panel.width - 56f, 43f),
+                    WaveRewardLabel(option) + (capped ? "（已达上限）" : ""),
+                    _buttonStyle))
+                {
+                    _controller.ChooseWaveReward(i);
+                }
+
+                GUI.enabled = true;
+            }
+
+            GUI.Label(
+                new Rect(panel.x + 20f, panel.yMax - 35f, panel.width - 40f, 22f),
+                "每波只能选择一次，强化持续到本局结束",
+                _hudStyle);
+        }
+
+        private static string WaveRewardLabel(WaveRewardEffectConfig reward)
+        {
+            switch (reward.stat)
+            {
+                case "damageAdd":
+                    return $"炮塔伤害 +{reward.add:0.##}";
+                case "fireRateAdd":
+                    return $"每秒攻速 +{reward.add:0.##}";
+                case "maxHpAdd":
+                    return $"最大生命 +{reward.add:0.##}";
+                case "rangeAdd":
+                    return $"攻击射程 +{reward.add:0.##}";
+                case "xpGainPct":
+                    return $"经验获取 +{reward.add * 100f:0}%";
+                default:
+                    return reward.id;
+            }
         }
 
         private static void DrawProgressBar(Rect rect, float ratio, Color color)

@@ -50,6 +50,11 @@ namespace ProjectVL.Config
             return Load<BountyConfig>("Config/bounty");
         }
 
+        public static WaveRewardsConfig LoadWaveRewards()
+        {
+            return Load<WaveRewardsConfig>("Config/waveRewards");
+        }
+
         private static T Load<T>(string resourcePath)
         {
             TextAsset asset = Resources.Load<TextAsset>(resourcePath);

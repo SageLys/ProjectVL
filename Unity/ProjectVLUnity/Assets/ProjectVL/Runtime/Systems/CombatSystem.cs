@@ -147,11 +147,11 @@ namespace ProjectVL.Systems
                 direction * _combat.bullet.speed,
                 _combat.bullet.radius,
                 _combat.bullet.life,
-                _combat.defaults.damage
+                BaseDamage(state)
                     * profile.ProjectileDamageMultiplier,
                 profile));
             state.ShotCooldown = 1f
-                / (_combat.defaults.fireRate * state.FireRateMultiplier);
+                / (BaseFireRate(state) * state.FireRateMultiplier);
         }
 
         private void CastPierce(
@@ -183,7 +183,7 @@ namespace ProjectVL.Systems
                     relative.X * direction.Y
                     - relative.Y * direction.X);
                 if (along >= 0f
-                    && along <= _combat.defaults.range
+                    && along <= AttackRange(state)
                     && perpendicular <= width / 2f + enemy.Radius)
                 {
                     targets.Add(enemy);
@@ -195,7 +195,7 @@ namespace ProjectVL.Systems
                 DamageEnemy(
                     state,
                     enemy,
-                    _combat.defaults.damage * damageMultiplier);
+                    BaseDamage(state) * damageMultiplier);
                 if (knockback > 0f && state.Enemies.Contains(enemy))
                 {
                     enemy.Position += direction * knockback;
@@ -204,7 +204,7 @@ namespace ProjectVL.Systems
 
             state.BeamVisualStart = TurretPosition;
             state.BeamVisualEnd = TurretPosition
-                + direction * _combat.defaults.range;
+                + direction * AttackRange(state);
             state.BeamVisualWidth = width;
             state.BeamVisualRemaining = 0.2f;
         }
@@ -262,7 +262,7 @@ namespace ProjectVL.Systems
                     state,
                     "chainLightning",
                     "controlPotencyMul");
-            float damage = _combat.defaults.damage;
+            float damage = BaseDamage(state);
             Float2 origin = first.Position;
             var visited =
                 new System.Collections.Generic.HashSet<int>();
@@ -376,7 +376,7 @@ namespace ProjectVL.Systems
                 radius,
                 duration,
                 0.5f,
-                _combat.defaults.damage * damageRatio,
+                BaseDamage(state) * damageRatio,
                 vulnerableRatio,
                 vulnerableRatio > 0f ? 0.6f : 0f));
         }
@@ -398,7 +398,7 @@ namespace ProjectVL.Systems
                     "splitBlast",
                     "effectDamageMul");
             float damage =
-                _combat.defaults.damage * damageMultiplier;
+                BaseDamage(state) * damageMultiplier;
             DamageArea(
                 state,
                 point,
@@ -489,7 +489,7 @@ namespace ProjectVL.Systems
                     DamageEnemy(
                         state,
                         collision,
-                        _combat.defaults.damage
+                        BaseDamage(state)
                             * 0.5f
                             * RelicMultiplier(
                                 state,
@@ -554,7 +554,7 @@ namespace ProjectVL.Systems
                     state,
                     point,
                     radius,
-                    _combat.defaults.damage * 5f,
+                    BaseDamage(state) * 5f,
                     -1,
                     knockback,
                     0f);
@@ -593,7 +593,7 @@ namespace ProjectVL.Systems
                 radius,
                 duration,
                 0.5f,
-                _combat.defaults.damage * damageRatio,
+                BaseDamage(state) * damageRatio,
                 0f,
                 0f,
                 star < 3 ? 0.3f : 0f,
@@ -632,7 +632,7 @@ namespace ProjectVL.Systems
             state.DecoyIsMirrorTurret = star >= 6;
             state.DecoyDamageRatio = star >= 6 ? 0.6f : 0f;
             state.DecoyFireInterval = star >= 6
-                ? 1f / _combat.defaults.fireRate
+                ? 1f / BaseFireRate(state)
                 : 0f;
             state.DecoyFireRangeRatio = star >= 6 ? 1f : 0f;
             state.DecoyFireCooldown = 0f;
@@ -731,7 +731,7 @@ namespace ProjectVL.Systems
                 state,
                 "frozenThunder",
                 "effectDamageMul");
-            float damage = _combat.defaults.damage * effectScale;
+            float damage = BaseDamage(state) * effectScale;
             for (int hit = 0;
                 hit <= bounces && target != null;
                 hit++)
@@ -759,7 +759,7 @@ namespace ProjectVL.Systems
                 state,
                 point,
                 120f,
-                _combat.defaults.damage * 3.5f,
+                BaseDamage(state) * 3.5f,
                 -1,
                 0f,
                 0f);
@@ -781,7 +781,7 @@ namespace ProjectVL.Systems
                 state,
                 "solarLance",
                 "effectDamageMul");
-            float damage = _combat.defaults.damage * 7f * effectScale;
+            float damage = BaseDamage(state) * 7f * effectScale;
             var targets =
                 new System.Collections.Generic.List<EnemyState>();
             foreach (EnemyState enemy in state.Enemies)
@@ -793,7 +793,7 @@ namespace ProjectVL.Systems
                     relative.X * direction.Y
                     - relative.Y * direction.X);
                 if (along >= 0f
-                    && along <= _combat.defaults.range
+                    && along <= AttackRange(state)
                     && perpendicular <= 19f + enemy.Radius)
                 {
                     targets.Add(enemy);
@@ -826,7 +826,7 @@ namespace ProjectVL.Systems
 
             state.BeamVisualStart = TurretPosition;
             state.BeamVisualEnd = TurretPosition
-                + direction * _combat.defaults.range;
+                + direction * AttackRange(state);
             state.BeamVisualWidth = 38f;
             state.BeamVisualRemaining = 0.25f;
         }
@@ -855,7 +855,7 @@ namespace ProjectVL.Systems
                 DamageEnemy(
                     state,
                     enemy,
-                    _combat.defaults.damage
+                    BaseDamage(state)
                         * 5.5f
                         * RelicMultiplier(
                             state,
@@ -901,7 +901,7 @@ namespace ProjectVL.Systems
                     state,
                     point,
                     160f * areaScale,
-                    _combat.defaults.damage * 5f * effectScale,
+                    BaseDamage(state) * 5f * effectScale,
                     -1,
                     0f,
                     0f,
@@ -914,7 +914,7 @@ namespace ProjectVL.Systems
                 210f * areaScale,
                 5f * areaScale,
                 0.5f,
-                _combat.defaults.damage
+                BaseDamage(state)
                     * 0.45f
                     * RelicMultiplier(
                         state,
@@ -947,7 +947,7 @@ namespace ProjectVL.Systems
                 state,
                 point,
                 200f * areaScale,
-                _combat.defaults.damage * 5f * retaliationScale,
+                BaseDamage(state) * 5f * retaliationScale,
                 -1,
                 140f,
                 0f);
@@ -956,7 +956,7 @@ namespace ProjectVL.Systems
                 200f * areaScale,
                 5f * areaScale,
                 0.5f,
-                _combat.defaults.damage * 0.4f * retaliationScale,
+                BaseDamage(state) * 0.4f * retaliationScale,
                 0f,
                 0f,
                 0f,
@@ -1002,6 +1002,27 @@ namespace ProjectVL.Systems
                     4f,
                     1f);
             }
+        }
+
+        private float BaseDamage(GameState state)
+        {
+            return Math.Max(
+                0f,
+                _combat.defaults.damage + state.RunDamageAdd);
+        }
+
+        private float BaseFireRate(GameState state)
+        {
+            return Math.Max(
+                0.01f,
+                _combat.defaults.fireRate + state.RunFireRateAdd);
+        }
+
+        private float AttackRange(GameState state)
+        {
+            return Math.Max(
+                0f,
+                _combat.defaults.range + state.RunRangeAdd);
         }
 
         private static float RelicMultiplier(
@@ -1139,7 +1160,7 @@ namespace ProjectVL.Systems
                         state,
                         TurretPosition,
                         profile.ThornsAuraRadius,
-                        _combat.defaults.damage
+                        BaseDamage(state)
                             * profile.ThornsAuraDamageRatio,
                         -1,
                         0f,
@@ -1164,7 +1185,7 @@ namespace ProjectVL.Systems
                         state,
                         TurretPosition,
                         profile.ScorchAuraRadius,
-                        _combat.defaults.damage
+                        BaseDamage(state)
                             * profile.ScorchAuraDamageRatio,
                         -1,
                         0f,
@@ -1397,7 +1418,7 @@ namespace ProjectVL.Systems
                         state,
                         enemy.Position,
                         profile.FrozenKillSplashRadius,
-                        _combat.defaults.damage
+                        BaseDamage(state)
                             * profile.FrozenKillSplashDamageRatio,
                         enemy.Id,
                         0f,
@@ -2109,7 +2130,7 @@ namespace ProjectVL.Systems
             }
 
             float radius =
-                _combat.defaults.range * profile.AuraRadiusRatio;
+                AttackRange(state) * profile.AuraRadiusRatio;
             foreach (EnemyState enemy in state.Enemies)
             {
                 if (Float2.Distance(TurretPosition, enemy.Position) > radius)
@@ -2207,7 +2228,7 @@ namespace ProjectVL.Systems
             }
 
             float radius =
-                _combat.defaults.range
+                AttackRange(state)
                 * profile.FrostAuraRadiusRatio;
             foreach (EnemyState enemy in state.Enemies)
             {
@@ -2255,9 +2276,9 @@ namespace ProjectVL.Systems
                 direction.Y,
                 direction.X);
             Float2 beamEnd = TurretPosition
-                + direction * _combat.defaults.range;
-            float damage = _combat.defaults.damage
-                * _combat.defaults.fireRate
+                + direction * AttackRange(state);
+            float damage = BaseDamage(state)
+                * BaseFireRate(state)
                 * profile.BeamInterval
                 * profile.BeamDamageRatio;
             var targets =
@@ -2272,7 +2293,7 @@ namespace ProjectVL.Systems
                     relative.X * direction.Y
                     - relative.Y * direction.X);
                 if (along >= 0f
-                    && along <= _combat.defaults.range
+                    && along <= AttackRange(state)
                     && perpendicular
                         <= profile.BeamWidth / 2f
                             + enemy.Radius)
@@ -2312,7 +2333,7 @@ namespace ProjectVL.Systems
                         state,
                         enemy.Position,
                         profile.DotHitBurstRadius,
-                        _combat.defaults.damage
+                        BaseDamage(state)
                             * profile.DotHitBurstDamageMultiplier,
                         enemy.Id,
                         0f,
@@ -2353,7 +2374,7 @@ namespace ProjectVL.Systems
                 EnemyState start = FindClosestChainTarget(
                     state,
                     TurretPosition,
-                    _combat.defaults.range,
+                    AttackRange(state),
                     pickedStarts);
                 if (start == null)
                 {
@@ -2362,7 +2383,7 @@ namespace ProjectVL.Systems
 
                 pickedStarts.Add(start.Id);
                 Float2 currentOrigin = start.Position;
-                float damage = _combat.defaults.damage;
+                float damage = BaseDamage(state);
                 var visited =
                     new System.Collections.Generic.HashSet<int>
                     {
@@ -2460,7 +2481,7 @@ namespace ProjectVL.Systems
                 DamageEnemy(
                     state,
                     enemy,
-                    _combat.defaults.damage
+                    BaseDamage(state)
                         * profile.AvalancheDamageMultiplier);
                 if (!state.Enemies.Contains(enemy))
                 {
@@ -2573,7 +2594,7 @@ namespace ProjectVL.Systems
                 state,
                 center,
                 profile.PyrestormRadius,
-                _combat.defaults.damage
+                BaseDamage(state)
                     * profile.PyrestormDamageRatio,
                 -1,
                 0f,
@@ -2585,7 +2606,7 @@ namespace ProjectVL.Systems
                 profile.PyrestormRadius,
                 profile.PyrestormZoneDuration,
                 profile.PyrestormZoneTickInterval,
-                _combat.defaults.damage
+                BaseDamage(state)
                     * profile.PyrestormZoneDamageRatio,
                 profile.PyrestormZoneVulnerableRatio,
                 profile.PyrestormZoneVulnerableDuration));
@@ -2707,7 +2728,7 @@ namespace ProjectVL.Systems
                 return;
             }
 
-            float damage = _combat.defaults.damage
+            float damage = BaseDamage(state)
                 * profile.BreachBurstDamageMultiplier;
             DamageArea(
                 state,
@@ -2775,7 +2796,7 @@ namespace ProjectVL.Systems
                     state,
                     destroyedPosition,
                     state.DecoyTauntRadius,
-                    _combat.defaults.damage
+                    BaseDamage(state)
                         * state.DecoyExplodeDamageMultiplier,
                     -1,
                     state.DecoyExplodeKnockback,
@@ -2846,7 +2867,7 @@ namespace ProjectVL.Systems
             EnemyState target = FindClosestChainTarget(
                 state,
                 state.DecoyPosition,
-                _combat.defaults.range
+                AttackRange(state)
                     * state.DecoyFireRangeRatio,
                 new System.Collections.Generic.HashSet<int>());
             if (target == null)
@@ -2862,7 +2883,7 @@ namespace ProjectVL.Systems
                 direction * _combat.bullet.speed,
                 _combat.bullet.radius,
                 _combat.bullet.life,
-                _combat.defaults.damage
+                BaseDamage(state)
                     * state.DecoyDamageRatio));
             state.DecoyFireCooldown +=
                 state.DecoyFireInterval;
@@ -2996,7 +3017,7 @@ namespace ProjectVL.Systems
 
             Float2 direction = toTurret.Normalized();
             float orbitStart = Math.Min(
-                _combat.defaults.range * behavior.orbitStartRangeRatio,
+                AttackRange(state) * behavior.orbitStartRangeRatio,
                 behavior.orbitStartMaxDistance);
             float curveSpan = orbitStart - behavior.contactDistance;
             if (turretDistance <= orbitStart && curveSpan > 0f)
@@ -3097,12 +3118,12 @@ namespace ProjectVL.Systems
             CardCombatProfile profile =
                 CardEffectResolver.Resolve(state);
             float auraRadius =
-                _combat.defaults.range * profile.AuraRadiusRatio;
+                AttackRange(state) * profile.AuraRadiusRatio;
 
             foreach (EnemyState enemy in state.Enemies)
             {
                 float distance = Float2.Distance(turret, enemy.Position);
-                if (distance > _combat.defaults.range)
+                if (distance > AttackRange(state))
                 {
                     continue;
                 }

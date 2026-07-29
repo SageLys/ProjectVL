@@ -174,8 +174,8 @@ namespace ProjectVL.Presentation
             {
                 float angle = index * Mathf.PI * 2f / segments;
                 var point = new Float2(
-                    _combat.turret.x + Mathf.Cos(angle) * _combat.defaults.range,
-                    _combat.turret.y + Mathf.Sin(angle) * _combat.defaults.range);
+                    _combat.turret.x + Mathf.Cos(angle) * AttackRange(),
+                    _combat.turret.y + Mathf.Sin(angle) * AttackRange());
                 line.SetPosition(index, PixelToWorld(point));
             }
         }
@@ -192,10 +192,15 @@ namespace ProjectVL.Presentation
             {
                 float angle = index * Mathf.PI * 2f / segments;
                 var point = new Float2(
-                    _combat.turret.x + Mathf.Cos(angle) * _combat.defaults.range,
-                    _combat.turret.y + Mathf.Sin(angle) * _combat.defaults.range);
+                    _combat.turret.x + Mathf.Cos(angle) * AttackRange(),
+                    _combat.turret.y + Mathf.Sin(angle) * AttackRange());
                 _attackRange.SetPosition(index, PixelToWorld(point));
             }
+        }
+
+        private float AttackRange()
+        {
+            return _combat.defaults.range + (_state?.RunRangeAdd ?? 0f);
         }
 
         private void CreateTurret()

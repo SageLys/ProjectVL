@@ -31,6 +31,17 @@ namespace ProjectVL.Core
             new Dictionary<int, int>();
         public int ConsumedCards { get; internal set; }
         public int Merges { get; internal set; }
+        public float RunDamageAdd { get; internal set; }
+        public float RunFireRateAdd { get; internal set; }
+        public float RunRangeAdd { get; internal set; }
+        public float RunMultiAdd { get; internal set; }
+        public int WaveRewardsClaimedWave { get; internal set; }
+        public int WaveChoiceOfferedWave { get; internal set; }
+        public WaveRewardChoice PendingWaveReward { get; internal set; }
+        public List<WaveRewardEffectConfig> LastFloorRewards { get; } =
+            new List<WaveRewardEffectConfig>();
+        public List<WaveRewardEffectConfig> ChosenWaveRewards { get; } =
+            new List<WaveRewardEffectConfig>();
         public EvolutionChoice PendingEvolution { get; internal set; }
         public List<string> CompletedRecipes { get; } = new List<string>();
         public int EquipmentEffectWave { get; internal set; }
@@ -336,6 +347,14 @@ namespace ProjectVL.Core
             Hp = Math.Min(MaxHp, Hp + Math.Max(0f, amount));
         }
 
+        internal void IncreaseBaseMaxHp(float amount)
+        {
+            float added = Math.Max(0f, amount);
+            BaseMaxHp += added;
+            MaxHp += added;
+            Hp = Math.Min(MaxHp, Hp + added);
+        }
+
         internal void AddExperience(float amount)
         {
             Experience += Math.Max(0f, amount);
@@ -460,7 +479,8 @@ namespace ProjectVL.Core
             DecisionLocked = _pendingLevelUpgrades.Count > 0
                 || PendingGodChoice != null
                 || PendingEvolution != null
-                || PendingBossReward != null;
+                || PendingBossReward != null
+                || PendingWaveReward != null;
         }
 
         internal void GrantReward(RunReward reward)

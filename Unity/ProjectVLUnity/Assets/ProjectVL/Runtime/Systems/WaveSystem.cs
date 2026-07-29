@@ -12,6 +12,7 @@ namespace ProjectVL.Systems
         private readonly GodPoolSystem _godPool;
         private readonly CardPoolSystem _cardPool;
         private readonly BountySystem _bounties;
+        private readonly WaveRewardSystem _waveRewards;
         private ResolvedWavePlan _activePlan;
 
         public WaveSystem(
@@ -19,13 +20,15 @@ namespace ProjectVL.Systems
             EnemyFactory enemyFactory,
             GodPoolSystem godPool = null,
             CardPoolSystem cardPool = null,
-            BountySystem bounties = null)
+            BountySystem bounties = null,
+            WaveRewardSystem waveRewards = null)
         {
             _waves = waves;
             _enemyFactory = enemyFactory;
             _godPool = godPool;
             _cardPool = cardPool;
             _bounties = bounties;
+            _waveRewards = waveRewards;
             _planResolver = new WavePlanResolver(waves);
         }
 
@@ -185,10 +188,18 @@ namespace ProjectVL.Systems
 
         public void ConfirmIntermissionReady(GameState state)
         {
-            if (state.IntermissionActive)
+            if (state.IntermissionActive
+                && state.PendingGodChoice == null
+                && state.PendingWaveReward == null)
             {
                 state.IntermissionReady = true;
             }
+        }
+
+        public bool ChooseWaveReward(GameState state, int optionIndex)
+        {
+            return _waveRewards != null
+                && _waveRewards.Choose(state, optionIndex);
         }
 
         private void OfferBossReward(GameState state)
@@ -202,6 +213,8 @@ namespace ProjectVL.Systems
         {
             state.Bullets.Clear();
             _bounties?.ClearOffers(state);
+            state.LastFloorRewards.Clear();
+            _waveRewards?.GrantFloorRewards(state, state.Wave);
             state.IntermissionActive = true;
             state.IntermissionReady = false;
             state.IntermissionRemaining = _waves.intermission.settleSeconds
@@ -212,6 +225,19 @@ namespace ProjectVL.Systems
 
         private void TickIntermission(GameState state, float deltaTime)
         {
+            if (state.PendingGodChoice != null
+                || state.PendingWaveReward != null)
+            {
+                return;
+            }
+
+            if (_waveRewards != null
+                && state.WaveChoiceOfferedWave < state.Wave
+                && _waveRewards.OfferChoice(state, state.Wave))
+            {
+                return;
+            }
+
             state.IntermissionRemaining = Math.Max(
                 0f,
                 state.IntermissionRemaining - deltaTime);

@@ -161,6 +161,8 @@ namespace ProjectVL.Presentation
             GodsConfig gods = GameConfigLoader.LoadGods();
             RelicsConfig relics = GameConfigLoader.LoadRelics();
             BountyConfig bounty = GameConfigLoader.LoadBounty();
+            WaveRewardsConfig waveRewards =
+                GameConfigLoader.LoadWaveRewards();
 
             GameState state = GameStateFactory.Create(combat, economy);
             state.AttachSettlement(
@@ -201,12 +203,16 @@ namespace ProjectVL.Presentation
                 cardPoolSystem,
                 _dropSystem,
                 random);
+            var waveRewardSystem = new WaveRewardSystem(
+                waveRewards,
+                combat);
             _waveSystem = new WaveSystem(
                 waves,
                 enemyFactory,
                 _godPoolSystem,
                 cardPoolSystem,
-                _bountySystem);
+                _bountySystem,
+                waveRewardSystem);
             _combatSystem = new CombatSystem(
                 combat,
                 enemies,
@@ -283,6 +289,14 @@ namespace ProjectVL.Presentation
             if (State.Wave == 0 && State.PendingGodChoice == null)
             {
                 _waveSystem.StartNextWave(State);
+            }
+        }
+
+        public void ChooseWaveReward(int optionIndex)
+        {
+            if (_waveSystem.ChooseWaveReward(State, optionIndex))
+            {
+                LastCardAction = "波次成长已生效。";
             }
         }
 
