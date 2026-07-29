@@ -14,6 +14,9 @@ namespace ProjectVL.Presentation
         private int _selectedDifficulty = 1;
         private Rect _physicalViewport;
         private float _uiScale = 1f;
+        private CardSlotKind? _pressedSlotKind;
+        private int _pressedSlotIndex = -1;
+        private Vector2 _pressPoint;
 
         public void Initialize(ProjectVLGameController controller)
         {
@@ -39,12 +42,13 @@ namespace ProjectVL.Presentation
                 new Vector3(_physicalViewport.x, _physicalViewport.y, 0f),
                 Quaternion.identity,
                 new Vector3(_uiScale, _uiScale, 1f));
+            HandleCardDragInput();
             DrawArenaFrame();
             DrawTopBar();
             DrawControls();
             DrawCardLoadout();
             DrawCenterPanel();
-            HandleCardDrag();
+            DrawCardDragOverlay();
             GUI.matrix = previousMatrix;
         }
 
@@ -445,7 +449,9 @@ namespace ProjectVL.Presentation
                 && current.button == 0
                 && rect.Contains(designPointer))
             {
-                _controller.BeginCardDrag(kind, index);
+                _pressedSlotKind = kind;
+                _pressedSlotIndex = index;
+                _pressPoint = designPointer;
             }
 
             if (GUI.Button(rect, text, _buttonStyle))
@@ -472,21 +478,34 @@ namespace ProjectVL.Presentation
             GUI.backgroundColor = previous;
         }
 
-        private void HandleCardDrag()
+        private void HandleCardDragInput()
         {
-            if (!_controller.HasCardDrag)
+            Event current = Event.current;
+            Vector2 designPointer = ToDesignPoint(current.mousePosition);
+            if (!_controller.HasCardDrag
+                && _pressedSlotKind != null
+                && current.type == EventType.MouseDrag
+                && current.button == 0
+                && Vector2.Distance(_pressPoint, designPointer) >= 6f)
             {
+                _controller.BeginCardDrag(
+                    _pressedSlotKind.Value,
+                    _pressedSlotIndex);
+                _pressedSlotKind = null;
+                _pressedSlotIndex = -1;
+                current.Use();
                 return;
             }
 
-            Event current = Event.current;
-            if (current.type == EventType.Repaint)
+            if (!_controller.HasCardDrag)
             {
-                Vector2 mouse = ToDesignPoint(current.mousePosition);
-                GUI.Label(
-                    new Rect(mouse.x + 18f, mouse.y - 16f, 180f, 32f),
-                    "松开到战场施放",
-                    _hudStyle);
+                if (current.type == EventType.MouseUp
+                    && current.button == 0)
+                {
+                    _pressedSlotKind = null;
+                    _pressedSlotIndex = -1;
+                }
+
                 return;
             }
 
@@ -495,14 +514,106 @@ namespace ProjectVL.Presentation
                 return;
             }
 
-            if (!ArenaRect().Contains(ToDesignPoint(current.mousePosition)))
+            if (TryGetCardSlotAt(
+                designPointer,
+                out CardSlotKind targetKind,
+                out int targetIndex))
+            {
+                _controller.ReleaseCardDragToSlot(
+                    targetKind,
+                    targetIndex);
+            }
+            else if (ArenaRect().Contains(designPointer))
+            {
+                _controller.ReleaseCardDrag(current.mousePosition);
+            }
+            else
             {
                 _controller.CancelCardDrag();
+            }
+
+            current.Use();
+        }
+
+        private void DrawCardDragOverlay()
+        {
+            if (!_controller.HasCardDrag
+                || Event.current.type != EventType.Repaint)
+            {
                 return;
             }
 
-            _controller.ReleaseCardDrag(current.mousePosition);
-            current.Use();
+            Vector2 mouse = ToDesignPoint(Event.current.mousePosition);
+            GUI.Label(
+                new Rect(mouse.x + 18f, mouse.y - 16f, 190f, 32f),
+                "松开到卡槽移动，松开到战场施放",
+                _hudStyle);
+        }
+
+        private bool TryGetCardSlotAt(
+            Vector2 point,
+            out CardSlotKind kind,
+            out int index)
+        {
+            GameState state = _controller.State;
+            Rect panel = LoadoutRect();
+            float padding = 8f;
+            float gap = 7f;
+            float contentWidth = panel.width - padding * 2f;
+            float equipmentWidth = (contentWidth - gap * 2f) / 3f;
+            float handWidth = (contentWidth - gap * 3f) / 4f;
+            float equipmentY = panel.y + 19f;
+
+            for (int i = 0; i < state.Equipment.Length && i < 3; i++)
+            {
+                Rect slot = new Rect(
+                    panel.x + padding + i * (equipmentWidth + gap),
+                    equipmentY,
+                    equipmentWidth,
+                    40f);
+                if (slot.Contains(point))
+                {
+                    kind = CardSlotKind.Equipment;
+                    index = i;
+                    return true;
+                }
+            }
+
+            float firstRowY = equipmentY + 59f;
+            for (int i = 0; i < state.Hand.Length && i < 4; i++)
+            {
+                Rect slot = new Rect(
+                    panel.x + padding + i * (handWidth + gap),
+                    firstRowY,
+                    handWidth,
+                    38f);
+                if (slot.Contains(point))
+                {
+                    kind = CardSlotKind.Hand;
+                    index = i;
+                    return true;
+                }
+            }
+
+            float secondRowY = firstRowY + 42f;
+            for (int i = 4; i < state.Hand.Length && i < 7; i++)
+            {
+                Rect slot = new Rect(
+                    panel.x + padding + (i - 4) * (handWidth + gap),
+                    secondRowY,
+                    handWidth,
+                    38f);
+                if (slot.Contains(point))
+                {
+                    kind = CardSlotKind.Hand;
+                    index = i;
+                    return true;
+                }
+            }
+
+            kind = default(CardSlotKind);
+            index = -1;
+            return false;
         }
 
         private void DrawEvolutionPanel(EvolutionChoice choice)

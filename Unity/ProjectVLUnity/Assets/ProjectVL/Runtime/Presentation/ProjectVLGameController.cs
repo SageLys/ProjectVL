@@ -330,7 +330,7 @@ namespace ProjectVL.Presentation
         public void BeginCardDrag(CardSlotKind kind, int index)
         {
             CardState card = CardAt(kind, index);
-            if (!CombatSystem.SupportsConsumable(card))
+            if (card == null)
             {
                 return;
             }
@@ -338,13 +338,32 @@ namespace ProjectVL.Presentation
             _draggedSlotKind = kind;
             _draggedSlotIndex = index;
             LastCardAction =
-                $"正在拖动 {card.Star}★ {card.Type}，松开到战场施放。";
+                $"正在拖动 {card.Star}★ {card.Type}。";
         }
 
         public void CancelCardDrag()
         {
             _draggedSlotKind = null;
             _draggedSlotIndex = -1;
+        }
+
+        public void ReleaseCardDragToSlot(
+            CardSlotKind targetKind,
+            int targetIndex)
+        {
+            if (_draggedSlotKind == null)
+            {
+                return;
+            }
+
+            CardMoveResult result = _cardInventory.MoveOrSwap(
+                State,
+                _draggedSlotKind.Value,
+                _draggedSlotIndex,
+                targetKind,
+                targetIndex);
+            ClearCardSelection(CardActionText(result));
+            CancelCardDrag();
         }
 
         public void ReleaseCardDrag(Vector2 guiPosition)
@@ -357,6 +376,13 @@ namespace ProjectVL.Presentation
             CardSlotKind kind = _draggedSlotKind.Value;
             int index = _draggedSlotIndex;
             CardState card = CardAt(kind, index);
+            if (!CombatSystem.SupportsConsumable(card))
+            {
+                LastCardAction = "这张卡牌不能拖到战场施放。";
+                CancelCardDrag();
+                return;
+            }
+
             Vector3 screenPoint = new Vector3(
                 guiPosition.x,
                 Screen.height - guiPosition.y,
