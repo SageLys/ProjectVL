@@ -17,10 +17,96 @@ namespace ProjectVL.Presentation
         private CardSlotKind? _pressedSlotKind;
         private int _pressedSlotIndex = -1;
         private Vector2 _pressPoint;
+        private Vector2 _pointerGuiPosition;
 
         public void Initialize(ProjectVLGameController controller)
         {
             _controller = controller;
+        }
+
+        private void Update()
+        {
+            if (_controller == null || _controller.State == null)
+            {
+                return;
+            }
+
+            RefreshViewport();
+            if (!TryReadPointer(
+                out Vector2 guiPosition,
+                out bool pressed,
+                out bool held,
+                out bool released,
+                out bool canceled))
+            {
+                return;
+            }
+
+            _pointerGuiPosition = guiPosition;
+            Vector2 designPointer = ToDesignPoint(guiPosition);
+            if (pressed)
+            {
+                if (TryGetCardSlotAt(
+                    designPointer,
+                    out CardSlotKind sourceKind,
+                    out int sourceIndex))
+                {
+                    _pressedSlotKind = sourceKind;
+                    _pressedSlotIndex = sourceIndex;
+                    _pressPoint = designPointer;
+                }
+                else
+                {
+                    ClearPressedSlot();
+                }
+            }
+
+            if (held
+                && !_controller.HasCardDrag
+                && _pressedSlotKind != null
+                && Vector2.Distance(_pressPoint, designPointer) >= 6f)
+            {
+                _controller.BeginCardDrag(
+                    _pressedSlotKind.Value,
+                    _pressedSlotIndex);
+                ClearPressedSlot();
+            }
+
+            if (canceled)
+            {
+                _controller.CancelCardDrag();
+                ClearPressedSlot();
+                return;
+            }
+
+            if (!released)
+            {
+                return;
+            }
+
+            ClearPressedSlot();
+            if (!_controller.HasCardDrag)
+            {
+                return;
+            }
+
+            if (TryGetCardSlotAt(
+                designPointer,
+                out CardSlotKind targetKind,
+                out int targetIndex))
+            {
+                _controller.ReleaseCardDragToSlot(
+                    targetKind,
+                    targetIndex);
+            }
+            else if (ArenaRect().Contains(designPointer))
+            {
+                _controller.ReleaseCardDrag(guiPosition);
+            }
+            else
+            {
+                _controller.CancelCardDrag();
+            }
         }
 
         private void OnGUI()
@@ -42,7 +128,6 @@ namespace ProjectVL.Presentation
                 new Vector3(_physicalViewport.x, _physicalViewport.y, 0f),
                 Quaternion.identity,
                 new Vector3(_uiScale, _uiScale, 1f));
-            HandleCardDragInput();
             DrawArenaFrame();
             DrawTopBar();
             DrawControls();
@@ -442,18 +527,6 @@ namespace ProjectVL.Presentation
                 GUI.backgroundColor = new Color(0.18f, 0.32f, 0.45f);
             }
 
-            Event current = Event.current;
-            Vector2 designPointer = ToDesignPoint(current.mousePosition);
-            if (card != null
-                && current.type == EventType.MouseDown
-                && current.button == 0
-                && rect.Contains(designPointer))
-            {
-                _pressedSlotKind = kind;
-                _pressedSlotIndex = index;
-                _pressPoint = designPointer;
-            }
-
             if (GUI.Button(rect, text, _buttonStyle))
             {
                 _controller.SelectCardSlot(kind, index);
@@ -478,63 +551,6 @@ namespace ProjectVL.Presentation
             GUI.backgroundColor = previous;
         }
 
-        private void HandleCardDragInput()
-        {
-            Event current = Event.current;
-            Vector2 designPointer = ToDesignPoint(current.mousePosition);
-            if (!_controller.HasCardDrag
-                && _pressedSlotKind != null
-                && current.type == EventType.MouseDrag
-                && current.button == 0
-                && Vector2.Distance(_pressPoint, designPointer) >= 6f)
-            {
-                _controller.BeginCardDrag(
-                    _pressedSlotKind.Value,
-                    _pressedSlotIndex);
-                _pressedSlotKind = null;
-                _pressedSlotIndex = -1;
-                current.Use();
-                return;
-            }
-
-            if (!_controller.HasCardDrag)
-            {
-                if (current.type == EventType.MouseUp
-                    && current.button == 0)
-                {
-                    _pressedSlotKind = null;
-                    _pressedSlotIndex = -1;
-                }
-
-                return;
-            }
-
-            if (current.type != EventType.MouseUp || current.button != 0)
-            {
-                return;
-            }
-
-            if (TryGetCardSlotAt(
-                designPointer,
-                out CardSlotKind targetKind,
-                out int targetIndex))
-            {
-                _controller.ReleaseCardDragToSlot(
-                    targetKind,
-                    targetIndex);
-            }
-            else if (ArenaRect().Contains(designPointer))
-            {
-                _controller.ReleaseCardDrag(current.mousePosition);
-            }
-            else
-            {
-                _controller.CancelCardDrag();
-            }
-
-            current.Use();
-        }
-
         private void DrawCardDragOverlay()
         {
             if (!_controller.HasCardDrag
@@ -543,11 +559,58 @@ namespace ProjectVL.Presentation
                 return;
             }
 
-            Vector2 mouse = ToDesignPoint(Event.current.mousePosition);
+            Vector2 mouse = ToDesignPoint(_pointerGuiPosition);
             GUI.Label(
                 new Rect(mouse.x + 18f, mouse.y - 16f, 190f, 32f),
                 "松开到卡槽移动，松开到战场施放",
                 _hudStyle);
+        }
+
+        private void RefreshViewport()
+        {
+            _physicalViewport = _controller.MobileViewportRect;
+            _uiScale = Mathf.Max(
+                0.01f,
+                Mathf.Min(
+                    _physicalViewport.width / MobileHudLayout.ReferenceWidth,
+                    _physicalViewport.height / MobileHudLayout.ReferenceHeight));
+        }
+
+        private static bool TryReadPointer(
+            out Vector2 guiPosition,
+            out bool pressed,
+            out bool held,
+            out bool released,
+            out bool canceled)
+        {
+            if (Input.touchCount > 0)
+            {
+                Touch touch = Input.GetTouch(0);
+                guiPosition = new Vector2(
+                    touch.position.x,
+                    Screen.height - touch.position.y);
+                pressed = touch.phase == TouchPhase.Began;
+                held = touch.phase == TouchPhase.Moved
+                    || touch.phase == TouchPhase.Stationary;
+                released = touch.phase == TouchPhase.Ended;
+                canceled = touch.phase == TouchPhase.Canceled;
+                return true;
+            }
+
+            pressed = Input.GetMouseButtonDown(0);
+            held = Input.GetMouseButton(0);
+            released = Input.GetMouseButtonUp(0);
+            canceled = false;
+            guiPosition = new Vector2(
+                Input.mousePosition.x,
+                Screen.height - Input.mousePosition.y);
+            return pressed || held || released;
+        }
+
+        private void ClearPressedSlot()
+        {
+            _pressedSlotKind = null;
+            _pressedSlotIndex = -1;
         }
 
         private bool TryGetCardSlotAt(
