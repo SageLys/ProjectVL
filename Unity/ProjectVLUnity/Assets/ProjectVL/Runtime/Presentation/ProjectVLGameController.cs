@@ -29,13 +29,7 @@ namespace ProjectVL.Presentation
             "aegis",
             "thorns",
             "decoy",
-            "harvest",
-            "frozenThunder",
-            "solarLance",
-            "avalanche",
-            "pyrestorm",
-            "crownOfThorns",
-            "goldenIdol"
+            "harvest"
         };
         private static readonly string[] AdvancedDemoTypes =
         {
@@ -121,7 +115,13 @@ namespace ProjectVL.Presentation
             "aegis",
             "thorns",
             "decoy",
-            "harvest"
+            "harvest",
+            "frozenThunder",
+            "solarLance",
+            "avalanche",
+            "pyrestorm",
+            "crownOfThorns",
+            "goldenIdol"
         };
 
         public GameState State => _simulation?.State;
