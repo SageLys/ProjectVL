@@ -103,6 +103,18 @@ describe('editor contract smoke', () => {
     expect(calls).toEqual(['/__config/validate', '/__config/write']);
   });
 
+  it('loads the current full validation report with an empty candidate payload', async () => {
+    let payload: unknown;
+    const fetcher: EditorFetch = async (input, init) => {
+      expect(String(input)).toBe('/__config/validate');
+      payload = JSON.parse(String(init?.body));
+      return json(200, { ok: true, report: okReport() });
+    };
+    const report = await new ConfigApi(fetcher).validateCurrent();
+    expect(payload).toEqual({});
+    expect(report.ok).toBe(true);
+  });
+
   it('preflights both entity and texts candidates before issuing any dual-domain write', async () => {
     const validations: string[] = [];
     const writes: string[] = [];

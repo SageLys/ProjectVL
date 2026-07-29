@@ -97,6 +97,13 @@ describe('editor human labels', () => {
     expect(labelWithKey('atom', 'chain')).toBe('连锁（chain）');
   });
 
+  it('covers content-workbench tags, phases, and trigger conditions from the shared label source', () => {
+    expect(lookupLabel('enumValue', 'tag.utility')?.label).toBe('功能');
+    expect(lookupLabel('enumValue', 'phase.intermission')?.label).toBe('波间');
+    expect(lookupLabel('domainField', 'requiresStatus')?.label).toBe('状态限定');
+    expect(lookupLabel('domainField', 'cooldownSeconds')?.label).toBe('冷却秒数');
+  });
+
   it('stays browser safe: no config pipeline or validator imports', () => {
     const source = readFileSync(LABELS_SOURCE, 'utf8');
     const imports = [...source.matchAll(/^import[^;]*?from\s+'([^']+)'/gm)].map(match => match[1]);

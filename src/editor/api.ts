@@ -57,6 +57,17 @@ export class ConfigApi {
     return body.report;
   }
 
+  /** 校验磁盘上的完整现状；内容工作台启动时用它取得只读基线报告。 */
+  async validateCurrent(): Promise<ValidationReportDto> {
+    const { status, body } = await this.post<ValidateResponse | { ok: false; error?: string }>(
+      '/__config/validate', {},
+    );
+    if (status !== 200 || !('report' in body)) {
+      throw new ConfigEndpointError(('error' in body && body.error) || '校验当前配置失败', status);
+    }
+    return body.report;
+  }
+
   async write(domain: EditorDomain, data: unknown): Promise<WriteResponse> {
     const { status, body } = await this.post<WriteResponse>('/__config/write', { domain, data });
     if (status === 200 || status === 422) return body;
