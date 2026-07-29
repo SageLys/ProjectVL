@@ -75,6 +75,7 @@ namespace ProjectVL.Systems
                 }
             }
 
+            RelicScalingSystem.Apply(state, profile);
             return profile;
         }
 

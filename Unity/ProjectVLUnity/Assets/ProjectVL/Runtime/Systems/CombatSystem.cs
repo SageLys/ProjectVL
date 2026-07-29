@@ -158,7 +158,8 @@ namespace ProjectVL.Systems
         {
             float width = StarValue(star, 10f, 16f, 24f);
             float damageMultiplier =
-                StarValue(star, 3f, 5f, 8f);
+                StarValue(star, 3f, 5f, 8f)
+                * RelicMultiplier(state, "pierce", "effectDamageMul");
             float knockback =
                 star >= 6 ? 40f : 0f;
             Float2 direction =
@@ -229,16 +230,35 @@ namespace ProjectVL.Systems
             }
 
             int bounces = (int)Math.Round(
-                StarValue(star, 4f, 7f, 12f));
+                StarValue(star, 4f, 7f, 12f))
+                + RelicQuantity(state, "chainLightning");
             float retention =
-                StarValue(star, 0.8f, 0.8f, 0.85f);
+                Math.Min(
+                    1f,
+                    StarValue(star, 0.8f, 0.8f, 0.85f)
+                    * RelicMultiplier(
+                        state,
+                        "chainLightning",
+                        "effectDamageMul"));
             float searchRange =
                 StarValue(star, 140f, 140f, 160f);
             float slowRatio =
-                star >= 3 && star < 6 ? 0.25f : 0f;
+                (star >= 3 && star < 6 ? 0.25f : 0f)
+                * RelicMultiplier(
+                    state,
+                    "chainLightning",
+                    "controlPotencyMul");
             float slowDuration =
-                star >= 3 && star < 6 ? 1.5f : 0f;
-            float stunDuration = star >= 6 ? 0.5f : 0f;
+                (star >= 3 && star < 6 ? 1.5f : 0f)
+                * RelicMultiplier(
+                    state,
+                    "chainLightning",
+                    "controlPotencyMul");
+            float stunDuration = (star >= 6 ? 0.5f : 0f)
+                * RelicMultiplier(
+                    state,
+                    "chainLightning",
+                    "controlPotencyMul");
             float damage = _combat.defaults.damage;
             Float2 origin = first.Position;
             var visited =
@@ -281,14 +301,31 @@ namespace ProjectVL.Systems
             int star,
             Float2 point)
         {
-            float radius = StarValue(star, 90f, 130f, 170f);
+            float radius = StarValue(star, 90f, 130f, 170f)
+                * RelicMultiplier(state, "frost", "areaScaleMul");
             float freezeDuration =
-                StarValue(star, 3f, 3f, 3.5f);
+                StarValue(star, 3f, 3f, 3.5f)
+                * RelicMultiplier(
+                    state,
+                    "frost",
+                    "controlPotencyMul");
             float slowRatio =
-                star >= 3 && star < 6 ? 0.4f : 0f;
+                (star >= 3 && star < 6 ? 0.4f : 0f)
+                * RelicMultiplier(
+                    state,
+                    "frost",
+                    "controlPotencyMul");
             float slowDuration =
-                star >= 3 && star < 6 ? 2f : 0f;
-            float vulnerableRatio = star >= 6 ? 0.3f : 0f;
+                (star >= 3 && star < 6 ? 2f : 0f)
+                * RelicMultiplier(
+                    state,
+                    "frost",
+                    "controlPotencyMul");
+            float vulnerableRatio = (star >= 6 ? 0.3f : 0f)
+                * RelicMultiplier(
+                    state,
+                    "frost",
+                    "controlPotencyMul");
             foreach (EnemyState enemy in state.Enemies)
             {
                 if (Float2.Distance(point, enemy.Position) > radius)
@@ -319,10 +356,17 @@ namespace ProjectVL.Systems
             int star,
             Float2 point)
         {
-            float radius = StarValue(star, 110f, 140f, 180f);
-            float duration = StarValue(star, 3f, 4f, 5f);
+            float areaScale = RelicMultiplier(
+                state,
+                "scorch",
+                "areaScaleMul");
+            float radius = StarValue(star, 110f, 140f, 180f)
+                * areaScale;
+            float duration = StarValue(star, 3f, 4f, 5f)
+                * areaScale;
             float damageRatio =
-                StarValue(star, 0.2f, 0.2f, 0.25f);
+                StarValue(star, 0.2f, 0.2f, 0.25f)
+                * RelicMultiplier(state, "scorch", "dotDamageMul");
             float vulnerableRatio = star >= 3 ? 0.15f : 0f;
             state.GroundZones.Add(new GroundZoneState(
                 point,
@@ -339,9 +383,17 @@ namespace ProjectVL.Systems
             int star,
             Float2 point)
         {
-            float radius = StarValue(star, 110f, 140f, 180f);
+            float radius = StarValue(star, 110f, 140f, 180f)
+                * RelicMultiplier(
+                    state,
+                    "splitBlast",
+                    "areaScaleMul");
             float damageMultiplier =
-                StarValue(star, 4f, 6f, 9f);
+                StarValue(star, 4f, 6f, 9f)
+                * RelicMultiplier(
+                    state,
+                    "splitBlast",
+                    "effectDamageMul");
             float damage =
                 _combat.defaults.damage * damageMultiplier;
             DamageArea(
@@ -358,7 +410,9 @@ namespace ProjectVL.Systems
             }
 
             var hit = new System.Collections.Generic.HashSet<int>();
-            for (int index = 0; index < 4; index++)
+            int splitTargets = 4
+                + RelicQuantity(state, "splitBlast");
+            for (int index = 0; index < splitTargets; index++)
             {
                 EnemyState target = FindClosestChainTarget(
                     state,
@@ -380,10 +434,17 @@ namespace ProjectVL.Systems
             int star,
             Float2 point)
         {
-            float radius = StarValue(star, 100f, 140f, 180f);
-            float knockback = StarValue(star, 80f, 120f, 180f);
+            float radius = StarValue(star, 100f, 140f, 180f)
+                * RelicMultiplier(state, "impact", "areaScaleMul");
+            float controlScale = RelicMultiplier(
+                state,
+                "impact",
+                "controlPotencyMul");
+            float knockback = StarValue(star, 80f, 120f, 180f)
+                * controlScale;
             float stunDuration =
-                star >= 6 ? 1f : star >= 3 ? 0.5f : 0f;
+                (star >= 6 ? 1f : star >= 3 ? 0.5f : 0f)
+                * controlScale;
             var targets =
                 new System.Collections.Generic.List<EnemyState>();
             foreach (EnemyState enemy in state.Enemies)
@@ -425,7 +486,12 @@ namespace ProjectVL.Systems
                     DamageEnemy(
                         state,
                         collision,
-                        _combat.defaults.damage * 0.5f);
+                        _combat.defaults.damage
+                            * 0.5f
+                            * RelicMultiplier(
+                                state,
+                                "impact",
+                                "effectDamageMul"));
                 }
             }
         }
@@ -435,9 +501,19 @@ namespace ProjectVL.Systems
             int star,
             Float2 point)
         {
-            float radius = StarValue(star, 110f, 140f, 170f);
-            float ratio = StarValue(star, 0.3f, 0.4f, 0.5f);
-            float duration = StarValue(star, 4f, 5f, 5f);
+            float areaScale = RelicMultiplier(
+                state,
+                "sanctum",
+                "areaScaleMul");
+            float radius = StarValue(star, 110f, 140f, 170f)
+                * areaScale;
+            float ratio = StarValue(star, 0.3f, 0.4f, 0.5f)
+                * RelicMultiplier(
+                    state,
+                    "sanctum",
+                    "controlPotencyMul");
+            float duration = StarValue(star, 4f, 5f, 5f)
+                * areaScale;
             foreach (EnemyState enemy in state.Enemies)
             {
                 if (Float2.Distance(point, enemy.Position) > radius)
@@ -459,8 +535,12 @@ namespace ProjectVL.Systems
             int star,
             Float2 point)
         {
-            int shieldHits = (int)Math.Round(
-                StarValue(star, 4f, 6f, 8f));
+            int shieldHits = (int)Math.Ceiling(
+                StarValue(star, 4f, 6f, 8f)
+                * RelicMultiplier(
+                    state,
+                    "aegis",
+                    "defenseDurabilityMul"));
             state.ShieldMaxHits += shieldHits;
             state.ShieldHits += shieldHits;
             float radius = StarValue(star, 90f, 120f, 150f);
@@ -491,10 +571,20 @@ namespace ProjectVL.Systems
             int star,
             Float2 point)
         {
-            float radius = StarValue(star, 90f, 120f, 150f);
-            float duration = StarValue(star, 4f, 4f, 5f);
+            float areaScale = RelicMultiplier(
+                state,
+                "thorns",
+                "areaScaleMul");
+            float radius = StarValue(star, 90f, 120f, 150f)
+                * areaScale;
+            float duration = StarValue(star, 4f, 4f, 5f)
+                * areaScale;
             float damageRatio =
-                StarValue(star, 0.15f, 0.2f, 0.25f);
+                StarValue(star, 0.15f, 0.2f, 0.25f)
+                * RelicMultiplier(
+                    state,
+                    "thorns",
+                    "retaliationMul");
             state.GroundZones.Add(new GroundZoneState(
                 point,
                 radius,
@@ -519,13 +609,21 @@ namespace ProjectVL.Systems
             state.DecoyLifeRemaining =
                 StarValue(star, 4f, 5f, 5f);
             state.DecoyHp =
-                StarValue(star, 30f, 50f, 9999f);
+                StarValue(star, 30f, 50f, 9999f)
+                * RelicMultiplier(
+                    state,
+                    "decoy",
+                    "defenseDurabilityMul");
             state.DecoyMaxHp = state.DecoyHp;
             state.DecoyTauntRadius =
                 star >= 6 ? 160f
                     : StarValue(star, 120f, 160f, 160f);
             state.DecoyExplodeDamageMultiplier =
-                star >= 3 && star < 6 ? 1.5f : 0f;
+                (star >= 3 && star < 6 ? 1.5f : 0f)
+                * RelicMultiplier(
+                    state,
+                    "decoy",
+                    "effectDamageMul");
             state.DecoyExplodeKnockback =
                 star >= 3 && star < 6 ? 90f : 0f;
             state.DecoyIsMirrorTurret = star >= 6;
@@ -620,9 +718,19 @@ namespace ProjectVL.Systems
                 new System.Collections.Generic.HashSet<int>();
             EnemyState target = first;
             Float2 origin = first.Position;
-            float damage = _combat.defaults.damage;
+            int bounces = 14
+                + RelicQuantity(state, "frozenThunder");
+            float controlScale = RelicMultiplier(
+                state,
+                "frozenThunder",
+                "controlPotencyMul");
+            float effectScale = RelicMultiplier(
+                state,
+                "frozenThunder",
+                "effectDamageMul");
+            float damage = _combat.defaults.damage * effectScale;
             for (int hit = 0;
-                hit <= 14 && target != null;
+                hit <= bounces && target != null;
                 hit++)
             {
                 visited.Add(target.Id);
@@ -632,7 +740,7 @@ namespace ProjectVL.Systems
                 {
                     target.FrozenRemaining = Math.Max(
                         target.FrozenRemaining,
-                        2.5f);
+                        2.5f * controlScale);
                 }
 
                 origin = nextOrigin;
@@ -666,7 +774,11 @@ namespace ProjectVL.Systems
                 direction = new Float2(1f, 0f);
             }
 
-            float damage = _combat.defaults.damage * 7f;
+            float effectScale = RelicMultiplier(
+                state,
+                "solarLance",
+                "effectDamageMul");
+            float damage = _combat.defaults.damage * 7f * effectScale;
             var targets =
                 new System.Collections.Generic.List<EnemyState>();
             foreach (EnemyState enemy in state.Enemies)
@@ -724,7 +836,12 @@ namespace ProjectVL.Systems
                 new System.Collections.Generic.List<EnemyState>();
             foreach (EnemyState enemy in state.Enemies)
             {
-                if (Float2.Distance(point, enemy.Position) <= 210f)
+                if (Float2.Distance(point, enemy.Position)
+                    <= 210f
+                        * RelicMultiplier(
+                            state,
+                            "avalanche",
+                            "areaScaleMul"))
                 {
                     targets.Add(enemy);
                 }
@@ -735,7 +852,12 @@ namespace ProjectVL.Systems
                 DamageEnemy(
                     state,
                     enemy,
-                    _combat.defaults.damage * 5.5f);
+                    _combat.defaults.damage
+                        * 5.5f
+                        * RelicMultiplier(
+                            state,
+                            "avalanche",
+                            "effectDamageMul"));
                 if (!state.Enemies.Contains(enemy))
                 {
                     continue;
@@ -743,9 +865,17 @@ namespace ProjectVL.Systems
 
                 enemy.FrozenRemaining = Math.Max(
                     enemy.FrozenRemaining,
-                    2f);
+                    2f * RelicMultiplier(
+                        state,
+                        "avalanche",
+                        "controlPotencyMul"));
                 enemy.Position +=
-                    (enemy.Position - point).Normalized() * 200f;
+                    (enemy.Position - point).Normalized()
+                    * 200f
+                    * RelicMultiplier(
+                        state,
+                        "avalanche",
+                        "controlPotencyMul");
             }
         }
 
@@ -753,13 +883,22 @@ namespace ProjectVL.Systems
             GameState state,
             Float2 point)
         {
-            for (int strike = 0; strike < 3; strike++)
+            float areaScale = RelicMultiplier(
+                state,
+                "pyrestorm",
+                "areaScaleMul");
+            float effectScale = RelicMultiplier(
+                state,
+                "pyrestorm",
+                "effectDamageMul");
+            int strikes = 3 + RelicQuantity(state, "pyrestorm");
+            for (int strike = 0; strike < strikes; strike++)
             {
                 DamageArea(
                     state,
                     point,
-                    160f,
-                    _combat.defaults.damage * 5f,
+                    160f * areaScale,
+                    _combat.defaults.damage * 5f * effectScale,
                     -1,
                     0f,
                     0f,
@@ -769,10 +908,15 @@ namespace ProjectVL.Systems
 
             state.GroundZones.Add(new GroundZoneState(
                 point,
-                210f,
-                5f,
+                210f * areaScale,
+                5f * areaScale,
                 0.5f,
-                _combat.defaults.damage * 0.45f,
+                _combat.defaults.damage
+                    * 0.45f
+                    * RelicMultiplier(
+                        state,
+                        "pyrestorm",
+                        "dotDamageMul"),
                 0.18f,
                 0.6f));
         }
@@ -781,22 +925,35 @@ namespace ProjectVL.Systems
             GameState state,
             Float2 point)
         {
-            state.ShieldMaxHits += 10;
-            state.ShieldHits += 10;
+            int shieldHits = (int)Math.Ceiling(
+                10f * RelicMultiplier(
+                    state,
+                    "crownOfThorns",
+                    "defenseDurabilityMul"));
+            state.ShieldMaxHits += shieldHits;
+            state.ShieldHits += shieldHits;
+            float areaScale = RelicMultiplier(
+                state,
+                "crownOfThorns",
+                "areaScaleMul");
+            float retaliationScale = RelicMultiplier(
+                state,
+                "crownOfThorns",
+                "retaliationMul");
             DamageArea(
                 state,
                 point,
-                200f,
-                _combat.defaults.damage * 5f,
+                200f * areaScale,
+                _combat.defaults.damage * 5f * retaliationScale,
                 -1,
                 140f,
                 0f);
             state.GroundZones.Add(new GroundZoneState(
                 point,
-                200f,
-                5f,
+                200f * areaScale,
+                5f * areaScale,
                 0.5f,
-                _combat.defaults.damage * 0.4f,
+                _combat.defaults.damage * 0.4f * retaliationScale,
                 0f,
                 0f,
                 0f,
@@ -811,10 +968,18 @@ namespace ProjectVL.Systems
             state.DecoyActive = true;
             state.DecoyPosition = point;
             state.DecoyLifeRemaining = 5f;
-            state.DecoyHp = 180f;
-            state.DecoyMaxHp = 180f;
+            float durability = RelicMultiplier(
+                state,
+                "goldenIdol",
+                "defenseDurabilityMul");
+            state.DecoyHp = 180f * durability;
+            state.DecoyMaxHp = state.DecoyHp;
             state.DecoyTauntRadius = 230f;
-            state.DecoyExplodeDamageMultiplier = 3f;
+            state.DecoyExplodeDamageMultiplier = 3f
+                * RelicMultiplier(
+                    state,
+                    "goldenIdol",
+                    "effectDamageMul");
             state.DecoyExplodeKnockback = 0f;
             state.DecoyIsMirrorTurret = false;
             state.KillXpBuffMultiplier = 1.6f;
@@ -834,6 +999,28 @@ namespace ProjectVL.Systems
                     4f,
                     1f);
             }
+        }
+
+        private static float RelicMultiplier(
+            GameState state,
+            string cardType,
+            string axis)
+        {
+            return 1f + RelicScalingSystem.ForCard(
+                state,
+                cardType,
+                axis);
+        }
+
+        private static int RelicQuantity(
+            GameState state,
+            string cardType)
+        {
+            float value = RelicScalingSystem.ForCard(
+                state,
+                cardType,
+                "quantityAdd");
+            return value > 0f ? (int)Math.Ceiling(value) : 0;
         }
 
         private static float StarValue(
@@ -1162,7 +1349,14 @@ namespace ProjectVL.Systems
             float vulnerability = enemy.VulnerableRemaining > 0f
                 ? enemy.VulnerableRatio
                 : 0f;
-            enemy.Hp -= damage * (1f + vulnerability);
+            float controlledBonus = killedWhileControlled
+                ? RelicScalingSystem.GlobalMax(
+                    state,
+                    "controlledDamageTakenMul")
+                : 0f;
+            enemy.Hp -= damage
+                * (1f + vulnerability)
+                * (1f + controlledBonus);
             if (enemy.Hp > 0f)
             {
                 return;

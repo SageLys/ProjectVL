@@ -154,5 +154,6 @@ namespace ProjectVL.Core
         public float ControlledKillXpMultiplier { get; set; } = 1f;
         public float ControlledKillXpDuration { get; set; }
         public int ControlledKillXpMaxStacks { get; set; }
+        public float ControlledDamageTakenBonus { get; set; }
     }
 }
