@@ -85,6 +85,7 @@ namespace ProjectVL.Systems
                 recipe.outputCardId,
                 recipe.outputStar);
             state.EquipmentEffectWave = 0;
+            CardAffixSystem.ReconcileMaxHp(state);
             state.CompletedRecipes.Add(recipe.id);
             return RecipeCraftResult.Crafted;
         }

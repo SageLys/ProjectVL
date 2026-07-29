@@ -149,6 +149,56 @@ namespace ProjectVL.Systems
                 GlobalMax(state, "controlledDamageTakenMul"));
         }
 
+        public static void ApplyAxis(
+            CardCombatProfile profile,
+            string axis,
+            float value)
+        {
+            if (profile == null || value == 0f)
+            {
+                return;
+            }
+
+            switch (axis)
+            {
+                case "effectDamageMul":
+                    ApplyEffectDamage(profile, value);
+                    break;
+                case "quantityAdd":
+                    ApplyQuantity(profile, value);
+                    break;
+                case "controlPotencyMul":
+                    ApplyControl(profile, value);
+                    break;
+                case "areaScaleMul":
+                    ApplyArea(profile, value);
+                    break;
+                case "dotDamageMul":
+                    ApplyDot(profile, value);
+                    break;
+                case "defenseDurabilityMul":
+                    ApplyDefenseDurability(profile, value);
+                    break;
+                case "retaliationMul":
+                    ApplyRetaliation(profile, value);
+                    break;
+                case "dropRateMul":
+                    profile.DropRateMultiplier *= 1f + value;
+                    break;
+                case "dropLifetimeMul":
+                    profile.DropLifetimeMultiplier *= 1f + value;
+                    break;
+                case "xpMul":
+                    profile.XpMultiplier *= 1f + value;
+                    break;
+                case "controlledDamageTakenMul":
+                    profile.ControlledDamageTakenBonus = Math.Max(
+                        profile.ControlledDamageTakenBonus,
+                        value);
+                    break;
+            }
+        }
+
         private static void ApplyEffectDamage(
             CardCombatProfile profile,
             float value)

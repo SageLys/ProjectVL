@@ -120,6 +120,10 @@ namespace ProjectVL.Core
             new Dictionary<string, CardTypeRunStats>();
         public Dictionary<string, List<CardAffixRoll>> CardAffixRolls { get; } =
             new Dictionary<string, List<CardAffixRoll>>();
+        public List<RuntimeCardAffixModifier> RuntimeCardAffixes { get; } =
+            new List<RuntimeCardAffixModifier>();
+        public int ExcludedEquipmentAffixCardId { get; internal set; }
+        public float AffixMaxHpAdd { get; private set; }
         public int OrdinaryDropCount { get; internal set; }
         public GodChoice PendingGodChoice { get; private set; }
         public int LastGodDecisionAfterWave { get; internal set; } = -1;
@@ -376,6 +380,19 @@ namespace ProjectVL.Core
             MaxHp += added;
             RunMaxHpAdd += added;
             Hp = Math.Min(MaxHp, Hp + added);
+        }
+
+        internal void ReconcileAffixMaxHp(float totalAdd)
+        {
+            float missing = Math.Max(0f, MaxHp - Hp);
+            AffixMaxHpAdd = Math.Max(0f, totalAdd);
+            MaxHp = Math.Max(0f, BaseMaxHp + AffixMaxHpAdd);
+            float floor = Mode == GameMode.Playing
+                ? Math.Min(1f, MaxHp)
+                : 0f;
+            Hp = Math.Min(
+                MaxHp,
+                Math.Max(floor, MaxHp - missing));
         }
 
         internal void AddExperience(float amount)

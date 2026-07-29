@@ -70,6 +70,190 @@ namespace ProjectVL.Systems
             return rolls;
         }
 
+        public static List<RuntimeCardAffixModifier> ActivateConsumable(
+            GameState state,
+            CardState card)
+        {
+            var activated = new List<RuntimeCardAffixModifier>();
+            if (state == null || card == null)
+            {
+                return activated;
+            }
+
+            foreach (CardAffixRoll roll in card.Affixes)
+            {
+                if (roll.Stat == "heal")
+                {
+                    state.RestoreHp(roll.Value);
+                    continue;
+                }
+
+                var modifier = new RuntimeCardAffixModifier(
+                    roll.Stat,
+                    roll.Value,
+                    roll.ConsumableDuration);
+                state.RuntimeCardAffixes.Add(modifier);
+                activated.Add(modifier);
+            }
+
+            ReconcileMaxHp(state);
+            return activated;
+        }
+
+        public static void RollbackConsumable(
+            GameState state,
+            List<RuntimeCardAffixModifier> activated)
+        {
+            if (state == null || activated == null)
+            {
+                return;
+            }
+
+            foreach (RuntimeCardAffixModifier modifier in activated)
+            {
+                state.RuntimeCardAffixes.Remove(modifier);
+            }
+
+            ReconcileMaxHp(state);
+        }
+
+        public static void StepRuntime(GameState state, float deltaTime)
+        {
+            if (state == null)
+            {
+                return;
+            }
+
+            for (int index = state.RuntimeCardAffixes.Count - 1;
+                index >= 0;
+                index--)
+            {
+                RuntimeCardAffixModifier modifier =
+                    state.RuntimeCardAffixes[index];
+                modifier.Remaining -= Math.Max(0f, deltaTime);
+                if (modifier.Remaining <= 0f)
+                {
+                    state.RuntimeCardAffixes.RemoveAt(index);
+                }
+            }
+
+            ReconcileMaxHp(state);
+        }
+
+        public static float EquipmentValue(
+            GameState state,
+            string stat)
+        {
+            float total = 0f;
+            if (state == null)
+            {
+                return total;
+            }
+
+            foreach (CardState card in state.Equipment)
+            {
+                if (card == null
+                    || card.Provisional
+                    || card.Id == state.ExcludedEquipmentAffixCardId)
+                {
+                    continue;
+                }
+
+                foreach (CardAffixRoll roll in card.Affixes)
+                {
+                    if (roll.Stat == stat)
+                    {
+                        total += roll.Value;
+                    }
+                }
+            }
+
+            return total;
+        }
+
+        public static float RuntimeAdd(GameState state, string stat)
+        {
+            float total = 0f;
+            if (state == null)
+            {
+                return total;
+            }
+
+            foreach (RuntimeCardAffixModifier modifier
+                in state.RuntimeCardAffixes)
+            {
+                if (modifier.Stat == stat)
+                {
+                    total += modifier.Value;
+                }
+            }
+
+            return total;
+        }
+
+        public static float RuntimeScaling(
+            GameState state,
+            string stat)
+        {
+            float multiplier = 1f;
+            if (state == null)
+            {
+                return 0f;
+            }
+
+            foreach (RuntimeCardAffixModifier modifier
+                in state.RuntimeCardAffixes)
+            {
+                if (modifier.Stat == stat)
+                {
+                    multiplier *= 1f + modifier.Value;
+                }
+            }
+
+            return multiplier - 1f;
+        }
+
+        public static void ApplyProfile(
+            GameState state,
+            CardCombatProfile profile)
+        {
+            string[] axes =
+            {
+                "effectDamageMul",
+                "quantityAdd",
+                "controlPotencyMul",
+                "areaScaleMul",
+                "dotDamageMul",
+                "defenseDurabilityMul",
+                "retaliationMul",
+                "dropRateMul",
+                "dropLifetimeMul",
+                "xpMul",
+                "controlledDamageTakenMul"
+            };
+            foreach (string axis in axes)
+            {
+                float value = EquipmentValue(state, axis)
+                    + RuntimeScaling(state, axis);
+                RelicScalingSystem.ApplyAxis(
+                    profile,
+                    axis,
+                    value);
+            }
+        }
+
+        public static void ReconcileMaxHp(GameState state)
+        {
+            if (state == null)
+            {
+                return;
+            }
+
+            state.ReconcileAffixMaxHp(
+                EquipmentValue(state, "maxHpAdd")
+                + RuntimeAdd(state, "maxHpAdd"));
+        }
+
         private CardAffixCandidateConfig TakeWeighted(
             List<CardAffixCandidateConfig> remaining)
         {

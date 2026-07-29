@@ -367,7 +367,10 @@ namespace ProjectVL.Presentation
 
                 _selectedSlotKind = kind;
                 _selectedSlotIndex = index;
-                LastCardAction = $"已选择 {card.Star}★ {card.Type}。";
+                LastCardAction =
+                    $"已选择 {card.Star}★ "
+                    + CardCatalog.Default.DisplayName(card.Type)
+                    + AffixSummary(card);
                 return;
             }
 
@@ -384,6 +387,63 @@ namespace ProjectVL.Presentation
                 kind,
                 index);
             ClearCardSelection(CardActionText(result));
+        }
+
+        private static string AffixSummary(CardState card)
+        {
+            if (card == null || card.Affixes.Count == 0)
+            {
+                return "。";
+            }
+
+            string text = "；词缀：";
+            for (int index = 0; index < card.Affixes.Count; index++)
+            {
+                CardAffixRoll roll = card.Affixes[index];
+                if (index > 0)
+                {
+                    text += "、";
+                }
+
+                text += AffixName(roll.Stat)
+                    + "+"
+                    + FormatAffixValue(roll);
+            }
+
+            return text + "。";
+        }
+
+        private static string FormatAffixValue(CardAffixRoll roll)
+        {
+            bool percentage = roll.Stat.EndsWith("Mul");
+            return percentage
+                ? Mathf.RoundToInt(roll.Value * 100f) + "%"
+                : roll.Value.ToString("0.##");
+        }
+
+        private static string AffixName(string stat)
+        {
+            switch (stat)
+            {
+                case "damageAdd": return "伤害";
+                case "fireRateAdd": return "攻速";
+                case "rangeAdd": return "射程";
+                case "multiAdd": return "弹道";
+                case "maxHpAdd": return "生命上限";
+                case "heal": return "治疗";
+                case "effectDamageMul": return "效果伤害";
+                case "quantityAdd": return "效果数量";
+                case "controlPotencyMul": return "控制强度";
+                case "controlledDamageTakenMul": return "受控增伤";
+                case "areaScaleMul": return "范围";
+                case "dotDamageMul": return "持续伤害";
+                case "defenseDurabilityMul": return "防御耐久";
+                case "retaliationMul": return "反击";
+                case "dropRateMul": return "掉率";
+                case "dropLifetimeMul": return "掉落时限";
+                case "xpMul": return "经验";
+                default: return stat;
+            }
         }
 
         public void ConsumeSelectedCard()

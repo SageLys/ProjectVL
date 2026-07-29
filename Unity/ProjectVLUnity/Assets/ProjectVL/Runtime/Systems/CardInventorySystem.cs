@@ -188,6 +188,7 @@ namespace ProjectVL.Systems
             else
             {
                 state.EquipmentEffectWave = 0;
+                CardAffixSystem.ReconcileMaxHp(state);
             }
 
             return WildcardUseResult.Upgraded;
@@ -223,6 +224,7 @@ namespace ProjectVL.Systems
             state.PendingEvolution = null;
             state.RefreshDecisionLock();
             state.EquipmentEffectWave = 0;
+            CardAffixSystem.ReconcileMaxHp(state);
 
             QueueNextEvolutionChoice(state);
             AutoMergeHand(state);
@@ -284,6 +286,7 @@ namespace ProjectVL.Systems
                 state.RecordCardMerge(replaced.Type, replaced.Star);
                 QueueEvolutionChoice(state, replaced);
                 state.EquipmentEffectWave = 0;
+                CardAffixSystem.ReconcileMaxHp(state);
                 return CardMoveResult.Fed;
             }
 
@@ -339,6 +342,7 @@ namespace ProjectVL.Systems
                 || targetKind == CardSlotKind.Equipment)
             {
                 state.EquipmentEffectWave = 0;
+                CardAffixSystem.ReconcileMaxHp(state);
             }
 
             return result;
@@ -362,6 +366,7 @@ namespace ProjectVL.Systems
             if (kind == CardSlotKind.Equipment)
             {
                 state.EquipmentEffectWave = 0;
+                CardAffixSystem.ReconcileMaxHp(state);
             }
             return true;
         }

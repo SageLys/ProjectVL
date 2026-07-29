@@ -718,7 +718,8 @@ namespace ProjectVL.Presentation
             else
             {
                 text = $"{card.Star}★{(card.Provisional ? " ?" : "")}\n"
-                    + CardDisplayName(card.Type);
+                    + CardDisplayName(card.Type)
+                    + (card.Affixes.Count > 0 ? " ◆" : string.Empty);
             }
 
             Color previous = GUI.backgroundColor;

@@ -36,6 +36,32 @@ namespace ProjectVL.Systems
                 return false;
             }
 
+            state.ExcludedEquipmentAffixCardId = card.Id;
+            System.Collections.Generic.List<RuntimeCardAffixModifier>
+                activated = CardAffixSystem.ActivateConsumable(
+                    state,
+                    card);
+            bool cast = CastConsumableCore(state, card, point);
+            state.ExcludedEquipmentAffixCardId = 0;
+            if (!cast)
+            {
+                CardAffixSystem.RollbackConsumable(
+                    state,
+                    activated);
+            }
+            else
+            {
+                CardAffixSystem.ReconcileMaxHp(state);
+            }
+
+            return cast;
+        }
+
+        private bool CastConsumableCore(
+            GameState state,
+            CardState card,
+            Float2 point)
+        {
             switch (card.Type)
             {
                 case "pierce":
@@ -197,15 +223,38 @@ namespace ProjectVL.Systems
             }
 
             Float2 muzzle = turret + direction * _combat.bullet.muzzleOffset;
-            state.Bullets.Add(new BulletState(
-                state.TakeNextBulletId(),
-                muzzle,
-                direction * _combat.bullet.speed,
-                _combat.bullet.radius,
-                _combat.bullet.life,
-                BaseDamage(state)
-                    * profile.ProjectileDamageMultiplier,
-                profile));
+            int projectileCount = Math.Max(
+                1,
+                1 + (int)Math.Round(
+                    state.RunMultiAdd
+                    + CardAffixSystem.EquipmentValue(
+                        state,
+                        "multiAdd")
+                    + CardAffixSystem.RuntimeAdd(
+                        state,
+                        "multiAdd")));
+            float baseAngle = (float)Math.Atan2(
+                direction.Y,
+                direction.X);
+            for (int index = 0; index < projectileCount; index++)
+            {
+                float offset = (
+                    index - (projectileCount - 1) / 2f)
+                    * _combat.bullet.spread;
+                Float2 velocity = new Float2(
+                    (float)Math.Cos(baseAngle + offset),
+                    (float)Math.Sin(baseAngle + offset))
+                    * _combat.bullet.speed;
+                state.Bullets.Add(new BulletState(
+                    state.TakeNextBulletId(),
+                    muzzle,
+                    velocity,
+                    _combat.bullet.radius,
+                    _combat.bullet.life,
+                    BaseDamage(state)
+                        * profile.ProjectileDamageMultiplier,
+                    profile));
+            }
             state.ShotCooldown = 1f
                 / (BaseFireRate(state) * state.FireRateMultiplier);
         }
@@ -1727,7 +1776,14 @@ namespace ProjectVL.Systems
         {
             return Math.Max(
                 0f,
-                (_combat.defaults.damage + state.RunDamageAdd)
+                (_combat.defaults.damage
+                    + state.RunDamageAdd
+                    + CardAffixSystem.EquipmentValue(
+                        state,
+                        "damageAdd")
+                    + CardAffixSystem.RuntimeAdd(
+                        state,
+                        "damageAdd"))
                     * state.DamageMultiplier);
         }
 
@@ -1735,14 +1791,28 @@ namespace ProjectVL.Systems
         {
             return Math.Max(
                 0.01f,
-                _combat.defaults.fireRate + state.RunFireRateAdd);
+                _combat.defaults.fireRate
+                    + state.RunFireRateAdd
+                    + CardAffixSystem.EquipmentValue(
+                        state,
+                        "fireRateAdd")
+                    + CardAffixSystem.RuntimeAdd(
+                        state,
+                        "fireRateAdd"));
         }
 
         private float AttackRange(GameState state)
         {
             return Math.Max(
                 0f,
-                _combat.defaults.range + state.RunRangeAdd);
+                _combat.defaults.range
+                    + state.RunRangeAdd
+                    + CardAffixSystem.EquipmentValue(
+                        state,
+                        "rangeAdd")
+                    + CardAffixSystem.RuntimeAdd(
+                        state,
+                        "rangeAdd"));
         }
 
         private static float RelicMultiplier(
@@ -1750,10 +1820,14 @@ namespace ProjectVL.Systems
             string cardType,
             string axis)
         {
-            return 1f + RelicScalingSystem.ForCard(
-                state,
-                cardType,
-                axis);
+            return 1f
+                + RelicScalingSystem.ForCard(
+                    state,
+                    cardType,
+                    axis)
+                + CardAffixSystem.RuntimeScaling(
+                    state,
+                    axis);
         }
 
         private static int RelicQuantity(
@@ -1788,6 +1862,7 @@ namespace ProjectVL.Systems
 
         public void StepPassives(GameState state, float deltaTime)
         {
+            CardAffixSystem.StepRuntime(state, deltaTime);
             CardCombatProfile profile = CardEffectResolver.Resolve(state);
             if (state.EconomyBuffRemaining > 0f)
             {

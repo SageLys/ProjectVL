@@ -148,6 +148,7 @@ namespace ProjectVL.Systems
             }
 
             RelicScalingSystem.Apply(state, profile);
+            CardAffixSystem.ApplyProfile(state, profile);
             return profile;
         }
 
