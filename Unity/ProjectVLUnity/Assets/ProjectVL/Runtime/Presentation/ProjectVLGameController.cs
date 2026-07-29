@@ -165,7 +165,7 @@ namespace ProjectVL.Presentation
             var random = new SystemRandomSource(System.Environment.TickCount);
             var difficultySystem =
                 new DifficultySystem(difficulty, waves.totalWaves);
-            var cardPoolSystem = new CardPoolSystem(random);
+            var cardPoolSystem = new CardPoolSystem(random, economy);
             _godPoolSystem = new GodPoolSystem(gods, random);
             _cardInventory = new CardInventorySystem(
                 economy,

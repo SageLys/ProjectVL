@@ -61,12 +61,153 @@ namespace ProjectVL.Tests
             Assert.That(_gods.Choose(_state, 0), Is.True);
             _cards.GenerateActivePool(_state, 2);
 
-            string first = _cards.SelectActiveDropType(_state);
-            string second = _cards.SelectActiveDropType(_state);
+            string first = _cards.SelectNormalEnemyDropType(_state);
+            _cards.RecordDropShown(_state, first, true);
+            string second = _cards.SelectNormalEnemyDropType(_state);
 
             Assert.That(first, Is.EqualTo("frost"));
             Assert.That(second, Is.EqualTo("impact"));
             Assert.That(_state.BootstrapDropsRemaining, Is.EqualTo(7));
+        }
+
+        [Test]
+        public void FormalDropDirectorConfigMatchesWebValues()
+        {
+            NormalDropTypePolicyConfig policy =
+                GameConfigLoader.LoadEconomy().normalDropTypePolicy;
+
+            Assert.That(policy.roleBagSize, Is.EqualTo(10));
+            Assert.That(policy.earlyMix.discovery, Is.EqualTo(6));
+            Assert.That(policy.earlyMix.build, Is.EqualTo(3));
+            Assert.That(policy.earlyMix.pivot, Is.EqualTo(1));
+            Assert.That(policy.lateMix.discovery, Is.EqualTo(1));
+            Assert.That(policy.lateMix.build, Is.EqualTo(7));
+            Assert.That(policy.lateMix.pivot, Is.EqualTo(2));
+            Assert.That(policy.maxSameTypeStreak, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void EarlyRoleBagContainsSixDiscoveryThreeBuildOnePivot()
+        {
+            SetActivePool("pierce", "chainLightning", "frost");
+
+            _cards.RefillNormalDropRoleBag(_state);
+
+            Assert.That(_state.NormalDropRoleBag, Has.Count.EqualTo(10));
+            Assert.That(
+                _state.NormalDropRoleBag.FindAll(
+                    role => role == NormalDropRole.Discovery),
+                Has.Count.EqualTo(6));
+            Assert.That(
+                _state.NormalDropRoleBag.FindAll(
+                    role => role == NormalDropRole.Build),
+                Has.Count.EqualTo(3));
+            Assert.That(
+                _state.NormalDropRoleBag.FindAll(
+                    role => role == NormalDropRole.Pivot),
+                Has.Count.EqualTo(1));
+        }
+
+        [Test]
+        public void NewWaveActivePoolResetsPreviousRoleBag()
+        {
+            ChooseMainGod();
+            _state.NormalDropRoleBag.Add(NormalDropRole.Build);
+
+            _cards.GenerateActivePool(_state, 1);
+
+            Assert.That(_state.NormalDropRoleBag, Is.Empty);
+        }
+
+        [Test]
+        public void DiscoverySelectsLeastShownActiveCard()
+        {
+            SetActivePool("pierce", "chainLightning", "frost");
+            _cards.RecordDropShown(_state, "pierce", true);
+            _cards.RecordDropShown(_state, "pierce", true);
+            _cards.RecordDropShown(_state, "chainLightning", true);
+
+            string selected = _cards.SelectDiscoveryType(_state);
+
+            Assert.That(selected, Is.EqualTo("frost"));
+        }
+
+        [Test]
+        public void BuildSelectionPrefersExistingEquippedInvestment()
+        {
+            SetActivePool("pierce", "chainLightning", "frost");
+            _state.Equipment[0] = _state.CreateCard("pierce", 3);
+
+            string selected = _cards.SelectBuildType(_state);
+
+            Assert.That(selected, Is.EqualTo("pierce"));
+            Assert.That(
+                _cards.CalculateCommitmentScore(_state, "pierce"),
+                Is.GreaterThan(
+                    _cards.CalculateCommitmentScore(
+                        _state,
+                        "chainLightning")));
+        }
+
+        [Test]
+        public void PivotSelectionAvoidsTwoMostCommittedCards()
+        {
+            SetActivePool("pierce", "chainLightning", "frost");
+            _state.Equipment[0] = _state.CreateCard("pierce", 3);
+            _state.Hand[0] = _state.CreateCard("chainLightning", 2);
+
+            string selected = _cards.SelectPivotType(_state);
+
+            Assert.That(selected, Is.EqualTo("frost"));
+        }
+
+        [Test]
+        public void BuildRoleCannotShowSameCardThreeTimesInARow()
+        {
+            SetActivePool("pierce", "chainLightning");
+            _state.Equipment[0] = _state.CreateCard("pierce", 3);
+            _state.NormalDropRoleBag.Add(NormalDropRole.Build);
+            _state.NormalDropRoleBag.Add(NormalDropRole.Build);
+            _state.NormalDropRoleBag.Add(NormalDropRole.Build);
+
+            string first = _cards.SelectNormalEnemyDropType(_state);
+            _cards.RecordDropShown(_state, first, true);
+            string second = _cards.SelectNormalEnemyDropType(_state);
+            _cards.RecordDropShown(_state, second, true);
+            string third = _cards.SelectNormalEnemyDropType(_state);
+
+            Assert.That(first, Is.EqualTo("pierce"));
+            Assert.That(second, Is.EqualTo("pierce"));
+            Assert.That(third, Is.EqualTo("chainLightning"));
+        }
+
+        [Test]
+        public void BonusDropDoesNotConsumeSubGodBootstrapGuarantee()
+        {
+            ChooseMainGod();
+            Assert.That(_gods.OfferForAfterWave(_state, 1), Is.True);
+            Assert.That(_gods.Choose(_state, 0), Is.True);
+            _cards.GenerateActivePool(_state, 2);
+
+            _cards.SelectActiveDropType(_state);
+            string ordinary = _cards.SelectNormalEnemyDropType(_state);
+
+            Assert.That(_state.BootstrapDropsRemaining, Is.EqualTo(8));
+            Assert.That(ordinary, Is.EqualTo("frost"));
+        }
+
+        [Test]
+        public void CardMergeUpdatesPerTypeDirectorStatistics()
+        {
+            var inventory = new CardInventorySystem(new EconomyConfig());
+
+            Assert.That(inventory.AddCard(_state, "pierce", 1), Is.True);
+            Assert.That(inventory.AddCard(_state, "pierce", 1), Is.True);
+
+            CardTypeRunStats stats = _state.CardTypeRunStats["pierce"];
+            Assert.That(stats.Collected, Is.EqualTo(2));
+            Assert.That(stats.MergeOperations, Is.EqualTo(1));
+            Assert.That(stats.HighestStarReached, Is.EqualTo(2));
         }
 
         [Test]
@@ -171,6 +312,12 @@ namespace ProjectVL.Tests
             }
 
             return result;
+        }
+
+        private void SetActivePool(params string[] cardTypes)
+        {
+            _state.ActiveCardPool.Clear();
+            _state.ActiveCardPool.AddRange(cardTypes);
         }
 
         private sealed class ConstantRandomSource : IRandomSource

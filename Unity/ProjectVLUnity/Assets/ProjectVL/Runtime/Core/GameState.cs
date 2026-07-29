@@ -80,6 +80,13 @@ namespace ProjectVL.Core
         public List<string> BootstrapCardQueue { get; } =
             new List<string>();
         public int BootstrapDropsRemaining { get; internal set; }
+        public List<NormalDropRole> NormalDropRoleBag { get; } =
+            new List<NormalDropRole>();
+        public List<string> RecentOrdinaryDropTypes { get; } =
+            new List<string>();
+        public Dictionary<string, CardTypeRunStats> CardTypeRunStats { get; } =
+            new Dictionary<string, CardTypeRunStats>();
+        public int OrdinaryDropCount { get; internal set; }
         public GodChoice PendingGodChoice { get; private set; }
         public int LastGodDecisionAfterWave { get; internal set; } = -1;
         public Dictionary<string, int> RelicStacks { get; } =
@@ -368,6 +375,37 @@ namespace ProjectVL.Core
                         : effect.value;
                 }
             }
+        }
+
+        internal CardTypeRunStats StatsFor(string cardType)
+        {
+            if (!CardTypeRunStats.TryGetValue(
+                cardType,
+                out CardTypeRunStats stats))
+            {
+                stats = new CardTypeRunStats();
+                CardTypeRunStats[cardType] = stats;
+            }
+
+            return stats;
+        }
+
+        internal void RecordCardCollected(string cardType, int star)
+        {
+            CardTypeRunStats stats = StatsFor(cardType);
+            stats.Collected++;
+            stats.HighestStarReached = Math.Max(
+                stats.HighestStarReached,
+                star);
+        }
+
+        internal void RecordCardMerge(string cardType, int resultStar)
+        {
+            CardTypeRunStats stats = StatsFor(cardType);
+            stats.MergeOperations++;
+            stats.HighestStarReached = Math.Max(
+                stats.HighestStarReached,
+                resultStar);
         }
 
         internal void RefreshDecisionLock()

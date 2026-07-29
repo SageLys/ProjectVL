@@ -86,6 +86,7 @@ namespace ProjectVL.Systems
 
             CardState card = state.CreateCard(type, ClampStar(star));
             state.Hand[slot] = card;
+            state.RecordCardCollected(type, card.Star);
             QueueEvolutionChoice(state, card);
             AutoMergeHand(state);
             return true;
@@ -132,6 +133,7 @@ namespace ProjectVL.Systems
                         state.Hand[j] = null;
                         state.Merges++;
                         state.MergeResultStarTotal += result.Star;
+                        state.RecordCardMerge(result.Type, result.Star);
                         merged++;
                         QueueEvolutionChoice(state, result);
                         changed = true;
@@ -185,6 +187,7 @@ namespace ProjectVL.Systems
             target.Star++;
             state.Merges++;
             state.MergeResultStarTotal += target.Star;
+            state.RecordCardMerge(target.Type, target.Star);
             QueueEvolutionChoice(state, target);
             if (kind == CardSlotKind.Hand)
             {
@@ -286,6 +289,7 @@ namespace ProjectVL.Systems
                 source[sourceIndex] = null;
                 state.Merges++;
                 state.MergeResultStarTotal += replaced.Star;
+                state.RecordCardMerge(replaced.Type, replaced.Star);
                 QueueEvolutionChoice(state, replaced);
                 state.EquipmentEffectWave = 0;
                 return CardMoveResult.Fed;

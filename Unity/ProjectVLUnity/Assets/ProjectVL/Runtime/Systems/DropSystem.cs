@@ -65,12 +65,14 @@ namespace ProjectVL.Systems
                 return null;
             }
 
-            string cardType = SelectActiveType(state);
+            string cardType = _cardPool?.SelectNormalEnemyDropType(state)
+                ?? SelectActiveType(state);
             return Spawn(
                 state,
                 enemy.Position,
                 cardType,
-                1);
+                1,
+                true);
         }
 
         public GroundDropState SpawnTestDrop(
@@ -84,7 +86,7 @@ namespace ProjectVL.Systems
                 cardType = CardTypes[typeIndex];
             }
 
-            return Spawn(state, position, cardType, 1);
+            return Spawn(state, position, cardType, 1, false);
         }
 
         public GroundDropState SpawnBonusDrop(
@@ -96,7 +98,8 @@ namespace ProjectVL.Systems
                 state,
                 position,
                 SelectActiveType(state),
-                Math.Max(1, star));
+                Math.Max(1, star),
+                false);
         }
 
         public GroundDropState SpawnWeightedBonusDrop(
@@ -127,7 +130,8 @@ namespace ProjectVL.Systems
                 state,
                 position,
                 SelectActiveType(state),
-                1);
+                1,
+                false);
         }
 
         public void Step(GameState state, float deltaTime)
@@ -198,7 +202,8 @@ namespace ProjectVL.Systems
             GameState state,
             Float2 position,
             string cardType,
-            int star)
+            int star,
+            bool ordinary)
         {
             float lifetime = _economy.defaults.dropLifetime
                 * state.DropLifetimeMultiplier;
@@ -209,6 +214,7 @@ namespace ProjectVL.Systems
                 star,
                 lifetime);
             state.GroundDrops.Add(drop);
+            _cardPool?.RecordDropShown(state, cardType, ordinary);
             return drop;
         }
 
