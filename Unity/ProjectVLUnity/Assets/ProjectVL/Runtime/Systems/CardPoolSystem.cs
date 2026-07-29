@@ -7,62 +7,26 @@ namespace ProjectVL.Systems
 {
     public sealed class CardPoolSystem
     {
-        private static readonly string[] PlayableCardTypes =
-        {
-            "pierce",
-            "chainLightning",
-            "frost",
-            "decoy",
-            "scorch",
-            "harvest",
-            "aegis",
-            "splitBlast",
-            "impact",
-            "sanctum",
-            "thorns",
-            "staticSurge",
-            "stormcall",
-            "arcSplitter",
-            "galvanicWard",
-            "overcharge",
-            "glacialSpike",
-            "permafrost",
-            "iceTomb",
-            "frozenBulwark",
-            "hoarfrostTithe",
-            "meteor",
-            "magmaPool",
-            "flashfire",
-            "cinderheart",
-            "ashHarvest",
-            "sentinel",
-            "retribution",
-            "ironvine",
-            "fateLoom",
-            "goldenVolley",
-            "bountyCall",
-            "overgrowth",
-            "springOfLife",
-            "luckyStar"
-        };
-
         private readonly IRandomSource _random;
         private readonly NormalDropTypePolicyConfig _dropPolicy;
         private readonly int _equipThreshold;
+        private readonly CardCatalog _catalog;
 
         public CardPoolSystem(
             IRandomSource random,
-            EconomyConfig economy = null)
+            EconomyConfig economy = null,
+            CardCatalog catalog = null)
         {
             _random = random ?? throw new ArgumentNullException(nameof(random));
             _dropPolicy = economy?.normalDropTypePolicy
                 ?? new NormalDropTypePolicyConfig();
             _equipThreshold = economy?.equipThreshold ?? 3;
+            _catalog = catalog ?? CardCatalog.Default;
         }
 
         public static bool IsPlayable(string cardType)
         {
-            return Array.IndexOf(PlayableCardTypes, cardType) >= 0;
+            return CardCatalog.Default.IsPlayable(cardType);
         }
 
         public void UpdateRunRoster(GameState state, bool lockRoster = false)
@@ -112,7 +76,10 @@ namespace ProjectVL.Systems
             if (pool.Count == 0
                 && (state == null || string.IsNullOrEmpty(state.MainGod)))
             {
-                AddUnique(pool, PlayableCardTypes, int.MaxValue);
+                AddUnique(
+                    pool,
+                    CardCatalog.Default.PlayableIds,
+                    int.MaxValue);
             }
 
             return pool;
@@ -152,7 +119,10 @@ namespace ProjectVL.Systems
 
             if (string.IsNullOrEmpty(state.MainGod))
             {
-                AddUnique(state.ActiveCardPool, PlayableCardTypes, 7);
+                AddUnique(
+                    state.ActiveCardPool,
+                    _catalog.PlayableIds,
+                    7);
             }
             else if (wave == 1)
             {

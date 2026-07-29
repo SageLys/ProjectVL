@@ -170,47 +170,7 @@ namespace ProjectVL.Systems
         public static bool SupportsConsumable(CardState card)
         {
             return card != null
-                && (card.Type == "pierce"
-                    || card.Type == "chainLightning"
-                    || card.Type == "frost"
-                    || card.Type == "scorch"
-                    || card.Type == "splitBlast"
-                    || card.Type == "impact"
-                    || card.Type == "sanctum"
-                    || card.Type == "aegis"
-                    || card.Type == "thorns"
-                    || card.Type == "decoy"
-                    || card.Type == "harvest"
-                    || card.Type == "frozenThunder"
-                    || card.Type == "solarLance"
-                    || card.Type == "avalanche"
-                    || card.Type == "pyrestorm"
-                    || card.Type == "crownOfThorns"
-                    || card.Type == "goldenIdol"
-                    || card.Type == "staticSurge"
-                    || card.Type == "stormcall"
-                    || card.Type == "arcSplitter"
-                    || card.Type == "galvanicWard"
-                    || card.Type == "overcharge"
-                    || card.Type == "glacialSpike"
-                    || card.Type == "permafrost"
-                    || card.Type == "iceTomb"
-                    || card.Type == "frozenBulwark"
-                    || card.Type == "hoarfrostTithe"
-                    || card.Type == "meteor"
-                    || card.Type == "magmaPool"
-                    || card.Type == "flashfire"
-                    || card.Type == "cinderheart"
-                    || card.Type == "ashHarvest"
-                    || card.Type == "sentinel"
-                    || card.Type == "retribution"
-                    || card.Type == "ironvine"
-                    || card.Type == "fateLoom"
-                    || card.Type == "goldenVolley"
-                    || card.Type == "bountyCall"
-                    || card.Type == "overgrowth"
-                    || card.Type == "springOfLife"
-                    || card.Type == "luckyStar");
+                && CardCatalog.Default.SupportsConsumable(card.Type);
         }
 
         public void StepTurret(GameState state, float deltaTime)

@@ -5,6 +5,7 @@ namespace ProjectVL.Config
 {
     public sealed class CardCatalog
     {
+        private static CardCatalog _default;
         private readonly CardsConfig _config;
         private readonly Dictionary<string, CardDefinitionConfig> _byId =
             new Dictionary<string, CardDefinitionConfig>(
@@ -36,6 +37,20 @@ namespace ProjectVL.Config
 
         public IReadOnlyList<CardDefinitionConfig> Cards =>
             _config.cards;
+
+        public static CardCatalog Default
+        {
+            get
+            {
+                if (_default == null)
+                {
+                    _default = new CardCatalog(
+                        GameConfigLoader.LoadCards());
+                }
+
+                return _default;
+            }
+        }
 
         public IReadOnlyList<string> PlayableIds => _playableIds;
 

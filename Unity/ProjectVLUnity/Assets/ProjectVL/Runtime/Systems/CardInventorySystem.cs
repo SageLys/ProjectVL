@@ -6,31 +6,19 @@ namespace ProjectVL.Systems
 {
     public sealed class CardInventorySystem
     {
-        private static readonly string[] RewardCardTypes =
-        {
-            "pierce",
-            "chainLightning",
-            "frost",
-            "decoy",
-            "scorch",
-            "harvest",
-            "aegis",
-            "splitBlast",
-            "impact",
-            "sanctum",
-            "thorns"
-        };
-
         private readonly EconomyConfig _config;
         private readonly CardPoolSystem _cardPool;
+        private readonly CardCatalog _catalog;
         private int _nextRewardType;
 
         public CardInventorySystem(
             EconomyConfig config,
-            CardPoolSystem cardPool = null)
+            CardPoolSystem cardPool = null,
+            CardCatalog catalog = null)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _cardPool = cardPool;
+            _catalog = catalog ?? CardCatalog.Default;
         }
 
         public bool GrantReward(GameState state, RunReward reward)
@@ -60,8 +48,8 @@ namespace ProjectVL.Systems
                     reward.TypePolicy);
                 if (string.IsNullOrEmpty(type))
                 {
-                    type = RewardCardTypes[
-                        _nextRewardType % RewardCardTypes.Length];
+                    type = _catalog.PlayableIds[
+                        _nextRewardType % _catalog.PlayableIds.Count];
                     _nextRewardType++;
                 }
 
@@ -403,7 +391,7 @@ namespace ProjectVL.Systems
             }
         }
 
-        private static bool QueueEvolutionChoice(
+        private bool QueueEvolutionChoice(
             GameState state,
             CardState card)
         {
@@ -422,13 +410,12 @@ namespace ProjectVL.Systems
                 return false;
             }
 
-            string suffix = checkpoint == 3 ? "" : "2";
             string[] options =
+                _catalog.EvolutionOptions(card.Type, checkpoint);
+            if (options.Length == 0)
             {
-                card.Type + "A" + suffix,
-                card.Type + "B" + suffix,
-                card.Type + "C" + suffix
-            };
+                return false;
+            }
             card.Provisional = true;
             state.PendingEvolution = new EvolutionChoice(
                 card.Id,

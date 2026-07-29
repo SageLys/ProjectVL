@@ -42,6 +42,9 @@ namespace ProjectVL.Config
             }
 
             var ids = new HashSet<string>(StringComparer.Ordinal);
+            var definitions =
+                new Dictionary<string, CardDefinitionConfig>(
+                    StringComparer.Ordinal);
             int playableCount = 0;
             int recipeCount = 0;
             foreach (CardDefinitionConfig card in cards.cards)
@@ -55,6 +58,10 @@ namespace ProjectVL.Config
                 if (!ids.Add(card.id))
                 {
                     errors.Add($"Duplicate card id: {card.id}.");
+                }
+                else
+                {
+                    definitions.Add(card.id, card);
                 }
                 if (!ValidGods.Contains(card.god))
                 {
@@ -103,8 +110,8 @@ namespace ProjectVL.Config
                     $"Expected 6 recipe cards, found {recipeCount}.");
             }
 
-            ValidateGodRosters(gods, ids, errors);
-            ValidateRecipes(recipes, ids, errors);
+            ValidateGodRosters(gods, definitions, errors);
+            ValidateRecipes(recipes, definitions, errors);
             return errors;
         }
 
@@ -151,7 +158,7 @@ namespace ProjectVL.Config
 
         private static void ValidateGodRosters(
             GodsConfig gods,
-            HashSet<string> ids,
+            Dictionary<string, CardDefinitionConfig> definitions,
             List<string> errors)
         {
             if (gods?.gods == null)
@@ -164,12 +171,12 @@ namespace ProjectVL.Config
                 ValidateRoster(
                     god?.id,
                     god?.anchorCardIds,
-                    ids,
+                    definitions,
                     errors);
                 ValidateRoster(
                     god?.id,
                     god?.variableCardIds,
-                    ids,
+                    definitions,
                     errors);
             }
         }
@@ -177,7 +184,7 @@ namespace ProjectVL.Config
         private static void ValidateRoster(
             string godId,
             string[] roster,
-            HashSet<string> ids,
+            Dictionary<string, CardDefinitionConfig> definitions,
             List<string> errors)
         {
             if (roster == null)
@@ -187,17 +194,31 @@ namespace ProjectVL.Config
 
             foreach (string cardId in roster)
             {
-                if (!ids.Contains(cardId))
+                if (!definitions.TryGetValue(
+                    cardId,
+                    out CardDefinitionConfig card))
                 {
                     errors.Add(
                         $"God {godId} references unknown card {cardId}.");
+                    continue;
+                }
+                if (card.recipeOnly)
+                {
+                    errors.Add(
+                        $"God {godId} roster cannot contain recipe card {cardId}.");
+                }
+                if (card.god != godId)
+                {
+                    errors.Add(
+                        $"God {godId} roster contains {cardId} "
+                        + $"owned by {card.god}.");
                 }
             }
         }
 
         private static void ValidateRecipes(
             EvolutionRecipesConfig recipes,
-            HashSet<string> ids,
+            Dictionary<string, CardDefinitionConfig> definitions,
             List<string> errors)
         {
             if (recipes?.recipes == null)
@@ -210,32 +231,53 @@ namespace ProjectVL.Config
                 ValidateRecipeCard(
                     recipe?.id,
                     recipe?.ingredientA?.cardId,
-                    ids,
+                    false,
+                    definitions,
                     errors);
                 ValidateRecipeCard(
                     recipe?.id,
                     recipe?.ingredientB?.cardId,
-                    ids,
+                    false,
+                    definitions,
                     errors);
                 ValidateRecipeCard(
                     recipe?.id,
                     recipe?.outputCardId,
-                    ids,
+                    true,
+                    definitions,
                     errors);
+                if (recipe != null
+                    && recipe.id != recipe.outputCardId)
+                {
+                    errors.Add(
+                        $"Recipe {recipe.id} output must use the same card id.");
+                }
             }
         }
 
         private static void ValidateRecipeCard(
             string recipeId,
             string cardId,
-            HashSet<string> ids,
+            bool mustBeRecipe,
+            Dictionary<string, CardDefinitionConfig> definitions,
             List<string> errors)
         {
             if (string.IsNullOrWhiteSpace(cardId)
-                || !ids.Contains(cardId))
+                || !definitions.TryGetValue(
+                    cardId,
+                    out CardDefinitionConfig card))
             {
                 errors.Add(
                     $"Recipe {recipeId} references unknown card {cardId}.");
+                return;
+            }
+
+            if (card.recipeOnly != mustBeRecipe)
+            {
+                errors.Add(
+                    mustBeRecipe
+                        ? $"Recipe {recipeId} output {cardId} must be recipe-only."
+                        : $"Recipe {recipeId} ingredient {cardId} cannot be recipe-only.");
             }
         }
     }

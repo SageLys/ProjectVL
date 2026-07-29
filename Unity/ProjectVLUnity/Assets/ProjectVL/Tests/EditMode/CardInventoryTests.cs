@@ -208,6 +208,47 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void EvolutionChoicesComeFromCardCatalog()
+        {
+            var cards = new CardsConfig
+            {
+                cards = new[]
+                {
+                    new CardDefinitionConfig
+                    {
+                        id = "pierce",
+                        god = "storm",
+                        category = "projectile",
+                        displayName = "测试卡",
+                        consumable = true,
+                        evolution3 = new[]
+                        {
+                            "routeLeft",
+                            "routeCenter",
+                            "routeRight"
+                        }
+                    }
+                }
+            };
+            var inventory = new CardInventorySystem(
+                _economy,
+                null,
+                new CardCatalog(cards));
+
+            inventory.AddCard(_state, "pierce", 3);
+
+            Assert.That(
+                _state.PendingEvolution.Options,
+                Is.EqualTo(
+                    new[]
+                    {
+                        "routeLeft",
+                        "routeCenter",
+                        "routeRight"
+                    }));
+        }
+
+        [Test]
         public void EvolutionChoiceStaysWithCardInstance()
         {
             _inventory.AddCard(_state, "impact", 3);

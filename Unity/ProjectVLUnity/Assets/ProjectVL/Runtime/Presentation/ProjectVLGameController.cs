@@ -159,10 +159,16 @@ namespace ProjectVL.Presentation
             DifficultyConfig difficulty = GameConfigLoader.LoadDifficulty();
             ProgressionConfig progression = GameConfigLoader.LoadProgression();
             GodsConfig gods = GameConfigLoader.LoadGods();
+            CardsConfig cards = GameConfigLoader.LoadCards();
             RelicsConfig relics = GameConfigLoader.LoadRelics();
             BountyConfig bounty = GameConfigLoader.LoadBounty();
             WaveRewardsConfig waveRewards =
                 GameConfigLoader.LoadWaveRewards();
+            CardsConfigValidator.ThrowIfInvalid(
+                cards,
+                gods,
+                recipes);
+            var cardCatalog = new CardCatalog(cards);
 
             GameState state = GameStateFactory.Create(combat, economy);
             state.AttachSettlement(
@@ -174,11 +180,15 @@ namespace ProjectVL.Presentation
             var random = new SystemRandomSource(System.Environment.TickCount);
             var difficultySystem =
                 new DifficultySystem(difficulty, waves.totalWaves);
-            var cardPoolSystem = new CardPoolSystem(random, economy);
+            var cardPoolSystem = new CardPoolSystem(
+                random,
+                economy,
+                cardCatalog);
             _godPoolSystem = new GodPoolSystem(gods, random);
             _cardInventory = new CardInventorySystem(
                 economy,
-                cardPoolSystem);
+                cardPoolSystem,
+                cardCatalog);
             state.AttachInventory(_cardInventory);
             var enemyFactory = new EnemyFactory(
                 combat,
