@@ -192,6 +192,50 @@ namespace ProjectVL.Tests
             Assert.That(_state.Hp, Is.EqualTo(100f));
         }
 
+        [Test]
+        public void InventoryMergeKeepsLockedAffixes()
+        {
+            var cards = new CardCatalog(
+                GameConfigLoader.LoadCards());
+            var inventory = new CardInventorySystem(
+                new EconomyConfig(),
+                null,
+                cards,
+                _affixes);
+
+            inventory.AddCard(_state, "pierce", 1);
+            inventory.AddCard(_state, "pierce", 1);
+
+            Assert.That(_state.Hand, Has.Exactly(1).Not.Null);
+            Assert.That(_state.Hand[0].Star, Is.EqualTo(2));
+            Assert.That(_state.Hand[0].Affixes, Has.Count.EqualTo(2));
+            Assert.That(
+                _state.Hand[0].Affixes[0].Stat,
+                Is.EqualTo("damageAdd"));
+        }
+
+        [Test]
+        public void CraftedRecipeReceivesItsOwnAffixTemplate()
+        {
+            _state.SetIntermission(true);
+            _state.Hand[0] = _state.CreateCard("pierce", 5);
+            _state.Hand[1] = _state.CreateCard("scorch", 5);
+            var recipes = new RecipeSystem(
+                GameConfigLoader.LoadEvolutionRecipes(),
+                _affixes);
+
+            RecipeCraftResult result = recipes.Craft(
+                _state,
+                "solarLance");
+
+            Assert.That(result, Is.EqualTo(RecipeCraftResult.Crafted));
+            Assert.That(_state.Hand[0].Type, Is.EqualTo("solarLance"));
+            Assert.That(_state.Hand[0].Affixes, Has.Count.EqualTo(2));
+            Assert.That(
+                _state.CardAffixRolls.ContainsKey("solarLance"),
+                Is.True);
+        }
+
         private EnemyState AddEnemy(Float2 position, float hp)
         {
             var enemy = new EnemyState(

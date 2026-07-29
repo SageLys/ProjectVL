@@ -121,6 +121,17 @@ namespace ProjectVL.Systems
                             first.Type,
                             first.Star + 1);
                         result.EvolutionPath.AddRange(first.EvolutionPath);
+                        if (_affixes != null)
+                        {
+                            _affixes.Attach(state, result);
+                        }
+                        else
+                        {
+                            foreach (CardAffixRoll affix in first.Affixes)
+                            {
+                                result.Affixes.Add(affix.Clone());
+                            }
+                        }
                         state.Hand[i] = result;
                         state.Hand[j] = null;
                         state.Merges++;
