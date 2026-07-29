@@ -17,7 +17,6 @@ namespace ProjectVL.Presentation
         private CardSlotKind? _pressedSlotKind;
         private int _pressedSlotIndex = -1;
         private Vector2 _pressPoint;
-        private Vector2 _pointerGuiPosition;
 
         public void Initialize(ProjectVLGameController controller)
         {
@@ -42,7 +41,6 @@ namespace ProjectVL.Presentation
                 return;
             }
 
-            _pointerGuiPosition = guiPosition;
             Vector2 designPointer = ToDesignPoint(guiPosition);
             if (pressed)
             {
@@ -133,7 +131,6 @@ namespace ProjectVL.Presentation
             DrawControls();
             DrawCardLoadout();
             DrawCenterPanel();
-            DrawCardDragOverlay();
             GUI.matrix = previousMatrix;
         }
 
@@ -549,21 +546,6 @@ namespace ProjectVL.Presentation
                 WildcardText(_controller.State),
                 _hudStyle);
             GUI.backgroundColor = previous;
-        }
-
-        private void DrawCardDragOverlay()
-        {
-            if (!_controller.HasCardDrag
-                || Event.current.type != EventType.Repaint)
-            {
-                return;
-            }
-
-            Vector2 mouse = ToDesignPoint(_pointerGuiPosition);
-            GUI.Label(
-                new Rect(mouse.x + 18f, mouse.y - 16f, 190f, 32f),
-                "松开到卡槽移动，松开到战场施放",
-                _hudStyle);
         }
 
         private void RefreshViewport()
