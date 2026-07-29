@@ -161,12 +161,16 @@ namespace ProjectVL.Presentation
             RelicsConfig relics = GameConfigLoader.LoadRelics();
 
             GameState state = GameStateFactory.Create(combat, economy);
-            _cardInventory = new CardInventorySystem(economy);
             _recipeSystem = new RecipeSystem(recipes);
             var random = new SystemRandomSource(System.Environment.TickCount);
             var difficultySystem =
                 new DifficultySystem(difficulty, waves.totalWaves);
+            var cardPoolSystem = new CardPoolSystem(random);
             _godPoolSystem = new GodPoolSystem(gods, random);
+            _cardInventory = new CardInventorySystem(
+                economy,
+                cardPoolSystem);
+            state.AttachInventory(_cardInventory);
             var enemyFactory = new EnemyFactory(
                 combat,
                 enemies,
@@ -176,7 +180,8 @@ namespace ProjectVL.Presentation
             _waveSystem = new WaveSystem(
                 waves,
                 enemyFactory,
-                _godPoolSystem);
+                _godPoolSystem,
+                cardPoolSystem);
             _progressionSystem = new ProgressionSystem(
                 progression,
                 relics,
@@ -184,7 +189,8 @@ namespace ProjectVL.Presentation
             _dropSystem = new DropSystem(
                 economy,
                 random,
-                _progressionSystem);
+                _progressionSystem,
+                cardPoolSystem);
             _combatSystem = new CombatSystem(
                 combat,
                 enemies,

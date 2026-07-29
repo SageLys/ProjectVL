@@ -22,11 +22,15 @@ namespace ProjectVL.Systems
         };
 
         private readonly EconomyConfig _config;
+        private readonly CardPoolSystem _cardPool;
         private int _nextRewardType;
 
-        public CardInventorySystem(EconomyConfig config)
+        public CardInventorySystem(
+            EconomyConfig config,
+            CardPoolSystem cardPool = null)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
+            _cardPool = cardPool;
         }
 
         public bool GrantReward(GameState state, RunReward reward)
@@ -51,8 +55,16 @@ namespace ProjectVL.Systems
             bool grantedAny = false;
             for (int i = 0; i < Math.Max(0, reward.Count); i++)
             {
-                string type = RewardCardTypes[_nextRewardType % RewardCardTypes.Length];
-                _nextRewardType++;
+                string type = _cardPool?.SelectRewardType(
+                    state,
+                    reward.TypePolicy);
+                if (string.IsNullOrEmpty(type))
+                {
+                    type = RewardCardTypes[
+                        _nextRewardType % RewardCardTypes.Length];
+                    _nextRewardType++;
+                }
+
                 grantedAny |= AddCard(state, type, reward.Star);
             }
 

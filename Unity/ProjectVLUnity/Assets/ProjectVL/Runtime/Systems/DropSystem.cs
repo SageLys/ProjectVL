@@ -31,15 +31,18 @@ namespace ProjectVL.Systems
         private readonly EconomyConfig _economy;
         private readonly IRandomSource _random;
         private readonly ProgressionSystem _progression;
+        private readonly CardPoolSystem _cardPool;
 
         public DropSystem(
             EconomyConfig economy,
             IRandomSource random,
-            ProgressionSystem progression = null)
+            ProgressionSystem progression = null,
+            CardPoolSystem cardPool = null)
         {
             _economy = economy ?? throw new ArgumentNullException(nameof(economy));
             _random = random ?? throw new ArgumentNullException(nameof(random));
             _progression = progression;
+            _cardPool = cardPool;
         }
 
         public GroundDropState TrySpawnOnKill(
@@ -62,13 +65,11 @@ namespace ProjectVL.Systems
                 return null;
             }
 
-            int typeIndex = Math.Min(
-                CardTypes.Length - 1,
-                (int)(_random.NextFloat() * CardTypes.Length));
+            string cardType = SelectActiveType(state);
             return Spawn(
                 state,
                 enemy.Position,
-                CardTypes[typeIndex],
+                cardType,
                 1);
         }
 
@@ -76,8 +77,14 @@ namespace ProjectVL.Systems
             GameState state,
             Float2 position)
         {
-            int typeIndex = state.GroundDrops.Count % CardTypes.Length;
-            return Spawn(state, position, CardTypes[typeIndex], 1);
+            string cardType = _cardPool?.SelectActiveDropType(state);
+            if (string.IsNullOrEmpty(cardType))
+            {
+                int typeIndex = state.GroundDrops.Count % CardTypes.Length;
+                cardType = CardTypes[typeIndex];
+            }
+
+            return Spawn(state, position, cardType, 1);
         }
 
         public GroundDropState SpawnBonusDrop(
@@ -85,13 +92,10 @@ namespace ProjectVL.Systems
             Float2 position,
             int star)
         {
-            int typeIndex = Math.Min(
-                CardTypes.Length - 1,
-                (int)(_random.NextFloat() * CardTypes.Length));
             return Spawn(
                 state,
                 position,
-                CardTypes[typeIndex],
+                SelectActiveType(state),
                 Math.Max(1, star));
         }
 
@@ -119,13 +123,10 @@ namespace ProjectVL.Systems
                 return null;
             }
 
-            int typeIndex = Math.Min(
-                CardTypes.Length - 1,
-                (int)(_random.NextFloat() * CardTypes.Length));
             return Spawn(
                 state,
                 position,
-                CardTypes[typeIndex],
+                SelectActiveType(state),
                 1);
         }
 
@@ -209,6 +210,20 @@ namespace ProjectVL.Systems
                 lifetime);
             state.GroundDrops.Add(drop);
             return drop;
+        }
+
+        private string SelectActiveType(GameState state)
+        {
+            string selected = _cardPool?.SelectActiveDropType(state);
+            if (!string.IsNullOrEmpty(selected))
+            {
+                return selected;
+            }
+
+            int typeIndex = Math.Min(
+                CardTypes.Length - 1,
+                (int)(_random.NextFloat() * CardTypes.Length));
+            return CardTypes[typeIndex];
         }
     }
 }

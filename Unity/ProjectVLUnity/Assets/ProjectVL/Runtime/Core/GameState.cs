@@ -68,6 +68,18 @@ namespace ProjectVL.Core
         public string MainGod { get; internal set; }
         public List<string> SubGods { get; } = new List<string>();
         public string FocusGod { get; internal set; }
+        public Dictionary<string, List<string>> RosterByGod { get; } =
+            new Dictionary<string, List<string>>();
+        public List<string> RunRoster { get; } = new List<string>();
+        public List<string> ActiveCardPool { get; } = new List<string>();
+        public List<string> PreviousActiveCardPool { get; } =
+            new List<string>();
+        public List<string> ActiveCardPoolHistory { get; } =
+            new List<string>();
+        public int ActiveCardPoolWave { get; internal set; }
+        public List<string> BootstrapCardQueue { get; } =
+            new List<string>();
+        public int BootstrapDropsRemaining { get; internal set; }
         public GodChoice PendingGodChoice { get; private set; }
         public int LastGodDecisionAfterWave { get; internal set; } = -1;
         public Dictionary<string, int> RelicStacks { get; } =

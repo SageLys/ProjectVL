@@ -10,16 +10,19 @@ namespace ProjectVL.Systems
         private readonly EnemyFactory _enemyFactory;
         private readonly WavePlanResolver _planResolver;
         private readonly GodPoolSystem _godPool;
+        private readonly CardPoolSystem _cardPool;
         private ResolvedWavePlan _activePlan;
 
         public WaveSystem(
             WavesConfig waves,
             EnemyFactory enemyFactory,
-            GodPoolSystem godPool = null)
+            GodPoolSystem godPool = null,
+            CardPoolSystem cardPool = null)
         {
             _waves = waves;
             _enemyFactory = enemyFactory;
             _godPool = godPool;
+            _cardPool = cardPool;
             _planResolver = new WavePlanResolver(waves);
         }
 
@@ -33,6 +36,7 @@ namespace ProjectVL.Systems
             }
 
             state.BeginWave(nextWave);
+            _cardPool?.GenerateActivePool(state, nextWave);
             _activePlan = _planResolver.Resolve(nextWave);
             state.SpawnLeft = _activePlan.Quota;
             state.SpawnTimer = _waves.firstSpawnDelay;

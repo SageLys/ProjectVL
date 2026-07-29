@@ -9,11 +9,13 @@ namespace ProjectVL.Systems
     {
         private readonly GodsConfig _config;
         private readonly IRandomSource _random;
+        private readonly CardPoolSystem _cardPool;
 
         public GodPoolSystem(GodsConfig config, IRandomSource random)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _random = random ?? throw new ArgumentNullException(nameof(random));
+            _cardPool = new CardPoolSystem(random);
         }
 
         public bool OfferInitial(GameState state)
@@ -80,6 +82,7 @@ namespace ProjectVL.Systems
             {
                 state.MainGod = godId;
                 state.FocusGod = godId;
+                FreezeRoster(state, choice.Options[optionIndex], true);
             }
             else if (choice.Role == GodChoiceRole.Sub)
             {
@@ -89,14 +92,76 @@ namespace ProjectVL.Systems
                 }
 
                 state.FocusGod = godId;
+                FreezeRoster(state, choice.Options[optionIndex], false);
+                state.BootstrapCardQueue.Clear();
+                state.BootstrapCardQueue.AddRange(
+                    state.RosterByGod[godId]);
+                state.BootstrapDropsRemaining = 9;
             }
             else
             {
                 state.FocusGod = godId;
             }
 
+            _cardPool.UpdateRunRoster(
+                state,
+                state.SubGods.Count >= 2);
             state.CompleteGodChoice();
             return true;
+        }
+
+        private void FreezeRoster(
+            GameState state,
+            GodConfig god,
+            bool main)
+        {
+            if (state.RosterByGod.ContainsKey(god.id))
+            {
+                return;
+            }
+
+            int target = Math.Max(
+                0,
+                main ? god.mainRosterSize : god.subRosterSize);
+            var roster = new List<string>();
+            AddUnique(roster, god.anchorCardIds, target);
+            var variables = new List<string>(god.variableCardIds);
+            Shuffle(variables);
+            AddUnique(roster, variables, target);
+            state.RosterByGod[god.id] = roster;
+        }
+
+        private void Shuffle(List<string> values)
+        {
+            for (int index = values.Count - 1; index > 0; index--)
+            {
+                int other = Math.Min(
+                    index,
+                    (int)(_random.NextFloat() * (index + 1)));
+                string current = values[index];
+                values[index] = values[other];
+                values[other] = current;
+            }
+        }
+
+        private static void AddUnique(
+            List<string> target,
+            IEnumerable<string> values,
+            int limit)
+        {
+            foreach (string value in values)
+            {
+                if (target.Count >= limit)
+                {
+                    return;
+                }
+
+                if (!string.IsNullOrEmpty(value)
+                    && !target.Contains(value))
+                {
+                    target.Add(value);
+                }
+            }
         }
 
         private bool Offer(
