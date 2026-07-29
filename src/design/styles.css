@@ -50,6 +50,10 @@ select, input, textarea { min-height: 34px; padding: .35rem .5rem; border: 1px s
 .button:hover { border-color: var(--rose); background: #fff7fa; }
 .button--primary { color: #fff; border-color: #a84e73; background: #a84e73; }
 .button--primary:hover { background: #913f62; }
+.button--save { color: #fff; border-color: #2f7754; background: #2f7754; }
+.button--save:hover:not(:disabled) { background: #246343; }
+.button--save:disabled { color: #beaeb5; border-color: #735a66; background: #4e3943; cursor: not-allowed; }
+.button--small { min-height: 26px; padding: .2rem .5rem; font-size: .72rem; }
 .status-badge { display: inline-flex; align-items: center; min-height: 28px; padding: .2rem .55rem; border-radius: 999px; font-size: .74rem; font-weight: 700; }
 .status-badge--ok { color: #daffeb; background: #246343; }
 .status-badge--error { color: #fff; background: var(--danger); }
@@ -115,6 +119,20 @@ select, input, textarea { min-height: 34px; padding: .35rem .5rem; border: 1px s
 .effect-line { margin-bottom: .25rem; color: #50464a; font-size: .82rem; line-height: 1.45; overflow-wrap: anywhere; }
 .nested-effect-list { margin-top: .25rem; border-left: 2px solid #d8bec9; }
 .missing-copy { color: var(--danger) !important; background: #fff0f1; }
+.editable-copy { position: relative; min-width: 0; }
+.editable-copy__toolbar { position: absolute; z-index: 2; top: 0; right: 0; opacity: 0; transition: opacity .15s; }
+.editable-copy:hover > .editable-copy__toolbar, .editable-copy:focus-within > .editable-copy__toolbar, .editable-copy.is-editing > .editable-copy__toolbar { opacity: 1; }
+.editable-copy.is-editing { padding: .55rem; border: 1px solid #d8b8c5; border-radius: 6px; background: #fff9fb; }
+.editable-copy.is-editing > .editable-copy__read { display: none; }
+.copy-editor { display: grid; gap: .55rem; padding-top: 1.8rem; }
+.copy-editor label { display: grid; gap: .25rem; color: #684c59; font-size: .76rem; font-weight: 700; }
+.copy-editor textarea { width: 100%; resize: vertical; line-height: 1.55; }
+.title-copy-editor { padding-right: 3.2rem; }
+.title-copy-editor.is-editing { min-height: 92px; }
+.overview-copy-editor { margin: .55rem 0; }
+.overview-copy-editor > .editable-copy__read > .overview { margin-block: 0; }
+.branch-copy-editor.is-editing { margin-bottom: .55rem; }
+.consumable-copy-editor .copy-edit-button { padding-inline: .35rem; }
 .design-notes { margin-top: .9rem; padding: .7rem; background: #f4eef0; }
 
 .data-table { width: 100%; border-collapse: collapse; margin-bottom: .9rem; font-size: .82rem; }

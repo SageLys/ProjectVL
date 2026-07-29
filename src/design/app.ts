@@ -1,6 +1,6 @@
 import type { EvolutionRecipesConfig, GodsConfig, RelicsConfig, SkillsConfig } from '../config/types';
 import { ConfigApi } from '../editor/api';
-import { EDITOR_DOMAINS, type EditorDomain, type ValidationReportDto } from '../editor/contracts';
+import { EDITOR_DOMAINS, reportHasErrors, type EditorDomain, type ValidationReportDto } from '../editor/contracts';
 import { deepClone, el } from '../editor/dom';
 import { buildReferenceCatalog, type ReferenceCatalog } from '../editor/references';
 import { renderAffixCoverageView } from './crossViews/affixCoverage';
@@ -14,6 +14,8 @@ import type { DescribeContext } from './describe';
 import type { CrossViewId, DesignSelection, NavFilters } from './navTree';
 import { renderNavTree } from './navTree';
 import { renderRelicView } from './relicView';
+import type { TextEditingOptions } from './textEditing';
+import { DesignTextSaveCoordinator } from './textSave';
 
 type ContentDomain = 'skills' | 'gods' | 'relics' | 'evolutionRecipes' | 'texts';
 type PrintScope = 'entity' | 'god' | 'all' | 'cross';
@@ -30,19 +32,28 @@ const CONTENT_DOMAINS: readonly ContentDomain[] = ['skills', 'gods', 'relics', '
 
 export class DesignWorkbenchApp {
   private readonly api = new ConfigApi();
+  private readonly textSaver = new DesignTextSaveCoordinator(this.api);
   private data?: DesignData;
   private originals?: DesignData;
   private report?: ValidationReportDto;
+  private textsReport?: ValidationReportDto;
   private references?: ReferenceCatalog;
   private selection: DesignSelection = { kind: 'card', id: '' };
   private crossView?: CrossViewId;
   private printScope: PrintScope = 'entity';
+  private editingTextPath?: string;
+  private textsDirty = false;
+  private validatingTexts = false;
+  private savingTexts = false;
+  private validationSequence = 0;
+  private saveMessage = '';
   private readonly filters: NavFilters = { query: '', tag: '', category: '', atom: '', copyDebt: false, designNotes: false };
   private nav?: HTMLElement;
   private main?: HTMLElement;
   private context?: HTMLElement;
   private printRoot?: HTMLElement;
   private status?: HTMLElement;
+  private saveButton?: HTMLButtonElement;
 
   constructor(private readonly root: HTMLElement) {}
 
@@ -80,9 +91,10 @@ export class DesignWorkbenchApp {
     const select = el('select');
     for (const [value, text] of [['entity', '当前实体'], ['god', '当前神整章'], ['all', '全部内容'], ['cross', '当前横切视图']] as const) { const option = el('option', '', text); option.value = value; select.append(option); }
     select.addEventListener('change', () => { this.printScope = select.value as PrintScope; this.preparePrint(); });
+    this.saveButton = el('button', 'button button--save', '保存文案'); this.saveButton.type = 'button'; this.saveButton.disabled = true; this.saveButton.addEventListener('click', () => void this.saveTexts());
     const print = el('button', 'button button--primary', '打印当前范围'); print.type = 'button'; print.addEventListener('click', () => { this.preparePrint(); window.print(); });
-    this.status = el('span', 'status-badge status-badge--ok', '只读 · 配置管线已连接');
-    label.append(select); tools.append(label, print, this.status); header.append(brand, tools);
+    this.status = el('span', 'status-badge status-badge--ok', '配置管线已连接');
+    label.append(select); tools.append(label, this.saveButton, print, this.status); header.append(brand, tools);
     const layout = el('div', 'workbench-layout'); this.nav = el('aside', 'workbench-nav'); this.main = el('main', 'workbench-main'); this.context = el('aside', 'workbench-context'); layout.append(this.nav, this.main, this.context);
     this.printRoot = el('div', 'print-batch');
     this.root.append(header, layout, this.printRoot);
@@ -98,8 +110,8 @@ export class DesignWorkbenchApp {
     renderNavTree(this.nav, {
       cards: this.data.skills.cards, gods: this.data.gods, relics: this.data.relics.relics, ctx: this.ctx(), filters: this.filters,
       selection: this.selection, crossView: this.crossView,
-      onSelect: selection => { this.selection = selection; this.crossView = undefined; this.render(); },
-      onCrossView: view => { this.crossView = view; this.render(); },
+      onSelect: selection => { this.selection = selection; this.crossView = undefined; this.editingTextPath = undefined; this.render(); },
+      onCrossView: view => { this.crossView = view; this.editingTextPath = undefined; this.render(); },
     });
     if (this.crossView) this.renderCrossView(this.crossView);
     else this.renderEntity(this.main, this.selection);
@@ -108,14 +120,15 @@ export class DesignWorkbenchApp {
     } else {
       renderContextPanel(this.context, {
         selection: this.selection, cards: this.data.skills.cards, gods: this.data.gods.gods, relics: this.data.relics.relics,
-        recipes: this.data.evolutionRecipes, texts: this.data.texts, report: this.report, references: this.references,
+        recipes: this.data.evolutionRecipes, texts: this.data.texts, report: this.textsReport ?? this.report, references: this.references,
         locate: (domain, path) => this.locate(domain, path),
       });
     }
+    this.updateSaveState();
   }
 
   private openCard(id: string, path?: string): void {
-    this.selection = { kind: 'card', id }; this.crossView = undefined; this.render();
+    this.selection = { kind: 'card', id }; this.crossView = undefined; this.editingTextPath = path; this.render();
     if (path) requestAnimationFrame(() => this.locate('texts', path));
   }
 
@@ -134,13 +147,103 @@ export class DesignWorkbenchApp {
     if (!this.data) return;
     if (selection.kind === 'card') {
       const index = this.data.skills.cards.findIndex(card => card.id === selection.id); const card = this.data.skills.cards[index];
-      if (card) renderCardView(container, card, this.ctx(), index); else container.replaceChildren(el('p', 'empty-state', '卡牌不存在'));
+      if (card) renderCardView(container, card, this.ctx(), index, this.textEditingOptions()); else container.replaceChildren(el('p', 'empty-state', '卡牌不存在'));
     } else if (selection.kind === 'relic') {
       const index = this.data.relics.relics.findIndex(relic => relic.id === selection.id); const relic = this.data.relics.relics[index];
-      if (relic) renderRelicView(container, relic, this.ctx(), index); else container.replaceChildren(el('p', 'empty-state', '遗物不存在'));
+      if (relic) renderRelicView(container, relic, this.ctx(), index, this.textEditingOptions()); else container.replaceChildren(el('p', 'empty-state', '遗物不存在'));
     } else {
       const god = this.data.gods.gods.find(item => item.id === selection.id);
-      if (god) renderGodView(container, god, this.data.skills.cards, this.ctx()); else container.replaceChildren(el('p', 'empty-state', '神祇不存在'));
+      if (god) renderGodView(container, god, this.data.skills.cards, this.ctx(), this.textEditingOptions()); else container.replaceChildren(el('p', 'empty-state', '神祇不存在'));
+    }
+  }
+
+  private textEditingOptions(): TextEditingOptions | undefined {
+    if (!this.data || this.crossView) return undefined;
+    return {
+      texts: this.data.texts,
+      editingPath: this.editingTextPath,
+      onToggle: path => { this.editingTextPath = path; this.render(); },
+      onChange: () => this.onTextsChanged(),
+    };
+  }
+
+  private onTextsChanged(): void {
+    if (!this.data) return;
+    this.textsDirty = true;
+    this.saveMessage = '';
+    const sequence = ++this.validationSequence;
+    this.validatingTexts = true;
+    this.updateSaveState();
+    void this.textSaver.validate(this.data.texts).then(report => {
+      if (sequence !== this.validationSequence) return;
+      this.textsReport = report;
+      this.renderContextOnly();
+    }).catch(error => {
+      if (sequence !== this.validationSequence) return;
+      this.saveMessage = error instanceof Error ? error.message : String(error);
+    }).finally(() => {
+      if (sequence !== this.validationSequence) return;
+      this.validatingTexts = false;
+      this.updateSaveState();
+    });
+  }
+
+  private async saveTexts(): Promise<void> {
+    if (!this.data || !this.originals || !this.textsDirty || this.validatingTexts || this.savingTexts || reportHasErrors(this.textsReport)) return;
+    this.savingTexts = true;
+    this.saveMessage = '保存中…';
+    this.updateSaveState();
+    try {
+      const result = await this.textSaver.save(this.data.texts, this.originals.texts);
+      if (result.reports.texts) this.textsReport = result.reports.texts;
+      if (result.ok) {
+        this.originals.texts = deepClone(this.data.texts);
+        this.textsDirty = false;
+        this.saveMessage = '文案已保存；刷新后游戏运行时才会读取新配置';
+        this.render();
+      } else {
+        this.saveMessage = result.error ?? '保存被配置管线拒绝；未保存输入仍保留';
+        this.renderContextOnly();
+      }
+    } catch (error) {
+      this.saveMessage = error instanceof Error ? error.message : String(error);
+    }
+    this.savingTexts = false;
+    this.updateSaveState();
+  }
+
+  private renderContextOnly(): void {
+    if (!this.data || !this.context || !this.references || this.crossView) return;
+    renderContextPanel(this.context, {
+      selection: this.selection, cards: this.data.skills.cards, gods: this.data.gods.gods, relics: this.data.relics.relics,
+      recipes: this.data.evolutionRecipes, texts: this.data.texts, report: this.textsReport ?? this.report, references: this.references,
+      locate: (domain, path) => this.locate(domain, path),
+    });
+  }
+
+  private updateSaveState(): void {
+    if (!this.status || !this.saveButton) return;
+    const errors = reportHasErrors(this.textsReport);
+    this.saveButton.disabled = !this.textsDirty || this.validatingTexts || this.savingTexts || errors;
+    this.status.className = 'status-badge';
+    if (this.savingTexts) {
+      this.status.classList.add('status-badge--busy');
+      this.status.textContent = '文案保存中';
+    } else if (this.validatingTexts) {
+      this.status.classList.add('status-badge--busy');
+      this.status.textContent = '文案候选校验中';
+    } else if (this.saveMessage) {
+      this.status.classList.add(this.textsDirty ? 'status-badge--warning' : 'status-badge--ok');
+      this.status.textContent = this.saveMessage;
+    } else if (this.textsDirty && errors) {
+      this.status.classList.add('status-badge--error');
+      this.status.textContent = '文案未保存 · 有 error';
+    } else if (this.textsDirty) {
+      this.status.classList.add('status-badge--warning');
+      this.status.textContent = '文案未保存 · 可保存';
+    } else {
+      this.status.classList.add('status-badge--ok');
+      this.status.textContent = '配置管线已连接';
     }
   }
 

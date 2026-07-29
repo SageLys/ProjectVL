@@ -4,6 +4,9 @@
   :root { color: #241a1f; background: #fff; }
   body { min-width: 0; background: #fff; }
   .workbench-header, .workbench-layout { display: none !important; }
+  .copy-edit-button, .copy-editor { display: none !important; }
+  .editable-copy.is-editing { padding: 0; border: 0; background: transparent; }
+  .editable-copy.is-editing > .editable-copy__read { display: block; }
   .print-batch { display: block; }
   .print-batch > * { display: block; }
   .entity-sheet, .audit-card { max-width: none; margin: 0 0 7mm; padding: 4mm; border-color: #c7aeb9; border-radius: 2mm; box-shadow: none; }
