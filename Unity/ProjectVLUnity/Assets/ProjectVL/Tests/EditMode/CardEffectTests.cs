@@ -2586,6 +2586,133 @@ namespace ProjectVL.Tests
             Assert.That(_state.DropLifetimeMultiplier, Is.GreaterThan(1.3f));
         }
 
+        [TestCase("fateLoom")]
+        [TestCase("goldenVolley")]
+        [TestCase("bountyCall")]
+        [TestCase("overgrowth")]
+        [TestCase("springOfLife")]
+        [TestCase("luckyStar")]
+        public void PlentyRosterCardsArePlayableAndCastable(string type)
+        {
+            CardState card = _state.CreateCard(type, 3);
+
+            Assert.That(CardPoolSystem.IsPlayable(type), Is.True);
+            Assert.That(CombatSystem.SupportsConsumable(card), Is.True);
+        }
+
+        [Test]
+        public void FateLoomRouteDrivesMergePulseAndConsumable()
+        {
+            EquipResolved(
+                "fateLoom",
+                5,
+                "3:fateLoomA",
+                "5:fateLoomA2");
+            EnemyState enemy = AddEnemy(
+                new Float2(250f, 250f),
+                200f);
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+
+            _system.CastConsumable(
+                _state,
+                _state.CreateCard("fateLoom", 3),
+                enemy.Position);
+
+            Assert.That(
+                profile.MergePulseDamagePerStar,
+                Is.EqualTo(11.25f));
+            Assert.That(profile.MergeVulnerableRatio, Is.EqualTo(0.15f));
+            Assert.That(enemy.Hp, Is.LessThan(200f));
+        }
+
+        [Test]
+        public void GoldenVolleyRouteUsesSplashAndSplitPipeline()
+        {
+            EquipResolved(
+                "goldenVolley",
+                5,
+                "3:goldenVolleyB",
+                "5:goldenVolleyC2");
+
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+
+            Assert.That(
+                profile.SplashDamageRatio,
+                Is.EqualTo(2.3f).Within(0.001f));
+            Assert.That(profile.SplitCount, Is.EqualTo(2));
+            Assert.That(profile.SplitDamageRatio, Is.EqualTo(0.55f));
+        }
+
+        [Test]
+        public void BountyCallConsumableMarksPriorityTargets()
+        {
+            EnemyState enemy = AddEnemy(
+                new Float2(250f, 250f),
+                100f);
+
+            _system.CastConsumable(
+                _state,
+                _state.CreateCard("bountyCall", 6),
+                enemy.Position);
+
+            Assert.That(enemy.FocusPriorityWeight, Is.EqualTo(8f));
+            Assert.That(enemy.VulnerableRatio, Is.EqualTo(0.25f));
+            Assert.That(enemy.SlowRatio, Is.EqualTo(0.3f));
+        }
+
+        [Test]
+        public void OvergrowthEquipmentAndConsumableCreateZones()
+        {
+            EquipResolved(
+                "overgrowth",
+                5,
+                "3:overgrowthC",
+                "5:overgrowthC2");
+            _system.CastConsumable(
+                _state,
+                _state.CreateCard("overgrowth", 3),
+                new Float2(250f, 250f));
+
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+
+            Assert.That(profile.OvergrowthZoneCount, Is.EqualTo(2));
+            Assert.That(profile.OvergrowthVulnerableRatio, Is.EqualTo(0.1f));
+            Assert.That(_state.GroundZones, Has.Count.EqualTo(1));
+        }
+
+        [Test]
+        public void SpringOfLifeConsumableAddsSixStarShield()
+        {
+            _system.CastConsumable(
+                _state,
+                _state.CreateCard("springOfLife", 6),
+                new Float2());
+
+            Assert.That(_state.ShieldHits, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void LuckyStarRouteAndConsumableBoostEconomy()
+        {
+            EquipResolved(
+                "luckyStar",
+                5,
+                "3:luckyStarB",
+                "5:luckyStarB2");
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+
+            _system.CastConsumable(
+                _state,
+                _state.CreateCard("luckyStar", 3),
+                new Float2());
+            _system.StepPassives(_state, 0f);
+
+            Assert.That(profile.DropLifetimeMultiplier, Is.EqualTo(1.3f));
+            Assert.That(profile.ExpiryConvertRatio, Is.EqualTo(0.7f));
+            Assert.That(_state.XpMultiplier, Is.GreaterThan(1.4f));
+            Assert.That(_state.DropRateMultiplier, Is.GreaterThan(1.4f));
+        }
+
         private void EquipResolved(
             string type,
             int star,

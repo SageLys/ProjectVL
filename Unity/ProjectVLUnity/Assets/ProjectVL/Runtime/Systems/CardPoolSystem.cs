@@ -37,7 +37,13 @@ namespace ProjectVL.Systems
             "ashHarvest",
             "sentinel",
             "retribution",
-            "ironvine"
+            "ironvine",
+            "fateLoom",
+            "goldenVolley",
+            "bountyCall",
+            "overgrowth",
+            "springOfLife",
+            "luckyStar"
         };
 
         private readonly IRandomSource _random;

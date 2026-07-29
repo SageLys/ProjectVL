@@ -144,6 +144,24 @@ namespace ProjectVL.Systems
                 case "ironvine":
                     CastIronvine(state, card.Star);
                     return true;
+                case "fateLoom":
+                    CastFateLoom(state, card.Star, point);
+                    return true;
+                case "goldenVolley":
+                    CastGoldenVolley(state, card.Star, point);
+                    return true;
+                case "bountyCall":
+                    CastBountyCall(state, card.Star, point);
+                    return true;
+                case "overgrowth":
+                    CastOvergrowth(state, card.Star, point);
+                    return true;
+                case "springOfLife":
+                    CastSpringOfLife(state, card.Star);
+                    return true;
+                case "luckyStar":
+                    CastLuckyStar(state, card.Star);
+                    return true;
                 default:
                     return false;
             }
@@ -186,7 +204,13 @@ namespace ProjectVL.Systems
                     || card.Type == "ashHarvest"
                     || card.Type == "sentinel"
                     || card.Type == "retribution"
-                    || card.Type == "ironvine");
+                    || card.Type == "ironvine"
+                    || card.Type == "fateLoom"
+                    || card.Type == "goldenVolley"
+                    || card.Type == "bountyCall"
+                    || card.Type == "overgrowth"
+                    || card.Type == "springOfLife"
+                    || card.Type == "luckyStar");
         }
 
         public void StepTurret(GameState state, float deltaTime)
@@ -1608,6 +1632,137 @@ namespace ProjectVL.Systems
                 StarValue(star, 3f, 4f, 5f));
         }
 
+        private void CastFateLoom(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            float radius = StarValue(star, 90f, 140f, 190f);
+            DamageArea(
+                state,
+                point,
+                radius,
+                BaseDamage(state)
+                    * StarValue(star, 2f, 4f, 7f),
+                -1,
+                0f,
+                star >= 3 ? 0.25f : 0f,
+                1.5f);
+            if (star >= 6)
+            {
+                MarkArea(
+                    state,
+                    point,
+                    radius,
+                    0.2f,
+                    2f,
+                    1f,
+                    0f,
+                    0f);
+                state.DamageMultiplier = Math.Max(
+                    state.DamageMultiplier,
+                    1.25f);
+                state.DamageBuffRemaining = Math.Max(
+                    state.DamageBuffRemaining,
+                    5f);
+            }
+        }
+
+        private void CastGoldenVolley(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            float radius = StarValue(star, 90f, 140f, 190f);
+            DamageArea(
+                state,
+                point,
+                radius,
+                BaseDamage(state)
+                    * StarValue(star, 2.5f, 4f, 6.5f),
+                -1,
+                0f,
+                0f);
+            MarkArea(
+                state,
+                point,
+                radius,
+                0f,
+                0f,
+                StarValue(star, 2f, 3f, 5f),
+                StarValue(star, 3f, 4f, 5f),
+                0f);
+        }
+
+        private void CastBountyCall(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            MarkArea(
+                state,
+                point,
+                StarValue(star, 90f, 140f, 190f),
+                StarValue(star, 0f, 0.12f, 0.25f),
+                StarValue(star, 3f, 4f, 5f),
+                StarValue(star, 3f, 5f, 8f),
+                StarValue(star, 3f, 4f, 5f),
+                star >= 6 ? 0.3f : 0f);
+        }
+
+        private void CastOvergrowth(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            state.GroundZones.Add(new GroundZoneState(
+                point,
+                StarValue(star, 90f, 140f, 190f),
+                StarValue(star, 3f, 4f, 5f),
+                0.5f,
+                0f,
+                StarValue(star, 0.08f, 0.14f, 0.24f),
+                0.8f,
+                StarValue(star, 0.25f, 0.4f, 0.55f),
+                0.8f));
+            if (star >= 6)
+            {
+                ApplyAreaKnockback(
+                    state,
+                    point,
+                    190f,
+                    0f,
+                    0.3f);
+            }
+        }
+
+        private static void CastSpringOfLife(
+            GameState state,
+            int star)
+        {
+            state.RestoreHp(
+                state.MaxHp
+                    * StarValue(star, 0.18f, 0.35f, 0.6f));
+            if (star >= 6)
+            {
+                state.ShieldHits += 2;
+                state.ShieldMaxHits = Math.Max(
+                    state.ShieldMaxHits,
+                    state.ShieldHits);
+            }
+        }
+
+        private void CastLuckyStar(GameState state, int star)
+        {
+            state.EconomyXpMultiplier =
+                StarValue(star, 1.2f, 1.4f, 1.7f);
+            state.EconomyDropRateMultiplier =
+                state.EconomyXpMultiplier;
+            state.EconomyBuffRemaining = Math.Max(
+                state.EconomyBuffRemaining,
+                StarValue(star, 3f, 4f, 5f));
+        }
+
         private float BaseDamage(GameState state)
         {
             return Math.Max(
@@ -1855,6 +2010,9 @@ namespace ProjectVL.Systems
             ApplyMagmaPool(state, profile, deltaTime);
             ApplyFlashfire(state, profile, deltaTime);
             ApplyCinderheart(state, profile, deltaTime);
+            ApplyBountyCall(state, profile, deltaTime);
+            ApplyOvergrowth(state, profile, deltaTime);
+            ApplySpringOfLife(state, profile, deltaTime);
             ApplyDecoyAura(state, profile);
             ApplyMirrorTurret(state, profile, deltaTime);
             ApplyHarvestMergePulse(state, profile);
@@ -2085,6 +2243,13 @@ namespace ProjectVL.Systems
                     state,
                     profile,
                     enemy.Position);
+                if (profile.KillExtraDropChance > 0f)
+                {
+                    _drops?.TrySpawnBonus(
+                        state,
+                        enemy.Position,
+                        profile.KillExtraDropChance);
+                }
                 if (killedWhileDot)
                 {
                     ApplyDotKillCardEffects(
@@ -2797,6 +2962,12 @@ namespace ProjectVL.Systems
                 profile.FlashfireInterval;
             state.CinderheartPulseRemaining =
                 profile.CinderheartRestoreInterval;
+            state.BountyPulseRemaining =
+                profile.BountyInterval;
+            state.OvergrowthPulseRemaining =
+                profile.OvergrowthInterval;
+            state.SpringPulseRemaining =
+                profile.SpringRestoreInterval;
             state.GroundZones.Clear();
             state.ScorchAuraTickRemaining =
                 profile.ScorchAuraTickInterval;
@@ -3725,6 +3896,158 @@ namespace ProjectVL.Systems
             }
         }
 
+        private static void MarkArea(
+            GameState state,
+            Float2 center,
+            float radius,
+            float vulnerableRatio,
+            float duration,
+            float focusWeight,
+            float focusDuration,
+            float slowRatio)
+        {
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                if (Float2.Distance(center, enemy.Position) > radius)
+                {
+                    continue;
+                }
+
+                if (vulnerableRatio > 0f)
+                {
+                    enemy.VulnerableRatio = Math.Max(
+                        enemy.VulnerableRatio,
+                        vulnerableRatio);
+                    enemy.VulnerableRemaining = Math.Max(
+                        enemy.VulnerableRemaining,
+                        duration);
+                }
+                if (focusWeight > 1f)
+                {
+                    enemy.FocusPriorityWeight = Math.Max(
+                        enemy.FocusPriorityWeight,
+                        focusWeight);
+                    enemy.FocusPriorityRemaining = Math.Max(
+                        enemy.FocusPriorityRemaining,
+                        focusDuration);
+                }
+                if (slowRatio > 0f)
+                {
+                    enemy.SlowRatio = Math.Max(
+                        enemy.SlowRatio,
+                        slowRatio);
+                    enemy.SlowRemaining = Math.Max(
+                        enemy.SlowRemaining,
+                        duration);
+                }
+            }
+        }
+
+        private void ApplyBountyCall(
+            GameState state,
+            CardCombatProfile profile,
+            float deltaTime)
+        {
+            if (profile.BountyInterval <= 0f)
+            {
+                return;
+            }
+
+            state.BountyPulseRemaining -= deltaTime;
+            if (state.BountyPulseRemaining > 0f)
+            {
+                return;
+            }
+
+            MarkArea(
+                state,
+                TurretPosition,
+                float.MaxValue,
+                profile.BountyVulnerableRatio,
+                profile.BountyInterval + 0.1f,
+                profile.BountyFocusWeight,
+                profile.BountyInterval + 0.1f,
+                profile.BountySlowRatio);
+            state.BountyPulseRemaining += profile.BountyInterval;
+        }
+
+        private void ApplyOvergrowth(
+            GameState state,
+            CardCombatProfile profile,
+            float deltaTime)
+        {
+            if (profile.OvergrowthInterval <= 0f)
+            {
+                return;
+            }
+
+            state.OvergrowthPulseRemaining -= deltaTime;
+            if (state.OvergrowthPulseRemaining > 0f)
+            {
+                return;
+            }
+
+            EnemyState target = FindTarget(state);
+            if (target == null)
+            {
+                return;
+            }
+
+            for (int index = 0;
+                index < Math.Max(1, profile.OvergrowthZoneCount);
+                index++)
+            {
+                float offset = (
+                    index - (profile.OvergrowthZoneCount - 1) / 2f)
+                    * profile.OvergrowthRadius;
+                Float2 center =
+                    target.Position + new Float2(offset, 0f);
+                state.GroundZones.Add(new GroundZoneState(
+                    center,
+                    profile.OvergrowthRadius,
+                    profile.OvergrowthDuration,
+                    0.5f,
+                    0f,
+                    profile.OvergrowthVulnerableRatio,
+                    0.8f,
+                    profile.OvergrowthSlowRatio,
+                    0.8f));
+                if (profile.OvergrowthStunDuration > 0f)
+                {
+                    ApplyAreaKnockback(
+                        state,
+                        center,
+                        profile.OvergrowthRadius,
+                        0f,
+                        profile.OvergrowthStunDuration);
+                }
+            }
+
+            state.OvergrowthPulseRemaining +=
+                profile.OvergrowthInterval;
+        }
+
+        private static void ApplySpringOfLife(
+            GameState state,
+            CardCombatProfile profile,
+            float deltaTime)
+        {
+            if (profile.SpringRestoreInterval <= 0f)
+            {
+                return;
+            }
+
+            state.SpringPulseRemaining -= deltaTime;
+            if (state.SpringPulseRemaining > 0f)
+            {
+                return;
+            }
+
+            state.RestoreHp(state.MaxHp * profile.SpringRestoreRatio);
+            state.SpringPulseRemaining +=
+                profile.SpringRestoreInterval;
+        }
+
         private void ApplyPyrestorm(
             GameState state,
             CardCombatProfile profile,
@@ -3874,6 +4197,11 @@ namespace ProjectVL.Systems
             ApplyBreachReaction(state, profile);
             ApplyImpactBreachReaction(state, profile);
             ApplyThornsAdvancedBreachEffects(state, profile);
+            if (profile.BreachRestoreRatio > 0f)
+            {
+                state.RestoreHp(
+                    state.MaxHp * profile.BreachRestoreRatio);
+            }
             if (profile.BreachDotDamageRatio > 0f)
             {
                 ApplyAreaDot(
@@ -4146,6 +4474,48 @@ namespace ProjectVL.Systems
                     -1,
                     0f,
                     0f);
+            }
+
+            if (pendingMergeStars > 0)
+            {
+                if (profile.MergeVulnerableRatio > 0f
+                    || profile.MergeSlowRatio > 0f)
+                {
+                    MarkArea(
+                        state,
+                        TurretPosition,
+                        float.MaxValue,
+                        profile.MergeVulnerableRatio,
+                        Math.Max(
+                            profile.MergeVulnerableDuration,
+                            profile.MergeSlowDuration),
+                        1f,
+                        0f,
+                        profile.MergeSlowRatio);
+                }
+                if (profile.MergeRestoreRatio > 0f)
+                {
+                    state.RestoreHp(
+                        state.MaxHp * profile.MergeRestoreRatio);
+                }
+                if (profile.MergeDamageMultiplier > 1f)
+                {
+                    state.DamageMultiplier = Math.Max(
+                        state.DamageMultiplier,
+                        profile.MergeDamageMultiplier);
+                    state.DamageBuffRemaining = Math.Max(
+                        state.DamageBuffRemaining,
+                        profile.MergeDamageDuration);
+                }
+                if (profile.MergeFireRateMultiplier > 1f)
+                {
+                    state.FireRateMultiplier = Math.Max(
+                        state.FireRateMultiplier,
+                        profile.MergeFireRateMultiplier);
+                    state.FireRateBuffRemaining = Math.Max(
+                        state.FireRateBuffRemaining,
+                        profile.MergeFireRateDuration);
+                }
             }
 
             state.HarvestProcessedMergeStars =

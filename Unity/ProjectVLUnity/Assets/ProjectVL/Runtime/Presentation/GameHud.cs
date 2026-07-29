@@ -1151,6 +1151,18 @@ namespace ProjectVL.Presentation
                     return "惩戒反击";
                 case "ironvine":
                     return "铁藤";
+                case "fateLoom":
+                    return "命运织机";
+                case "goldenVolley":
+                    return "黄金齐射";
+                case "bountyCall":
+                    return "悬赏号令";
+                case "overgrowth":
+                    return "蔓生";
+                case "springOfLife":
+                    return "生命之泉";
+                case "luckyStar":
+                    return "幸运星";
                 default:
                     return type;
             }

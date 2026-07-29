@@ -224,5 +224,29 @@ namespace ProjectVL.Core
         public float WaveStartRestoreRatio { get; set; }
         public float WaveStartDefenseMultiplier { get; set; } = 1f;
         public float WaveStartDefenseDuration { get; set; }
+        public float MergeVulnerableRatio { get; set; }
+        public float MergeVulnerableDuration { get; set; }
+        public float MergeSlowRatio { get; set; }
+        public float MergeSlowDuration { get; set; }
+        public float MergeRestoreRatio { get; set; }
+        public float MergeDamageMultiplier { get; set; } = 1f;
+        public float MergeDamageDuration { get; set; }
+        public float MergeFireRateMultiplier { get; set; } = 1f;
+        public float MergeFireRateDuration { get; set; }
+        public float KillExtraDropChance { get; set; }
+        public float BountyInterval { get; set; }
+        public float BountyFocusWeight { get; set; }
+        public float BountyVulnerableRatio { get; set; }
+        public float BountySlowRatio { get; set; }
+        public float OvergrowthInterval { get; set; }
+        public int OvergrowthZoneCount { get; set; }
+        public float OvergrowthRadius { get; set; }
+        public float OvergrowthDuration { get; set; }
+        public float OvergrowthSlowRatio { get; set; }
+        public float OvergrowthVulnerableRatio { get; set; }
+        public float OvergrowthStunDuration { get; set; }
+        public float SpringRestoreInterval { get; set; }
+        public float SpringRestoreRatio { get; set; }
+        public float BreachRestoreRatio { get; set; }
     }
 }

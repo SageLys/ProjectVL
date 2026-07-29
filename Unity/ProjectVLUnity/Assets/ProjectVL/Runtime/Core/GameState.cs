@@ -61,6 +61,9 @@ namespace ProjectVL.Core
         public float MagmaPulseRemaining { get; internal set; }
         public float FlashfirePulseRemaining { get; internal set; }
         public float CinderheartPulseRemaining { get; internal set; }
+        public float BountyPulseRemaining { get; internal set; }
+        public float OvergrowthPulseRemaining { get; internal set; }
+        public float SpringPulseRemaining { get; internal set; }
         public float ImpactHitCooldownRemaining { get; internal set; }
         public float ThornsAuraTickRemaining { get; internal set; }
         public float BeamPulseRemaining { get; internal set; }

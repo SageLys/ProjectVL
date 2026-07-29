@@ -126,6 +126,24 @@ namespace ProjectVL.Systems
                     case "ironvine":
                         ApplyIronvine(card, profile);
                         break;
+                    case "fateLoom":
+                        ApplyFateLoom(card, profile);
+                        break;
+                    case "goldenVolley":
+                        ApplyGoldenVolley(card, profile);
+                        break;
+                    case "bountyCall":
+                        ApplyBountyCall(card, profile);
+                        break;
+                    case "overgrowth":
+                        ApplyOvergrowth(card, profile);
+                        break;
+                    case "springOfLife":
+                        ApplySpringOfLife(card, profile);
+                        break;
+                    case "luckyStar":
+                        ApplyLuckyStar(card, profile);
+                        break;
                 }
             }
 
@@ -1559,6 +1577,333 @@ namespace ProjectVL.Systems
                 profile.ControlledKillExtraDropChance = Max(
                     profile.ControlledKillExtraDropChance,
                     0.2f);
+            }
+        }
+
+        private static void ApplyFateLoom(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            if (card.Star >= 6)
+            {
+                profile.MergePulseDamagePerStar = Max(
+                    profile.MergePulseDamagePerStar,
+                    14f);
+                profile.MergeDamageMultiplier = 1.35f;
+                profile.MergeDamageDuration = 4f;
+                return;
+            }
+
+            string route = RouteAt(card, 3);
+            profile.MergePulseDamagePerStar = Max(
+                profile.MergePulseDamagePerStar,
+                route == "fateLoomA" ? 9f : 5f);
+            if (route == "fateLoomB")
+            {
+                profile.MergeFireRateMultiplier = 1.2f;
+                profile.MergeFireRateDuration = 3f;
+            }
+            else if (route == "fateLoomC")
+            {
+                profile.MergeSlowRatio = 0.3f;
+                profile.MergeSlowDuration = 1.5f;
+            }
+            if (card.Star >= 4)
+            {
+                profile.MergePulseDamagePerStar *= 1.25f;
+            }
+
+            string advanced = RouteAt(card, 5);
+            if (advanced == "fateLoomA2")
+            {
+                profile.MergeVulnerableRatio = 0.15f;
+                profile.MergeVulnerableDuration = 2f;
+            }
+            else if (advanced == "fateLoomB2")
+            {
+                profile.MergeRestoreRatio = 0.05f;
+            }
+            else if (advanced == "fateLoomC2")
+            {
+                profile.MergeDamageMultiplier = 1.2f;
+                profile.MergeDamageDuration = 3f;
+            }
+        }
+
+        private static void ApplyGoldenVolley(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            if (card.Star >= 6)
+            {
+                profile.BeamInterval = 0.9f;
+                profile.BeamWidth = 30f;
+                profile.BeamDamageRatio = 1f;
+                profile.KillExtraDropChance = Max(
+                    profile.KillExtraDropChance,
+                    0.2f);
+                return;
+            }
+
+            string route = RouteAt(card, 3);
+            profile.SplashRadius = Max(profile.SplashRadius, 35f);
+            profile.SplashDamageRatio = Max(
+                profile.SplashDamageRatio,
+                route == "goldenVolleyB" ? 2f : 1.2f);
+            if (route == "goldenVolleyC")
+            {
+                profile.AuraFocusPriorityWeight = Max(
+                    profile.AuraFocusPriorityWeight,
+                    3f);
+            }
+            if (card.Star >= 4)
+            {
+                profile.SplashDamageRatio *= 1.15f;
+            }
+
+            string advanced = RouteAt(card, 5);
+            if (advanced == "goldenVolleyA2")
+            {
+                profile.DotHitBurstDamageMultiplier = Max(
+                    profile.DotHitBurstDamageMultiplier,
+                    0.8f);
+                profile.DotHitBurstRadius = Max(
+                    profile.DotHitBurstRadius,
+                    35f);
+            }
+            else if (advanced == "goldenVolleyB2")
+            {
+                profile.KillExtraDropChance = Max(
+                    profile.KillExtraDropChance,
+                    0.25f);
+            }
+            else if (advanced == "goldenVolleyC2")
+            {
+                profile.SplitCount += 2;
+                profile.SplitDamageRatio = Max(
+                    profile.SplitDamageRatio,
+                    0.55f);
+            }
+        }
+
+        private static void ApplyBountyCall(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            if (card.Star >= 6)
+            {
+                profile.BountyInterval = 1f;
+                profile.BountyFocusWeight = 5f;
+                profile.BountyVulnerableRatio = 0.18f;
+                return;
+            }
+
+            string route = RouteAt(card, 3);
+            profile.BountyInterval = 4f;
+            profile.BountyFocusWeight =
+                route == "bountyCallA" ? 6f : 4f;
+            if (route == "bountyCallB")
+            {
+                profile.BountyVulnerableRatio = 0.16f;
+            }
+            else if (route == "bountyCallC")
+            {
+                profile.BountySlowRatio = 0.3f;
+            }
+            if (card.Star >= 4)
+            {
+                profile.BountyFocusWeight += 1f;
+                profile.BountyVulnerableRatio *= 1.2f;
+            }
+
+            string advanced = RouteAt(card, 5);
+            if (advanced == "bountyCallA2")
+            {
+                profile.KillVulnerableRadius = Max(
+                    profile.KillVulnerableRadius,
+                    100f);
+                profile.KillVulnerableDuration = Max(
+                    profile.KillVulnerableDuration,
+                    3f);
+            }
+            else if (advanced == "bountyCallB2")
+            {
+                profile.ControlledKillXpMultiplier = Max(
+                    profile.ControlledKillXpMultiplier,
+                    1.35f);
+                profile.ControlledKillXpDuration = 3f;
+                profile.ControlledKillXpMaxStacks = 1;
+            }
+            else if (advanced == "bountyCallC2")
+            {
+                profile.BountyFocusWeight = Max(
+                    profile.BountyFocusWeight,
+                    5f);
+            }
+        }
+
+        private static void ApplyOvergrowth(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            if (card.Star >= 6)
+            {
+                profile.OvergrowthInterval = 5f;
+                profile.OvergrowthZoneCount = 1;
+                profile.OvergrowthRadius = 190f;
+                profile.OvergrowthDuration = 5f;
+                profile.OvergrowthSlowRatio = 0.4f;
+                profile.OvergrowthVulnerableRatio = 0.18f;
+                return;
+            }
+
+            string route = RouteAt(card, 3);
+            profile.OvergrowthInterval = 4f;
+            profile.OvergrowthZoneCount = 1;
+            profile.OvergrowthRadius =
+                route == "overgrowthA" ? 120f : 90f;
+            profile.OvergrowthDuration = 3f;
+            profile.OvergrowthSlowRatio =
+                route == "overgrowthB" ? 0.45f : 0.25f;
+            profile.OvergrowthVulnerableRatio =
+                route == "overgrowthC" ? 0.16f : 0.08f;
+            if (card.Star >= 4)
+            {
+                profile.OvergrowthDuration *= 1.3f;
+            }
+
+            string advanced = RouteAt(card, 5);
+            if (advanced == "overgrowthA2")
+            {
+                profile.OvergrowthRadius = 95f;
+                profile.OvergrowthStunDuration = 0.3f;
+            }
+            else if (advanced == "overgrowthB2")
+            {
+                profile.XpMultiplier = Max(
+                    profile.XpMultiplier,
+                    1.15f);
+            }
+            else if (advanced == "overgrowthC2")
+            {
+                profile.OvergrowthZoneCount = 2;
+                profile.OvergrowthRadius = 85f;
+                profile.OvergrowthVulnerableRatio = 0.1f;
+            }
+        }
+
+        private static void ApplySpringOfLife(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            if (card.Star >= 6)
+            {
+                profile.SpringRestoreInterval = 2f;
+                profile.SpringRestoreRatio = 0.035f;
+                profile.BreachReductionRatio = System.Math.Min(
+                    0.8f,
+                    profile.BreachReductionRatio + 0.2f);
+                return;
+            }
+
+            string route = RouteAt(card, 3);
+            profile.WaveStartRestoreRatio =
+                route == "springOfLifeA" ? 0.12f : 0.08f;
+            profile.SpringRestoreInterval =
+                route == "springOfLifeB" ? 2.5f : 4f;
+            profile.SpringRestoreRatio =
+                route == "springOfLifeA" ? 0.025f : 0.02f;
+            if (route == "springOfLifeC")
+            {
+                profile.ShieldHits += 1;
+            }
+            if (card.Star >= 4)
+            {
+                profile.WaveStartRestoreRatio *= 1.25f;
+                profile.SpringRestoreRatio *= 1.25f;
+            }
+
+            string advanced = RouteAt(card, 5);
+            if (advanced == "springOfLifeA2")
+            {
+                profile.BreachRestoreRatio = 0.1f;
+            }
+            else if (advanced == "springOfLifeB2")
+            {
+                profile.ScorchAuraRadius = Max(
+                    profile.ScorchAuraRadius,
+                    100f);
+                profile.ScorchAuraTickInterval = 4f;
+                profile.ScorchAuraDamageRatio = Max(
+                    profile.ScorchAuraDamageRatio,
+                    0.8f);
+            }
+            else if (advanced == "springOfLifeC2")
+            {
+                profile.WaveStartDefenseMultiplier = Max(
+                    profile.WaveStartDefenseMultiplier,
+                    1.1f);
+                profile.WaveStartDefenseDuration = 5f;
+            }
+        }
+
+        private static void ApplyLuckyStar(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            if (card.Star >= 6)
+            {
+                profile.DropRateMultiplier = Max(
+                    profile.DropRateMultiplier,
+                    1.45f);
+                profile.XpMultiplier = Max(
+                    profile.XpMultiplier,
+                    1.4f);
+                profile.DropLifetimeMultiplier = Max(
+                    profile.DropLifetimeMultiplier,
+                    1.25f);
+                return;
+            }
+
+            string route = RouteAt(card, 3);
+            profile.DropRateMultiplier = Max(
+                profile.DropRateMultiplier,
+                route == "luckyStarA" ? 1.25f : 1.12f);
+            profile.XpMultiplier = Max(
+                profile.XpMultiplier,
+                route == "luckyStarC" ? 1.2f : 1.08f);
+            if (route == "luckyStarB")
+            {
+                profile.DropLifetimeMultiplier = Max(
+                    profile.DropLifetimeMultiplier,
+                    1.3f);
+            }
+            if (card.Star >= 4)
+            {
+                profile.DropRateMultiplier =
+                    1f + (profile.DropRateMultiplier - 1f) * 1.15f;
+                profile.XpMultiplier =
+                    1f + (profile.XpMultiplier - 1f) * 1.15f;
+            }
+
+            string advanced = RouteAt(card, 5);
+            if (advanced == "luckyStarA2")
+            {
+                profile.KillExtraDropChance = Max(
+                    profile.KillExtraDropChance,
+                    0.1f);
+            }
+            else if (advanced == "luckyStarB2")
+            {
+                profile.ExpiryConvertRatio = Max(
+                    profile.ExpiryConvertRatio,
+                    0.7f);
+            }
+            else if (advanced == "luckyStarC2")
+            {
+                profile.MergePulseDamagePerStar = Max(
+                    profile.MergePulseDamagePerStar,
+                    8f);
             }
         }
 
