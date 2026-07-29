@@ -185,5 +185,41 @@ namespace ProjectVL.Core
         public float PermafrostFreezeDuration { get; set; }
         public float FrozenKillRestore { get; set; }
         public float FrozenHitExecuteThresholdRatio { get; set; }
+        public float MeteorChance { get; set; }
+        public float MeteorRadius { get; set; }
+        public float MeteorDamageRatio { get; set; }
+        public float MeteorFalloff { get; set; }
+        public int MeteorCount { get; set; }
+        public float MeteorInterval { get; set; }
+        public float MeteorZoneDuration { get; set; }
+        public float MeteorZoneDamageRatio { get; set; }
+        public float MagmaInterval { get; set; }
+        public int MagmaZoneCount { get; set; }
+        public float MagmaRadius { get; set; }
+        public float MagmaDuration { get; set; }
+        public float MagmaTickInterval { get; set; }
+        public float MagmaDamageRatio { get; set; }
+        public float MagmaVulnerableRatio { get; set; }
+        public float MagmaSlowRatio { get; set; }
+        public float MagmaAuraRadius { get; set; }
+        public float FlashfireInterval { get; set; }
+        public float FlashfireRadius { get; set; }
+        public float FlashfireKnockback { get; set; }
+        public float FlashfireDotRatio { get; set; }
+        public float FlashfireDotDuration { get; set; }
+        public float BreachDotDamageRatio { get; set; }
+        public float BreachDotDuration { get; set; }
+        public float CinderheartRestoreInterval { get; set; }
+        public float CinderheartRestoreRatio { get; set; }
+        public float DotDamageMultiplier { get; set; } = 1f;
+        public float DotKillXpMultiplier { get; set; } = 1f;
+        public float DotKillXpDuration { get; set; }
+        public float DotKillExtraDropChance { get; set; }
+        public float DotKillDropLifetimeMultiplier { get; set; } = 1f;
+        public float DotKillDamageMultiplier { get; set; } = 1f;
+        public int DotKillDamageMaxStacks { get; set; }
+        public float DotKillRestore { get; set; }
+        public float WaveStartDamageMultiplier { get; set; } = 1f;
+        public float WaveStartDamageDuration { get; set; }
     }
 }

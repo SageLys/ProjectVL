@@ -29,7 +29,12 @@ namespace ProjectVL.Systems
             "permafrost",
             "iceTomb",
             "frozenBulwark",
-            "hoarfrostTithe"
+            "hoarfrostTithe",
+            "meteor",
+            "magmaPool",
+            "flashfire",
+            "cinderheart",
+            "ashHarvest"
         };
 
         private readonly IRandomSource _random;

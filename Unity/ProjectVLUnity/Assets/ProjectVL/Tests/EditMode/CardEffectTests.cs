@@ -2396,6 +2396,117 @@ namespace ProjectVL.Tests
             Assert.That(_state.EconomyBuffRemaining, Is.EqualTo(4f));
         }
 
+        [TestCase("meteor")]
+        [TestCase("magmaPool")]
+        [TestCase("flashfire")]
+        [TestCase("cinderheart")]
+        [TestCase("ashHarvest")]
+        public void InfernoRosterCardsArePlayableAndCastable(string type)
+        {
+            CardState card = _state.CreateCard(type, 3);
+
+            Assert.That(CardPoolSystem.IsPlayable(type), Is.True);
+            Assert.That(CombatSystem.SupportsConsumable(card), Is.True);
+        }
+
+        [Test]
+        public void MeteorRouteAndConsumableCreateConfiguredImpacts()
+        {
+            EquipResolved("meteor", 3, "3:meteorB");
+            EnemyState enemy = AddEnemy(
+                new Float2(250f, 250f),
+                200f);
+
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+            _system.CastConsumable(
+                _state,
+                _state.CreateCard("meteor", 3),
+                enemy.Position);
+
+            Assert.That(profile.MeteorRadius, Is.EqualTo(80f));
+            Assert.That(profile.MeteorDamageRatio, Is.EqualTo(2.2f));
+            Assert.That(enemy.Hp, Is.LessThan(200f));
+        }
+
+        [Test]
+        public void MagmaPoolEquipmentCreatesPersistentZones()
+        {
+            EquipResolved(
+                "magmaPool",
+                5,
+                "3:magmaPoolA",
+                "5:magmaPoolA2");
+            _state.BeginWave(1);
+            AddEnemy(new Float2(201f, 380f), 100f);
+
+            _system.StepPassives(_state, 0f);
+            _system.StepPassives(_state, 4f);
+
+            Assert.That(_state.GroundZones, Has.Count.EqualTo(2));
+        }
+
+        [Test]
+        public void FlashfireConsumableKnocksBackAndIgnites()
+        {
+            EnemyState enemy = AddEnemy(
+                new Float2(250f, 250f),
+                100f);
+            Float2 original = enemy.Position;
+
+            _system.CastConsumable(
+                _state,
+                _state.CreateCard("flashfire", 3),
+                new Float2(201f, 300f));
+
+            Assert.That(enemy.Position.X, Is.GreaterThan(original.X));
+            Assert.That(enemy.DotRemaining, Is.EqualTo(3f));
+        }
+
+        [Test]
+        public void CinderheartCombinesBreachDefenseAndBurningZone()
+        {
+            EquipResolved(
+                "cinderheart",
+                5,
+                "3:cinderheartA",
+                "5:cinderheartB2");
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+
+            _system.CastConsumable(
+                _state,
+                _state.CreateCard("cinderheart", 3),
+                new Float2(201f, 300f));
+
+            Assert.That(profile.BreachReductionRatio, Is.GreaterThan(0f));
+            Assert.That(profile.ScorchAuraRadius, Is.EqualTo(105f));
+            Assert.That(
+                _state.DefenseDurabilityMultiplier,
+                Is.EqualTo(1.35f));
+            Assert.That(_state.GroundZones, Has.Count.EqualTo(1));
+        }
+
+        [Test]
+        public void AshHarvestRoutesAndConsumableBoostEconomy()
+        {
+            EquipResolved(
+                "ashHarvest",
+                5,
+                "3:ashHarvestA",
+                "5:ashHarvestA2");
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+
+            _system.CastConsumable(
+                _state,
+                _state.CreateCard("ashHarvest", 3),
+                new Float2());
+            _system.StepPassives(_state, 0f);
+
+            Assert.That(profile.DotKillXpMultiplier, Is.EqualTo(1.24f));
+            Assert.That(profile.ExpiryConvertRatio, Is.EqualTo(0.65f));
+            Assert.That(_state.XpMultiplier, Is.EqualTo(1.3f));
+            Assert.That(_state.DropRateMultiplier, Is.EqualTo(1.3f));
+        }
+
         private void EquipResolved(
             string type,
             int star,

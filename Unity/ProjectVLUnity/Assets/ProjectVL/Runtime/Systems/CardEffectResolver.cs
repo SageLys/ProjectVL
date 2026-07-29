@@ -102,6 +102,21 @@ namespace ProjectVL.Systems
                     case "hoarfrostTithe":
                         ApplyHoarfrostTithe(card, profile);
                         break;
+                    case "meteor":
+                        ApplyMeteor(card, profile);
+                        break;
+                    case "magmaPool":
+                        ApplyMagmaPool(card, profile);
+                        break;
+                    case "flashfire":
+                        ApplyFlashfire(card, profile);
+                        break;
+                    case "cinderheart":
+                        ApplyCinderheart(card, profile);
+                        break;
+                    case "ashHarvest":
+                        ApplyAshHarvest(card, profile);
+                        break;
                 }
             }
 
@@ -1048,6 +1063,318 @@ namespace ProjectVL.Systems
                 profile.ControlledKillExtraDropChance = Max(
                     profile.ControlledKillExtraDropChance,
                     0.25f);
+            }
+        }
+
+        private static void ApplyMeteor(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            if (card.Star >= 6)
+            {
+                profile.MeteorInterval = 3f;
+                profile.MeteorCount = 2;
+                profile.MeteorRadius = 100f;
+                profile.MeteorDamageRatio = 2f;
+                profile.MeteorFalloff = 0.4f;
+                return;
+            }
+
+            string route = RouteAt(card, 3);
+            profile.MeteorChance = 0.2f;
+            profile.MeteorCount = 1;
+            profile.MeteorRadius =
+                route == "meteorA" ? 110f : 80f;
+            profile.MeteorDamageRatio =
+                route == "meteorB" ? 2.2f : 1.5f;
+            profile.MeteorFalloff = 0.5f;
+            if (route == "meteorC")
+            {
+                profile.MeteorZoneDuration = 2.5f;
+                profile.MeteorZoneDamageRatio = 0.12f;
+            }
+
+            if (card.Star >= 4)
+            {
+                profile.MeteorRadius *= 1.2f;
+            }
+
+            string advanced = RouteAt(card, 5);
+            if (advanced == "meteorA2")
+            {
+                profile.MeteorChance = 0.25f;
+                profile.MeteorCount = 2;
+                profile.MeteorRadius = 75f;
+                profile.MeteorDamageRatio = 1.2f;
+            }
+            else if (advanced == "meteorB2")
+            {
+                profile.OnHitStunDuration = Max(
+                    profile.OnHitStunDuration,
+                    0.4f);
+                profile.OnHitStunCooldown = Max(
+                    profile.OnHitStunCooldown,
+                    1.5f);
+            }
+            else if (advanced == "meteorC2")
+            {
+                profile.MeteorZoneDuration = 4f;
+                profile.MeteorZoneDamageRatio = 0.1f;
+            }
+        }
+
+        private static void ApplyMagmaPool(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            if (card.Star >= 6)
+            {
+                profile.MagmaAuraRadius = 145f;
+                profile.MagmaTickInterval = 0.5f;
+                profile.MagmaDamageRatio = 0.18f;
+                profile.MagmaVulnerableRatio = 0.08f;
+                return;
+            }
+
+            string route = RouteAt(card, 3);
+            profile.MagmaInterval = 4f;
+            profile.MagmaZoneCount = 1;
+            profile.MagmaRadius =
+                route == "magmaPoolA" ? 115f : 90f;
+            profile.MagmaDuration = 3f;
+            profile.MagmaTickInterval = 0.5f;
+            profile.MagmaDamageRatio =
+                route == "magmaPoolB" ? 0.22f : 0.14f;
+            if (route == "magmaPoolC")
+            {
+                profile.MagmaVulnerableRatio = 0.12f;
+            }
+
+            if (card.Star >= 4)
+            {
+                profile.MagmaDuration *= 1.3f;
+            }
+
+            string advanced = RouteAt(card, 5);
+            if (advanced == "magmaPoolA2")
+            {
+                profile.MagmaZoneCount = 2;
+                profile.MagmaRadius = 85f;
+                profile.MagmaDamageRatio = 0.12f;
+            }
+            else if (advanced == "magmaPoolB2")
+            {
+                profile.MagmaRadius = 100f;
+                profile.MagmaDamageRatio = 0f;
+                profile.MagmaSlowRatio = 0.25f;
+            }
+            else if (advanced == "magmaPoolC2")
+            {
+                profile.KillBurstRadius = Max(
+                    profile.KillBurstRadius,
+                    90f);
+                profile.KillBurstDamageMultiplier = Max(
+                    profile.KillBurstDamageMultiplier,
+                    1f);
+            }
+        }
+
+        private static void ApplyFlashfire(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            if (card.Star >= 6)
+            {
+                profile.BreachBurstDamageMultiplier = Max(
+                    profile.BreachBurstDamageMultiplier,
+                    3f);
+                profile.BreachBurstRadius = Max(
+                    profile.BreachBurstRadius,
+                    180f);
+                profile.BreachKnockback = Max(
+                    profile.BreachKnockback,
+                    110f);
+                profile.BreachDotDamageRatio = 0.2f;
+                profile.BreachDotDuration = 3f;
+                return;
+            }
+
+            string route = RouteAt(card, 3);
+            profile.FlashfireInterval = 4f;
+            profile.FlashfireRadius =
+                route == "flashfireC" ? 155f : 120f;
+            profile.FlashfireKnockback =
+                route == "flashfireA" ? 80f : 55f;
+            profile.FlashfireDotRatio =
+                route == "flashfireB" ? 0.18f : 0.1f;
+            profile.FlashfireDotDuration = 2f;
+            if (card.Star >= 4)
+            {
+                profile.FlashfireRadius *= 1.15f;
+                profile.FlashfireKnockback *= 1.2f;
+                profile.FlashfireDotRatio *= 1.2f;
+            }
+
+            string advanced = RouteAt(card, 5);
+            if (advanced == "flashfireA2")
+            {
+                profile.DotHitBurstDamageMultiplier = Max(
+                    profile.DotHitBurstDamageMultiplier,
+                    0.8f);
+                profile.DotHitBurstRadius = Max(
+                    profile.DotHitBurstRadius,
+                    45f);
+            }
+            else if (advanced == "flashfireB2")
+            {
+                profile.OnHitStunDuration = Max(
+                    profile.OnHitStunDuration,
+                    0.4f);
+                profile.OnHitStunCooldown = Max(
+                    profile.OnHitStunCooldown,
+                    4f);
+            }
+            else if (advanced == "flashfireC2")
+            {
+                profile.MagmaRadius = Max(
+                    profile.MagmaRadius,
+                    70f);
+                profile.MagmaDuration = Max(
+                    profile.MagmaDuration,
+                    3f);
+                profile.MagmaTickInterval = 0.5f;
+                profile.MagmaDamageRatio = Max(
+                    profile.MagmaDamageRatio,
+                    0.14f);
+            }
+        }
+
+        private static void ApplyCinderheart(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            if (card.Star >= 6)
+            {
+                profile.CinderheartRestoreInterval = 2f;
+                profile.CinderheartRestoreRatio = 0.02f;
+                profile.DotDamageMultiplier = Max(
+                    profile.DotDamageMultiplier,
+                    1.3f);
+                return;
+            }
+
+            string route = RouteAt(card, 3);
+            profile.BreachReductionRatio = System.Math.Min(
+                0.8f,
+                profile.BreachReductionRatio
+                    + (route == "cinderheartB" ? 0.3f : 0.18f));
+            profile.ThornsRatio = Max(
+                profile.ThornsRatio,
+                route == "cinderheartB" ? 0.15f : 0.25f);
+            if (route == "cinderheartC")
+            {
+                profile.ShieldHits += 1;
+                profile.ShieldRegenSeconds = 3f;
+            }
+            else
+            {
+                profile.BreachDotDamageRatio =
+                    route == "cinderheartB" ? 0.14f : 0.2f;
+                profile.BreachDotDuration = 3f;
+            }
+
+            if (card.Star >= 4)
+            {
+                profile.BreachReductionRatio = System.Math.Min(
+                    0.8f,
+                    profile.BreachReductionRatio * 1.2f);
+                profile.ThornsRatio *= 1.2f;
+                profile.BreachDotDamageRatio *= 1.2f;
+            }
+
+            string advanced = RouteAt(card, 5);
+            if (advanced == "cinderheartA2")
+            {
+                profile.ShieldBreakDamage = Max(
+                    profile.ShieldBreakDamage,
+                    40f);
+                profile.ShieldBreakKnockback = Max(
+                    profile.ShieldBreakKnockback,
+                    70f);
+            }
+            else if (advanced == "cinderheartB2")
+            {
+                profile.ScorchAuraRadius = Max(
+                    profile.ScorchAuraRadius,
+                    105f);
+                profile.ScorchAuraTickInterval = 0.5f;
+                profile.ScorchAuraDamageRatio = Max(
+                    profile.ScorchAuraDamageRatio,
+                    0.12f);
+            }
+            else if (advanced == "cinderheartC2")
+            {
+                profile.BreachDotDamageRatio = Max(
+                    profile.BreachDotDamageRatio,
+                    0.4f);
+                profile.BreachDotDuration = 4f;
+                profile.BreachBurstRadius = Max(
+                    profile.BreachBurstRadius,
+                    120f);
+            }
+        }
+
+        private static void ApplyAshHarvest(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            if (card.Star >= 6)
+            {
+                profile.WaveStartDamageMultiplier = 1.35f;
+                profile.WaveStartDamageDuration = 5f;
+                return;
+            }
+
+            string route = RouteAt(card, 3);
+            if (route == "ashHarvestB")
+            {
+                profile.DotKillExtraDropChance = 0.12f;
+            }
+            else if (route == "ashHarvestC")
+            {
+                profile.DotKillDropLifetimeMultiplier = 1.25f;
+                profile.DropLifetimeMultiplier = Max(
+                    profile.DropLifetimeMultiplier,
+                    1.25f);
+            }
+            else
+            {
+                profile.DotKillXpMultiplier = 1.2f;
+                profile.DotKillXpDuration = 3f;
+            }
+
+            if (card.Star >= 4)
+            {
+                profile.DotKillXpMultiplier =
+                    1f + (profile.DotKillXpMultiplier - 1f) * 1.2f;
+                profile.DotKillExtraDropChance *= 1.2f;
+            }
+
+            string advanced = RouteAt(card, 5);
+            if (advanced == "ashHarvestA2")
+            {
+                profile.ExpiryConvertRatio = Max(
+                    profile.ExpiryConvertRatio,
+                    0.65f);
+            }
+            else if (advanced == "ashHarvestB2")
+            {
+                profile.DotKillDamageMultiplier = 1.15f;
+                profile.DotKillDamageMaxStacks = 3;
+            }
+            else if (advanced == "ashHarvestC2")
+            {
+                profile.DotKillRestore = 2f;
             }
         }
 

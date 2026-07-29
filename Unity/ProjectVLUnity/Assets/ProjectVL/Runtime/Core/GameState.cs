@@ -57,6 +57,10 @@ namespace ProjectVL.Core
         public float PyrestormPulseRemaining { get; internal set; }
         public float StormcallPulseRemaining { get; internal set; }
         public float PermafrostPulseRemaining { get; internal set; }
+        public float MeteorPulseRemaining { get; internal set; }
+        public float MagmaPulseRemaining { get; internal set; }
+        public float FlashfirePulseRemaining { get; internal set; }
+        public float CinderheartPulseRemaining { get; internal set; }
         public float ImpactHitCooldownRemaining { get; internal set; }
         public float ThornsAuraTickRemaining { get; internal set; }
         public float BeamPulseRemaining { get; internal set; }
@@ -79,6 +83,11 @@ namespace ProjectVL.Core
         public float EconomyBuffRemaining { get; internal set; }
         public float EconomyXpMultiplier { get; internal set; } = 1f;
         public float EconomyDropRateMultiplier { get; internal set; } = 1f;
+        public float DamageMultiplier { get; internal set; } = 1f;
+        public float DamageBuffRemaining { get; internal set; }
+        public int DamageBuffStacks { get; internal set; }
+        public float DefenseDurabilityMultiplier { get; internal set; } = 1f;
+        public float DefenseBuffRemaining { get; internal set; }
         public float Experience { get; private set; }
         public float ExperienceFloor { get; private set; }
         public float ExperienceNeeded { get; private set; } = 10f;

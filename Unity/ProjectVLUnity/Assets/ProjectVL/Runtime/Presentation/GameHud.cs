@@ -1135,6 +1135,16 @@ namespace ProjectVL.Presentation
                     return "寒冰壁垒";
                 case "hoarfrostTithe":
                     return "霜冻贡赋";
+                case "meteor":
+                    return "陨星";
+                case "magmaPool":
+                    return "熔岩池";
+                case "flashfire":
+                    return "爆燃";
+                case "cinderheart":
+                    return "烬心";
+                case "ashHarvest":
+                    return "灰烬收割";
                 default:
                     return type;
             }

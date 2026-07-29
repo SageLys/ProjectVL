@@ -120,6 +120,21 @@ namespace ProjectVL.Systems
                 case "hoarfrostTithe":
                     CastHoarfrostTithe(state, card.Star);
                     return true;
+                case "meteor":
+                    CastMeteor(state, card.Star, point);
+                    return true;
+                case "magmaPool":
+                    CastMagmaPool(state, card.Star, point);
+                    return true;
+                case "flashfire":
+                    CastFlashfire(state, card.Star, point);
+                    return true;
+                case "cinderheart":
+                    CastCinderheart(state, card.Star, point);
+                    return true;
+                case "ashHarvest":
+                    CastAshHarvest(state, card.Star);
+                    return true;
                 default:
                     return false;
             }
@@ -154,7 +169,12 @@ namespace ProjectVL.Systems
                     || card.Type == "permafrost"
                     || card.Type == "iceTomb"
                     || card.Type == "frozenBulwark"
-                    || card.Type == "hoarfrostTithe");
+                    || card.Type == "hoarfrostTithe"
+                    || card.Type == "meteor"
+                    || card.Type == "magmaPool"
+                    || card.Type == "flashfire"
+                    || card.Type == "cinderheart"
+                    || card.Type == "ashHarvest");
         }
 
         public void StepTurret(GameState state, float deltaTime)
@@ -1409,11 +1429,111 @@ namespace ProjectVL.Systems
                 StarValue(star, 3f, 4f, 5f));
         }
 
+        private void CastMeteor(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            int count = star >= 6 ? 3 : star >= 3 ? 2 : 1;
+            float radius = StarValue(star, 90f, 110f, 140f);
+            float damage = BaseDamage(state)
+                * StarValue(star, 3f, 3.5f, 4f)
+                * RelicMultiplier(state, "meteor", "effectDamageMul");
+            for (int index = 0; index < count; index++)
+            {
+                float offset = (index - (count - 1) / 2f) * radius * 0.45f;
+                DamageArea(
+                    state,
+                    point + new Float2(offset, 0f),
+                    radius,
+                    damage,
+                    -1,
+                    0f,
+                    0f,
+                    0f,
+                    star >= 6 ? 0.3f : 0.4f);
+            }
+        }
+
+        private void CastMagmaPool(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            float radius = StarValue(star, 90f, 135f, 185f);
+            float duration = StarValue(star, 3f, 4f, 5f);
+            state.GroundZones.Add(new GroundZoneState(
+                point,
+                radius,
+                duration,
+                0.5f,
+                BaseDamage(state)
+                    * StarValue(star, 0.2f, 0.28f, 0.4f)
+                    * RelicMultiplier(state, "magmaPool", "dotDamageMul"),
+                star >= 3 ? StarValue(star, 0f, 0.1f, 0.18f) : 0f,
+                0.6f));
+        }
+
+        private void CastFlashfire(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            float radius = StarValue(star, 90f, 135f, 185f);
+            ApplyAreaDot(
+                state,
+                point,
+                radius,
+                BaseDamage(state)
+                    * StarValue(star, 0.12f, 0.2f, 0.3f),
+                0.5f,
+                StarValue(star, 2f, 3f, 4f));
+            ApplyAreaKnockback(
+                state,
+                point,
+                radius,
+                StarValue(star, 70f, 110f, 160f),
+                StarValue(star, 0f, 0.3f, 0.6f));
+        }
+
+        private void CastCinderheart(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            state.DefenseDurabilityMultiplier =
+                StarValue(star, 1.2f, 1.35f, 1.55f);
+            state.DefenseBuffRemaining = Math.Max(
+                state.DefenseBuffRemaining,
+                StarValue(star, 3f, 4f, 5f));
+            state.GroundZones.Add(new GroundZoneState(
+                point,
+                StarValue(star, 90f, 135f, 185f),
+                StarValue(star, 3f, 4f, 5f),
+                0.5f,
+                BaseDamage(state)
+                    * StarValue(star, 0.15f, 0.22f, 0.32f),
+                0f,
+                0f));
+        }
+
+        private void CastAshHarvest(GameState state, int star)
+        {
+            state.EconomyXpMultiplier =
+                StarValue(star, 1.15f, 1.3f, 1.5f);
+            state.EconomyDropRateMultiplier =
+                state.EconomyXpMultiplier;
+            state.EconomyBuffRemaining = Math.Max(
+                state.EconomyBuffRemaining,
+                StarValue(star, 3f, 4f, 5f));
+        }
+
         private float BaseDamage(GameState state)
         {
             return Math.Max(
                 0f,
-                _combat.defaults.damage + state.RunDamageAdd);
+                (_combat.defaults.damage + state.RunDamageAdd)
+                    * state.DamageMultiplier);
         }
 
         private float BaseFireRate(GameState state)
@@ -1483,6 +1603,29 @@ namespace ProjectVL.Systems
                 {
                     state.EconomyXpMultiplier = 1f;
                     state.EconomyDropRateMultiplier = 1f;
+                }
+            }
+
+            if (state.DefenseBuffRemaining > 0f)
+            {
+                state.DefenseBuffRemaining = Math.Max(
+                    0f,
+                    state.DefenseBuffRemaining - deltaTime);
+                if (state.DefenseBuffRemaining <= 0f)
+                {
+                    state.DefenseDurabilityMultiplier = 1f;
+                }
+            }
+
+            if (state.DamageBuffRemaining > 0f)
+            {
+                state.DamageBuffRemaining = Math.Max(
+                    0f,
+                    state.DamageBuffRemaining - deltaTime);
+                if (state.DamageBuffRemaining <= 0f)
+                {
+                    state.DamageMultiplier = 1f;
+                    state.DamageBuffStacks = 0;
                 }
             }
 
@@ -1626,6 +1769,10 @@ namespace ProjectVL.Systems
             ApplyPyrestorm(state, profile, deltaTime);
             ApplyStormcall(state, profile, deltaTime);
             ApplyPermafrost(state, profile, deltaTime);
+            ApplyMeteor(state, profile, deltaTime);
+            ApplyMagmaPool(state, profile, deltaTime);
+            ApplyFlashfire(state, profile, deltaTime);
+            ApplyCinderheart(state, profile, deltaTime);
             ApplyDecoyAura(state, profile);
             ApplyMirrorTurret(state, profile, deltaTime);
             ApplyHarvestMergePulse(state, profile);
@@ -1670,6 +1817,11 @@ namespace ProjectVL.Systems
                     ApplyOnHitStun(state, enemy, bullet);
                     ApplyOnHitFireRate(state, bullet);
                     ApplyImpactAndSplitEffects(
+                        state,
+                        bullet,
+                        hitPosition,
+                        enemy.Id);
+                    ApplyMeteorHit(
                         state,
                         bullet,
                         hitPosition,
@@ -1799,6 +1951,8 @@ namespace ProjectVL.Systems
             float damage)
         {
             bool killedWhileFrozen = enemy.FrozenRemaining > 0f;
+            bool killedWhileDot = enemy.DotRemaining > 0f
+                || enemy.SecondaryDotRemaining > 0f;
             bool killedWhileControlled =
                 enemy.FrozenRemaining > 0f
                 || enemy.StunnedRemaining > 0f
@@ -1828,6 +1982,10 @@ namespace ProjectVL.Systems
                 float experience = enemy.XpReward
                     * profile.XpMultiplier
                     * state.KillXpBuffMultiplier;
+                if (killedWhileDot)
+                {
+                    experience *= profile.DotKillXpMultiplier;
+                }
                 if (_progression != null)
                 {
                     _progression.AddExperience(state, experience);
@@ -1845,6 +2003,13 @@ namespace ProjectVL.Systems
                     state,
                     profile,
                     enemy.Position);
+                if (killedWhileDot)
+                {
+                    ApplyDotKillCardEffects(
+                        state,
+                        profile,
+                        enemy.Position);
+                }
                 if (killedWhileFrozen
                     && profile.FrozenKillRestore > 0f)
                 {
@@ -2540,12 +2705,30 @@ namespace ProjectVL.Systems
                 profile.StormcallInterval;
             state.PermafrostPulseRemaining =
                 profile.PermafrostInterval;
+            state.MeteorPulseRemaining =
+                profile.MeteorInterval;
+            state.MagmaPulseRemaining =
+                profile.MagmaInterval > 0f
+                    ? profile.MagmaInterval
+                    : profile.MagmaTickInterval;
+            state.FlashfirePulseRemaining =
+                profile.FlashfireInterval;
+            state.CinderheartPulseRemaining =
+                profile.CinderheartRestoreInterval;
             state.GroundZones.Clear();
             state.ScorchAuraTickRemaining =
                 profile.ScorchAuraTickInterval;
             state.SanctumPulseRemaining =
                 profile.SanctumPulseInterval;
             state.BeamVisualRemaining = 0f;
+            if (profile.WaveStartDamageMultiplier > 1f)
+            {
+                state.DamageMultiplier =
+                    profile.WaveStartDamageMultiplier;
+                state.DamageBuffRemaining =
+                    profile.WaveStartDamageDuration;
+                state.DamageBuffStacks = 1;
+            }
 
             state.DecoyActive = profile.DecoyHp > 0f;
             state.DecoyMaxHp = profile.DecoyHp;
@@ -3150,6 +3333,304 @@ namespace ProjectVL.Systems
             }
         }
 
+        private void ApplyDotKillCardEffects(
+            GameState state,
+            CardCombatProfile profile,
+            Float2 deathPosition)
+        {
+            if (profile.DotKillExtraDropChance > 0f)
+            {
+                _drops?.TrySpawnBonus(
+                    state,
+                    deathPosition,
+                    profile.DotKillExtraDropChance);
+            }
+
+            if (profile.DotKillRestore > 0f)
+            {
+                state.RestoreHp(profile.DotKillRestore);
+            }
+
+            if (profile.DotKillDamageMultiplier > 1f
+                && profile.DotKillDamageMaxStacks > 0)
+            {
+                state.DamageBuffStacks = Math.Min(
+                    profile.DotKillDamageMaxStacks,
+                    state.DamageBuffStacks + 1);
+                state.DamageMultiplier = (float)Math.Pow(
+                    profile.DotKillDamageMultiplier,
+                    state.DamageBuffStacks);
+                state.DamageBuffRemaining = Math.Max(
+                    state.DamageBuffRemaining,
+                    3f);
+            }
+
+            if (profile.DotKillXpMultiplier > 1f)
+            {
+                state.KillXpBuffMultiplier = Math.Max(
+                    state.KillXpBuffMultiplier,
+                    profile.DotKillXpMultiplier);
+                state.KillXpBuffRemaining = Math.Max(
+                    state.KillXpBuffRemaining,
+                    profile.DotKillXpDuration);
+            }
+        }
+
+        private void ApplyMeteorHit(
+            GameState state,
+            BulletState bullet,
+            Float2 hitPosition,
+            int excludedEnemyId)
+        {
+            CardCombatProfile profile = CardEffectResolver.Resolve(state);
+            if (profile.MeteorChance <= 0f)
+            {
+                return;
+            }
+
+            float roll = ((bullet.Id * 37) % 100) / 100f;
+            if (roll >= profile.MeteorChance)
+            {
+                return;
+            }
+
+            for (int index = 0;
+                index < Math.Max(1, profile.MeteorCount);
+                index++)
+            {
+                float offset = (
+                    index - (profile.MeteorCount - 1) / 2f)
+                    * profile.MeteorRadius * 0.45f;
+                Float2 center =
+                    hitPosition + new Float2(offset, 0f);
+                DamageArea(
+                    state,
+                    center,
+                    profile.MeteorRadius,
+                    BaseDamage(state) * profile.MeteorDamageRatio,
+                    excludedEnemyId,
+                    0f,
+                    0f,
+                    0f,
+                    profile.MeteorFalloff);
+                if (profile.MeteorZoneDuration > 0f)
+                {
+                    state.GroundZones.Add(new GroundZoneState(
+                        center,
+                        profile.MeteorRadius,
+                        profile.MeteorZoneDuration,
+                        0.5f,
+                        BaseDamage(state)
+                            * profile.MeteorZoneDamageRatio,
+                        0f,
+                        0f));
+                }
+            }
+        }
+
+        private void ApplyMeteor(
+            GameState state,
+            CardCombatProfile profile,
+            float deltaTime)
+        {
+            if (profile.MeteorInterval <= 0f)
+            {
+                return;
+            }
+
+            state.MeteorPulseRemaining -= deltaTime;
+            if (state.MeteorPulseRemaining > 0f)
+            {
+                return;
+            }
+
+            EnemyState target = FindTarget(state);
+            if (target == null)
+            {
+                return;
+            }
+
+            for (int index = 0; index < profile.MeteorCount; index++)
+            {
+                float offset = (
+                    index - (profile.MeteorCount - 1) / 2f)
+                    * profile.MeteorRadius * 0.45f;
+                DamageArea(
+                    state,
+                    target.Position + new Float2(offset, 0f),
+                    profile.MeteorRadius,
+                    BaseDamage(state) * profile.MeteorDamageRatio,
+                    -1,
+                    0f,
+                    0f,
+                    0f,
+                    profile.MeteorFalloff);
+            }
+
+            state.MeteorPulseRemaining += profile.MeteorInterval;
+        }
+
+        private void ApplyMagmaPool(
+            GameState state,
+            CardCombatProfile profile,
+            float deltaTime)
+        {
+            if (profile.MagmaInterval <= 0f
+                && profile.MagmaAuraRadius <= 0f)
+            {
+                return;
+            }
+
+            state.MagmaPulseRemaining -= deltaTime;
+            if (state.MagmaPulseRemaining > 0f)
+            {
+                return;
+            }
+
+            if (profile.MagmaAuraRadius > 0f)
+            {
+                DamageArea(
+                    state,
+                    TurretPosition,
+                    profile.MagmaAuraRadius,
+                    BaseDamage(state)
+                        * profile.MagmaDamageRatio
+                        * profile.DotDamageMultiplier,
+                    -1,
+                    0f,
+                    0f);
+                foreach (EnemyState enemy in state.Enemies)
+                {
+                    if (Float2.Distance(
+                        TurretPosition,
+                        enemy.Position) <= profile.MagmaAuraRadius)
+                    {
+                        enemy.VulnerableRatio = Math.Max(
+                            enemy.VulnerableRatio,
+                            profile.MagmaVulnerableRatio);
+                        enemy.VulnerableRemaining = Math.Max(
+                            enemy.VulnerableRemaining,
+                            0.6f);
+                    }
+                }
+                state.MagmaPulseRemaining +=
+                    profile.MagmaTickInterval;
+                return;
+            }
+
+            EnemyState target = FindTarget(state);
+            if (target == null)
+            {
+                return;
+            }
+
+            for (int index = 0;
+                index < Math.Max(1, profile.MagmaZoneCount);
+                index++)
+            {
+                float offset = (
+                    index - (profile.MagmaZoneCount - 1) / 2f)
+                    * profile.MagmaRadius;
+                state.GroundZones.Add(new GroundZoneState(
+                    target.Position + new Float2(offset, 0f),
+                    profile.MagmaRadius,
+                    profile.MagmaDuration,
+                    profile.MagmaTickInterval,
+                    BaseDamage(state)
+                        * profile.MagmaDamageRatio
+                        * profile.DotDamageMultiplier,
+                    profile.MagmaVulnerableRatio,
+                    0.6f,
+                    profile.MagmaSlowRatio,
+                    0.7f));
+            }
+
+            state.MagmaPulseRemaining += profile.MagmaInterval;
+        }
+
+        private void ApplyFlashfire(
+            GameState state,
+            CardCombatProfile profile,
+            float deltaTime)
+        {
+            if (profile.FlashfireInterval <= 0f)
+            {
+                return;
+            }
+
+            state.FlashfirePulseRemaining -= deltaTime;
+            if (state.FlashfirePulseRemaining > 0f)
+            {
+                return;
+            }
+
+            ApplyAreaKnockback(
+                state,
+                TurretPosition,
+                profile.FlashfireRadius,
+                profile.FlashfireKnockback,
+                0f);
+            ApplyAreaDot(
+                state,
+                TurretPosition,
+                profile.FlashfireRadius,
+                BaseDamage(state)
+                    * profile.FlashfireDotRatio
+                    * profile.DotDamageMultiplier,
+                0.5f,
+                profile.FlashfireDotDuration);
+            state.FlashfirePulseRemaining +=
+                profile.FlashfireInterval;
+        }
+
+        private void ApplyCinderheart(
+            GameState state,
+            CardCombatProfile profile,
+            float deltaTime)
+        {
+            if (profile.CinderheartRestoreInterval <= 0f)
+            {
+                return;
+            }
+
+            state.CinderheartPulseRemaining -= deltaTime;
+            if (state.CinderheartPulseRemaining > 0f)
+            {
+                return;
+            }
+
+            state.RestoreHp(
+                state.MaxHp * profile.CinderheartRestoreRatio);
+            state.CinderheartPulseRemaining +=
+                profile.CinderheartRestoreInterval;
+        }
+
+        private static void ApplyAreaDot(
+            GameState state,
+            Float2 center,
+            float radius,
+            float damagePerTick,
+            float tickInterval,
+            float duration)
+        {
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                if (Float2.Distance(center, enemy.Position) > radius)
+                {
+                    continue;
+                }
+
+                enemy.DotDamagePerTick = Math.Max(
+                    enemy.DotDamagePerTick,
+                    damagePerTick);
+                enemy.DotTickInterval = tickInterval;
+                enemy.DotTickRemaining = tickInterval;
+                enemy.DotRemaining = Math.Max(
+                    enemy.DotRemaining,
+                    duration);
+            }
+        }
+
         private void ApplyPyrestorm(
             GameState state,
             CardCombatProfile profile,
@@ -3294,10 +3775,23 @@ namespace ProjectVL.Systems
 
             state.ApplyDamage(
                 incomingDamage
-                * (1f - profile.BreachReductionRatio));
+                * (1f - profile.BreachReductionRatio)
+                / Math.Max(1f, state.DefenseDurabilityMultiplier));
             ApplyBreachReaction(state, profile);
             ApplyImpactBreachReaction(state, profile);
             ApplyThornsAdvancedBreachEffects(state, profile);
+            if (profile.BreachDotDamageRatio > 0f)
+            {
+                ApplyAreaDot(
+                    state,
+                    TurretPosition,
+                    Math.Max(100f, profile.BreachBurstRadius),
+                    BaseDamage(state)
+                        * profile.BreachDotDamageRatio
+                        * profile.DotDamageMultiplier,
+                    0.5f,
+                    profile.BreachDotDuration);
+            }
         }
 
         private void ApplyThornsAdvancedBreachEffects(
