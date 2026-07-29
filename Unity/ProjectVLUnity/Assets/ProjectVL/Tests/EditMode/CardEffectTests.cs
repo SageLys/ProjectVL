@@ -1594,6 +1594,59 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void DecoyConsumableBecomesTemporaryMirrorAtSixStars()
+        {
+            CardState card = _state.CreateCard("decoy", 6);
+            Float2 point = new Float2(200f, 200f);
+            AddEnemy(point + new Float2(50f, 0f), 100f);
+
+            bool cast = _system.CastConsumable(
+                _state,
+                card,
+                point);
+            _system.StepPassives(_state, 0f);
+
+            Assert.That(cast, Is.True);
+            Assert.That(_state.DecoyActive, Is.True);
+            Assert.That(_state.DecoyIsMirrorTurret, Is.True);
+            Assert.That(_state.DecoyHp, Is.EqualTo(9999f));
+            Assert.That(_state.DecoyLifeRemaining, Is.EqualTo(5f));
+            Assert.That(_state.Bullets, Has.Count.EqualTo(1));
+            Assert.That(_state.Bullets[0].Damage, Is.EqualTo(10.8f));
+
+            _system.StepPassives(_state, 5f);
+
+            Assert.That(_state.DecoyActive, Is.False);
+        }
+
+        [Test]
+        public void HarvestConsumableSpawnsFourDropsAtSixStars()
+        {
+            CardState card = _state.CreateCard("harvest", 6);
+            var drops = new DropSystem(
+                new EconomyConfig(),
+                new ConstantRandomSource(0.5f));
+            var system = new CombatSystem(
+                _combat,
+                _enemies,
+                drops);
+
+            bool cast = system.CastConsumable(
+                _state,
+                card,
+                new Float2(200f, 200f));
+
+            Assert.That(cast, Is.True);
+            Assert.That(_state.GroundDrops, Has.Count.EqualTo(4));
+            Assert.That(
+                _state.GroundDrops.FindAll(drop => drop.Star == 1),
+                Has.Count.EqualTo(3));
+            Assert.That(
+                _state.GroundDrops.FindAll(drop => drop.Star == 2),
+                Has.Count.EqualTo(1));
+        }
+
+        [Test]
         public void FrozenThunderShatterFreezesNearbyEnemies()
         {
             EquipResolved("frozenThunder", 6);

@@ -77,6 +77,35 @@ namespace ProjectVL.Systems
             return Spawn(state, position, CardTypes[typeIndex], 1);
         }
 
+        public GroundDropState SpawnBonusDrop(
+            GameState state,
+            Float2 position,
+            int star)
+        {
+            int typeIndex = Math.Min(
+                CardTypes.Length - 1,
+                (int)(_random.NextFloat() * CardTypes.Length));
+            return Spawn(
+                state,
+                position,
+                CardTypes[typeIndex],
+                Math.Max(1, star));
+        }
+
+        public GroundDropState SpawnWeightedBonusDrop(
+            GameState state,
+            Float2 position,
+            float oneStarWeight,
+            float twoStarWeight)
+        {
+            float total = Math.Max(
+                0.0001f,
+                oneStarWeight + twoStarWeight);
+            int star = _random.NextFloat() * total
+                < oneStarWeight ? 1 : 2;
+            return SpawnBonusDrop(state, position, star);
+        }
+
         public GroundDropState TrySpawnBonus(
             GameState state,
             Float2 position,

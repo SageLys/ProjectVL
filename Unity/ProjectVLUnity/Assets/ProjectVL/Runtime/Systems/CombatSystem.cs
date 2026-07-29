@@ -61,6 +61,12 @@ namespace ProjectVL.Systems
                 case "thorns":
                     CastThorns(state, card.Star, point);
                     return true;
+                case "decoy":
+                    CastDecoy(state, card.Star, point);
+                    return true;
+                case "harvest":
+                    CastHarvest(state, card.Star, point);
+                    return true;
                 default:
                     return false;
             }
@@ -77,7 +83,9 @@ namespace ProjectVL.Systems
                     || card.Type == "impact"
                     || card.Type == "sanctum"
                     || card.Type == "aegis"
-                    || card.Type == "thorns");
+                    || card.Type == "thorns"
+                    || card.Type == "decoy"
+                    || card.Type == "harvest");
         }
 
         public void StepTurret(GameState state, float deltaTime)
@@ -475,6 +483,92 @@ namespace ProjectVL.Systems
                 star >= 3 && star < 6 ? 2f : 1f));
         }
 
+        private void CastDecoy(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            state.DecoyActive = true;
+            state.DecoyPosition = point;
+            state.DecoyLifeRemaining =
+                StarValue(star, 4f, 5f, 5f);
+            state.DecoyHp =
+                StarValue(star, 30f, 50f, 9999f);
+            state.DecoyMaxHp = state.DecoyHp;
+            state.DecoyTauntRadius =
+                star >= 6 ? 160f
+                    : StarValue(star, 120f, 160f, 160f);
+            state.DecoyExplodeDamageMultiplier =
+                star >= 3 && star < 6 ? 1.5f : 0f;
+            state.DecoyExplodeKnockback =
+                star >= 3 && star < 6 ? 90f : 0f;
+            state.DecoyIsMirrorTurret = star >= 6;
+            state.DecoyDamageRatio = star >= 6 ? 0.6f : 0f;
+            state.DecoyFireInterval = star >= 6
+                ? 1f / _combat.defaults.fireRate
+                : 0f;
+            state.DecoyFireRangeRatio = star >= 6 ? 1f : 0f;
+            state.DecoyFireCooldown = 0f;
+        }
+
+        private void CastHarvest(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            if (_drops == null)
+            {
+                return;
+            }
+
+            if (star >= 6)
+            {
+                SpawnHarvestDrops(state, point, 1, 2);
+                SpawnHarvestDrops(state, point, 3, 1);
+                return;
+            }
+
+            int count = star >= 3 ? 3 : 2;
+            if (star >= 3)
+            {
+                for (int index = 0; index < count; index++)
+                {
+                    float offset =
+                        (index - (count - 1) / 2f) * 28f;
+                    _drops.SpawnWeightedBonusDrop(
+                        state,
+                        point + new Float2(offset, 0f),
+                        4f,
+                        1f);
+                }
+
+                return;
+            }
+
+            SpawnHarvestDrops(
+                state,
+                point,
+                count,
+                1);
+        }
+
+        private void SpawnHarvestDrops(
+            GameState state,
+            Float2 point,
+            int count,
+            int baseStar)
+        {
+            for (int index = 0; index < count; index++)
+            {
+                float offset =
+                    (index - (count - 1) / 2f) * 28f;
+                _drops.SpawnBonusDrop(
+                    state,
+                    point + new Float2(offset, 0f),
+                    baseStar);
+            }
+        }
+
         private static float StarValue(
             int star,
             float oneStar,
@@ -529,6 +623,18 @@ namespace ProjectVL.Systems
                 {
                     state.KillXpBuffMultiplier = 1f;
                     state.KillXpBuffStacks = 0;
+                }
+            }
+
+            if (state.DecoyActive && state.DecoyLifeRemaining > 0f)
+            {
+                state.DecoyLifeRemaining = Math.Max(
+                    0f,
+                    state.DecoyLifeRemaining - deltaTime);
+                if (state.DecoyLifeRemaining <= 0f)
+                {
+                    state.DecoyActive = false;
+                    state.DecoyIsMirrorTurret = false;
                 }
             }
 
@@ -1492,6 +1598,11 @@ namespace ProjectVL.Systems
             state.DecoyIsMirrorTurret =
                 profile.DecoyMirrorTurret;
             state.DecoyFireCooldown = 0f;
+            state.DecoyLifeRemaining = 0f;
+            state.DecoyDamageRatio = profile.DecoyDamageRatio;
+            state.DecoyFireInterval = profile.DecoyFireInterval;
+            state.DecoyFireRangeRatio =
+                profile.DecoyFireRangeRatio;
             state.DecoyPosition = TurretPosition
                 + new Float2(profile.DecoyDistance, 0f);
             state.SecondaryDecoyActive =
@@ -2246,8 +2357,8 @@ namespace ProjectVL.Systems
             float deltaTime)
         {
             if (!state.DecoyActive
-                || !profile.DecoyMirrorTurret
-                || profile.DecoyFireInterval <= 0f)
+                || !state.DecoyIsMirrorTurret
+                || state.DecoyFireInterval <= 0f)
             {
                 return;
             }
@@ -2262,7 +2373,7 @@ namespace ProjectVL.Systems
                 state,
                 state.DecoyPosition,
                 _combat.defaults.range
-                    * profile.DecoyFireRangeRatio,
+                    * state.DecoyFireRangeRatio,
                 new System.Collections.Generic.HashSet<int>());
             if (target == null)
             {
@@ -2278,9 +2389,9 @@ namespace ProjectVL.Systems
                 _combat.bullet.radius,
                 _combat.bullet.life,
                 _combat.defaults.damage
-                    * profile.DecoyDamageRatio));
+                    * state.DecoyDamageRatio));
             state.DecoyFireCooldown +=
-                profile.DecoyFireInterval;
+                state.DecoyFireInterval;
         }
 
         private void ApplyHarvestMergePulse(
