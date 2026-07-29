@@ -160,6 +160,8 @@ namespace ProjectVL.Presentation
             ProgressionConfig progression = GameConfigLoader.LoadProgression();
             GodsConfig gods = GameConfigLoader.LoadGods();
             CardsConfig cards = GameConfigLoader.LoadCards();
+            CardAffixesConfig affixes =
+                GameConfigLoader.LoadCardAffixes();
             RelicsConfig relics = GameConfigLoader.LoadRelics();
             BountyConfig bounty = GameConfigLoader.LoadBounty();
             WaveRewardsConfig waveRewards =
@@ -169,6 +171,9 @@ namespace ProjectVL.Presentation
                 gods,
                 recipes);
             var cardCatalog = new CardCatalog(cards);
+            var cardAffixCatalog = new CardAffixCatalog(
+                affixes,
+                cardCatalog);
 
             GameState state = GameStateFactory.Create(combat, economy);
             state.AttachSettlement(
@@ -176,8 +181,13 @@ namespace ProjectVL.Presentation
                     progression,
                     relics,
                     waves.totalWaves));
-            _recipeSystem = new RecipeSystem(recipes);
             var random = new SystemRandomSource(System.Environment.TickCount);
+            var cardAffixSystem = new CardAffixSystem(
+                cardAffixCatalog,
+                random);
+            _recipeSystem = new RecipeSystem(
+                recipes,
+                cardAffixSystem);
             var difficultySystem =
                 new DifficultySystem(difficulty, waves.totalWaves);
             var cardPoolSystem = new CardPoolSystem(
@@ -188,7 +198,8 @@ namespace ProjectVL.Presentation
             _cardInventory = new CardInventorySystem(
                 economy,
                 cardPoolSystem,
-                cardCatalog);
+                cardCatalog,
+                cardAffixSystem);
             state.AttachInventory(_cardInventory);
             var enemyFactory = new EnemyFactory(
                 combat,

@@ -11,6 +11,8 @@ namespace ProjectVL.Core
         public bool Provisional { get; internal set; }
         public List<string> EvolutionPath { get; } =
             new List<string>();
+        public List<CardAffixRoll> Affixes { get; } =
+            new List<CardAffixRoll>();
 
         public CardState(int id, string type, int star)
         {

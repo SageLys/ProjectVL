@@ -118,6 +118,8 @@ namespace ProjectVL.Core
             new List<string>();
         public Dictionary<string, CardTypeRunStats> CardTypeRunStats { get; } =
             new Dictionary<string, CardTypeRunStats>();
+        public Dictionary<string, List<CardAffixRoll>> CardAffixRolls { get; } =
+            new Dictionary<string, List<CardAffixRoll>>();
         public int OrdinaryDropCount { get; internal set; }
         public GodChoice PendingGodChoice { get; private set; }
         public int LastGodDecisionAfterWave { get; internal set; } = -1;

@@ -7,10 +7,14 @@ namespace ProjectVL.Systems
     public sealed class RecipeSystem
     {
         private readonly EvolutionRecipesConfig _config;
+        private readonly CardAffixSystem _affixes;
 
-        public RecipeSystem(EvolutionRecipesConfig config)
+        public RecipeSystem(
+            EvolutionRecipesConfig config,
+            CardAffixSystem affixes = null)
         {
             _config = config;
+            _affixes = affixes;
         }
 
         public string FirstAvailableRecipe(GameState state)
@@ -72,9 +76,11 @@ namespace ProjectVL.Systems
 
             Slots(state, first.Kind)[first.Index] = null;
             Slots(state, second.Kind)[second.Index] = null;
-            state.Hand[outputSlot] = state.CreateCard(
+            CardState output = state.CreateCard(
                 recipe.outputCardId,
                 recipe.outputStar);
+            _affixes?.Attach(state, output);
+            state.Hand[outputSlot] = output;
             state.RecordCardCollected(
                 recipe.outputCardId,
                 recipe.outputStar);

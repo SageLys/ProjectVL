@@ -9,16 +9,19 @@ namespace ProjectVL.Systems
         private readonly EconomyConfig _config;
         private readonly CardPoolSystem _cardPool;
         private readonly CardCatalog _catalog;
+        private readonly CardAffixSystem _affixes;
         private int _nextRewardType;
 
         public CardInventorySystem(
             EconomyConfig config,
             CardPoolSystem cardPool = null,
-            CardCatalog catalog = null)
+            CardCatalog catalog = null,
+            CardAffixSystem affixes = null)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _cardPool = cardPool;
             _catalog = catalog ?? CardCatalog.Default;
+            _affixes = affixes;
         }
 
         public bool GrantReward(GameState state, RunReward reward)
@@ -73,6 +76,7 @@ namespace ProjectVL.Systems
             }
 
             CardState card = state.CreateCard(type, ClampStar(star));
+            _affixes?.Attach(state, card);
             state.Hand[slot] = card;
             state.RecordCardCollected(type, card.Star);
             QueueEvolutionChoice(state, card);
