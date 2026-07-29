@@ -67,6 +67,23 @@ namespace ProjectVL.Systems
                 case "harvest":
                     CastHarvest(state, card.Star, point);
                     return true;
+                case "frozenThunder":
+                    return CastFrozenThunder(state, point);
+                case "solarLance":
+                    CastSolarLance(state, point);
+                    return true;
+                case "avalanche":
+                    CastAvalanche(state, point);
+                    return true;
+                case "pyrestorm":
+                    CastPyrestorm(state, point);
+                    return true;
+                case "crownOfThorns":
+                    CastCrownOfThorns(state, point);
+                    return true;
+                case "goldenIdol":
+                    CastGoldenIdol(state, point);
+                    return true;
                 default:
                     return false;
             }
@@ -85,7 +102,13 @@ namespace ProjectVL.Systems
                     || card.Type == "aegis"
                     || card.Type == "thorns"
                     || card.Type == "decoy"
-                    || card.Type == "harvest");
+                    || card.Type == "harvest"
+                    || card.Type == "frozenThunder"
+                    || card.Type == "solarLance"
+                    || card.Type == "avalanche"
+                    || card.Type == "pyrestorm"
+                    || card.Type == "crownOfThorns"
+                    || card.Type == "goldenIdol");
         }
 
         public void StepTurret(GameState state, float deltaTime)
@@ -566,6 +589,247 @@ namespace ProjectVL.Systems
                     state,
                     point + new Float2(offset, 0f),
                     baseStar);
+            }
+        }
+
+        private bool CastFrozenThunder(
+            GameState state,
+            Float2 point)
+        {
+            EnemyState first = null;
+            float closest = 190f;
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                float distance = Float2.Distance(point, enemy.Position);
+                if (distance <= closest)
+                {
+                    closest = distance;
+                    first = enemy;
+                }
+            }
+
+            if (first == null)
+            {
+                return false;
+            }
+
+            var visited =
+                new System.Collections.Generic.HashSet<int>();
+            EnemyState target = first;
+            Float2 origin = first.Position;
+            float damage = _combat.defaults.damage;
+            for (int hit = 0;
+                hit <= 14 && target != null;
+                hit++)
+            {
+                visited.Add(target.Id);
+                Float2 nextOrigin = target.Position;
+                DamageEnemy(state, target, damage);
+                if (state.Enemies.Contains(target))
+                {
+                    target.FrozenRemaining = Math.Max(
+                        target.FrozenRemaining,
+                        2.5f);
+                }
+
+                origin = nextOrigin;
+                damage *= 0.9f;
+                target = FindClosestChainTarget(
+                    state,
+                    origin,
+                    190f,
+                    visited);
+            }
+
+            DamageArea(
+                state,
+                point,
+                120f,
+                _combat.defaults.damage * 3.5f,
+                -1,
+                0f,
+                0f);
+            return true;
+        }
+
+        private void CastSolarLance(
+            GameState state,
+            Float2 point)
+        {
+            Float2 direction =
+                (point - TurretPosition).Normalized();
+            if (direction.Length <= 0.000001f)
+            {
+                direction = new Float2(1f, 0f);
+            }
+
+            float damage = _combat.defaults.damage * 7f;
+            var targets =
+                new System.Collections.Generic.List<EnemyState>();
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                Float2 relative = enemy.Position - TurretPosition;
+                float along = relative.X * direction.X
+                    + relative.Y * direction.Y;
+                float perpendicular = Math.Abs(
+                    relative.X * direction.Y
+                    - relative.Y * direction.X);
+                if (along >= 0f
+                    && along <= _combat.defaults.range
+                    && perpendicular <= 19f + enemy.Radius)
+                {
+                    targets.Add(enemy);
+                }
+            }
+
+            foreach (EnemyState enemy in targets)
+            {
+                DamageEnemy(state, enemy, damage);
+                if (!state.Enemies.Contains(enemy))
+                {
+                    continue;
+                }
+
+                enemy.DotDamagePerTick = Math.Max(
+                    enemy.DotDamagePerTick,
+                    damage * 0.35f);
+                enemy.DotTickInterval = 0.5f;
+                enemy.DotTickRemaining = 0.5f;
+                enemy.DotRemaining = Math.Max(
+                    enemy.DotRemaining,
+                    5f);
+                enemy.VulnerableRatio = Math.Max(
+                    enemy.VulnerableRatio,
+                    0.2f);
+                enemy.VulnerableRemaining = Math.Max(
+                    enemy.VulnerableRemaining,
+                    3f);
+            }
+
+            state.BeamVisualStart = TurretPosition;
+            state.BeamVisualEnd = TurretPosition
+                + direction * _combat.defaults.range;
+            state.BeamVisualWidth = 38f;
+            state.BeamVisualRemaining = 0.25f;
+        }
+
+        private void CastAvalanche(
+            GameState state,
+            Float2 point)
+        {
+            var targets =
+                new System.Collections.Generic.List<EnemyState>();
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                if (Float2.Distance(point, enemy.Position) <= 210f)
+                {
+                    targets.Add(enemy);
+                }
+            }
+
+            foreach (EnemyState enemy in targets)
+            {
+                DamageEnemy(
+                    state,
+                    enemy,
+                    _combat.defaults.damage * 5.5f);
+                if (!state.Enemies.Contains(enemy))
+                {
+                    continue;
+                }
+
+                enemy.FrozenRemaining = Math.Max(
+                    enemy.FrozenRemaining,
+                    2f);
+                enemy.Position +=
+                    (enemy.Position - point).Normalized() * 200f;
+            }
+        }
+
+        private void CastPyrestorm(
+            GameState state,
+            Float2 point)
+        {
+            for (int strike = 0; strike < 3; strike++)
+            {
+                DamageArea(
+                    state,
+                    point,
+                    160f,
+                    _combat.defaults.damage * 5f,
+                    -1,
+                    0f,
+                    0f,
+                    0f,
+                    0.3f);
+            }
+
+            state.GroundZones.Add(new GroundZoneState(
+                point,
+                210f,
+                5f,
+                0.5f,
+                _combat.defaults.damage * 0.45f,
+                0.18f,
+                0.6f));
+        }
+
+        private void CastCrownOfThorns(
+            GameState state,
+            Float2 point)
+        {
+            state.ShieldMaxHits += 10;
+            state.ShieldHits += 10;
+            DamageArea(
+                state,
+                point,
+                200f,
+                _combat.defaults.damage * 5f,
+                -1,
+                140f,
+                0f);
+            state.GroundZones.Add(new GroundZoneState(
+                point,
+                200f,
+                5f,
+                0.5f,
+                _combat.defaults.damage * 0.4f,
+                0f,
+                0f,
+                0f,
+                0f,
+                0.16f));
+        }
+
+        private void CastGoldenIdol(
+            GameState state,
+            Float2 point)
+        {
+            state.DecoyActive = true;
+            state.DecoyPosition = point;
+            state.DecoyLifeRemaining = 5f;
+            state.DecoyHp = 180f;
+            state.DecoyMaxHp = 180f;
+            state.DecoyTauntRadius = 230f;
+            state.DecoyExplodeDamageMultiplier = 3f;
+            state.DecoyExplodeKnockback = 0f;
+            state.DecoyIsMirrorTurret = false;
+            state.KillXpBuffMultiplier = 1.6f;
+            state.KillXpBuffRemaining = 5f;
+            state.KillXpBuffStacks = 1;
+            if (_drops == null)
+            {
+                return;
+            }
+
+            for (int index = 0; index < 4; index++)
+            {
+                float offset = (index - 1.5f) * 28f;
+                _drops.SpawnWeightedBonusDrop(
+                    state,
+                    point + new Float2(offset, 0f),
+                    4f,
+                    1f);
             }
         }
 

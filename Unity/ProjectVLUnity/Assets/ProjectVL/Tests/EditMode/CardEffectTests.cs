@@ -1647,6 +1647,144 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void FrozenThunderConsumableChainsFreezesAndBursts()
+        {
+            CardState card = _state.CreateCard("frozenThunder", 6);
+            EnemyState first = AddEnemy(
+                new Float2(200f, 200f),
+                500f);
+            EnemyState second = AddEnemy(
+                new Float2(250f, 200f),
+                500f);
+
+            bool cast = _system.CastConsumable(
+                _state,
+                card,
+                first.Position);
+
+            Assert.That(cast, Is.True);
+            Assert.That(first.Hp, Is.EqualTo(419f));
+            Assert.That(second.Hp, Is.EqualTo(420.8f).Within(0.001f));
+            Assert.That(first.FrozenRemaining, Is.EqualTo(2.5f));
+            Assert.That(second.FrozenRemaining, Is.EqualTo(2.5f));
+        }
+
+        [Test]
+        public void SolarLanceConsumableBurnsItsBeamLine()
+        {
+            CardState card = _state.CreateCard("solarLance", 6);
+            Float2 turret = new Float2(
+                _combat.turret.x,
+                _combat.turret.y);
+            EnemyState inside = AddEnemy(
+                turret + new Float2(100f, 0f),
+                500f);
+            EnemyState outside = AddEnemy(
+                turret + new Float2(100f, 60f),
+                500f);
+
+            bool cast = _system.CastConsumable(
+                _state,
+                card,
+                turret + new Float2(100f, 0f));
+
+            Assert.That(cast, Is.True);
+            Assert.That(inside.Hp, Is.EqualTo(374f));
+            Assert.That(inside.DotDamagePerTick, Is.EqualTo(44.1f));
+            Assert.That(inside.DotRemaining, Is.EqualTo(5f));
+            Assert.That(inside.VulnerableRatio, Is.EqualTo(0.2f));
+            Assert.That(outside.Hp, Is.EqualTo(500f));
+        }
+
+        [Test]
+        public void AvalancheConsumableDamagesFreezesAndKnocksBack()
+        {
+            CardState card = _state.CreateCard("avalanche", 6);
+            Float2 center = new Float2(200f, 200f);
+            EnemyState inside = AddEnemy(
+                center + new Float2(100f, 0f),
+                500f);
+
+            bool cast = _system.CastConsumable(
+                _state,
+                card,
+                center);
+
+            Assert.That(cast, Is.True);
+            Assert.That(inside.Hp, Is.EqualTo(401f));
+            Assert.That(inside.FrozenRemaining, Is.EqualTo(2f));
+            Assert.That(
+                Float2.Distance(center, inside.Position),
+                Is.EqualTo(300f));
+        }
+
+        [Test]
+        public void PyrestormConsumableBombardsThenBurns()
+        {
+            CardState card = _state.CreateCard("pyrestorm", 6);
+            EnemyState inside = AddEnemy(
+                new Float2(200f, 200f),
+                500f);
+
+            bool cast = _system.CastConsumable(
+                _state,
+                card,
+                inside.Position);
+            _system.StepPassives(_state, 0.5f);
+
+            Assert.That(cast, Is.True);
+            Assert.That(inside.Hp, Is.EqualTo(221.9f).Within(0.001f));
+            Assert.That(inside.VulnerableRatio, Is.EqualTo(0.18f));
+            Assert.That(_state.GroundZones, Has.Count.EqualTo(1));
+        }
+
+        [Test]
+        public void CrownConsumableShieldsBurstsAndExecutes()
+        {
+            CardState card = _state.CreateCard(
+                "crownOfThorns",
+                6);
+            Float2 center = new Float2(200f, 200f);
+            EnemyState low = AddEnemy(center, 100f);
+
+            bool cast = _system.CastConsumable(
+                _state,
+                card,
+                center);
+            _system.StepPassives(_state, 0.5f);
+
+            Assert.That(cast, Is.True);
+            Assert.That(_state.ShieldHits, Is.EqualTo(10));
+            Assert.That(_state.Enemies.Contains(low), Is.False);
+        }
+
+        [Test]
+        public void GoldenIdolConsumableCreatesRewardShrine()
+        {
+            CardState card = _state.CreateCard("goldenIdol", 6);
+            var drops = new DropSystem(
+                new EconomyConfig(),
+                new ConstantRandomSource(0.1f));
+            var system = new CombatSystem(
+                _combat,
+                _enemies,
+                drops);
+
+            bool cast = system.CastConsumable(
+                _state,
+                card,
+                new Float2(200f, 200f));
+
+            Assert.That(cast, Is.True);
+            Assert.That(_state.DecoyActive, Is.True);
+            Assert.That(_state.DecoyHp, Is.EqualTo(180f));
+            Assert.That(_state.DecoyTauntRadius, Is.EqualTo(230f));
+            Assert.That(_state.GroundDrops, Has.Count.EqualTo(4));
+            Assert.That(_state.KillXpBuffMultiplier, Is.EqualTo(1.6f));
+            Assert.That(_state.KillXpBuffRemaining, Is.EqualTo(5f));
+        }
+
+        [Test]
         public void FrozenThunderShatterFreezesNearbyEnemies()
         {
             EquipResolved("frozenThunder", 6);
