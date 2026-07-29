@@ -1,6 +1,6 @@
 import type { EvolutionRecipesConfig, GodsConfig, RelicsConfig, SkillsConfig } from '../config/types';
 import { ConfigApi } from '../editor/api';
-import { EDITOR_DOMAINS, reportHasErrors, type EditorDomain, type ValidationReportDto } from '../editor/contracts';
+import { collectIssues, EDITOR_DOMAINS, reportHasErrors, type EditorDomain, type ValidationReportDto } from '../editor/contracts';
 import { deepClone, el } from '../editor/dom';
 import { buildReferenceCatalog, type ReferenceCatalog } from '../editor/references';
 import { renderAffixCoverageView } from './crossViews/affixCoverage';
@@ -16,6 +16,9 @@ import { renderNavTree } from './navTree';
 import { renderRelicView } from './relicView';
 import type { TextEditingOptions } from './textEditing';
 import { DesignTextSaveCoordinator } from './textSave';
+import { DesignContentSaveCoordinator } from './contentSave';
+import type { MechanismEditingOptions, EditableContentDomain } from './mechanismEditor';
+import type { SaveCandidate } from '../editor/saveFlow';
 
 type ContentDomain = 'skills' | 'gods' | 'relics' | 'evolutionRecipes' | 'texts';
 type PrintScope = 'entity' | 'god' | 'all' | 'cross';
@@ -33,18 +36,24 @@ const CONTENT_DOMAINS: readonly ContentDomain[] = ['skills', 'gods', 'relics', '
 export class DesignWorkbenchApp {
   private readonly api = new ConfigApi();
   private readonly textSaver = new DesignTextSaveCoordinator(this.api);
+  private readonly contentSaver = new DesignContentSaveCoordinator(this.api);
   private data?: DesignData;
   private originals?: DesignData;
   private report?: ValidationReportDto;
   private textsReport?: ValidationReportDto;
+  private readonly entityReports: Partial<Record<ContentDomain, ValidationReportDto>> = {};
   private references?: ReferenceCatalog;
   private selection: DesignSelection = { kind: 'card', id: '' };
   private crossView?: CrossViewId;
   private printScope: PrintScope = 'entity';
   private editingTextPath?: string;
+  private editingMechanismPath?: string;
   private textsDirty = false;
+  private readonly entityDirtyDomains = new Set<ContentDomain>();
   private validatingTexts = false;
-  private savingTexts = false;
+  private readonly validatingEntityDomains = new Set<ContentDomain>();
+  private readonly entityValidationSequences = new Map<ContentDomain, number>();
+  private saving = false;
   private validationSequence = 0;
   private saveMessage = '';
   private readonly filters: NavFilters = { query: '', tag: '', category: '', atom: '', copyDebt: false, designNotes: false };
@@ -91,7 +100,7 @@ export class DesignWorkbenchApp {
     const select = el('select');
     for (const [value, text] of [['entity', '当前实体'], ['god', '当前神整章'], ['all', '全部内容'], ['cross', '当前横切视图']] as const) { const option = el('option', '', text); option.value = value; select.append(option); }
     select.addEventListener('change', () => { this.printScope = select.value as PrintScope; this.preparePrint(); });
-    this.saveButton = el('button', 'button button--save', '保存文案'); this.saveButton.type = 'button'; this.saveButton.disabled = true; this.saveButton.addEventListener('click', () => void this.saveTexts());
+    this.saveButton = el('button', 'button button--save', '保存更改'); this.saveButton.type = 'button'; this.saveButton.disabled = true; this.saveButton.addEventListener('click', () => void this.saveChanges());
     const print = el('button', 'button button--primary', '打印当前范围'); print.type = 'button'; print.addEventListener('click', () => { this.preparePrint(); window.print(); });
     this.status = el('span', 'status-badge status-badge--ok', '配置管线已连接');
     label.append(select); tools.append(label, this.saveButton, print, this.status); header.append(brand, tools);
@@ -110,8 +119,8 @@ export class DesignWorkbenchApp {
     renderNavTree(this.nav, {
       cards: this.data.skills.cards, gods: this.data.gods, relics: this.data.relics.relics, ctx: this.ctx(), filters: this.filters,
       selection: this.selection, crossView: this.crossView,
-      onSelect: selection => { this.selection = selection; this.crossView = undefined; this.editingTextPath = undefined; this.render(); },
-      onCrossView: view => { this.crossView = view; this.editingTextPath = undefined; this.render(); },
+      onSelect: selection => { this.selection = selection; this.crossView = undefined; this.editingTextPath = undefined; this.editingMechanismPath = undefined; this.render(); },
+      onCrossView: view => { this.crossView = view; this.editingTextPath = undefined; this.editingMechanismPath = undefined; this.render(); },
     });
     if (this.crossView) this.renderCrossView(this.crossView);
     else this.renderEntity(this.main, this.selection);
@@ -120,7 +129,7 @@ export class DesignWorkbenchApp {
     } else {
       renderContextPanel(this.context, {
         selection: this.selection, cards: this.data.skills.cards, gods: this.data.gods.gods, relics: this.data.relics.relics,
-        recipes: this.data.evolutionRecipes, texts: this.data.texts, report: this.textsReport ?? this.report, references: this.references,
+        recipes: this.data.evolutionRecipes, texts: this.data.texts, report: this.combinedReport(), references: this.references,
         locate: (domain, path) => this.locate(domain, path),
       });
     }
@@ -147,10 +156,12 @@ export class DesignWorkbenchApp {
     if (!this.data) return;
     if (selection.kind === 'card') {
       const index = this.data.skills.cards.findIndex(card => card.id === selection.id); const card = this.data.skills.cards[index];
-      if (card) renderCardView(container, card, this.ctx(), index, this.textEditingOptions()); else container.replaceChildren(el('p', 'empty-state', '卡牌不存在'));
+      if (card) renderCardView(container, card, this.ctx(), index, this.textEditingOptions(), this.mechanismEditingOptions()); else container.replaceChildren(el('p', 'empty-state', '卡牌不存在'));
     } else if (selection.kind === 'relic') {
       const index = this.data.relics.relics.findIndex(relic => relic.id === selection.id); const relic = this.data.relics.relics[index];
-      if (relic) renderRelicView(container, relic, this.ctx(), index, this.textEditingOptions()); else container.replaceChildren(el('p', 'empty-state', '遗物不存在'));
+      const rarityOptions = [...new Set(this.data.relics.relics.map(item => item.rarity))];
+      const axisOptions = [...new Set(this.data.relics.relics.flatMap(item => item.effects.map(effect => effect.axis)))];
+      if (relic) renderRelicView(container, relic, this.ctx(), index, this.textEditingOptions(), this.mechanismEditingOptions(), rarityOptions, axisOptions); else container.replaceChildren(el('p', 'empty-state', '遗物不存在'));
     } else {
       const god = this.data.gods.gods.find(item => item.id === selection.id);
       if (god) renderGodView(container, god, this.data.skills.cards, this.ctx(), this.textEditingOptions()); else container.replaceChildren(el('p', 'empty-state', '神祇不存在'));
@@ -165,6 +176,38 @@ export class DesignWorkbenchApp {
       onToggle: path => { this.editingTextPath = path; this.render(); },
       onChange: () => this.onTextsChanged(),
     };
+  }
+
+  private mechanismEditingOptions(): MechanismEditingOptions | undefined {
+    if (!this.references || this.crossView) return undefined;
+    return {
+      editingPath: this.editingMechanismPath,
+      references: this.references,
+      onToggle: path => { this.editingMechanismPath = path; this.render(); },
+      onChange: domain => this.onEntityChanged(domain),
+    };
+  }
+
+  private onEntityChanged(domain: EditableContentDomain): void {
+    if (!this.data) return;
+    this.entityDirtyDomains.add(domain);
+    this.saveMessage = '';
+    const sequence = (this.entityValidationSequences.get(domain) ?? 0) + 1;
+    this.entityValidationSequences.set(domain, sequence);
+    this.validatingEntityDomains.add(domain);
+    this.updateSaveState();
+    void this.contentSaver.validate(domain, this.data[domain]).then(report => {
+      if (this.entityValidationSequences.get(domain) !== sequence) return;
+      this.entityReports[domain] = report;
+      this.renderContextOnly();
+    }).catch(error => {
+      if (this.entityValidationSequences.get(domain) !== sequence) return;
+      this.saveMessage = error instanceof Error ? error.message : String(error);
+    }).finally(() => {
+      if (this.entityValidationSequences.get(domain) !== sequence) return;
+      this.validatingEntityDomains.delete(domain);
+      this.updateSaveState();
+    });
   }
 
   private onTextsChanged(): void {
@@ -188,18 +231,24 @@ export class DesignWorkbenchApp {
     });
   }
 
-  private async saveTexts(): Promise<void> {
-    if (!this.data || !this.originals || !this.textsDirty || this.validatingTexts || this.savingTexts || reportHasErrors(this.textsReport)) return;
-    this.savingTexts = true;
+  private async saveChanges(): Promise<void> {
+    if (!this.data || !this.originals || !this.hasDirtyDomains() || this.isValidating() || this.saving || this.dirtyReportsHaveErrors()) return;
+    this.saving = true;
     this.saveMessage = '保存中…';
     this.updateSaveState();
     try {
-      const result = await this.textSaver.save(this.data.texts, this.originals.texts);
+      const candidates = this.dirtyCandidates();
+      const result = await this.contentSaver.save(candidates);
       if (result.reports.texts) this.textsReport = result.reports.texts;
+      for (const domain of this.entityDirtyDomains) if (result.reports[domain]) this.entityReports[domain] = result.reports[domain];
       if (result.ok) {
-        this.originals.texts = deepClone(this.data.texts);
+        for (const candidate of candidates) {
+          const domain = candidate.domain as ContentDomain;
+          this.originals[domain] = deepClone(this.data[domain]) as never;
+        }
         this.textsDirty = false;
-        this.saveMessage = '文案已保存；刷新后游戏运行时才会读取新配置';
+        this.entityDirtyDomains.clear();
+        this.saveMessage = '更改已保存；刷新后游戏运行时才会读取新配置';
         this.render();
       } else {
         this.saveMessage = result.error ?? '保存被配置管线拒绝；未保存输入仍保留';
@@ -208,7 +257,7 @@ export class DesignWorkbenchApp {
     } catch (error) {
       this.saveMessage = error instanceof Error ? error.message : String(error);
     }
-    this.savingTexts = false;
+    this.saving = false;
     this.updateSaveState();
   }
 
@@ -216,35 +265,64 @@ export class DesignWorkbenchApp {
     if (!this.data || !this.context || !this.references || this.crossView) return;
     renderContextPanel(this.context, {
       selection: this.selection, cards: this.data.skills.cards, gods: this.data.gods.gods, relics: this.data.relics.relics,
-      recipes: this.data.evolutionRecipes, texts: this.data.texts, report: this.textsReport ?? this.report, references: this.references,
+      recipes: this.data.evolutionRecipes, texts: this.data.texts, report: this.combinedReport(), references: this.references,
       locate: (domain, path) => this.locate(domain, path),
     });
   }
 
   private updateSaveState(): void {
     if (!this.status || !this.saveButton) return;
-    const errors = reportHasErrors(this.textsReport);
-    this.saveButton.disabled = !this.textsDirty || this.validatingTexts || this.savingTexts || errors;
+    const errors = this.dirtyReportsHaveErrors();
+    this.saveButton.disabled = !this.hasDirtyDomains() || this.isValidating() || this.saving || errors;
     this.status.className = 'status-badge';
-    if (this.savingTexts) {
+    if (this.saving) {
       this.status.classList.add('status-badge--busy');
-      this.status.textContent = '文案保存中';
-    } else if (this.validatingTexts) {
+      this.status.textContent = '更改保存中';
+    } else if (this.isValidating()) {
       this.status.classList.add('status-badge--busy');
-      this.status.textContent = '文案候选校验中';
+      this.status.textContent = '候选配置校验中';
     } else if (this.saveMessage) {
-      this.status.classList.add(this.textsDirty ? 'status-badge--warning' : 'status-badge--ok');
+      this.status.classList.add(this.hasDirtyDomains() ? 'status-badge--warning' : 'status-badge--ok');
       this.status.textContent = this.saveMessage;
-    } else if (this.textsDirty && errors) {
+    } else if (this.hasDirtyDomains() && errors) {
       this.status.classList.add('status-badge--error');
-      this.status.textContent = '文案未保存 · 有 error';
-    } else if (this.textsDirty) {
+      this.status.textContent = '更改未保存 · 有 error';
+    } else if (this.hasDirtyDomains()) {
       this.status.classList.add('status-badge--warning');
-      this.status.textContent = '文案未保存 · 可保存';
+      this.status.textContent = `未保存：${this.dirtyDomainList().join(' + ')}`;
     } else {
       this.status.classList.add('status-badge--ok');
       this.status.textContent = '配置管线已连接';
     }
+  }
+
+  private dirtyDomainList(): ContentDomain[] {
+    return [...(this.textsDirty ? ['texts' as const] : []), ...this.entityDirtyDomains];
+  }
+
+  private hasDirtyDomains(): boolean { return this.textsDirty || this.entityDirtyDomains.size > 0; }
+
+  private isValidating(): boolean { return this.validatingTexts || this.validatingEntityDomains.size > 0; }
+
+  private dirtyReportsHaveErrors(): boolean {
+    return this.dirtyDomainList().some(domain => reportHasErrors(domain === 'texts' ? this.textsReport : this.entityReports[domain]));
+  }
+
+  private dirtyCandidates(): SaveCandidate[] {
+    if (!this.data || !this.originals) return [];
+    return this.dirtyDomainList().map(domain => ({ domain, data: this.data?.[domain], original: this.originals?.[domain] }));
+  }
+
+  private combinedReport(): ValidationReportDto | undefined {
+    const sources = [this.report, this.textsReport, ...Object.values(this.entityReports)].filter((item): item is ValidationReportDto => Boolean(item));
+    if (!sources.length) return undefined;
+    const issues = new Map<string, ValidationReportDto['issues'][number]>();
+    for (const source of sources) for (const { issue } of collectIssues(source)) issues.set(`${issue.level}:${issue.domain}:${issue.path}:${issue.message}`, issue);
+    return {
+      ok: [...issues.values()].every(issue => issue.level !== 'error'),
+      checks: [...new Set(sources.flatMap(source => source.checks))],
+      issues: [...issues.values()],
+    };
   }
 
   private currentGodId(): string {

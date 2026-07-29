@@ -251,6 +251,7 @@ function normalTiers(card: CardDef, ctx: DescribeContext, cardTexts: unknown): T
       milestone: milestone(cardTexts, 'equip', star),
       options: [],
       bindings: (node?.equip ?? card.stars['6'].equip).map(describeBinding),
+      activeBindings: card.stars['6'].equip.map(describeBinding),
     });
   }
   return tiers;

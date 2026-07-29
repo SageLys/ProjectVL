@@ -4,6 +4,11 @@ import { el } from '../editor/dom';
 import type { BindingView, CardView, DescribeContext, EffectView, TierView } from './describe';
 import { describeCard } from './describe';
 import { editableTextBlock, type TextEditingOptions, type TextFieldSpec } from './textEditing';
+import {
+  editableMechanismBlock, renderAffixPoolForm, renderAmplifyForm, renderBindingsForm,
+  renderCardMetaForm, renderConsumableEffectsForm, renderDesignNotesForm, renderRecipeForm,
+  type MechanismEditingOptions,
+} from './mechanismEditor';
 
 function badge(text: string, tone = ''): HTMLElement { return el('span', `badge${tone ? ` badge--${tone}` : ''}`, text); }
 function missing(value: string, fallback = '缺失'): HTMLElement { return el('span', value ? '' : 'missing-copy', value || fallback); }
@@ -57,7 +62,14 @@ function tierTitle(tier: TierView): string {
   return '6★ 终态（公共）';
 }
 
-function renderTier(tier: TierView, view: CardView, editing?: TextEditingOptions): HTMLElement {
+function renderTier(
+  tier: TierView,
+  view: CardView,
+  card: CardDef,
+  cardPath: string,
+  editing?: TextEditingOptions,
+  mechanism?: MechanismEditingOptions,
+): HTMLElement {
   const section = el('section', `tier-block card-block tier-block--${tier.kind}`);
   section.append(el('h2', '', tierTitle(tier)));
   if (tier.kind !== 'amplify') section.append(renderPlayerCopy(tier, view, editing));
@@ -65,7 +77,11 @@ function renderTier(tier: TierView, view: CardView, editing?: TextEditingOptions
     if (tier.activeBindings?.length) {
       const active = el('details', 'active-bindings');
       active.append(el('summary', '', 'stars 当前实际生效值'));
-      active.append(renderBindings(tier.activeBindings));
+      const starSource = card.stars[String(tier.star) as '3' | '5'];
+      const starPath = `${cardPath}.stars.${tier.star}.equip`;
+      active.append(editableMechanismBlock(renderBindings(tier.activeBindings), starPath, mechanism, editor => {
+        if (starSource) renderBindingsForm(editor, starSource.equip, starPath, mechanism?.references ?? { cards: [], gods: [], tags: [], textKeys: [] }, () => mechanism?.onChange('skills'));
+      }));
       section.append(active);
     }
     const grid = el('div', 'branch-grid');
@@ -77,8 +93,16 @@ function renderTier(tier: TierView, view: CardView, editing?: TextEditingOptions
       copy.append(el('p', branch.summary ? '' : 'missing-copy', branch.summary || '缺失：summary'));
       copy.append(el('p', branch.intent ? '' : 'missing-copy', `设计意图：${branch.intent || '缺失'}`));
       copy.append(el('small', '', `关键词：${branch.keywords.join('、') || '缺失'} · 构筑适配：${branch.buildFit || '缺失'}`));
-      const mechanism = el('div', 'mechanism');
-      mechanism.append(el('span', 'eyebrow', '设计层机制'), renderBindings(branch.bindings));
+      const mechanismBlock = el('div', 'mechanism');
+      mechanismBlock.append(el('span', 'eyebrow', '设计层机制'));
+      const checkpointIndex = card.evolutionTree?.checkpoints.findIndex(checkpoint => checkpoint.star === tier.star) ?? -1;
+      const checkpoint = checkpointIndex >= 0 ? card.evolutionTree?.checkpoints[checkpointIndex] : undefined;
+      const optionIndex = checkpoint?.options.findIndex(option => option.id === branch.id) ?? -1;
+      const source = optionIndex >= 0 ? checkpoint?.options[optionIndex] : undefined;
+      const branchPath = `${cardPath}.evolutionTree.checkpoints[${checkpointIndex}].options[${optionIndex}].equip`;
+      mechanismBlock.append(editableMechanismBlock(renderBindings(branch.bindings), branchPath, mechanism, editor => {
+        if (source) renderBindingsForm(editor, source.equip, branchPath, mechanism?.references ?? { cards: [], gods: [], tags: [], textKeys: [] }, () => mechanism?.onChange('skills'));
+      }));
       const branchBase = `$.texts.evolution.${view.id}.${branch.id}`;
       const fields: TextFieldSpec[] = [
         { path: `${branchBase}.name`, label: '分支名称' },
@@ -87,20 +111,36 @@ function renderTier(tier: TierView, view: CardView, editing?: TextEditingOptions
         { path: `${branchBase}.keywords`, label: '关键词', kind: 'stringArray' },
         { path: `${branchBase}.buildFit`, label: '构筑适配', multiline: true },
       ];
-      item.append(editableTextBlock(copy, fields, editing, 'branch-copy-editor'), mechanism);
+      item.append(editableTextBlock(copy, fields, editing, 'branch-copy-editor'), mechanismBlock);
       grid.append(item);
     }
     section.append(grid);
   } else if (tier.kind === 'amplify') {
     section.append(el('p', 'silent-note', '无独立里程碑文案：数值静默提升，不弹窗。'));
-    section.append(missing(tier.amplifyDescription ?? '', '缺失：amplifyAxis.description'));
+    const amplifyRead = el('div'); amplifyRead.append(missing(tier.amplifyDescription ?? '', '缺失：amplifyAxis.description'));
+    section.append(editableMechanismBlock(amplifyRead, `${cardPath}.amplifyAxis`, mechanism, editor => {
+      if (mechanism) renderAmplifyForm(editor, card, cardPath, mechanism);
+    }, '', '编辑强化'));
   } else {
-    section.append(el('div', 'mechanism'), renderBindings(tier.bindings));
+    if (tier.kind === 'shared' && tier.activeBindings?.length) {
+      const current = el('details', 'active-bindings'); current.append(el('summary', '', 'stars.6 当前实际生效值'));
+      const starPath = `${cardPath}.stars.6.equip`;
+      current.append(editableMechanismBlock(renderBindings(tier.activeBindings), starPath, mechanism, editor => {
+        renderBindingsForm(editor, card.stars['6'].equip, starPath, mechanism?.references ?? { cards: [], gods: [], tags: [], textKeys: [] }, () => mechanism?.onChange('skills'));
+      })); section.append(current);
+    }
+    const sourceNodeIndex = card.evolutionTree?.sharedNodes.findIndex(node => node.star === tier.star) ?? -1;
+    const sourceBindings = tier.kind === 'fixed' ? card.stars['6'].equip : card.evolutionTree?.sharedNodes[sourceNodeIndex]?.equip;
+    const sourcePath = tier.kind === 'fixed' ? `${cardPath}.stars.6.equip` : `${cardPath}.evolutionTree.sharedNodes[${sourceNodeIndex}].equip`;
+    const read = el('div', 'mechanism'); read.append(renderBindings(tier.bindings));
+    section.append(editableMechanismBlock(read, sourcePath, mechanism, editor => {
+      if (sourceBindings) renderBindingsForm(editor, sourceBindings, sourcePath, mechanism?.references ?? { cards: [], gods: [], tags: [], textKeys: [] }, () => mechanism?.onChange('skills'));
+    }));
   }
   return section;
 }
 
-function renderConsumable(view: CardView, editing?: TextEditingOptions): HTMLElement {
+function renderConsumable(view: CardView, card: CardDef, cardPath: string, editing?: TextEditingOptions, mechanism?: MechanismEditingOptions): HTMLElement {
   const section = el('section', 'card-block');
   section.append(el('h2', '', '消耗态（落点释放）'));
   const table = el('table', 'data-table consumable-table');
@@ -121,7 +161,13 @@ function renderConsumable(view: CardView, editing?: TextEditingOptions): HTMLEle
     );
     const copy = el('td'); copy.append(editableTextBlock(copyRead, fields, editing, 'consumable-copy-editor'));
     tr.append(copy, el('td', '', [tier.radius === undefined ? '' : `半径 ${tier.radius}`, tier.duration === undefined ? '' : `持续 ${tier.duration}s`].filter(Boolean).join('，') || '—'));
-    const effects = el('td'); const list = el('ul', 'effect-list'); tier.effects.forEach(effect => list.append(renderEffectView(effect))); effects.append(list); tr.append(effects);
+    const effects = el('td'); const list = el('ul', 'effect-list'); tier.effects.forEach(effect => list.append(renderEffectView(effect)));
+    const anchor = card.consumable.anchors[String(tier.star) as '1' | '3' | '6'];
+    const anchorPath = `${cardPath}.consumable.anchors.${tier.star}`;
+    effects.append(editableMechanismBlock(list, anchorPath, mechanism, editor => {
+      renderConsumableEffectsForm(editor, anchor, anchorPath, mechanism?.references ?? { cards: [], gods: [], tags: [], textKeys: [] }, () => mechanism?.onChange('skills'));
+    }, '', '编辑落点'));
+    tr.append(effects);
     body.append(tr);
   }
   table.append(body); section.append(table); return section;
@@ -139,24 +185,43 @@ function renderAffixes(view: CardView): HTMLElement {
   table.append(body); section.append(table); return section;
 }
 
-export function renderCardView(container: HTMLElement, card: CardDef, ctx: DescribeContext, cardIndex?: number, editing?: TextEditingOptions): void {
+export function renderCardView(
+  container: HTMLElement,
+  card: CardDef,
+  ctx: DescribeContext,
+  cardIndex?: number,
+  editing?: TextEditingOptions,
+  mechanism?: MechanismEditingOptions,
+): void {
   container.replaceChildren();
   const view = describeCard(card, ctx);
   const article = el('article', 'entity-sheet card-sheet card-block');
   article.dataset.entityKind = 'card'; article.dataset.entityId = card.id;
   article.dataset.configPath = cardIndex === undefined ? '$.skills.cards' : `$.skills.cards[${cardIndex}]`;
+  const cardPath = article.dataset.configPath;
   const title = el('header', 'entity-header');
   const heading = el('h1', '', view.name || '缺失名称'); heading.append(el('code', '', view.id));
   const badges = el('div', 'badge-row');
   badges.append(badge(view.categoryLabel, 'category'), ...view.tagLabels.map(label => badge(label, 'tag')));
   if (view.teaching) badges.append(badge('教学卡', 'teach'));
   badges.append(badge(view.roster === 'anchor' ? '锚点卡 · 必进本局' : view.roster === 'variable' ? '可变卡 · 抽取候选' : '融合产物 · recipeOnly', view.roster === 'recipeOnly' ? 'fusion' : 'roster'));
-  title.append(editableTextBlock(heading, [{ path: `$.texts.cards.${view.id}.name`, label: '卡牌名称' }], editing, 'title-copy-editor'), badges); article.append(title);
-  if (view.recipe) article.append(el('p', 'recipe-banner', `配方 ${view.recipe.id}：${view.recipe.a.name || view.recipe.a.cardId}（${view.recipe.a.cardId} ≥${view.recipe.a.minStar}★） + ${view.recipe.b.name || view.recipe.b.cardId}（${view.recipe.b.cardId} ≥${view.recipe.b.minStar}★） → ${view.recipe.outputStar}★，仅限 ${view.recipe.allowedPhase}`));
+  const metaRead = el('div'); metaRead.append(badges);
+  title.append(
+    editableTextBlock(heading, [{ path: `$.texts.cards.${view.id}.name`, label: '卡牌名称' }], editing, 'title-copy-editor'),
+    editableMechanismBlock(metaRead, `${cardPath}.category`, mechanism, editor => { if (mechanism) renderCardMetaForm(editor, card, cardPath, mechanism); }, 'card-meta-editor', '编辑属性'),
+  ); article.append(title);
+  if (view.recipe) {
+    const recipeRead = el('p', 'recipe-banner', `配方 ${view.recipe.id}：${view.recipe.a.name || view.recipe.a.cardId}（${view.recipe.a.cardId} ≥${view.recipe.a.minStar}★） + ${view.recipe.b.name || view.recipe.b.cardId}（${view.recipe.b.cardId} ≥${view.recipe.b.minStar}★） → ${view.recipe.outputStar}★，仅限 ${view.recipe.allowedPhase}`);
+    const recipeIndex = ctx.recipes.recipes.findIndex(recipe => recipe.id === view.recipe?.id);
+    const recipe = ctx.recipes.recipes[recipeIndex]; const recipePath = `$.evolutionRecipes.recipes[${recipeIndex}]`;
+    article.append(editableMechanismBlock(recipeRead, recipePath, mechanism, editor => { if (recipe && mechanism) renderRecipeForm(editor, recipe, recipePath, mechanism); }, '', '编辑配方'));
+  }
   article.append(editableTextBlock(el('p', view.overview ? 'overview' : 'overview missing-copy', view.overview || '缺失：overview'), [{ path: `$.texts.cards.${view.id}.overview`, label: '概述', multiline: true }], editing, 'overview-copy-editor'));
-  const route = el('section', 'tier-route'); route.append(el('h2', '', '装备态 · 星级路线')); view.tiers.forEach(tier => route.append(renderTier(tier, view, editing))); article.append(route);
-  article.append(renderConsumable(view, editing), renderAffixes(view));
-  const notes = el('section', 'design-notes card-block'); notes.append(el('h2', '', '设计备注'), missing(view.designNotes ?? '', '无 designNotes')); article.append(notes);
+  const route = el('section', 'tier-route'); route.append(el('h2', '', '装备态 · 星级路线')); view.tiers.forEach(tier => route.append(renderTier(tier, view, card, cardPath, editing, mechanism))); article.append(route);
+  article.append(renderConsumable(view, card, cardPath, editing, mechanism));
+  article.append(editableMechanismBlock(renderAffixes(view), `${cardPath}.affixPool`, mechanism, editor => { if (mechanism) renderAffixPoolForm(editor, card, cardPath, mechanism); }, '', '编辑词条池'));
+  const notes = el('section', 'design-notes card-block'); notes.append(el('h2', '', '设计备注'), missing(view.designNotes ?? '', '无 designNotes'));
+  article.append(editableMechanismBlock(notes, `${cardPath}.designNotes`, mechanism, editor => { if (mechanism) renderDesignNotesForm(editor, card, cardPath, mechanism); }, '', '编辑备注'));
   if (card.fusionPolicy) article.append(el('section', 'callout callout--warning', `fusionPolicy：${JSON.stringify(card.fusionPolicy)}。未实现，暂不建议填写。`));
   container.append(article);
 }
