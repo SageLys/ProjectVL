@@ -1,4 +1,4 @@
-// 效果原子注册表：33 个原子的通用实现。
+// 效果原子注册表：34 个原子的通用实现。
 // 原子只描述「做什么」，由 EffectCtx 决定「何时何地」：
 //   - 装备态：触发器载荷（bullet/enemy/drop/merge）进入 ctx；
 //   - 消耗态：origin=落点、radius/duration=档位参数、consume=true；
@@ -187,7 +187,8 @@ const noopModifier: AtomHandler = () => {
 
 /** Data-audit contract: these handlers intentionally do nothing at trigger time. */
 export const NOOP_MODIFIER_ATOMS = [
-  'dropRateMul', 'dropLifetimeMul', 'xpMul', 'expiryConvert', 'mergeRule',
+  'dropRateMul', 'dropLifetimeMul', 'xpMul', 'expiryConvert',
+  'mergeMaterialRefund', 'wildcardRewardBonus',
   'thorns', 'breachReduction', 'novaOnBreak',
 ] as const satisfies readonly AtomName[];
 
@@ -516,7 +517,8 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
     }
   },
   expiryConvert: noopModifier,
-  mergeRule: noopModifier,
+  mergeMaterialRefund: noopModifier,
+  wildcardRewardBonus: noopModifier,
   mergePulse(ctx, p) {
     const dmg = cNum('mergePulse', p, 'damagePerMergeCount') * (ctx.merge?.resultStar ?? 1);
     const t = cfg.combat.turret;

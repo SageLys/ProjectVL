@@ -185,18 +185,6 @@ describe('解释器 · passive 修饰聚合', () => {
     expect(s2.kills).toBe(1); // 按击杀结算
   });
 
-  it('mergeRule 暴露给上层（P5 万能卡建模前置）；execute 取最高阈值', () => {
-    registerSkillDefs([def('harvest', passive([
-      { atom: 'mergeRule', params: { rule: 'wildcardDrop', value: 1 } },
-      { atom: 'execute', params: { hpThresholdRatio: 0.2 } },
-    ]))]);
-    const s = freshState();
-    equipCard(s, 'harvest', 3);
-    const mods = getModifiers(s);
-    expect(mods.mergeRules).toEqual([{ rule: 'wildcardDrop', value: 1 }]);
-    expect(mods.executeThreshold).toBe(0.2);
-  });
-
   it('mortarMorph passive：主炮改射榴弹并在落点爆炸', () => {
     registerSkillDefs([def('splitBlast', passive([{ atom: 'mortarMorph', params: { radius: 90, damageRatio: 1, falloff: 0.5 } }]))]);
     const s = freshState();

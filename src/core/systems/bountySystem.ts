@@ -1,5 +1,5 @@
 import { cfg } from '../../config';
-import { getSkillDef } from '../effects/interpreter';
+import { getModifiers, getSkillDef } from '../effects/interpreter';
 import type { BuildTag } from '../effects/defs';
 import type { BountyEncounter, BountyOffer, BountySide, CardType, Config, Enemy, EnemyType, GameEvent, GameState, Rng } from '../types';
 import { spawnGroundDrop, spawnWildcardDrop } from './dropSystem';
@@ -157,6 +157,15 @@ function createOffer(state: GameState, rng: Rng, guaranteed: boolean): GameEvent
   const side = SIDES[Math.min(SIDES.length - 1, Math.floor(rng() * SIDES.length))];
   const anchor = offerAnchor(side, rng);
   const reward = cfg.bounty.reward;
+  let wildcardCount = reward.wildcardCount;
+  const wildcardBonuses = getModifiers(state).wildcardRewardBonuses.filter(
+    rule => rule.scope === 'both' || rule.scope === 'bounty',
+  );
+  if (wildcardBonuses.length > 0) {
+    for (const rule of wildcardBonuses) {
+      if (rng() < rule.bonusChance) wildcardCount += rule.count;
+    }
+  }
   const offer: BountyOffer = {
     id: state.nextBountyOfferId++,
     rewardCardType: selectBountyRewardType(state, rng),
@@ -169,7 +178,7 @@ function createOffer(state: GameState, rng: Rng, guaranteed: boolean): GameEvent
       reward.wildcardStarByWave, reward.wildcardStarMax, state.wave,
       reward.wildcardStarBase, reward.wildcardStarUpgradeEveryWaves,
     ),
-    wildcardCount: reward.wildcardCount,
+    wildcardCount,
     side,
     ...anchor,
     remaining: cfg.bounty.offer.markWindowSeconds,

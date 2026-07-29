@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""33 个效果原子的文案：人话 / 代码机制 / 叠加融合 / 坑。
+"""34 个效果原子的文案：人话 / 代码机制 / 叠加融合 / 坑。
 参数表、允许触发器、词条缩放靶点、卡牌用例均由脚本从代码自动提取，不在此处手抄。
 """
 
@@ -259,7 +259,7 @@ ATOMS = {
         "plain": "以炮台为中心的一圈常驻光环，每隔一段时间对圈内所有敌人施加一次里面写的效果。",
         "code": [
             "<b>契约锁死只能绑 passive</b>（" + c("allowedTriggers: ['passive']") + "），"
-            "是全项目唯一有此限制的原子。",
+            "与两个合成经济原子一样，只允许放在 passive 下。",
             f"passive 路径：进 {c('getModifiers().auras')}，由 "
             + c('runtime.tickAuras()') + " 用独立时钟 " + c("'aura:卡id:绑定序号'") + " 推进；"
             f"每次脉冲对圈内每个敌人以 {c('zoneTick: true')} 跑一遍 "
@@ -417,19 +417,39 @@ ATOMS = {
             "ratio = 0 仍代表存在贡献并消费一次 RNG；chance 参数在 passive 聚合路径没有语义。",
         ],
     },
-    "mergeRule": {
-        "plain": "改变卡牌合成的规则，比如「合成时有概率掉万用牌」或「有概率返还材料」。",
+    "mergeMaterialRefund": {
+        "plain": "普通同型合并或装备喂养升星后，按概率补回若干张同型低星素材卡。",
         "code": [
-            f"modifierOnly。{c('getModifiers()')} 中 push 进 "
-            f"{c('m.mergeRules[]')}（<b>累积，不覆盖</b>）。",
-            f"两种 rule：{c('wildcardDrop')}（万用牌掉落）、{c('refundChance')}（返还概率）。"
-            f"契约的 rule 默认值是<b>空字符串</b>，意味着不写 rule 等于无效规则。",
-            "<b>当前 skills.json 中 0 处使用</b>——是全项目唯一完全未被任何卡使用的原子。",
+            f"modifierOnly，且契约锁死 {c("allowedTriggers: ['passive']")}。"
+            f"{c('getModifiers()')} 按稳定装备来源序累积到 {c('mergeMaterialRefunds[]')}，聚合时绝不掷骰。",
+            f"消费点是 {c('commitMerge()')}：仅 {c('merge / feed')} 会按 scope 过滤后逐条掷 "
+            f"{c('rng() < refundChance')}；{c('wildcard / recipe')} 直接跳过且不读 RNG。",
+            f"成功项先进入 {c('state.pendingMergeRefunds')}；当前合并循环稳定后由 "
+            f"{c('flushMergeRefunds()')} 发牌，避免中途重入自动合并。",
+            f"连续返还最多推进 {c('MAX_REFUND_ROUNDS = 4')} 轮；满手牌或超限的待发卡只记 lost，"
+            "不会生成地面掉落。",
         ],
-        "fusion": "多来源全部入列，由消费方各自解释。",
+        "fusion": "多来源全部入列；按稳定来源序逐条独立掷骰，成功数量相加。",
         "pitfalls": [
-            "<b>未被使用 = 未被验证。</b>启用前需要先确认消费端逻辑是否完整。",
-            f"rule 默认空串会静默产生一条无效规则，不会报错。",
+            "<b>当前 skills.json 中 0 处使用</b>——只有契约、消费端与测试，现有卡牌行为和 RNG 流不变。",
+            "返还星级会夹到 resultStar - 1；结果小于 1 时不发牌。",
+        ],
+    },
+    "wildcardRewardBonus": {
+        "plain": "在 Bounty 或波末 Boss 原本承诺的万能卡奖励上，再加若干张同星万能卡。",
+        "code": [
+            f"modifierOnly，且只允许 passive。{c('getModifiers()')} 按稳定来源序累积到 "
+            f"{c('wildcardRewardBonuses[]')}，聚合时不掷骰。",
+            f"Bounty 在 {c('createOffer()')} 组装奖励时掷完并冻结 count，展示与最终掉落共用同一个值。",
+            f"Boss 在 {c('grantWaveBossReward()')} 组装地面奖励时加成；validation 的 "
+            f"{c("kind: 'card'")} 分支直接跳过，不额外读取 RNG。",
+            f"奖励仍由 {c('spawnWildcardDrop()')} 生成同一堆地面掉落，不直接写入库存。"
+            "基线 count 为 0 时，加成命中也可以凭空生成一堆。",
+        ],
+        "fusion": "多来源逐条独立掷骰，命中的 count 全部加到该来源的一堆基线奖励上。",
+        "pitfalls": [
+            "<b>当前 skills.json 中 0 处使用</b>——现有 Bounty/Boss 的 RNG 顺序与奖励不变。",
+            "未拾取的万能卡仍在地面，不计入结算分。",
         ],
     },
     "mergePulse": {

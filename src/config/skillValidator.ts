@@ -19,7 +19,7 @@ const CARD_KEYS = new Set([
 const FUSION_TRANSFER = new Set(['none', 'strongest', 'sum', 'average']);
 const FUSION_CONFLICT = new Set(['keepHigher', 'keepNewer', 'reject']);
 
-const SKILLS_SCHEMA_VERSION = '0.4.1';
+const SKILLS_SCHEMA_VERSION = '0.5.0';
 
 function fail(path: string, message: string): never {
   throw new Error(`[skills-schema v${SKILLS_SCHEMA_VERSION}] ${path}: ${message}`);

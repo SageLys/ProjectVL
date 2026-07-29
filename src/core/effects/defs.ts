@@ -1,4 +1,4 @@
-// 技能数据模型（对应 docs/skills-schema.json v0.4.1）。
+// 技能数据模型（对应 docs/skills-schema.json v0.5.0）。
 // 技能 = 数据（JSON 实例）+ 通用解释器（触发器 → 效果原子）。禁止每张卡硬编码 if。
 // v0.3.0（P3）：新增 'passive' 触发器承载常驻修饰类原子（掉率/反伤/突破减免等，
 // 设计表中"掉率+25%"这类无事件语义的装备态此前在 schema 中无处安放）。
@@ -28,7 +28,7 @@ export type Trigger =
   | 'onMerge'
   | 'passive';
 
-/** 效果原子（33 个，见 docs/skills-schema.json atomCatalog）。 */
+/** 效果原子（34 个，见 docs/skills-schema.json atomCatalog）。 */
 export type AtomName =
   // 弹道
   | 'pierce' | 'chain' | 'split' | 'ricochet' | 'aoeOnHit' | 'beamMorph' | 'mortarMorph'
@@ -37,7 +37,8 @@ export type AtomName =
   // 领域
   | 'aura' | 'groundZone' | 'dot' | 'summon'
   // 经济
-  | 'dropRateMul' | 'dropLifetimeMul' | 'xpMul' | 'extraDrop' | 'expiryConvert' | 'mergeRule' | 'mergePulse'
+  | 'dropRateMul' | 'dropLifetimeMul' | 'xpMul' | 'extraDrop' | 'expiryConvert'
+  | 'mergeMaterialRefund' | 'wildcardRewardBonus' | 'mergePulse'
   // 防御
   | 'shield' | 'thorns' | 'breachReduction' | 'novaOnBreak' | 'execute'
   // 共用
@@ -87,7 +88,8 @@ export interface EffectParamsMap {
   xpMul: { mul?: number; chance?: number };
   extraDrop: { count?: number; starWeights?: Record<string, number>; at?: 'point' | 'turret' | 'killPoint'; chance?: number };
   expiryConvert: { ratio?: number; chance?: number };
-  mergeRule: { rule?: 'wildcardDrop' | 'refundChance'; value?: number; chance?: number };
+  mergeMaterialRefund: { refundChance?: number; count?: number; star?: number; scope?: 'merge' | 'feed' | 'both' };
+  wildcardRewardBonus: { bonusChance?: number; count?: number; scope?: 'bounty' | 'boss' | 'both' };
   mergePulse: { damagePerMergeCount?: number; radius?: number | 'all'; chance?: number };
   // —— 防御 ——
   shield: { absorbHits?: number; regenSeconds?: number; chance?: number };

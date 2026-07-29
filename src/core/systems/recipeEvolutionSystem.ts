@@ -120,7 +120,7 @@ export function confirmRecipe(
     outputStar: output.star,
   }];
   events.push(...created.events);
-  events.push(...commitMerge(state, config, rng, output.type, output.star));
+  events.push(...commitMerge(state, config, rng, output.type, output.star, 'recipe'));
   events.push(...autoMergeCards(state, config, rng).events);
   reconcileMaxHp(state);
   events.push(...reconcileEquipmentPassives(state, config, rng));

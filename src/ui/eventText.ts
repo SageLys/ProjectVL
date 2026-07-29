@@ -16,14 +16,14 @@ export function resetToastDedupe(): void {
 /** 事件类型中会改变卡槽/装备内容、需要重绘槽位的集合。 */
 export const SLOT_CHANGING = new Set<GameEvent['type']>([
   'collected', 'moved', 'swapped', 'merged', 'fed', 'skillConsumed', 'equipped',
-  'wildcardsGranted', 'wildcardMerged',
+  'mergeRefunded', 'wildcardsGranted', 'wildcardMerged',
   'evolutionBranchSelected',
   'bossRewardGranted',
   'recipeCompleted',
 ]);
 
 function wildcardGrantDescription(grants: Array<{ star: number; count: number }>): string {
-  return grants.map(grant => `${grant.star}★万能卡×${grant.count}`).join('、');
+  return grants.map(grant => `${grant.count} 张 ${grant.star}★ 万能卡`).join('、');
 }
 
 /** 把语义事件翻译成 toast 文案；无需 toast 的事件返回 null。 */
@@ -70,7 +70,15 @@ export function formatToast(ev: GameEvent): string | null {
     case 'swapped': return fmt(T.swapped, { a: name(ev.a), b: name(ev.b) });
     case 'merged': return null; // 合成提示已并入 collected/moved 的 mergeSuffix
     case 'fed': return fmt(T.fed, { name: name(ev.cardType), star: ev.resultStar });
-    case 'wildcardsGranted': return T.testWildcards;
+    case 'mergeRefunded':
+      if (ev.granted > 0 && ev.lost > 0) return fmt(T.mergeRefundPartial, {
+        name: name(ev.cardType), star: ev.star, granted: ev.granted, lost: ev.lost,
+      });
+      if (ev.granted > 0) return fmt(T.mergeRefunded, {
+        name: name(ev.cardType), star: ev.star, granted: ev.granted,
+      });
+      return fmt(T.mergeRefundLost, { name: name(ev.cardType), star: ev.star, lost: ev.lost });
+    case 'wildcardsGranted': return fmt(T.wildcardsGranted, { desc: wildcardGrantDescription(ev.grants) });
     case 'wildcardMerged': return fmt(T.wildcardMerged, { name: name(ev.cardType), star: ev.resultStar });
     case 'wildcardMergeRejected':
       return ev.reason === 'missingWildcard' ? fmt(T.wildcardMissing, { star: ev.requiredStar ?? '' }) : ev.reason === 'maxStar' ? T.wildcardMaxStar : null;

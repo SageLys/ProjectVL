@@ -9,6 +9,7 @@ import {
   recordCardDropShown, selectBuildType, selectPivotType, selectUniformCardType,
 } from './dropTypePolicy';
 import { selectFocusGodCard } from './activePoolSystem';
+import { getModifiers } from '../effects/interpreter';
 
 function stageWaveIndex(wave: number, game: GameConfig): number {
   const plan = game.waves.stagePlan;
@@ -72,16 +73,38 @@ function spawnValidationReward(
   drop.validationRewardWave = state.wave;
 }
 
+function bossWildcardBonus(state: GameState, rng: Rng): number {
+  const rules = getModifiers(state).wildcardRewardBonuses.filter(
+    rule => rule.scope === 'both' || rule.scope === 'boss',
+  );
+  if (rules.length === 0) return 0;
+  let count = 0;
+  for (const rule of rules) if (rng() < rule.bonusChance) count += rule.count;
+  return count;
+}
+
 /** Drops the Boss reward for manual pickup. Validation rewards are secure and gate wave completion. */
 export function grantWaveBossReward(state: GameState, config: Config, rng: Rng, x: number, y: number): GameEvent[] {
   if (state.bossRewardClaimedWave >= state.wave) return [];
   const plan = resolveActiveWavePlan(cfg, state.wave);
   if (plan.validation) {
-    spawnValidationReward(state, config, rng, x, y, plan.validation.bossReward, 'bossKill');
+    const spec = plan.validation.bossReward;
+    if (spec.kind === 'card') {
+      spawnValidationReward(state, config, rng, x, y, spec, 'bossKill');
+    } else {
+      spawnValidationReward(
+        state, config, rng, x, y,
+        { ...spec, count: spec.count + bossWildcardBonus(state, rng) },
+        'bossKill',
+      );
+    }
     const drop = state.groundDrops[state.groundDrops.length - 1];
     if (drop.kind === 'wildcard') drop.bossRewardWave = state.wave;
   } else {
-    for (const grant of computeWaveBossReward(state.wave)) {
+    const grants = computeWaveBossReward(state.wave);
+    const bonus = bossWildcardBonus(state, rng);
+    if (grants.length > 0) grants[0] = { ...grants[0], count: grants[0].count + bonus };
+    for (const grant of grants) {
       spawnWildcardDrop(state, x, y, grant.star, grant.count, cfg.bounty.reward.dropLifetimeSeconds);
       const drop = state.groundDrops[state.groundDrops.length - 1];
       if (drop.kind !== 'wildcard') throw new Error('Boss reward must be a wildcard drop');

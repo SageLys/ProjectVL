@@ -2,9 +2,9 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "urn:projectvl:skills-schema",
   "title": "ProjectVL 技能卡数据模型",
-  "version": "0.4.1",
-  "date": "2026-07-12",
-  "description": "v0.4.0 技能卡数据模型。35 张正式卡全部通过 evolutionTree 解析 3/4/5/6★；recipeOnly 产物没有进化树，只声明 6★ 终态。技能行为只由 JSON 触发器与效果原子组成。",
+  "version": "0.5.0",
+  "date": "2026-07-29",
+  "description": "v0.5.0 技能卡数据模型。35 张正式卡全部通过 evolutionTree 解析 3/4/5/6★；recipeOnly 产物没有进化树，只声明 6★ 终态。技能行为只由 JSON 触发器与效果原子组成。",
   "type": "object",
   "required": [
     "version",
@@ -71,7 +71,7 @@
       "onPickup": "玩家点击拾取地面掉落时。上下文: drop。经济类联动。",
       "interval": "固定周期。参数: seconds。3★ 形态（雷暴/新星/脉冲光环）的主要载体。",
       "onMerge": "卡牌合成完成时。上下文: cardType, resultStar。合成规则类效果的载体。",
-      "passive": "（v0.3.0 新增）常驻修饰，无事件时机。解释器聚合读取：经济乘数/防御修饰/换形/常驻光环/mergeRule。"
+      "passive": "（v0.3.0 新增）常驻修饰，无事件时机。解释器聚合读取：经济乘数/防御修饰/换形/常驻光环/合成素材返还/万能卡奖励加成。"
     },
     "atom": {
       "description": "效果原子。正交设计：原子只描述『做什么』，由所在上下文（装备触发绑定 / 消耗落点释放）决定『何时何地』。同一原子可同时服务装备态与消耗态——这是一卡两用不膨胀的关键。",
@@ -99,7 +99,8 @@
         "xpMul",
         "extraDrop",
         "expiryConvert",
-        "mergeRule",
+        "mergeMaterialRefund",
+        "wildcardRewardBonus",
         "mergePulse",
         "shield",
         "thorns",
@@ -287,12 +288,22 @@
           ],
           "note": "过期掉落按比例转化，突破『过期即损失』"
         },
-        "mergeRule": {
+        "mergeMaterialRefund": {
           "params": [
-            "rule(wildcardDrop|refundChance)",
-            "value"
+            "refundChance",
+            "count",
+            "star",
+            "scope(merge|feed|both)"
           ],
-          "note": "改变合成规则本身（触碰 P4 掉落经济学，需建模）"
+          "note": "普通同型合并或装备喂养后，按概率返还同型低星素材；万能升星与配方进化恒不返还"
+        },
+        "wildcardRewardBonus": {
+          "params": [
+            "bonusChance",
+            "count",
+            "scope(bounty|boss|both)"
+          ],
+          "note": "在 Bounty 或波末 Boss 的基线万能卡奖励上增加数量"
         },
         "mergePulse": {
           "params": [

@@ -1,6 +1,6 @@
 import { cfg } from '../../config';
 import type { Card, Config, GameEvent, GameState, Rng, SlotKind } from '../types';
-import { autoMergeCards, commitMerge } from './cardSystem';
+import { autoMergeCards, commitMerge, flushMergeRefunds } from './cardSystem';
 import { getSkillDef, reconcileEquipmentPassives, releaseConsumable } from '../effects/interpreter';
 import { finalizeEvolutionUpgrade } from './evolutionTreeSystem';
 import { reconcileMaxHp } from '../stats';
@@ -15,8 +15,10 @@ function feed(state: GameState, config: Config, rng: Rng, source: (Card | null)[
   state.equipOps++;
   const events: GameEvent[] = [{ type: 'fed', cardType: target.type, resultStar: target.star, slotIndex: targetIndex, targetCardId: target.id }];
   const evolutionEvents = finalizeEvolutionUpgrade(state, target);
-  events.push(...commitMerge(state, config, rng, target.type, target.star));
+  events.push(...commitMerge(state, config, rng, target.type, target.star, 'feed'));
   events.push(...evolutionEvents);
+  events.push(...flushMergeRefunds(state, config, rng));
+  events.push(...autoMergeCards(state, config, rng).events);
   reconcileMaxHp(state);
   events.push(...reconcileEquipmentPassives(state, config, rng));
   return events;

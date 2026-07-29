@@ -119,8 +119,13 @@ const PRE_MIGRATION_DEFAULTS: Record<string, number | string | boolean> = {
   'extraDrop.count': 1,
   'extraDrop.at': 'point',
   'expiryConvert.ratio': 0.5,
-  'mergeRule.rule': '',
-  'mergeRule.value': 0,
+  'mergeMaterialRefund.refundChance': 0.25,
+  'mergeMaterialRefund.count': 1,
+  'mergeMaterialRefund.star': 1,
+  'mergeMaterialRefund.scope': 'merge',
+  'wildcardRewardBonus.bonusChance': 1,
+  'wildcardRewardBonus.count': 1,
+  'wildcardRewardBonus.scope': 'both',
   'mergePulse.damagePerMergeCount': 4,
   'mergePulse.radius': 200,
   // 防御
@@ -156,7 +161,7 @@ const PRE_MIGRATION_RECORD_DEFAULTS: Record<string, Record<string, number>> = {
 describe('原子契约 · 单一来源', () => {
   it('契约键集与注册表实现键集双向一致（无遗漏、无多余）', () => {
     expect([...ATOM_NAMES].sort()).toEqual(Object.keys(ATOMS).sort());
-    expect(ATOM_NAMES).toHaveLength(33);
+    expect(ATOM_NAMES).toHaveLength(34);
   });
 
   it('modifierOnly 与 NOOP_MODIFIER_ATOMS / getModifiers 处理清单双向一致', () => {
@@ -184,7 +189,11 @@ describe('原子契约 · 单一来源', () => {
       const contract = atomContract(atom);
       for (const [key, spec] of Object.entries(contract.params)) {
         const types = Array.isArray(spec.type) ? spec.type : [spec.type];
-        if (types.includes('enum')) expect(spec.enum, `${atom}.${key}`).toBeDefined();
+        if (types.includes('enum')) {
+          expect(spec.enum, `${atom}.${key}`).toBeDefined();
+          // number | enum 联合参数可有数值默认值；字符串默认值必须落在枚举分支内。
+          if (typeof spec.default === 'string') expect(spec.enum, `${atom}.${key}`).toContain(spec.default);
+        }
         if (types.includes('effects')) expect(contract.allowsNestedEffects, `${atom}.${key}`).toBe(true);
         if (spec.variantDefaults) {
           expect(contract.params[spec.variantDefaults.on], `${atom}.${key}`).toBeDefined();

@@ -1,4 +1,4 @@
-// 效果原子参数契约：33 个原子的**唯一权威**参数声明。
+// 效果原子参数契约：34 个原子的**唯一权威**参数声明。
 // 改原子先改这里——契约默认值即运行时默认值，registry/interpreter 一律从本表读取兜底，
 // 禁止在实现里再写字面量默认值（`docs/效果原子参数契约_落地记录.md` 记录了逐项核对结果）。
 //
@@ -83,7 +83,7 @@ const TARGET_RADIUS: AtomParamSpec = {
 };
 
 /**
- * 唯一权威：33 原子的参数契约。
+ * 唯一权威：34 原子的参数契约。
  * 默认值以迁移前 `registry.ts` / `interpreter.ts` 的内联值为准（代码是事实，文档可能滞后）。
  */
 export const ATOM_CONTRACT = {
@@ -409,14 +409,36 @@ export const ATOM_CONTRACT = {
     emitsEvents: false,
     modifierOnly: true,
   },
-  mergeRule: {
+  mergeMaterialRefund: {
     category: 'economy',
     params: {
-      rule: { type: 'enum', default: '', enum: ['wildcardDrop', 'refundChance'] },
-      value: { type: 'number', default: 0 },
-      ...CHANCE,
+      refundChance: {
+        type: 'number', default: 0.25, min: 0, max: 1,
+        note: '由 commitMerge 消费端掷骰；不是 runEffects 的 chance 闸门',
+      },
+      count: { type: 'integer', default: 1, min: 1, max: 4, note: '单次返还张数' },
+      star: { type: 'integer', default: 1, min: 1, note: '返还素材星级；运行时再按 maxStar 夹紧' },
+      scope: {
+        type: 'enum', default: 'merge', enum: ['merge', 'feed', 'both'],
+        note: '生效的合成来源；万能升星与配方进化恒不返还',
+      },
     },
-    allowedTriggers: 'any',
+    allowedTriggers: ['passive'],
+    supports: { equip: true, consume: false },
+    emitsEvents: false,
+    modifierOnly: true,
+  },
+  wildcardRewardBonus: {
+    category: 'economy',
+    params: {
+      bonusChance: {
+        type: 'number', default: 1, min: 0, max: 1,
+        note: '由奖励组装消费端掷骰；不是 runEffects 的 chance 闸门',
+      },
+      count: { type: 'integer', default: 1, min: 1, max: 3, note: '在基线奖励上额外增加的张数' },
+      scope: { type: 'enum', default: 'both', enum: ['bounty', 'boss', 'both'] },
+    },
+    allowedTriggers: ['passive'],
     supports: { equip: true, consume: false },
     emitsEvents: false,
     modifierOnly: true,

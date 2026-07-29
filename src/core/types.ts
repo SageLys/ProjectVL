@@ -197,6 +197,12 @@ export interface EnemyStatus {
   kbFatigue: { multiplier: number; remaining: number } | null;
 }
 
+export interface PendingMergeRefund {
+  cardType: CardType;
+  star: number;
+  count: number;
+}
+
 export interface TauntCandidate {
   sourceKey: string;
   priorityWeight: number;
@@ -516,6 +522,8 @@ export interface GameState {
   particles: Particle[];
   groundDrops: GroundDrop[];
   cards: (Card | null)[];
+  /** 合成返还先进入此队列，待当前自动合并循环稳定后再发牌，避免循环中途重入。 */
+  pendingMergeRefunds: PendingMergeRefund[];
   /** 独立装备格；装备卡可拖到战场消耗释放，不可回到手牌。 */
   equipment: (Card | null)[];
   /** 按目标当前星级储存的万能卡数量；合法键 1..maxStar-1（当前 1..5）。独立于 cards/equipment。 */
@@ -632,6 +640,7 @@ export type GameEvent =
   | { type: 'moved'; cardType: CardType; merges: number }
   | { type: 'swapped'; a: CardType; b: CardType }
   | { type: 'merged'; cardType: CardType; resultStar: number; resultCardId?: number }
+  | { type: 'mergeRefunded'; cardType: CardType; star: number; granted: number; lost: number }
   | { type: 'skillConsumed'; cardType: CardType; star: number; x: number; y: number }
   | { type: 'equipped'; cardType: CardType; star: number; slotIndex: number }
   | { type: 'fed'; cardType: CardType; resultStar: number; slotIndex?: number; targetCardId?: number }

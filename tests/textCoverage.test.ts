@@ -27,7 +27,7 @@ describe('player-facing text coverage', () => {
       }
     }
     expect(Object.keys(copy.glossary)).toEqual(expect.arrayContaining(Object.keys(ATOM_LABELS)));
-    expect(Object.keys(copy.effectText.atoms)).toHaveLength(33);
+    expect(Object.keys(copy.effectText.atoms)).toHaveLength(34);
     expect(Object.keys(copy.effectText.triggers)).toHaveLength(9);
     expect(Object.keys(copy.affixHelp)).toEqual(expect.arrayContaining(Object.keys(AFFIX_SINKS)));
   });

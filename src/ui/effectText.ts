@@ -49,7 +49,8 @@ export const ATOM_LABELS: Record<AtomName, string> = {
   xpMul: '经验获取',
   extraDrop: '额外掉落',
   expiryConvert: '过期转化',
-  mergeRule: '合成规则',
+  mergeMaterialRefund: '合成素材返还',
+  wildcardRewardBonus: '万能卡奖励加成',
   mergePulse: '合成脉冲',
   shield: '护盾',
   thorns: '反伤',
@@ -246,9 +247,16 @@ export function formatEffect(effect: EffectDef, depth = 0): EffectTextLine[] {
     case 'expiryConvert':
       text = `掉落物过期时，将其中 ${pct(p.ratio)} 转化为收益`;
       break;
-    case 'mergeRule':
-      text = '调整同类同星卡牌的合成规则';
+    case 'mergeMaterialRefund': {
+      const scope = p.scope === 'feed' ? '装备喂养' : p.scope === 'both' ? '普通合并或装备喂养' : '普通同型合并';
+      text = `${scope}时，有 ${pct(p.refundChance)} 概率返还 ${shown(p.count)} 张 ${shown(p.star)}★ 同型素材卡`;
       break;
+    }
+    case 'wildcardRewardBonus': {
+      const scope = p.scope === 'bounty' ? 'Bounty' : p.scope === 'boss' ? '波末 Boss' : 'Bounty 或波末 Boss';
+      text = `${scope}发放万能卡奖励时，有 ${pct(p.bonusChance)} 概率额外增加 ${shown(p.count)} 张`;
+      break;
+    }
     case 'mergePulse':
       text = `合成时释放半径 ${shown(p.radius)} 的脉冲，每次累计合成造成 ${shown(p.damagePerMergeCount)} 点伤害`;
       break;

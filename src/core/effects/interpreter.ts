@@ -37,9 +37,14 @@ export const FUSION_RULES = [
   '主炮形态(weaponForm): delivery/impact/cadence 正交轴确定性融合',
 ] as const;
 
-/** Passive no-op atoms wired into getModifiers; kept explicit for config audits. */
+/**
+ * Passive no-op atoms wired into getModifiers; kept explicit for config audits.
+ * Legacy modifiers below are not uniformly trigger-filtered; the two merge-economy atoms
+ * enforce passive locally. Do not broaden that cleanup here because existing cards rely on it.
+ */
 export const MODIFIER_ATOMS_HANDLED = [
-  'dropRateMul', 'dropLifetimeMul', 'xpMul', 'expiryConvert', 'mergeRule',
+  'dropRateMul', 'dropLifetimeMul', 'xpMul', 'expiryConvert',
+  'mergeMaterialRefund', 'wildcardRewardBonus',
   'thorns', 'breachReduction', 'novaOnBreak',
 ] as const;
 
@@ -396,7 +401,17 @@ export interface Modifiers {
   breachReduction: number;
   executeThreshold: number;
   novaOnBreak: { damage: number; knockbackDistance: number } | null;
-  mergeRules: { rule: string; value: number }[];
+  mergeMaterialRefunds: {
+    refundChance: number;
+    count: number;
+    star: number;
+    scope: 'merge' | 'feed' | 'both';
+  }[];
+  wildcardRewardBonuses: {
+    bonusChance: number;
+    count: number;
+    scope: 'bounty' | 'boss' | 'both';
+  }[];
   expiryConvert: { ratio: number } | null;
   weaponForms: WeaponFormContribution[];
   auras: { key: string; sourceCardId: number; sourceCardType: CardType; sourceBindingIndex: number; radius: number | null; radiusRatioOfRange: number | null; tickInterval: number; effects: EffectDef[]; star: number }[];
@@ -443,7 +458,7 @@ export function getModifiers(state: GameState): Modifiers {
     dropLifetimeMul: runtimeDropLifetime.mul + runtimeDropLifetime.add,
     xpMul: runtimeXp.mul + runtimeXp.add,
     thornsRatio: 0, breachReduction: 0, executeThreshold: 0,
-    novaOnBreak: null, mergeRules: [], expiryConvert: null,
+    novaOnBreak: null, mergeMaterialRefunds: [], wildcardRewardBonuses: [], expiryConvert: null,
     weaponForms: [],
     auras: [],
     equipmentAffixAdd: {
@@ -477,10 +492,19 @@ export function getModifiers(state: GameState): Modifiers {
             knockbackDistance: passiveNum(p, 'novaOnBreak', 'knockbackDistance'),
           });
           break;
-        case 'mergeRule':
-          m.mergeRules.push({
-            rule: str(p, 'rule', atomStringDefault('mergeRule', 'rule')),
-            value: passiveNum(p, 'mergeRule', 'value'),
+        case 'mergeMaterialRefund':
+          if (binding.trigger === 'passive') m.mergeMaterialRefunds.push({
+            refundChance: passiveNum(p, 'mergeMaterialRefund', 'refundChance'),
+            count: passiveNum(p, 'mergeMaterialRefund', 'count'),
+            star: passiveNum(p, 'mergeMaterialRefund', 'star'),
+            scope: str(p, 'scope', atomStringDefault('mergeMaterialRefund', 'scope')) as 'merge' | 'feed' | 'both',
+          });
+          break;
+        case 'wildcardRewardBonus':
+          if (binding.trigger === 'passive') m.wildcardRewardBonuses.push({
+            bonusChance: passiveNum(p, 'wildcardRewardBonus', 'bonusChance'),
+            count: passiveNum(p, 'wildcardRewardBonus', 'count'),
+            scope: str(p, 'scope', atomStringDefault('wildcardRewardBonus', 'scope')) as 'bounty' | 'boss' | 'both',
           });
           break;
         case 'expiryConvert':

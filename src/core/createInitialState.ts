@@ -78,6 +78,7 @@ export function createInitialState(difficultyId: DifficultyId = 'hell'): GameSta
     particles: [],
     groundDrops: [],
     cards: Array(cfg.economy.handSlots).fill(null),
+    pendingMergeRefunds: [],
     equipment: Array(cfg.economy.equipSlots).fill(null),
     wildcards: createEmptyWildcardInventory(cfg.economy.maxStar),
     zones: [],

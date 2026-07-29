@@ -13,7 +13,7 @@
 1. ✅ 模块三分类清单已定（见 `docs/接下来任务计划_v1.md` §1）。
 2. ✅ 核心更新契约已定（本文件 §三）。
 3. ✅ 配置权威源 = JSON，Unity **只读不反向写**（见 §五）。
-4. ✅ 第一版效果原子参数契约已定：`src/core/effects/atomContract.ts`（33 原子的参数/默认值/触发器/形态支持），核对记录见 `docs/效果原子参数契约_落地记录.md`。
+4. ✅ 效果原子参数契约已定：`src/core/effects/atomContract.ts`（当前 34 原子的参数/默认值/触发器/形态支持），核对记录见 `docs/效果原子参数契约_落地记录.md`。
 5. ✅ 一组固定 seed 黄金 fixture 已产出：`tests/golden/`，字段定义与比对口径见 `docs/黄金回放_fixture规格.md`。
 
 ---

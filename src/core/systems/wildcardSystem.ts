@@ -51,7 +51,7 @@ export function useWildcardOnSlot(state: GameState, config: Config, rng: Rng, ta
     targetCardId: target.id,
   }];
   const evolutionEvents = finalizeEvolutionUpgrade(state, target);
-  events.push(...commitMerge(state, config, rng, target.type, target.star));
+  events.push(...commitMerge(state, config, rng, target.type, target.star, 'wildcard'));
   events.push(...evolutionEvents);
   if (targetKind === 'cards') events.push(...autoMergeCards(state, config, rng).events);
   else {

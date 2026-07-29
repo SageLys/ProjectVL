@@ -377,7 +377,7 @@ _cov = Table([[""]], colWidths=[38 * mm], rowHeights=[3])
 _cov.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#3F9D7B"))]))
 story += [_cov, Spacer(1, 10 * mm)]
 story += [Paragraph(x, ST["cover_meta"]) for x in [
-    "版本　　skills-schema v0.4.1　·　9 个触发器　·　33 个效果原子",
+    "版本　　skills-schema v0.5.0　·　9 个触发器　·　34 个效果原子",
     "生成日期　%s" % DATE,
     "唯一权威　<font color='#0B5C74'>src/core/effects/atomContract.ts</font>（参数契约）、"
     "<font color='#0B5C74'>registry.ts</font>（原子实现）、<font color='#0B5C74'>interpreter.ts</font>（触发器总线）",
@@ -462,7 +462,7 @@ story += [data_table(["触发器", "游戏内文案", "什么时候发生", "绑
                      [30 * mm, 24 * mm, CW - 68 * mm, 14 * mm]), Spacer(1, 12)]
 
 # 原子速查
-story += [CondPageBreak(60 * mm), Paragraph("效果原子速查表（33 个）", ST["h2"]), Spacer(1, 5)]
+story += [CondPageBreak(60 * mm), Paragraph("效果原子速查表（34 个）", ST["h2"]), Spacer(1, 5)]
 rows = []
 for cat in ORDER:
     for name in BY_CAT[cat]:
@@ -533,11 +533,14 @@ story.append(PageBreak())
 # ============ 第三部分 效果原子 ============
 h_section("第三部分　效果原子详解", "p3",
           colors.HexColor("#12303F"),
-          "33 个原子 = 效果的「做什么」。参数表、允许触发器、词条靶点与卡牌用例由脚本直接从源码提取。")
+          "34 个原子 = 效果的「做什么」。参数表、允许触发器、词条靶点与卡牌用例由脚本直接从源码提取。")
 
 first = True
 for cat in ORDER:
-    story.append(PageBreak() if not first else Spacer(1, 0))
+    if not first:
+        story += [PageBreak(), Spacer(1, 12 * mm)]
+    else:
+        story.append(Spacer(1, 0))
     first = False
     story.append(Sec("第三部分　效果原子详解　·　" + CAT_CN[cat] + "类"))
     story += section_title("%s类（%s）" % (CAT_CN[cat], cat), 1, "cat_" + cat, CAT[cat],
@@ -545,7 +548,9 @@ for cat in ORDER:
 
     for j, name in enumerate(BY_CAT[cat]):
         if j:
-            story.append(PageBreak())
+            # ReportLab 的零高度 Sec 标记紧跟 PageBreak 时，部分页会从页眉区开始排版；
+            # 固定安全间距确保每个原子页都落在正文框内。
+            story += [PageBreak(), Spacer(1, 12 * mm)]
         spec = ATOMS[name]
         story.append(Sec("第三部分　效果原子详解　·　%s类　·　%s %s"
                          % (CAT_CN[cat], LABELS[name]["atom"]["label"], name)))
@@ -673,8 +678,8 @@ FUSION = [
     ("正交轴确定性融合", "beamMorph / mortarMorph",
      "delivery 覆盖轴由最强 beam <b>赢家通吃</b>（其余完全压制）；"
      "impact 叠加轴上 mortar 从第 2 个起按 damping 衰减、半径按 √areaMul 缩放。", "warn"),
-    ("累积入列", "mergeRule / dot",
-     "全部入列，由消费方各自解释；dot 是少数真正线性相加的效果。", "ok"),
+    ("累积入列", "mergeMaterialRefund / wildcardRewardBonus / dot",
+     "全部按稳定来源序入列，由消费方各自解释；dot 是少数真正线性相加的效果。", "ok"),
     ("卡内覆盖、跨卡分轴取最大", "novaOnBreak",
      "同卡后声明覆盖；跨卡 damage 与 knockbackDistance 独立取最大。", "ok"),
     ("失败概率连乘", "expiryConvert",
@@ -712,7 +717,7 @@ PIT = [
         "把 <b>aura</b> 绑到了 passive 以外的触发器——校验器会直接拒绝（allowedTriggers 锁死）。",
         "<b>interval</b> 绑定漏写 <font color='#0B5C74'>triggerParams.seconds</font>——不是不触发，是每 1 秒触发一次。",
         "<b>thorns / breachReduction</b> 漏写 ratio——契约默认 0，等于原子不存在，且不报错。",
-        "<b>mergeRule</b> 漏写 rule——契约默认空串，会产生一条无效规则。",
+        "<b>合成经济原子</b>只能放在 passive 下；概率由消费端掷骰，不能写成通用 chance。",
         "<b>restore</b> 同时漏写 amount 与 amountRatio——校验器会拦，但只写其中一个为 0 时不会拦。",
     ]),
     ("效果生效了但强度对不上", [
@@ -869,7 +874,7 @@ class Doc(BaseDocTemplate):
 
 doc = Doc(OUT, pagesize=A4, leftMargin=ML, rightMargin=MR, topMargin=MT, bottomMargin=MB,
           title="ProjectVL 触发器与效果原子说明手册", author="ProjectVL",
-          subject="skills-schema v0.4.1 · 9 触发器 · 33 效果原子")
+          subject="skills-schema v0.5.0 · 9 触发器 · 34 效果原子")
 frame = Frame(ML, MB, CW, PAGE_H - MT - MB, id="f", leftPadding=0, rightPadding=0,
               topPadding=0, bottomPadding=0)
 doc.addPageTemplates([

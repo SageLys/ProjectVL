@@ -903,29 +903,80 @@
    "emitsEvents": false,
    "modifierOnly": true
   },
-  "mergeRule": {
+  "mergeMaterialRefund": {
    "category": "economy",
    "params": {
-    "rule": {
-     "type": "enum",
-     "default": "",
-     "enum": [
-      "wildcardDrop",
-      "refundChance"
-     ]
-    },
-    "value": {
+    "refundChance": {
      "type": "number",
-     "default": 0
-    },
-    "chance": {
-     "type": "number",
+     "default": 0.25,
      "min": 0,
      "max": 1,
-     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+     "note": "由 commitMerge 消费端掷骰；不是 runEffects 的 chance 闸门"
+    },
+    "count": {
+     "type": "integer",
+     "default": 1,
+     "min": 1,
+     "max": 4,
+     "note": "单次返还张数"
+    },
+    "star": {
+     "type": "integer",
+     "default": 1,
+     "min": 1,
+     "note": "返还素材星级；运行时再按 maxStar 夹紧"
+    },
+    "scope": {
+     "type": "enum",
+     "default": "merge",
+     "enum": [
+      "merge",
+      "feed",
+      "both"
+     ],
+     "note": "生效的合成来源；万能升星与配方进化恒不返还"
     }
    },
-   "allowedTriggers": "any",
+   "allowedTriggers": [
+    "passive"
+   ],
+   "supports": {
+    "equip": true,
+    "consume": false
+   },
+   "emitsEvents": false,
+   "modifierOnly": true
+  },
+  "wildcardRewardBonus": {
+   "category": "economy",
+   "params": {
+    "bonusChance": {
+     "type": "number",
+     "default": 1,
+     "min": 0,
+     "max": 1,
+     "note": "由奖励组装消费端掷骰；不是 runEffects 的 chance 闸门"
+    },
+    "count": {
+     "type": "integer",
+     "default": 1,
+     "min": 1,
+     "max": 3,
+     "note": "在基线奖励上额外增加的张数"
+    },
+    "scope": {
+     "type": "enum",
+     "default": "both",
+     "enum": [
+      "bounty",
+      "boss",
+      "both"
+     ]
+    }
+   },
+   "allowedTriggers": [
+    "passive"
+   ],
    "supports": {
     "equip": true,
     "consume": false
@@ -2154,21 +2205,46 @@
     }
    }
   },
-  "mergeRule": {
+  "mergeMaterialRefund": {
    "atom": {
-    "label": "合成规则",
-    "help": "改变同类同星卡牌合并时使用的规则。"
+    "label": "合成素材返还",
+    "help": "普通同型合并或装备喂养完成时，按概率返还同型低星素材卡。"
    },
    "params": {
-    "rule": {
-     "label": "合成规则"
+    "refundChance": {
+     "label": "返还概率",
+     "help": "由 commitMerge 消费端掷骰；不是 runEffects 的 chance 闸门"
     },
-    "value": {
-     "label": "规则数值"
+    "count": {
+     "label": "返还张数",
+     "help": "单次返还张数"
     },
-    "chance": {
-     "label": "触发概率",
-     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    "star": {
+     "label": "返还素材星级",
+     "help": "返还素材星级；运行时再按 maxStar 夹紧"
+    },
+    "scope": {
+     "label": "返还来源",
+     "help": "生效的合成来源；万能升星与配方进化恒不返还"
+    }
+   }
+  },
+  "wildcardRewardBonus": {
+   "atom": {
+    "label": "万能卡奖励加成",
+    "help": "在 Bounty 或波末 Boss 的基线万能卡奖励上额外增加数量。"
+   },
+   "params": {
+    "bonusChance": {
+     "label": "加成概率",
+     "help": "由奖励组装消费端掷骰；不是 runEffects 的 chance 闸门"
+    },
+    "count": {
+     "label": "额外万能卡张数",
+     "help": "在基线奖励上额外增加的张数"
+    },
+    "scope": {
+     "label": "奖励来源"
     }
    }
   },
