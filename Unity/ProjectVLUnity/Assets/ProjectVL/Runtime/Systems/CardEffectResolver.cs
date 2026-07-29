@@ -72,6 +72,21 @@ namespace ProjectVL.Systems
                     case "goldenIdol":
                         ApplyGoldenIdol(profile);
                         break;
+                    case "staticSurge":
+                        ApplyStaticSurge(card, profile);
+                        break;
+                    case "stormcall":
+                        ApplyStormcall(card, profile);
+                        break;
+                    case "arcSplitter":
+                        ApplyArcSplitter(card, profile);
+                        break;
+                    case "galvanicWard":
+                        ApplyGalvanicWard(card, profile);
+                        break;
+                    case "overcharge":
+                        ApplyOvercharge(card, profile);
+                        break;
                 }
             }
 
@@ -723,6 +738,292 @@ namespace ProjectVL.Systems
             {
                 profile.MergePulseDamagePerStar =
                     Max(profile.MergePulseDamagePerStar, 7f);
+            }
+        }
+
+        private static void ApplyStaticSurge(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            if (card.Star >= 6)
+            {
+                profile.AuraRadiusRatio = Max(
+                    profile.AuraRadiusRatio,
+                    170f / 150f);
+                profile.AuraVulnerableRatio = Max(
+                    profile.AuraVulnerableRatio,
+                    0.12f);
+                return;
+            }
+
+            string route = RouteAt(card, 3);
+            float ratio = route == "staticSurgeB" ? 0.08f : 0.05f;
+            if (card.Star >= 4)
+            {
+                ratio *= 1.25f;
+            }
+
+            profile.VulnerableRatio = Max(
+                profile.VulnerableRatio,
+                ratio);
+            profile.VulnerableDuration = Max(
+                profile.VulnerableDuration,
+                route == "staticSurgeC2" ? 5f : 3f);
+            if (route == "staticSurgeC")
+            {
+                profile.OnHitStunDuration = Max(
+                    profile.OnHitStunDuration,
+                    0.35f);
+                profile.OnHitStunCooldown = 2f;
+            }
+
+            string advanced = RouteAt(card, 5);
+            if (advanced == "staticSurgeA2")
+            {
+                profile.KillVulnerableRadius = 90f;
+                profile.KillVulnerableRatio = 0.1f;
+                profile.KillVulnerableDuration = 3f;
+            }
+            else if (advanced == "staticSurgeB2")
+            {
+                profile.SplashRadius = Max(profile.SplashRadius, 55f);
+                profile.SplashDamageRatio = Max(
+                    profile.SplashDamageRatio,
+                    0.32f);
+            }
+            else if (advanced == "staticSurgeC2")
+            {
+                profile.VulnerableDuration = Max(
+                    profile.VulnerableDuration,
+                    5f);
+            }
+        }
+
+        private static void ApplyStormcall(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            if (card.Star >= 6)
+            {
+                profile.StormcallInterval = 4f;
+                profile.StormcallStrikeCount = 1;
+                profile.StormcallRadius = 150f;
+                profile.StormcallZoneDuration = 4f;
+                profile.StormcallZoneTickInterval = 0.6f;
+                profile.StormcallZoneDamageRatio = 0.45f;
+                profile.StormcallZoneVulnerableRatio = 0.08f;
+                return;
+            }
+
+            string route = RouteAt(card, 3);
+            profile.StormcallInterval =
+                route == "stormcallA" ? 2.2f : 3f;
+            profile.StormcallStrikeCount = 1;
+            profile.StormcallRadius =
+                route == "stormcallC" ? 70f : 75f;
+            profile.StormcallDamageRatio =
+                route == "stormcallB" ? 1.8f : 1.3f;
+            profile.StormcallFalloff = 0.4f;
+            if (card.Star >= 4)
+            {
+                profile.StormcallDamageRatio *= 1.25f;
+                profile.StormcallRadius *= 1.25f;
+            }
+
+            string advanced = RouteAt(card, 5);
+            if (advanced == "stormcallA2")
+            {
+                profile.StormcallStrikeCount = 2;
+                profile.StormcallRadius = 70f;
+                profile.StormcallDamageRatio = 1.1f;
+            }
+            else if (advanced == "stormcallB2")
+            {
+                profile.StormcallRadius = 90f;
+                profile.StormcallDamageRatio = 1.5f;
+            }
+            else if (advanced == "stormcallC2")
+            {
+                profile.StormcallZoneDuration = 2f;
+                profile.StormcallZoneTickInterval = 0.5f;
+                profile.StormcallZoneDamageRatio = 0f;
+                profile.StormcallZoneVulnerableRatio = 0.12f;
+            }
+        }
+
+        private static void ApplyArcSplitter(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            string route = RouteAt(card, 3);
+            if (card.Star >= 6)
+            {
+                profile.SplitCount += 12;
+                profile.SplitDamageRatio = Max(
+                    profile.SplitDamageRatio,
+                    0.6f);
+                profile.RecursiveSplitCount = 1;
+                return;
+            }
+
+            profile.SplitCount += route == "arcSplitterB" ? 3 : 4;
+            profile.SplitDamageRatio = Max(
+                profile.SplitDamageRatio,
+                route == "arcSplitterB" ? 0.7f : 0.45f);
+            if (route == "arcSplitterC")
+            {
+                profile.VulnerableRatio = Max(
+                    profile.VulnerableRatio,
+                    0.06f);
+                profile.VulnerableDuration = Max(
+                    profile.VulnerableDuration,
+                    1.5f);
+            }
+
+            if (card.Star >= 4)
+            {
+                profile.SplitCount += 1;
+                profile.SplitDamageRatio *= 1.25f;
+            }
+
+            string advanced = RouteAt(card, 5);
+            if (advanced == "arcSplitterA2")
+            {
+                profile.RecursiveSplitCount = 2;
+                profile.RecursiveSplitDamageRatio = 0.4f;
+            }
+            else if (advanced == "arcSplitterB2")
+            {
+                profile.RicochetBounces += 1;
+            }
+            else if (advanced == "arcSplitterC2")
+            {
+                profile.OnHitFireRateMultiplier = 1.08f;
+                profile.OnHitFireRateDuration = 2f;
+                profile.OnHitFireRateMaxStacks = 3;
+            }
+        }
+
+        private static void ApplyGalvanicWard(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            if (card.Star >= 6)
+            {
+                profile.ShieldHits += 4;
+                profile.ShieldRegenSeconds = 6f;
+                profile.ShieldBreakDamage = Max(
+                    profile.ShieldBreakDamage,
+                    55f);
+                profile.ShieldBreakKnockback = Max(
+                    profile.ShieldBreakKnockback,
+                    90f);
+                profile.WaveStartFireRateMultiplier = Max(
+                    profile.WaveStartFireRateMultiplier,
+                    1.25f);
+                profile.WaveStartFireRateDuration = Max(
+                    profile.WaveStartFireRateDuration,
+                    5f);
+                return;
+            }
+
+            string route = RouteAt(card, 3);
+            profile.ShieldHits += route == "galvanicWardA" ? 3 : 2;
+            profile.ShieldRegenSeconds = 10f;
+            profile.ShieldBreakDamage = Max(
+                profile.ShieldBreakDamage,
+                route == "galvanicWardB" ? 40f : 24f);
+            profile.ShieldBreakKnockback = Max(
+                profile.ShieldBreakKnockback,
+                60f);
+            if (route == "galvanicWardC")
+            {
+                profile.BreachVulnerableRadius = 120f;
+                profile.BreachVulnerableRatio = 0.12f;
+                profile.BreachVulnerableDuration = 2f;
+            }
+
+            if (card.Star >= 4)
+            {
+                profile.ShieldHits += 1;
+                profile.ShieldBreakDamage *= 1.25f;
+            }
+
+            string advanced = RouteAt(card, 5);
+            if (advanced == "galvanicWardA2")
+            {
+                profile.ShieldHits += 1;
+                profile.ShieldRegenSeconds = 6f;
+            }
+            else if (advanced == "galvanicWardB2")
+            {
+                profile.WaveStartFireRateMultiplier = Max(
+                    profile.WaveStartFireRateMultiplier,
+                    1.18f);
+                profile.WaveStartFireRateDuration = 5f;
+            }
+            else if (advanced == "galvanicWardC2")
+            {
+                profile.BreachVulnerableRadius = 140f;
+                profile.BreachVulnerableRatio = 0.2f;
+                profile.BreachVulnerableDuration = 3f;
+            }
+        }
+
+        private static void ApplyOvercharge(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            if (card.Star >= 6)
+            {
+                profile.WaveStartFireRateMultiplier = Max(
+                    profile.WaveStartFireRateMultiplier,
+                    1.25f);
+                profile.WaveStartFireRateDuration = Max(
+                    profile.WaveStartFireRateDuration,
+                    5f);
+                profile.DropRateMultiplier = Max(
+                    profile.DropRateMultiplier,
+                    1.1f);
+                return;
+            }
+
+            string route = RouteAt(card, 3);
+            profile.KillFireRateMultiplier =
+                route == "overchargeB"
+                    ? 1.16f
+                    : route == "overchargeC"
+                        ? 1.08f
+                        : 1.1f;
+            profile.KillFireRateDuration =
+                route == "overchargeB"
+                    ? 2.5f
+                    : route == "overchargeC"
+                        ? 3f
+                        : 4f;
+            profile.KillFireRateMaxStacks =
+                route == "overchargeC" ? 5 : 3;
+            if (card.Star >= 4)
+            {
+                profile.KillFireRateMultiplier =
+                    1f + (profile.KillFireRateMultiplier - 1f) * 1.25f;
+            }
+
+            string advanced = RouteAt(card, 5);
+            if (advanced == "overchargeA2")
+            {
+                profile.KillBurstDamageMultiplier = 1.2f;
+                profile.KillBurstRadius = 100f;
+            }
+            else if (advanced == "overchargeB2")
+            {
+                profile.KillRestore = 1.5f;
+            }
+            else if (advanced == "overchargeC2")
+            {
+                profile.DropRateMultiplier = Max(
+                    profile.DropRateMultiplier,
+                    1.12f);
             }
         }
 

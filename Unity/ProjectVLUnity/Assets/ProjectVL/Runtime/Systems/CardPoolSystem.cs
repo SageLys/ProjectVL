@@ -19,7 +19,12 @@ namespace ProjectVL.Systems
             "splitBlast",
             "impact",
             "sanctum",
-            "thorns"
+            "thorns",
+            "staticSurge",
+            "stormcall",
+            "arcSplitter",
+            "galvanicWard",
+            "overcharge"
         };
 
         private readonly IRandomSource _random;

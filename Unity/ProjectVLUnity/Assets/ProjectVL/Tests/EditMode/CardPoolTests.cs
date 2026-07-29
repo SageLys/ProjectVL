@@ -49,7 +49,14 @@ namespace ProjectVL.Tests
 
             Assert.That(
                 active,
-                Is.EquivalentTo(new[] { "chainLightning", "pierce" }));
+                Is.EquivalentTo(new[]
+                {
+                    "chainLightning",
+                    "pierce",
+                    "stormcall",
+                    "arcSplitter",
+                    "galvanicWard"
+                }));
             Assert.That(active, Has.All.Matches<string>(CardPoolSystem.IsPlayable));
         }
 

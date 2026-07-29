@@ -2149,6 +2149,135 @@ namespace ProjectVL.Tests
             Assert.That(second.Hp, Is.EqualTo(86f));
         }
 
+        [TestCase("staticSurge")]
+        [TestCase("stormcall")]
+        [TestCase("arcSplitter")]
+        [TestCase("galvanicWard")]
+        [TestCase("overcharge")]
+        public void StormRosterCardsArePlayableAndCastable(string type)
+        {
+            CardState card = _state.CreateCard(type, 3);
+
+            Assert.That(CardPoolSystem.IsPlayable(type), Is.True);
+            Assert.That(CombatSystem.SupportsConsumable(card), Is.True);
+        }
+
+        [Test]
+        public void StaticSurgeRouteAndConsumableApplyVulnerability()
+        {
+            EquipResolved(
+                "staticSurge",
+                3,
+                "3:staticSurgeB");
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+            EnemyState enemy = AddEnemy(new Float2(250f, 250f), 100f);
+
+            Assert.That(profile.VulnerableRatio, Is.EqualTo(0.08f));
+            Assert.That(
+                _system.CastConsumable(
+                    _state,
+                    _state.CreateCard("staticSurge", 3),
+                    enemy.Position),
+                Is.True);
+            Assert.That(enemy.VulnerableRatio, Is.EqualTo(0.2f));
+            Assert.That(enemy.VulnerableRemaining, Is.EqualTo(4f));
+        }
+
+        [Test]
+        public void StormcallEquipmentStrikesAtConfiguredInterval()
+        {
+            EquipResolved(
+                "stormcall",
+                3,
+                "3:stormcallB");
+            _state.BeginWave(1);
+            EnemyState enemy = AddEnemy(
+                new Float2(201f, 380f),
+                100f);
+
+            _system.StepPassives(_state, 0f);
+            _system.StepPassives(_state, 3f);
+
+            Assert.That(enemy.Hp, Is.LessThan(100f));
+            Assert.That(
+                CardEffectResolver.Resolve(_state).StormcallDamageRatio,
+                Is.EqualTo(1.8f));
+        }
+
+        [Test]
+        public void ArcSplitterRoutesFeedProjectileSplitPipeline()
+        {
+            EquipResolved(
+                "arcSplitter",
+                5,
+                "3:arcSplitterB",
+                "5:arcSplitterB2");
+
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+
+            Assert.That(profile.SplitCount, Is.EqualTo(4));
+            Assert.That(
+                profile.SplitDamageRatio,
+                Is.EqualTo(0.875f).Within(0.001f));
+            Assert.That(profile.RicochetBounces, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void ArcSplitterConsumableEmitsConfiguredRadialProjectiles()
+        {
+            CardState card = _state.CreateCard("arcSplitter", 3);
+
+            _system.CastConsumable(
+                _state,
+                card,
+                new Float2(201f, 300f));
+
+            Assert.That(_state.Bullets, Has.Count.EqualTo(10));
+        }
+
+        [Test]
+        public void GalvanicWardProvidesWaveAndConsumableShields()
+        {
+            EquipResolved(
+                "galvanicWard",
+                3,
+                "3:galvanicWardA");
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+
+            Assert.That(profile.ShieldHits, Is.EqualTo(3));
+            Assert.That(profile.ShieldBreakDamage, Is.EqualTo(24f));
+
+            _system.CastConsumable(
+                _state,
+                _state.CreateCard("galvanicWard", 3),
+                new Float2(201f, 300f));
+
+            Assert.That(_state.ShieldHits, Is.EqualTo(5));
+            Assert.That(_state.ShieldMaxHits, Is.EqualTo(5));
+        }
+
+        [Test]
+        public void OverchargeKillBuildsFireRateStacks()
+        {
+            EquipResolved(
+                "overcharge",
+                3,
+                "3:overchargeA");
+            EnemyState enemy = AddEnemy(
+                new Float2(200f, 200f),
+                5f);
+
+            HitWithProfile(
+                enemy.Position,
+                CardEffectResolver.Resolve(_state));
+
+            Assert.That(_state.KillFireRateStacks, Is.EqualTo(1));
+            Assert.That(
+                _state.FireRateMultiplier,
+                Is.EqualTo(1.1f).Within(0.001f));
+            Assert.That(_state.FireRateBuffRemaining, Is.EqualTo(4f));
+        }
+
         private void EquipResolved(
             string type,
             int star,

@@ -54,6 +54,9 @@ namespace ProjectVL.Core
         public float KnockbackCollisionDamageRatio { get; }
         public float OnHitStunDuration { get; }
         public float OnHitStunCooldown { get; }
+        public float OnHitFireRateMultiplier { get; }
+        public float OnHitFireRateDuration { get; }
+        public int OnHitFireRateMaxStacks { get; }
         public HashSet<int> HitEnemyIds { get; } = new HashSet<int>();
 
         public BulletState(
@@ -130,6 +133,12 @@ namespace ProjectVL.Core
                 profile.KnockbackCollisionDamageRatio;
             OnHitStunDuration = profile.OnHitStunDuration;
             OnHitStunCooldown = profile.OnHitStunCooldown;
+            OnHitFireRateMultiplier =
+                profile.OnHitFireRateMultiplier;
+            OnHitFireRateDuration =
+                profile.OnHitFireRateDuration;
+            OnHitFireRateMaxStacks =
+                profile.OnHitFireRateMaxStacks;
         }
     }
 }

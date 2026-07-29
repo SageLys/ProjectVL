@@ -1115,6 +1115,16 @@ namespace ProjectVL.Presentation
                     return "荆棘王冠";
                 case "goldenIdol":
                     return "黄金神像";
+                case "staticSurge":
+                    return "静电涌动";
+                case "stormcall":
+                    return "风暴召唤";
+                case "arcSplitter":
+                    return "电弧分裂";
+                case "galvanicWard":
+                    return "电流护壁";
+                case "overcharge":
+                    return "超载";
                 default:
                     return type;
             }

@@ -155,5 +155,26 @@ namespace ProjectVL.Core
         public float ControlledKillXpDuration { get; set; }
         public int ControlledKillXpMaxStacks { get; set; }
         public float ControlledDamageTakenBonus { get; set; }
+        public float StormcallInterval { get; set; }
+        public int StormcallStrikeCount { get; set; }
+        public float StormcallRadius { get; set; }
+        public float StormcallDamageRatio { get; set; }
+        public float StormcallFalloff { get; set; }
+        public float StormcallZoneDuration { get; set; }
+        public float StormcallZoneTickInterval { get; set; }
+        public float StormcallZoneDamageRatio { get; set; }
+        public float StormcallZoneVulnerableRatio { get; set; }
+        public float KillFireRateMultiplier { get; set; } = 1f;
+        public float KillFireRateDuration { get; set; }
+        public int KillFireRateMaxStacks { get; set; }
+        public float KillBurstDamageMultiplier { get; set; }
+        public float KillBurstRadius { get; set; }
+        public float KillRestore { get; set; }
+        public float KillVulnerableRadius { get; set; }
+        public float KillVulnerableRatio { get; set; }
+        public float KillVulnerableDuration { get; set; }
+        public float OnHitFireRateMultiplier { get; set; } = 1f;
+        public float OnHitFireRateDuration { get; set; }
+        public int OnHitFireRateMaxStacks { get; set; }
     }
 }

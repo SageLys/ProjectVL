@@ -90,6 +90,21 @@ namespace ProjectVL.Systems
                 case "goldenIdol":
                     CastGoldenIdol(state, point);
                     return true;
+                case "staticSurge":
+                    CastStaticSurge(state, card.Star, point);
+                    return true;
+                case "stormcall":
+                    CastStormcall(state, card.Star, point);
+                    return true;
+                case "arcSplitter":
+                    CastArcSplitter(state, card.Star, point);
+                    return true;
+                case "galvanicWard":
+                    CastGalvanicWard(state, card.Star, point);
+                    return true;
+                case "overcharge":
+                    CastOvercharge(state, card.Star);
+                    return true;
                 default:
                     return false;
             }
@@ -114,7 +129,12 @@ namespace ProjectVL.Systems
                     || card.Type == "avalanche"
                     || card.Type == "pyrestorm"
                     || card.Type == "crownOfThorns"
-                    || card.Type == "goldenIdol");
+                    || card.Type == "goldenIdol"
+                    || card.Type == "staticSurge"
+                    || card.Type == "stormcall"
+                    || card.Type == "arcSplitter"
+                    || card.Type == "galvanicWard"
+                    || card.Type == "overcharge");
         }
 
         public void StepTurret(GameState state, float deltaTime)
@@ -1004,6 +1024,167 @@ namespace ProjectVL.Systems
             }
         }
 
+        private void CastStaticSurge(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            float radius = StarValue(star, 90f, 130f, 175f);
+            float ratio = StarValue(star, 0.12f, 0.2f, 0.3f)
+                * RelicMultiplier(
+                    state,
+                    "staticSurge",
+                    "controlPotencyMul");
+            float duration = StarValue(star, 3f, 4f, 5f);
+            float stun = star >= 6 ? 0.4f : 0f;
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                if (Float2.Distance(point, enemy.Position) > radius)
+                {
+                    continue;
+                }
+
+                enemy.VulnerableRatio = Math.Max(
+                    enemy.VulnerableRatio,
+                    ratio);
+                enemy.VulnerableRemaining = Math.Max(
+                    enemy.VulnerableRemaining,
+                    duration);
+                enemy.StunnedRemaining = Math.Max(
+                    enemy.StunnedRemaining,
+                    stun);
+            }
+        }
+
+        private void CastStormcall(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            int strikes = star >= 6 ? 3 : star >= 3 ? 2 : 1;
+            float radius = StarValue(star, 80f, 100f, 130f)
+                * RelicMultiplier(
+                    state,
+                    "stormcall",
+                    "areaScaleMul");
+            float damageRatio = StarValue(star, 2f, 2.5f, 3f)
+                * RelicMultiplier(
+                    state,
+                    "stormcall",
+                    "effectDamageMul");
+            float falloff = star >= 6 ? 0.3f : 0.4f;
+            for (int index = 0; index < strikes; index++)
+            {
+                DamageArea(
+                    state,
+                    point,
+                    radius,
+                    BaseDamage(state) * damageRatio,
+                    -1,
+                    0f,
+                    0f,
+                    0f,
+                    falloff);
+            }
+        }
+
+        private void CastArcSplitter(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            int count = (int)Math.Round(
+                StarValue(star, 6f, 10f, 16f))
+                + RelicQuantity(state, "arcSplitter");
+            float damageRatio = StarValue(star, 0.6f, 0.7f, 0.8f)
+                * RelicMultiplier(
+                    state,
+                    "arcSplitter",
+                    "effectDamageMul");
+            for (int index = 0; index < count; index++)
+            {
+                float angle = index * (float)Math.PI * 2f / count;
+                var direction = new Float2(
+                    (float)Math.Cos(angle),
+                    (float)Math.Sin(angle));
+                state.Bullets.Add(new BulletState(
+                    state.TakeNextBulletId(),
+                    point,
+                    direction * _combat.bullet.speed,
+                    _combat.bullet.radius,
+                    0.8f,
+                    BaseDamage(state) * damageRatio));
+            }
+
+            if (star >= 3)
+            {
+                DamageArea(
+                    state,
+                    point,
+                    star >= 6 ? 130f : 90f,
+                    BaseDamage(state)
+                        * (star >= 6 ? 2.5f : 1.5f),
+                    -1,
+                    0f,
+                    0f);
+            }
+        }
+
+        private void CastGalvanicWard(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            int hits = (int)Math.Round(
+                StarValue(star, 3f, 5f, 8f)
+                * RelicMultiplier(
+                    state,
+                    "galvanicWard",
+                    "defenseDurabilityMul"));
+            state.ShieldMaxHits += hits;
+            state.ShieldHits += hits;
+            float radius = StarValue(star, 90f, 130f, 175f);
+            float damageRatio = StarValue(star, 1f, 2f, 3.5f)
+                * RelicMultiplier(
+                    state,
+                    "galvanicWard",
+                    "effectDamageMul");
+            DamageArea(
+                state,
+                point,
+                radius,
+                BaseDamage(state) * damageRatio,
+                -1,
+                0f,
+                0f);
+            float stun = star >= 6 ? 0.5f : star >= 3 ? 0.3f : 0f;
+            if (stun <= 0f)
+            {
+                return;
+            }
+
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                if (Float2.Distance(point, enemy.Position) <= radius)
+                {
+                    enemy.StunnedRemaining = Math.Max(
+                        enemy.StunnedRemaining,
+                        stun);
+                }
+            }
+        }
+
+        private void CastOvercharge(GameState state, int star)
+        {
+            float multiplier = StarValue(star, 1.2f, 1.35f, 1.55f);
+            state.FireRateMultiplier = Math.Max(
+                state.FireRateMultiplier,
+                multiplier);
+            state.FireRateBuffRemaining = Math.Max(
+                state.FireRateBuffRemaining,
+                StarValue(star, 3f, 4f, 5f));
+        }
+
         private float BaseDamage(GameState state)
         {
             return Math.Max(
@@ -1089,6 +1270,7 @@ namespace ProjectVL.Systems
                 if (state.FireRateBuffRemaining <= 0f)
                 {
                     state.FireRateMultiplier = 1f;
+                    state.KillFireRateStacks = 0;
                 }
             }
 
@@ -1203,6 +1385,7 @@ namespace ProjectVL.Systems
             ApplyChainPulse(state, profile, deltaTime);
             ApplyFrostNova(state, profile, deltaTime);
             ApplyAvalanchePulse(state, profile, deltaTime);
+            ApplyStormcall(state, profile, deltaTime);
             ApplyPyrestorm(state, profile, deltaTime);
             ApplyDecoyAura(state, profile);
             ApplyMirrorTurret(state, profile, deltaTime);
@@ -1237,6 +1420,7 @@ namespace ProjectVL.Systems
                     DamageEnemy(state, enemy, bullet.Damage);
                     ApplyStatusEffects(enemy, bullet);
                     ApplyOnHitStun(state, enemy, bullet);
+                    ApplyOnHitFireRate(state, bullet);
                     ApplyImpactAndSplitEffects(
                         state,
                         bullet,
@@ -1410,6 +1594,11 @@ namespace ProjectVL.Systems
                 {
                     state.RestoreHp(profile.PickupRestore);
                 }
+
+                ApplyKillCardEffects(
+                    state,
+                    profile,
+                    enemy.Position);
 
                 if (killedWhileFrozen
                     && profile.FrozenKillSplashRadius > 0f)
@@ -1814,6 +2003,29 @@ namespace ProjectVL.Systems
                 bullet.OnHitStunCooldown;
         }
 
+        private static void ApplyOnHitFireRate(
+            GameState state,
+            BulletState bullet)
+        {
+            if (bullet.OnHitFireRateMultiplier <= 1f
+                || bullet.OnHitFireRateMaxStacks <= 0)
+            {
+                return;
+            }
+
+            state.KillFireRateStacks = Math.Min(
+                bullet.OnHitFireRateMaxStacks,
+                state.KillFireRateStacks + 1);
+            state.FireRateMultiplier = Math.Max(
+                state.FireRateMultiplier,
+                (float)Math.Pow(
+                    bullet.OnHitFireRateMultiplier,
+                    state.KillFireRateStacks));
+            state.FireRateBuffRemaining = Math.Max(
+                state.FireRateBuffRemaining,
+                bullet.OnHitFireRateDuration);
+        }
+
         private static EnemyState FindEnemyById(
             GameState state,
             int enemyId)
@@ -2073,6 +2285,8 @@ namespace ProjectVL.Systems
                 profile.AvalancheInterval;
             state.PyrestormPulseRemaining =
                 profile.PyrestormInterval;
+            state.StormcallPulseRemaining =
+                profile.StormcallInterval;
             state.GroundZones.Clear();
             state.ScorchAuraTickRemaining =
                 profile.ScorchAuraTickInterval;
@@ -2498,6 +2712,129 @@ namespace ProjectVL.Systems
 
             state.AvalanchePulseRemaining +=
                 profile.AvalancheInterval;
+        }
+
+        private void ApplyStormcall(
+            GameState state,
+            CardCombatProfile profile,
+            float deltaTime)
+        {
+            if (profile.StormcallInterval <= 0f)
+            {
+                return;
+            }
+
+            state.StormcallPulseRemaining -= deltaTime;
+            if (state.StormcallPulseRemaining > 0f)
+            {
+                return;
+            }
+
+            EnemyState target = FindTarget(state);
+            if (target == null)
+            {
+                return;
+            }
+
+            Float2 center = target.Position;
+            int strikes = Math.Max(1, profile.StormcallStrikeCount);
+            for (int index = 0; index < strikes; index++)
+            {
+                if (profile.StormcallDamageRatio > 0f)
+                {
+                    DamageArea(
+                        state,
+                        center,
+                        profile.StormcallRadius,
+                        BaseDamage(state)
+                            * profile.StormcallDamageRatio,
+                        -1,
+                        0f,
+                        0f,
+                        0f,
+                        profile.StormcallFalloff);
+                }
+            }
+
+            if (profile.StormcallZoneDuration > 0f)
+            {
+                state.GroundZones.Add(new GroundZoneState(
+                    center,
+                    profile.StormcallRadius,
+                    profile.StormcallZoneDuration,
+                    Math.Max(
+                        0.1f,
+                        profile.StormcallZoneTickInterval),
+                    BaseDamage(state)
+                        * profile.StormcallZoneDamageRatio,
+                    profile.StormcallZoneVulnerableRatio,
+                    0.7f));
+            }
+
+            state.StormcallPulseRemaining +=
+                profile.StormcallInterval;
+        }
+
+        private void ApplyKillCardEffects(
+            GameState state,
+            CardCombatProfile profile,
+            Float2 deathPosition)
+        {
+            if (profile.KillFireRateMultiplier > 1f
+                && profile.KillFireRateMaxStacks > 0)
+            {
+                state.KillFireRateStacks = Math.Min(
+                    profile.KillFireRateMaxStacks,
+                    state.KillFireRateStacks + 1);
+                state.FireRateMultiplier = Math.Max(
+                    state.FireRateMultiplier,
+                    (float)Math.Pow(
+                        profile.KillFireRateMultiplier,
+                        state.KillFireRateStacks));
+                state.FireRateBuffRemaining = Math.Max(
+                    state.FireRateBuffRemaining,
+                    profile.KillFireRateDuration);
+            }
+
+            if (profile.KillRestore > 0f)
+            {
+                state.RestoreHp(profile.KillRestore);
+            }
+
+            if (profile.KillVulnerableRadius > 0f)
+            {
+                foreach (EnemyState nearby in state.Enemies)
+                {
+                    if (Float2.Distance(
+                        deathPosition,
+                        nearby.Position)
+                        > profile.KillVulnerableRadius)
+                    {
+                        continue;
+                    }
+
+                    nearby.VulnerableRatio = Math.Max(
+                        nearby.VulnerableRatio,
+                        profile.KillVulnerableRatio);
+                    nearby.VulnerableRemaining = Math.Max(
+                        nearby.VulnerableRemaining,
+                        profile.KillVulnerableDuration);
+                }
+            }
+
+            if (profile.KillBurstRadius > 0f
+                && profile.KillBurstDamageMultiplier > 0f)
+            {
+                DamageArea(
+                    state,
+                    deathPosition,
+                    profile.KillBurstRadius,
+                    BaseDamage(state)
+                        * profile.KillBurstDamageMultiplier,
+                    -1,
+                    0f,
+                    0f);
+            }
         }
 
         private void ApplyPyrestorm(
