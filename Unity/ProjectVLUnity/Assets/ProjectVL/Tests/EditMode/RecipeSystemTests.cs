@@ -66,6 +66,33 @@ namespace ProjectVL.Tests
             Assert.That(
                 _state.CompletedRecipes,
                 Does.Contain("solarLance"));
+            Assert.That(
+                _state.CardTypeRunStats["solarLance"].Collected,
+                Is.EqualTo(1));
+            Assert.That(
+                _state.CardTypeRunStats["solarLance"].HighestStarReached,
+                Is.EqualTo(6));
+        }
+
+        [Test]
+        public void CraftingEquippedMaterialsInvalidatesCachedEffects()
+        {
+            _state.SetIntermission(true);
+            typeof(GameState)
+                .GetProperty(nameof(GameState.EquipmentEffectWave))
+                ?.SetValue(_state, 9);
+            _state.Equipment[0] = CreateResolvedCard("aegis", 5);
+            _state.Equipment[1] = CreateResolvedCard("thorns", 5);
+
+            RecipeCraftResult result = _system.Craft(
+                _state,
+                "crownOfThorns");
+
+            Assert.That(result, Is.EqualTo(RecipeCraftResult.Crafted));
+            Assert.That(_state.Equipment[0], Is.Null);
+            Assert.That(_state.Equipment[1], Is.Null);
+            Assert.That(_state.Hand[0].Type, Is.EqualTo("crownOfThorns"));
+            Assert.That(_state.EquipmentEffectWave, Is.Zero);
         }
 
         [Test]
@@ -114,10 +141,15 @@ namespace ProjectVL.Tests
 
         private void AddResolvedCard(string type, int star, int slot)
         {
+            _state.Hand[slot] = CreateResolvedCard(type, star);
+        }
+
+        private CardState CreateResolvedCard(string type, int star)
+        {
             CardState card = _state.CreateCard(type, star);
             card.EvolutionPath.Add($"3:{type}A");
             card.EvolutionPath.Add($"5:{type}A2");
-            _state.Hand[slot] = card;
+            return card;
         }
     }
 }

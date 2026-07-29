@@ -61,7 +61,7 @@ namespace ProjectVL.Systems
 
         public bool AddCard(GameState state, string type, int star)
         {
-            if (state == null)
+            if (state == null || !_catalog.IsPlayable(type))
             {
                 return false;
             }

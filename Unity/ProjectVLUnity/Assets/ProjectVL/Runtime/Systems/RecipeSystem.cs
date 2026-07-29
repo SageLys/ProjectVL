@@ -75,6 +75,10 @@ namespace ProjectVL.Systems
             state.Hand[outputSlot] = state.CreateCard(
                 recipe.outputCardId,
                 recipe.outputStar);
+            state.RecordCardCollected(
+                recipe.outputCardId,
+                recipe.outputStar);
+            state.EquipmentEffectWave = 0;
             state.CompletedRecipes.Add(recipe.id);
             return RecipeCraftResult.Crafted;
         }

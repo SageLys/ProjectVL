@@ -187,6 +187,17 @@ namespace ProjectVL.Tests
             Assert.That(_state.Hand[0].Star, Is.EqualTo(2));
         }
 
+        [TestCase("solarLance")]
+        [TestCase("not-a-card")]
+        public void AddCardRejectsRecipeOnlyAndUnknownCards(string type)
+        {
+            bool added = _inventory.AddCard(_state, type, 6);
+
+            Assert.That(added, Is.False);
+            Assert.That(_state.Hand, Is.All.Null);
+            Assert.That(_state.CardTypeRunStats, Is.Empty);
+        }
+
         [Test]
         public void FourMatchingCardsChainMergeAndOfferEvolution()
         {
