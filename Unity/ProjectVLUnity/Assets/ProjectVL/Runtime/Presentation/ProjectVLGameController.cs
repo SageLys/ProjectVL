@@ -29,7 +29,13 @@ namespace ProjectVL.Presentation
             "aegis",
             "thorns",
             "decoy",
-            "harvest"
+            "harvest",
+            "frozenThunder",
+            "solarLance",
+            "avalanche",
+            "pyrestorm",
+            "crownOfThorns",
+            "goldenIdol"
         };
         private static readonly string[] AdvancedDemoTypes =
         {
@@ -409,8 +415,8 @@ namespace ProjectVL.Presentation
             }
 
             LastCardAction = added > 0
-                ? $"Added {added} six-star transform cards."
-                : "Free hand slots, then press U for more transforms.";
+                ? $"Added {added} six-star terminal cards."
+                : "Free hand slots, then press U for more terminal cards.";
         }
 
         public void CraftAvailableRecipe()
