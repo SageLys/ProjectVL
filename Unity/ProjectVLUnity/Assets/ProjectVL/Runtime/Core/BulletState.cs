@@ -45,6 +45,7 @@ namespace ProjectVL.Core
         public float RecursiveSplitDamageRatio { get; }
         public float SplashRadius { get; }
         public float SplashDamageRatio { get; }
+        public float SplashFalloff { get; }
         public float SecondarySplashRadius { get; }
         public float SecondarySplashDamageRatio { get; }
         public float HitAreaKnockbackRadius { get; }
@@ -116,6 +117,7 @@ namespace ProjectVL.Core
                 profile.RecursiveSplitDamageRatio;
             SplashRadius = profile.SplashRadius;
             SplashDamageRatio = profile.SplashDamageRatio;
+            SplashFalloff = profile.SplashFalloff;
             SecondarySplashRadius = profile.SecondarySplashRadius;
             SecondarySplashDamageRatio =
                 profile.SecondarySplashDamageRatio;

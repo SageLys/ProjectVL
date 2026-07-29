@@ -57,6 +57,13 @@ namespace ProjectVL.Core
         public float SplashDamageRatio { get; set; }
         public float SecondarySplashRadius { get; set; }
         public float SecondarySplashDamageRatio { get; set; }
+        public float ProjectileDamageMultiplier { get; set; } = 1f;
+        public float SplashFalloff { get; set; }
+        public float ScorchAuraRadius { get; set; }
+        public float ScorchAuraTickInterval { get; set; }
+        public float ScorchAuraDamageRatio { get; set; }
+        public float ScorchAuraSlowRatio { get; set; }
+        public float ScorchAuraSlowDuration { get; set; }
         public float HitAreaKnockbackRadius { get; set; }
         public float HitAreaKnockbackDistance { get; set; }
         public float KnockbackDistance { get; set; }
@@ -68,6 +75,7 @@ namespace ProjectVL.Core
         public float ImpactPulseRadius { get; set; }
         public float ImpactPulseKnockback { get; set; }
         public float ImpactPulseInterval { get; set; }
+        public float ImpactPulseStunDuration { get; set; }
         public float OnHitStunDuration { get; set; }
         public float OnHitStunCooldown { get; set; }
         public float AuraRadiusRatio { get; set; }

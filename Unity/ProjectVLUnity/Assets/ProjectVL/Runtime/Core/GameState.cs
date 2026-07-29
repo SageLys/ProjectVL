@@ -43,6 +43,7 @@ namespace ProjectVL.Core
         public float BeamPulseRemaining { get; internal set; }
         public float ChainPulseRemaining { get; internal set; }
         public float FrostNovaRemaining { get; internal set; }
+        public float ScorchAuraTickRemaining { get; internal set; }
         public float BeamVisualRemaining { get; internal set; }
         public Float2 BeamVisualStart { get; internal set; }
         public Float2 BeamVisualEnd { get; internal set; }

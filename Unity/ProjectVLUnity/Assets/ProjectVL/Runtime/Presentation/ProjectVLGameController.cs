@@ -107,7 +107,10 @@ namespace ProjectVL.Presentation
         {
             "pierce",
             "chainLightning",
-            "frost"
+            "frost",
+            "scorch",
+            "splitBlast",
+            "impact"
         };
 
         public GameState State => _simulation?.State;

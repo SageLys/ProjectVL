@@ -240,6 +240,16 @@ namespace ProjectVL.Systems
             CardState card,
             CardCombatProfile profile)
         {
+            if (card.Star >= 6)
+            {
+                profile.ScorchAuraRadius = 200f;
+                profile.ScorchAuraTickInterval = 0.5f;
+                profile.ScorchAuraDamageRatio = 0.1f;
+                profile.ScorchAuraSlowRatio = 0.15f;
+                profile.ScorchAuraSlowDuration = 0.6f;
+                return;
+            }
+
             string route = RouteAt(card, 3);
             profile.DotDamageRatio =
                 Max(profile.DotDamageRatio, 0.15f);
@@ -285,6 +295,15 @@ namespace ProjectVL.Systems
             CardState card,
             CardCombatProfile profile)
         {
+            if (card.Star >= 6)
+            {
+                profile.ProjectileDamageMultiplier = 1.3f;
+                profile.SplashRadius = 90f;
+                profile.SplashDamageRatio = 1f;
+                profile.SplashFalloff = 0.5f;
+                return;
+            }
+
             string route = RouteAt(card, 3);
             profile.SplitCount += 2;
             profile.SplitDamageRatio = route == "splitBlastB"
@@ -336,6 +355,15 @@ namespace ProjectVL.Systems
             CardState card,
             CardCombatProfile profile)
         {
+            if (card.Star >= 6)
+            {
+                profile.ImpactPulseInterval = 4f;
+                profile.ImpactPulseRadius = 150f;
+                profile.ImpactPulseKnockback = 100f;
+                profile.ImpactPulseStunDuration = 0.4f;
+                return;
+            }
+
             string route = RouteAt(card, 3);
             profile.KnockbackDistance =
                 Max(profile.KnockbackDistance, 22f);

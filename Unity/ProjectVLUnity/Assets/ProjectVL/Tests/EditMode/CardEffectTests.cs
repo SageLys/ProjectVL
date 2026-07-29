@@ -1120,6 +1120,95 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void ScorchSixStarBurnsAndSlowsInsideAura()
+        {
+            EquipResolved(
+                "scorch",
+                6,
+                "3:scorchA",
+                "5:scorchA2");
+            _state.BeginWave(1);
+            _system.StepPassives(_state, 0f);
+            Float2 turret = new Float2(
+                _combat.turret.x,
+                _combat.turret.y);
+            EnemyState inside = AddEnemy(
+                turret + new Float2(100f, 0f),
+                100f);
+            EnemyState outside = AddEnemy(
+                turret + new Float2(210f, 0f),
+                100f);
+
+            _system.StepPassives(_state, 0.5f);
+
+            Assert.That(inside.Hp, Is.EqualTo(98.2f).Within(0.001f));
+            Assert.That(inside.SlowRatio, Is.EqualTo(0.15f));
+            Assert.That(inside.SlowRemaining, Is.EqualTo(0.6f));
+            Assert.That(outside.Hp, Is.EqualTo(100f));
+        }
+
+        [Test]
+        public void SplitBlastSixStarFiresFallingDamageMortar()
+        {
+            EquipResolved(
+                "splitBlast",
+                6,
+                "3:splitBlastA",
+                "5:splitBlastA2");
+            Float2 turret = new Float2(
+                _combat.turret.x,
+                _combat.turret.y);
+            EnemyState primary = AddEnemy(
+                turret + new Float2(70f, 0f),
+                200f);
+            EnemyState nearby = AddEnemy(
+                turret + new Float2(115f, 0f),
+                200f);
+
+            _system.StepTurret(_state, 0f);
+            BulletState mortar = _state.Bullets[0];
+            mortar.Position = primary.Position;
+            mortar.Velocity = new Float2();
+            _system.StepBullets(_state, 0f);
+
+            Assert.That(mortar.Damage, Is.EqualTo(23.4f).Within(0.001f));
+            Assert.That(primary.Hp, Is.EqualTo(176.6f).Within(0.001f));
+            Assert.That(nearby.Hp, Is.EqualTo(182.45f).Within(0.001f));
+        }
+
+        [Test]
+        public void ImpactSixStarPeriodicallyKnocksBackAndStuns()
+        {
+            EquipResolved(
+                "impact",
+                6,
+                "3:impactA",
+                "5:impactA2");
+            _state.BeginWave(1);
+            _system.StepPassives(_state, 0f);
+            Float2 turret = new Float2(
+                _combat.turret.x,
+                _combat.turret.y);
+            EnemyState inside = AddEnemy(
+                turret + new Float2(100f, 0f),
+                100f);
+            EnemyState outside = AddEnemy(
+                turret + new Float2(160f, 0f),
+                100f);
+
+            _system.StepPassives(_state, 4f);
+
+            Assert.That(
+                Float2.Distance(turret, inside.Position),
+                Is.EqualTo(200f));
+            Assert.That(inside.StunnedRemaining, Is.EqualTo(0.4f));
+            Assert.That(
+                Float2.Distance(turret, outside.Position),
+                Is.EqualTo(160f));
+            Assert.That(outside.StunnedRemaining, Is.Zero);
+        }
+
+        [Test]
         public void DecoySpawnsAtWaveStartAndTakesEnemyHit()
         {
             EquipResolved("decoy", 3, "3:decoyA");

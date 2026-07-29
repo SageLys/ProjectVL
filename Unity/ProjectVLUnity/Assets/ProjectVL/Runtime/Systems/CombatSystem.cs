@@ -50,7 +50,8 @@ namespace ProjectVL.Systems
                 direction * _combat.bullet.speed,
                 _combat.bullet.radius,
                 _combat.bullet.life,
-                _combat.defaults.damage,
+                _combat.defaults.damage
+                    * profile.ProjectileDamageMultiplier,
                 profile));
             state.ShotCooldown = 1f
                 / (_combat.defaults.fireRate * state.FireRateMultiplier);
@@ -111,7 +112,7 @@ namespace ProjectVL.Systems
                         TurretPosition,
                         profile.ImpactPulseRadius,
                         profile.ImpactPulseKnockback,
-                        0f);
+                        profile.ImpactPulseStunDuration);
                     state.ImpactPulseRemaining =
                         profile.ImpactPulseInterval;
                 }
@@ -133,6 +134,26 @@ namespace ProjectVL.Systems
                         0f);
                     state.ThornsAuraTickRemaining =
                         profile.ThornsAuraTickInterval;
+                }
+            }
+
+            if (profile.ScorchAuraTickInterval > 0f)
+            {
+                state.ScorchAuraTickRemaining -= deltaTime;
+                if (state.ScorchAuraTickRemaining <= 0f)
+                {
+                    DamageArea(
+                        state,
+                        TurretPosition,
+                        profile.ScorchAuraRadius,
+                        _combat.defaults.damage
+                            * profile.ScorchAuraDamageRatio,
+                        -1,
+                        0f,
+                        profile.ScorchAuraSlowRatio,
+                        profile.ScorchAuraSlowDuration);
+                    state.ScorchAuraTickRemaining +=
+                        profile.ScorchAuraTickInterval;
                 }
             }
 
@@ -470,7 +491,9 @@ namespace ProjectVL.Systems
                     bullet.Damage * bullet.SplashDamageRatio,
                     primaryEnemyId,
                     0f,
-                    0f);
+                    0f,
+                    0f,
+                    bullet.SplashFalloff);
             }
 
             if (bullet.SecondarySplashRadius > 0f
@@ -935,6 +958,8 @@ namespace ProjectVL.Systems
                 profile.ChainPulseInterval;
             state.FrostNovaRemaining =
                 profile.FrostNovaInterval;
+            state.ScorchAuraTickRemaining =
+                profile.ScorchAuraTickInterval;
             state.BeamVisualRemaining = 0f;
 
             state.DecoyActive = profile.DecoyHp > 0f;
@@ -1450,7 +1475,8 @@ namespace ProjectVL.Systems
             int excludedEnemyId,
             float knockback,
             float slowRatio,
-            float slowDuration = 0f)
+            float slowDuration = 0f,
+            float falloff = 0f)
         {
             var targets = new System.Collections.Generic.List<EnemyState>();
             foreach (EnemyState enemy in state.Enemies)
@@ -1464,7 +1490,16 @@ namespace ProjectVL.Systems
 
             foreach (EnemyState enemy in targets)
             {
-                DamageEnemy(state, enemy, damage);
+                float distance =
+                    Float2.Distance(center, enemy.Position);
+                float damageMultiplier = radius > 0f
+                    ? 1f - falloff
+                        * Math.Min(1f, distance / radius)
+                    : 1f;
+                DamageEnemy(
+                    state,
+                    enemy,
+                    damage * damageMultiplier);
                 if (!state.Enemies.Contains(enemy))
                 {
                     continue;
