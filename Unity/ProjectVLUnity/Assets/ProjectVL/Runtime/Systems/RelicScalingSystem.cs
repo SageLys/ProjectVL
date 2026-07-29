@@ -227,6 +227,7 @@ namespace ProjectVL.Systems
             profile.SplashDamageRatio *= multiplier;
             profile.SecondarySplashDamageRatio *= multiplier;
             profile.DotHitBurstDamageMultiplier *= multiplier;
+            profile.BrandedHitBurstDamageMultiplier *= multiplier;
             profile.DotKillBurstDamageMultiplier *= multiplier;
             profile.AvalancheDamageMultiplier *= multiplier;
             profile.DecoyExplodeDamageMultiplier *= multiplier;

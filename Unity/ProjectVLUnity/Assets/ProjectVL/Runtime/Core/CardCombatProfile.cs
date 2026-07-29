@@ -57,6 +57,10 @@ namespace ProjectVL.Core
         public float DotHitVulnerableDuration { get; set; }
         public float DotHitBurstDamageMultiplier { get; set; }
         public float DotHitBurstRadius { get; set; }
+        public float BrandedHitBurstDamageMultiplier { get; set; }
+        public float BrandedHitBurstRadius { get; set; }
+        public float OnHitFocusPriorityWeight { get; set; } = 1f;
+        public float OnHitFocusDuration { get; set; }
         public int SplitCount { get; set; }
         public float SplitDamageRatio { get; set; }
         public int RecursiveSplitCount { get; set; }
@@ -187,6 +191,7 @@ namespace ProjectVL.Core
         public float BrandedKillXpMultiplier { get; set; } = 1f;
         public float BrandedKillXpDuration { get; set; }
         public int BrandedKillXpMaxStacks { get; set; }
+        public float BrandedKillExtraDropChance { get; set; }
         public float OnHitFireRateMultiplier { get; set; } = 1f;
         public float OnHitFireRateDuration { get; set; }
         public int OnHitFireRateMaxStacks { get; set; }

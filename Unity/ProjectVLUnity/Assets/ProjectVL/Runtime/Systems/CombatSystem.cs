@@ -2079,6 +2079,8 @@ namespace ProjectVL.Systems
                     bullet.HitEnemyIds.Add(enemy.Id);
                     Float2 hitPosition = enemy.Position;
                     bool wasFrozen = enemy.FrozenRemaining > 0f;
+                    bool wasBranded =
+                        enemy.FocusPriorityRemaining > 0f;
                     DamageEnemy(state, enemy, bullet.Damage);
                     ApplyStatusEffects(enemy, bullet);
                     if (wasFrozen
@@ -2099,7 +2101,8 @@ namespace ProjectVL.Systems
                         state,
                         bullet,
                         hitPosition,
-                        enemy.Id);
+                        enemy.Id,
+                        wasBranded);
                     ApplyMeteorHit(
                         state,
                         bullet,
@@ -2439,6 +2442,16 @@ namespace ProjectVL.Systems
                     bullet.DotAreaVulnerableDuration);
             }
 
+            if (bullet.OnHitFocusPriorityWeight > 1f)
+            {
+                enemy.FocusPriorityWeight = Math.Max(
+                    enemy.FocusPriorityWeight,
+                    bullet.OnHitFocusPriorityWeight);
+                enemy.FocusPriorityRemaining = Math.Max(
+                    enemy.FocusPriorityRemaining,
+                    bullet.OnHitFocusDuration);
+            }
+
             if (hadDot && bullet.DotHitVulnerableRatio > 0f)
             {
                 enemy.VulnerableRatio = Math.Max(
@@ -2480,7 +2493,8 @@ namespace ProjectVL.Systems
             GameState state,
             BulletState bullet,
             Float2 hitPosition,
-            int primaryEnemyId)
+            int primaryEnemyId,
+            bool primaryWasBranded)
         {
             EnemyState primary = FindEnemyById(state, primaryEnemyId);
             if (primary != null && bullet.KnockbackDistance > 0f)
@@ -2518,6 +2532,21 @@ namespace ProjectVL.Systems
                     bullet.SecondarySplashRadius,
                     bullet.Damage
                         * bullet.SecondarySplashDamageRatio,
+                    primaryEnemyId,
+                    0f,
+                    0f);
+            }
+
+            if (primaryWasBranded
+                && bullet.BrandedHitBurstRadius > 0f
+                && bullet.BrandedHitBurstDamageMultiplier > 0f)
+            {
+                DamageArea(
+                    state,
+                    hitPosition,
+                    bullet.BrandedHitBurstRadius,
+                    bullet.Damage
+                        * bullet.BrandedHitBurstDamageMultiplier,
                     primaryEnemyId,
                     0f,
                     0f);
@@ -3678,11 +3707,18 @@ namespace ProjectVL.Systems
             }
         }
 
-        private static void ApplyBrandedKillCardEffects(
+        private void ApplyBrandedKillCardEffects(
             GameState state,
             CardCombatProfile profile,
             Float2 deathPosition)
         {
+            if (profile.BrandedKillExtraDropChance > 0f)
+            {
+                _drops?.TrySpawnBonus(
+                    state,
+                    deathPosition,
+                    profile.BrandedKillExtraDropChance);
+            }
             if (profile.BrandedKillFocusRadius > 0f
                 && profile.BrandedKillFocusWeight > 1f)
             {

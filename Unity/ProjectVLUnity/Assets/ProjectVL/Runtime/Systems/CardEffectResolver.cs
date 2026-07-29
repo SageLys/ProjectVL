@@ -1661,8 +1661,11 @@ namespace ProjectVL.Systems
                 route == "goldenVolleyB" ? 2f : 1.2f);
             if (route == "goldenVolleyC")
             {
-                profile.AuraFocusPriorityWeight = Max(
-                    profile.AuraFocusPriorityWeight,
+                profile.OnHitFocusPriorityWeight = Max(
+                    profile.OnHitFocusPriorityWeight,
+                    3f);
+                profile.OnHitFocusDuration = Max(
+                    profile.OnHitFocusDuration,
                     3f);
             }
             if (card.Star >= 4)
@@ -1673,17 +1676,17 @@ namespace ProjectVL.Systems
             string advanced = RouteAt(card, 5);
             if (advanced == "goldenVolleyA2")
             {
-                profile.DotHitBurstDamageMultiplier = Max(
-                    profile.DotHitBurstDamageMultiplier,
+                profile.BrandedHitBurstDamageMultiplier = Max(
+                    profile.BrandedHitBurstDamageMultiplier,
                     0.8f);
-                profile.DotHitBurstRadius = Max(
-                    profile.DotHitBurstRadius,
+                profile.BrandedHitBurstRadius = Max(
+                    profile.BrandedHitBurstRadius,
                     35f);
             }
             else if (advanced == "goldenVolleyB2")
             {
-                profile.KillExtraDropChance = Max(
-                    profile.KillExtraDropChance,
+                profile.BrandedKillExtraDropChance = Max(
+                    profile.BrandedKillExtraDropChance,
                     0.25f);
             }
             else if (advanced == "goldenVolleyC2")

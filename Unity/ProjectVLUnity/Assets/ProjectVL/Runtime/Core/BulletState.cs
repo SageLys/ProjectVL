@@ -45,6 +45,10 @@ namespace ProjectVL.Core
         public float DotAreaVulnerableDuration { get; }
         public float DotHitVulnerableRatio { get; }
         public float DotHitVulnerableDuration { get; }
+        public float BrandedHitBurstDamageMultiplier { get; }
+        public float BrandedHitBurstRadius { get; }
+        public float OnHitFocusPriorityWeight { get; }
+        public float OnHitFocusDuration { get; }
         public int SplitCount { get; }
         public float SplitDamageRatio { get; }
         public int RecursiveSplitCount { get; }
@@ -129,6 +133,14 @@ namespace ProjectVL.Core
                 profile.DotHitVulnerableRatio;
             DotHitVulnerableDuration =
                 profile.DotHitVulnerableDuration;
+            BrandedHitBurstDamageMultiplier =
+                profile.BrandedHitBurstDamageMultiplier;
+            BrandedHitBurstRadius =
+                profile.BrandedHitBurstRadius;
+            OnHitFocusPriorityWeight =
+                profile.OnHitFocusPriorityWeight;
+            OnHitFocusDuration =
+                profile.OnHitFocusDuration;
             SplitCount = profile.SplitCount;
             SplitDamageRatio = profile.SplitDamageRatio;
             RecursiveSplitCount = profile.RecursiveSplitCount;

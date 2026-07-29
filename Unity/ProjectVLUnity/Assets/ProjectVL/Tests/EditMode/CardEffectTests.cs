@@ -2753,6 +2753,95 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void GoldenVolleyFocusRouteBrandsTheHitTarget()
+        {
+            EquipResolved(
+                "goldenVolley",
+                3,
+                "3:goldenVolleyC");
+            EnemyState enemy = AddEnemy(
+                new Float2(200f, 200f),
+                100f);
+
+            HitWithProfile(
+                enemy.Position,
+                CardEffectResolver.Resolve(_state));
+
+            Assert.That(enemy.FocusPriorityWeight, Is.EqualTo(3f));
+            Assert.That(enemy.FocusPriorityRemaining, Is.EqualTo(3f));
+        }
+
+        [Test]
+        public void GoldenVolleyBrandedBurstRequiresBrand()
+        {
+            EquipResolved(
+                "goldenVolley",
+                5,
+                "3:goldenVolleyA",
+                "5:goldenVolleyA2");
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+            EnemyState branded = AddEnemy(
+                new Float2(200f, 200f),
+                100f);
+            branded.FocusPriorityRemaining = 2f;
+            EnemyState brandedNearby = AddEnemy(
+                new Float2(220f, 200f),
+                100f);
+            EnemyState plain = AddEnemy(
+                new Float2(500f, 200f),
+                100f);
+            EnemyState plainNearby = AddEnemy(
+                new Float2(520f, 200f),
+                100f);
+
+            HitWithProfile(branded.Position, profile);
+            HitWithProfile(plain.Position, profile);
+
+            Assert.That(
+                brandedNearby.Hp,
+                Is.EqualTo(78.2f).Within(0.001f));
+            Assert.That(
+                plainNearby.Hp,
+                Is.EqualTo(86.2f).Within(0.001f));
+        }
+
+        [Test]
+        public void GoldenVolleyBonusDropRequiresBrandedKill()
+        {
+            EquipResolved(
+                "goldenVolley",
+                5,
+                "3:goldenVolleyA",
+                "5:goldenVolleyB2");
+            var economy = new EconomyConfig();
+            economy.defaults.dropChance = 0f;
+            var drops = new DropSystem(
+                economy,
+                new ConstantRandomSource(0f));
+            var system = new CombatSystem(
+                _combat,
+                _enemies,
+                drops);
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+            EnemyState plain = AddEnemy(
+                new Float2(200f, 200f),
+                1f);
+
+            HitWithSystem(system, plain.Position, profile);
+
+            Assert.That(_state.GroundDrops, Is.Empty);
+
+            EnemyState branded = AddEnemy(
+                new Float2(500f, 200f),
+                1f);
+            branded.FocusPriorityRemaining = 2f;
+
+            HitWithSystem(system, branded.Position, profile);
+
+            Assert.That(_state.GroundDrops.Count, Is.EqualTo(1));
+        }
+
+        [Test]
         public void BountyCallConsumableMarksPriorityTargets()
         {
             EnemyState enemy = AddEnemy(
