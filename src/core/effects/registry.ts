@@ -273,6 +273,7 @@ function configureSummon(summon: Summon, ctx: EffectCtx, p: Record<string, unkno
   summon.tauntRadius = cNum('summon', p, 'tauntRadius', { variant: kind });
   summon.priorityWeight = cNum('summon', p, 'priorityWeight');
   summon.damageRatio = cNum('summon', p, 'damageRatio');
+  summon.fireInterval = cNum('summon', p, 'fireInterval', { variant: kind });
   summon.fireCd = 0;
   summon.angle = ctx.rng() * Math.PI * 2;
   summon.explodeOnDeath = cBool('summon', p, 'explode')
@@ -464,7 +465,8 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
         s.sourceCardId === ctx.sourceCardId && s.sourceBindingIndex === ctx.sourceBindingIndex);
       const summon = matches[0] ?? {
         id: ctx.state.nextSummonId++, kind, x: ctx.origin.x, y: ctx.origin.y,
-        hp: 0, maxHp: 0, sourceCardId: ctx.sourceCardId, sourceCardType: ctx.sourceCardType,
+        hp: 0, maxHp: 0, fireInterval: 0,
+        sourceCardId: ctx.sourceCardId, sourceCardType: ctx.sourceCardType,
         sourceBindingIndex: ctx.sourceBindingIndex, sourceEffectIndex: ctx.sourceEffectIndex,
       };
       configureSummon(summon, ctx, p, equipmentSummonPosition(ctx, p));
@@ -486,6 +488,7 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
         y: ctx.origin.y + (ctx.rng() - 0.5) * jitter,
         hp: 0,
         maxHp: 0,
+        fireInterval: 0,
       };
       configureSummon(summon, ctx, p, { x: summon.x, y: summon.y });
       ctx.state.summons.push(summon);

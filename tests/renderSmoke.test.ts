@@ -63,7 +63,7 @@ describe('渲染冒烟 · 战斗表现实体', () => {
     s.bullets.push({ x: 100, y: 100, vx: 10, vy: 0, r: 8, life: 1, damage: 10, kind: 'mortar', flightProgress: 0.5 });
     const taunted = enemy({ id: 7, x: 150, y: 100 });
     s.enemies = [taunted];
-    s.summons.push({ id: 8, kind: 'decoy', x: 210, y: 100, hp: 20, maxHp: 40, tauntRadius: 140 });
+    s.summons.push({ id: 8, kind: 'decoy', x: 210, y: 100, hp: 20, maxHp: 40, tauntRadius: 140, fireInterval: 0 });
     s.vfx.push(
       { kind: 'mortarTarget', x: 100, y: 100, radius: 60, remaining: 0.4 },
       { kind: 'mortarImpact', x: 120, y: 100, radius: 60, remaining: 0.2 },

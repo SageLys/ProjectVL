@@ -565,6 +565,7 @@ function equipmentSummonMatches(summon: Summon, expected: ExpectedEquipmentSummo
     && summon.tauntRadius === summonNum('tauntRadius', kind)
     && summon.priorityWeight === summonNum('priorityWeight')
     && summon.damageRatio === summonNum('damageRatio')
+    && summon.fireInterval === summonNum('fireInterval', kind)
     && !!summon.explodeOnDeath === explode
     && (!explode || (summon.explodeOnDeath?.damage === baseDamage * summonNum('explodeDamageMul')
       && summon.explodeOnDeath.knockbackDistance === summonNum('knockbackDistance')))

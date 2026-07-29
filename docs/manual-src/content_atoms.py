@@ -328,10 +328,10 @@ ATOMS = {
         "plain": "召唤一个有自己血量的小单位。有三种：吸引火力的诱饵、会自己开火的镜像炮台、绕着炮台转的环绕体。",
         "code": [
             f"三种 kind：{c('decoy')}（纯挨打）、{c('mirrorTurret')}"
-            f"（每 0.7s 向 0.8 射程内最近敌人开一发，伤害 = 总伤 × damageRatio）、"
-            f"{c('orbital')}（绕炮台半径 85 公转，接触伤害，冷却 0.25s）。"
-            f"<b>0.7s / 0.25s / 85 均为 runtime.ts 内硬编码</b>，"
-            f"契约里的 {c('fireInterval')} 参数当前<b>未被消费</b>。",
+            f"（向 0.8 射程内最近敌人开火，伤害 = 总伤 × damageRatio）、"
+            f"{c('orbital')}（绕炮台半径 85 公转并造成接触伤害）。"
+            f"开火/接触冷却统一读取 {c('fireInterval')}：mirrorTurret 默认 0.7s、"
+            f"orbital 默认 0.25s、decoy 为 0 且不开火；显式配置下限 0.05s。",
             f"装备态：每 <b>(卡, 绑定)</b> 严格<b>单实例</b>，键 = "
             f"{c('sourceCardId:sourceBindingIndex')}；"
             f"{c('remaining = undefined')} 表示常驻至来源消失。重复触发只会就地刷新属性。",
@@ -340,7 +340,7 @@ ATOMS = {
             f"非装备态（消耗/临时）：按 {c('count')} 生成，带 "
             f"{c('SUMMON_GROUP_JITTER = 30')} 散布，读 duration 到期消失。",
             f"{c('placement: threatDirection')}：按 1/距离 加权的威胁方向放到炮台外围 "
-            f"{c('distanceFromTurret')} 处；无敌人时按装备槽序号均分方位。",
+            f"{c('distanceFromTurret')} 处；无敌人时按不含装备槽号的稳定来源键确定方位。",
             f"{c('respawnOnce')} 只对<b>被摧毁</b>生效，到期消失不重生，每实例限一次。",
             f"{c('tauntRadius')} 有 variantDefault：{c('orbital')} 默认 0（不嘲讽），其余 140。",
         ],
@@ -349,7 +349,8 @@ ATOMS = {
         "pitfalls": [
             f"<b>装备态 {c('count')} 与 {c('duration')} 无效</b>——单实例、常驻。"
             "写了不报错，但完全不生效。",
-            f"<b>{c('fireInterval')} 是死参数</b>，镜像炮台射速改不了。",
+            f"{c('fireInterval')} 会参与装备实例对账；配置变化后现有实例会同步刷新，"
+            "不需要等待召唤物被摧毁。",
             f"{c('hp')} 吃 defenseDurabilityMul 轴、{c('damageRatio')} 与 "
             f"{c('explodeDamageMul')} 吃 effectDamageMul 轴——召唤流吃两条不同的词条轴。",
             f"死亡爆炸半径硬编码 120（{c('explodeSummon')}），不是任何参数。",

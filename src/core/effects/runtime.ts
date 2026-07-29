@@ -120,7 +120,7 @@ function tickSummons(state: GameState, config: Config, rng: Rng, dt: number, eve
             damage: totalDamage(state, config) * (s.damageRatio ?? 0.3),
             sourceCardId: s.sourceCardId,
           });
-          s.fireCd = 0.7;
+          s.fireCd = s.fireInterval;
         }
       }
     }
@@ -137,7 +137,7 @@ function tickSummons(state: GameState, config: Config, rng: Rng, dt: number, eve
             const hpBefore = Math.max(0, e.hp);
             events.push(...dealDamage(state, config, rng, e, totalDamage(state, config) * (s.damageRatio ?? 0.5)));
             recordCardImpact(state, s.sourceCardId, hpBefore - Math.max(0, e.hp));
-            s.fireCd = 0.25;
+            s.fireCd = s.fireInterval;
             break;
           }
         }

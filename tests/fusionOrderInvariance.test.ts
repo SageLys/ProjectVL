@@ -242,7 +242,7 @@ describe('taunt 候选仲裁与来源链路', () => {
     const state = freshState();
     const target = enemy();
     state.enemies = [target];
-    state.summons = [{ id: 9, kind: 'decoy', x: 10, y: 10, hp: 10, maxHp: 10 }];
+    state.summons = [{ id: 9, kind: 'decoy', x: 10, y: 10, hp: 10, maxHp: 10, fireInterval: 0 }];
     applyTaunt(target, 'weak', 1, 100, 0, 10);
     applyTaunt(target, 'strong', 2, 10, 10, 1, 9);
     tickStatusTimers(state, 1.1);
@@ -259,7 +259,7 @@ describe('taunt 候选仲裁与来源链路', () => {
     const state = freshState();
     const counting = makeCountingRng(19);
     const boss = spawnWaveBoss(state, counting.rng);
-    const summon = { id: 70, kind: 'decoy' as const, x: 200, y: 200, hp: 100, maxHp: 100 };
+    const summon = { id: 70, kind: 'decoy' as const, x: 200, y: 200, hp: 100, maxHp: 100, fireInterval: 0 };
     state.summons = [summon];
     boss.x = summon.x;
     boss.y = summon.y;
@@ -298,7 +298,7 @@ describe('taunt 候选仲裁与来源链路', () => {
     expect(target.status.taunt.map(candidate => candidate.sourceKey)).toContain('consume/zoneSource');
 
     const environmentOnly = enemy({ x: 0, y: 0 });
-    state.summons = [{ id: 5, kind: 'decoy', x: 0, y: 0, hp: 10, maxHp: 10, tauntRadius: 100 }];
+    state.summons = [{ id: 5, kind: 'decoy', x: 0, y: 0, hp: 10, maxHp: 10, tauntRadius: 100, fireInterval: 0 }];
     expect(moveTargetFor(state, environmentOnly).summon?.id).toBe(5);
     expect(isControlled(environmentOnly)).toBe(false);
   });

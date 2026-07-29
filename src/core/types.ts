@@ -442,8 +442,9 @@ export interface Summon {
   remaining?: number;
   tauntRadius?: number;
   priorityWeight?: number;
-  /** 镜像炮台：本体伤害比例与开火冷却。 */
+  /** 镜像炮台/环绕球：本体伤害比例、配置冷却与当前冷却。 */
   damageRatio?: number;
+  fireInterval: number;
   fireCd?: number;
   /** 环绕球公转角。 */
   angle?: number;

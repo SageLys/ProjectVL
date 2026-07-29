@@ -341,7 +341,11 @@ export const ATOM_CONTRACT = {
       knockbackDistance: { type: 'number', default: 80, min: 0 },
       respawnOnce: { type: 'boolean', default: false, note: '被摧毁（非到期）时重生一次' },
       replacesEarlier: { type: 'boolean', default: false, note: '装备态：替换同卡更早绑定的召唤物' },
-      fireInterval: { type: 'number', min: 0, note: '当前实现未消费（mirrorTurret 固定 0.7s、orbital 固定 0.25s 冷却）' },
+      fireInterval: {
+        type: 'number', default: 0.7, min: 0.05,
+        variantDefaults: { on: 'kind', cases: { orbital: 0.25, decoy: 0 } },
+        note: '召唤物开火冷却；decoy 不开火。0.05s 防御性下限避免每帧开火',
+      },
       ...CHANCE,
     },
     allowedTriggers: 'any',

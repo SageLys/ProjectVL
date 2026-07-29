@@ -107,6 +107,9 @@ const PRE_MIGRATION_DEFAULTS: Record<string, number | string | boolean> = {
   'summon.tauntRadius@orbital': 0,
   'summon.priorityWeight': 1,
   'summon.damageRatio': 0.3,
+  'summon.fireInterval': 0.7,
+  'summon.fireInterval@orbital': 0.25,
+  'summon.fireInterval@decoy': 0,
   'summon.explode': false,
   'summon.explodeDamageMul': 1.5,
   'summon.knockbackDistance': 80,
@@ -275,12 +278,19 @@ describe('原子契约 · 默认值即运行时行为', () => {
     expect(decoy.tauntRadius).toBe(atomNumberDefault('summon', 'tauntRadius'));
     expect(decoy.priorityWeight).toBe(atomNumberDefault('summon', 'priorityWeight'));
     expect(decoy.damageRatio).toBe(atomNumberDefault('summon', 'damageRatio'));
+    expect(decoy.fireInterval).toBe(atomNumberDefault('summon', 'fireInterval', { variant: 'decoy' }));
     expect(decoy.explodeOnDeath).toBeNull();
 
     const state = freshState();
     runEffects(ctxFor(state), [{ atom: 'summon', params: { kind: 'orbital' } }]);
     expect(state.summons[0].tauntRadius)
       .toBe(atomNumberDefault('summon', 'tauntRadius', { variant: 'orbital' }));
+    expect(state.summons[0].fireInterval)
+      .toBe(atomNumberDefault('summon', 'fireInterval', { variant: 'orbital' }));
+
+    const mirrorState = freshState();
+    runEffects(ctxFor(mirrorState), [{ atom: 'summon', params: { kind: 'mirrorTurret' } }]);
+    expect(mirrorState.summons[0].fireInterval).toBe(atomNumberDefault('summon', 'fireInterval'));
   });
 
   it('shield / statBuff / pierce 空参数落在契约默认值上', () => {

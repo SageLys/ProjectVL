@@ -173,6 +173,39 @@ describe('装备态 summon 声明式生命周期', () => {
     expect(state.summons[0]).toMatchObject({ kind: 'mirrorTurret', sourceCardId: sourceId, hp: 80, maxHp: 80 });
   });
 
+  it('装备态召唤物会在 fireInterval 配置变化后同步实例参数', () => {
+    const defs = structuredClone(cfg.skills.cards);
+    const sentinel = defs.find(def => def.id === 'sentinel')!;
+    const effect = sentinel.evolutionTree!.sharedNodes.find(node => node.star === 6)!.equip![0].effects[0];
+    if (effect.atom !== 'summon') throw new Error('sentinel 6★ shared summon missing');
+    const params = effect.params!;
+    const state = freshState();
+    state.equipment[0] = card('sentinel', 6);
+
+    registerSkillDefs(defs);
+    reconcileEquipmentPassives(state, config, rng);
+    expect(state.summons[0].fireInterval).toBe(0.35);
+
+    params.fireInterval = 0.45;
+    registerSkillDefs(defs);
+    reconcileEquipmentPassives(state, config, rng);
+    expect(state.summons[0].fireInterval).toBe(0.45);
+  });
+
+  it('mirrorTurret 开火后按配置的 fireInterval 回填冷却', () => {
+    const state = freshState();
+    state.equipment[0] = card('sentinel', 6);
+    reconcileEquipmentPassives(state, config, rng);
+    const summon = state.summons[0];
+    state.enemies = [enemy({ x: summon.x + 20, y: summon.y })];
+
+    tickEffects(state, config, rng, 0.01);
+
+    expect(state.bullets).toHaveLength(1);
+    expect(summon.fireInterval).toBe(0.35);
+    expect(summon.fireCd).toBe(0.35);
+  });
+
   it('消耗态诱饵仍在指定落点生成且按 duration 到期，不带装备来源', () => {
     const state = freshState();
     state.cards[0] = card('decoy', 1);
