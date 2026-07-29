@@ -15,8 +15,12 @@ namespace ProjectVL.Presentation
         private CardInventorySystem _cardInventory;
         private RecipeSystem _recipeSystem;
         private DropSystem _dropSystem;
+        private CombatSystem _combatSystem;
         private CardSlotKind? _selectedSlotKind;
         private int _selectedSlotIndex = -1;
+        private CardSlotKind? _pendingCastSlotKind;
+        private int _pendingCastSlotIndex = -1;
+        private int _castArmedFrame = -1;
         private int _effectDemoIndex;
         private int _advancedDemoIndex;
         private int _transformDemoIndex;
@@ -147,9 +151,15 @@ namespace ProjectVL.Presentation
             var enemyFactory = new EnemyFactory(combat, enemies, waves, random);
             _waveSystem = new WaveSystem(waves, enemyFactory);
             _dropSystem = new DropSystem(economy, random);
-            var combatSystem = new CombatSystem(combat, enemies, _dropSystem);
+            _combatSystem = new CombatSystem(
+                combat,
+                enemies,
+                _dropSystem);
 
-            _world = new CombatWorld(combatSystem, _waveSystem, _dropSystem);
+            _world = new CombatWorld(
+                _combatSystem,
+                _waveSystem,
+                _dropSystem);
             _simulation = new GameSimulation(state, combat);
             _simulation.SimulationStep += _world.Step;
 
@@ -254,14 +264,18 @@ namespace ProjectVL.Presentation
             CardState card = CardAt(
                 _selectedSlotKind.Value,
                 _selectedSlotIndex);
-            bool consumed = _cardInventory.Consume(
-                State,
-                _selectedSlotKind.Value,
-                _selectedSlotIndex);
+            if (!CombatSystem.SupportsConsumable(card))
+            {
+                LastCardAction =
+                    "This card's active cast is still being migrated.";
+                return;
+            }
+
+            _pendingCastSlotKind = _selectedSlotKind;
+            _pendingCastSlotIndex = _selectedSlotIndex;
+            _castArmedFrame = Time.frameCount;
             ClearCardSelection(
-                consumed && card != null
-                    ? $"Cast {card.Star} STAR {card.Type}."
-                    : "The selected slot is empty.");
+                $"Aim {card.Star} STAR {card.Type}, then click the arena.");
         }
 
         public void GrantTestCards()
@@ -536,6 +550,36 @@ namespace ProjectVL.Presentation
                     Input.mousePosition,
                     out Float2 arenaPoint))
             {
+                return;
+            }
+
+            if (_pendingCastSlotKind != null
+                && Time.frameCount > _castArmedFrame)
+            {
+                CardState card = CardAt(
+                    _pendingCastSlotKind.Value,
+                    _pendingCastSlotIndex);
+                bool cast = _combatSystem.CastConsumable(
+                    State,
+                    card,
+                    arenaPoint);
+                if (cast)
+                {
+                    _cardInventory.Consume(
+                        State,
+                        _pendingCastSlotKind.Value,
+                        _pendingCastSlotIndex);
+                    LastCardAction =
+                        $"Cast {card.Star} STAR {card.Type}.";
+                    _pendingCastSlotKind = null;
+                    _pendingCastSlotIndex = -1;
+                }
+                else
+                {
+                    LastCardAction =
+                        "No valid target. Click the arena again.";
+                }
+
                 return;
             }
 

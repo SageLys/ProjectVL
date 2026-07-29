@@ -20,6 +20,42 @@ namespace ProjectVL.Systems
             _drops = drops;
         }
 
+        public bool CastConsumable(
+            GameState state,
+            CardState card,
+            Float2 point)
+        {
+            if (state == null || card == null || card.Provisional)
+            {
+                return false;
+            }
+
+            switch (card.Type)
+            {
+                case "pierce":
+                    CastPierce(state, card.Star, point);
+                    return true;
+                case "chainLightning":
+                    return CastChainLightning(
+                        state,
+                        card.Star,
+                        point);
+                case "frost":
+                    CastFrost(state, card.Star, point);
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public static bool SupportsConsumable(CardState card)
+        {
+            return card != null
+                && (card.Type == "pierce"
+                    || card.Type == "chainLightning"
+                    || card.Type == "frost");
+        }
+
         public void StepTurret(GameState state, float deltaTime)
         {
             state.ShotCooldown -= deltaTime;
@@ -55,6 +91,188 @@ namespace ProjectVL.Systems
                 profile));
             state.ShotCooldown = 1f
                 / (_combat.defaults.fireRate * state.FireRateMultiplier);
+        }
+
+        private void CastPierce(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            float width = StarValue(star, 10f, 16f, 24f);
+            float damageMultiplier =
+                StarValue(star, 3f, 5f, 8f);
+            float knockback =
+                star >= 6 ? 40f : 0f;
+            Float2 direction =
+                (point - TurretPosition).Normalized();
+            if (direction.Length <= 0.000001f)
+            {
+                direction = new Float2(1f, 0f);
+            }
+
+            var targets =
+                new System.Collections.Generic.List<EnemyState>();
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                Float2 relative = enemy.Position - TurretPosition;
+                float along = relative.X * direction.X
+                    + relative.Y * direction.Y;
+                float perpendicular = Math.Abs(
+                    relative.X * direction.Y
+                    - relative.Y * direction.X);
+                if (along >= 0f
+                    && along <= _combat.defaults.range
+                    && perpendicular <= width / 2f + enemy.Radius)
+                {
+                    targets.Add(enemy);
+                }
+            }
+
+            foreach (EnemyState enemy in targets)
+            {
+                DamageEnemy(
+                    state,
+                    enemy,
+                    _combat.defaults.damage * damageMultiplier);
+                if (knockback > 0f && state.Enemies.Contains(enemy))
+                {
+                    enemy.Position += direction * knockback;
+                }
+            }
+
+            state.BeamVisualStart = TurretPosition;
+            state.BeamVisualEnd = TurretPosition
+                + direction * _combat.defaults.range;
+            state.BeamVisualWidth = width;
+            state.BeamVisualRemaining = 0.2f;
+        }
+
+        private bool CastChainLightning(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            float radius = StarValue(star, 120f, 140f, 160f);
+            EnemyState first = null;
+            float closest = radius;
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                float distance = Float2.Distance(point, enemy.Position);
+                if (distance <= closest)
+                {
+                    closest = distance;
+                    first = enemy;
+                }
+            }
+
+            if (first == null)
+            {
+                return false;
+            }
+
+            int bounces = (int)Math.Round(
+                StarValue(star, 4f, 7f, 12f));
+            float retention =
+                StarValue(star, 0.8f, 0.8f, 0.85f);
+            float searchRange =
+                StarValue(star, 140f, 140f, 160f);
+            float slowRatio =
+                star >= 3 && star < 6 ? 0.25f : 0f;
+            float slowDuration =
+                star >= 3 && star < 6 ? 1.5f : 0f;
+            float stunDuration = star >= 6 ? 0.5f : 0f;
+            float damage = _combat.defaults.damage;
+            Float2 origin = first.Position;
+            var visited =
+                new System.Collections.Generic.HashSet<int>();
+            EnemyState target = first;
+            for (int hit = 0;
+                hit <= bounces && target != null;
+                hit++)
+            {
+                visited.Add(target.Id);
+                Float2 nextOrigin = target.Position;
+                DamageEnemy(state, target, damage);
+                if (state.Enemies.Contains(target))
+                {
+                    target.SlowRatio = Math.Max(
+                        target.SlowRatio,
+                        slowRatio);
+                    target.SlowRemaining = Math.Max(
+                        target.SlowRemaining,
+                        slowDuration);
+                    target.StunnedRemaining = Math.Max(
+                        target.StunnedRemaining,
+                        stunDuration);
+                }
+
+                origin = nextOrigin;
+                damage *= retention;
+                target = FindClosestChainTarget(
+                    state,
+                    origin,
+                    searchRange,
+                    visited);
+            }
+
+            return true;
+        }
+
+        private void CastFrost(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            float radius = StarValue(star, 90f, 130f, 170f);
+            float freezeDuration =
+                StarValue(star, 3f, 3f, 3.5f);
+            float slowRatio =
+                star >= 3 && star < 6 ? 0.4f : 0f;
+            float slowDuration =
+                star >= 3 && star < 6 ? 2f : 0f;
+            float vulnerableRatio = star >= 6 ? 0.3f : 0f;
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                if (Float2.Distance(point, enemy.Position) > radius)
+                {
+                    continue;
+                }
+
+                enemy.FrozenRemaining = Math.Max(
+                    enemy.FrozenRemaining,
+                    freezeDuration);
+                enemy.SlowRatio = Math.Max(
+                    enemy.SlowRatio,
+                    slowRatio);
+                enemy.SlowRemaining = Math.Max(
+                    enemy.SlowRemaining,
+                    slowDuration);
+                enemy.VulnerableRatio = Math.Max(
+                    enemy.VulnerableRatio,
+                    vulnerableRatio);
+                enemy.VulnerableRemaining = Math.Max(
+                    enemy.VulnerableRemaining,
+                    star >= 6 ? 3.5f : 0f);
+            }
+        }
+
+        private static float StarValue(
+            int star,
+            float oneStar,
+            float threeStar,
+            float sixStar)
+        {
+            int clamped = Math.Max(1, Math.Min(6, star));
+            if (clamped <= 3)
+            {
+                return oneStar
+                    + (threeStar - oneStar)
+                    * ((clamped - 1) / 2f);
+            }
+
+            return threeStar
+                + (sixStar - threeStar)
+                * ((clamped - 3) / 3f);
         }
 
         public void StepPassives(GameState state, float deltaTime)

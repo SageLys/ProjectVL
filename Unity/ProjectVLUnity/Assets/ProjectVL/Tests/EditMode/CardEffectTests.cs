@@ -1373,6 +1373,89 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void PierceConsumableDamagesEveryEnemyOnAimedLine()
+        {
+            CardState card = _state.CreateCard("pierce", 3);
+            Float2 turret = new Float2(
+                _combat.turret.x,
+                _combat.turret.y);
+            EnemyState near = AddEnemy(
+                turret + new Float2(80f, 0f),
+                200f);
+            EnemyState far = AddEnemy(
+                turret + new Float2(150f, 0f),
+                200f);
+            EnemyState outside = AddEnemy(
+                turret + new Float2(80f, 40f),
+                200f);
+
+            bool cast = _system.CastConsumable(
+                _state,
+                card,
+                turret + new Float2(100f, 0f));
+
+            Assert.That(cast, Is.True);
+            Assert.That(near.Hp, Is.EqualTo(110f));
+            Assert.That(far.Hp, Is.EqualTo(110f));
+            Assert.That(outside.Hp, Is.EqualTo(200f));
+            Assert.That(_state.BeamVisualRemaining, Is.GreaterThan(0f));
+        }
+
+        [Test]
+        public void ChainConsumableJumpsAndSlowsAtThreeStars()
+        {
+            CardState card = _state.CreateCard(
+                "chainLightning",
+                3);
+            EnemyState first = AddEnemy(
+                new Float2(200f, 200f),
+                100f);
+            EnemyState second = AddEnemy(
+                new Float2(250f, 200f),
+                100f);
+            EnemyState third = AddEnemy(
+                new Float2(300f, 200f),
+                100f);
+
+            bool cast = _system.CastConsumable(
+                _state,
+                card,
+                first.Position);
+
+            Assert.That(cast, Is.True);
+            Assert.That(first.Hp, Is.EqualTo(82f));
+            Assert.That(second.Hp, Is.EqualTo(85.6f));
+            Assert.That(
+                third.Hp,
+                Is.EqualTo(88.48f).Within(0.001f));
+            Assert.That(first.SlowRatio, Is.EqualTo(0.25f));
+            Assert.That(third.SlowRemaining, Is.EqualTo(1.5f));
+        }
+
+        [Test]
+        public void FrostConsumableFreezesAndExposesAtSixStars()
+        {
+            CardState card = _state.CreateCard("frost", 6);
+            EnemyState inside = AddEnemy(
+                new Float2(200f, 200f),
+                100f);
+            EnemyState outside = AddEnemy(
+                new Float2(380f, 200f),
+                100f);
+
+            bool cast = _system.CastConsumable(
+                _state,
+                card,
+                new Float2(200f, 200f));
+
+            Assert.That(cast, Is.True);
+            Assert.That(inside.FrozenRemaining, Is.EqualTo(3.5f));
+            Assert.That(inside.VulnerableRatio, Is.EqualTo(0.3f));
+            Assert.That(inside.VulnerableRemaining, Is.EqualTo(3.5f));
+            Assert.That(outside.FrozenRemaining, Is.Zero);
+        }
+
+        [Test]
         public void FrozenThunderShatterFreezesNearbyEnemies()
         {
             EquipResolved("frozenThunder", 6);
