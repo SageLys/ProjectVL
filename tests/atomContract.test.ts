@@ -78,6 +78,7 @@ const PRE_MIGRATION_DEFAULTS: Record<string, number | string | boolean> = {
   'knockback.radius': 120,
   'taunt.duration': 3,
   'taunt.radius': 120,
+  'taunt.priorityWeight': 1,
   'vulnerable.ratio': 0.2,
   'vulnerable.duration': 2,
   'vulnerable.maxStacks': 1,

@@ -102,7 +102,9 @@ describe('Bounty Encounter · 生成与生命周期', () => {
     state.summons = [{ id: 7, kind: 'decoy', x: 100, y: 100, hp: 20, maxHp: 20 }];
     member.x = 100;
     member.y = 100;
-    member.status.taunt = { x: 100, y: 100, remaining: 2, summonId: 7 };
+    member.status.taunt = [{
+      sourceKey: 'test/bounty', priorityWeight: 1, x: 100, y: 100, remaining: 2, summonId: 7,
+    }];
     const events = moveEnemies(state, createDefaultConfig(), constRng(0), 0);
     expect(events.some(event => event.type === 'bountyCompleted')).toBe(true);
     expect(state.kills).toBe(0);

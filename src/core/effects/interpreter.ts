@@ -4,6 +4,8 @@
 //
 // 被动融合契约（与装备槽顺序无关）：
 //   数值乘数乘法叠加；加法数值相加（breachReduction 封顶 0.9）；阈值取最高；
+//   novaOnBreak 卡内后写覆盖、跨卡 damage/knockbackDistance 分轴取最大；
+//   expiryConvert 卡内后写覆盖、跨卡按规范来源顺序连乘失败概率；taunt 按来源候选权重仲裁并回退；
 //   slow/vulnerable/freeze/stun 交给 statusSystem 取最强并延长；aura 按来源并行；
 //   所有触发绑定独立触发且所有攻击形态必须经过统一攻击管线；summon 每(卡,绑定)单实例（B2）；
 //   shield 的 absorbHits 取最大、regenSeconds 取最小；weaponForm 按正交轴确定性融合。
@@ -24,6 +26,9 @@ export const FUSION_RULES = [
   '数值乘数(dropRateMul/dropLifetimeMul/xpMul): 乘法叠加',
   '加法数值(thorns/breachReduction): 加法，breachReduction 上限 0.9',
   '阈值(execute): 取最高',
+  '破盾新星(novaOnBreak): 卡内后写覆盖，跨卡 damage/knockbackDistance 分轴取最大',
+  '过期转化(expiryConvert): 卡内后写覆盖，跨卡按规范来源顺序连乘失败概率',
+  '嘲讽(taunt): 同来源 upsert，跨来源按 priorityWeight/remaining/sourceKey 仲裁并回退',
   '状态(slow/vulnerable/freeze/stun): statusSystem 取最强，时长取最大',
   '光环/领域(aura): 按来源独立并行',
   '触发绑定: 所有装备独立触发，所有攻击形态经过统一攻击管线',
@@ -226,16 +231,22 @@ function* equippedBindings(state: GameState): Generator<{ card: Card; def: CardD
 }
 
 /** 触发执行也遵守槽位无关契约；同卡内仍按原 bindingIndex 顺序。 */
-function orderedEquippedBindings(state: GameState): Array<{
+export interface EquippedBindingSource {
   card: Card;
   def: CardDef;
   binding: BindingDef;
   bindingIndex: number;
-}> {
-  return [...equippedBindings(state)].sort((a, b) =>
-    a.card.type.localeCompare(b.card.type)
+}
+
+/** 稳定绑定来源序：卡类型 → 卡实例 id → 卡内 bindingIndex；绝不读取装备槽号。 */
+export function compareBindingSource(a: EquippedBindingSource, b: EquippedBindingSource): number {
+  return a.card.type.localeCompare(b.card.type)
     || a.card.id - b.card.id
-    || a.bindingIndex - b.bindingIndex);
+    || a.bindingIndex - b.bindingIndex;
+}
+
+function orderedEquippedBindings(state: GameState): EquippedBindingSource[] {
+  return [...equippedBindings(state)].sort(compareBindingSource);
 }
 
 export interface TriggerPayload {
@@ -351,7 +362,7 @@ function fireTriggerBindings(state: GameState, config: Config, rng: Rng, trigger
 export function tickIntervalBindings(state: GameState, config: Config, rng: Rng, dt: number): GameEvent[] {
   const events: GameEvent[] = [];
   const liveKeys = new Set<string>();
-  for (const { card, binding, bindingIndex } of equippedBindings(state)) {
+  for (const { card, binding, bindingIndex } of orderedEquippedBindings(state)) {
     if (binding.trigger !== 'interval') continue;
     const seconds = binding.triggerParams?.seconds ?? 1;
     const key = `${card.id}:${bindingIndex}`;
@@ -388,7 +399,7 @@ export interface Modifiers {
   mergeRules: { rule: string; value: number }[];
   expiryConvert: { ratio: number } | null;
   weaponForms: WeaponFormContribution[];
-  auras: { key: string; sourceCardType: CardType; radius: number | null; radiusRatioOfRange: number | null; tickInterval: number; effects: EffectDef[]; star: number }[];
+  auras: { key: string; sourceCardId: number; sourceCardType: CardType; sourceBindingIndex: number; radius: number | null; radiusRatioOfRange: number | null; tickInterval: number; effects: EffectDef[]; star: number }[];
   equipmentAffixAdd: Record<RunBaseStatKind, number>;
 }
 
@@ -402,6 +413,26 @@ const passiveNum = (p: Record<string, unknown>, atom: AtomName, k: string): numb
 
 /** 融合契约常量（非原子参数）：突破减免加法叠加后的硬上限。 */
 const BREACH_REDUCTION_CAP = 0.9;
+
+export function fuseNovaOnBreak(
+  perCard: { damage: number; knockbackDistance: number }[],
+): { damage: number; knockbackDistance: number } | null {
+  if (perCard.length === 0) return null;
+  let damage = perCard[0].damage;
+  let knockbackDistance = perCard[0].knockbackDistance;
+  for (let i = 1; i < perCard.length; i++) {
+    damage = Math.max(damage, perCard[i].damage);
+    knockbackDistance = Math.max(knockbackDistance, perCard[i].knockbackDistance);
+  }
+  return { damage, knockbackDistance };
+}
+
+export function fuseExpiryConvert(perCard: number[]): { ratio: number } | null {
+  if (perCard.length === 0) return null;
+  let failureProbability = 1;
+  for (const ratio of perCard) failureProbability *= 1 - ratio;
+  return { ratio: 1 - failureProbability };
+}
 
 export function getModifiers(state: GameState): Modifiers {
   const runtimeDropRate = modifierTotal(state, 'dropRateMul');
@@ -424,7 +455,9 @@ export function getModifiers(state: GameState): Modifiers {
       heal: equipmentAffixAdd(state, 'heal'),
     },
   };
-  for (const { card, binding, bindingIndex } of equippedBindings(state)) {
+  const novaByCard = new Map<number, { damage: number; knockbackDistance: number }>();
+  const expiryConvertByCard = new Map<number, number>();
+  for (const { card, binding, bindingIndex } of orderedEquippedBindings(state)) {
     for (const ef of binding.effects) {
       const p = effectParams(ef);
       switch (ef.atom) {
@@ -439,10 +472,10 @@ export function getModifiers(state: GameState): Modifiers {
           m.executeThreshold = Math.max(m.executeThreshold, passiveNum(p, 'execute', 'hpThresholdRatio'));
           break;
         case 'novaOnBreak':
-          m.novaOnBreak = {
+          novaByCard.set(card.id, {
             damage: passiveNum(p, 'novaOnBreak', 'damage'),
             knockbackDistance: passiveNum(p, 'novaOnBreak', 'knockbackDistance'),
-          };
+          });
           break;
         case 'mergeRule':
           m.mergeRules.push({
@@ -451,7 +484,7 @@ export function getModifiers(state: GameState): Modifiers {
           });
           break;
         case 'expiryConvert':
-          m.expiryConvert = { ratio: passiveNum(p, 'expiryConvert', 'ratio') };
+          expiryConvertByCard.set(card.id, passiveNum(p, 'expiryConvert', 'ratio'));
           break;
         case 'beamMorph':
           if (binding.trigger === 'passive') m.weaponForms.push({
@@ -467,7 +500,9 @@ export function getModifiers(state: GameState): Modifiers {
           if (binding.trigger === 'passive') {
             m.auras.push({
               key: `aura:${card.id}:${bindingIndex}`,
+              sourceCardId: card.id,
               sourceCardType: card.type,
+              sourceBindingIndex: bindingIndex,
               radius: typeof p.radius === 'number' ? (p.radius as number) : null,
               radiusRatioOfRange: typeof p.radiusRatioOfRange === 'number' ? (p.radiusRatioOfRange as number) : null,
               tickInterval: passiveNum(p, 'aura', 'tickInterval'),
@@ -480,12 +515,15 @@ export function getModifiers(state: GameState): Modifiers {
       }
     }
   }
+  m.novaOnBreak = fuseNovaOnBreak([...novaByCard.values()]);
+  m.expiryConvert = fuseExpiryConvert([...expiryConvertByCard.values()]);
   return m;
 }
 
 interface ExpectedEquipmentSummon {
   card: Card;
   bindingIndex: number;
+  effectIndex: number;
   effect: EffectDef;
 }
 
@@ -516,15 +554,16 @@ function equipmentSummonMatches(summon: Summon, expected: ExpectedEquipmentSummo
 export function reconcileEquipmentPassives(state: GameState, config: Config, rng: Rng): GameEvent[] {
   const events: GameEvent[] = [];
   const expected = new Map<string, ExpectedEquipmentSummon>();
-  for (const { card, binding, bindingIndex } of equippedBindings(state)) {
-    const summonEffect = binding.effects.find(effect => effect.atom === 'summon');
-    if (!summonEffect) continue;
+  for (const { card, binding, bindingIndex } of orderedEquippedBindings(state)) {
+    const effectIndex = binding.effects.findIndex(effect => effect.atom === 'summon');
+    if (effectIndex < 0) continue;
+    const summonEffect = binding.effects[effectIndex];
     if (effectParams(summonEffect).replacesEarlier === true) {
       for (const [key, item] of expected) {
         if (item.card.id === card.id) expected.delete(key);
       }
     }
-    expected.set(`${card.id}:${bindingIndex}`, { card, bindingIndex, effect: summonEffect });
+    expected.set(`${card.id}:${bindingIndex}`, { card, bindingIndex, effectIndex, effect: summonEffect });
   }
 
   const kept = new Set<string>();
@@ -540,11 +579,15 @@ export function reconcileEquipmentPassives(state: GameState, config: Config, rng
   for (const [key, item] of expected) {
     const existing = state.summons.find(s =>
       s.sourceCardId === item.card.id && s.sourceBindingIndex === item.bindingIndex);
-    if (existing && equipmentSummonMatches(existing, item, baseDamage)) continue;
+    if (existing && equipmentSummonMatches(existing, item, baseDamage)) {
+      existing.sourceCardType = item.card.type;
+      existing.sourceEffectIndex = item.effectIndex;
+      continue;
+    }
     const ctx = baseCtx(state, config, rng, item.card.star, {}, {
       cardId: item.card.id, cardType: item.card.type, bindingIndex: item.bindingIndex,
     });
-    runEffects(ctx, [item.effect]);
+    runEffects(ctx, [item.effect], item.effectIndex);
     events.push(...ctx.events);
     kept.add(key);
   }

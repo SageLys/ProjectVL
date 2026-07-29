@@ -5,7 +5,7 @@
 //   3. 减速多来源 → 取最强 ratio，剩余时长取最大（不叠乘，防组合失控）。
 //   4. 易伤多来源 → 同减速：取最强。
 //   5. 索敌优先级（炮台）：紧急半径最近 > 活跃 bounty > 烙印 brand 权重降序 > 最近敌人。
-//   6. 移动目标（敌人）：嘲讽（点/召唤物）> 炮台；嘲讽召唤物死亡即失效。
+//   6. 移动目标（敌人）：显式嘲讽候选按权重/时长/来源键仲裁 > 环境召唤物 > 炮台；候选失效后回退。
 //   - 击退 × 类型抗性（boss/tank 减免）。
 //   - 连续击退短窗递减，窗口过期重置。
 //   - freeze/stun × 类型抗性（boss/tank 减免时长）。
@@ -25,14 +25,15 @@ export const CONFLICT_RULES = [
   'slow 多来源取最强，不叠乘',
   'vulnerable 多来源取最强',
   '索敌: 紧急半径最近 > 活跃 bounty > brand 权重 > 最近',
-  '移动: taunt > 炮台；嘲讽源死亡即失效',
+  '移动: 显式 taunt 候选按 priorityWeight > remaining > sourceKey 仲裁，再高于环境召唤物与炮台',
+  'taunt 候选独立计时；赢家过期或关联召唤物死亡时回退到下一候选',
 ] as const;
 
 import { cfg } from '../../config';
-import type { Enemy, EnemyStatus, GameState } from '../types';
+import type { Enemy, EnemyStatus, GameState, TauntCandidate } from '../types';
 
 export function emptyStatus(): EnemyStatus {
-  return { slow: null, frozen: 0, freezeStacks: 0, stunned: 0, ccImmune: 0, vulnerable: null, dots: [], brand: null, taunt: null, kbFatigue: null };
+  return { slow: null, frozen: 0, freezeStacks: 0, stunned: 0, ccImmune: 0, vulnerable: null, dots: [], brand: null, taunt: [], kbFatigue: null };
 }
 
 /** 冻结或眩晕 = 不可移动。 */
@@ -65,7 +66,7 @@ export function controlBudgetDenies(state: GameState, e: Enemy): boolean {
 
 /** Controlled means any active slow, freeze, stun, or taunt. */
 export function isControlled(e: Enemy): boolean {
-  return e.status.slow !== null || e.status.frozen > 0 || e.status.stunned > 0 || e.status.taunt !== null;
+  return e.status.slow !== null || e.status.frozen > 0 || e.status.stunned > 0 || activeTaunt(e) !== null;
 }
 
 /** 移动速度乘数：不可动=0；减速取最强单一来源。 */
@@ -171,8 +172,43 @@ export function applyBrand(e: Enemy, weight: number, duration: number): void {
   };
 }
 
-export function applyTaunt(e: Enemy, x: number, y: number, duration: number, summonId?: number): void {
-  e.status.taunt = { x, y, remaining: duration, summonId };
+/** 唯一嘲讽仲裁入口：权重降序、剩余时长降序、来源键字典序升序。 */
+export function activeTaunt(e: Enemy): TauntCandidate | null {
+  let winner: TauntCandidate | null = null;
+  for (const candidate of e.status.taunt) {
+    if (candidate.remaining <= 0) continue;
+    if (!winner
+      || candidate.priorityWeight > winner.priorityWeight
+      || (candidate.priorityWeight === winner.priorityWeight && candidate.remaining > winner.remaining)
+      || (candidate.priorityWeight === winner.priorityWeight
+        && candidate.remaining === winner.remaining
+        && candidate.sourceKey.localeCompare(winner.sourceKey) < 0)) {
+      winner = candidate;
+    }
+  }
+  return winner;
+}
+
+export function applyTaunt(
+  e: Enemy,
+  sourceKey: string,
+  priorityWeight: number,
+  x: number,
+  y: number,
+  duration: number,
+  summonId?: number,
+): void {
+  const current = e.status.taunt.find(candidate => candidate.sourceKey === sourceKey);
+  if (current) {
+    current.priorityWeight = priorityWeight;
+    current.x = x;
+    current.y = y;
+    current.summonId = summonId;
+    current.remaining = Math.max(current.remaining, duration);
+    return;
+  }
+  e.status.taunt.push({ sourceKey, priorityWeight, x, y, remaining: duration, summonId });
+  e.status.taunt.sort((a, b) => a.sourceKey.localeCompare(b.sourceKey));
 }
 
 export function applyDot(e: Enemy, dps: number, duration: number): void {
@@ -181,7 +217,7 @@ export function applyDot(e: Enemy, dps: number, duration: number): void {
 
 /**
  * 推进所有敌人状态计时（不含 dot 伤害结算——那需要伤害管线，见 runtime.tickEffects）。
- * 嘲讽源召唤物已消失时立刻失效（仲裁规则 6）。
+ * 嘲讽候选独立计时；关联召唤物已消失时只移除对应候选（仲裁规则 6）。
  */
 export function tickStatusTimers(state: GameState, dt: number): void {
   for (const e of state.enemies) {
@@ -200,11 +236,9 @@ export function tickStatusTimers(state: GameState, dt: number): void {
     if (s.vulnerable && (s.vulnerable.remaining -= dt) <= 0) s.vulnerable = null;
     if (s.brand && (s.brand.remaining -= dt) <= 0) s.brand = null;
     if (s.kbFatigue && (s.kbFatigue.remaining -= dt) <= 0) s.kbFatigue = null;
-    if (s.taunt) {
-      s.taunt.remaining -= dt;
-      const sourceGone = s.taunt.summonId != null && !state.summons.some(sum => sum.id === s.taunt!.summonId);
-      if (s.taunt.remaining <= 0 || sourceGone) s.taunt = null;
-    }
+    for (const candidate of s.taunt) candidate.remaining -= dt;
+    s.taunt = s.taunt.filter(candidate => candidate.remaining > 0
+      && (candidate.summonId == null || state.summons.some(sum => sum.id === candidate.summonId)));
     for (const dot of s.dots) dot.remaining -= dt;
   }
 }

@@ -33,6 +33,9 @@ function tickZones(state: GameState, config: Config, rng: Rng, dt: number, event
           star: 0,
           baseDamage: zone.baseDamage,
           zoneTick: true,
+          sourceCardId: zone.sourceCardId,
+          sourceCardType: zone.sourceCardType,
+          sourceBindingIndex: zone.sourceBindingIndex,
           enemy,
         };
         runEffects(ctx, zone.effects);
@@ -63,7 +66,9 @@ function tickAuras(state: GameState, config: Config, rng: Rng, dt: number, event
           star: aura.star,
           baseDamage: totalDamage(state, config),
           zoneTick: true,
+          sourceCardId: aura.sourceCardId,
           sourceCardType: aura.sourceCardType,
+          sourceBindingIndex: aura.sourceBindingIndex,
           enemy,
         };
         runEffects(ctx, aura.effects);
@@ -146,7 +151,8 @@ function tickSummons(state: GameState, config: Config, rng: Rng, dt: number, eve
       // 重生一次（decoy 5★）：只对"被摧毁"（非到期）生效，每个召唤物实例限一次。
       if (dead && s.respawnOnce && !s.respawned) {
         if (s.placement === 'threatDirection' && s.sourceCardId != null) {
-          const position = threatDirectionSummonPosition(state, s.sourceCardId, s.distanceFromTurret ?? 150);
+          const sourceKey = `${s.sourceCardType ?? 'unknown'}/${s.sourceCardId}/${s.sourceBindingIndex ?? 0}/${s.sourceEffectIndex ?? 0}`;
+          const position = threatDirectionSummonPosition(state, sourceKey, s.distanceFromTurret ?? 150);
           s.x = position.x;
           s.y = position.y;
         } else {

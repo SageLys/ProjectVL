@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { cfg } from '../src/config';
-import { registerSkillDefs } from '../src/core/effects/interpreter';
+import { reconcileEquipmentPassives, registerSkillDefs } from '../src/core/effects/interpreter';
 import { tickEffects } from '../src/core/effects/runtime';
 import { consumeCard, moveOrSwap } from '../src/core/systems/equipmentSystem';
 import { moveEnemies } from '../src/core/systems/enemySystem';
@@ -46,7 +46,7 @@ describe('装备态 summon 声明式生命周期', () => {
     expect(summon.remaining).toBeUndefined();
   });
 
-  it('有敌人时朝 1/dist 加权威胁方向放置；无敌人时按装备槽方位回退', () => {
+  it('有敌人时朝 1/dist 加权威胁方向放置；无敌人时按稳定来源键回退', () => {
     const threatened = freshState();
     threatened.enemies = [
       enemy({ x: cfg.combat.turret.x, y: cfg.combat.turret.y - 200 }),
@@ -57,18 +57,29 @@ describe('装备态 summon 声明式生命周期', () => {
     expect(towardEnemies.distance).toBeCloseTo(150, 6);
     expect(towardEnemies.angle).toBeCloseTo(-Math.PI / 2, 6);
 
-    const fallback = freshState();
-    equipDecoy(fallback, 3, 1);
-    const bySlot = polarFromTurret(fallback.summons[0].x, fallback.summons[0].y);
-    expect(bySlot.angle).toBeCloseTo(1 / fallback.equipment.length * Math.PI * 2, 6);
+    const decoy = card('decoy', 3);
+    const fallbackA = freshState();
+    const fallbackB = freshState();
+    fallbackA.equipment[0] = structuredClone(decoy);
+    fallbackB.equipment[1] = structuredClone(decoy);
+    reconcileEquipmentPassives(fallbackA, config, rng);
+    reconcileEquipmentPassives(fallbackB, config, rng);
+    expect({ x: fallbackA.summons[0].x, y: fallbackA.summons[0].y })
+      .toEqual({ x: fallbackB.summons[0].x, y: fallbackB.summons[0].y });
   });
 
   it('嘲讽半径内的射程外/内敌人都会撞击诱饵；半径外敌人仍朝炮台移动', () => {
     const state = freshState();
-    equipDecoy(state, 3); // slot 0 无敌人回退到炮台右侧 150px
+    equipDecoy(state, 3);
     const summon = state.summons[0];
     const attracted = enemy({ x: summon.x + 110, y: summon.y, speed: 40, damage: 8, r: 12 });
-    const attractedInRange = enemy({ x: cfg.combat.turret.x + 121, y: summon.y, speed: 20, damage: 8, r: 12 });
+    const radialX = (summon.x - cfg.combat.turret.x) / 150;
+    const radialY = (summon.y - cfg.combat.turret.y) / 150;
+    const attractedInRange = enemy({
+      x: cfg.combat.turret.x + radialX * 121,
+      y: cfg.combat.turret.y + radialY * 121,
+      speed: 20, damage: 8, r: 12,
+    });
     const unaffected = enemy({ x: cfg.combat.turret.x, y: cfg.combat.turret.y - 260, speed: 20, r: 12 });
     state.enemies = [attracted, attractedInRange, unaffected];
     const unaffectedStartY = unaffected.y;

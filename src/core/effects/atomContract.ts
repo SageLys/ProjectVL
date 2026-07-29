@@ -238,8 +238,8 @@ export const ATOM_CONTRACT = {
       radius: TARGET_RADIUS,
       summonId: { type: 'integer', min: 0, note: '未声明 = 嘲讽到 origin；声明后嘲讽到指定召唤物' },
       priorityWeight: {
-        type: 'number', min: 0,
-        note: '当前实现未消费（applyTaunt 不读取），故意不给默认值；保留供索敌权重扩展',
+        type: 'number', default: 1, min: 0,
+        note: '同来源 upsert；跨来源按 priorityWeight、remaining、sourceKey 依次仲裁，赢家失效后回退',
       },
       ...CHANCE,
     },

@@ -191,10 +191,19 @@ export interface EnemyStatus {
   dots: { dps: number; remaining: number }[];
   /** 烙印（focusPriority）：炮台索敌优先级权重。 */
   brand: { weight: number; remaining: number } | null;
-  /** 嘲讽：移动目标改为坐标/召唤物。 */
-  taunt: { x: number; y: number; remaining: number; summonId?: number } | null;
+  /** 嘲讽候选集：由 activeTaunt 统一仲裁移动目标。 */
+  taunt: TauntCandidate[];
   /** 击退疲劳:短窗口内连续击退按 multiplier 递减;窗口过期重置。 */
   kbFatigue: { multiplier: number; remaining: number } | null;
+}
+
+export interface TauntCandidate {
+  sourceKey: string;
+  priorityWeight: number;
+  x: number;
+  y: number;
+  summonId?: number;
+  remaining: number;
 }
 
 export interface BossRuntimeState {
@@ -228,8 +237,8 @@ export interface Enemy {
   ccResistOverride?: number;
   knockbackResistOverride?: number;
   validationReward?: ValidationRewardSpec;
-  /** Presentation-only memory used to emit a pulse when taunt target changes. */
-  tauntVfxTargetId?: number;
+  /** Presentation-only memory used to emit a pulse when the arbitrated taunt source changes. */
+  tauntVfxSourceKey?: string;
   bossRuntime?: BossRuntimeState;
 }
 
@@ -399,6 +408,9 @@ export interface Zone {
   tickInterval: number;
   tickTimer: number;
   effects: EffectDef[];
+  sourceCardId?: number;
+  sourceCardType?: CardType;
+  sourceBindingIndex?: number;
   /** 效果结算的伤害基准（创建时的炮台总伤）。 */
   baseDamage: number;
   color?: string;
@@ -410,7 +422,9 @@ export interface Summon {
   kind: 'decoy' | 'mirrorTurret' | 'orbital';
   /** 装备态召唤物来源；无来源表示消耗态/其他临时召唤物，仍走自身 duration。 */
   sourceCardId?: number;
+  sourceCardType?: CardType;
   sourceBindingIndex?: number;
+  sourceEffectIndex?: number;
   /** 装备态重生/换波刷新复用的放置策略。 */
   placement?: 'threatDirection';
   distanceFromTurret?: number;

@@ -1,4 +1,5 @@
 import type { GameState, Summon } from '../core/types';
+import { moveTargetFor } from '../core/systems/enemySystem';
 
 const TAU = Math.PI * 2;
 
@@ -24,11 +25,7 @@ function drawSpike(
 function pulseTarget(state: GameState, enemyId: number): Summon | undefined {
   const enemy = state.enemies.find(item => item.id === enemyId);
   if (!enemy) return undefined;
-  const explicit = enemy.status.taunt?.summonId;
-  if (explicit != null) return state.summons.find(summon => summon.id === explicit);
-  return state.summons
-    .filter(summon => (summon.tauntRadius ?? 0) >= Math.hypot(summon.x - enemy.x, summon.y - enemy.y))
-    .sort((a, b) => (b.priorityWeight ?? 1) - (a.priorityWeight ?? 1))[0];
+  return moveTargetFor(state, enemy).summon ?? undefined;
 }
 
 /** Short-lived combat feedback. It consumes state.vfx but never affects simulation. */

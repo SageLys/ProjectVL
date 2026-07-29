@@ -46,6 +46,7 @@ export interface EffectCtx {
   /** Semantic source used by presentation entities to inherit the skill accent. */
   sourceCardType?: CardType;
   sourceBindingIndex?: number;
+  sourceEffectIndex?: number;
   bullet?: Bullet;
   enemy?: Enemy;
   drop?: GroundDrop;
@@ -114,6 +115,9 @@ function makeZone(ctx: EffectCtx, atom: 'aura' | 'groundZone', p: Record<string,
     tickInterval: cNum(atom, p, 'tickInterval'),
     tickTimer: 0,
     effects: (Array.isArray(p.effects) ? (p.effects as EffectDef[]) : []),
+    sourceCardId: ctx.sourceCardId,
+    sourceCardType: ctx.sourceCardType,
+    sourceBindingIndex: ctx.sourceBindingIndex,
     baseDamage: ctx.baseDamage,
     color: typeof p.color === 'string'
       ? (p.color as string)
@@ -198,9 +202,29 @@ function attachRider(ctx: EffectCtx, atom: AtomName, params: Record<string, unkn
   return true;
 }
 
-/** 装备召唤物外围放置：优先朝 1/dist 加权威胁方向，无敌人时按装备槽序号均分方位。 */
+export function effectSourceKey(ctx: EffectCtx): string {
+  if (ctx.consume || (ctx.sourceCardType != null && ctx.sourceCardId == null)) {
+    return `consume/${ctx.sourceCardType ?? 'anonymous'}`;
+  }
+  if (ctx.sourceCardType != null && ctx.sourceCardId != null && ctx.sourceBindingIndex != null) {
+    return `${ctx.sourceCardType}/${ctx.sourceCardId}/${ctx.sourceBindingIndex}/${ctx.sourceEffectIndex ?? 0}`;
+  }
+  return `anonymous/${ctx.sourceEffectIndex ?? 0}`;
+}
+
+/** FNV-1a：只用于把稳定来源键映射到确定方位，不参与随机流。 */
+function stableSourceHash(sourceKey: string): number {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < sourceKey.length; i++) {
+    hash ^= sourceKey.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return hash >>> 0;
+}
+
+/** 装备召唤物外围放置：优先朝 1/dist 加权威胁方向，无敌人时按稳定来源键确定方位。 */
 export function threatDirectionSummonPosition(
-  state: GameState, sourceCardId: number, distanceFromTurret: number,
+  state: GameState, sourceKey: string, distanceFromTurret: number,
 ): { x: number; y: number } {
   const turret = cfg.combat.turret;
   let vx = 0;
@@ -217,8 +241,7 @@ export function threatDirectionSummonPosition(
   if (Math.hypot(vx, vy) > 1e-9) {
     angle = Math.atan2(vy, vx);
   } else {
-    const slot = Math.max(0, state.equipment.findIndex(card => card?.id === sourceCardId));
-    angle = slot / Math.max(1, state.equipment.length) * Math.PI * 2;
+    angle = stableSourceHash(sourceKey) / 0x1_0000_0000 * Math.PI * 2;
   }
   return {
     x: turret.x + Math.cos(angle) * distanceFromTurret,
@@ -228,13 +251,15 @@ export function threatDirectionSummonPosition(
 
 export function equipmentSummonPosition(ctx: EffectCtx, p: Record<string, unknown>): { x: number; y: number } {
   if (p.placement !== 'threatDirection' || ctx.sourceCardId == null) return ctx.origin;
-  return threatDirectionSummonPosition(ctx.state, ctx.sourceCardId, cNum('summon', p, 'distanceFromTurret'));
+  return threatDirectionSummonPosition(ctx.state, effectSourceKey(ctx), cNum('summon', p, 'distanceFromTurret'));
 }
 
 function configureSummon(summon: Summon, ctx: EffectCtx, p: Record<string, unknown>, position: { x: number; y: number }): void {
   const kind = cStr('summon', p, 'kind') as Summon['kind'];
   const hp = cNum('summon', p, 'hp');
   summon.kind = kind;
+  summon.sourceCardType = ctx.sourceCardType;
+  summon.sourceEffectIndex = ctx.sourceEffectIndex;
   summon.x = position.x;
   summon.y = position.y;
   summon.hp = hp;
@@ -386,7 +411,11 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
   taunt(ctx, p) {
     const duration = cappedDuration(ctx, num(p, 'duration', ctx.duration ?? atomNumberDefault('taunt', 'duration')));
     const summonId = typeof p.summonId === 'number' ? (p.summonId as number) : undefined;
-    for (const e of targets(ctx, 'taunt', p)) applyTaunt(e, ctx.origin.x, ctx.origin.y, duration, summonId);
+    const priorityWeight = cNum('taunt', p, 'priorityWeight');
+    const sourceKey = effectSourceKey(ctx);
+    for (const e of targets(ctx, 'taunt', p)) {
+      applyTaunt(e, sourceKey, priorityWeight, ctx.origin.x, ctx.origin.y, duration, summonId);
+    }
   },
   vulnerable(ctx, p) {
     if (attachRider(ctx, 'vulnerable', p)) return;
@@ -434,7 +463,8 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
         s.sourceCardId === ctx.sourceCardId && s.sourceBindingIndex === ctx.sourceBindingIndex);
       const summon = matches[0] ?? {
         id: ctx.state.nextSummonId++, kind, x: ctx.origin.x, y: ctx.origin.y,
-        hp: 0, maxHp: 0, sourceCardId: ctx.sourceCardId, sourceBindingIndex: ctx.sourceBindingIndex,
+        hp: 0, maxHp: 0, sourceCardId: ctx.sourceCardId, sourceCardType: ctx.sourceCardType,
+        sourceBindingIndex: ctx.sourceBindingIndex, sourceEffectIndex: ctx.sourceEffectIndex,
       };
       configureSummon(summon, ctx, p, equipmentSummonPosition(ctx, p));
       if (!matches.length) ctx.state.summons.push(summon);
@@ -580,8 +610,10 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
 };
 
 /** 依序执行一组效果。 */
-export function runEffects(ctx: EffectCtx, effects: EffectDef[]): void {
-  for (const ef of effects) {
+export function runEffects(ctx: EffectCtx, effects: EffectDef[], effectIndexOffset = 0): void {
+  for (let effectIndex = 0; effectIndex < effects.length; effectIndex++) {
+    const ef = effects[effectIndex];
+    ctx.sourceEffectIndex = effectIndexOffset + effectIndex;
     const handler = ATOMS[ef.atom];
     if (!handler) continue;
     const params = effectParams(ef);
