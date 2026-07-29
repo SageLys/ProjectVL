@@ -163,6 +163,11 @@ namespace ProjectVL.Presentation
             BountyConfig bounty = GameConfigLoader.LoadBounty();
 
             GameState state = GameStateFactory.Create(combat, economy);
+            state.AttachSettlement(
+                new SettlementSystem(
+                    progression,
+                    relics,
+                    waves.totalWaves));
             _recipeSystem = new RecipeSystem(recipes);
             var random = new SystemRandomSource(System.Environment.TickCount);
             var difficultySystem =

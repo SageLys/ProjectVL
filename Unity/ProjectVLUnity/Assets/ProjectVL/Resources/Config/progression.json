@@ -8,5 +8,19 @@
     { "common": 0.75, "rare": 0.25 },
     { "common": 0.55, "rare": 0.4, "epic": 0.05 },
     { "common": 0.3, "rare": 0.55, "epic": 0.15 }
-  ]
+  ],
+  "settlement": {
+    "winBonus": 500,
+    "perWaveCleared": 40,
+    "perKill": 2,
+    "hpRatioBonusMax": 200,
+    "perEquippedStarSquared": 10,
+    "wildcardStarValue": {
+      "star1": 15,
+      "star2": 40,
+      "star3": 100,
+      "star4": 250,
+      "star5": 600
+    }
+  }
 }

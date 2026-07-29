@@ -279,6 +279,12 @@ namespace ProjectVL.Presentation
                 return;
             }
 
+            if (state.Mode == GameMode.Ended)
+            {
+                DrawSettlementPanel(state);
+                return;
+            }
+
             Rect arena = ArenaRect();
             float width = Mathf.Min(390f, arena.width - 28f);
             float height = state.Mode == GameMode.Ready ? 220f : 180f;
@@ -345,6 +351,138 @@ namespace ProjectVL.Presentation
                     _controller.TogglePause();
                 }
             }
+        }
+
+        private void DrawSettlementPanel(GameState state)
+        {
+            RunSummary summary = state.RunSummary;
+            Rect panel = CenterPanelRect(374f, 470f);
+            GUI.Box(panel, GUIContent.none);
+
+            string title = summary != null && summary.Won
+                ? "守住了！"
+                : "防线失守";
+            GUI.Label(
+                new Rect(panel.x + 18f, panel.y + 14f, panel.width - 36f, 38f),
+                title,
+                _centerStyle);
+
+            if (summary == null)
+            {
+                GUI.Label(
+                    new Rect(panel.x + 20f, panel.y + 62f, panel.width - 40f, 40f),
+                    "本局结算数据尚未生成",
+                    _hudStyle);
+            }
+            else
+            {
+                GUI.Label(
+                    new Rect(panel.x + 20f, panel.y + 56f, panel.width - 40f, 34f),
+                    $"本局评分  {summary.Score.Total}",
+                    _titleStyle);
+                GUI.Label(
+                    new Rect(panel.x + 20f, panel.y + 91f, panel.width - 40f, 25f),
+                    $"{DifficultyName(summary.Difficulty)}  ·  "
+                    + $"通过 {summary.ClearedWaves} 波  ·  "
+                    + $"到达等级 {summary.Level}",
+                    _hudStyle);
+
+                Rect scoreBox = new Rect(
+                    panel.x + 18f,
+                    panel.y + 123f,
+                    panel.width - 36f,
+                    76f);
+                GUI.Box(scoreBox, GUIContent.none);
+                GUI.Label(
+                    new Rect(scoreBox.x + 10f, scoreBox.y + 5f, scoreBox.width - 20f, 30f),
+                    $"胜利 {summary.Score.Win}    波次 {summary.Score.Waves}"
+                    + $"    击杀 {summary.Score.Kills}",
+                    _hudStyle);
+                GUI.Label(
+                    new Rect(scoreBox.x + 10f, scoreBox.y + 37f, scoreBox.width - 20f, 30f),
+                    $"生命 {summary.Score.Hp}    卡组 {summary.Score.Build}"
+                    + $"    万能牌 {summary.Score.Wildcards}",
+                    _hudStyle);
+
+                string highest = summary.HighestCard == null
+                    ? "暂无"
+                    : $"{CardDisplayName(summary.HighestCard.Type)} "
+                        + $"{summary.HighestCard.Star}★";
+                string subGods = summary.SubGods.Count == 0
+                    ? "无"
+                    : JoinGodNames(summary.SubGods);
+                GUI.Label(
+                    new Rect(panel.x + 24f, panel.y + 211f, panel.width - 48f, 26f),
+                    $"战斗：击杀 {summary.Kills}  ·  "
+                    + $"用时 {FormatDuration(summary.DurationSeconds)}  ·  "
+                    + $"生命 {Mathf.CeilToInt(summary.Hp)}/{Mathf.CeilToInt(summary.MaxHp)}",
+                    _leftStyle);
+                GUI.Label(
+                    new Rect(panel.x + 24f, panel.y + 241f, panel.width - 48f, 26f),
+                    $"神祇：主神 {GodName(summary.MainGod)}  ·  副神 {subGods}",
+                    _leftStyle);
+                GUI.Label(
+                    new Rect(panel.x + 24f, panel.y + 271f, panel.width - 48f, 26f),
+                    $"构筑：最高 {highest}  ·  合成 {summary.Merges} 次",
+                    _leftStyle);
+                GUI.Label(
+                    new Rect(panel.x + 24f, panel.y + 301f, panel.width - 48f, 26f),
+                    $"遗物：{summary.RelicKinds} 种 / {summary.RelicStacks} 层"
+                    + $"  ·  配方 {summary.CompletedRecipes.Count}",
+                    _leftStyle);
+                GUI.Label(
+                    new Rect(panel.x + 24f, panel.y + 331f, panel.width - 48f, 26f),
+                    $"悬赏：完成 {summary.BountiesCompleted}"
+                    + $"/接受 {summary.BountiesAccepted}"
+                    + $"  ·  收集奖励 {summary.RewardsCollected}",
+                    _leftStyle);
+            }
+
+            if (GUI.Button(
+                new Rect(panel.x + 72f, panel.yMax - 58f, panel.width - 144f, 42f),
+                "重新开始",
+                _buttonStyle))
+            {
+                _controller.RestartGame();
+            }
+        }
+
+        private static string DifficultyName(DifficultyId difficulty)
+        {
+            switch (difficulty)
+            {
+                case DifficultyId.Relaxed:
+                    return "轻松";
+                case DifficultyId.Hard:
+                    return "困难";
+                case DifficultyId.Hell:
+                    return "地狱";
+                default:
+                    return "标准";
+            }
+        }
+
+        private static string JoinGodNames(
+            System.Collections.Generic.IReadOnlyList<string> gods)
+        {
+            string result = "";
+            for (int i = 0; i < gods.Count; i++)
+            {
+                if (i > 0)
+                {
+                    result += "、";
+                }
+
+                result += GodName(gods[i]);
+            }
+
+            return result;
+        }
+
+        private static string FormatDuration(float seconds)
+        {
+            int totalSeconds = Mathf.Max(0, Mathf.FloorToInt(seconds));
+            return $"{totalSeconds / 60:00}:{totalSeconds % 60:00}";
         }
 
         private void DrawDifficultyButtons(Rect panel)

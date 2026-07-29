@@ -19,6 +19,7 @@ namespace ProjectVL.Core
         public DifficultyId Difficulty { get; private set; } =
             DifficultyId.Standard;
         public bool? Won { get; private set; }
+        public RunSummary RunSummary { get; private set; }
         public WavePhase WavePhase { get; internal set; } = WavePhase.Regular;
         public int? BossId { get; internal set; }
         public int LastSpawnCheckCount { get; internal set; }
@@ -165,6 +166,9 @@ namespace ProjectVL.Core
         public int BountyOffersThisWave { get; internal set; }
         public int BountiesAcceptedThisWave { get; internal set; }
         public int BountiesCompletedThisWave { get; internal set; }
+        public int TotalBountyOffers { get; internal set; }
+        public int TotalBountiesAccepted { get; internal set; }
+        public int TotalBountiesCompleted { get; internal set; }
         public float BountyCheckTimer { get; internal set; }
         public float BountyCooldownRemaining { get; internal set; }
         public float LastHpLossAt { get; internal set; }
@@ -178,6 +182,7 @@ namespace ProjectVL.Core
         private int _nextBountyOfferId = 1;
         private int _nextBountyEncounterId = 1;
         private CardInventorySystem _inventory;
+        private SettlementSystem _settlement = new SettlementSystem();
         private readonly List<LevelUpgradeChoice> _pendingLevelUpgrades =
             new List<LevelUpgradeChoice>();
 
@@ -211,6 +216,11 @@ namespace ProjectVL.Core
         internal void AttachInventory(CardInventorySystem inventory)
         {
             _inventory = inventory;
+        }
+
+        internal void AttachSettlement(SettlementSystem settlement)
+        {
+            _settlement = settlement ?? new SettlementSystem();
         }
 
         public CardState CreateCard(string type, int star)
@@ -270,6 +280,12 @@ namespace ProjectVL.Core
 
         public void EndRun(bool won = false)
         {
+            if (Mode == GameMode.Ended)
+            {
+                return;
+            }
+
+            RunSummary = _settlement.Build(this, won);
             Mode = GameMode.Ended;
             Paused = false;
             Won = won;

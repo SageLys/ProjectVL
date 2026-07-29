@@ -196,6 +196,7 @@ namespace ProjectVL.Systems
                 state.Time);
             state.BountyOffers.Add(offer);
             state.BountyOffersThisWave++;
+            state.TotalBountyOffers++;
             state.GuaranteedBountyThisWave |= guaranteed;
             state.BountyCooldownRemaining = _config.offer.cooldownSeconds;
             return offer;
@@ -226,6 +227,7 @@ namespace ProjectVL.Systems
                         memberCount,
                         state.Time));
                 state.BountiesAcceptedThisWave++;
+                state.TotalBountiesAccepted++;
                 return true;
             }
 
@@ -259,6 +261,7 @@ namespace ProjectVL.Systems
 
             encounter.Status = BountyEncounterStatus.Completed;
             state.BountiesCompletedThisWave++;
+            state.TotalBountiesCompleted++;
             SpawnReward(state, encounter);
             return true;
         }
