@@ -25,6 +25,12 @@ namespace ProjectVL.Core
         public int BountiesAccepted { get; }
         public int BountiesCompleted { get; }
         public int RewardsCollected { get; }
+        public int WaveGrowthChoices { get; }
+        public float RunDamageAdd { get; }
+        public float RunFireRateAdd { get; }
+        public float RunMaxHpAdd { get; }
+        public float RunRangeAdd { get; }
+        public float XpGainBonus { get; }
         public CardSummary HighestCard { get; }
         public RunScore Score { get; }
 
@@ -50,6 +56,12 @@ namespace ProjectVL.Core
             int bountiesAccepted,
             int bountiesCompleted,
             int rewardsCollected,
+            int waveGrowthChoices,
+            float runDamageAdd,
+            float runFireRateAdd,
+            float runMaxHpAdd,
+            float runRangeAdd,
+            float xpGainBonus,
             CardSummary highestCard,
             RunScore score)
         {
@@ -74,6 +86,12 @@ namespace ProjectVL.Core
             BountiesAccepted = bountiesAccepted;
             BountiesCompleted = bountiesCompleted;
             RewardsCollected = rewardsCollected;
+            WaveGrowthChoices = waveGrowthChoices;
+            RunDamageAdd = runDamageAdd;
+            RunFireRateAdd = runFireRateAdd;
+            RunMaxHpAdd = runMaxHpAdd;
+            RunRangeAdd = runRangeAdd;
+            XpGainBonus = xpGainBonus;
             HighestCard = highestCard;
             Score = score;
         }

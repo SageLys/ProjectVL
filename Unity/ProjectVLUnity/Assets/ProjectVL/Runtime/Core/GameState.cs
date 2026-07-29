@@ -35,6 +35,7 @@ namespace ProjectVL.Core
         public float RunFireRateAdd { get; internal set; }
         public float RunRangeAdd { get; internal set; }
         public float RunMultiAdd { get; internal set; }
+        public float RunMaxHpAdd { get; internal set; }
         public int WaveRewardsClaimedWave { get; internal set; }
         public int WaveChoiceOfferedWave { get; internal set; }
         public WaveRewardChoice PendingWaveReward { get; internal set; }
@@ -352,6 +353,7 @@ namespace ProjectVL.Core
             float added = Math.Max(0f, amount);
             BaseMaxHp += added;
             MaxHp += added;
+            RunMaxHpAdd += added;
             Hp = Math.Min(MaxHp, Hp + added);
         }
 

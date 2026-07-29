@@ -107,6 +107,12 @@ namespace ProjectVL.Systems
                 state.TotalBountiesAccepted,
                 state.TotalBountiesCompleted,
                 state.CollectedRewards.Count,
+                state.ChosenWaveRewards.Count,
+                state.RunDamageAdd,
+                state.RunFireRateAdd,
+                state.RunMaxHpAdd,
+                state.RunRangeAdd,
+                state.XpGainBonus,
                 highestCard,
                 score);
         }

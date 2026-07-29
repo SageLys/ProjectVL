@@ -362,7 +362,7 @@ namespace ProjectVL.Presentation
         private void DrawSettlementPanel(GameState state)
         {
             RunSummary summary = state.RunSummary;
-            Rect panel = CenterPanelRect(374f, 470f);
+            Rect panel = CenterPanelRect(374f, 520f);
             GUI.Box(panel, GUIContent.none);
 
             string title = summary != null && summary.Won
@@ -438,6 +438,18 @@ namespace ProjectVL.Presentation
                     _leftStyle);
                 GUI.Label(
                     new Rect(panel.x + 24f, panel.y + 331f, panel.width - 48f, 26f),
+                    $"成长：选择 {summary.WaveGrowthChoices} 次  ·  "
+                    + $"伤害 +{summary.RunDamageAdd:0.##}  ·  "
+                    + $"攻速 +{summary.RunFireRateAdd:0.##}",
+                    _leftStyle);
+                GUI.Label(
+                    new Rect(panel.x + 24f, panel.y + 361f, panel.width - 48f, 26f),
+                    $"成长属性：生命 +{summary.RunMaxHpAdd:0.##}  ·  "
+                    + $"射程 +{summary.RunRangeAdd:0.##}  ·  "
+                    + $"经验 +{summary.XpGainBonus * 100f:0}%",
+                    _leftStyle);
+                GUI.Label(
+                    new Rect(panel.x + 24f, panel.y + 391f, panel.width - 48f, 26f),
                     $"悬赏：完成 {summary.BountiesCompleted}"
                     + $"/接受 {summary.BountiesAccepted}"
                     + $"  ·  收集奖励 {summary.RewardsCollected}",

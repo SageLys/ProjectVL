@@ -104,5 +104,23 @@ namespace ProjectVL.Tests
             Assert.That(state.Won, Is.False);
             Assert.That(state.Mode, Is.EqualTo(GameMode.Ended));
         }
+
+        [Test]
+        public void SummaryCapturesPermanentWaveGrowth()
+        {
+            GameState state = GameStateFactory.Create(_combat);
+            var rewards = new WaveRewardSystem(
+                GameConfigLoader.LoadWaveRewards(),
+                _combat);
+            state.BeginWave(1);
+            rewards.OfferChoice(state, 1);
+            rewards.Choose(state, 0);
+
+            RunSummary summary = new SettlementSystem().Build(state, false);
+
+            Assert.That(summary.WaveGrowthChoices, Is.EqualTo(1));
+            Assert.That(summary.RunDamageAdd, Is.EqualTo(2f));
+            Assert.That(summary.RunFireRateAdd, Is.Zero);
+        }
     }
 }
