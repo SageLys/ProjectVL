@@ -10,17 +10,20 @@ namespace ProjectVL.Systems
         private readonly EnemiesConfig _enemies;
         private readonly WavesConfig _waves;
         private readonly IRandomSource _random;
+        private readonly DifficultySystem _difficulty;
 
         public EnemyFactory(
             CombatConfig combat,
             EnemiesConfig enemies,
             WavesConfig waves,
-            IRandomSource random)
+            IRandomSource random,
+            DifficultySystem difficulty = null)
         {
             _combat = combat;
             _enemies = enemies;
             _waves = waves;
             _random = random;
+            _difficulty = difficulty;
         }
 
         public EnemyKind DetermineKind(int wave, float roll)
@@ -41,8 +44,11 @@ namespace ProjectVL.Systems
         {
             EnemyKind kind = DetermineKind(state.Wave, _random.NextFloat());
             EnemyTypeConfig definition = _enemies.Get(kind);
-            float hp = definition.hpBase + state.Wave * definition.hpPerWave;
-            float speed = definition.speedBase + state.Wave * definition.speedPerWave;
+            DifficultyMultipliers multipliers = MultipliersFor(state, kind);
+            float hp = (definition.hpBase + state.Wave * definition.hpPerWave)
+                * multipliers.Hp;
+            float speed = (definition.speedBase + state.Wave * definition.speedPerWave)
+                * multipliers.Speed;
 
             var enemy = new EnemyState(
                 state.TakeNextEnemyId(),
@@ -51,7 +57,8 @@ namespace ProjectVL.Systems
                 hp,
                 speed,
                 definition.r,
-                definition.damage);
+                definition.damage * multipliers.Damage,
+                xpReward: definition.xp);
             state.Enemies.Add(enemy);
             return enemy;
         }
@@ -59,8 +66,12 @@ namespace ProjectVL.Systems
         public EnemyState SpawnWaveBoss(GameState state)
         {
             EnemyTypeConfig definition = _enemies.Get(EnemyKind.Boss);
-            float hp = definition.hpBase + state.Wave * definition.hpPerWave;
-            float speed = definition.speedBase + state.Wave * definition.speedPerWave;
+            DifficultyMultipliers multipliers =
+                MultipliersFor(state, EnemyKind.Boss);
+            float hp = (definition.hpBase + state.Wave * definition.hpPerWave)
+                * multipliers.Hp;
+            float speed = (definition.speedBase + state.Wave * definition.speedPerWave)
+                * multipliers.Speed;
             var boss = new EnemyState(
                 state.TakeNextEnemyId(),
                 EnemyKind.Boss,
@@ -68,9 +79,10 @@ namespace ProjectVL.Systems
                 hp,
                 speed,
                 definition.r,
-                definition.damage,
+                definition.damage * multipliers.Damage,
                 EnemySpawnKind.WaveBoss,
-                definition.contactDps);
+                definition.contactDps * multipliers.Damage,
+                xpReward: definition.xp);
             boss.ContactTickRemaining = _enemies.bossBehavior.contactWarmup;
             state.Enemies.Add(boss);
             return boss;
@@ -82,10 +94,13 @@ namespace ProjectVL.Systems
         {
             EnemyKind kind = ParseKind(validation.type);
             EnemyTypeConfig definition = _enemies.Get(kind);
+            DifficultyMultipliers multipliers = MultipliersFor(state, kind);
             float hp = (definition.hpBase + state.Wave * definition.hpPerWave)
-                * validation.hpMul;
+                * validation.hpMul
+                * multipliers.Hp;
             float speed = (definition.speedBase + state.Wave * definition.speedPerWave)
-                * validation.speedMul;
+                * validation.speedMul
+                * multipliers.Speed;
             var enemy = new EnemyState(
                 state.TakeNextEnemyId(),
                 kind,
@@ -93,10 +108,13 @@ namespace ProjectVL.Systems
                 hp,
                 speed,
                 definition.r,
-                definition.damage * validation.damageMul,
+                definition.damage
+                    * validation.damageMul
+                    * multipliers.Damage,
                 EnemySpawnKind.ValidationElite,
                 0f,
-                ToRunReward(validation.reward));
+                ToRunReward(validation.reward),
+                definition.xp);
             state.Enemies.Add(enemy);
             return enemy;
         }
@@ -130,6 +148,15 @@ namespace ProjectVL.Systems
                 default:
                     return EnemyKind.Normal;
             }
+        }
+
+        private DifficultyMultipliers MultipliersFor(
+            GameState state,
+            EnemyKind kind)
+        {
+            return _difficulty != null
+                ? _difficulty.Get(state.Difficulty, kind, state.Wave)
+                : new DifficultyMultipliers(1f, 1f, 1f);
         }
 
         private Float2 RandomEdgePosition()

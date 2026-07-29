@@ -85,17 +85,21 @@ namespace ProjectVL.Presentation
                 $"波次 {state.Wave}/{_controller.TotalWaves}",
                 _hudStyle);
 
-            int level = 1 + Mathf.FloorToInt(state.Experience / 10f);
-            float levelXp = state.Experience % 10f;
+            float levelSpan = Mathf.Max(
+                1f,
+                state.ExperienceNeeded - state.ExperienceFloor);
+            float levelXp = Mathf.Max(
+                0f,
+                state.Experience - state.ExperienceFloor);
             float levelX = waveX + waveWidth;
             float levelWidth = bar.width * 0.22f;
             GUI.Label(
                 new Rect(levelX, bar.y, levelWidth, 19f),
-                $"等级 {level} · {levelXp:0.#}/10",
+                $"等级 {state.Level} · {levelXp:0.#}/{levelSpan:0.#}",
                 _leftStyle);
             DrawProgressBar(
                 new Rect(levelX, bar.y + 25f, levelWidth, 6f),
-                levelXp / 10f,
+                levelXp / levelSpan,
                 new Color(0.18f, 0.55f, 0.9f));
         }
 
@@ -153,6 +157,12 @@ namespace ProjectVL.Presentation
         private void DrawCenterPanel()
         {
             GameState state = _controller.State;
+            if (state.PendingLevelUpgrade != null)
+            {
+                DrawLevelUpgradePanel(state.PendingLevelUpgrade);
+                return;
+            }
+
             if (state.PendingEvolution != null)
             {
                 DrawEvolutionPanel(state.PendingEvolution);
@@ -262,12 +272,61 @@ namespace ProjectVL.Presentation
                         30f),
                     labels[i],
                     _buttonStyle))
-                {
-                    _selectedDifficulty = i;
-                }
+                    {
+                        _selectedDifficulty = i;
+                        _controller.SelectDifficulty(i);
+                    }
 
                 GUI.backgroundColor = previous;
             }
+        }
+
+        private void DrawLevelUpgradePanel(LevelUpgradeChoice choice)
+        {
+            Rect panel = CenterPanelRect(382f, 270f);
+            GUI.Box(panel, GUIContent.none);
+            GUI.Label(
+                new Rect(panel.x + 18f, panel.y + 14f, panel.width - 36f, 38f),
+                $"等级 {choice.Level} · 选择强化",
+                _centerStyle);
+            GUI.Label(
+                new Rect(panel.x + 18f, panel.y + 50f, panel.width - 36f, 24f),
+                _controller.State.PendingLevelUpgradeCount > 1
+                    ? $"连续升级：还有 {_controller.State.PendingLevelUpgradeCount} 次选择"
+                    : "经验已满，选择一项本局永久强化",
+                _hudStyle);
+
+            float gap = 7f;
+            float width = (panel.width - 36f - gap * 2f) / 3f;
+            for (int index = 0;
+                index < choice.Options.Length && index < 3;
+                index++)
+            {
+                var option = choice.Options[index];
+                int stacks = _controller.State.UpgradeStacks.TryGetValue(
+                    option.id,
+                    out int count)
+                    ? count
+                    : 0;
+                Rect button = new Rect(
+                    panel.x + 18f + index * (width + gap),
+                    panel.y + 82f,
+                    width,
+                    154f);
+                if (GUI.Button(
+                    button,
+                    $"{option.title}\n\n{option.description}\n\n"
+                    + $"已选 {stacks} 次",
+                    _buttonStyle))
+                {
+                    _controller.ChooseLevelUpgrade(index);
+                }
+            }
+
+            GUI.Label(
+                new Rect(panel.x + 18f, panel.y + 241f, panel.width - 36f, 20f),
+                "选择后战斗自动继续",
+                _hudStyle);
         }
 
         private void DrawCardLoadout()

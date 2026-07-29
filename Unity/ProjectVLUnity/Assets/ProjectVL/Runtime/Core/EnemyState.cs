@@ -11,6 +11,7 @@ namespace ProjectVL.Core
         public float Radius { get; }
         public float Damage { get; }
         public float ContactDps { get; }
+        public float XpReward { get; }
         public EnemySpawnKind SpawnKind { get; }
         public BossPhase BossPhase { get; set; }
         public int OrbitDirection { get; }
@@ -45,7 +46,8 @@ namespace ProjectVL.Core
             float damage,
             EnemySpawnKind spawnKind = EnemySpawnKind.Regular,
             float contactDps = 0f,
-            RunReward reward = null)
+            RunReward reward = null,
+            float xpReward = 1f)
         {
             Id = id;
             Kind = kind;
@@ -58,6 +60,7 @@ namespace ProjectVL.Core
             SpawnKind = spawnKind;
             ContactDps = contactDps;
             Reward = reward;
+            XpReward = xpReward;
             BossPhase = BossPhase.Approach;
             OrbitDirection = id % 2 == 0 ? 1 : -1;
         }

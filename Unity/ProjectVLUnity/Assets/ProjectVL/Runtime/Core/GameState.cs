@@ -16,6 +16,8 @@ namespace ProjectVL.Core
         public float BaseMaxHp { get; private set; }
         public float MaxHp { get; private set; }
         public int Wave { get; private set; }
+        public DifficultyId Difficulty { get; private set; } =
+            DifficultyId.Standard;
         public bool? Won { get; private set; }
         public WavePhase WavePhase { get; internal set; } = WavePhase.Regular;
         public int? BossId { get; internal set; }
@@ -59,6 +61,17 @@ namespace ProjectVL.Core
         public float KillXpBuffRemaining { get; internal set; }
         public int KillXpBuffStacks { get; internal set; }
         public float Experience { get; private set; }
+        public float ExperienceFloor { get; private set; }
+        public float ExperienceNeeded { get; private set; } = 10f;
+        public int Level { get; private set; } = 1;
+        public float XpGainBonus { get; internal set; }
+        public LevelUpgradeChoice PendingLevelUpgrade =>
+            _pendingLevelUpgrades.Count > 0
+                ? _pendingLevelUpgrades[0]
+                : null;
+        public int PendingLevelUpgradeCount => _pendingLevelUpgrades.Count;
+        public Dictionary<string, int> UpgradeStacks { get; } =
+            new Dictionary<string, int>();
         public int ExpiredDropsConverted { get; internal set; }
         public int HarvestProcessedMergeStars { get; internal set; }
         public int MergeResultStarTotal { get; internal set; }
@@ -98,6 +111,8 @@ namespace ProjectVL.Core
         private int _nextDropId = 1;
         private int _nextCardId = 1;
         private CardInventorySystem _inventory;
+        private readonly List<LevelUpgradeChoice> _pendingLevelUpgrades =
+            new List<LevelUpgradeChoice>();
 
         public bool CanAdvance =>
             Mode == GameMode.Playing
@@ -144,6 +159,14 @@ namespace ProjectVL.Core
             }
 
             Mode = GameMode.Playing;
+        }
+
+        public void SelectDifficulty(DifficultyId difficulty)
+        {
+            if (Mode == GameMode.Ready)
+            {
+                Difficulty = difficulty;
+            }
         }
 
         public void SetPaused(bool paused)
@@ -217,6 +240,59 @@ namespace ProjectVL.Core
         internal void AddExperience(float amount)
         {
             Experience += Math.Max(0f, amount);
+        }
+
+        internal void AdvanceLevel(float nextExperienceNeeded)
+        {
+            ExperienceFloor = ExperienceNeeded;
+            Level++;
+            ExperienceNeeded = Math.Max(ExperienceNeeded, nextExperienceNeeded);
+        }
+
+        internal void EnqueueLevelUpgrade(LevelUpgradeChoice choice)
+        {
+            if (choice == null)
+            {
+                return;
+            }
+
+            _pendingLevelUpgrades.Add(choice);
+            DecisionLocked = true;
+        }
+
+        internal void CompleteLevelUpgrade()
+        {
+            if (_pendingLevelUpgrades.Count > 0)
+            {
+                _pendingLevelUpgrades.RemoveAt(0);
+            }
+
+            DecisionLocked = _pendingLevelUpgrades.Count > 0
+                || PendingEvolution != null
+                || PendingBossReward != null;
+        }
+
+        internal void IncreaseMaxHp(float amount, bool restoreAddedAmount)
+        {
+            float positive = Math.Max(0f, amount);
+            BaseMaxHp += positive;
+            MaxHp += positive;
+            if (restoreAddedAmount)
+            {
+                Hp = Math.Min(MaxHp, Hp + positive);
+            }
+        }
+
+        internal void RecordUpgrade(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return;
+            }
+
+            UpgradeStacks[id] = UpgradeStacks.TryGetValue(id, out int count)
+                ? count + 1
+                : 1;
         }
 
         internal void GrantReward(RunReward reward)

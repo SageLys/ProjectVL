@@ -30,13 +30,16 @@ namespace ProjectVL.Systems
 
         private readonly EconomyConfig _economy;
         private readonly IRandomSource _random;
+        private readonly ProgressionSystem _progression;
 
         public DropSystem(
             EconomyConfig economy,
-            IRandomSource random)
+            IRandomSource random,
+            ProgressionSystem progression = null)
         {
             _economy = economy ?? throw new ArgumentNullException(nameof(economy));
             _random = random ?? throw new ArgumentNullException(nameof(random));
+            _progression = progression;
         }
 
         public GroundDropState TrySpawnOnKill(
@@ -139,7 +142,16 @@ namespace ProjectVL.Systems
                         && _random.NextFloat()
                             < state.ExpiryConvertRatio)
                     {
-                        state.AddExperience(drop.Star * 4f);
+                        float experience = drop.Star * 4f;
+                        if (_progression != null)
+                        {
+                            _progression.AddExperience(state, experience);
+                        }
+                        else
+                        {
+                            state.AddExperience(experience);
+                        }
+
                         state.ExpiredDropsConverted++;
                     }
                 }

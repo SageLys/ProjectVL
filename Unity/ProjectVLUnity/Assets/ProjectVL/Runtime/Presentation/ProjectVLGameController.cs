@@ -16,6 +16,7 @@ namespace ProjectVL.Presentation
         private RecipeSystem _recipeSystem;
         private DropSystem _dropSystem;
         private CombatSystem _combatSystem;
+        private ProgressionSystem _progressionSystem;
         private CardSlotKind? _selectedSlotKind;
         private int _selectedSlotIndex = -1;
         private CardSlotKind? _pendingCastSlotKind;
@@ -153,18 +154,35 @@ namespace ProjectVL.Presentation
             EconomyConfig economy = GameConfigLoader.LoadEconomy();
             EvolutionRecipesConfig recipes =
                 GameConfigLoader.LoadEvolutionRecipes();
+            DifficultyConfig difficulty = GameConfigLoader.LoadDifficulty();
+            ProgressionConfig progression = GameConfigLoader.LoadProgression();
 
             GameState state = GameStateFactory.Create(combat, economy);
             _cardInventory = new CardInventorySystem(economy);
             _recipeSystem = new RecipeSystem(recipes);
             var random = new SystemRandomSource(System.Environment.TickCount);
-            var enemyFactory = new EnemyFactory(combat, enemies, waves, random);
+            var difficultySystem =
+                new DifficultySystem(difficulty, waves.totalWaves);
+            var enemyFactory = new EnemyFactory(
+                combat,
+                enemies,
+                waves,
+                random,
+                difficultySystem);
             _waveSystem = new WaveSystem(waves, enemyFactory);
-            _dropSystem = new DropSystem(economy, random);
+            _progressionSystem = new ProgressionSystem(
+                progression,
+                combat,
+                random);
+            _dropSystem = new DropSystem(
+                economy,
+                random,
+                _progressionSystem);
             _combatSystem = new CombatSystem(
                 combat,
                 enemies,
-                _dropSystem);
+                _dropSystem,
+                _progressionSystem);
 
             _world = new CombatWorld(
                 _combatSystem,
@@ -196,6 +214,27 @@ namespace ProjectVL.Presentation
 
             State.StartRun();
             _waveSystem.StartNextWave(State);
+        }
+
+        public void SelectDifficulty(int optionIndex)
+        {
+            DifficultyId difficulty = optionIndex <= 0
+                ? DifficultyId.Relaxed
+                : optionIndex == 1
+                    ? DifficultyId.Standard
+                    : optionIndex == 2
+                        ? DifficultyId.Hard
+                        : DifficultyId.Hell;
+            State.SelectDifficulty(difficulty);
+        }
+
+        public void ChooseLevelUpgrade(int optionIndex)
+        {
+            if (_progressionSystem != null
+                && _progressionSystem.Choose(State, optionIndex))
+            {
+                LastCardAction = "升级强化已生效。";
+            }
         }
 
         public void TogglePause()

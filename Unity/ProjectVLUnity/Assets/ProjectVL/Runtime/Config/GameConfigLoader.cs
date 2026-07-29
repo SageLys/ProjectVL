@@ -25,6 +25,16 @@ namespace ProjectVL.Config
             return Load<EvolutionRecipesConfig>("Config/evolutionRecipes");
         }
 
+        public static DifficultyConfig LoadDifficulty()
+        {
+            return Load<DifficultyConfig>("Config/difficulty");
+        }
+
+        public static ProgressionConfig LoadProgression()
+        {
+            return Load<ProgressionConfig>("Config/progression");
+        }
+
         private static T Load<T>(string resourcePath)
         {
             TextAsset asset = Resources.Load<TextAsset>(resourcePath);

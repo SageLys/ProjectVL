@@ -99,9 +99,13 @@ namespace ProjectVL.Systems
                     state.WavePhase = WavePhase.Boss;
                     state.BossId = boss.Id;
                 }
+                else if (state.Wave >= _waves.totalWaves)
+                {
+                    state.EndRun(true);
+                }
                 else
                 {
-                    StartNextWave(state);
+                    BeginIntermission(state);
                 }
             }
         }

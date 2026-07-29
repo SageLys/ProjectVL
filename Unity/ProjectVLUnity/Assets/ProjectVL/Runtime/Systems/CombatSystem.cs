@@ -9,15 +9,18 @@ namespace ProjectVL.Systems
         private readonly CombatConfig _combat;
         private readonly EnemiesConfig _enemies;
         private readonly DropSystem _drops;
+        private readonly ProgressionSystem _progression;
 
         public CombatSystem(
             CombatConfig combat,
             EnemiesConfig enemies,
-            DropSystem drops = null)
+            DropSystem drops = null,
+            ProgressionSystem progression = null)
         {
             _combat = combat;
             _enemies = enemies;
             _drops = drops;
+            _progression = progression;
         }
 
         public bool CastConsumable(
@@ -1172,9 +1175,17 @@ namespace ProjectVL.Systems
                 state.GrantReward(enemy.Reward);
                 CardCombatProfile profile =
                     CardEffectResolver.Resolve(state);
-                state.AddExperience(
-                    profile.XpMultiplier
-                    * state.KillXpBuffMultiplier);
+                float experience = enemy.XpReward
+                    * profile.XpMultiplier
+                    * state.KillXpBuffMultiplier;
+                if (_progression != null)
+                {
+                    _progression.AddExperience(state, experience);
+                }
+                else
+                {
+                    state.AddExperience(experience);
+                }
                 if (enemy.Reward != null)
                 {
                     state.RestoreHp(profile.PickupRestore);

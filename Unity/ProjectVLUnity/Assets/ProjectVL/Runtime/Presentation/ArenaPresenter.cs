@@ -21,6 +21,7 @@ namespace ProjectVL.Presentation
         private Sprite _circleSprite;
         private Sprite _squareSprite;
         private Transform _turret;
+        private LineRenderer _attackRange;
         private SpriteRenderer _decoyView;
         private SpriteRenderer _secondaryDecoyView;
         private SpriteRenderer _beamView;
@@ -49,6 +50,7 @@ namespace ProjectVL.Presentation
                 0f,
                 0f,
                 -_state.TurretAngleRadians * Mathf.Rad2Deg);
+            UpdateAttackRange();
             SyncEnemies();
             SyncBullets();
             SyncDrops();
@@ -155,6 +157,7 @@ namespace ProjectVL.Presentation
             var rangeObject = new GameObject("Attack Range");
             rangeObject.transform.SetParent(transform, false);
             var line = rangeObject.AddComponent<LineRenderer>();
+            _attackRange = line;
             line.loop = true;
             line.useWorldSpace = true;
             line.positionCount = segments;
@@ -171,6 +174,24 @@ namespace ProjectVL.Presentation
                     _combat.turret.x + Mathf.Cos(angle) * _combat.defaults.range,
                     _combat.turret.y + Mathf.Sin(angle) * _combat.defaults.range);
                 line.SetPosition(index, PixelToWorld(point));
+            }
+        }
+
+        private void UpdateAttackRange()
+        {
+            if (_attackRange == null)
+            {
+                return;
+            }
+
+            int segments = _attackRange.positionCount;
+            for (int index = 0; index < segments; index++)
+            {
+                float angle = index * Mathf.PI * 2f / segments;
+                var point = new Float2(
+                    _combat.turret.x + Mathf.Cos(angle) * _combat.defaults.range,
+                    _combat.turret.y + Mathf.Sin(angle) * _combat.defaults.range);
+                _attackRange.SetPosition(index, PixelToWorld(point));
             }
         }
 
