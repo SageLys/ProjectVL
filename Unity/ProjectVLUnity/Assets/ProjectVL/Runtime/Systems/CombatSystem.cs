@@ -43,6 +43,15 @@ namespace ProjectVL.Systems
                 case "frost":
                     CastFrost(state, card.Star, point);
                     return true;
+                case "scorch":
+                    CastScorch(state, card.Star, point);
+                    return true;
+                case "splitBlast":
+                    CastSplitBlast(state, card.Star, point);
+                    return true;
+                case "impact":
+                    CastImpact(state, card.Star, point);
+                    return true;
                 default:
                     return false;
             }
@@ -53,7 +62,10 @@ namespace ProjectVL.Systems
             return card != null
                 && (card.Type == "pierce"
                     || card.Type == "chainLightning"
-                    || card.Type == "frost");
+                    || card.Type == "frost"
+                    || card.Type == "scorch"
+                    || card.Type == "splitBlast"
+                    || card.Type == "impact");
         }
 
         public void StepTurret(GameState state, float deltaTime)
@@ -253,6 +265,122 @@ namespace ProjectVL.Systems
                 enemy.VulnerableRemaining = Math.Max(
                     enemy.VulnerableRemaining,
                     star >= 6 ? 3.5f : 0f);
+            }
+        }
+
+        private void CastScorch(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            float radius = StarValue(star, 110f, 140f, 180f);
+            float duration = StarValue(star, 3f, 4f, 5f);
+            float damageRatio =
+                StarValue(star, 0.2f, 0.2f, 0.25f);
+            float vulnerableRatio = star >= 3 ? 0.15f : 0f;
+            state.GroundZones.Add(new GroundZoneState(
+                point,
+                radius,
+                duration,
+                0.5f,
+                _combat.defaults.damage * damageRatio,
+                vulnerableRatio,
+                vulnerableRatio > 0f ? 0.6f : 0f));
+        }
+
+        private void CastSplitBlast(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            float radius = StarValue(star, 110f, 140f, 180f);
+            float damageMultiplier =
+                StarValue(star, 4f, 6f, 9f);
+            float damage =
+                _combat.defaults.damage * damageMultiplier;
+            DamageArea(
+                state,
+                point,
+                radius,
+                damage,
+                -1,
+                0f,
+                0f);
+            if (star < 3)
+            {
+                return;
+            }
+
+            var hit = new System.Collections.Generic.HashSet<int>();
+            for (int index = 0; index < 4; index++)
+            {
+                EnemyState target = FindClosestChainTarget(
+                    state,
+                    point,
+                    radius * 1.5f,
+                    hit);
+                if (target == null)
+                {
+                    break;
+                }
+
+                hit.Add(target.Id);
+                DamageEnemy(state, target, damage * 0.5f);
+            }
+        }
+
+        private void CastImpact(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            float radius = StarValue(star, 100f, 140f, 180f);
+            float knockback = StarValue(star, 80f, 120f, 180f);
+            float stunDuration =
+                star >= 6 ? 1f : star >= 3 ? 0.5f : 0f;
+            var targets =
+                new System.Collections.Generic.List<EnemyState>();
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                if (Float2.Distance(point, enemy.Position) <= radius)
+                {
+                    targets.Add(enemy);
+                }
+            }
+
+            foreach (EnemyState enemy in targets)
+            {
+                enemy.Position +=
+                    (enemy.Position - point).Normalized() * knockback;
+                enemy.StunnedRemaining = Math.Max(
+                    enemy.StunnedRemaining,
+                    stunDuration);
+                if (star < 6)
+                {
+                    continue;
+                }
+
+                EnemyState collision = null;
+                foreach (EnemyState other in state.Enemies)
+                {
+                    if (other.Id != enemy.Id
+                        && Float2.Distance(
+                            enemy.Position,
+                            other.Position)
+                            <= enemy.Radius + other.Radius)
+                    {
+                        collision = other;
+                        break;
+                    }
+                }
+
+                if (collision != null)
+                {
+                    DamageEnemy(
+                        state,
+                        collision,
+                        _combat.defaults.damage * 0.5f);
+                }
             }
         }
 

@@ -1456,6 +1456,76 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void ScorchConsumableCreatesPersistentBurningGround()
+        {
+            CardState card = _state.CreateCard("scorch", 3);
+            EnemyState inside = AddEnemy(
+                new Float2(200f, 200f),
+                100f);
+            EnemyState outside = AddEnemy(
+                new Float2(350f, 200f),
+                100f);
+
+            bool cast = _system.CastConsumable(
+                _state,
+                card,
+                new Float2(200f, 200f));
+            _system.StepPassives(_state, 0.5f);
+
+            Assert.That(cast, Is.True);
+            Assert.That(_state.GroundZones, Has.Count.EqualTo(1));
+            Assert.That(inside.Hp, Is.EqualTo(96.4f));
+            Assert.That(inside.VulnerableRatio, Is.EqualTo(0.15f));
+            Assert.That(outside.Hp, Is.EqualTo(100f));
+        }
+
+        [Test]
+        public void SplitBlastConsumableBurstsThenSplits()
+        {
+            CardState card = _state.CreateCard("splitBlast", 3);
+            EnemyState first = AddEnemy(
+                new Float2(200f, 200f),
+                200f);
+            EnemyState second = AddEnemy(
+                new Float2(250f, 200f),
+                200f);
+
+            bool cast = _system.CastConsumable(
+                _state,
+                card,
+                new Float2(200f, 200f));
+
+            Assert.That(cast, Is.True);
+            Assert.That(first.Hp, Is.EqualTo(38f));
+            Assert.That(second.Hp, Is.EqualTo(38f));
+        }
+
+        [Test]
+        public void ImpactConsumableKnocksBackAndStuns()
+        {
+            CardState card = _state.CreateCard("impact", 3);
+            Float2 center = new Float2(200f, 200f);
+            EnemyState inside = AddEnemy(
+                center + new Float2(50f, 0f),
+                100f);
+            EnemyState outside = AddEnemy(
+                center + new Float2(150f, 0f),
+                100f);
+
+            bool cast = _system.CastConsumable(
+                _state,
+                card,
+                center);
+
+            Assert.That(cast, Is.True);
+            Assert.That(
+                Float2.Distance(center, inside.Position),
+                Is.EqualTo(170f));
+            Assert.That(inside.StunnedRemaining, Is.EqualTo(0.5f));
+            Assert.That(outside.StunnedRemaining, Is.Zero);
+        }
+
+        [Test]
         public void FrozenThunderShatterFreezesNearbyEnemies()
         {
             EquipResolved("frozenThunder", 6);
