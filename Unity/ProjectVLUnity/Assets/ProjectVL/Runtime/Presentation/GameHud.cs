@@ -45,38 +45,42 @@ namespace ProjectVL.Presentation
         private void DrawTopBar()
         {
             GameState state = _controller.State;
-            Rect bar = new Rect(8f, 6f, Screen.width - 16f, 42f);
+            Rect viewport = ViewportRect();
+            Rect bar = new Rect(
+                viewport.x + 3f,
+                viewport.y + 3f,
+                viewport.width - 6f,
+                38f);
             GUI.Box(bar, GUIContent.none);
 
-            float hpWidth = Mathf.Clamp(Screen.width * 0.27f, 108f, 250f);
+            float contentX = bar.x + 4f;
+            float hpWidth = bar.width * 0.27f;
             DrawProgressBar(
-                new Rect(12f, 9f, hpWidth, 8f),
+                new Rect(contentX, bar.y + 3f, hpWidth, 7f),
                 state.MaxHp <= 0f ? 0f : state.Hp / state.MaxHp,
                 new Color(0.95f, 0.35f, 0.58f));
             GUI.Label(
-                new Rect(12f, 18f, hpWidth, 22f),
+                new Rect(contentX, bar.y + 11f, hpWidth, 22f),
                 $"生命 {state.Hp:0}/{state.MaxHp:0}",
                 _leftStyle);
 
-            float waveX = hpWidth + 18f;
+            float waveWidth = bar.width * 0.16f;
+            float waveX = contentX + hpWidth;
             GUI.Label(
-                new Rect(waveX, 6f, 78f, 36f),
+                new Rect(waveX, bar.y, waveWidth, 34f),
                 $"波次 {state.Wave}/{_controller.TotalWaves}",
                 _hudStyle);
 
             int level = 1 + Mathf.FloorToInt(state.Experience / 10f);
             float levelXp = state.Experience % 10f;
-            float levelX = waveX + 78f;
-            float levelWidth = Mathf.Clamp(
-                Screen.width - 146f - levelX,
-                72f,
-                112f);
+            float levelX = waveX + waveWidth;
+            float levelWidth = bar.width * 0.22f;
             GUI.Label(
-                new Rect(levelX, 6f, levelWidth, 20f),
+                new Rect(levelX, bar.y, levelWidth, 19f),
                 $"等级 {level} · {levelXp:0.#}/10",
                 _leftStyle);
             DrawProgressBar(
-                new Rect(levelX, 29f, levelWidth, 7f),
+                new Rect(levelX, bar.y + 25f, levelWidth, 6f),
                 levelXp / 10f,
                 new Color(0.18f, 0.55f, 0.9f));
         }
@@ -84,9 +88,14 @@ namespace ProjectVL.Presentation
         private void DrawControls()
         {
             GameState state = _controller.State;
-            float x = Screen.width - 140f;
+            Rect viewport = ViewportRect();
+            float x = viewport.x + viewport.width * 0.65f;
+            float width = viewport.xMax - 4f - x;
+            float speedWidth = width * 0.28f;
+            float pauseWidth = width * 0.31f;
+            float y = viewport.y + 8f;
             if (GUI.Button(
-                new Rect(x, 11f, 40f, 30f),
+                new Rect(x, y, speedWidth, 28f),
                 $"{_controller.TimeScale:0.#}×",
                 _buttonStyle))
             {
@@ -99,7 +108,7 @@ namespace ProjectVL.Presentation
                 && !state.DecisionLocked
                 && !state.IntermissionActive;
             if (GUI.Button(
-                new Rect(x + 44f, 11f, 42f, 30f),
+                new Rect(x + speedWidth + 3f, y, pauseWidth, 28f),
                 state.Paused ? "继续" : "暂停",
                 _buttonStyle))
             {
@@ -108,7 +117,11 @@ namespace ProjectVL.Presentation
 
             GUI.enabled = true;
             if (GUI.Button(
-                new Rect(x + 90f, 11f, 50f, 30f),
+                new Rect(
+                    x + speedWidth + pauseWidth + 6f,
+                    y,
+                    width - speedWidth - pauseWidth - 6f,
+                    28f),
                 state.Mode == GameMode.Ready ? "▶ 开始" : "重开",
                 _buttonStyle))
             {
@@ -256,10 +269,10 @@ namespace ProjectVL.Presentation
             float handWidth = (contentWidth - gap * 3f) / 4f;
 
             GUI.Label(
-                new Rect(panel.x + padding, panel.y + 3f, contentWidth, 20f),
+                new Rect(panel.x + padding, panel.y + 2f, contentWidth, 17f),
                 "装备  ·  放入 3★ 以上卡牌",
                 _leftStyle);
-            float equipmentY = panel.y + 24f;
+            float equipmentY = panel.y + 19f;
             for (int i = 0; i < state.Equipment.Length && i < 3; i++)
             {
                 DrawCardSlot(
@@ -269,17 +282,17 @@ namespace ProjectVL.Presentation
                         panel.x + padding + i * (equipmentWidth + gap),
                         equipmentY,
                         equipmentWidth,
-                        55f),
+                        40f),
                     i == 0 ? "Q" : i == 1 ? "W" : "E");
             }
 
-            float handLabelY = equipmentY + 59f;
+            float handLabelY = equipmentY + 42f;
             GUI.Label(
-                new Rect(panel.x + padding, handLabelY, contentWidth, 20f),
-                $"手牌  ·  点击两张卡可移动或交换  ·  {_controller.LastCardAction}",
+                new Rect(panel.x + padding, handLabelY, contentWidth, 17f),
+                $"手牌 · 点击卡牌移动或交换 · {_controller.LastCardAction}",
                 _leftStyle);
 
-            float firstRowY = handLabelY + 21f;
+            float firstRowY = handLabelY + 17f;
             for (int i = 0; i < state.Hand.Length && i < 4; i++)
             {
                 DrawCardSlot(
@@ -289,11 +302,11 @@ namespace ProjectVL.Presentation
                         panel.x + padding + i * (handWidth + gap),
                         firstRowY,
                         handWidth,
-                        48f),
+                        38f),
                     (i + 1).ToString());
             }
 
-            float secondRowY = firstRowY + 54f;
+            float secondRowY = firstRowY + 42f;
             for (int i = 4; i < state.Hand.Length && i < 7; i++)
             {
                 DrawCardSlot(
@@ -303,7 +316,7 @@ namespace ProjectVL.Presentation
                         panel.x + padding + (i - 4) * (handWidth + gap),
                         secondRowY,
                         handWidth,
-                        48f),
+                        38f),
                     (i + 1).ToString());
             }
 
@@ -312,7 +325,7 @@ namespace ProjectVL.Presentation
                     panel.x + padding + 3f * (handWidth + gap),
                     secondRowY,
                     handWidth,
-                    48f));
+                    38f));
         }
 
         private void DrawCardSlot(
@@ -375,11 +388,11 @@ namespace ProjectVL.Presentation
             GUI.backgroundColor = new Color(0.55f, 0.38f, 0.75f);
             GUI.Box(rect, GUIContent.none);
             GUI.Label(
-                new Rect(rect.x + 4f, rect.y + 1f, rect.width - 8f, 18f),
+                new Rect(rect.x + 4f, rect.y, rect.width - 8f, 15f),
                 "万能",
                 _hudStyle);
             GUI.Label(
-                new Rect(rect.x + 4f, rect.y + 17f, rect.width - 8f, 30f),
+                new Rect(rect.x + 3f, rect.y + 13f, rect.width - 6f, 24f),
                 WildcardText(_controller.State),
                 _hudStyle);
             GUI.backgroundColor = previous;
@@ -525,24 +538,22 @@ namespace ProjectVL.Presentation
             GUI.color = previous;
         }
 
-        private static Rect ArenaRect()
+        private Rect ViewportRect()
         {
-            float bottomHeight = Mathf.Clamp(Screen.height * 0.28f, 215f, 260f);
-            return new Rect(
-                8f,
-                52f,
-                Screen.width - 16f,
-                Mathf.Max(180f, Screen.height - bottomHeight - 58f));
+            return _controller.MobileViewportRect;
         }
 
-        private static Rect LoadoutRect()
+        private Rect ArenaRect()
         {
-            Rect arena = ArenaRect();
-            float y = arena.yMax + 5f;
-            return new Rect(8f, y, Screen.width - 16f, Screen.height - y - 6f);
+            return MobileHudLayout.ArenaRect(ViewportRect());
         }
 
-        private static Rect CenterPanelRect(float width, float height)
+        private Rect LoadoutRect()
+        {
+            return MobileHudLayout.LoadoutRect(ViewportRect());
+        }
+
+        private Rect CenterPanelRect(float width, float height)
         {
             Rect arena = ArenaRect();
             width = Mathf.Min(width, arena.width - 28f);
@@ -556,8 +567,7 @@ namespace ProjectVL.Presentation
         private static string WildcardText(GameState state)
         {
             return $"1★×{state.Wildcards[1]}  2★×{state.Wildcards[2]}\n"
-                + $"3★×{state.Wildcards[3]}  4★×{state.Wildcards[4]}  "
-                + $"5★×{state.Wildcards[5]}";
+                + $"3★×{state.Wildcards[3]}  4★×{state.Wildcards[4]} 5★×{state.Wildcards[5]}";
         }
 
         private static string CardDisplayName(string type)
@@ -658,6 +668,36 @@ namespace ProjectVL.Presentation
                 fontStyle = FontStyle.Bold,
                 normal = { textColor = Color.white }
             };
+        }
+    }
+
+    internal static class MobileHudLayout
+    {
+        public static Rect ArenaRect(Rect viewport)
+        {
+            float topHeight = 44f;
+            float loadoutHeight = Mathf.Clamp(
+                viewport.height * 0.34f,
+                170f,
+                188f);
+            return new Rect(
+                viewport.x + 3f,
+                viewport.y + topHeight,
+                viewport.width - 6f,
+                Mathf.Max(
+                    160f,
+                    viewport.height - topHeight - loadoutHeight - 4f));
+        }
+
+        public static Rect LoadoutRect(Rect viewport)
+        {
+            Rect arena = ArenaRect(viewport);
+            float y = arena.yMax + 3f;
+            return new Rect(
+                viewport.x + 3f,
+                y,
+                viewport.width - 6f,
+                viewport.yMax - y - 3f);
         }
     }
 }

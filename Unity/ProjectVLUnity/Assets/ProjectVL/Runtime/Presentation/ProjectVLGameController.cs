@@ -136,6 +136,10 @@ namespace ProjectVL.Presentation
         public string LastCardAction { get; private set; } =
             "点击卡牌，再点击目标槽位。";
         public int TotalWaves => _totalWaves;
+        public Rect MobileViewportRect =>
+            _presenter != null
+                ? _presenter.GetArenaGuiRect()
+                : new Rect(0f, 0f, Screen.width, Screen.height);
         public string AvailableRecipeId =>
             _recipeSystem?.FirstAvailableRecipe(State);
         public bool HasCardDrag => _draggedSlotKind != null;
@@ -607,8 +611,13 @@ namespace ProjectVL.Presentation
 
         private void HandleDropPickup()
         {
+            Vector2 guiPoint = new Vector2(
+                Input.mousePosition.x,
+                Screen.height - Input.mousePosition.y);
             if (!Input.GetMouseButtonDown(0)
                 || _dropSystem == null
+                || !MobileHudLayout.ArenaRect(MobileViewportRect)
+                    .Contains(guiPoint)
                 || !_presenter.TryScreenToArenaPoint(
                     Input.mousePosition,
                     out Float2 arenaPoint))

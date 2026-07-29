@@ -62,7 +62,7 @@ namespace ProjectVL.Presentation
             out Float2 arenaPoint)
         {
             Camera camera = Camera.main;
-            if (camera == null)
+            if (camera == null || !GetArenaScreenRect().Contains(screenPoint))
             {
                 arenaPoint = new Float2();
                 return false;
@@ -73,6 +73,41 @@ namespace ProjectVL.Presentation
                 world.x + _combat.canvas.width / 2f,
                 _combat.canvas.height / 2f - world.y);
             return true;
+        }
+
+        public Rect GetArenaGuiRect()
+        {
+            Rect screenRect = GetArenaScreenRect();
+            return new Rect(
+                screenRect.x,
+                Screen.height - screenRect.yMax,
+                screenRect.width,
+                screenRect.height);
+        }
+
+        private Rect GetArenaScreenRect()
+        {
+            Camera camera = Camera.main;
+            if (camera == null || _combat == null)
+            {
+                return new Rect(0f, 0f, Screen.width, Screen.height);
+            }
+
+            Vector3 bottomLeft = camera.WorldToScreenPoint(
+                new Vector3(
+                    -_combat.canvas.width / 2f,
+                    -_combat.canvas.height / 2f,
+                    0f));
+            Vector3 topRight = camera.WorldToScreenPoint(
+                new Vector3(
+                    _combat.canvas.width / 2f,
+                    _combat.canvas.height / 2f,
+                    0f));
+            return Rect.MinMaxRect(
+                bottomLeft.x,
+                bottomLeft.y,
+                topRight.x,
+                topRight.y);
         }
 
         private void CreateCamera()
