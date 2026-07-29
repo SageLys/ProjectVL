@@ -735,7 +735,7 @@ PIT = [
         "<b>onWaveStart / onMerge</b> 的 origin 是炮台；<b>onPickup</b> 的 origin 是掉落物位置，可能远离战场。",
         "<b>mergePulse</b> 永远以炮台为心，不用 ctx.origin。",
         "<b>novaOnBreak 半径硬编码 220</b>，<b>召唤物死亡爆炸半径硬编码 120</b>，都不是参数。",
-        "<b>groundZone.shape = 'line'</b> 当前按 circle 结算。",
+        "<b>groundZone.shape = 'line'</b> 以 origin 为起点，长度 = 2 × radius、宽度 = radius，按敌人中心到线段距离判定。",
     ]),
     ("控制打不上去 / 覆盖率低于预期", [
         "<b>控制预算</b>（controlBudgetDenies）会主动拒绝对新敌人施加 freeze / stun / knockback，"

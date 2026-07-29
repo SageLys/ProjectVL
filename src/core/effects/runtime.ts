@@ -12,6 +12,24 @@ import { reconcileMaxHp, totalDamage, totalRange } from '../stats';
 import { recordCardImpact } from '../../telemetry/combatCounters';
 
 function insideZone(zone: Zone, x: number, y: number, r: number): boolean {
+  if (zone.shape === 'line') {
+    const startX = zone.lineStartX ?? zone.x;
+    const startY = zone.lineStartY ?? zone.y;
+    const dirX = zone.lineDirX ?? 1;
+    const dirY = zone.lineDirY ?? 0;
+    const length = zone.lineLength ?? zone.radius * 2;
+    const endX = startX + dirX * length;
+    const endY = startY + dirY * length;
+    const segmentX = endX - startX;
+    const segmentY = endY - startY;
+    const segmentLengthSq = segmentX * segmentX + segmentY * segmentY;
+    const projection = segmentLengthSq > 0
+      ? Math.max(0, Math.min(1, ((x - startX) * segmentX + (y - startY) * segmentY) / segmentLengthSq))
+      : 0;
+    const nearestX = startX + segmentX * projection;
+    const nearestY = startY + segmentY * projection;
+    return Math.hypot(x - nearestX, y - nearestY) <= (zone.lineWidth ?? zone.radius) / 2;
+  }
   const d = Math.hypot(x - zone.x, y - zone.y);
   if (zone.shape === 'ring') return d + r >= (zone.innerRadius ?? zone.radius * 0.5) && d - r <= zone.radius;
   return d <= zone.radius + r;

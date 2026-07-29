@@ -99,7 +99,7 @@ function runImpactRiders(
     if (!handler) continue;
     const ctx: EffectCtx = {
       state, config, rng, events, origin: point, star: attack.sourceStar,
-      baseDamage: attack.baseDamage, attack, bullet, enemy,
+      triggerPoint: point, baseDamage: attack.baseDamage, attack, bullet, enemy,
     };
     const hpBefore = totalEnemyHp(state);
     handler(ctx, rider.params ?? {});

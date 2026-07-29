@@ -232,7 +232,7 @@
             "effects[]",
             "shape?"
           ],
-          "note": "地面区域（点/环带），内嵌 dot/slow 等原子"
+          "note": "地面区域（圆形/环带/线形），内嵌 dot/slow 等原子；线形长度=2×radius、宽度=radius"
         },
         "dot": {
           "params": [

@@ -29,6 +29,8 @@ export interface EffectCtx {
   events: GameEvent[];
   /** 空间锚点：消耗落点 / 命中点 / 击杀点 / 炮台。 */
   origin: { x: number; y: number };
+  /** 触发器原始 point 载荷；用于区分“有载荷命中点”与普通 origin。 */
+  triggerPoint?: { x: number; y: number };
   /** 消耗态档位半径（原子无 radius 参数时的兜底）。 */
   radius?: number;
   /** 消耗态档位时长。 */
@@ -75,6 +77,9 @@ const PIERCE_CONSUME_LIMIT = 999;
 const SUMMON_GROUP_JITTER = 30;
 /** 非契约常量：额外掉落的落点散布，避免堆叠在同一像素。 */
 const EXTRA_DROP_SCATTER = 60;
+/** line 沿用 radius 作为单一尺寸轴：长度 2r、宽度 r，避免新增未定标参数。 */
+const LINE_ZONE_LENGTH_MUL = 2;
+const LINE_ZONE_WIDTH_MUL = 1;
 
 function enemiesInRadius(state: GameState, x: number, y: number, r: number): Enemy[] {
   return state.enemies.filter(e => Math.hypot(e.x - x, e.y - y) <= r + e.r);
@@ -103,14 +108,41 @@ function cappedDuration(ctx: EffectCtx, want: number): number {
   return ctx.consume ? Math.min(5, want) : want;
 }
 
+function lineZoneDirection(ctx: EffectCtx): { x: number; y: number } {
+  const turret = cfg.combat.turret;
+  if (ctx.triggerPoint) {
+    const dx = ctx.triggerPoint.x - turret.x;
+    const dy = ctx.triggerPoint.y - turret.y;
+    const length = Math.hypot(dx, dy);
+    if (length > 1e-9) return { x: dx / length, y: dy / length };
+  }
+  const target = nearestEnemy(ctx.state, ctx.origin.x, ctx.origin.y, Infinity);
+  if (target) {
+    const dx = target.x - ctx.origin.x;
+    const dy = target.y - ctx.origin.y;
+    const length = Math.hypot(dx, dy);
+    if (length > 1e-9) return { x: dx / length, y: dy / length };
+  }
+  return { x: 1, y: 0 };
+}
+
 function makeZone(ctx: EffectCtx, atom: 'aura' | 'groundZone', p: Record<string, unknown>): Zone {
+  const radius = num(p, 'radius', ctx.radius ?? atomNumberDefault(atom, 'radius'));
+  const shape = cStr(atom, p, 'shape') as Zone['shape'];
+  const direction = shape === 'line' ? lineZoneDirection(ctx) : null;
   const zone: Zone = {
     id: ctx.state.nextZoneId++,
     x: ctx.origin.x,
     y: ctx.origin.y,
-    radius: num(p, 'radius', ctx.radius ?? atomNumberDefault(atom, 'radius')),
+    radius,
     innerRadius: typeof p.innerRadius === 'number' ? (p.innerRadius as number) : undefined,
-    shape: cStr(atom, p, 'shape') as Zone['shape'],
+    shape,
+    lineStartX: direction ? ctx.origin.x : undefined,
+    lineStartY: direction ? ctx.origin.y : undefined,
+    lineDirX: direction?.x,
+    lineDirY: direction?.y,
+    lineLength: direction ? radius * LINE_ZONE_LENGTH_MUL : undefined,
+    lineWidth: direction ? radius * LINE_ZONE_WIDTH_MUL : undefined,
     remaining: cappedDuration(ctx, num(p, 'duration', ctx.duration ?? atomNumberDefault(atom, 'duration'))),
     tickInterval: cNum(atom, p, 'tickInterval'),
     tickTimer: 0,

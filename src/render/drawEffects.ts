@@ -13,6 +13,29 @@ export function drawZones(ctx: CanvasRenderingContext2D, state: GameState): void
     ctx.save();
     ctx.globalAlpha = alpha;
     ctx.fillStyle = color;
+    if (zone.shape === 'line') {
+      const startX = zone.lineStartX ?? zone.x;
+      const startY = zone.lineStartY ?? zone.y;
+      const length = zone.lineLength ?? zone.radius * 2;
+      const endX = startX + (zone.lineDirX ?? 1) * length;
+      const endY = startY + (zone.lineDirY ?? 0) * length;
+      ctx.strokeStyle = color;
+      ctx.lineCap = 'round';
+      ctx.lineWidth = (zone.lineWidth ?? zone.radius) + 4;
+      ctx.globalAlpha = Math.min(0.8, alpha * 2);
+      ctx.beginPath();
+      ctx.moveTo(startX, startY);
+      ctx.lineTo(endX, endY);
+      ctx.stroke();
+      ctx.lineWidth = zone.lineWidth ?? zone.radius;
+      ctx.globalAlpha = alpha;
+      ctx.beginPath();
+      ctx.moveTo(startX, startY);
+      ctx.lineTo(endX, endY);
+      ctx.stroke();
+      ctx.restore();
+      continue;
+    }
     ctx.beginPath();
     ctx.arc(zone.x, zone.y, zone.radius, 0, TAU);
     if (zone.shape === 'ring') {

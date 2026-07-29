@@ -208,7 +208,13 @@ export function formatEffect(effect: EffectDef, depth = 0): EffectTextLine[] {
       if (p.tickInterval != null) text += `，每 ${seconds(p.tickInterval)} 结算`;
       break;
     case 'groundZone':
-      text = `生成半径 ${shown(p.radius)} 的${p.shape === 'ring' ? '环形' : ''}领域，持续 ${seconds(p.duration)}`;
+      if (p.shape === 'line') {
+        text = typeof p.radius === 'number'
+          ? `生成朝敌方向延伸、长 ${shown(p.radius * 2)} 宽 ${shown(p.radius)} 的线形领域，持续 ${seconds(p.duration)}`
+          : `生成朝敌方向延伸的线形领域，持续 ${seconds(p.duration)}`;
+      } else {
+        text = `生成半径 ${shown(p.radius)} 的${p.shape === 'ring' ? '环形' : ''}领域，持续 ${seconds(p.duration)}`;
+      }
       if (p.tickInterval != null) text += `，每 ${seconds(p.tickInterval)} 结算`;
       break;
     case 'dot':

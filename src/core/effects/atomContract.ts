@@ -289,12 +289,12 @@ export const ATOM_CONTRACT = {
   groundZone: {
     category: 'domain',
     params: {
-      radius: { type: 'number', default: 100, min: 0 },
+      radius: { type: 'number', default: 100, min: 0, note: "shape='line' 时线长 = radius × 2、线宽 = radius" },
       duration: { type: 'number', default: 3, min: 0, note: '消耗态强制 ≤5s（R4）' },
       tickInterval: { type: 'number', default: 0.5, min: 0 },
       shape: {
         type: 'enum', default: 'circle', enum: ['circle', 'ring', 'line'],
-        note: "'line' 当前按 circle 几何结算（Zone.shape 只实现 circle/ring）",
+        note: "'line' 使用确定性朝向与点到线段距离判定",
       },
       innerRadius: { type: 'number', min: 0, note: 'shape=ring 的内径；未声明 = radius × 0.5' },
       color: { type: 'string', note: '未声明 = 继承来源卡的主题色' },

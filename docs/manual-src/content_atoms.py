@@ -285,7 +285,10 @@ ATOMS = {
             f"{c('makeZone()')} 往 {c('state.zones')} 推一个 Zone，"
             f"由 {c('runtime.tickZones()')} 每帧推进 remaining 与 tickTimer。",
             f"形状：{c('circle / ring / line')}。"
-            f"<b>{c('line')} 当前按 circle 几何结算</b>——Zone.shape 只实现了 circle / ring。",
+            f"{c('line')} 以 origin 为起点，长度 = {c('radius × 2')}、宽度 = {c('radius')}，"
+            f"按敌人中心到线段距离 ≤ 半宽命中。",
+            f"线形朝向优先取触发 {c('payload.point')} 相对炮台的方向；无 point 时从 origin 朝最近敌人；"
+            f"两者都不存在时确定性回退 {c('+x')}，全程不读取 RNG。",
             f"ring 的内径未声明时 = {c('radius × 0.5')}。",
             f"消耗态 duration <b>硬性封顶 5 秒</b>（{c('cappedDuration')}，设计约束 R4）。",
             f"半径/时长优先级：{c('params')} &gt; {c('ctx.radius / ctx.duration')}（消耗态档位）&gt; 契约默认。",
@@ -295,7 +298,7 @@ ATOMS = {
         "fusion": "多块区域重叠时<b>各自独立结算</b>，敌人会被每块区域各打一次。",
         "pitfalls": [
             f"<b>baseDamage 是创建时快照。</b>区域存续期间玩家吃了增伤，已铺下的区域伤害不会更新。",
-            f"{c('shape: line')} 是纸面参数，实际是圆——文案上别承诺「一条线」。",
+            f"{c('shape: line')} 的 radius 同时决定长度与宽度；areaScaleMul 放大 radius 时两轴会一起变大。",
             "使用最密集的原子（78 处绑定），且 tick 是「区域数 × 敌人数」的乘积，性能敏感。",
             f"areaScaleMul 轴同时放大 {c('radius')} 与 {c('duration')}，范围类词条对领域卡是双重收益。",
         ],

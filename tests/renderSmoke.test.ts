@@ -9,7 +9,7 @@ import { drawBountyOffers } from '../src/render/drawBountyOffers';
 import { drawBountyEffects } from '../src/render/drawBountyEffects';
 import { drawBeams } from '../src/render/drawBeams';
 import { drawBullets } from '../src/render/drawBullets';
-import { drawSummonsAndShield, drawTauntRanges } from '../src/render/drawEffects';
+import { drawSummonsAndShield, drawTauntRanges, drawZones } from '../src/render/drawEffects';
 import { drawVfx } from '../src/render/drawVfx';
 import { spawnGroundDrop, spawnWildcardDrop } from '../src/core/systems/dropSystem';
 import { registerSkillDefs } from '../src/core/effects/interpreter';
@@ -64,6 +64,11 @@ describe('渲染冒烟 · 战斗表现实体', () => {
     const taunted = enemy({ id: 7, x: 150, y: 100 });
     s.enemies = [taunted];
     s.summons.push({ id: 8, kind: 'decoy', x: 210, y: 100, hp: 20, maxHp: 40, tauntRadius: 140, fireInterval: 0 });
+    s.zones.push({
+      id: 9, x: 100, y: 120, radius: 40, shape: 'line',
+      lineStartX: 100, lineStartY: 120, lineDirX: 1, lineDirY: 0, lineLength: 80, lineWidth: 40,
+      remaining: 2, tickInterval: 0.5, tickTimer: 0, effects: [], baseDamage: 10,
+    });
     s.vfx.push(
       { kind: 'mortarTarget', x: 100, y: 100, radius: 60, remaining: 0.4 },
       { kind: 'mortarImpact', x: 120, y: 100, radius: 60, remaining: 0.2 },
@@ -78,6 +83,7 @@ describe('渲染冒烟 · 战斗表现实体', () => {
     );
     s.shield = { hits: 2, maxHits: 3, regenRemaining: null, regenSeconds: 2 };
     const ctx = fakeCtx();
+    expect(() => drawZones(ctx, s)).not.toThrow();
     expect(() => drawTauntRanges(ctx, s)).not.toThrow();
     expect(() => drawBullets(ctx, s)).not.toThrow();
     expect(() => drawBeams(ctx, s)).not.toThrow();

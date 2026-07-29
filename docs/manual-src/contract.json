@@ -564,7 +564,8 @@
     "radius": {
      "type": "number",
      "default": 100,
-     "min": 0
+     "min": 0,
+     "note": "shape='line' 时线长 = radius × 2、线宽 = radius"
     },
     "duration": {
      "type": "number",
@@ -585,7 +586,7 @@
       "ring",
       "line"
      ],
-     "note": "'line' 当前按 circle 几何结算（Zone.shape 只实现 circle/ring）"
+     "note": "'line' 使用确定性朝向与点到线段距离判定"
     },
     "innerRadius": {
      "type": "number",
@@ -1994,7 +1995,8 @@
    },
    "params": {
     "radius": {
-     "label": "半径"
+     "label": "半径",
+     "help": "shape='line' 时线长 = radius × 2、线宽 = radius"
     },
     "duration": {
      "label": "持续时间",
@@ -2006,7 +2008,7 @@
     },
     "shape": {
      "label": "形状",
-     "help": "'line' 当前按 circle 几何结算（Zone.shape 只实现 circle/ring）"
+     "help": "'line' 使用确定性朝向与点到线段距离判定"
     },
     "innerRadius": {
      "label": "内径",

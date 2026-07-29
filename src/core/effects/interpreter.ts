@@ -296,6 +296,7 @@ function baseCtx(
     state, config, rng,
     events: [],
     origin: payload.point ?? { x: cfg.combat.turret.x, y: cfg.combat.turret.y },
+    triggerPoint: payload.point,
     star,
     baseDamage: totalDamage(state, config),
     attack: payload.attack,

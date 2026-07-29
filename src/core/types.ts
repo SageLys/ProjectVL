@@ -409,7 +409,14 @@ export interface Zone {
   radius: number;
   /** 环带内径（shape=ring 时生效）。 */
   innerRadius?: number;
-  shape: 'circle' | 'ring';
+  shape: 'circle' | 'ring' | 'line';
+  /** 线形区域几何；仅 shape=line 时写入，x/y 仍保留为空间锚点。 */
+  lineStartX?: number;
+  lineStartY?: number;
+  lineDirX?: number;
+  lineDirY?: number;
+  lineLength?: number;
+  lineWidth?: number;
   remaining: number;
   tickInterval: number;
   tickTimer: number;

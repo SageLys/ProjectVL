@@ -51,4 +51,14 @@ describe('effect text coverage', () => {
     expect(lines.map(line => line.text).join(' ')).toContain('减速 20%');
     expect(lines.some(line => line.depth === 1)).toBe(true);
   });
+
+  it('formats line ground zones with their derived length and width', () => {
+    const text = formatEffect({
+      atom: 'groundZone',
+      params: { shape: 'line', radius: 70, duration: 3, tickInterval: 0.5, effects: [] },
+    }).map(line => line.text).join(' ');
+    expect(text).toContain('线形领域');
+    expect(text).toContain('长 140');
+    expect(text).toContain('宽 70');
+  });
 });
