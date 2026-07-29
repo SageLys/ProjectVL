@@ -45,6 +45,11 @@ namespace ProjectVL.Config
             return Load<CardsConfig>("Config/cards");
         }
 
+        public static CardAffixesConfig LoadCardAffixes()
+        {
+            return Load<CardAffixesConfig>("Config/cardAffixes");
+        }
+
         public static RelicsConfig LoadRelics()
         {
             return Load<RelicsConfig>("Config/relics");
