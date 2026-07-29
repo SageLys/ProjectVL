@@ -5,18 +5,18 @@ namespace ProjectVL.Config
     [Serializable]
     public sealed class ProgressionConfig
     {
+        public float killXpMul = 1f;
         public int relicChoices = 3;
         public float[] xpThresholds = Array.Empty<float>();
-        public UpgradeOptionConfig[] choices = Array.Empty<UpgradeOptionConfig>();
+        public RelicRarityWeights[] rarityByRelicIndex =
+            Array.Empty<RelicRarityWeights>();
     }
 
     [Serializable]
-    public sealed class UpgradeOptionConfig
+    public sealed class RelicRarityWeights
     {
-        public string id;
-        public string title;
-        public string description;
-        public string stat;
-        public float add;
+        public float common;
+        public float rare;
+        public float epic;
     }
 }

@@ -35,6 +35,16 @@ namespace ProjectVL.Config
             return Load<ProgressionConfig>("Config/progression");
         }
 
+        public static GodsConfig LoadGods()
+        {
+            return Load<GodsConfig>("Config/gods");
+        }
+
+        public static RelicsConfig LoadRelics()
+        {
+            return Load<RelicsConfig>("Config/relics");
+        }
+
         private static T Load<T>(string resourcePath)
         {
             TextAsset asset = Resources.Load<TextAsset>(resourcePath);

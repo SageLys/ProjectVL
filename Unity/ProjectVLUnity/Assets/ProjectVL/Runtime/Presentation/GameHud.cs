@@ -1,3 +1,4 @@
+using ProjectVL.Config;
 using ProjectVL.Core;
 using UnityEngine;
 
@@ -249,6 +250,12 @@ namespace ProjectVL.Presentation
                 return;
             }
 
+            if (state.PendingGodChoice != null)
+            {
+                DrawGodChoicePanel(state.PendingGodChoice);
+                return;
+            }
+
             if (state.PendingEvolution != null)
             {
                 DrawEvolutionPanel(state.PendingEvolution);
@@ -373,13 +380,13 @@ namespace ProjectVL.Presentation
             GUI.Box(panel, GUIContent.none);
             GUI.Label(
                 new Rect(panel.x + 18f, panel.y + 14f, panel.width - 36f, 38f),
-                $"等级 {choice.Level} · 选择强化",
+                $"等级 {choice.Level} · 选择遗物",
                 _centerStyle);
             GUI.Label(
                 new Rect(panel.x + 18f, panel.y + 50f, panel.width - 36f, 24f),
                 _controller.State.PendingLevelUpgradeCount > 1
-                    ? $"连续升级：还有 {_controller.State.PendingLevelUpgradeCount} 次选择"
-                    : "经验已满，选择一项本局永久强化",
+                    ? $"连续升级：还有 {_controller.State.PendingLevelUpgradeCount} 次遗物选择"
+                    : "经验已满，选择一件遗物强化本局构筑",
                 _hudStyle);
 
             float gap = 7f;
@@ -390,7 +397,7 @@ namespace ProjectVL.Presentation
             {
                 var option = choice.Options[index];
                 int stacks = _controller.State.UpgradeStacks.TryGetValue(
-                    option.id,
+                    option.Id,
                     out int count)
                     ? count
                     : 0;
@@ -401,7 +408,9 @@ namespace ProjectVL.Presentation
                     154f);
                 if (GUI.Button(
                     button,
-                    $"{option.title}\n\n{option.description}\n\n"
+                    $"{option.Title}\n"
+                    + $"{GodName(option.God)} · {RarityName(option.Rarity)}\n\n"
+                    + $"{option.Description}\n\n"
                     + $"已选 {stacks} 次",
                     _buttonStyle))
                 {
@@ -412,6 +421,52 @@ namespace ProjectVL.Presentation
             GUI.Label(
                 new Rect(panel.x + 18f, panel.y + 241f, panel.width - 36f, 20f),
                 "选择后战斗自动继续",
+                _hudStyle);
+        }
+
+        private void DrawGodChoicePanel(GodChoice choice)
+        {
+            Rect panel = CenterPanelRect(382f, 270f);
+            GUI.Box(panel, GUIContent.none);
+            string title = choice.Role == GodChoiceRole.Main
+                ? "选择主神"
+                : choice.Role == GodChoiceRole.Sub
+                    ? "选择副神"
+                    : "选择本波重点";
+            string body = choice.Role == GodChoiceRole.Focus
+                ? "重点神会影响后续遗物候选倾向。"
+                : "主神和副神共同决定本局遗物候选范围。";
+            GUI.Label(
+                new Rect(panel.x + 18f, panel.y + 14f, panel.width - 36f, 38f),
+                title,
+                _centerStyle);
+            GUI.Label(
+                new Rect(panel.x + 18f, panel.y + 52f, panel.width - 36f, 36f),
+                body,
+                _hudStyle);
+
+            float gap = 8f;
+            int count = Mathf.Max(1, choice.Options.Length);
+            float width = (panel.width - 36f - gap * (count - 1)) / count;
+            for (int index = 0; index < choice.Options.Length; index++)
+            {
+                GodConfig god = choice.Options[index];
+                if (GUI.Button(
+                    new Rect(
+                        panel.x + 18f + index * (width + gap),
+                        panel.y + 98f,
+                        width,
+                        126f),
+                    $"{GodName(god.id)}\n\n{GodTheme(god.id)}",
+                    _buttonStyle))
+                {
+                    _controller.ChooseGod(index);
+                }
+            }
+
+            GUI.Label(
+                new Rect(panel.x + 18f, panel.y + 234f, panel.width - 36f, 24f),
+                "选择后自动继续游戏",
                 _hudStyle);
         }
 
@@ -851,6 +906,57 @@ namespace ProjectVL.Presentation
                     return "黄金神像";
                 default:
                     return type;
+            }
+        }
+
+        private static string GodName(string god)
+        {
+            switch (god)
+            {
+                case "storm":
+                    return "迅霆";
+                case "winter":
+                    return "凛冬";
+                case "inferno":
+                    return "焚狱";
+                case "bulwark":
+                    return "磐垒";
+                case "plenty":
+                    return "丰饶";
+                default:
+                    return "中立";
+            }
+        }
+
+        private static string GodTheme(string god)
+        {
+            switch (god)
+            {
+                case "storm":
+                    return "雷霆与速度\n连锁、穿透与攻速";
+                case "winter":
+                    return "冰封与迟滞\n减速、冻结与增伤";
+                case "inferno":
+                    return "烈焰与蔓延\n灼烧、区域与爆炸";
+                case "bulwark":
+                    return "壁垒与反击\n护盾、反伤与召唤";
+                case "plenty":
+                    return "收获与命运\n掉落、经验与合成";
+                default:
+                    return "中立构筑";
+            }
+        }
+
+        private static string RarityName(string rarity)
+        {
+            switch (rarity)
+            {
+                case "rare":
+                    return "稀有";
+                case "epic":
+                    return "史诗";
+                default:
+                    return "普通";
             }
         }
 

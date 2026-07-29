@@ -1,41 +1,12 @@
 {
+  "killXpMul": 1,
   "relicChoices": 3,
   "xpThresholds": [10, 22, 38, 62, 95, 140, 200, 280],
-  "choices": [
-    {
-      "id": "damage",
-      "title": "火力校准",
-      "description": "基础伤害 +2",
-      "stat": "damageAdd",
-      "add": 2
-    },
-    {
-      "id": "fireRate",
-      "title": "快速装填",
-      "description": "基础射速 +0.15/秒",
-      "stat": "fireRateAdd",
-      "add": 0.15
-    },
-    {
-      "id": "maxHp",
-      "title": "心防扩容",
-      "description": "生命上限 +10，并恢复 10 点生命",
-      "stat": "maxHpAdd",
-      "add": 10
-    },
-    {
-      "id": "range",
-      "title": "感知延伸",
-      "description": "基础射程 +8",
-      "stat": "rangeAdd",
-      "add": 8
-    },
-    {
-      "id": "xpGain",
-      "title": "经验回路",
-      "description": "经验获取 +8%",
-      "stat": "xpGainPct",
-      "add": 0.08
-    }
+  "rarityByRelicIndex": [
+    { "common": 1.0 },
+    { "common": 0.9, "rare": 0.1 },
+    { "common": 0.75, "rare": 0.25 },
+    { "common": 0.55, "rare": 0.4, "epic": 0.05 },
+    { "common": 0.3, "rare": 0.55, "epic": 0.15 }
   ]
 }

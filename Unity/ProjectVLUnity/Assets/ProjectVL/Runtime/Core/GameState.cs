@@ -65,13 +65,46 @@ namespace ProjectVL.Core
         public float ExperienceNeeded { get; private set; } = 10f;
         public int Level { get; private set; } = 1;
         public float XpGainBonus { get; internal set; }
+        public string MainGod { get; internal set; }
+        public List<string> SubGods { get; } = new List<string>();
+        public string FocusGod { get; internal set; }
+        public GodChoice PendingGodChoice { get; private set; }
+        public int LastGodDecisionAfterWave { get; internal set; } = -1;
+        public Dictionary<string, int> RelicStacks { get; } =
+            new Dictionary<string, int>();
+        public Dictionary<string, int> GodAffinity { get; } =
+            new Dictionary<string, int>();
+        public Dictionary<string, float> RelicScaling { get; } =
+            new Dictionary<string, float>();
         public LevelUpgradeChoice PendingLevelUpgrade =>
             _pendingLevelUpgrades.Count > 0
                 ? _pendingLevelUpgrades[0]
                 : null;
         public int PendingLevelUpgradeCount => _pendingLevelUpgrades.Count;
+        internal LevelUpgradeChoice LevelUpgradeAt(int index)
+        {
+            return index >= 0 && index < _pendingLevelUpgrades.Count
+                ? _pendingLevelUpgrades[index]
+                : null;
+        }
+
         public Dictionary<string, int> UpgradeStacks { get; } =
             new Dictionary<string, int>();
+        public IEnumerable<string> SelectedGodIds
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(MainGod))
+                {
+                    yield return MainGod;
+                }
+
+                foreach (string god in SubGods)
+                {
+                    yield return god;
+                }
+            }
+        }
         public int ExpiredDropsConverted { get; internal set; }
         public int HarvestProcessedMergeStars { get; internal set; }
         public int MergeResultStarTotal { get; internal set; }
@@ -267,32 +300,70 @@ namespace ProjectVL.Core
                 _pendingLevelUpgrades.RemoveAt(0);
             }
 
-            DecisionLocked = _pendingLevelUpgrades.Count > 0
-                || PendingEvolution != null
-                || PendingBossReward != null;
+            RefreshDecisionLock();
         }
 
-        internal void IncreaseMaxHp(float amount, bool restoreAddedAmount)
+        internal void SetGodChoice(GodChoice choice)
         {
-            float positive = Math.Max(0f, amount);
-            BaseMaxHp += positive;
-            MaxHp += positive;
-            if (restoreAddedAmount)
+            PendingGodChoice = choice;
+            if (choice != null)
             {
-                Hp = Math.Min(MaxHp, Hp + positive);
+                DecisionLocked = true;
             }
         }
 
-        internal void RecordUpgrade(string id)
+        internal void CompleteGodChoice()
         {
-            if (string.IsNullOrEmpty(id))
+            PendingGodChoice = null;
+            RefreshDecisionLock();
+        }
+
+        internal void RecordRelic(RelicConfig relic)
+        {
+            if (relic == null || string.IsNullOrEmpty(relic.id))
             {
                 return;
             }
 
-            UpgradeStacks[id] = UpgradeStacks.TryGetValue(id, out int count)
+            RelicStacks[relic.id] = RelicStacks.TryGetValue(
+                relic.id,
+                out int relicCount)
+                ? relicCount + 1
+                : 1;
+            UpgradeStacks[relic.id] = UpgradeStacks.TryGetValue(
+                relic.id,
+                out int count)
                 ? count + 1
                 : 1;
+            if (!string.IsNullOrEmpty(relic.god))
+            {
+                GodAffinity[relic.god] = GodAffinity.TryGetValue(
+                    relic.god,
+                    out int affinity)
+                    ? affinity + 1
+                    : 1;
+            }
+
+            foreach (RelicEffectConfig effect in relic.effects)
+            {
+                foreach (string tag in effect.targetTags)
+                {
+                    string key = tag + ":" + effect.axis;
+                    RelicScaling[key] = RelicScaling.TryGetValue(
+                        key,
+                        out float value)
+                        ? value + effect.value
+                        : effect.value;
+                }
+            }
+        }
+
+        internal void RefreshDecisionLock()
+        {
+            DecisionLocked = _pendingLevelUpgrades.Count > 0
+                || PendingGodChoice != null
+                || PendingEvolution != null
+                || PendingBossReward != null;
         }
 
         internal void GrantReward(RunReward reward)

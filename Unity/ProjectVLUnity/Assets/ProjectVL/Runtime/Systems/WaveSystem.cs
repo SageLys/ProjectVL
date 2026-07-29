@@ -9,12 +9,17 @@ namespace ProjectVL.Systems
         private readonly WavesConfig _waves;
         private readonly EnemyFactory _enemyFactory;
         private readonly WavePlanResolver _planResolver;
+        private readonly GodPoolSystem _godPool;
         private ResolvedWavePlan _activePlan;
 
-        public WaveSystem(WavesConfig waves, EnemyFactory enemyFactory)
+        public WaveSystem(
+            WavesConfig waves,
+            EnemyFactory enemyFactory,
+            GodPoolSystem godPool = null)
         {
             _waves = waves;
             _enemyFactory = enemyFactory;
+            _godPool = godPool;
             _planResolver = new WavePlanResolver(waves);
         }
 
@@ -154,7 +159,7 @@ namespace ProjectVL.Systems
 
             state.GrantReward(state.PendingBossReward);
             state.PendingBossReward = null;
-            state.SetDecisionLocked(false);
+            state.RefreshDecisionLock();
 
             if (state.Wave >= _waves.totalWaves)
             {
@@ -188,6 +193,7 @@ namespace ProjectVL.Systems
             state.IntermissionRemaining = _waves.intermission.settleSeconds
                 + FreeSecondsFor(state.Wave);
             state.WavePhase = WavePhase.Intermission;
+            _godPool?.OfferForAfterWave(state, state.Wave);
         }
 
         private void TickIntermission(GameState state, float deltaTime)

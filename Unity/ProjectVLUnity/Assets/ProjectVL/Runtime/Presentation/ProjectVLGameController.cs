@@ -17,6 +17,7 @@ namespace ProjectVL.Presentation
         private DropSystem _dropSystem;
         private CombatSystem _combatSystem;
         private ProgressionSystem _progressionSystem;
+        private GodPoolSystem _godPoolSystem;
         private CardSlotKind? _selectedSlotKind;
         private int _selectedSlotIndex = -1;
         private CardSlotKind? _pendingCastSlotKind;
@@ -156,6 +157,8 @@ namespace ProjectVL.Presentation
                 GameConfigLoader.LoadEvolutionRecipes();
             DifficultyConfig difficulty = GameConfigLoader.LoadDifficulty();
             ProgressionConfig progression = GameConfigLoader.LoadProgression();
+            GodsConfig gods = GameConfigLoader.LoadGods();
+            RelicsConfig relics = GameConfigLoader.LoadRelics();
 
             GameState state = GameStateFactory.Create(combat, economy);
             _cardInventory = new CardInventorySystem(economy);
@@ -163,16 +166,20 @@ namespace ProjectVL.Presentation
             var random = new SystemRandomSource(System.Environment.TickCount);
             var difficultySystem =
                 new DifficultySystem(difficulty, waves.totalWaves);
+            _godPoolSystem = new GodPoolSystem(gods, random);
             var enemyFactory = new EnemyFactory(
                 combat,
                 enemies,
                 waves,
                 random,
                 difficultySystem);
-            _waveSystem = new WaveSystem(waves, enemyFactory);
+            _waveSystem = new WaveSystem(
+                waves,
+                enemyFactory,
+                _godPoolSystem);
             _progressionSystem = new ProgressionSystem(
                 progression,
-                combat,
+                relics,
                 random);
             _dropSystem = new DropSystem(
                 economy,
@@ -213,7 +220,10 @@ namespace ProjectVL.Presentation
             }
 
             State.StartRun();
-            _waveSystem.StartNextWave(State);
+            if (!_godPoolSystem.OfferInitial(State))
+            {
+                _waveSystem.StartNextWave(State);
+            }
         }
 
         public void SelectDifficulty(int optionIndex)
@@ -233,7 +243,22 @@ namespace ProjectVL.Presentation
             if (_progressionSystem != null
                 && _progressionSystem.Choose(State, optionIndex))
             {
-                LastCardAction = "升级强化已生效。";
+                LastCardAction = "遗物已加入本局构筑。";
+            }
+        }
+
+        public void ChooseGod(int optionIndex)
+        {
+            if (_godPoolSystem == null
+                || !_godPoolSystem.Choose(State, optionIndex))
+            {
+                return;
+            }
+
+            LastCardAction = "神祇选择已生效。";
+            if (State.Wave == 0 && State.PendingGodChoice == null)
+            {
+                _waveSystem.StartNextWave(State);
             }
         }
 

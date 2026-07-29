@@ -214,7 +214,7 @@ namespace ProjectVL.Systems
                     ParseCheckpoint(left).CompareTo(ParseCheckpoint(right)));
             card.Provisional = false;
             state.PendingEvolution = null;
-            state.SetDecisionLocked(false);
+            state.RefreshDecisionLock();
             state.EquipmentEffectWave = 0;
 
             QueueNextEvolutionChoice(state);

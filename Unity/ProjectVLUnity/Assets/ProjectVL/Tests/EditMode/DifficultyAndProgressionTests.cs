@@ -75,13 +75,16 @@ namespace ProjectVL.Tests
         [Test]
         public void CumulativeExperienceQueuesEveryCrossedLevelChoice()
         {
-            CombatConfig combat = CombatConfigLoader.LoadDefault();
+            ProgressionConfig config = GameConfigLoader.LoadProgression();
+            RelicsConfig relics = GameConfigLoader.LoadRelics();
             var progression = new ProgressionSystem(
-                GameConfigLoader.LoadProgression(),
-                combat,
+                config,
+                relics,
                 new ConstantRandomSource(0f));
-            GameState state = GameStateFactory.Create(combat);
+            GameState state = GameStateFactory.Create(
+                CombatConfigLoader.LoadDefault());
             state.StartRun();
+            SelectInitialGod(state);
 
             progression.AddExperience(state, 40f);
 
@@ -90,32 +93,96 @@ namespace ProjectVL.Tests
             Assert.That(state.PendingLevelUpgradeCount, Is.EqualTo(3));
             Assert.That(state.DecisionLocked, Is.True);
             Assert.That(
-                state.PendingLevelUpgrade.Options.Select(option => option.id),
-                Is.EqualTo(new[] { "damage", "fireRate", "maxHp" }));
+                state.PendingLevelUpgrade.Options.Select(option => option.Id),
+                Is.EqualTo(new[]
+                {
+                    "proj_damage",
+                    "neutral_calibrator",
+                    "neutral_redundant_armor"
+                }));
         }
 
         [Test]
-        public void ChoosingUpgradeAppliesEffectAndContinuesQueuedChoices()
+        public void ChoosingRelicRecordsFormalScalingAndContinuesQueue()
         {
             CombatConfig combat = CombatConfigLoader.LoadDefault();
             var progression = new ProgressionSystem(
                 GameConfigLoader.LoadProgression(),
-                combat,
+                GameConfigLoader.LoadRelics(),
                 new ConstantRandomSource(0f));
             GameState state = GameStateFactory.Create(combat);
             state.StartRun();
+            SelectInitialGod(state);
             progression.AddExperience(state, 22f);
 
             Assert.That(progression.Choose(state, 0), Is.True);
-            Assert.That(combat.defaults.damage, Is.EqualTo(20f));
+            Assert.That(state.RelicStacks["proj_damage"], Is.EqualTo(1));
+            Assert.That(
+                state.RelicScaling["projectile:effectDamageMul"],
+                Is.EqualTo(0.15f).Within(0.0001f));
+            Assert.That(state.GodAffinity["storm"], Is.EqualTo(1));
             Assert.That(state.PendingLevelUpgradeCount, Is.EqualTo(1));
             Assert.That(state.DecisionLocked, Is.True);
 
-            Assert.That(progression.Choose(state, 2), Is.True);
-            Assert.That(state.MaxHp, Is.EqualTo(110f));
-            Assert.That(state.Hp, Is.EqualTo(110f));
+            Assert.That(progression.Choose(state, 1), Is.True);
+            Assert.That(
+                state.RelicStacks["neutral_calibrator"],
+                Is.EqualTo(1));
             Assert.That(state.PendingLevelUpgradeCount, Is.Zero);
             Assert.That(state.DecisionLocked, Is.False);
+        }
+
+        [Test]
+        public void GodDraftFollowsMainThenTwoSubGods()
+        {
+            var system = new GodPoolSystem(
+                GameConfigLoader.LoadGods(),
+                new ConstantRandomSource(0f));
+            GameState state = GameStateFactory.Create(
+                CombatConfigLoader.LoadDefault());
+            state.StartRun();
+
+            Assert.That(system.OfferInitial(state), Is.True);
+            Assert.That(state.PendingGodChoice.Role, Is.EqualTo(GodChoiceRole.Main));
+            Assert.That(state.PendingGodChoice.Options, Has.Length.EqualTo(3));
+            Assert.That(system.Choose(state, 0), Is.True);
+            Assert.That(state.MainGod, Is.EqualTo("storm"));
+            Assert.That(state.FocusGod, Is.EqualTo("storm"));
+
+            Assert.That(system.OfferForAfterWave(state, 1), Is.True);
+            Assert.That(state.PendingGodChoice.Role, Is.EqualTo(GodChoiceRole.Sub));
+            Assert.That(system.Choose(state, 0), Is.True);
+            Assert.That(state.SubGods, Is.EqualTo(new[] { "winter" }));
+
+            Assert.That(system.OfferForAfterWave(state, 2), Is.True);
+            Assert.That(system.Choose(state, 0), Is.True);
+            Assert.That(state.SubGods, Is.EqualTo(new[] { "winter", "inferno" }));
+        }
+
+        [Test]
+        public void FormalGodAndRelicConfigsAreLoaded()
+        {
+            GodsConfig gods = GameConfigLoader.LoadGods();
+            RelicsConfig relics = GameConfigLoader.LoadRelics();
+            ProgressionConfig progression = GameConfigLoader.LoadProgression();
+
+            Assert.That(gods.gods, Has.Length.EqualTo(5));
+            Assert.That(relics.relics, Has.Length.EqualTo(22));
+            Assert.That(
+                relics.relics.Select(relic => relic.id),
+                Does.Contain("storm_overload_coil"));
+            Assert.That(
+                progression.rarityByRelicIndex,
+                Has.Length.EqualTo(5));
+        }
+
+        private static void SelectInitialGod(GameState state)
+        {
+            var gods = new GodPoolSystem(
+                GameConfigLoader.LoadGods(),
+                new ConstantRandomSource(0f));
+            Assert.That(gods.OfferInitial(state), Is.True);
+            Assert.That(gods.Choose(state, 0), Is.True);
         }
 
         private sealed class ConstantRandomSource : IRandomSource
