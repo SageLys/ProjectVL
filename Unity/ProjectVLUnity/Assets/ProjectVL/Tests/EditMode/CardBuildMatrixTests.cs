@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Reflection;
 using NUnit.Framework;
 using ProjectVL.Config;
@@ -91,6 +93,40 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void EveryEvolutionChoiceProducesADistinctBuild()
+        {
+            var duplicates = new List<string>();
+            foreach (string cardId in _catalog.PlayableIds)
+            {
+                string[] firstChoices =
+                    _catalog.EvolutionOptions(cardId, 3);
+                AssertDistinctProfiles(
+                    cardId,
+                    3,
+                    firstChoices,
+                    null,
+                    duplicates);
+
+                string[] secondChoices =
+                    _catalog.EvolutionOptions(cardId, 5);
+                foreach (string first in firstChoices)
+                {
+                    AssertDistinctProfiles(
+                        cardId,
+                        5,
+                        secondChoices,
+                        first,
+                        duplicates);
+                }
+            }
+
+            Assert.That(
+                duplicates,
+                Is.Empty,
+                string.Join(", ", duplicates));
+        }
+
+        [Test]
         public void EverySixStarTransformationResolvesAnEquipmentProfile()
         {
             foreach (CardDefinitionConfig definition in _catalog.Cards)
@@ -154,6 +190,89 @@ namespace ProjectVL.Tests
             }
 
             return false;
+        }
+
+        private void AssertDistinctProfiles(
+            string cardId,
+            int star,
+            string[] choices,
+            string firstChoice,
+            List<string> duplicates)
+        {
+            var signatures = new HashSet<string>();
+            string baselineSignature = firstChoice == null
+                ? null
+                : ProfileSignature(
+                    ResolveProfile(
+                        cardId,
+                        4,
+                        $"3:{firstChoice}"));
+            foreach (string choice in choices)
+            {
+                CardCombatProfile profile = firstChoice == null
+                    ? ResolveProfile(
+                        cardId,
+                        star,
+                        $"3:{choice}")
+                    : ResolveProfile(
+                        cardId,
+                        star,
+                        $"3:{firstChoice}",
+                        $"5:{choice}");
+                string signature = ProfileSignature(profile);
+                bool sourceEquivalent =
+                    AllowsSourceEquivalentBuild(cardId, choice);
+                if (signature == baselineSignature
+                    && !sourceEquivalent)
+                {
+                    duplicates.Add(
+                        $"{cardId} {star}-star choice {choice}"
+                        + $" has no effect after {firstChoice}");
+                }
+
+                if (!signatures.Add(signature)
+                    && !sourceEquivalent)
+                {
+                    duplicates.Add(
+                        $"{cardId} {star}-star choice {choice}"
+                        + (firstChoice == null
+                            ? string.Empty
+                            : $" after {firstChoice}"));
+                }
+            }
+        }
+
+        private static bool AllowsSourceEquivalentBuild(
+            string cardId,
+            string choice)
+        {
+            // These web definitions add a second, weaker copy of a
+            // strongest-wins status, so their resolved combat result is
+            // intentionally equivalent even though the route is recorded.
+            return cardId == "sanctum"
+                    && (choice == "sanctumB2"
+                        || choice == "sanctumC2")
+                || cardId == "bountyCall"
+                    && choice == "bountyCallC2";
+        }
+
+        private static string ProfileSignature(
+            CardCombatProfile profile)
+        {
+            var values = new List<string>();
+            foreach (PropertyInfo property in
+                typeof(CardCombatProfile).GetProperties(
+                    BindingFlags.Instance | BindingFlags.Public))
+            {
+                values.Add(
+                    property.Name
+                    + "="
+                    + Convert.ToString(
+                        property.GetValue(profile),
+                        CultureInfo.InvariantCulture));
+            }
+
+            return string.Join("|", values);
         }
     }
 }

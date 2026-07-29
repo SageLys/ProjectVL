@@ -70,6 +70,23 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void FrostDomainRouteCreatesSlowZoneOnHit()
+        {
+            EquipResolved("frost", 3, "3:frostC");
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+            EnemyState enemy = AddEnemy(new Float2(200f, 200f), 100f);
+
+            HitWithProfile(enemy.Position, profile);
+
+            Assert.That(_state.GroundZones, Has.Count.EqualTo(1));
+            GroundZoneState zone = _state.GroundZones[0];
+            Assert.That(zone.Radius, Is.EqualTo(45f));
+            Assert.That(zone.LifeRemaining, Is.EqualTo(1.5f));
+            Assert.That(zone.SlowRatio, Is.EqualTo(0.25f));
+            Assert.That(zone.SlowDuration, Is.EqualTo(0.7f));
+        }
+
+        [Test]
         public void ChainLightningDamagesNearbyTargets()
         {
             EquipResolved(
@@ -2658,6 +2675,59 @@ namespace ProjectVL.Tests
             Assert.That(enemy.FocusPriorityWeight, Is.EqualTo(8f));
             Assert.That(enemy.VulnerableRatio, Is.EqualTo(0.25f));
             Assert.That(enemy.SlowRatio, Is.EqualTo(0.3f));
+        }
+
+        [Test]
+        public void BountyCallBrandedKillCreatesPriorityZone()
+        {
+            EquipResolved(
+                "bountyCall",
+                5,
+                "3:bountyCallA",
+                "5:bountyCallA2");
+            EnemyState victim = AddEnemy(
+                new Float2(200f, 200f),
+                1f);
+            victim.FocusPriorityRemaining = 2f;
+            EnemyState nearby = AddEnemy(
+                new Float2(250f, 200f),
+                100f);
+
+            HitWithProfile(
+                victim.Position,
+                CardEffectResolver.Resolve(_state));
+
+            Assert.That(
+                nearby.FocusPriorityWeight,
+                Is.EqualTo(4f));
+            Assert.That(
+                nearby.FocusPriorityRemaining,
+                Is.EqualTo(3f));
+        }
+
+        [Test]
+        public void BountyCallBrandedKillStartsXpBuff()
+        {
+            EquipResolved(
+                "bountyCall",
+                5,
+                "3:bountyCallA",
+                "5:bountyCallB2");
+            EnemyState victim = AddEnemy(
+                new Float2(200f, 200f),
+                1f);
+            victim.FocusPriorityRemaining = 2f;
+
+            HitWithProfile(
+                victim.Position,
+                CardEffectResolver.Resolve(_state));
+
+            Assert.That(
+                _state.KillXpBuffMultiplier,
+                Is.EqualTo(1.35f));
+            Assert.That(
+                _state.KillXpBuffRemaining,
+                Is.EqualTo(3f));
         }
 
         [Test]

@@ -39,6 +39,11 @@ namespace ProjectVL.Core
         public float FrostNovaInterval { get; set; }
         public float FrostNovaRadius { get; set; }
         public float FrostNovaDuration { get; set; }
+        public float FrostHitZoneRadius { get; set; }
+        public float FrostHitZoneDuration { get; set; }
+        public float FrostHitZoneTickInterval { get; set; }
+        public float FrostHitZoneSlowRatio { get; set; }
+        public float FrostHitZoneSlowDuration { get; set; }
         public float DotDamageRatio { get; set; }
         public float DotDuration { get; set; }
         public float DotTickInterval { get; set; }
@@ -173,6 +178,12 @@ namespace ProjectVL.Core
         public float KillVulnerableRadius { get; set; }
         public float KillVulnerableRatio { get; set; }
         public float KillVulnerableDuration { get; set; }
+        public float BrandedKillFocusRadius { get; set; }
+        public float BrandedKillFocusWeight { get; set; } = 1f;
+        public float BrandedKillFocusDuration { get; set; }
+        public float BrandedKillXpMultiplier { get; set; } = 1f;
+        public float BrandedKillXpDuration { get; set; }
+        public int BrandedKillXpMaxStacks { get; set; }
         public float OnHitFireRateMultiplier { get; set; } = 1f;
         public float OnHitFireRateDuration { get; set; }
         public int OnHitFireRateMaxStacks { get; set; }

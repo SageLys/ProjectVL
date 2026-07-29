@@ -2016,6 +2016,10 @@ namespace ProjectVL.Systems
                     }
                     ApplyOnHitStun(state, enemy, bullet);
                     ApplyOnHitFireRate(state, bullet);
+                    ApplyFrostHitZone(
+                        state,
+                        bullet,
+                        hitPosition);
                     ApplyImpactAndSplitEffects(
                         state,
                         bullet,
@@ -2157,6 +2161,8 @@ namespace ProjectVL.Systems
                 enemy.FrozenRemaining > 0f
                 || enemy.StunnedRemaining > 0f
                 || enemy.SlowRemaining > 0f;
+            bool killedWhileBranded =
+                enemy.FocusPriorityRemaining > 0f;
             CardCombatProfile profile =
                 CardEffectResolver.Resolve(state);
             float vulnerability = enemy.VulnerableRemaining > 0f
@@ -2203,6 +2209,13 @@ namespace ProjectVL.Systems
                     state,
                     profile,
                     enemy.Position);
+                if (killedWhileBranded)
+                {
+                    ApplyBrandedKillCardEffects(
+                        state,
+                        profile,
+                        enemy.Position);
+                }
                 if (profile.KillExtraDropChance > 0f)
                 {
                     _drops?.TrySpawnBonus(
@@ -2647,6 +2660,29 @@ namespace ProjectVL.Systems
             state.FireRateBuffRemaining = Math.Max(
                 state.FireRateBuffRemaining,
                 bullet.OnHitFireRateDuration);
+        }
+
+        private static void ApplyFrostHitZone(
+            GameState state,
+            BulletState bullet,
+            Float2 hitPosition)
+        {
+            if (bullet.FrostHitZoneRadius <= 0f
+                || bullet.FrostHitZoneDuration <= 0f)
+            {
+                return;
+            }
+
+            state.GroundZones.Add(new GroundZoneState(
+                hitPosition,
+                bullet.FrostHitZoneRadius,
+                bullet.FrostHitZoneDuration,
+                Math.Max(0.01f, bullet.FrostHitZoneTickInterval),
+                0f,
+                0f,
+                0f,
+                bullet.FrostHitZoneSlowRatio,
+                bullet.FrostHitZoneSlowDuration));
         }
 
         private static EnemyState FindEnemyById(
@@ -3556,6 +3592,40 @@ namespace ProjectVL.Systems
                     0f,
                     0f);
             }
+        }
+
+        private static void ApplyBrandedKillCardEffects(
+            GameState state,
+            CardCombatProfile profile,
+            Float2 deathPosition)
+        {
+            if (profile.BrandedKillFocusRadius > 0f
+                && profile.BrandedKillFocusWeight > 1f)
+            {
+                MarkArea(
+                    state,
+                    deathPosition,
+                    profile.BrandedKillFocusRadius,
+                    0f,
+                    profile.BrandedKillFocusDuration,
+                    profile.BrandedKillFocusWeight,
+                    profile.BrandedKillFocusDuration,
+                    0f);
+            }
+
+            if (profile.BrandedKillXpMaxStacks <= 0)
+            {
+                return;
+            }
+
+            state.KillXpBuffStacks = Math.Min(
+                profile.BrandedKillXpMaxStacks,
+                state.KillXpBuffStacks + 1);
+            state.KillXpBuffMultiplier = (float)Math.Pow(
+                profile.BrandedKillXpMultiplier,
+                state.KillXpBuffStacks);
+            state.KillXpBuffRemaining =
+                profile.BrandedKillXpDuration;
         }
 
         private void ApplyDotKillCardEffects(

@@ -297,6 +297,14 @@ namespace ProjectVL.Systems
             profile.FreezeDuration = Max(profile.FreezeDuration, 0.8f);
             profile.FreezeStacksToTrigger =
                 route == "frostB" ? 2 : 3;
+            if (route == "frostC")
+            {
+                profile.FrostHitZoneRadius = 45f;
+                profile.FrostHitZoneDuration = 1.5f;
+                profile.FrostHitZoneTickInterval = 0.5f;
+                profile.FrostHitZoneSlowRatio = 0.25f;
+                profile.FrostHitZoneSlowDuration = 0.7f;
+            }
             if (card.Star >= 4)
             {
                 profile.SlowRatio =
@@ -1719,20 +1727,23 @@ namespace ProjectVL.Systems
             string advanced = RouteAt(card, 5);
             if (advanced == "bountyCallA2")
             {
-                profile.KillVulnerableRadius = Max(
-                    profile.KillVulnerableRadius,
+                profile.BrandedKillFocusRadius = Max(
+                    profile.BrandedKillFocusRadius,
                     100f);
-                profile.KillVulnerableDuration = Max(
-                    profile.KillVulnerableDuration,
+                profile.BrandedKillFocusWeight = Max(
+                    profile.BrandedKillFocusWeight,
+                    4f);
+                profile.BrandedKillFocusDuration = Max(
+                    profile.BrandedKillFocusDuration,
                     3f);
             }
             else if (advanced == "bountyCallB2")
             {
-                profile.ControlledKillXpMultiplier = Max(
-                    profile.ControlledKillXpMultiplier,
+                profile.BrandedKillXpMultiplier = Max(
+                    profile.BrandedKillXpMultiplier,
                     1.35f);
-                profile.ControlledKillXpDuration = 3f;
-                profile.ControlledKillXpMaxStacks = 1;
+                profile.BrandedKillXpDuration = 3f;
+                profile.BrandedKillXpMaxStacks = 1;
             }
             else if (advanced == "bountyCallC2")
             {

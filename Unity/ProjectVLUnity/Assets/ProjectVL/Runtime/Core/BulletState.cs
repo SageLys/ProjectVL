@@ -29,6 +29,11 @@ namespace ProjectVL.Core
         public float FrozenHitVulnerableRatio { get; }
         public float FrozenHitVulnerableDuration { get; }
         public float FrozenHitExecuteThresholdRatio { get; }
+        public float FrostHitZoneRadius { get; }
+        public float FrostHitZoneDuration { get; }
+        public float FrostHitZoneTickInterval { get; }
+        public float FrostHitZoneSlowRatio { get; }
+        public float FrostHitZoneSlowDuration { get; }
         public float DotDamageRatio { get; }
         public float DotDuration { get; }
         public float DotTickInterval { get; }
@@ -99,6 +104,14 @@ namespace ProjectVL.Core
                 profile.FrozenHitVulnerableDuration;
             FrozenHitExecuteThresholdRatio =
                 profile.FrozenHitExecuteThresholdRatio;
+            FrostHitZoneRadius = profile.FrostHitZoneRadius;
+            FrostHitZoneDuration = profile.FrostHitZoneDuration;
+            FrostHitZoneTickInterval =
+                profile.FrostHitZoneTickInterval;
+            FrostHitZoneSlowRatio =
+                profile.FrostHitZoneSlowRatio;
+            FrostHitZoneSlowDuration =
+                profile.FrostHitZoneSlowDuration;
             DotDamageRatio = profile.DotDamageRatio;
             DotDuration = profile.DotDuration;
             DotTickInterval = profile.DotTickInterval;
