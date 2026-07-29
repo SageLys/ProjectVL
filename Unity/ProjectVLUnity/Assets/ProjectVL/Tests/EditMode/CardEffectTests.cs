@@ -2278,6 +2278,124 @@ namespace ProjectVL.Tests
             Assert.That(_state.FireRateBuffRemaining, Is.EqualTo(4f));
         }
 
+        [TestCase("glacialSpike")]
+        [TestCase("permafrost")]
+        [TestCase("iceTomb")]
+        [TestCase("frozenBulwark")]
+        [TestCase("hoarfrostTithe")]
+        public void WinterRosterCardsArePlayableAndCastable(string type)
+        {
+            CardState card = _state.CreateCard(type, 3);
+
+            Assert.That(CardPoolSystem.IsPlayable(type), Is.True);
+            Assert.That(CombatSystem.SupportsConsumable(card), Is.True);
+        }
+
+        [Test]
+        public void GlacialSpikeRouteUsesPierceAndFreezeConfig()
+        {
+            EquipResolved(
+                "glacialSpike",
+                3,
+                "3:glacialSpikeB");
+
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+
+            Assert.That(profile.PierceCount, Is.EqualTo(2));
+            Assert.That(profile.PierceDamageRetention, Is.EqualTo(0.8f));
+            Assert.That(profile.FreezeStacksToTrigger, Is.EqualTo(2));
+            Assert.That(profile.FreezeDuration, Is.EqualTo(0.8f));
+        }
+
+        [Test]
+        public void GlacialSpikeConsumableFreezesEnemiesOnItsLine()
+        {
+            EnemyState enemy = AddEnemy(
+                new Float2(201f, 350f),
+                200f);
+
+            _system.CastConsumable(
+                _state,
+                _state.CreateCard("glacialSpike", 3),
+                new Float2(201f, 100f));
+
+            Assert.That(enemy.Hp, Is.LessThan(200f));
+            Assert.That(enemy.FrozenRemaining, Is.EqualTo(1.2f));
+        }
+
+        [Test]
+        public void PermafrostCreatesTimedSlowZones()
+        {
+            EquipResolved(
+                "permafrost",
+                5,
+                "3:permafrostA",
+                "5:permafrostA2");
+            _state.BeginWave(1);
+            AddEnemy(new Float2(201f, 380f), 100f);
+
+            _system.StepPassives(_state, 0f);
+            _system.StepPassives(_state, 4f);
+
+            Assert.That(_state.GroundZones, Has.Count.EqualTo(2));
+            Assert.That(
+                CardEffectResolver.Resolve(_state).PermafrostZoneCount,
+                Is.EqualTo(2));
+        }
+
+        [Test]
+        public void IceTombConsumableFreezesAndMarksAtSixStars()
+        {
+            EnemyState enemy = AddEnemy(
+                new Float2(250f, 250f),
+                100f);
+
+            _system.CastConsumable(
+                _state,
+                _state.CreateCard("iceTomb", 6),
+                enemy.Position);
+
+            Assert.That(enemy.FrozenRemaining, Is.EqualTo(2.2f));
+            Assert.That(enemy.VulnerableRatio, Is.EqualTo(0.2f));
+        }
+
+        [Test]
+        public void FrozenBulwarkCombinesShieldAndFreeze()
+        {
+            EquipResolved(
+                "frozenBulwark",
+                3,
+                "3:frozenBulwarkA");
+            EnemyState enemy = AddEnemy(
+                new Float2(250f, 250f),
+                100f);
+
+            CardCombatProfile profile = CardEffectResolver.Resolve(_state);
+            _system.CastConsumable(
+                _state,
+                _state.CreateCard("frozenBulwark", 3),
+                enemy.Position);
+
+            Assert.That(profile.ShieldHits, Is.EqualTo(3));
+            Assert.That(_state.ShieldHits, Is.EqualTo(5));
+            Assert.That(enemy.FrozenRemaining, Is.EqualTo(1.1f));
+        }
+
+        [Test]
+        public void HoarfrostConsumableTemporarilyBoostsEconomy()
+        {
+            _system.CastConsumable(
+                _state,
+                _state.CreateCard("hoarfrostTithe", 3),
+                new Float2());
+
+            _system.StepPassives(_state, 0f);
+
+            Assert.That(_state.XpMultiplier, Is.EqualTo(1.3f));
+            Assert.That(_state.DropRateMultiplier, Is.EqualTo(1.3f));
+            Assert.That(_state.EconomyBuffRemaining, Is.EqualTo(4f));
+        }
+
         private void EquipResolved(
             string type,
             int star,

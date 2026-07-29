@@ -24,7 +24,12 @@ namespace ProjectVL.Systems
             "stormcall",
             "arcSplitter",
             "galvanicWard",
-            "overcharge"
+            "overcharge",
+            "glacialSpike",
+            "permafrost",
+            "iceTomb",
+            "frozenBulwark",
+            "hoarfrostTithe"
         };
 
         private readonly IRandomSource _random;

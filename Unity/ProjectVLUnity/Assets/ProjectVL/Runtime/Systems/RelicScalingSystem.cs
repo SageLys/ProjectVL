@@ -144,8 +144,9 @@ namespace ProjectVL.Systems
                 profile.XpMultiplier *= 1f
                     + ForEquipped(state, "xpMul");
             }
-            profile.ControlledDamageTakenBonus =
-                GlobalMax(state, "controlledDamageTakenMul");
+            profile.ControlledDamageTakenBonus = Math.Max(
+                profile.ControlledDamageTakenBonus,
+                GlobalMax(state, "controlledDamageTakenMul"));
         }
 
         private static void ApplyEffectDamage(

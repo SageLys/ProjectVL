@@ -87,6 +87,21 @@ namespace ProjectVL.Systems
                     case "overcharge":
                         ApplyOvercharge(card, profile);
                         break;
+                    case "glacialSpike":
+                        ApplyGlacialSpike(card, profile);
+                        break;
+                    case "permafrost":
+                        ApplyPermafrost(card, profile);
+                        break;
+                    case "iceTomb":
+                        ApplyIceTomb(card, profile);
+                        break;
+                    case "frozenBulwark":
+                        ApplyFrozenBulwark(card, profile);
+                        break;
+                    case "hoarfrostTithe":
+                        ApplyHoarfrostTithe(card, profile);
+                        break;
                 }
             }
 
@@ -738,6 +753,301 @@ namespace ProjectVL.Systems
             {
                 profile.MergePulseDamagePerStar =
                     Max(profile.MergePulseDamagePerStar, 7f);
+            }
+        }
+
+        private static void ApplyGlacialSpike(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            if (card.Star >= 6)
+            {
+                profile.BeamInterval = 0.9f;
+                profile.BeamWidth = 28f;
+                profile.BeamDamageRatio = 0.95f;
+                profile.FreezeStacksToTrigger = 2;
+                profile.FreezeDuration = Max(
+                    profile.FreezeDuration,
+                    0.7f);
+                return;
+            }
+
+            string route = RouteAt(card, 3);
+            profile.PierceCount += route == "glacialSpikeA" ? 3 : 2;
+            profile.PierceDamageRetention =
+                route == "glacialSpikeC" ? 0.9f : 0.8f;
+            if (route != "glacialSpikeC")
+            {
+                profile.FreezeStacksToTrigger =
+                    route == "glacialSpikeB" ? 2 : 3;
+                profile.FreezeDuration = Max(
+                    profile.FreezeDuration,
+                    0.8f);
+            }
+            else
+            {
+                profile.FrozenHitVulnerableRatio = Max(
+                    profile.FrozenHitVulnerableRatio,
+                    0.08f);
+                profile.FrozenHitVulnerableDuration = Max(
+                    profile.FrozenHitVulnerableDuration,
+                    1f);
+            }
+
+            if (card.Star >= 4)
+            {
+                profile.PierceCount += 1;
+                profile.FreezeDuration *= 1.25f;
+            }
+
+            string advanced = RouteAt(card, 5);
+            if (advanced == "glacialSpikeA2")
+            {
+                profile.SplashRadius = Max(profile.SplashRadius, 70f);
+                profile.SplashDamageRatio = Max(
+                    profile.SplashDamageRatio,
+                    0.7f);
+                profile.SlowRatio = Max(profile.SlowRatio, 0.3f);
+                profile.SlowDuration = Max(profile.SlowDuration, 1.2f);
+            }
+            else if (advanced == "glacialSpikeB2")
+            {
+                profile.ChainBounces += 1;
+                profile.ChainDamageRetention = 0.7f;
+                profile.ChainSearchRange = Max(
+                    profile.ChainSearchRange,
+                    110f);
+            }
+            else if (advanced == "glacialSpikeC2")
+            {
+                profile.FrozenHitExecuteThresholdRatio = 0.16f;
+            }
+        }
+
+        private static void ApplyPermafrost(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            if (card.Star >= 6)
+            {
+                profile.FrostAuraRadiusRatio = Max(
+                    profile.FrostAuraRadiusRatio,
+                    155f / 150f);
+                profile.FrostAuraSlowRatio = Max(
+                    profile.FrostAuraSlowRatio,
+                    0.35f);
+                profile.FrostAuraSlowDuration = Max(
+                    profile.FrostAuraSlowDuration,
+                    0.9f);
+                profile.FreezeStacksToTrigger = 5;
+                profile.FreezeDuration = Max(
+                    profile.FreezeDuration,
+                    0.5f);
+                return;
+            }
+
+            string route = RouteAt(card, 3);
+            profile.PermafrostInterval = 4f;
+            profile.PermafrostZoneCount = 1;
+            profile.PermafrostRadius =
+                route == "permafrostA" ? 115f : 90f;
+            profile.PermafrostDuration = 3f;
+            profile.PermafrostSlowRatio =
+                route == "permafrostB" ? 0.45f : 0.25f;
+            if (route == "permafrostC")
+            {
+                profile.PermafrostFreezeDuration = 0.6f;
+            }
+
+            if (card.Star >= 4)
+            {
+                profile.PermafrostRadius *= 1.25f;
+                profile.PermafrostSlowRatio *= 1.25f;
+            }
+
+            string advanced = RouteAt(card, 5);
+            if (advanced == "permafrostA2")
+            {
+                profile.PermafrostZoneCount = 2;
+                profile.PermafrostRadius = 85f;
+            }
+            else if (advanced == "permafrostB2")
+            {
+                profile.PermafrostRadius = 95f;
+                profile.PermafrostVulnerableRatio = 0.12f;
+            }
+            else if (advanced == "permafrostC2")
+            {
+                profile.PermafrostRadius = 130f;
+                profile.PermafrostSlowRatio = Max(
+                    profile.PermafrostSlowRatio,
+                    0.25f);
+                profile.PermafrostDuration = 2f;
+            }
+        }
+
+        private static void ApplyIceTomb(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            if (card.Star >= 6)
+            {
+                profile.FrostNovaInterval = 9f;
+                profile.FrostNovaRadius = 1000f;
+                profile.FrostNovaDuration = 0.75f;
+                return;
+            }
+
+            string route = RouteAt(card, 3);
+            profile.FreezeStacksToTrigger =
+                route == "iceTombA" ? 5 : 8;
+            profile.FreezeDuration = Max(
+                profile.FreezeDuration,
+                route == "iceTombB" ? 1.4f : route == "iceTombC" ? 0.9f : 0.8f);
+            if (card.Star >= 4)
+            {
+                profile.FreezeDuration *= 1.25f;
+            }
+
+            string advanced = RouteAt(card, 5);
+            if (advanced == "iceTombA2")
+            {
+                profile.FrozenKillSplashRadius = 90f;
+                profile.FrozenKillSplashDamageRatio = 0.9f;
+            }
+            else if (advanced == "iceTombB2")
+            {
+                profile.FrozenKillSplashRadius = 95f;
+                profile.FrozenKillFreezeDuration = 0.7f;
+            }
+            else if (advanced == "iceTombC2")
+            {
+                profile.FrozenHitVulnerableRatio = 0.22f;
+                profile.FrozenHitVulnerableDuration = 1.5f;
+            }
+        }
+
+        private static void ApplyFrozenBulwark(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            if (card.Star >= 6)
+            {
+                profile.ShieldHits += 4;
+                profile.ShieldRegenSeconds = 6f;
+                profile.FrostAuraRadiusRatio = Max(
+                    profile.FrostAuraRadiusRatio,
+                    170f / 150f);
+                profile.FrostAuraSlowRatio = Max(
+                    profile.FrostAuraSlowRatio,
+                    0.3f);
+                profile.FrostAuraSlowDuration = Max(
+                    profile.FrostAuraSlowDuration,
+                    0.9f);
+                return;
+            }
+
+            string route = RouteAt(card, 3);
+            profile.ShieldHits += route == "frozenBulwarkA" ? 3 : 2;
+            profile.ShieldRegenSeconds = 10f;
+            if (route == "frozenBulwarkA")
+            {
+                profile.ShieldBreakDamage = Max(
+                    profile.ShieldBreakDamage,
+                    18f);
+                profile.ShieldBreakKnockback = Max(
+                    profile.ShieldBreakKnockback,
+                    40f);
+            }
+            else if (route == "frozenBulwarkB")
+            {
+                profile.BreachBurstRadius = Max(
+                    profile.BreachBurstRadius,
+                    150f);
+                profile.BreachSlowRatio = Max(
+                    profile.BreachSlowRatio,
+                    0.8f);
+                profile.BreachSlowDuration = Max(
+                    profile.BreachSlowDuration,
+                    0.8f);
+            }
+
+            if (card.Star >= 4)
+            {
+                profile.ShieldHits += 1;
+            }
+
+            string advanced = RouteAt(card, 5);
+            if (advanced == "frozenBulwarkA2")
+            {
+                profile.ShieldHits += 1;
+                profile.ShieldRegenSeconds = 6f;
+            }
+            else if (advanced == "frozenBulwarkB2")
+            {
+                profile.BreachBurstRadius = 130f;
+                profile.BreachBurstDamageMultiplier = 2.2f;
+                profile.BreachSlowRatio = 1f;
+                profile.BreachSlowDuration = 0.7f;
+            }
+            else if (advanced == "frozenBulwarkC2")
+            {
+                profile.ControlledDamageTakenBonus = Max(
+                    profile.ControlledDamageTakenBonus,
+                    0.12f);
+            }
+        }
+
+        private static void ApplyHoarfrostTithe(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            if (card.Star >= 6)
+            {
+                profile.ControlledKillExtraDropChance = Max(
+                    profile.ControlledKillExtraDropChance,
+                    0.35f);
+                return;
+            }
+
+            string route = RouteAt(card, 3);
+            if (route == "hoarfrostTitheA")
+            {
+                profile.ControlledKillXpMultiplier = Max(
+                    profile.ControlledKillXpMultiplier,
+                    1.2f);
+                profile.ControlledKillXpDuration = 3f;
+                profile.ControlledKillXpMaxStacks = 1;
+            }
+            else if (route == "hoarfrostTitheB")
+            {
+                profile.ControlledKillExtraDropChance = Max(
+                    profile.ControlledKillExtraDropChance,
+                    0.12f);
+            }
+            else
+            {
+                profile.DropLifetimeMultiplier = Max(
+                    profile.DropLifetimeMultiplier,
+                    1.25f);
+            }
+
+            string advanced = RouteAt(card, 5);
+            if (advanced == "hoarfrostTitheA2")
+            {
+                profile.FrozenKillRestore = 2f;
+            }
+            else if (advanced == "hoarfrostTitheB2")
+            {
+                profile.MergePulseDamagePerStar = Max(
+                    profile.MergePulseDamagePerStar,
+                    4f);
+            }
+            else if (advanced == "hoarfrostTitheC2")
+            {
+                profile.ControlledKillExtraDropChance = Max(
+                    profile.ControlledKillExtraDropChance,
+                    0.25f);
             }
         }
 

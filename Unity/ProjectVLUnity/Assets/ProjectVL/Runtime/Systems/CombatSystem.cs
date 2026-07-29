@@ -105,6 +105,21 @@ namespace ProjectVL.Systems
                 case "overcharge":
                     CastOvercharge(state, card.Star);
                     return true;
+                case "glacialSpike":
+                    CastGlacialSpike(state, card.Star, point);
+                    return true;
+                case "permafrost":
+                    CastPermafrost(state, card.Star, point);
+                    return true;
+                case "iceTomb":
+                    CastIceTomb(state, card.Star, point);
+                    return true;
+                case "frozenBulwark":
+                    CastFrozenBulwark(state, card.Star, point);
+                    return true;
+                case "hoarfrostTithe":
+                    CastHoarfrostTithe(state, card.Star);
+                    return true;
                 default:
                     return false;
             }
@@ -134,7 +149,12 @@ namespace ProjectVL.Systems
                     || card.Type == "stormcall"
                     || card.Type == "arcSplitter"
                     || card.Type == "galvanicWard"
-                    || card.Type == "overcharge");
+                    || card.Type == "overcharge"
+                    || card.Type == "glacialSpike"
+                    || card.Type == "permafrost"
+                    || card.Type == "iceTomb"
+                    || card.Type == "frozenBulwark"
+                    || card.Type == "hoarfrostTithe");
         }
 
         public void StepTurret(GameState state, float deltaTime)
@@ -1185,6 +1205,210 @@ namespace ProjectVL.Systems
                 StarValue(star, 3f, 4f, 5f));
         }
 
+        private void CastGlacialSpike(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            Float2 direction = (point - TurretPosition).Normalized();
+            if (direction.Length <= 0.000001f)
+            {
+                direction = new Float2(1f, 0f);
+            }
+
+            float width = StarValue(star, 10f, 16f, 24f);
+            float damage = BaseDamage(state)
+                * StarValue(star, 2.5f, 4f, 6.5f)
+                * RelicMultiplier(
+                    state,
+                    "glacialSpike",
+                    "effectDamageMul");
+            float freeze = StarValue(star, 0.7f, 1.2f, 2f)
+                * RelicMultiplier(
+                    state,
+                    "glacialSpike",
+                    "controlPotencyMul");
+            var targets =
+                new System.Collections.Generic.List<EnemyState>();
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                Float2 relative = enemy.Position - TurretPosition;
+                float along = relative.X * direction.X
+                    + relative.Y * direction.Y;
+                float perpendicular = Math.Abs(
+                    relative.X * direction.Y
+                    - relative.Y * direction.X);
+                if (along >= 0f
+                    && along <= AttackRange(state)
+                    && perpendicular <= width / 2f + enemy.Radius)
+                {
+                    targets.Add(enemy);
+                }
+            }
+
+            foreach (EnemyState enemy in targets)
+            {
+                Float2 hit = enemy.Position;
+                DamageEnemy(state, enemy, damage);
+                if (state.Enemies.Contains(enemy))
+                {
+                    enemy.FrozenRemaining = Math.Max(
+                        enemy.FrozenRemaining,
+                        freeze);
+                }
+
+                if (star >= 6)
+                {
+                    DamageArea(
+                        state,
+                        hit,
+                        100f,
+                        damage,
+                        enemy.Id,
+                        0f,
+                        0f);
+                }
+            }
+        }
+
+        private void CastPermafrost(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            float radius = StarValue(star, 90f, 130f, 180f)
+                * RelicMultiplier(
+                    state,
+                    "permafrost",
+                    "areaScaleMul");
+            float duration = StarValue(star, 3f, 4f, 5f);
+            float slow = StarValue(star, 0.3f, 0.4f, 0.55f)
+                * RelicMultiplier(
+                    state,
+                    "permafrost",
+                    "controlPotencyMul");
+            state.GroundZones.Add(new GroundZoneState(
+                point,
+                radius,
+                duration,
+                0.5f,
+                0f,
+                0f,
+                0f,
+                slow,
+                0.8f));
+            if (star < 3)
+            {
+                return;
+            }
+
+            float freeze = star >= 6 ? 0.8f : 0.6f;
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                if (Float2.Distance(point, enemy.Position) <= radius)
+                {
+                    enemy.FreezeStacks++;
+                    int threshold = star >= 6 ? 3 : 4;
+                    if (enemy.FreezeStacks >= threshold)
+                    {
+                        enemy.FreezeStacks = 0;
+                        enemy.FrozenRemaining = Math.Max(
+                            enemy.FrozenRemaining,
+                            freeze);
+                    }
+                }
+            }
+        }
+
+        private void CastIceTomb(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            float radius = StarValue(star, 80f, 125f, 180f)
+                * RelicMultiplier(
+                    state,
+                    "iceTomb",
+                    "areaScaleMul");
+            float duration = StarValue(star, 0.8f, 1.4f, 2.2f)
+                * RelicMultiplier(
+                    state,
+                    "iceTomb",
+                    "controlPotencyMul");
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                if (Float2.Distance(point, enemy.Position) > radius)
+                {
+                    continue;
+                }
+
+                enemy.FrozenRemaining = Math.Max(
+                    enemy.FrozenRemaining,
+                    duration);
+                if (star >= 6)
+                {
+                    enemy.VulnerableRatio = Math.Max(
+                        enemy.VulnerableRatio,
+                        0.2f);
+                    enemy.VulnerableRemaining = Math.Max(
+                        enemy.VulnerableRemaining,
+                        2.2f);
+                }
+            }
+        }
+
+        private void CastFrozenBulwark(
+            GameState state,
+            int star,
+            Float2 point)
+        {
+            int hits = (int)Math.Round(
+                StarValue(star, 3f, 5f, 8f)
+                * RelicMultiplier(
+                    state,
+                    "frozenBulwark",
+                    "defenseDurabilityMul"));
+            state.ShieldMaxHits += hits;
+            state.ShieldHits += hits;
+            float radius = StarValue(star, 90f, 130f, 180f);
+            float freeze = StarValue(star, 0.6f, 1.1f, 1.8f);
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                if (Float2.Distance(point, enemy.Position) <= radius)
+                {
+                    enemy.FrozenRemaining = Math.Max(
+                        enemy.FrozenRemaining,
+                        freeze);
+                }
+            }
+
+            if (star >= 6)
+            {
+                DamageArea(
+                    state,
+                    point,
+                    radius,
+                    BaseDamage(state) * 2f,
+                    -1,
+                    0f,
+                    0f);
+            }
+        }
+
+        private void CastHoarfrostTithe(GameState state, int star)
+        {
+            state.EconomyXpMultiplier = StarValue(
+                star,
+                1.15f,
+                1.3f,
+                1.5f);
+            state.EconomyDropRateMultiplier =
+                state.EconomyXpMultiplier;
+            state.EconomyBuffRemaining = Math.Max(
+                state.EconomyBuffRemaining,
+                StarValue(star, 3f, 4f, 5f));
+        }
+
         private float BaseDamage(GameState state)
         {
             return Math.Max(
@@ -1250,10 +1474,24 @@ namespace ProjectVL.Systems
         public void StepPassives(GameState state, float deltaTime)
         {
             CardCombatProfile profile = CardEffectResolver.Resolve(state);
-            state.DropRateMultiplier = profile.DropRateMultiplier;
+            if (state.EconomyBuffRemaining > 0f)
+            {
+                state.EconomyBuffRemaining = Math.Max(
+                    0f,
+                    state.EconomyBuffRemaining - deltaTime);
+                if (state.EconomyBuffRemaining <= 0f)
+                {
+                    state.EconomyXpMultiplier = 1f;
+                    state.EconomyDropRateMultiplier = 1f;
+                }
+            }
+
+            state.DropRateMultiplier = profile.DropRateMultiplier
+                * state.EconomyDropRateMultiplier;
             state.DropLifetimeMultiplier = profile.DropLifetimeMultiplier;
             state.ExpiryConvertRatio = profile.ExpiryConvertRatio;
-            state.XpMultiplier = profile.XpMultiplier;
+            state.XpMultiplier = profile.XpMultiplier
+                * state.EconomyXpMultiplier;
             state.BeamVisualRemaining = Math.Max(
                 0f,
                 state.BeamVisualRemaining - deltaTime);
@@ -1385,8 +1623,9 @@ namespace ProjectVL.Systems
             ApplyChainPulse(state, profile, deltaTime);
             ApplyFrostNova(state, profile, deltaTime);
             ApplyAvalanchePulse(state, profile, deltaTime);
-            ApplyStormcall(state, profile, deltaTime);
             ApplyPyrestorm(state, profile, deltaTime);
+            ApplyStormcall(state, profile, deltaTime);
+            ApplyPermafrost(state, profile, deltaTime);
             ApplyDecoyAura(state, profile);
             ApplyMirrorTurret(state, profile, deltaTime);
             ApplyHarvestMergePulse(state, profile);
@@ -1417,8 +1656,17 @@ namespace ProjectVL.Systems
 
                     bullet.HitEnemyIds.Add(enemy.Id);
                     Float2 hitPosition = enemy.Position;
+                    bool wasFrozen = enemy.FrozenRemaining > 0f;
                     DamageEnemy(state, enemy, bullet.Damage);
                     ApplyStatusEffects(enemy, bullet);
+                    if (wasFrozen
+                        && state.Enemies.Contains(enemy)
+                        && bullet.FrozenHitExecuteThresholdRatio > 0f
+                        && enemy.Hp / enemy.MaxHp
+                            <= bullet.FrozenHitExecuteThresholdRatio)
+                    {
+                        DamageEnemy(state, enemy, enemy.Hp);
+                    }
                     ApplyOnHitStun(state, enemy, bullet);
                     ApplyOnHitFireRate(state, bullet);
                     ApplyImpactAndSplitEffects(
@@ -1555,13 +1803,13 @@ namespace ProjectVL.Systems
                 enemy.FrozenRemaining > 0f
                 || enemy.StunnedRemaining > 0f
                 || enemy.SlowRemaining > 0f;
+            CardCombatProfile profile =
+                CardEffectResolver.Resolve(state);
             float vulnerability = enemy.VulnerableRemaining > 0f
                 ? enemy.VulnerableRatio
                 : 0f;
             float controlledBonus = killedWhileControlled
-                ? RelicScalingSystem.GlobalMax(
-                    state,
-                    "controlledDamageTakenMul")
+                ? profile.ControlledDamageTakenBonus
                 : 0f;
             enemy.Hp -= damage
                 * (1f + vulnerability)
@@ -1577,8 +1825,6 @@ namespace ProjectVL.Systems
                 state.Kills++;
                 _drops?.TrySpawnOnKill(state, enemy);
                 state.GrantReward(enemy.Reward);
-                CardCombatProfile profile =
-                    CardEffectResolver.Resolve(state);
                 float experience = enemy.XpReward
                     * profile.XpMultiplier
                     * state.KillXpBuffMultiplier;
@@ -1599,6 +1845,11 @@ namespace ProjectVL.Systems
                     state,
                     profile,
                     enemy.Position);
+                if (killedWhileFrozen
+                    && profile.FrozenKillRestore > 0f)
+                {
+                    state.RestoreHp(profile.FrozenKillRestore);
+                }
 
                 if (killedWhileFrozen
                     && profile.FrozenKillSplashRadius > 0f)
@@ -2287,6 +2538,8 @@ namespace ProjectVL.Systems
                 profile.PyrestormInterval;
             state.StormcallPulseRemaining =
                 profile.StormcallInterval;
+            state.PermafrostPulseRemaining =
+                profile.PermafrostInterval;
             state.GroundZones.Clear();
             state.ScorchAuraTickRemaining =
                 profile.ScorchAuraTickInterval;
@@ -2712,6 +2965,66 @@ namespace ProjectVL.Systems
 
             state.AvalanchePulseRemaining +=
                 profile.AvalancheInterval;
+        }
+
+        private void ApplyPermafrost(
+            GameState state,
+            CardCombatProfile profile,
+            float deltaTime)
+        {
+            if (profile.PermafrostInterval <= 0f)
+            {
+                return;
+            }
+
+            state.PermafrostPulseRemaining -= deltaTime;
+            if (state.PermafrostPulseRemaining > 0f)
+            {
+                return;
+            }
+
+            EnemyState target = FindTarget(state);
+            if (target == null)
+            {
+                return;
+            }
+
+            int count = Math.Max(1, profile.PermafrostZoneCount);
+            for (int index = 0; index < count; index++)
+            {
+                float offset = (index - (count - 1) / 2f)
+                    * profile.PermafrostRadius;
+                Float2 center = target.Position
+                    + new Float2(offset, 0f);
+                state.GroundZones.Add(new GroundZoneState(
+                    center,
+                    profile.PermafrostRadius,
+                    profile.PermafrostDuration,
+                    0.5f,
+                    0f,
+                    profile.PermafrostVulnerableRatio,
+                    0.8f,
+                    profile.PermafrostSlowRatio,
+                    0.8f));
+                if (profile.PermafrostFreezeDuration <= 0f)
+                {
+                    continue;
+                }
+
+                foreach (EnemyState enemy in state.Enemies)
+                {
+                    if (Float2.Distance(center, enemy.Position)
+                        <= profile.PermafrostRadius)
+                    {
+                        enemy.FrozenRemaining = Math.Max(
+                            enemy.FrozenRemaining,
+                            profile.PermafrostFreezeDuration);
+                    }
+                }
+            }
+
+            state.PermafrostPulseRemaining +=
+                profile.PermafrostInterval;
         }
 
         private void ApplyStormcall(

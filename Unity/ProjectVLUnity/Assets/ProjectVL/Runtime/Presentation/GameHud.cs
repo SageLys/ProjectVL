@@ -1125,6 +1125,16 @@ namespace ProjectVL.Presentation
                     return "电流护壁";
                 case "overcharge":
                     return "超载";
+                case "glacialSpike":
+                    return "冰川尖刺";
+                case "permafrost":
+                    return "永冻领域";
+                case "iceTomb":
+                    return "冰墓";
+                case "frozenBulwark":
+                    return "寒冰壁垒";
+                case "hoarfrostTithe":
+                    return "霜冻贡赋";
                 default:
                     return type;
             }

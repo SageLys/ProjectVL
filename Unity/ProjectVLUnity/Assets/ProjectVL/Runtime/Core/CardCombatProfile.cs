@@ -176,5 +176,14 @@ namespace ProjectVL.Core
         public float OnHitFireRateMultiplier { get; set; } = 1f;
         public float OnHitFireRateDuration { get; set; }
         public int OnHitFireRateMaxStacks { get; set; }
+        public float PermafrostInterval { get; set; }
+        public int PermafrostZoneCount { get; set; }
+        public float PermafrostRadius { get; set; }
+        public float PermafrostDuration { get; set; }
+        public float PermafrostSlowRatio { get; set; }
+        public float PermafrostVulnerableRatio { get; set; }
+        public float PermafrostFreezeDuration { get; set; }
+        public float FrozenKillRestore { get; set; }
+        public float FrozenHitExecuteThresholdRatio { get; set; }
     }
 }
