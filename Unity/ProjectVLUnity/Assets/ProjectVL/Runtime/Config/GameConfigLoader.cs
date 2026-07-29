@@ -50,6 +50,11 @@ namespace ProjectVL.Config
             return Load<CardAffixesConfig>("Config/cardAffixes");
         }
 
+        public static EvolutionTextConfig LoadEvolutionText()
+        {
+            return Load<EvolutionTextConfig>("Config/evolutionText");
+        }
+
         public static RelicsConfig LoadRelics()
         {
             return Load<RelicsConfig>("Config/relics");

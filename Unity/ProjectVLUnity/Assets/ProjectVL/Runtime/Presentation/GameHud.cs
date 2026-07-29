@@ -895,7 +895,7 @@ namespace ProjectVL.Presentation
                         panel.y + 105f,
                         optionWidth,
                         92f),
-                    $"{(char)('A' + i)}\n{RouteLabel(choice.Options[i])}",
+                    EvolutionLabel(choice.Options[i]),
                     _buttonStyle))
                 {
                     _controller.ChooseEvolution(i);
@@ -1134,24 +1134,16 @@ namespace ProjectVL.Presentation
             }
         }
 
-        private static string RouteLabel(string option)
+        private static string EvolutionLabel(string option)
         {
-            if (string.IsNullOrEmpty(option))
+            EvolutionOptionTextConfig text =
+                EvolutionTextCatalog.Default.Find(option);
+            if (text == null)
             {
-                return "未知";
+                return "未知路线";
             }
 
-            if (option.EndsWith("A") || option.EndsWith("A2"))
-            {
-                return "力量";
-            }
-
-            if (option.EndsWith("B") || option.EndsWith("B2"))
-            {
-                return "专注";
-            }
-
-            return "功能";
+            return text.name + "\n" + text.summary;
         }
 
         private void EnsureStyles()
@@ -1187,6 +1179,7 @@ namespace ProjectVL.Presentation
             {
                 fontSize = 13,
                 fontStyle = FontStyle.Bold,
+                wordWrap = true,
                 normal = { textColor = Color.white }
             };
         }
