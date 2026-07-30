@@ -58,7 +58,12 @@ namespace ProjectVL.Systems
                 speed,
                 definition.r,
                 definition.damage * multipliers.Damage,
-                xpReward: definition.xp);
+                xpReward: definition.xp,
+                label: definition.label,
+                color: definition.color,
+                sides: definition.sides,
+                knockbackResist: definition.knockbackResist,
+                ccResist: definition.ccResist);
             state.Enemies.Add(enemy);
             return enemy;
         }
@@ -82,7 +87,12 @@ namespace ProjectVL.Systems
                 definition.damage * multipliers.Damage,
                 EnemySpawnKind.WaveBoss,
                 definition.contactDps * multipliers.Damage,
-                xpReward: definition.xp);
+                xpReward: definition.xp,
+                label: definition.label,
+                color: definition.color,
+                sides: definition.sides,
+                knockbackResist: definition.knockbackResist,
+                ccResist: definition.ccResist);
             boss.ContactTickRemaining = _enemies.bossBehavior.contactWarmup;
             state.Enemies.Add(boss);
             return boss;
@@ -114,7 +124,12 @@ namespace ProjectVL.Systems
                 EnemySpawnKind.ValidationElite,
                 0f,
                 ToRunReward(validation.reward),
-                definition.xp);
+                definition.xp,
+                definition.label,
+                definition.color,
+                definition.sides,
+                definition.knockbackResist,
+                definition.ccResist);
             state.Enemies.Add(enemy);
             return enemy;
         }
@@ -148,7 +163,12 @@ namespace ProjectVL.Systems
                 EnemySpawnKind.Bounty,
                 0f,
                 null,
-                definition.xp);
+                definition.xp,
+                definition.label,
+                definition.color,
+                definition.sides,
+                definition.knockbackResist,
+                definition.ccResist);
             enemy.BountyEncounterId = encounter.Id;
             enemy.BountyRewardType = encounter.RewardCardType;
             state.Enemies.Add(enemy);

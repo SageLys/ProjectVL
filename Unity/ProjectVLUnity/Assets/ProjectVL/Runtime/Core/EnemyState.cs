@@ -12,6 +12,11 @@ namespace ProjectVL.Core
         public float Damage { get; }
         public float ContactDps { get; }
         public float XpReward { get; }
+        public string Label { get; }
+        public string Color { get; }
+        public int Sides { get; }
+        public float KnockbackResist { get; }
+        public float CcResist { get; }
         public EnemySpawnKind SpawnKind { get; internal set; }
         public int? BountyEncounterId { get; internal set; }
         public string BountyRewardType { get; internal set; }
@@ -49,7 +54,12 @@ namespace ProjectVL.Core
             EnemySpawnKind spawnKind = EnemySpawnKind.Regular,
             float contactDps = 0f,
             RunReward reward = null,
-            float xpReward = 1f)
+            float xpReward = 1f,
+            string label = null,
+            string color = null,
+            int sides = 4,
+            float knockbackResist = 0f,
+            float ccResist = 0f)
         {
             Id = id;
             Kind = kind;
@@ -63,6 +73,11 @@ namespace ProjectVL.Core
             ContactDps = contactDps;
             Reward = reward;
             XpReward = xpReward;
+            Label = label ?? kind.ToString();
+            Color = color ?? "#8793a3";
+            Sides = sides;
+            KnockbackResist = knockbackResist;
+            CcResist = ccResist;
             BossPhase = BossPhase.Approach;
             OrbitDirection = id % 2 == 0 ? 1 : -1;
         }

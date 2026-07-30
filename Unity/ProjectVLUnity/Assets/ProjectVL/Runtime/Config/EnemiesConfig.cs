@@ -56,6 +56,8 @@ namespace ProjectVL.Config
         public float damage;
         public int xp;
         public int sides;
+        public float knockbackResist;
+        public float ccResist;
         public float contactDps;
     }
 

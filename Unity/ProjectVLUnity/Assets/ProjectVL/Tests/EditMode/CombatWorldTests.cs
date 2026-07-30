@@ -162,11 +162,42 @@ namespace ProjectVL.Tests
         public void EnemyConfigMatchesWebBaseline()
         {
             EnemyTypeConfig normal = _enemies.types.normal;
+            EnemyTypeConfig tank = _enemies.types.tank;
+            EnemyTypeConfig boss = _enemies.types.boss;
 
             Assert.That(normal.hpBase, Is.EqualTo(38f));
             Assert.That(normal.hpPerWave, Is.EqualTo(12f));
             Assert.That(normal.speedBase, Is.EqualTo(24f));
+            Assert.That(normal.sides, Is.EqualTo(4));
+            Assert.That(tank.knockbackResist, Is.EqualTo(0.4f));
+            Assert.That(tank.ccResist, Is.EqualTo(0.25f));
+            Assert.That(boss.knockbackResist, Is.EqualTo(0.85f));
+            Assert.That(boss.ccResist, Is.EqualTo(0.5f));
             Assert.That(_waves.typeRoll.fastThreshold, Is.EqualTo(0.47f));
+        }
+
+        [Test]
+        public void SpawnedEnemiesCarryTheirConfiguredArchetype()
+        {
+            var factory = new EnemyFactory(
+                _combat,
+                _enemies,
+                _waves,
+                new ConstantRandomSource(0f));
+            _state.BeginWave(1);
+
+            EnemyState tank = factory.SpawnRegular(_state);
+            EnemyState boss = factory.SpawnWaveBoss(_state);
+
+            Assert.That(tank.Kind, Is.EqualTo(EnemyKind.Tank));
+            Assert.That(tank.Label, Is.EqualTo(_enemies.types.tank.label));
+            Assert.That(tank.Color, Is.EqualTo(_enemies.types.tank.color));
+            Assert.That(tank.Sides, Is.EqualTo(6));
+            Assert.That(tank.KnockbackResist, Is.EqualTo(0.4f));
+            Assert.That(tank.CcResist, Is.EqualTo(0.25f));
+            Assert.That(boss.Sides, Is.EqualTo(8));
+            Assert.That(boss.KnockbackResist, Is.EqualTo(0.85f));
+            Assert.That(boss.CcResist, Is.EqualTo(0.5f));
         }
 
         private EnemyState CreateEnemy(

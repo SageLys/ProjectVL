@@ -13,7 +13,9 @@
       "color": "#8793a3",
       "damage": 8,
       "xp": 1,
-      "sides": 4
+      "sides": 4,
+      "knockbackResist": 0,
+      "ccResist": 0
     },
     "fast": {
       "label": "Fast",
@@ -25,7 +27,9 @@
       "color": "#8793a3",
       "damage": 6,
       "xp": 1,
-      "sides": 3
+      "sides": 3,
+      "knockbackResist": 0,
+      "ccResist": 0
     },
     "tank": {
       "label": "Tank",
@@ -37,7 +41,9 @@
       "color": "#8793a3",
       "damage": 14,
       "xp": 2,
-      "sides": 6
+      "sides": 6,
+      "knockbackResist": 0.4,
+      "ccResist": 0.25
     },
     "boss": {
       "label": "Boss",
@@ -50,6 +56,8 @@
       "damage": 28,
       "xp": 5,
       "sides": 8,
+      "knockbackResist": 0.85,
+      "ccResist": 0.5,
       "contactDps": 14
     }
   },
