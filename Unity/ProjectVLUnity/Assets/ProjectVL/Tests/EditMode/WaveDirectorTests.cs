@@ -128,6 +128,68 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void SlowReducesBossApproachSpeed()
+        {
+            _state.BeginWave(1);
+            EnemyState boss = _factory.SpawnWaveBoss(_state);
+            boss.Position = new Float2(
+                _combat.turret.x + 300f,
+                _combat.turret.y);
+            boss.SlowRatio = 0.5f;
+            boss.SlowRemaining = 2f;
+            var combat = new CombatSystem(_combat, _enemies);
+
+            combat.StepEnemies(_state, 1f);
+
+            float expectedDistance = 300f - boss.Speed * 0.5f;
+            Assert.That(
+                Float2.Distance(
+                    boss.Position,
+                    new Float2(_combat.turret.x, _combat.turret.y)),
+                Is.EqualTo(expectedDistance).Within(0.001f));
+        }
+
+        [Test]
+        public void HardControlPausesBossContactDamage()
+        {
+            _state.BeginWave(1);
+            EnemyState boss = _factory.SpawnWaveBoss(_state);
+            boss.BossPhase = BossPhase.Contact;
+            boss.Position = new Float2(
+                _combat.turret.x + _enemies.bossBehavior.contactDistance,
+                _combat.turret.y);
+            boss.ContactTickRemaining = 0.1f;
+            boss.FrozenRemaining = 1f;
+            var combat = new CombatSystem(_combat, _enemies);
+
+            combat.StepEnemies(_state, 0.2f);
+
+            Assert.That(_state.Hp, Is.EqualTo(_state.MaxHp));
+            Assert.That(boss.ContactTickRemaining, Is.EqualTo(0.1f));
+        }
+
+        [Test]
+        public void LethalContactRetaliationKillsBossBeforePlayerDamage()
+        {
+            _state.BeginWave(1);
+            CardState thorns = _state.CreateCard("thorns", 3);
+            _state.Equipment[0] = thorns;
+            EnemyState boss = _factory.SpawnWaveBoss(_state);
+            boss.Hp = 1f;
+            boss.BossPhase = BossPhase.Contact;
+            boss.Position = new Float2(
+                _combat.turret.x + _enemies.bossBehavior.contactDistance,
+                _combat.turret.y);
+            boss.ContactTickRemaining = 0.1f;
+            var combat = new CombatSystem(_combat, _enemies);
+
+            combat.StepEnemies(_state, 0.11f);
+
+            Assert.That(_state.Enemies.Contains(boss), Is.False);
+            Assert.That(_state.Hp, Is.EqualTo(_state.MaxHp));
+        }
+
+        [Test]
         public void BossUsesWebBaselineValues()
         {
             Assert.That(_enemies.types.boss.contactDps, Is.EqualTo(14f));

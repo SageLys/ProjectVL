@@ -2163,8 +2163,13 @@ namespace ProjectVL.Systems
                     continue;
                 }
 
-                if (enemy.FrozenRemaining > 0f
-                    || enemy.StunnedRemaining > 0f)
+                bool hardControlled = enemy.FrozenRemaining > 0f
+                    || enemy.StunnedRemaining > 0f;
+                bool contactDamageContinues =
+                    enemy.SpawnKind == EnemySpawnKind.WaveBoss
+                    && enemy.BossPhase == BossPhase.Contact
+                    && !_enemies.bossBehavior.hardControlPausesDamage;
+                if (hardControlled && !contactDamageContinues)
                 {
                     continue;
                 }
@@ -4384,6 +4389,15 @@ namespace ProjectVL.Systems
             CardCombatProfile profile,
             float incomingDamage)
         {
+            ResolveBreachDamage(state, profile, incomingDamage);
+            ApplyBreachEffects(state, profile);
+        }
+
+        private void ResolveBreachDamage(
+            GameState state,
+            CardCombatProfile profile,
+            float incomingDamage)
+        {
             if (state.ShieldHits > 0)
             {
                 state.ShieldHits--;
@@ -4414,6 +4428,12 @@ namespace ProjectVL.Systems
                 incomingDamage
                 * (1f - profile.BreachReductionRatio)
                 / Math.Max(1f, state.DefenseDurabilityMultiplier));
+        }
+
+        private void ApplyBreachEffects(
+            GameState state,
+            CardCombatProfile profile)
+        {
             ApplyBreachReaction(state, profile);
             ApplyImpactBreachReaction(state, profile);
             ApplyThornsAdvancedBreachEffects(state, profile);
@@ -4858,7 +4878,7 @@ namespace ProjectVL.Systems
             float turretDistance = toTurret.Length;
             if (turretDistance <= behavior.contactDistance)
             {
-                EnterBossContact(boss, turret);
+                EnterBossContact(state, boss, profile, turret);
                 return;
             }
 
@@ -4880,17 +4900,24 @@ namespace ProjectVL.Systems
                 direction = (direction + tangent * curveWeight).Normalized();
             }
 
-            float step = boss.Speed * _enemies.defaults.enemySpeed * deltaTime;
+            float step = boss.Speed
+                * _enemies.defaults.enemySpeed
+                * (1f - boss.SlowRatio)
+                * deltaTime;
             if (step + 0.000001f >= turretDistance - behavior.contactDistance)
             {
-                EnterBossContact(boss, turret);
+                EnterBossContact(state, boss, profile, turret);
                 return;
             }
 
             boss.Position += direction * step;
         }
 
-        private void EnterBossContact(EnemyState boss, Float2 turret)
+        private void EnterBossContact(
+            GameState state,
+            EnemyState boss,
+            CardCombatProfile profile,
+            Float2 turret)
         {
             BossBehaviorConfig behavior = _enemies.bossBehavior;
             Float2 fromTurret = boss.Position - turret;
@@ -4903,6 +4930,7 @@ namespace ProjectVL.Systems
                 * behavior.contactDistance;
             boss.BossPhase = BossPhase.Contact;
             boss.ContactTickRemaining = behavior.contactWarmup;
+            ApplyBreachEffects(state, profile);
         }
 
         private void StepBossContact(
@@ -4938,7 +4966,27 @@ namespace ProjectVL.Systems
                 boss.ContactTickRemaining += behavior.contactTickInterval;
                 float damage =
                     boss.ContactDps * behavior.contactTickInterval;
-                HandleBreach(state, profile, damage);
+                if (profile.ThornsRatio > 0f)
+                {
+                    float reflectedDamage =
+                        damage * profile.ThornsRatio;
+                    if (reflectedDamage >= boss.Hp)
+                    {
+                        DamageEnemy(
+                            state,
+                            boss,
+                            reflectedDamage,
+                            true);
+                        break;
+                    }
+                }
+
+                ResolveBreachDamage(state, profile, damage);
+                if (!state.Enemies.Contains(boss))
+                {
+                    break;
+                }
+
                 if (profile.ThornsRatio > 0f)
                 {
                     DamageEnemy(
