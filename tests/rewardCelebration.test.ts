@@ -11,7 +11,10 @@ describe('reward celebration', () => {
   it('shows a non-blocking top banner and completes automatically without a button', () => {
     vi.useFakeTimers();
     const onComplete = vi.fn();
-    const celebration = createRewardCelebration(onComplete);
+    const arena = document.createElement('section');
+    arena.id = 'arena';
+    document.body.append(arena);
+    const celebration = createRewardCelebration(arena, onComplete);
     const root = document.querySelector<HTMLElement>('#rewardCelebration');
 
     celebration.show({
@@ -21,6 +24,7 @@ describe('reward celebration', () => {
     });
 
     expect(root?.classList.contains('show')).toBe(true);
+    expect(root?.parentElement).toBe(arena);
     expect(root?.classList.contains('modal')).toBe(false);
     expect(root?.querySelector('button')).toBeNull();
     expect(onComplete).not.toHaveBeenCalled();

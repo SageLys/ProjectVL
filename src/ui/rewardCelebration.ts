@@ -21,18 +21,17 @@ function resultLines(receipt: RewardReceipt): string[] {
   return lines.length ? lines : [resolveText('rewardReceipt.fallback') ?? '奖励已结算'];
 }
 
-export function createRewardCelebration(onComplete: () => void, durationMs = REWARD_CELEBRATION_MS) {
+export function createRewardCelebration(host: HTMLElement, onComplete: () => void, durationMs = REWARD_CELEBRATION_MS) {
   const root = document.createElement('aside');
   root.className = 'reward-celebration';
   root.id = 'rewardCelebration';
   root.setAttribute('role', 'status');
   root.setAttribute('aria-live', 'polite');
   const title = document.createElement('h2');
-  const desc = document.createElement('p');
   const result = document.createElement('div');
   result.className = 'reward-celebration-result';
-  root.append(title, desc, result);
-  document.body.append(root);
+  root.append(title, result);
+  host.append(root);
 
   let shown: RewardReceipt | null = null;
   let timer: number | null = null;
@@ -51,7 +50,6 @@ export function createRewardCelebration(onComplete: () => void, durationMs = REW
       shown = receipt;
       const copy = rewardCopy(receipt.rewardId);
       title.textContent = copy.name;
-      desc.textContent = copy.desc;
       result.replaceChildren(...resultLines(receipt).map(line => {
         const p = document.createElement('p');
         p.textContent = line;

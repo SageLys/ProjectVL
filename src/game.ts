@@ -143,7 +143,7 @@ const modals = createModals(refs, {
     start();
   },
 });
-const rewardCelebration = createRewardCelebration(() => dispatch(confirmRewardReceipt(state, config, rng)));
+const rewardCelebration = createRewardCelebration(refs.arena, () => dispatch(confirmRewardReceipt(state, config, rng)));
 
 const cardDetail = createCardDetailModal({
   onOpen() {
