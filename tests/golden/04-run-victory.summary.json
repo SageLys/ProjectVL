@@ -2695,14 +2695,6 @@
       "type": "decisionResolved"
     },
     {
-      "frame": 4278,
-      "type": "decisionOffered"
-    },
-    {
-      "frame": 4278,
-      "type": "decisionResolved"
-    },
-    {
       "frame": 4279,
       "type": "waveBaseRewardOffered"
     },
@@ -2789,9 +2781,9 @@
   ],
   "eventCounts": {
     "godOffer": 3,
-    "decisionOffered": 8,
+    "decisionOffered": 7,
     "godSelected": 3,
-    "decisionResolved": 8,
+    "decisionResolved": 7,
     "waveStart": 3,
     "activePoolCreated": 3,
     "rewardPointsGained": 215,

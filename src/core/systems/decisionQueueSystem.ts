@@ -25,7 +25,6 @@ function validChoices(decision: RunDecision): string[] {
     case 'godDraft':
     case 'godFocus':
     case 'waveBaseReward':
-    case 'recipePin':
       return decision.candidates;
     case 'evolutionBranch':
       return decision.options;

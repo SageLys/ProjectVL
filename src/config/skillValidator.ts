@@ -81,11 +81,12 @@ function effects(value: unknown, path: string, scope: EffectScope): void {
       const fanout = object(e.forEach, `${at}.forEach`);
       for (const key of Object.keys(fanout)) if (!['set', 'maxTargets', 'order', 'effects'].includes(key)) fail(`${at}.forEach.${key}`, '不允许的字段');
       const set = object(fanout.set, `${at}.forEach.set`);
-      if (!['enemiesWithStatus', 'ownZones', 'ownSummons'].includes(String(set.kind))) fail(`${at}.forEach.set.kind`, '非法集合');
+      if (!['enemiesWithStatus', 'enemiesWithoutStatus', 'ownZones', 'ownSummons'].includes(String(set.kind))) fail(`${at}.forEach.set.kind`, '非法集合');
       if (set.kind === 'enemiesWithStatus') {
         const statuses = Array.isArray(set.status) ? set.status : [set.status];
         if (!statuses.length || statuses.some(status => !STATUS_IDS.has(String(status)))) fail(`${at}.forEach.set.status`, '必须是合法状态或非空状态数组');
       }
+      if (set.kind === 'enemiesWithoutStatus' && !STATUS_IDS.has(String(set.status))) fail(`${at}.forEach.set.status`, '必须是合法状态');
       if (set.kind === 'ownSummons' && set.summonKind !== undefined && typeof set.summonKind !== 'string') fail(`${at}.forEach.set.summonKind`, '必须是字符串');
       if (!Number.isInteger(fanout.maxTargets) || Number(fanout.maxTargets) < 1 || Number(fanout.maxTargets) > 8) fail(`${at}.forEach.maxTargets`, '必须是 1..8 的整数');
       if (fanout.order !== undefined && fanout.order !== 'nearest' && fanout.order !== 'farthest') fail(`${at}.forEach.order`, '必须是 nearest/farthest');
@@ -144,7 +145,12 @@ function effects(value: unknown, path: string, scope: EffectScope): void {
       if (typeof radius.from !== 'number' || radius.from < 0 || typeof radius.to !== 'number' || radius.to < 0) fail(`${at}.params.radiusOverTime`, 'from/to 必须是非负数');
       if (radius.easing !== undefined && radius.easing !== 'linear') fail(`${at}.params.radiusOverTime.easing`, '仅支持 linear');
     }
-    if (Array.isArray(params.effects)) effects(params.effects, `${at}.params.effects`, scope);
+    for (const key of ['effects', 'onDeathEffects', 'intervalEffects', 'auraEffects']) {
+      const nestedScope = atom === 'charge' && scope.kind === 'equip'
+        ? { ...scope, trigger: 'interval' }
+        : scope;
+      if (Array.isArray(params[key])) effects(params[key], `${at}.params.${key}`, nestedScope);
+    }
   });
 }
 function bindings(value: unknown, path: string): void {
@@ -288,9 +294,9 @@ function affixPool(value: unknown, path: string, card: Record<string, unknown>):
     if (Number(candidate.step) <= 0) fail(`${candidatePath}.step`, '必须大于 0');
     if (Number(candidate.max) < Number(candidate.min)) fail(candidatePath, 'max 不得小于 min');
     if (Number(candidate.consumableDuration) < 0) fail(`${candidatePath}.consumableDuration`, '不得小于 0');
-    // B0 recipeOnly products deliberately expose the primary-god template while
-    // their graybox binding remains only burstDamage + statBuff. Formal B1–B3
-    // products restore scoped sinks; ordinary cards are never exempt here.
+    // Composite recipe products use the primary-god affix template. Their two-god
+    // mechanisms intentionally span multiple sinks, so sink reachability remains
+    // enforced on ordinary single-god cards only.
     if (card.recipeOnly !== true) validateAffixSink(card, candidate as unknown as CardAffixCandidateDef, candidatePath);
   });
 }
@@ -412,6 +418,14 @@ function validateCrossCardAndDesignFingerprints(cards: Record<string, unknown>[]
       }
     }
   }
+  for (const card of cards.filter(candidate => candidate.recipeOnly === true)) {
+    const cardId = String(card.id);
+    const equip = ((card.stars as Record<string, Record<string, unknown>>)?.['6']?.equip);
+    const fingerprint = exactBranchFingerprint(equip);
+    const prior = seen.get(fingerprint);
+    if (prior && prior.cardId !== cardId) fail('$.cards', `V15：跨卡分支完全同构 ${prior.cardId}/${prior.branchId} = ${cardId}/6★`);
+    seen.set(fingerprint, { cardId, branchId: '6★' });
+  }
   for (const fixtureId of Object.keys(fixtureCards)) {
     if (!cards.some(card => card.recipeOnly !== true && card.id === fixtureId)) fail('$.cards', `V16：设计指纹中的 ${fixtureId} 无实现卡`);
   }
@@ -489,6 +503,9 @@ function validateDesignRules(card: Record<string, unknown>, path: string): void 
     if (!Array.isArray(card.sourceGods) || card.sourceGods.length < 1
       || card.sourceGods.some(god => typeof god !== 'string' || !god)) {
       fail(`${path}.sourceGods`, 'recipeOnly 产物必须声明非空 sourceGods');
+    }
+    if (/灰盒|占位|B0/.test(JSON.stringify(card))) {
+      fail(path, '正式 recipeOnly 产物不得包含“灰盒”“占位”或“B0”');
     }
   } else if (card.primaryGod !== undefined || card.sourceGods !== undefined) {
     fail(path, 'primaryGod/sourceGods 仅允许 recipeOnly 产物声明');

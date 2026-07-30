@@ -289,10 +289,11 @@ function enemyHasStatus(enemy: Enemy | undefined, status: string): boolean {
 
 /** 绑定的 triggerParams 条件是否满足（requiresSource / requiresStatus）；两者都是通用过滤，非任何卡专属。 */
 function bindingConditionMet(binding: BindingDef, payload: TriggerPayload): boolean {
-  const tp = binding.triggerParams as { requiresSource?: string; requiresStatus?: string } | undefined;
+  const tp = binding.triggerParams as { requiresSource?: string; requiresStatus?: string | string[] } | undefined;
   if (!tp) return true;
   if (tp.requiresSource && tp.requiresSource !== payload.source) return false;
-  if (tp.requiresStatus && !enemyHasStatus(payload.enemy, tp.requiresStatus)) return false;
+  const statuses = Array.isArray(tp.requiresStatus) ? tp.requiresStatus : tp.requiresStatus ? [tp.requiresStatus] : [];
+  if (statuses.some(status => !enemyHasStatus(payload.enemy, status))) return false;
   return true;
 }
 
@@ -317,6 +318,8 @@ function baseCtx(
     scaleEnemy: payload.enemy,
     drop: payload.drop,
     merge: payload.merge,
+    eventDamage: payload.damage,
+    eventSource: payload.source,
   };
   if (at) {
     ctx.origin = selectEffectOrigin(ctx, at);
@@ -367,6 +370,7 @@ function fireTriggerBindings(state: GameState, config: Config, rng: Rng, trigger
     if (!bindingConditionMet(binding, payload)) continue;
     if (!cooldownReady(state, card.id, bindingIndex, binding)) continue;
     const ctx = baseCtx(state, config, rng, card.star, payload, { cardId: card.id, cardType: card.type, bindingIndex }, binding.at);
+    ctx.trigger = trigger;
     const dynamic = getModifiers(state);
     ctx.dynamic = { thornsRatio: dynamic.thornsRatio, auraReduction: dynamic.breachReduction };
     const hpBefore = totalEnemyHp(state);
@@ -393,6 +397,7 @@ export function tickIntervalBindings(state: GameState, config: Config, rng: Rng,
     const clock = (state.intervalClocks[key] ?? seconds) - dt;
     if (clock <= 0) {
       const ctx = baseCtx(state, config, rng, card.star, {}, { cardId: card.id, cardType: card.type, bindingIndex }, binding.at);
+      ctx.trigger = 'interval';
       const dynamic = getModifiers(state);
       ctx.dynamic = { thornsRatio: dynamic.thornsRatio, auraReduction: dynamic.breachReduction };
       const hpBefore = totalEnemyHp(state);

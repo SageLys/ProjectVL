@@ -134,7 +134,6 @@ export type RunDecision =
   | { kind: 'godDraft'; wave: number; candidates: GodId[]; role: 'main' | 'sub' }
   | { kind: 'godFocus'; wave: number; candidates: GodId[] }
   | { kind: 'evolutionBranch'; cardType: CardType; checkpointStar: number; options: string[]; provisionalCardId: number }
-  | { kind: 'recipePin'; candidates: string[] }
   | { kind: 'waveBaseReward'; wave: number; candidates: string[]; capped: string[] };
 
 export interface DecisionQueueState {
@@ -161,7 +160,8 @@ export interface GodPoolState {
 
 export interface RecipeRunState {
   compatibleRecipeIds: string[];
-  pinnedRecipeId: string | null;
+  /** Invisible deterministic assistance target; never exposed as a player choice. */
+  directedRecipeId: string | null;
   readyRecipeIds: string[];
   notifiedRecipeIds: string[];
   completedRecipeIds: string[];
@@ -462,14 +462,14 @@ export interface Zone {
 /** 召唤物：诱饵图腾 / 镜像炮台 / 环绕球。 */
 export interface Summon {
   id: number;
-  kind: 'decoy' | 'mirrorTurret' | 'orbital';
+  kind: 'decoy' | 'mirrorTurret' | 'orbital' | 'wall' | 'goldenTree' | 'rootSegment' | 'crystal' | 'pylon' | 'iceSpire' | 'iceDecoy';
   /** 装备态召唤物来源；无来源表示消耗态/其他临时召唤物，仍走自身 duration。 */
   sourceCardId?: number;
   sourceCardType?: CardType;
   sourceBindingIndex?: number;
   sourceEffectIndex?: number;
   /** 装备态重生/换波刷新复用的放置策略。 */
-  placement?: 'threatDirection';
+  placement?: 'threatDirection' | 'ring';
   distanceFromTurret?: number;
   x: number;
   y: number;
@@ -490,6 +490,15 @@ export interface Summon {
   /** 被摧毁时在新位置重生一次（decoy 5★ 修饰）；respawned 标记该次重生已用掉。 */
   respawnOnce?: boolean;
   respawned?: boolean;
+  chainRelay?: boolean;
+  onDeathEffects?: EffectDef[];
+  intervalEffects?: EffectDef[];
+  intervalSeconds?: number;
+  intervalTimer?: number;
+  auraRadius?: number;
+  auraEffects?: EffectDef[];
+  buffLevel?: number;
+  baseDamage?: number;
 }
 
 /** 炮台护盾：按可吸收突破次数计。 */
@@ -595,6 +604,7 @@ export interface GameState {
     killsAtLastRelease: number;
     pickupsThisWave: number;
     auraOrigins: Record<string, { x: number; y: number; startedAt: number }>;
+    charges: Record<string, number>;
   };
   nextCardId: number;
   nextDropId: number;

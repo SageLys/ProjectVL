@@ -64,7 +64,7 @@ export function createInitialState(difficultyId: DifficultyId = 'hell'): GameSta
     },
     recipes: {
       compatibleRecipeIds: [],
-      pinnedRecipeId: null,
+      directedRecipeId: null,
       readyRecipeIds: [],
       notifiedRecipeIds: [],
       completedRecipeIds: [],
@@ -103,6 +103,7 @@ export function createInitialState(difficultyId: DifficultyId = 'hell'): GameSta
       killsAtLastRelease: 0,
       pickupsThisWave: 0,
       auraOrigins: {},
+      charges: {},
     },
     nextCardId: 1,
     nextDropId: 1,

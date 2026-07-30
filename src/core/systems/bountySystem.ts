@@ -63,11 +63,11 @@ function weightedRewardChoice(state: GameState, candidates: CardType[], rng: Rng
   const directorActive = state.wave >= cfg.economy.evolution.assistWindowWaves[0]
     && state.wave <= cfg.economy.evolution.assistWindowWaves[1]
     && !state.recipes.assistClosed;
-  const pinned = directorActive
-    ? cfg.evolutionRecipes.recipes.find(recipe => recipe.id === state.recipes.pinnedRecipeId)
+  const directed = directorActive
+    ? cfg.evolutionRecipes.recipes.find(recipe => recipe.id === state.recipes.directedRecipeId)
     : undefined;
-  const recipeMaterials = new Set(pinned
-    ? [pinned.ingredientVariable.cardId, pinned.ingredientAnchor.cardId]
+  const recipeMaterials = new Set(directed
+    ? [directed.ingredientVariable.cardId, directed.ingredientAnchor.cardId]
     : []);
   const weights = candidates.map(type => {
     let weight = 1;

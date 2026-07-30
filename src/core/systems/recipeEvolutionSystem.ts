@@ -5,7 +5,6 @@ import { reconcileMaxHp } from '../stats';
 import type { Card, CardRef, Config, GameEvent, GameState, RecipeLineage, Rng, SlotKind } from '../types';
 import { autoMergeCards, commitMerge } from './cardSystem';
 import { createCardWithAffixes } from './cardAffixSystem';
-import { enqueueDecision, registerDecisionResolver } from './decisionQueueSystem';
 
 interface LocatedCard extends CardRef {
   card: Card;
@@ -83,38 +82,17 @@ export function recipeProgress(state: GameState, recipeId: string): [number, num
     : [0, 0];
 }
 
-export function setPinnedRecipe(state: GameState, recipeId: string | null): boolean {
+export function setDirectedRecipe(state: GameState, recipeId: string | null): boolean {
   if (recipeId !== null && !state.recipes.compatibleRecipeIds.includes(recipeId)) return false;
-  state.recipes.pinnedRecipeId = recipeId;
+  state.recipes.directedRecipeId = recipeId;
   state.normalDropDirector.roleBag.length = 0;
   state.bountyDirector.rewardBag.length = 0;
   return true;
 }
 
-function recipePinResolver(
-  state: GameState,
-  _config: Config,
-  _rng: Rng,
-  decision: import('../types').RunDecision,
-  choice: string,
-): GameEvent[] {
-  if (decision.kind !== 'recipePin') return [];
-  setPinnedRecipe(state, choice === '__skip__' ? null : choice);
-  return [];
-}
-
 export function initializeRecipesAfterRosterLock(state: GameState): GameEvent[] {
   state.recipes.compatibleRecipeIds = getRosterCompatibleRecipes(state).map(recipe => recipe.id);
-  registerDecisionResolver('recipePin', recipePinResolver);
-  const events = recomputeRecipeReadiness(state);
-  if (!state.recipes.compatibleRecipeIds.length) return events;
-  return [
-    ...events,
-    ...enqueueDecision(state, {
-      kind: 'recipePin',
-      candidates: [...state.recipes.compatibleRecipeIds, '__skip__'],
-    }),
-  ];
+  return recomputeRecipeReadiness(state);
 }
 
 /** Deterministically selects the lowest-star live pair for every ready, unfinished recipe. */
@@ -292,6 +270,7 @@ export function evolveRecipePair(
 
 /** Compatibility query for presentation code; recipe execution is drag-only. */
 export function availableRecipes(state: GameState): Array<{ recipeId: string; a: CardRef; b: CardRef }> {
+  if (executionRejection(state, '') !== null) return [];
   return getActionableRecipes(state).map(item => ({ recipeId: item.recipeId, a: item.variable, b: item.anchor }));
 }
 
@@ -311,17 +290,18 @@ export function confirmRecipe(
   return evolveRecipePair(state, config, rng, recipeId, a, b);
 }
 
-/** Director hook; later stages add pool, weight and checkpoint interventions here. */
+/** Hidden deterministic director target; this selection never consumes RNG. */
 export function updateRecipeDirector(state: GameState): GameEvent[] {
   if (state.wave >= cfg.economy.evolution.assistWindowWaves[0]
-    && state.recipes.pinnedRecipeId === null
+    && !state.recipes.assistClosed
+    && state.recipes.directedRecipeId === null
     && state.recipes.compatibleRecipeIds.length) {
     const ranked = [...state.recipes.compatibleRecipeIds].sort((left, right) => {
       const a = recipeProgress(state, left);
       const b = recipeProgress(state, right);
       return (b[0] + b[1]) - (a[0] + a[1]) || left.localeCompare(right);
     });
-    setPinnedRecipe(state, ranked[0]);
+    setDirectedRecipe(state, ranked[0]);
   }
   return recomputeRecipeReadiness(state);
 }

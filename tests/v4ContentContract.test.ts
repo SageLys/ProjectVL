@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { cfg } from '../src/config';
 import { validateGodConfig } from '../src/config/godValidator';
 import { validateSkillsConfig } from '../src/config/skillValidator';
-import { ATOM_NAMES } from '../src/core/effects/atomContract';
+import { ATOM_NAMES, nestedEffectsOf } from '../src/core/effects/atomContract';
 import type { EffectDef } from '../src/core/effects/defs';
 import { resolveCardBindings, resolveConsumableTier } from '../src/core/effects/interpreter';
 import { texts } from '../src/data';
@@ -14,8 +14,9 @@ const OLD_PRODUCTS = [
 
 function walk(effects: readonly EffectDef[]): EffectDef[] {
   return effects.flatMap(effect => {
-    const nested = (effect.params as Record<string, unknown> | undefined)?.effects;
-    return [effect, ...(Array.isArray(nested) ? walk(nested as EffectDef[]) : [])];
+    const nested = nestedEffectsOf(effect) as EffectDef[];
+    const fanout = (effect as EffectDef & { forEach?: { effects?: EffectDef[] } }).forEach?.effects ?? [];
+    return [effect, ...walk([...nested, ...fanout])];
   });
 }
 
@@ -41,7 +42,7 @@ function effectParams(cardId: string, star: 3 | 5, optionId: string, atom: strin
 }
 
 describe('v4 full-card matrix contract', () => {
-  it('loads exactly 35 base cards plus 25 B0 recipe products and rejects every retired product', () => {
+  it('loads exactly 35 base cards plus 25 formal recipe products and rejects every retired product', () => {
     const base = cfg.skills.cards.filter(card => !card.recipeOnly);
     const products = cfg.skills.cards.filter(card => card.recipeOnly);
     expect(base).toHaveLength(35);
@@ -91,8 +92,24 @@ describe('v4 full-card matrix contract', () => {
     }
   });
 
-  it('binds each B0 output to one recipe and only the approved graybox payload', () => {
+  it('binds every output to one formal, distinct recipe payload with complete copy', () => {
+    const expected: Record<string, string[]> = {
+      stormLattice: ['pierce', 'groundZone', 'chain'], glacialEpoch: ['groundZone', 'freeze', 'knockback'],
+      volcanoCore: ['groundZone', 'mortarMorph', 'charge'], aegisCitadel: ['summon', 'breachReduction'],
+      goldenGrove: ['summon', 'summonBuff', 'extraDrop'], thunderRime: ['aura', 'burstDamage', 'freeze'],
+      emberSpark: ['dot', 'chain', 'groundZone'], voltBastion: ['shield', 'charge', 'aura'],
+      ampereFlow: ['dropRateMul', 'vulnerable', 'extraDrop'], rimeShell: ['freeze', 'split', 'dot'],
+      tombSpire: ['thorns', 'summon', 'freeze'], stasisLedger: ['mergePulse', 'slow', 'extraDrop'],
+      emberMoat: ['shield', 'aura', 'novaOnBreak'], emberYield: ['dot', 'extraDrop', 'statBuff'],
+      rootLoom: ['mergePulse', 'summon', 'summonBuff'], crystalRelay: ['chain', 'summon', 'slow'],
+      solarPiercer: ['pierce', 'groundZone', 'dot'], pylonCircuit: ['summon', 'chain', 'vulnerable'],
+      midasChain: ['chain', 'extraDrop'], steamBurst: ['aura', 'dot', 'knockback'],
+      glacialEffigy: ['mortarMorph', 'summon', 'freeze'], frostDew: ['aura', 'restore', 'extraDrop'],
+      wrathMortar: ['charge', 'mortarMorph', 'groundZone'], pyreBrand: ['dot', 'focusPriority', 'burstDamage'],
+      fortuneThorns: ['thorns', 'charge', 'extraDrop'],
+    };
     const referenceCount = new Map<string, number>();
+    const fingerprints = new Set<string>();
     for (const recipe of cfg.evolutionRecipes.recipes) {
       referenceCount.set(recipe.outputCardId, (referenceCount.get(recipe.outputCardId) ?? 0) + 1);
     }
@@ -102,17 +119,15 @@ describe('v4 full-card matrix contract', () => {
       expect(product.primaryGod, product.id).toBeTruthy();
       expect(product.sourceGods?.length, product.id).toBeGreaterThanOrEqual(1);
       expect(referenceCount.get(product.id), product.id).toBe(1);
-      expect(product.stars['6'].equip, product.id).toEqual([
-        expect.objectContaining({
-          trigger: 'interval',
-          triggerParams: { seconds: 2.5 },
-          effects: [expect.objectContaining({ atom: 'burstDamage' })],
-        }),
-        expect.objectContaining({
-          trigger: 'passive',
-          effects: [expect.objectContaining({ atom: 'statBuff' })],
-        }),
-      ]);
+      const atoms = new Set<string>(product.stars['6'].equip.flatMap(binding => walk(binding.effects)).map(effect => effect.atom));
+      for (const atom of expected[product.id]) expect(atoms.has(atom), `${product.id}:${atom}`).toBe(true);
+      const fingerprint = JSON.stringify(product.stars['6'].equip);
+      expect(fingerprints.has(fingerprint), product.id).toBe(false);
+      fingerprints.add(fingerprint);
+      expect(product.affixPool?.count, product.id).toBe(2);
+      expect(product.consumable.anchors['1'], product.id).toEqual(product.consumable.anchors['6']);
+      const playerCopy = (texts.cards as Record<string, unknown>)[product.id];
+      expect(`${JSON.stringify(product)}${JSON.stringify(playerCopy)}`, product.id).not.toMatch(/灰盒|占位|B0/);
     }
   });
 

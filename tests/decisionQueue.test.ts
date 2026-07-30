@@ -8,11 +8,11 @@ describe('decision queue', () => {
   it('queues and resolves choices in order', () => {
     const state = freshState();
     registerDecisionResolver('godFocus', () => []);
-    registerDecisionResolver('recipePin', () => []);
+    registerDecisionResolver('godFocus', () => []);
     expect(enqueueDecision(state, { kind: 'godFocus', wave: 2, candidates: ['storm', 'winter'] })).toEqual([{ type: 'decisionOffered', kind: 'godFocus' }]);
-    enqueueDecision(state, { kind: 'recipePin', candidates: ['recipe1'] });
-    expect(resolveCurrentDecision(state, createDefaultConfig(), constRng(0), 'storm')).toContainEqual({ type: 'decisionOffered', kind: 'recipePin' });
-    expect(resolveCurrentDecision(state, createDefaultConfig(), constRng(0), 'recipe1')).toContainEqual({ type: 'decisionResolved', kind: 'recipePin', choice: 'recipe1' });
+    enqueueDecision(state, { kind: 'godFocus', wave: 3, candidates: ['inferno'] });
+    expect(resolveCurrentDecision(state, createDefaultConfig(), constRng(0), 'storm')).toContainEqual({ type: 'decisionOffered', kind: 'godFocus' });
+    expect(resolveCurrentDecision(state, createDefaultConfig(), constRng(0), 'inferno')).toContainEqual({ type: 'decisionResolved', kind: 'godFocus', choice: 'inferno' });
     expect(state.decisions.current).toBeNull();
   });
   it('pauses updates for decisions but not reward celebrations', () => {

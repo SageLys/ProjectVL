@@ -78,11 +78,11 @@ function protectedCards(state: GameState): CardType[] {
   const directorActive = state.wave >= cfg.economy.evolution.assistWindowWaves[0]
     && state.wave <= cfg.economy.evolution.assistWindowWaves[1]
     && !state.recipes.assistClosed;
-  const pinned = directorActive
-    ? cfg.evolutionRecipes.recipes.find(recipe => recipe.id === state.recipes.pinnedRecipeId)
+  const directed = directorActive
+    ? cfg.evolutionRecipes.recipes.find(recipe => recipe.id === state.recipes.directedRecipeId)
     : undefined;
-  const recipeMaterials = pinned
-    ? [pinned.ingredientVariable.cardId, pinned.ingredientAnchor.cardId]
+  const recipeMaterials = directed
+    ? [directed.ingredientVariable.cardId, directed.ingredientAnchor.cardId]
       .filter(type => roster.includes(type))
       .slice(0, cfg.economy.evolution.recipeProtectionSlots)
     : [];

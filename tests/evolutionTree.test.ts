@@ -169,18 +169,18 @@ describe('single-card evolution tree', () => {
 
   it('queues behind an existing build decision without overwriting either decision', () => {
     const state = freshState();
-    enqueueDecision(state, { kind: 'recipePin', candidates: ['recipe1'] });
+    enqueueDecision(state, { kind: 'godFocus', wave: 2, candidates: ['storm'] });
     state.cards[0] = card('pierce', 2);
     state.cards[1] = card('pierce', 2);
     autoMergeCards(state, config, rng);
 
-    expect(state.decisions.current).toEqual({ kind: 'recipePin', candidates: ['recipe1'] });
+    expect(state.decisions.current).toEqual({ kind: 'godFocus', wave: 2, candidates: ['storm'] });
     expect(state.decisions.pending).toHaveLength(1);
     expect(state.decisions.pending[0]).toMatchObject({
       kind: 'evolutionBranch',
       options: ['pierceA', 'pierceB', 'pierceC'],
     });
-    resolveCurrentDecision(state, config, rng, 'recipe1');
+    resolveCurrentDecision(state, config, rng, 'storm');
     expect(state.decisions.current).toMatchObject({ kind: 'evolutionBranch' });
     resolveCurrentDecision(state, config, rng, 'pierceB');
     expect(state.decisions.current).toBeNull();

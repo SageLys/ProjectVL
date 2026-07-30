@@ -152,7 +152,7 @@ function trackedRecipeMaterials(state: GameState): CardType[] {
   if (state.wave < cfg.economy.evolution.assistWindowWaves[0]
     || state.wave > cfg.economy.evolution.assistWindowWaves[1]
     || state.recipes.assistClosed) return [];
-  const recipe = cfg.evolutionRecipes.recipes.find(item => item.id === state.recipes.pinnedRecipeId);
+  const recipe = cfg.evolutionRecipes.recipes.find(item => item.id === state.recipes.directedRecipeId);
   return recipe ? [recipe.ingredientVariable.cardId, recipe.ingredientAnchor.cardId] : [];
 }
 

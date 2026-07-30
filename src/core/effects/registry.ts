@@ -6,7 +6,7 @@
 // 纯修饰类原子（掉率乘数/反伤/换形等）在 interpreter.getModifiers 聚合，这里是 no-op。
 import { cfg } from '../../config';
 import type { AttackInstance, AttackRider, Bullet, CardType, Config, Enemy, GameEvent, GameState, GroundDrop, Rng, Summon, Zone } from '../types';
-import type { AtomicEffectDef, AtomName, EffectDef, ForEachEffectDef, OriginSelector, ScaleByDef } from './defs';
+import type { AtomicEffectDef, AtomName, EffectDef, ForEachEffectDef, OriginSelector, ScaleByDef, Trigger } from './defs';
 import {
   atomBooleanDefault, atomNumberDefault, atomRecordDefault, atomStringDefault, effectParams,
   type AtomDefaultOptions,
@@ -57,6 +57,9 @@ export interface EffectCtx {
   merge?: { cardType: CardType; resultStar: number };
   /** Snapshot supplied by the interpreter so scaleBy never reaches back into card arbitration. */
   dynamic?: { thornsRatio: number; auraReduction: number };
+  trigger?: Trigger;
+  eventDamage?: number;
+  eventSource?: string;
 }
 
 export type AtomHandler = (ctx: EffectCtx, params: Record<string, unknown>) => void;
@@ -214,6 +217,9 @@ function forEachMembers(ctx: EffectCtx, effect: ForEachEffectDef): Array<{ x: nu
     const statuses = Array.isArray(set.status) ? set.status : [set.status];
     members = ctx.state.enemies.filter(enemy => statuses.every(status => hasStatus(enemy, status)))
       .map(enemy => ({ x: enemy.x, y: enemy.y, enemy }));
+  } else if (set.kind === 'enemiesWithoutStatus') {
+    members = ctx.state.enemies.filter(enemy => !hasStatus(enemy, set.status))
+      .map(enemy => ({ x: enemy.x, y: enemy.y, enemy }));
   } else if (set.kind === 'ownZones') {
     members = ctx.state.zones.filter(zone => zone.sourceCardId === ctx.sourceCardId
       && zone.sourceBindingIndex === ctx.sourceBindingIndex).map(zone => ({ x: zone.x, y: zone.y }));
@@ -298,7 +304,11 @@ function makeZone(ctx: EffectCtx, atom: 'aura' | 'groundZone', p: Record<string,
 function chainFrom(ctx: EffectCtx, p: Record<string, unknown>, start: Enemy, initialHit: boolean): void {
   const searchRange = cNum('chain', p, 'searchRange');
   const retention = cNum('chain', p, 'damageRetention');
-  let dmg = ctx.attack?.damage ?? (ctx.bullet ? ctx.bullet.damage : ctx.baseDamage * cNum('chain', p, 'damageMul'));
+  const relayCount = p.preferRelay === true
+    ? ctx.state.summons.filter(s => s.chainRelay && Math.hypot(s.x - start.x, s.y - start.y) <= searchRange).length
+    : 0;
+  const relayBonus = Math.min(cNum('chain', p, 'relayBonusCap'), relayCount * cNum('chain', p, 'relayDamageBonus'));
+  let dmg = (ctx.attack?.damage ?? (ctx.bullet ? ctx.bullet.damage : ctx.baseDamage * cNum('chain', p, 'damageMul'))) * (1 + relayBonus);
   const visited = new Set<number>([start.id]);
   let current = start;
   if (initialHit) {
@@ -320,7 +330,7 @@ function chainFrom(ctx: EffectCtx, p: Record<string, unknown>, start: Enemy, ini
 /** chain 专用状态传播：直接走 statusSystem，不经 fireTrigger('onHit')。 */
 function spreadChainStatus(ctx: EffectCtx, p: Record<string, unknown>, enemy: Enemy): void {
   const status = p.spreadStatus;
-  if (status !== 'vulnerable' && status !== 'slow' && status !== 'dot') return;
+  if (status !== 'vulnerable' && status !== 'slow' && status !== 'dot' && status !== 'brand') return;
   const raw = p.spreadParams;
   const params = raw && typeof raw === 'object' && !Array.isArray(raw)
     ? raw as Record<string, unknown>
@@ -329,7 +339,8 @@ function spreadChainStatus(ctx: EffectCtx, p: Record<string, unknown>, enemy: En
   const duration = typeof params.duration === 'number' ? params.duration : 2;
   if (status === 'vulnerable') applyVulnerable(enemy, ratio, duration);
   else if (status === 'slow') applySlow(enemy, ratio, duration);
-  else applyDot(enemy, ctx.baseDamage * ratio, duration);
+  else if (status === 'dot') applyDot(enemy, ctx.baseDamage * ratio, duration);
+  else applyBrand(enemy, ratio, duration);
 }
 
 /** 命中点爆炸（aoeOnHit / mortar 落点共用）。 */
@@ -454,7 +465,7 @@ function configureSummon(summon: Summon, ctx: EffectCtx, p: Record<string, unkno
   summon.remaining = ctx.sourceCardId != null
     ? undefined
     : (cappedDuration(ctx, num(p, 'duration', ctx.duration ?? atomNumberDefault('summon', 'duration'))) || undefined);
-  summon.placement = ctx.sourceCardId != null && p.placement === 'threatDirection' ? 'threatDirection' : undefined;
+  summon.placement = ctx.sourceCardId != null && (p.placement === 'threatDirection' || p.placement === 'ring') ? p.placement : undefined;
   summon.distanceFromTurret = summon.placement ? cNum('summon', p, 'distanceFromTurret') : undefined;
   summon.tauntRadius = cNum('summon', p, 'tauntRadius', { variant: kind });
   summon.priorityWeight = cNum('summon', p, 'priorityWeight');
@@ -470,6 +481,15 @@ function configureSummon(summon: Summon, ctx: EffectCtx, p: Record<string, unkno
     : null;
   summon.respawnOnce = cBool('summon', p, 'respawnOnce');
   summon.respawned = false;
+  summon.chainRelay = cBool('summon', p, 'chainRelay');
+  summon.onDeathEffects = Array.isArray(p.onDeathEffects) ? structuredClone(p.onDeathEffects as EffectDef[]) : undefined;
+  summon.intervalEffects = Array.isArray(p.intervalEffects) ? structuredClone(p.intervalEffects as EffectDef[]) : undefined;
+  summon.intervalSeconds = cNum('summon', p, 'intervalSeconds');
+  summon.intervalTimer = summon.intervalSeconds;
+  summon.auraRadius = cNum('summon', p, 'auraRadius');
+  summon.auraEffects = Array.isArray(p.auraEffects) ? structuredClone(p.auraEffects as EffectDef[]) : undefined;
+  summon.buffLevel ??= 0;
+  summon.baseDamage = ctx.baseDamage;
 }
 
 export const ATOMS: Record<AtomName, AtomHandler> = {
@@ -636,7 +656,7 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
     for (const e of targets(ctx, 'dot', p)) applyDot(e, perTick / tickInterval, duration);
   },
   summon(ctx, p) {
-    const kind = cStr('summon', p, 'kind') as 'decoy' | 'mirrorTurret' | 'orbital';
+    const kind = cStr('summon', p, 'kind') as Summon['kind'];
     if (ctx.sourceCardId != null && ctx.sourceBindingIndex != null) {
       if (p.replacesEarlier === true) {
         for (let i = ctx.state.summons.length - 1; i >= 0; i--) {
@@ -647,20 +667,28 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
           }
         }
       }
+      // Equipment-triggered summons share one cap per source card and summon kind.
+      // This lets independent bindings (pickup/interval/wave start) replenish the
+      // same formation without exceeding the configured ceiling.
       const matches = ctx.state.summons.filter(s =>
-        s.sourceCardId === ctx.sourceCardId && s.sourceBindingIndex === ctx.sourceBindingIndex);
-      const summon = matches[0] ?? {
-        id: ctx.state.nextSummonId++, kind, x: ctx.origin.x, y: ctx.origin.y,
-        hp: 0, maxHp: 0, fireInterval: 0,
-        sourceCardId: ctx.sourceCardId, sourceCardType: ctx.sourceCardType,
-        sourceBindingIndex: ctx.sourceBindingIndex, sourceEffectIndex: ctx.sourceEffectIndex,
-      };
-      configureSummon(summon, ctx, p, equipmentSummonPosition(ctx, p));
-      if (!matches.length) ctx.state.summons.push(summon);
-      // 装备态每(卡,绑定)严格单实例；重复实例由刷新动作就地收敛。
-      for (let i = matches.length - 1; i >= 1; i--) {
-        const index = ctx.state.summons.indexOf(matches[i]);
-        if (index >= 0) ctx.state.summons.splice(index, 1);
+        s.sourceCardId === ctx.sourceCardId && s.kind === kind);
+      const maxCount = cNum('summon', p, 'maxCount');
+      const createCount = Math.min(cNum('summon', p, 'count'), Math.max(0, maxCount - matches.length));
+      for (let i = 0; i < createCount; i++) {
+        const formationIndex = matches.length + i;
+        const summon: Summon = {
+          id: ctx.state.nextSummonId++, kind, x: ctx.origin.x, y: ctx.origin.y,
+          hp: 0, maxHp: 0, fireInterval: 0,
+          sourceCardId: ctx.sourceCardId, sourceCardType: ctx.sourceCardType,
+          sourceBindingIndex: ctx.sourceBindingIndex, sourceEffectIndex: ctx.sourceEffectIndex,
+        };
+        let position = equipmentSummonPosition(ctx, p);
+        if (p.placement === 'ring') {
+          const angle = formationIndex / Math.max(1, maxCount) * Math.PI * 2;
+          position = { x: cfg.combat.turret.x + Math.cos(angle) * cNum('summon', p, 'distanceFromTurret'), y: cfg.combat.turret.y + Math.sin(angle) * cNum('summon', p, 'distanceFromTurret') };
+        }
+        configureSummon(summon, ctx, p, position);
+        ctx.state.summons.push(summon);
       }
       return;
     }
@@ -703,6 +731,7 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
       const type = selectUniformCardType(ctx.state, ctx.rng);
       spawnGroundDrop(ctx.state, ctx.config, ctx.rng, x, y, type, star, 'skillExtra');
       recordCardDropShown(ctx.state, type, 'skillExtra');
+      if (p.secure === true) ctx.state.groundDrops[ctx.state.groundDrops.length - 1].secure = true;
     }
   },
   expiryConvert: noopModifier,
@@ -797,6 +826,36 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
       remaining: duration,
     });
     if (stat === 'maxHpAdd') reconcileMaxHp(ctx.state);
+  },
+  charge(ctx, p) {
+    const key = `charge:${ctx.sourceCardId ?? 'consume'}:${cStr('charge', p, 'chargeKey')}`;
+    const current = ctx.state.effectRuntime.charges[key] ?? 0;
+    const by = cStr('charge', p, 'by');
+    const triggerMatches = (by === 'breach' && ctx.trigger === 'onBreach')
+      || (by === 'shieldAbsorb' && ctx.trigger === 'onBreach' && ctx.eventDamage === 0)
+      || (by === 'killWithSource:dot' && ctx.trigger === 'onKill' && ctx.eventSource === 'dot')
+      || (by === 'thornsDamage' && ctx.eventSource === 'thorns');
+    let next = current;
+    if (triggerMatches) next = Math.min(cNum('charge', p, 'max'), next + cNum('charge', p, 'perEvent'));
+    const releaseAt = cStr('charge', p, 'releaseAt');
+    const release = (releaseAt === 'full' && next >= cNum('charge', p, 'max'))
+      || (releaseAt === 'interval' && ctx.trigger === 'interval' && next > 0);
+    ctx.state.effectRuntime.charges[key] = release ? 0 : next;
+    if (release && Array.isArray(p.effects)) runEffects(ctx, p.effects as EffectDef[]);
+  },
+  summonBuff(ctx, p) {
+    // `kind` is required by validation, so it intentionally has no contract
+    // default. Avoid asking the default resolver for a value that cannot exist.
+    const kind = String(p.kind);
+    let candidates = ctx.state.summons.filter(s => s.kind === kind && s.sourceCardId === ctx.sourceCardId);
+    candidates.sort((a, b) => Math.hypot(a.x - ctx.origin.x, a.y - ctx.origin.y) - Math.hypot(b.x - ctx.origin.x, b.y - ctx.origin.y) || a.id - b.id);
+    if (cStr('summonBuff', p, 'target') !== 'all') candidates = candidates.slice(0, 1);
+    for (const summon of candidates) {
+      if ((summon.buffLevel ?? 0) >= cNum('summonBuff', p, 'capLevels')) continue;
+      summon.buffLevel = (summon.buffLevel ?? 0) + 1;
+      summon.damageRatio = (summon.damageRatio ?? 0) * cNum('summonBuff', p, 'damageMul');
+      summon.auraRadius = (summon.auraRadius ?? 0) + cNum('summonBuff', p, 'radiusAdd');
+    }
   },
 };
 

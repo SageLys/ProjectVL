@@ -10,7 +10,6 @@ import { resolveCardVisual } from '../presentation/cardVisual';
 import { glyphToSvg } from '../presentation/skillGeometry';
 import { cardDisplayName, formatAffixRoll } from './cardMeta';
 import { ATOM_LABELS, formatBinding, formatEffect, type EffectTextBlock, type EffectTextLine } from './effectText';
-import { fmt } from './format';
 
 export interface EffectSection {
   title: string;
@@ -53,36 +52,8 @@ export interface SkillTreeNode {
   locked: boolean;
 }
 
-export interface RecipeViewModel {
-  ingredientA: string;
-  ingredientB: string;
-  output: string;
-  exactEffects: EffectTextBlock[];
-  notice: string;
-}
-
-export interface RecipeIngredientViewModel {
-  recipeId: string;
-  selfMinStar: number;
-  partnerCardId: string;
-  partner: string;
-  partnerMinStar: number;
-  outputCardId: string;
-  output: string;
-  outputStar: number;
-  notice: string;
-  compatible: boolean;
-}
-
-export interface RecipeDisplayContext {
-  mode: 'run' | 'compendium';
-  compatibleRecipeIds?: string[];
-}
-
 export interface SkillTreeViewModel {
   nodes: SkillTreeNode[];
-  recipe?: RecipeViewModel;
-  asIngredient: RecipeIngredientViewModel[];
 }
 
 export interface CardDetailViewModel {
@@ -271,61 +242,18 @@ function syntheticBlock(trigger: string, lines: EffectTextLine[]): EffectTextBlo
   return { trigger, lines, keywords: [...new Set(lines.flatMap(line => line.keywords))] };
 }
 
-export function ingredientRecipeViewModels(
-  cardType: string,
-  context: RecipeDisplayContext = { mode: 'compendium' },
-): RecipeIngredientViewModel[] {
-  const compatibleIds = new Set(context.compatibleRecipeIds ?? []);
-  return cfg.evolutionRecipes.recipes.flatMap(recipe => {
-    const isIngredientA = recipe.ingredientVariable.cardId === cardType;
-    const isIngredientB = recipe.ingredientAnchor.cardId === cardType;
-    if (!isIngredientA && !isIngredientB) return [];
-    const self = isIngredientA ? recipe.ingredientVariable : recipe.ingredientAnchor;
-    const partner = isIngredientA ? recipe.ingredientAnchor : recipe.ingredientVariable;
-    const partnerName = cardDisplayName(partner.cardId);
-    const outputName = cardDisplayName(recipe.outputCardId);
-    const compatible = context.mode === 'compendium' || compatibleIds.has(recipe.id);
-    return [{
-      recipeId: recipe.id,
-      selfMinStar: self.minStar,
-      partnerCardId: partner.cardId,
-      partner: partnerName,
-      partnerMinStar: partner.minStar,
-      outputCardId: recipe.outputCardId,
-      output: outputName,
-      outputStar: recipe.outputStar,
-      notice: compatible ? fmt(texts.evolution.recipeAsIngredient, {
-        selfStar: self.minStar,
-        partner: partnerName,
-        partnerStar: partner.minStar,
-        output: outputName,
-        outputStar: recipe.outputStar,
-      }) : '本局材料未入池',
-      compatible,
-    }];
-  });
-}
-
 export function buildSkillTreeViewModel(
   card: Card,
   def = getDef(card.type),
-  recipeContext: RecipeDisplayContext = { mode: 'compendium' },
 ): SkillTreeViewModel {
-  const asIngredient = ingredientRecipeViewModels(card.type, recipeContext);
-  if (!def) return { nodes: [], asIngredient };
+  if (!def) return { nodes: [] };
   if (def.recipeOnly && !def.evolutionTree) {
-    const recipe = cfg.evolutionRecipes.recipes.find(item => item.outputCardId === card.type);
     const bindings = resolveCardBindings(def, card.evolutionPath ?? [], 6);
     return {
-      nodes: [],
-      asIngredient,
-      recipe: recipe ? {
-        ingredientA: `${cardDisplayName(recipe.ingredientVariable.cardId)} ≥${recipe.ingredientVariable.minStar}★`,
-        ingredientB: `${cardDisplayName(recipe.ingredientAnchor.cardId)} ≥${recipe.ingredientAnchor.minStar}★`,
-        output: `${cardDisplayName(recipe.outputCardId)} ${recipe.outputStar}★`,
-        exactEffects: bindings.map(formatBinding),
-        notice: '原分支被终极形态替代；拖动任一材料至另一张，立即进化。',
-      } : undefined,
+      nodes: [{
+        star: 6, kind: 'terminal', label: '终极形态效果', exactEffects: bindings.map(formatBinding),
+        reached: true, current: true, locked: false,
+      }],
     };
   }
 
@@ -367,7 +295,7 @@ export function buildSkillTreeViewModel(
       locked: card.star < star,
     });
   }
-  return { nodes, asIngredient };
+  return { nodes };
 }
 
 function glossaryFor(atoms: string[]): GlossaryEntry[] {
@@ -386,7 +314,6 @@ function glossaryFor(atoms: string[]): GlossaryEntry[] {
 export function buildCardDetailViewModel(
   card: Card,
   source: 'cards' | 'equipment',
-  recipeContext: RecipeDisplayContext = { mode: 'compendium' },
 ): CardDetailViewModel {
   const def = getDef(card.type);
   const visual = resolveCardVisual(card.type);
@@ -399,7 +326,7 @@ export function buildCardDetailViewModel(
       currentRoute: '尚未选择路线',
       consume: { title: '消耗释放效果', hint: '', blocks: [], empty: '暂无可用效果。' },
       equip: { title: '装备持续效果', hint: '', blocks: [], empty: '暂无可用效果。' },
-      affixes: [], glossary: [], tree: { nodes: [], asIngredient: ingredientRecipeViewModels(card.type, recipeContext) },
+      affixes: [], glossary: [], tree: { nodes: [] },
     };
   }
   const path = card.evolutionPath ?? [];
@@ -419,7 +346,7 @@ export function buildCardDetailViewModel(
     god: def.god ? detailTexts.gods?.[def.god]?.name ?? def.god : '中立',
     overview: detailTexts.cards?.[card.type]?.overview ?? `以${CATEGORY_LABELS[def.category]}机制为核心的技能卡。`,
     sourceLabel: source === 'equipment' ? '已装备' : '手牌',
-    currentRoute: routeNames.length ? routeNames.join(' → ') : def.recipeOnly ? '配方终态' : '尚未选择路线',
+    currentRoute: routeNames.length ? routeNames.join(' → ') : def.recipeOnly ? '终极形态' : '尚未选择路线',
     consume: {
       title: '消耗释放效果',
       hint: '将卡牌拖到战场后结算；下列数值为当前星级精确值。',
@@ -433,6 +360,6 @@ export function buildCardDetailViewModel(
     },
     affixes: (card.affixes ?? []).map(buildAffixDetail),
     glossary: glossaryFor([...effectAtoms(tier.effects), ...bindingAtoms(bindings)]),
-    tree: buildSkillTreeViewModel(card, def, recipeContext),
+    tree: buildSkillTreeViewModel(card, def),
   };
 }

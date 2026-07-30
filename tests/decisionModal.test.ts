@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { RunDecision } from '../src/core/types';
+import { cfg } from '../src/config';
 import { createModals } from '../src/ui/modals';
 import { freshState, resetTestEnv } from './helpers';
 
@@ -42,6 +43,23 @@ describe('decision modal', () => {
     buttonAfterFrame?.click();
     expect(onDecision).toHaveBeenCalledOnce();
     expect(onDecision).toHaveBeenCalledWith('storm');
+  });
+
+  it('shows only god theme and sampled base roster, never candidate recipes or outputs', () => {
+    document.body.innerHTML = '<button id="restartBtn"></button>';
+    const modals = createModals({ restartBtn: document.querySelector('#restartBtn') } as never, {
+      onDecision: vi.fn(), onRestart: vi.fn(),
+    });
+    const state = freshState();
+    state.godPool.offerRosterPreviews.storm = ['chainLightning', 'pierce'];
+    modals.showDecision({ kind: 'godDraft', wave: 1, candidates: ['storm'], role: 'main' }, state);
+    const choice = document.querySelector('[data-decision-choice="storm"]')!;
+    expect(choice.querySelector('.god-roster-preview')).not.toBeNull();
+    expect(choice.querySelector('.god-recipe-preview')).toBeNull();
+    expect(choice.textContent).not.toContain('候选·');
+    for (const recipe of cfg.evolutionRecipes.recipes) {
+      expect(choice.textContent).not.toContain(recipe.outputCardId);
+    }
   });
 
   it('shows intent, exact effects, build fit and the 5★ stacking notice', () => {

@@ -47,6 +47,7 @@ export interface ScaleByDef {
 
 export type ForEachSetDef =
   | { kind: 'enemiesWithStatus'; status: string | string[] }
+  | { kind: 'enemiesWithoutStatus'; status: string }
   | { kind: 'ownZones' }
   | { kind: 'ownSummons'; summonKind?: string };
 
@@ -86,7 +87,7 @@ export type AtomName =
   // 防御
   | 'shield' | 'thorns' | 'breachReduction' | 'novaOnBreak' | 'execute'
   // 共用
-  | 'burstDamage' | 'focusPriority' | 'restore' | 'statBuff';
+  | 'burstDamage' | 'focusPriority' | 'restore' | 'statBuff' | 'charge' | 'summonBuff';
 
 /**
  * 每个原子的参数形状。**唯一权威是 `atomContract.ts` 的 ATOM_CONTRACT**：
@@ -100,8 +101,9 @@ export interface EffectParamsMap {
   chain: {
     bounces?: number; damageRetention?: number; searchRange?: number; targets?: number; damageMul?: number;
     /** 每次链伤结算后直接施加状态；不会重新发送完整 onHit。 */
-    spreadStatus?: 'vulnerable' | 'slow' | 'dot';
+    spreadStatus?: 'vulnerable' | 'slow' | 'dot' | 'brand';
     spreadParams?: { ratio?: number; duration?: number };
+    preferRelay?: boolean; relayDamageBonus?: number; relayBonusCap?: number;
     chance?: number;
   };
   split: { count?: number; damageRatio?: number; maxDepth?: number; chance?: number };
@@ -131,16 +133,18 @@ export interface EffectParamsMap {
   };
   dot: { damageRatio?: number; damagePerTick?: number; tickInterval?: number; duration?: number; radius?: number; chance?: number };
   summon: {
-    kind?: 'decoy' | 'mirrorTurret' | 'orbital'; count?: number; hp?: number; duration?: number;
-    placement?: 'threatDirection'; distanceFromTurret?: number; tauntRadius?: number; priorityWeight?: number;
+    kind?: 'decoy' | 'mirrorTurret' | 'orbital' | 'wall' | 'goldenTree' | 'rootSegment' | 'crystal' | 'pylon' | 'iceSpire' | 'iceDecoy'; count?: number; hp?: number; duration?: number;
+    placement?: 'threatDirection' | 'ring'; distanceFromTurret?: number; tauntRadius?: number; priorityWeight?: number;
     damageRatio?: number; explode?: boolean; explodeDamageMul?: number; knockbackDistance?: number;
     respawnOnce?: boolean; replacesEarlier?: boolean; fireInterval?: number; chance?: number;
+    maxCount?: number; chainRelay?: boolean; onDeathEffects?: EffectDef[];
+    intervalSeconds?: number; intervalEffects?: EffectDef[]; auraRadius?: number; auraEffects?: EffectDef[];
   };
   // —— 经济 ——
   dropRateMul: { mul?: number; chance?: number };
   dropLifetimeMul: { mul?: number; chance?: number };
   xpMul: { mul?: number; chance?: number };
-  extraDrop: { count?: number; starWeights?: Record<string, number>; at?: 'point' | 'turret' | 'killPoint'; chance?: number };
+  extraDrop: { count?: number; starWeights?: Record<string, number>; at?: 'point' | 'turret' | 'killPoint'; secure?: boolean; chance?: number };
   expiryConvert: { ratio?: number; chance?: number };
   mergeMaterialRefund: { refundChance?: number; count?: number; star?: number; scope?: 'merge' | 'feed' | 'both' };
   wildcardRewardBonus: { bonusChance?: number; count?: number; scope?: 'bounty' | 'boss' | 'both' };
@@ -156,6 +160,14 @@ export interface EffectParamsMap {
   focusPriority: { priorityWeight?: number; duration?: number; hpThresholdRatio?: number; radius?: number; chance?: number };
   restore: { amount?: number; amountRatio?: number; chance?: number };
   statBuff: { stat?: RuntimeStatKind; operation?: 'add' | 'mul'; value?: number; duration?: number; maxStacks?: number; chance?: number };
+  charge: {
+    by?: 'breach' | 'shieldAbsorb' | 'thornsDamage' | 'killWithSource:dot'; perEvent?: number; max?: number;
+    releaseAt?: 'full' | 'interval' | 'onShieldBreak'; chargeKey?: string; effects?: EffectDef[]; chance?: number;
+  };
+  summonBuff: {
+    target?: 'nearestToPoint' | 'all'; kind?: string; damageMul?: number; radiusAdd?: number;
+    dropChanceAdd?: number; capLevels?: number; chance?: number;
+  };
 }
 
 /** 单条效果：按 atom 判别的联合类型，参数形状由 EffectParamsMap 决定。 */
@@ -181,7 +193,7 @@ export interface BindingDef {
    * interval 用 seconds；onKill 可选 requiresSource（击杀来源标签）/requiresStatus（死亡时刻状态，'frozen'|'dot'）过滤；
    * cooldownSeconds 通用于任意触发器：限制该绑定的最短再触发间隔（如冲击 5★ 破门反制每 6s 至多一次）。
    */
-  triggerParams?: { seconds?: number; requiresSource?: string; requiresStatus?: string; cooldownSeconds?: number };
+  triggerParams?: { seconds?: number; requiresSource?: string; requiresStatus?: string | string[]; cooldownSeconds?: number };
   effects: EffectDef[];
 }
 

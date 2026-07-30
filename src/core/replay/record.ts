@@ -149,7 +149,7 @@ function choiceFor(state: GameState, policy: ReplayDecisionPolicy): string | nul
   const decision = state.decisions.current;
   if (!decision) return null;
   const options = decision.kind === 'godDraft' || decision.kind === 'godFocus'
-    || decision.kind === 'waveBaseReward' || decision.kind === 'recipePin'
+    || decision.kind === 'waveBaseReward'
     ? decision.candidates
     : decision.kind === 'evolutionBranch'
       ? decision.options

@@ -1,20 +1,13 @@
 import { cfg } from '../config';
-import type { CardType, GameState } from '../core/types';
+import type { GameState } from '../core/types';
 import { texts } from '../data';
 import type { RunBaseStatKind } from '../config/types';
-import { cardDisplayName } from './cardMeta';
 
 export interface IntermissionPanel {
   render(state: GameState): void;
 }
 
-function commitment(state: GameState, cardType: CardType): number {
-  return Math.min(16, [...state.cards, ...state.equipment]
-    .filter(card => card?.type === cardType && !card.provisional)
-    .reduce((sum, card) => sum + 2 ** ((card?.star ?? 1) - 1), 0));
-}
-
-/** Wave intermission is display-only for recipes; execution exists exclusively on card-to-card drag. */
+/** Wave intermission only presents wave status, rewards, countdown and readiness. */
 export function createIntermissionPanel(
   arena: HTMLElement,
   hooks: { onReady(): void },
@@ -27,7 +20,6 @@ export function createIntermissionPanel(
   const rewardsTitle = document.createElement('span');
   const rewardsList = document.createElement('ul');
   const ready = document.createElement('button');
-  const recipes = document.createElement('div');
   root.className = 'intermission-panel';
   root.hidden = true;
   ready.className = 'btn primary';
@@ -37,9 +29,7 @@ export function createIntermissionPanel(
   rewards.dataset.testid = 'intermission-rewards';
   rewardsTitle.textContent = texts.intermission.rewardsTitle;
   rewards.append(rewardsTitle, rewardsList);
-  recipes.className = 'intermission-recipes recipe-progress-only';
-  recipes.dataset.testid = 'recipe-panel';
-  root.append(title, status, countdown, rewards, recipes, ready);
+  root.append(title, status, countdown, rewards, ready);
   arena.append(root);
 
   const rewardLabels: Record<RunBaseStatKind, string> = texts.intermission.rewardStats;
@@ -67,19 +57,6 @@ export function createIntermissionPanel(
         return item;
       }));
 
-      const compatible = state.recipes.compatibleRecipeIds
-        .map(id => cfg.evolutionRecipes.recipes.find(recipe => recipe.id === id))
-        .filter(recipe => recipe !== undefined);
-      recipes.hidden = compatible.length === 0;
-      recipes.replaceChildren(...compatible.map(recipe => {
-        const row = document.createElement('article');
-        row.className = 'recipe-row recipe-progress-row';
-        row.dataset.recipeId = recipe.id;
-        if (state.recipes.pinnedRecipeId === recipe.id) row.classList.add('pinned');
-        if (state.recipes.readyRecipeIds.includes(recipe.id)) row.classList.add('ready');
-        row.textContent = `${cardDisplayName(recipe.ingredientVariable.cardId)} ${commitment(state, recipe.ingredientVariable.cardId)}/16 + ${cardDisplayName(recipe.ingredientAnchor.cardId)} ${commitment(state, recipe.ingredientAnchor.cardId)}/16 → ${cardDisplayName(recipe.outputCardId)}`;
-        return row;
-      }));
       ready.classList.toggle(
         'auto-ready-highlight',
         cfg.waves.intermission.autoReadyHighlight

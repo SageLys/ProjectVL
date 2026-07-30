@@ -18,7 +18,7 @@ import { acceptBountyOfferAt, calculateOfferChance } from './core/systems/bounty
 import { resolveCurrentDecision } from './core/systems/decisionQueueSystem';
 import { beginOpeningIntermission, confirmIntermissionReady, confirmValidationRewardSettle } from './core/systems/intermissionSystem';
 import { checkWildcardTarget, grantWildcards, useWildcardOnSlot, type WildcardGrant } from './core/systems/wildcardSystem';
-import { evolveRecipePair, matchRecipeDrop, setPinnedRecipe } from './core/systems/recipeEvolutionSystem';
+import { evolveRecipePair, matchRecipeDrop } from './core/systems/recipeEvolutionSystem';
 import { createCardWithAffixes } from './core/systems/cardAffixSystem';
 import { totalRange } from './core/stats';
 import { createRenderer } from './render/canvasRenderer';
@@ -46,7 +46,6 @@ import type { DifficultyId } from './config/types';
 import { resyncEnemyStats, type EnemyStatConfigKey } from './core/systems/enemySystem';
 import { DEV_TOOLS_ENABLED } from './debug/devToolsMode';
 import { cardDisplayName } from './ui/cardMeta';
-import { createRecipeGraph } from './ui/recipeGraph';
 
 // 技能 = 数据 + 解释器：把配置里的卡定义注入解释器（P5 实装 12 张正式卡后自动生效）。
 registerSkillDefs(cfg.skills.cards);
@@ -147,10 +146,6 @@ const modals = createModals(refs, {
 const rewardCelebration = createRewardCelebration(() => dispatch(confirmRewardReceipt(state, config, rng)));
 
 const cardDetail = createCardDetailModal({
-  recipeContext: () => ({
-    mode: state.recipes.compatibleRecipeIds.length ? 'run' : 'compendium',
-    compatibleRecipeIds: state.recipes.compatibleRecipeIds,
-  }),
   onOpen() {
     uiPauseReasons.add('cardDetail');
     syncPauseState();
@@ -164,14 +159,6 @@ const cardDetail = createCardDetailModal({
 const intermissionPanel = createIntermissionPanel(refs.arena, {
   onReady() {
     dispatch(confirmIntermissionReady(state));
-  },
-});
-const recipeGraph = createRecipeGraph(refs.dock, {
-  onPin(recipeId) {
-    if (setPinnedRecipe(state, recipeId)) {
-      refreshSlots();
-      recipeGraph.render(state);
-    }
   },
 });
 
@@ -298,7 +285,6 @@ function reset(): void {
   refreshSlots();
   renderHud(refs, state, config);
   intermissionPanel.render(state);
-  recipeGraph.render(state);
 }
 
 function start(): void {
@@ -363,7 +349,6 @@ function loop(now: number): void {
   dispatch(events);
   renderHud(refs, state, config);
   intermissionPanel.render(state);
-  recipeGraph.render(state);
   render(state, config);
   if (DEV_TOOLS_ENABLED) telemetry?.updateFrame(now);
   requestAnimationFrame(loop);

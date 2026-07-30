@@ -6,8 +6,10 @@ import { makeCountingRng } from '../src/core/rng';
 import {
   evolveRecipePair,
   getActionableRecipes,
+  initializeRecipesAfterRosterLock,
   matchRecipeDrop,
   recomputeRecipeReadiness,
+  updateRecipeDirector,
 } from '../src/core/systems/recipeEvolutionSystem';
 import type { CardRef, GameState, SlotKind } from '../src/core/types';
 import { createDevTelemetry } from '../src/telemetry/devTelemetry';
@@ -47,6 +49,35 @@ beforeEach(() => {
 });
 
 describe('instant fixed-recipe evolution', () => {
+  it('initializes compatibility after the third god without enqueueing a recipe choice', () => {
+    const state = freshState();
+    const item = recipe();
+    state.godPool.runRoster = [item.ingredientVariable.cardId, item.ingredientAnchor.cardId];
+    const events = initializeRecipesAfterRosterLock(state);
+    expect(state.recipes.compatibleRecipeIds).toContain(item.id);
+    expect(state.decisions).toEqual({ current: null, pending: [] });
+    expect(events.some(event => event.type === 'decisionOffered')).toBe(false);
+  });
+
+  it('selects one hidden director target deterministically at the assist window and clears stale bags', () => {
+    const state = freshState();
+    const [first, second] = cfg.evolutionRecipes.recipes.slice(0, 2);
+    state.wave = cfg.economy.evolution.assistWindowWaves[0];
+    state.recipes.compatibleRecipeIds = [first.id, second.id];
+    state.cards[0] = card(second.ingredientVariable.cardId, 4);
+    state.cards[1] = card(second.ingredientAnchor.cardId, 3);
+    state.normalDropDirector.roleBag.push('discovery');
+    state.bountyDirector.rewardBag.push(first.ingredientVariable.cardId);
+    updateRecipeDirector(state);
+    expect(state.recipes.directedRecipeId).toBe(second.id);
+    expect(state.normalDropDirector.roleBag).toEqual([]);
+    expect(state.bountyDirector.rewardBag).toEqual([]);
+    const selected = state.recipes.directedRecipeId;
+    state.cards = state.cards.map(() => null);
+    updateRecipeDirector(state);
+    expect(state.recipes.directedRecipeId).toBe(selected);
+  });
+
   it.each([
     ['cards', 'cards'],
     ['cards', 'equipment'],
@@ -94,7 +125,7 @@ describe('instant fixed-recipe evolution', () => {
 
   it.each([
     ['paused', (state: GameState) => { state.paused = true; }, 'paused'],
-    ['decision', (state: GameState) => { state.decisions.current = { kind: 'recipePin', candidates: ['x'] }; }, 'decision'],
+    ['decision', (state: GameState) => { state.decisions.current = { kind: 'godFocus', wave: 2, candidates: ['storm'] }; }, 'decision'],
     ['settle', (state: GameState) => { state.wavePhase = 'between'; state.intermission.active = true; state.intermission.step = 'settle'; }, 'intermission'],
     ['decide', (state: GameState) => { state.wavePhase = 'between'; state.intermission.active = true; state.intermission.step = 'decide'; }, 'intermission'],
   ])('rejects %s with an exact reason and consumes no RNG', (_label, mutate, reason) => {
@@ -175,7 +206,7 @@ describe('instant fixed-recipe evolution', () => {
     });
   });
 
-  it('keeps the intermission recipe area display-only', () => {
+  it('does not render any recipe area during intermission', () => {
     const { state } = readyPair();
     state.wave = 4;
     state.wavePhase = 'between';
@@ -185,7 +216,8 @@ describe('instant fixed-recipe evolution', () => {
     const arena = document.createElement('div');
     const confirmSpy = vi.spyOn(window, 'confirm');
     createIntermissionPanel(arena, { onReady() {} }).render(state);
-    expect(arena.querySelector('.recipe-progress-row')).not.toBeNull();
+    expect(arena.querySelector('.recipe-progress-row')).toBeNull();
+    expect(arena.querySelector('.intermission-recipes')).toBeNull();
     expect(arena.querySelector('.recipe-confirm')).toBeNull();
     expect(arena.querySelector('[data-equipment-card-id]')).toBeNull();
     expect(confirmSpy).not.toHaveBeenCalled();

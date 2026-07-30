@@ -41,7 +41,7 @@ function runBotGame(s: GameState, config: Config, rng: Rng): ValidationEntrySnap
     }
     if (s.decisions.current) {
       const decision = s.decisions.current;
-      const choice = decision.kind === 'godDraft' || decision.kind === 'godFocus' || decision.kind === 'recipePin'
+      const choice = decision.kind === 'godDraft' || decision.kind === 'godFocus'
         ? decision.candidates[0]
         : decision.kind === 'waveBaseReward'
           ? decision.candidates[0]

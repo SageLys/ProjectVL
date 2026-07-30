@@ -19845,9 +19845,10 @@
       "recipeOnly": true,
       "category": "projectile",
       "synergyTags": [
-        "projectile"
+        "projectile",
+        "domain"
       ],
-      "identityContract": "灰盒占位：以 2.5 秒周期爆发验证 天罗电网 的配方终态管线。",
+      "identityContract": "贯穿雷矛的飞行路径留下导电雷轨，轨上敌人持续感电。",
       "textKey": "cards.stormLattice",
       "teaching": false,
       "implementationBatch": 1,
@@ -19856,31 +19857,69 @@
           "tier": "transform",
           "equip": [
             {
-              "trigger": "interval",
-              "triggerParams": {
-                "seconds": 2.5
-              },
+              "trigger": "onFire",
               "effects": [
                 {
-                  "atom": "burstDamage",
+                  "atom": "pierce",
                   "params": {
-                    "damageMul": 1.25,
-                    "radius": 100
+                    "count": 999,
+                    "damageRetention": 0.85
                   }
                 }
               ]
             },
             {
-              "trigger": "passive",
+              "trigger": "onHit",
               "effects": [
                 {
-                  "atom": "statBuff",
+                  "atom": "groundZone",
                   "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.06,
-                    "duration": 3,
-                    "maxStacks": 1
+                    "radius": 80,
+                    "duration": 4,
+                    "tickInterval": 0.5,
+                    "effects": [
+                      {
+                        "atom": "vulnerable",
+                        "params": {
+                          "ratio": 0.2,
+                          "duration": 2.5
+                        }
+                      }
+                    ],
+                    "shape": "line",
+                    "lineFrom": "bulletPath"
+                  }
+                }
+              ]
+            },
+            {
+              "trigger": "onHit",
+              "triggerParams": {
+                "requiresStatus": "vulnerable"
+              },
+              "effects": [
+                {
+                  "atom": "burstDamage",
+                  "params": {
+                    "radius": 60,
+                    "damageMul": 0.8
+                  }
+                }
+              ]
+            },
+            {
+              "trigger": "interval",
+              "triggerParams": {
+                "seconds": 2
+              },
+              "effects": [
+                {
+                  "atom": "chain",
+                  "params": {
+                    "targets": 2,
+                    "bounces": 3,
+                    "damageRetention": 0.8,
+                    "spreadStatus": "vulnerable"
                   }
                 }
               ]
@@ -19889,54 +19928,119 @@
         }
       },
       "amplifyAxis": {
-        "description": "B0 灰盒占位",
+        "description": "终极形态按正式机制完整生效。",
         "params": {
-          "damageMul": "+0.05"
+          "formal": "+0"
         }
       },
       "consumable": {
         "placement": "point",
-        "interpolation": "linear",
         "anchors": {
           "1": {
-            "radius": 100,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "pierce",
                 "params": {
-                  "damageMul": 0.8,
-                  "radius": 100
+                  "count": 999,
+                  "damageRetention": 1,
+                  "width": 26,
+                  "damageMul": 3
+                }
+              },
+              {
+                "atom": "groundZone",
+                "params": {
+                  "radius": 130,
+                  "duration": 4,
+                  "tickInterval": 0.5,
+                  "effects": [
+                    {
+                      "atom": "vulnerable",
+                      "params": {
+                        "ratio": 0.25,
+                        "duration": 3
+                      }
+                    }
+                  ],
+                  "shape": "line",
+                  "lineFrom": "turretToPoint"
                 }
               }
             ]
           },
           "3": {
-            "radius": 115,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "pierce",
                 "params": {
-                  "damageMul": 1,
-                  "radius": 115
+                  "count": 999,
+                  "damageRetention": 1,
+                  "width": 26,
+                  "damageMul": 3
+                }
+              },
+              {
+                "atom": "groundZone",
+                "params": {
+                  "radius": 130,
+                  "duration": 4,
+                  "tickInterval": 0.5,
+                  "effects": [
+                    {
+                      "atom": "vulnerable",
+                      "params": {
+                        "ratio": 0.25,
+                        "duration": 3
+                      }
+                    }
+                  ],
+                  "shape": "line",
+                  "lineFrom": "turretToPoint"
                 }
               }
             ]
           },
           "6": {
-            "radius": 130,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "pierce",
                 "params": {
-                  "damageMul": 1.3,
-                  "radius": 130
+                  "count": 999,
+                  "damageRetention": 1,
+                  "width": 26,
+                  "damageMul": 3
+                }
+              },
+              {
+                "atom": "groundZone",
+                "params": {
+                  "radius": 130,
+                  "duration": 4,
+                  "tickInterval": 0.5,
+                  "effects": [
+                    {
+                      "atom": "vulnerable",
+                      "params": {
+                        "ratio": 0.25,
+                        "duration": 3
+                      }
+                    }
+                  ],
+                  "shape": "line",
+                  "lineFrom": "turretToPoint"
                 }
               }
             ]
           }
         }
       },
-      "designNotes": "B0 灰盒占位；正式产物按 B1 同神、B2 正向、B3 反向分批替换。",
+      "designNotes": "正式配方产物；批次 B1。",
       "affixPool": {
         "count": 2,
         "candidates": [
@@ -19976,18 +20080,43 @@
         "winter"
       ],
       "recipeOnly": true,
-      "category": "control",
+      "category": "domain",
       "synergyTags": [
+        "domain",
         "control"
       ],
-      "identityContract": "灰盒占位：以 2.5 秒周期爆发验证 霜雷云 的配方终态管线。",
+      "identityContract": "移动雷云追随最密敌群，云内减速并以双状态落雷冻结。",
       "textKey": "cards.thunderRime",
       "teaching": false,
-      "implementationBatch": 1,
+      "implementationBatch": 2,
       "stars": {
         "6": {
           "tier": "transform",
           "equip": [
+            {
+              "trigger": "passive",
+              "effects": [
+                {
+                  "atom": "aura",
+                  "params": {
+                    "radius": 110,
+                    "tickInterval": 0.5,
+                    "duration": 999,
+                    "effects": [
+                      {
+                        "atom": "slow",
+                        "params": {
+                          "ratio": 0.3,
+                          "duration": 1
+                        }
+                      }
+                    ],
+                    "follow": "densestCluster",
+                    "followLerp": 0.5
+                  }
+                }
+              ]
+            },
             {
               "trigger": "interval",
               "triggerParams": {
@@ -19996,24 +20125,67 @@
               "effects": [
                 {
                   "atom": "burstDamage",
-                  "params": {
-                    "damageMul": 1.3,
-                    "radius": 108
+                  "forEach": {
+                    "set": {
+                      "kind": "enemiesWithStatus",
+                      "status": "slow"
+                    },
+                    "maxTargets": 2,
+                    "order": "nearest",
+                    "effects": [
+                      {
+                        "atom": "burstDamage",
+                        "params": {
+                          "radius": 55,
+                          "damageMul": 1
+                        }
+                      },
+                      {
+                        "atom": "vulnerable",
+                        "params": {
+                          "ratio": 0.2,
+                          "duration": 2
+                        }
+                      }
+                    ]
                   }
                 }
               ]
             },
             {
-              "trigger": "passive",
+              "trigger": "interval",
+              "triggerParams": {
+                "seconds": 2.5
+              },
               "effects": [
                 {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "fireRate",
-                    "operation": "mul",
-                    "value": 1.07,
-                    "duration": 3,
-                    "maxStacks": 1
+                  "atom": "freeze",
+                  "forEach": {
+                    "set": {
+                      "kind": "enemiesWithStatus",
+                      "status": [
+                        "slow",
+                        "vulnerable"
+                      ]
+                    },
+                    "maxTargets": 2,
+                    "order": "nearest",
+                    "effects": [
+                      {
+                        "atom": "freeze",
+                        "params": {
+                          "duration": 1,
+                          "stacksToTrigger": 3
+                        }
+                      },
+                      {
+                        "atom": "burstDamage",
+                        "params": {
+                          "radius": 55,
+                          "damageMul": 1.5
+                        }
+                      }
+                    ]
                   }
                 }
               ]
@@ -20022,54 +20194,125 @@
         }
       },
       "amplifyAxis": {
-        "description": "B0 灰盒占位",
+        "description": "终极形态按正式机制完整生效。",
         "params": {
-          "damageMul": "+0.05"
+          "formal": "+0"
         }
       },
       "consumable": {
         "placement": "point",
-        "interpolation": "linear",
         "anchors": {
           "1": {
-            "radius": 108,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "groundZone",
                 "params": {
-                  "damageMul": 0.8,
-                  "radius": 108
+                  "radius": 110,
+                  "duration": 5,
+                  "tickInterval": 0.5,
+                  "effects": [
+                    {
+                      "atom": "slow",
+                      "params": {
+                        "ratio": 0.3,
+                        "duration": 2
+                      }
+                    },
+                    {
+                      "atom": "vulnerable",
+                      "params": {
+                        "ratio": 0.2,
+                        "duration": 2
+                      }
+                    },
+                    {
+                      "atom": "burstDamage",
+                      "params": {
+                        "damageMul": 1
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "3": {
-            "radius": 123,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "groundZone",
                 "params": {
-                  "damageMul": 1,
-                  "radius": 123
+                  "radius": 110,
+                  "duration": 5,
+                  "tickInterval": 0.5,
+                  "effects": [
+                    {
+                      "atom": "slow",
+                      "params": {
+                        "ratio": 0.3,
+                        "duration": 2
+                      }
+                    },
+                    {
+                      "atom": "vulnerable",
+                      "params": {
+                        "ratio": 0.2,
+                        "duration": 2
+                      }
+                    },
+                    {
+                      "atom": "burstDamage",
+                      "params": {
+                        "damageMul": 1
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "6": {
-            "radius": 138,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "groundZone",
                 "params": {
-                  "damageMul": 1.3,
-                  "radius": 138
+                  "radius": 110,
+                  "duration": 5,
+                  "tickInterval": 0.5,
+                  "effects": [
+                    {
+                      "atom": "slow",
+                      "params": {
+                        "ratio": 0.3,
+                        "duration": 2
+                      }
+                    },
+                    {
+                      "atom": "vulnerable",
+                      "params": {
+                        "ratio": 0.2,
+                        "duration": 2
+                      }
+                    },
+                    {
+                      "atom": "burstDamage",
+                      "params": {
+                        "damageMul": 1
+                      }
+                    }
+                  ]
                 }
               }
             ]
           }
         }
       },
-      "designNotes": "B0 灰盒占位；正式产物按 B1 同神、B2 正向、B3 反向分批替换。",
+      "designNotes": "正式配方产物；批次 B2。",
       "affixPool": {
         "count": 2,
         "candidates": [
@@ -20111,42 +20354,90 @@
       "recipeOnly": true,
       "category": "domain",
       "synergyTags": [
-        "domain"
+        "domain",
+        "control"
       ],
-      "identityContract": "灰盒占位：以 2.5 秒周期爆发验证 引雷火种 的配方终态管线。",
+      "identityContract": "灼烧目标成为连锁放电的起点，双状态死亡引爆火场。",
       "textKey": "cards.emberSpark",
       "teaching": false,
-      "implementationBatch": 1,
+      "implementationBatch": 2,
       "stars": {
         "6": {
           "tier": "transform",
           "equip": [
             {
-              "trigger": "interval",
-              "triggerParams": {
-                "seconds": 2.5
-              },
+              "trigger": "onHit",
               "effects": [
                 {
-                  "atom": "burstDamage",
+                  "atom": "dot",
                   "params": {
-                    "damageMul": 1.35,
-                    "radius": 116
+                    "duration": 3,
+                    "damageRatio": 0.15
                   }
                 }
               ]
             },
             {
-              "trigger": "passive",
+              "trigger": "interval",
+              "triggerParams": {
+                "seconds": 2
+              },
               "effects": [
                 {
-                  "atom": "statBuff",
+                  "atom": "chain",
+                  "forEach": {
+                    "set": {
+                      "kind": "enemiesWithStatus",
+                      "status": "dot"
+                    },
+                    "maxTargets": 4,
+                    "order": "nearest",
+                    "effects": [
+                      {
+                        "atom": "chain",
+                        "params": {
+                          "targets": 1,
+                          "bounces": 1,
+                          "damageMul": 0.5,
+                          "spreadStatus": "vulnerable"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "trigger": "onKill",
+              "triggerParams": {
+                "requiresStatus": [
+                  "dot",
+                  "vulnerable"
+                ]
+              },
+              "at": "point",
+              "effects": [
+                {
+                  "atom": "burstDamage",
                   "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.08,
-                    "duration": 3,
-                    "maxStacks": 1
+                    "radius": 70,
+                    "damageMul": 1.35
+                  }
+                },
+                {
+                  "atom": "groundZone",
+                  "params": {
+                    "radius": 55,
+                    "duration": 4,
+                    "tickInterval": 0.5,
+                    "effects": [
+                      {
+                        "atom": "dot",
+                        "params": {
+                          "damageRatio": 0.15
+                        }
+                      }
+                    ]
                   }
                 }
               ]
@@ -20155,54 +20446,101 @@
         }
       },
       "amplifyAxis": {
-        "description": "B0 灰盒占位",
+        "description": "终极形态按正式机制完整生效。",
         "params": {
-          "damageMul": "+0.05"
+          "formal": "+0"
         }
       },
       "consumable": {
         "placement": "point",
-        "interpolation": "linear",
         "anchors": {
           "1": {
-            "radius": 116,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
-                "params": {
-                  "damageMul": 0.8,
-                  "radius": 116
+                "atom": "chain",
+                "forEach": {
+                  "set": {
+                    "kind": "enemiesWithStatus",
+                    "status": "dot"
+                  },
+                  "maxTargets": 8,
+                  "order": "nearest",
+                  "effects": [
+                    {
+                      "atom": "chain",
+                      "params": {
+                        "targets": 1,
+                        "bounces": 2,
+                        "damageMul": 0.7,
+                        "spreadStatus": "vulnerable"
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "3": {
-            "radius": 131,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
-                "params": {
-                  "damageMul": 1,
-                  "radius": 131
+                "atom": "chain",
+                "forEach": {
+                  "set": {
+                    "kind": "enemiesWithStatus",
+                    "status": "dot"
+                  },
+                  "maxTargets": 8,
+                  "order": "nearest",
+                  "effects": [
+                    {
+                      "atom": "chain",
+                      "params": {
+                        "targets": 1,
+                        "bounces": 2,
+                        "damageMul": 0.7,
+                        "spreadStatus": "vulnerable"
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "6": {
-            "radius": 146,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
-                "params": {
-                  "damageMul": 1.3,
-                  "radius": 146
+                "atom": "chain",
+                "forEach": {
+                  "set": {
+                    "kind": "enemiesWithStatus",
+                    "status": "dot"
+                  },
+                  "maxTargets": 8,
+                  "order": "nearest",
+                  "effects": [
+                    {
+                      "atom": "chain",
+                      "params": {
+                        "targets": 1,
+                        "bounces": 2,
+                        "damageMul": 0.7,
+                        "spreadStatus": "vulnerable"
+                      }
+                    }
+                  ]
                 }
               }
             ]
           }
         }
       },
-      "designNotes": "B0 灰盒占位；正式产物按 B1 同神、B2 正向、B3 反向分批替换。",
+      "designNotes": "正式配方产物；批次 B2。",
       "affixPool": {
         "count": 2,
         "candidates": [
@@ -20244,27 +20582,55 @@
       "recipeOnly": true,
       "category": "defense",
       "synergyTags": [
-        "defense"
+        "defense",
+        "control"
       ],
-      "identityContract": "灰盒占位：以 2.5 秒周期爆发验证 电容堡垒 的配方终态管线。",
+      "identityContract": "护盾吸收伤害并储存电荷，破盾或满充时释放放电风暴。",
       "textKey": "cards.voltBastion",
       "teaching": false,
-      "implementationBatch": 1,
+      "implementationBatch": 2,
       "stars": {
         "6": {
           "tier": "transform",
           "equip": [
             {
-              "trigger": "interval",
-              "triggerParams": {
-                "seconds": 2.5
-              },
+              "trigger": "onWaveStart",
               "effects": [
                 {
-                  "atom": "burstDamage",
+                  "atom": "shield",
                   "params": {
-                    "damageMul": 1.4,
-                    "radius": 124
+                    "absorbHits": 3
+                  }
+                }
+              ]
+            },
+            {
+              "trigger": "onBreach",
+              "effects": [
+                {
+                  "atom": "charge",
+                  "params": {
+                    "by": "shieldAbsorb",
+                    "perEvent": 1,
+                    "max": 5,
+                    "releaseAt": "full",
+                    "effects": [
+                      {
+                        "atom": "chain",
+                        "params": {
+                          "targets": 2,
+                          "bounces": 5,
+                          "spreadStatus": "vulnerable"
+                        }
+                      },
+                      {
+                        "atom": "stun",
+                        "params": {
+                          "radius": 160,
+                          "duration": 0.3
+                        }
+                      }
+                    ]
                   }
                 }
               ]
@@ -20273,13 +20639,20 @@
               "trigger": "passive",
               "effects": [
                 {
-                  "atom": "statBuff",
+                  "atom": "aura",
                   "params": {
-                    "stat": "fireRate",
-                    "operation": "mul",
-                    "value": 1.09,
-                    "duration": 3,
-                    "maxStacks": 1
+                    "radius": 90,
+                    "tickInterval": 0.5,
+                    "duration": 999,
+                    "effects": [
+                      {
+                        "atom": "knockback",
+                        "params": {
+                          "distance": 12,
+                          "radius": 90
+                        }
+                      }
+                    ]
                   }
                 }
               ]
@@ -20288,54 +20661,80 @@
         }
       },
       "amplifyAxis": {
-        "description": "B0 灰盒占位",
+        "description": "终极形态按正式机制完整生效。",
         "params": {
-          "damageMul": "+0.05"
+          "formal": "+0"
         }
       },
       "consumable": {
         "placement": "point",
-        "interpolation": "linear",
         "anchors": {
           "1": {
-            "radius": 124,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "chain",
                 "params": {
-                  "damageMul": 0.8,
-                  "radius": 124
+                  "targets": 4,
+                  "bounces": 5,
+                  "spreadStatus": "vulnerable"
+                }
+              },
+              {
+                "atom": "stun",
+                "params": {
+                  "radius": 160,
+                  "duration": 0.3
                 }
               }
             ]
           },
           "3": {
-            "radius": 139,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "chain",
                 "params": {
-                  "damageMul": 1,
-                  "radius": 139
+                  "targets": 4,
+                  "bounces": 5,
+                  "spreadStatus": "vulnerable"
+                }
+              },
+              {
+                "atom": "stun",
+                "params": {
+                  "radius": 160,
+                  "duration": 0.3
                 }
               }
             ]
           },
           "6": {
-            "radius": 154,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "chain",
                 "params": {
-                  "damageMul": 1.3,
-                  "radius": 154
+                  "targets": 4,
+                  "bounces": 5,
+                  "spreadStatus": "vulnerable"
+                }
+              },
+              {
+                "atom": "stun",
+                "params": {
+                  "radius": 160,
+                  "duration": 0.3
                 }
               }
             ]
           }
         }
       },
-      "designNotes": "B0 灰盒占位；正式产物按 B1 同神、B2 正向、B3 反向分批替换。",
+      "designNotes": "正式配方产物；批次 B2。",
       "affixPool": {
         "count": 2,
         "candidates": [
@@ -20379,40 +20778,64 @@
       "synergyTags": [
         "utility"
       ],
-      "identityContract": "灰盒占位：以 2.5 秒周期爆发验证 盈电金流 的配方终态管线。",
+      "identityContract": "感电密度提高掉落汇率，赏印与感电双持击杀必定产出。",
       "textKey": "cards.ampereFlow",
       "teaching": false,
-      "implementationBatch": 1,
+      "implementationBatch": 2,
       "stars": {
         "6": {
           "tier": "transform",
           "equip": [
             {
-              "trigger": "interval",
-              "triggerParams": {
-                "seconds": 2.5
-              },
+              "trigger": "passive",
               "effects": [
                 {
-                  "atom": "burstDamage",
+                  "atom": "focusPriority",
                   "params": {
-                    "damageMul": 1.45,
-                    "radius": 132
+                    "priorityWeight": 2,
+                    "duration": 4
+                  }
+                },
+                {
+                  "atom": "dropRateMul",
+                  "params": {
+                    "mul": 1
+                  },
+                  "scaleBy": {
+                    "source": "concurrentStatus:vulnerable",
+                    "param": "mul",
+                    "perUnit": 0.08,
+                    "cap": 5
                   }
                 }
               ]
             },
             {
-              "trigger": "passive",
+              "trigger": "onHit",
               "effects": [
                 {
-                  "atom": "statBuff",
+                  "atom": "vulnerable",
                   "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.1,
-                    "duration": 3,
-                    "maxStacks": 1
+                    "ratio": 0.2,
+                    "duration": 2.5
+                  }
+                }
+              ]
+            },
+            {
+              "trigger": "onKill",
+              "triggerParams": {
+                "requiresStatus": [
+                  "brand",
+                  "vulnerable"
+                ]
+              },
+              "at": "point",
+              "effects": [
+                {
+                  "atom": "extraDrop",
+                  "params": {
+                    "count": 1
                   }
                 }
               ]
@@ -20421,54 +20844,77 @@
         }
       },
       "amplifyAxis": {
-        "description": "B0 灰盒占位",
+        "description": "终极形态按正式机制完整生效。",
         "params": {
-          "damageMul": "+0.05"
+          "formal": "+0"
         }
       },
       "consumable": {
         "placement": "point",
-        "interpolation": "linear",
         "anchors": {
           "1": {
-            "radius": 132,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "vulnerable",
                 "params": {
-                  "damageMul": 0.8,
-                  "radius": 132
+                  "radius": 999,
+                  "ratio": 0.2,
+                  "duration": 3
+                }
+              },
+              {
+                "atom": "extraDrop",
+                "params": {
+                  "count": 2
                 }
               }
             ]
           },
           "3": {
-            "radius": 147,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "vulnerable",
                 "params": {
-                  "damageMul": 1,
-                  "radius": 147
+                  "radius": 999,
+                  "ratio": 0.2,
+                  "duration": 3
+                }
+              },
+              {
+                "atom": "extraDrop",
+                "params": {
+                  "count": 2
                 }
               }
             ]
           },
           "6": {
-            "radius": 162,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "vulnerable",
                 "params": {
-                  "damageMul": 1.3,
-                  "radius": 162
+                  "radius": 999,
+                  "ratio": 0.2,
+                  "duration": 3
+                }
+              },
+              {
+                "atom": "extraDrop",
+                "params": {
+                  "count": 2
                 }
               }
             ]
           }
         }
       },
-      "designNotes": "B0 灰盒占位；正式产物按 B1 同神、B2 正向、B3 反向分批替换。",
+      "designNotes": "正式配方产物；批次 B2。",
       "affixPool": {
         "count": 2,
         "candidates": [
@@ -20510,42 +20956,56 @@
       "recipeOnly": true,
       "category": "projectile",
       "synergyTags": [
-        "projectile"
+        "projectile",
+        "control"
       ],
-      "identityContract": "灰盒占位：以 2.5 秒周期爆发验证 晶脉传导 的配方终态管线。",
+      "identityContract": "连锁命中生成晶柱中继，晶柱增强后续链路并在消失时碎裂。",
       "textKey": "cards.crystalRelay",
       "teaching": false,
-      "implementationBatch": 1,
+      "implementationBatch": 3,
       "stars": {
         "6": {
           "tier": "transform",
           "equip": [
             {
-              "trigger": "interval",
-              "triggerParams": {
-                "seconds": 2.5
-              },
+              "trigger": "onHit",
               "effects": [
                 {
-                  "atom": "burstDamage",
+                  "atom": "chain",
                   "params": {
-                    "damageMul": 1.5,
-                    "radius": 103
+                    "bounces": 3,
+                    "spreadStatus": "vulnerable",
+                    "preferRelay": true,
+                    "relayDamageBonus": 0.15,
+                    "relayBonusCap": 0.45
                   }
-                }
-              ]
-            },
-            {
-              "trigger": "passive",
-              "effects": [
+                },
                 {
-                  "atom": "statBuff",
+                  "atom": "summon",
                   "params": {
-                    "stat": "fireRate",
-                    "operation": "mul",
-                    "value": 1.11,
-                    "duration": 3,
-                    "maxStacks": 1
+                    "kind": "crystal",
+                    "count": 1,
+                    "maxCount": 5,
+                    "hp": 55,
+                    "duration": 6,
+                    "chainRelay": true,
+                    "onDeathEffects": [
+                      {
+                        "atom": "slow",
+                        "params": {
+                          "radius": 80,
+                          "ratio": 0.3,
+                          "duration": 2
+                        }
+                      },
+                      {
+                        "atom": "burstDamage",
+                        "params": {
+                          "radius": 80,
+                          "damageMul": 0.4
+                        }
+                      }
+                    ]
                   }
                 }
               ]
@@ -20554,54 +21014,119 @@
         }
       },
       "amplifyAxis": {
-        "description": "B0 灰盒占位",
+        "description": "终极形态按正式机制完整生效。",
         "params": {
-          "damageMul": "+0.05"
+          "formal": "+0"
         }
       },
       "consumable": {
         "placement": "point",
-        "interpolation": "linear",
         "anchors": {
           "1": {
-            "radius": 103,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "summon",
                 "params": {
-                  "damageMul": 0.8,
-                  "radius": 103
+                  "kind": "crystal",
+                  "count": 3,
+                  "maxCount": 5,
+                  "hp": 65,
+                  "duration": 5,
+                  "chainRelay": true,
+                  "onDeathEffects": [
+                    {
+                      "atom": "slow",
+                      "params": {
+                        "radius": 80,
+                        "ratio": 0.3,
+                        "duration": 2
+                      }
+                    },
+                    {
+                      "atom": "burstDamage",
+                      "params": {
+                        "radius": 80,
+                        "damageMul": 0.4
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "3": {
-            "radius": 118,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "summon",
                 "params": {
-                  "damageMul": 1,
-                  "radius": 118
+                  "kind": "crystal",
+                  "count": 3,
+                  "maxCount": 5,
+                  "hp": 65,
+                  "duration": 5,
+                  "chainRelay": true,
+                  "onDeathEffects": [
+                    {
+                      "atom": "slow",
+                      "params": {
+                        "radius": 80,
+                        "ratio": 0.3,
+                        "duration": 2
+                      }
+                    },
+                    {
+                      "atom": "burstDamage",
+                      "params": {
+                        "radius": 80,
+                        "damageMul": 0.4
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "6": {
-            "radius": 133,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "summon",
                 "params": {
-                  "damageMul": 1.3,
-                  "radius": 133
+                  "kind": "crystal",
+                  "count": 3,
+                  "maxCount": 5,
+                  "hp": 65,
+                  "duration": 5,
+                  "chainRelay": true,
+                  "onDeathEffects": [
+                    {
+                      "atom": "slow",
+                      "params": {
+                        "radius": 80,
+                        "ratio": 0.3,
+                        "duration": 2
+                      }
+                    },
+                    {
+                      "atom": "burstDamage",
+                      "params": {
+                        "radius": 80,
+                        "damageMul": 0.4
+                      }
+                    }
+                  ]
                 }
               }
             ]
           }
         }
       },
-      "designNotes": "B0 灰盒占位；正式产物按 B1 同神、B2 正向、B3 反向分批替换。",
+      "designNotes": "正式配方产物；批次 B3。",
       "affixPool": {
         "count": 2,
         "candidates": [
@@ -20640,11 +21165,12 @@
         "winter"
       ],
       "recipeOnly": true,
-      "category": "control",
+      "category": "domain",
       "synergyTags": [
+        "domain",
         "control"
       ],
-      "identityContract": "灰盒占位：以 2.5 秒周期爆发验证 冰河世纪 的配方终态管线。",
+      "identityContract": "周期从核心向外推进冰川锋面，扫过者减速、叠冻、被推离。",
       "textKey": "cards.glacialEpoch",
       "teaching": false,
       "implementationBatch": 1,
@@ -20655,29 +21181,59 @@
             {
               "trigger": "interval",
               "triggerParams": {
-                "seconds": 2.5
+                "seconds": 4
               },
               "effects": [
                 {
-                  "atom": "burstDamage",
+                  "atom": "groundZone",
                   "params": {
-                    "damageMul": 1.55,
-                    "radius": 111
+                    "radius": 260,
+                    "duration": 3,
+                    "tickInterval": 0.25,
+                    "shape": "ring",
+                    "innerRadius": 45,
+                    "radiusOverTime": {
+                      "from": 60,
+                      "to": 260,
+                      "easing": "linear"
+                    },
+                    "effects": [
+                      {
+                        "atom": "slow",
+                        "params": {
+                          "ratio": 0.35,
+                          "duration": 2
+                        }
+                      },
+                      {
+                        "atom": "freeze",
+                        "params": {
+                          "duration": 1,
+                          "stacksToTrigger": 3
+                        }
+                      },
+                      {
+                        "atom": "knockback",
+                        "params": {
+                          "distance": 40
+                        }
+                      }
+                    ]
                   }
                 }
               ]
             },
             {
-              "trigger": "passive",
+              "trigger": "onHit",
+              "triggerParams": {
+                "requiresStatus": "frozen"
+              },
               "effects": [
                 {
-                  "atom": "statBuff",
+                  "atom": "burstDamage",
                   "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.06,
-                    "duration": 3,
-                    "maxStacks": 1
+                    "damageMul": 1.5,
+                    "radius": 55
                   }
                 }
               ]
@@ -20686,54 +21242,143 @@
         }
       },
       "amplifyAxis": {
-        "description": "B0 灰盒占位",
+        "description": "终极形态按正式机制完整生效。",
         "params": {
-          "damageMul": "+0.05"
+          "formal": "+0"
         }
       },
       "consumable": {
         "placement": "point",
-        "interpolation": "linear",
         "anchors": {
           "1": {
-            "radius": 111,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "groundZone",
                 "params": {
-                  "damageMul": 0.8,
-                  "radius": 111
+                  "radius": 260,
+                  "duration": 3,
+                  "tickInterval": 0.2,
+                  "shape": "ring",
+                  "innerRadius": 45,
+                  "radiusOverTime": {
+                    "from": 60,
+                    "to": 260
+                  },
+                  "effects": [
+                    {
+                      "atom": "slow",
+                      "params": {
+                        "ratio": 0.35,
+                        "duration": 2
+                      }
+                    },
+                    {
+                      "atom": "freeze",
+                      "params": {
+                        "duration": 1,
+                        "stacksToTrigger": 3
+                      }
+                    },
+                    {
+                      "atom": "knockback",
+                      "params": {
+                        "distance": 40
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "3": {
-            "radius": 126,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "groundZone",
                 "params": {
-                  "damageMul": 1,
-                  "radius": 126
+                  "radius": 260,
+                  "duration": 3,
+                  "tickInterval": 0.2,
+                  "shape": "ring",
+                  "innerRadius": 45,
+                  "radiusOverTime": {
+                    "from": 60,
+                    "to": 260
+                  },
+                  "effects": [
+                    {
+                      "atom": "slow",
+                      "params": {
+                        "ratio": 0.35,
+                        "duration": 2
+                      }
+                    },
+                    {
+                      "atom": "freeze",
+                      "params": {
+                        "duration": 1,
+                        "stacksToTrigger": 3
+                      }
+                    },
+                    {
+                      "atom": "knockback",
+                      "params": {
+                        "distance": 40
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "6": {
-            "radius": 141,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "groundZone",
                 "params": {
-                  "damageMul": 1.3,
-                  "radius": 141
+                  "radius": 260,
+                  "duration": 3,
+                  "tickInterval": 0.2,
+                  "shape": "ring",
+                  "innerRadius": 45,
+                  "radiusOverTime": {
+                    "from": 60,
+                    "to": 260
+                  },
+                  "effects": [
+                    {
+                      "atom": "slow",
+                      "params": {
+                        "ratio": 0.35,
+                        "duration": 2
+                      }
+                    },
+                    {
+                      "atom": "freeze",
+                      "params": {
+                        "duration": 1,
+                        "stacksToTrigger": 3
+                      }
+                    },
+                    {
+                      "atom": "knockback",
+                      "params": {
+                        "distance": 40
+                      }
+                    }
+                  ]
                 }
               }
             ]
           }
         }
       },
-      "designNotes": "B0 灰盒占位；正式产物按 B1 同神、B2 正向、B3 反向分批替换。",
+      "designNotes": "正式配方产物；批次 B1。",
       "affixPool": {
         "count": 2,
         "candidates": [
@@ -20773,44 +21418,62 @@
         "inferno"
       ],
       "recipeOnly": true,
-      "category": "domain",
+      "category": "projectile",
       "synergyTags": [
-        "domain"
+        "projectile",
+        "control"
       ],
-      "identityContract": "灰盒占位：以 2.5 秒周期爆发验证 霜火榴弹 的配方终态管线。",
+      "identityContract": "霜火弹片先叠冻并灼烧，冻结目标承受二段爆裂。",
       "textKey": "cards.rimeShell",
       "teaching": false,
-      "implementationBatch": 1,
+      "implementationBatch": 2,
       "stars": {
         "6": {
           "tier": "transform",
           "equip": [
             {
-              "trigger": "interval",
-              "triggerParams": {
-                "seconds": 2.5
-              },
+              "trigger": "onHit",
               "effects": [
                 {
-                  "atom": "burstDamage",
+                  "atom": "freeze",
                   "params": {
-                    "damageMul": 1.25,
-                    "radius": 119
+                    "duration": 1,
+                    "stacksToTrigger": 3
+                  }
+                },
+                {
+                  "atom": "split",
+                  "params": {
+                    "count": 3,
+                    "damageRatio": 0.5
+                  }
+                },
+                {
+                  "atom": "dot",
+                  "params": {
+                    "damageRatio": 0.08,
+                    "duration": 3
                   }
                 }
               ]
             },
             {
-              "trigger": "passive",
+              "trigger": "onHit",
+              "triggerParams": {
+                "requiresStatus": "frozen"
+              },
               "effects": [
                 {
-                  "atom": "statBuff",
+                  "atom": "burstDamage",
                   "params": {
-                    "stat": "fireRate",
-                    "operation": "mul",
-                    "value": 1.07,
-                    "duration": 3,
-                    "maxStacks": 1
+                    "damageMul": 1.8,
+                    "radius": 45
+                  },
+                  "scaleBy": {
+                    "source": "statusStacks",
+                    "param": "damageMul",
+                    "perUnit": 0.25,
+                    "cap": 4
                   }
                 }
               ]
@@ -20819,54 +21482,98 @@
         }
       },
       "amplifyAxis": {
-        "description": "B0 灰盒占位",
+        "description": "终极形态按正式机制完整生效。",
         "params": {
-          "damageMul": "+0.05"
+          "formal": "+0"
         }
       },
       "consumable": {
         "placement": "point",
-        "interpolation": "linear",
         "anchors": {
           "1": {
-            "radius": 119,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "mortarMorph",
                 "params": {
-                  "damageMul": 0.8,
-                  "radius": 119
+                  "radius": 110,
+                  "damageRatio": 2
+                }
+              },
+              {
+                "atom": "freeze",
+                "params": {
+                  "radius": 110,
+                  "duration": 1
+                }
+              },
+              {
+                "atom": "dot",
+                "params": {
+                  "radius": 110,
+                  "damageRatio": 0.2
                 }
               }
             ]
           },
           "3": {
-            "radius": 134,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "mortarMorph",
                 "params": {
-                  "damageMul": 1,
-                  "radius": 134
+                  "radius": 110,
+                  "damageRatio": 2
+                }
+              },
+              {
+                "atom": "freeze",
+                "params": {
+                  "radius": 110,
+                  "duration": 1
+                }
+              },
+              {
+                "atom": "dot",
+                "params": {
+                  "radius": 110,
+                  "damageRatio": 0.2
                 }
               }
             ]
           },
           "6": {
-            "radius": 149,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "mortarMorph",
                 "params": {
-                  "damageMul": 1.3,
-                  "radius": 149
+                  "radius": 110,
+                  "damageRatio": 2
+                }
+              },
+              {
+                "atom": "freeze",
+                "params": {
+                  "radius": 110,
+                  "duration": 1
+                }
+              },
+              {
+                "atom": "dot",
+                "params": {
+                  "radius": 110,
+                  "damageRatio": 0.2
                 }
               }
             ]
           }
         }
       },
-      "designNotes": "B0 灰盒占位；正式产物按 B1 同神、B2 正向、B3 反向分批替换。",
+      "designNotes": "正式配方产物；批次 B2。",
       "affixPool": {
         "count": 2,
         "candidates": [
@@ -20908,42 +21615,73 @@
       "recipeOnly": true,
       "category": "defense",
       "synergyTags": [
-        "defense"
+        "defense",
+        "control"
       ],
-      "identityContract": "灰盒占位：以 2.5 秒周期爆发验证 寒棺尖碑 的配方终态管线。",
+      "identityContract": "防线缺口长出嘲讽冰碑，碑亡时按原坐标冻结爆裂。",
       "textKey": "cards.tombSpire",
       "teaching": false,
-      "implementationBatch": 1,
+      "implementationBatch": 2,
       "stars": {
         "6": {
           "tier": "transform",
           "equip": [
             {
-              "trigger": "interval",
-              "triggerParams": {
-                "seconds": 2.5
-              },
+              "trigger": "passive",
               "effects": [
                 {
-                  "atom": "burstDamage",
+                  "atom": "thorns",
                   "params": {
-                    "damageMul": 1.3,
-                    "radius": 127
+                    "ratio": 0.3
                   }
                 }
               ]
             },
             {
-              "trigger": "passive",
+              "trigger": "onBreach",
+              "at": "point",
               "effects": [
                 {
-                  "atom": "statBuff",
+                  "atom": "summon",
                   "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.08,
-                    "duration": 3,
-                    "maxStacks": 1
+                    "kind": "iceSpire",
+                    "count": 1,
+                    "maxCount": 3,
+                    "hp": 130,
+                    "tauntRadius": 110,
+                    "auraRadius": 110,
+                    "auraEffects": [
+                      {
+                        "atom": "taunt",
+                        "params": {
+                          "radius": 110,
+                          "duration": 1
+                        }
+                      },
+                      {
+                        "atom": "thorns",
+                        "params": {
+                          "ratio": 0.15
+                        }
+                      }
+                    ],
+                    "onDeathEffects": [
+                      {
+                        "atom": "freeze",
+                        "params": {
+                          "radius": 100,
+                          "duration": 1.5,
+                          "stacksToTrigger": 2
+                        }
+                      },
+                      {
+                        "atom": "burstDamage",
+                        "params": {
+                          "radius": 100,
+                          "damageMul": 0.8
+                        }
+                      }
+                    ]
                   }
                 }
               ]
@@ -20952,54 +21690,116 @@
         }
       },
       "amplifyAxis": {
-        "description": "B0 灰盒占位",
+        "description": "终极形态按正式机制完整生效。",
         "params": {
-          "damageMul": "+0.05"
+          "formal": "+0"
         }
       },
       "consumable": {
         "placement": "point",
-        "interpolation": "linear",
         "anchors": {
           "1": {
-            "radius": 127,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "summon",
                 "params": {
-                  "damageMul": 0.8,
-                  "radius": 127
+                  "kind": "iceSpire",
+                  "count": 1,
+                  "maxCount": 3,
+                  "hp": 160,
+                  "duration": 5,
+                  "tauntRadius": 110,
+                  "onDeathEffects": [
+                    {
+                      "atom": "freeze",
+                      "params": {
+                        "radius": 100,
+                        "duration": 1.5
+                      }
+                    },
+                    {
+                      "atom": "burstDamage",
+                      "params": {
+                        "radius": 100,
+                        "damageMul": 0.8
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "3": {
-            "radius": 142,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "summon",
                 "params": {
-                  "damageMul": 1,
-                  "radius": 142
+                  "kind": "iceSpire",
+                  "count": 1,
+                  "maxCount": 3,
+                  "hp": 160,
+                  "duration": 5,
+                  "tauntRadius": 110,
+                  "onDeathEffects": [
+                    {
+                      "atom": "freeze",
+                      "params": {
+                        "radius": 100,
+                        "duration": 1.5
+                      }
+                    },
+                    {
+                      "atom": "burstDamage",
+                      "params": {
+                        "radius": 100,
+                        "damageMul": 0.8
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "6": {
-            "radius": 157,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "summon",
                 "params": {
-                  "damageMul": 1.3,
-                  "radius": 157
+                  "kind": "iceSpire",
+                  "count": 1,
+                  "maxCount": 3,
+                  "hp": 160,
+                  "duration": 5,
+                  "tauntRadius": 110,
+                  "onDeathEffects": [
+                    {
+                      "atom": "freeze",
+                      "params": {
+                        "radius": 100,
+                        "duration": 1.5
+                      }
+                    },
+                    {
+                      "atom": "burstDamage",
+                      "params": {
+                        "radius": 100,
+                        "damageMul": 0.8
+                      }
+                    }
+                  ]
                 }
               }
             ]
           }
         }
       },
-      "designNotes": "B0 灰盒占位；正式产物按 B1 同神、B2 正向、B3 反向分批替换。",
+      "designNotes": "正式配方产物；批次 B2。",
       "affixPool": {
         "count": 2,
         "candidates": [
@@ -21041,42 +21841,67 @@
       "recipeOnly": true,
       "category": "economy",
       "synergyTags": [
-        "utility"
+        "utility",
+        "control"
       ],
-      "identityContract": "灰盒占位：以 2.5 秒周期爆发验证 冻结时价 的配方终态管线。",
+      "identityContract": "每次合成释放时价脉冲并冻结目标，冰封击杀兑现双倍掉落。",
       "textKey": "cards.stasisLedger",
       "teaching": false,
-      "implementationBatch": 1,
+      "implementationBatch": 2,
       "stars": {
         "6": {
           "tier": "transform",
           "equip": [
             {
-              "trigger": "interval",
-              "triggerParams": {
-                "seconds": 2.5
-              },
+              "trigger": "onMerge",
               "effects": [
                 {
-                  "atom": "burstDamage",
+                  "atom": "mergePulse",
                   "params": {
-                    "damageMul": 1.35,
-                    "radius": 135
+                    "damagePerMergeCount": 6,
+                    "radius": "all"
+                  }
+                },
+                {
+                  "atom": "slow",
+                  "params": {
+                    "radius": 999,
+                    "ratio": 0.3,
+                    "duration": 2.5
+                  }
+                },
+                {
+                  "atom": "freeze",
+                  "forEach": {
+                    "set": {
+                      "kind": "enemiesWithStatus",
+                      "status": "slow"
+                    },
+                    "maxTargets": 2,
+                    "order": "nearest",
+                    "effects": [
+                      {
+                        "atom": "freeze",
+                        "params": {
+                          "duration": 1.5
+                        }
+                      }
+                    ]
                   }
                 }
               ]
             },
             {
-              "trigger": "passive",
+              "trigger": "onKill",
+              "triggerParams": {
+                "requiresStatus": "frozen"
+              },
+              "at": "point",
               "effects": [
                 {
-                  "atom": "statBuff",
+                  "atom": "extraDrop",
                   "params": {
-                    "stat": "fireRate",
-                    "operation": "mul",
-                    "value": 1.09,
-                    "duration": 3,
-                    "maxStacks": 1
+                    "count": 2
                   }
                 }
               ]
@@ -21085,54 +21910,101 @@
         }
       },
       "amplifyAxis": {
-        "description": "B0 灰盒占位",
+        "description": "终极形态按正式机制完整生效。",
         "params": {
-          "damageMul": "+0.05"
+          "formal": "+0"
         }
       },
       "consumable": {
         "placement": "point",
-        "interpolation": "linear",
         "anchors": {
           "1": {
-            "radius": 135,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
                 "atom": "burstDamage",
                 "params": {
-                  "damageMul": 0.8,
-                  "radius": 135
+                  "damageMul": 1.8,
+                  "radius": 999
+                }
+              },
+              {
+                "atom": "slow",
+                "params": {
+                  "radius": 999,
+                  "ratio": 0.3,
+                  "duration": 2.5
+                }
+              },
+              {
+                "atom": "freeze",
+                "params": {
+                  "radius": 220,
+                  "duration": 1.5
                 }
               }
             ]
           },
           "3": {
-            "radius": 150,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
                 "atom": "burstDamage",
                 "params": {
-                  "damageMul": 1,
-                  "radius": 150
+                  "damageMul": 1.8,
+                  "radius": 999
+                }
+              },
+              {
+                "atom": "slow",
+                "params": {
+                  "radius": 999,
+                  "ratio": 0.3,
+                  "duration": 2.5
+                }
+              },
+              {
+                "atom": "freeze",
+                "params": {
+                  "radius": 220,
+                  "duration": 1.5
                 }
               }
             ]
           },
           "6": {
-            "radius": 165,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
                 "atom": "burstDamage",
                 "params": {
-                  "damageMul": 1.3,
-                  "radius": 165
+                  "damageMul": 1.8,
+                  "radius": 999
+                }
+              },
+              {
+                "atom": "slow",
+                "params": {
+                  "radius": 999,
+                  "ratio": 0.3,
+                  "duration": 2.5
+                }
+              },
+              {
+                "atom": "freeze",
+                "params": {
+                  "radius": 220,
+                  "duration": 1.5
                 }
               }
             ]
           }
         }
       },
-      "designNotes": "B0 灰盒占位；正式产物按 B1 同神、B2 正向、B3 反向分批替换。",
+      "designNotes": "正式配方产物；批次 B2。",
       "affixPool": {
         "count": 2,
         "candidates": [
@@ -21174,42 +22046,70 @@
       "recipeOnly": true,
       "category": "projectile",
       "synergyTags": [
-        "projectile"
+        "projectile",
+        "domain"
       ],
-      "identityContract": "灰盒占位：以 2.5 秒周期爆发验证 贯日 的配方终态管线。",
+      "identityContract": "天降贯穿光柱沿飞行轴留下灼热走廊，逐个兑现燃烧目标。",
       "textKey": "cards.solarPiercer",
       "teaching": false,
-      "implementationBatch": 1,
+      "implementationBatch": 3,
       "stars": {
         "6": {
           "tier": "transform",
           "equip": [
             {
-              "trigger": "interval",
-              "triggerParams": {
-                "seconds": 2.5
-              },
+              "trigger": "onFire",
               "effects": [
                 {
-                  "atom": "burstDamage",
+                  "atom": "pierce",
                   "params": {
-                    "damageMul": 1.4,
-                    "radius": 106
+                    "count": 999,
+                    "damageRetention": 0.9
                   }
                 }
               ]
             },
             {
-              "trigger": "passive",
+              "trigger": "onHit",
               "effects": [
                 {
-                  "atom": "statBuff",
+                  "atom": "groundZone",
                   "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.1,
-                    "duration": 3,
-                    "maxStacks": 1
+                    "radius": 90,
+                    "duration": 3.5,
+                    "tickInterval": 0.5,
+                    "effects": [
+                      {
+                        "atom": "dot",
+                        "params": {
+                          "damageRatio": 0.18
+                        }
+                      }
+                    ],
+                    "shape": "line",
+                    "lineFrom": "bulletPath"
+                  }
+                },
+                {
+                  "atom": "dot",
+                  "params": {
+                    "damageRatio": 0.16,
+                    "duration": 3
+                  }
+                }
+              ]
+            },
+            {
+              "trigger": "onHit",
+              "triggerParams": {
+                "requiresStatus": "dot"
+              },
+              "effects": [
+                {
+                  "atom": "burstDamage",
+                  "params": {
+                    "damageMul": 0.9,
+                    "radius": 50
                   }
                 }
               ]
@@ -21218,54 +22118,110 @@
         }
       },
       "amplifyAxis": {
-        "description": "B0 灰盒占位",
+        "description": "终极形态按正式机制完整生效。",
         "params": {
-          "damageMul": "+0.05"
+          "formal": "+0"
         }
       },
       "consumable": {
         "placement": "point",
-        "interpolation": "linear",
         "anchors": {
           "1": {
-            "radius": 106,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "beamMorph",
                 "params": {
-                  "damageMul": 0.8,
-                  "radius": 106
+                  "width": 30,
+                  "damageRatio": 2
+                }
+              },
+              {
+                "atom": "groundZone",
+                "params": {
+                  "radius": 130,
+                  "duration": 3.5,
+                  "tickInterval": 0.5,
+                  "effects": [
+                    {
+                      "atom": "dot",
+                      "params": {
+                        "damageRatio": 0.2
+                      }
+                    }
+                  ],
+                  "shape": "line",
+                  "lineFrom": "turretToPoint"
                 }
               }
             ]
           },
           "3": {
-            "radius": 121,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "beamMorph",
                 "params": {
-                  "damageMul": 1,
-                  "radius": 121
+                  "width": 30,
+                  "damageRatio": 2
+                }
+              },
+              {
+                "atom": "groundZone",
+                "params": {
+                  "radius": 130,
+                  "duration": 3.5,
+                  "tickInterval": 0.5,
+                  "effects": [
+                    {
+                      "atom": "dot",
+                      "params": {
+                        "damageRatio": 0.2
+                      }
+                    }
+                  ],
+                  "shape": "line",
+                  "lineFrom": "turretToPoint"
                 }
               }
             ]
           },
           "6": {
-            "radius": 136,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "beamMorph",
                 "params": {
-                  "damageMul": 1.3,
-                  "radius": 136
+                  "width": 30,
+                  "damageRatio": 2
+                }
+              },
+              {
+                "atom": "groundZone",
+                "params": {
+                  "radius": 130,
+                  "duration": 3.5,
+                  "tickInterval": 0.5,
+                  "effects": [
+                    {
+                      "atom": "dot",
+                      "params": {
+                        "damageRatio": 0.2
+                      }
+                    }
+                  ],
+                  "shape": "line",
+                  "lineFrom": "turretToPoint"
                 }
               }
             ]
           }
         }
       },
-      "designNotes": "B0 灰盒占位；正式产物按 B1 同神、B2 正向、B3 反向分批替换。",
+      "designNotes": "正式配方产物；批次 B3。",
       "affixPool": {
         "count": 2,
         "candidates": [
@@ -21307,16 +22263,51 @@
       "recipeOnly": true,
       "category": "control",
       "synergyTags": [
-        "control"
+        "control",
+        "domain"
       ],
-      "identityContract": "灰盒占位：以 2.5 秒周期爆发验证 蒸汽爆裂 的配方终态管线。",
+      "identityContract": "冷热双持目标成为蒸汽爆点，按位置爆裂、击退并传播减速。",
       "textKey": "cards.steamBurst",
       "teaching": false,
-      "implementationBatch": 1,
+      "implementationBatch": 3,
       "stars": {
         "6": {
           "tier": "transform",
           "equip": [
+            {
+              "trigger": "passive",
+              "effects": [
+                {
+                  "atom": "aura",
+                  "params": {
+                    "radius": 120,
+                    "tickInterval": 0.5,
+                    "duration": 999,
+                    "effects": [
+                      {
+                        "atom": "slow",
+                        "params": {
+                          "ratio": 0.3,
+                          "duration": 1
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "trigger": "onHit",
+              "effects": [
+                {
+                  "atom": "dot",
+                  "params": {
+                    "damageRatio": 0.12,
+                    "duration": 3
+                  }
+                }
+              ]
+            },
             {
               "trigger": "interval",
               "triggerParams": {
@@ -21325,24 +22316,40 @@
               "effects": [
                 {
                   "atom": "burstDamage",
-                  "params": {
-                    "damageMul": 1.45,
-                    "radius": 114
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "passive",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "fireRate",
-                    "operation": "mul",
-                    "value": 1.11,
-                    "duration": 3,
-                    "maxStacks": 1
+                  "forEach": {
+                    "set": {
+                      "kind": "enemiesWithStatus",
+                      "status": [
+                        "slow",
+                        "dot"
+                      ]
+                    },
+                    "maxTargets": 6,
+                    "order": "nearest",
+                    "effects": [
+                      {
+                        "atom": "burstDamage",
+                        "params": {
+                          "radius": 70,
+                          "damageMul": 1.1
+                        }
+                      },
+                      {
+                        "atom": "knockback",
+                        "params": {
+                          "radius": 70,
+                          "distance": 30
+                        }
+                      },
+                      {
+                        "atom": "slow",
+                        "params": {
+                          "radius": 70,
+                          "ratio": 0.3,
+                          "duration": 2
+                        }
+                      }
+                    ]
                   }
                 }
               ]
@@ -21351,54 +22358,125 @@
         }
       },
       "amplifyAxis": {
-        "description": "B0 灰盒占位",
+        "description": "终极形态按正式机制完整生效。",
         "params": {
-          "damageMul": "+0.05"
+          "formal": "+0"
         }
       },
       "consumable": {
         "placement": "point",
-        "interpolation": "linear",
         "anchors": {
           "1": {
-            "radius": 114,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
                 "atom": "burstDamage",
-                "params": {
-                  "damageMul": 0.8,
-                  "radius": 114
+                "forEach": {
+                  "set": {
+                    "kind": "enemiesWithStatus",
+                    "status": [
+                      "slow",
+                      "dot"
+                    ]
+                  },
+                  "maxTargets": 8,
+                  "order": "nearest",
+                  "effects": [
+                    {
+                      "atom": "burstDamage",
+                      "params": {
+                        "radius": 70,
+                        "damageMul": 1.3
+                      }
+                    },
+                    {
+                      "atom": "knockback",
+                      "params": {
+                        "radius": 70,
+                        "distance": 30
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "3": {
-            "radius": 129,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
                 "atom": "burstDamage",
-                "params": {
-                  "damageMul": 1,
-                  "radius": 129
+                "forEach": {
+                  "set": {
+                    "kind": "enemiesWithStatus",
+                    "status": [
+                      "slow",
+                      "dot"
+                    ]
+                  },
+                  "maxTargets": 8,
+                  "order": "nearest",
+                  "effects": [
+                    {
+                      "atom": "burstDamage",
+                      "params": {
+                        "radius": 70,
+                        "damageMul": 1.3
+                      }
+                    },
+                    {
+                      "atom": "knockback",
+                      "params": {
+                        "radius": 70,
+                        "distance": 30
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "6": {
-            "radius": 144,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
                 "atom": "burstDamage",
-                "params": {
-                  "damageMul": 1.3,
-                  "radius": 144
+                "forEach": {
+                  "set": {
+                    "kind": "enemiesWithStatus",
+                    "status": [
+                      "slow",
+                      "dot"
+                    ]
+                  },
+                  "maxTargets": 8,
+                  "order": "nearest",
+                  "effects": [
+                    {
+                      "atom": "burstDamage",
+                      "params": {
+                        "radius": 70,
+                        "damageMul": 1.3
+                      }
+                    },
+                    {
+                      "atom": "knockback",
+                      "params": {
+                        "radius": 70,
+                        "distance": 30
+                      }
+                    }
+                  ]
                 }
               }
             ]
           }
         }
       },
-      "designNotes": "B0 灰盒占位；正式产物按 B1 同神、B2 正向、B3 反向分批替换。",
+      "designNotes": "正式配方产物；批次 B3。",
       "affixPool": {
         "count": 2,
         "candidates": [
@@ -21441,7 +22519,7 @@
       "synergyTags": [
         "domain"
       ],
-      "identityContract": "灰盒占位：以 2.5 秒周期爆发验证 常燃火山 的配方终态管线。",
+      "identityContract": "常驻火山周期喷发熔弹铺设子火场，火场击杀为喷发蓄能。",
       "textKey": "cards.volcanoCore",
       "teaching": false,
       "implementationBatch": 1,
@@ -21450,31 +22528,127 @@
           "tier": "transform",
           "equip": [
             {
-              "trigger": "interval",
-              "triggerParams": {
-                "seconds": 2.5
-              },
+              "trigger": "onWaveStart",
+              "at": "densestCluster",
               "effects": [
                 {
-                  "atom": "burstDamage",
+                  "atom": "groundZone",
                   "params": {
-                    "damageMul": 1.5,
-                    "radius": 122
+                    "radius": 90,
+                    "duration": 999,
+                    "tickInterval": 0.5,
+                    "effects": [
+                      {
+                        "atom": "dot",
+                        "params": {
+                          "damageRatio": 0.18,
+                          "tickInterval": 0.5
+                        }
+                      }
+                    ]
                   }
                 }
               ]
             },
             {
-              "trigger": "passive",
+              "trigger": "interval",
+              "triggerParams": {
+                "seconds": 3.5
+              },
+              "at": "densestCluster",
               "effects": [
                 {
-                  "atom": "statBuff",
+                  "atom": "mortarMorph",
                   "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.06,
-                    "duration": 3,
-                    "maxStacks": 1
+                    "radius": 80,
+                    "damageRatio": 1.4
+                  }
+                },
+                {
+                  "atom": "groundZone",
+                  "params": {
+                    "radius": 70,
+                    "duration": 5,
+                    "tickInterval": 0.5,
+                    "effects": [
+                      {
+                        "atom": "dot",
+                        "params": {
+                          "damageRatio": 0.16,
+                          "tickInterval": 0.5
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "trigger": "onKill",
+              "triggerParams": {
+                "requiresSource": "dot"
+              },
+              "effects": [
+                {
+                  "atom": "charge",
+                  "params": {
+                    "by": "killWithSource:dot",
+                    "perEvent": 1,
+                    "max": 3,
+                    "releaseAt": "full",
+                    "effects": [
+                      {
+                        "atom": "mortarMorph",
+                        "params": {
+                          "radius": 80,
+                          "damageRatio": 1.4
+                        },
+                        "at": "densestCluster"
+                      },
+                      {
+                        "atom": "groundZone",
+                        "params": {
+                          "radius": 70,
+                          "duration": 5,
+                          "tickInterval": 0.5,
+                          "effects": [
+                            {
+                              "atom": "dot",
+                              "params": {
+                                "damageRatio": 0.16
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "trigger": "onHit",
+              "effects": [
+                {
+                  "atom": "dot",
+                  "params": {
+                    "damageRatio": 0.14,
+                    "duration": 3
+                  }
+                }
+              ]
+            },
+            {
+              "trigger": "onHit",
+              "triggerParams": {
+                "requiresStatus": "dot"
+              },
+              "effects": [
+                {
+                  "atom": "burstDamage",
+                  "params": {
+                    "damageMul": 0.5,
+                    "radius": 55
                   }
                 }
               ]
@@ -21483,54 +22657,104 @@
         }
       },
       "amplifyAxis": {
-        "description": "B0 灰盒占位",
+        "description": "终极形态按正式机制完整生效。",
         "params": {
-          "damageMul": "+0.05"
+          "formal": "+0"
         }
       },
       "consumable": {
         "placement": "point",
-        "interpolation": "linear",
         "anchors": {
           "1": {
-            "radius": 122,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "groundZone",
                 "params": {
-                  "damageMul": 0.8,
-                  "radius": 122
+                  "radius": 100,
+                  "duration": 5,
+                  "tickInterval": 0.5,
+                  "effects": [
+                    {
+                      "atom": "dot",
+                      "params": {
+                        "damageRatio": 0.2
+                      }
+                    },
+                    {
+                      "atom": "mortarMorph",
+                      "params": {
+                        "radius": 80,
+                        "damageRatio": 1.4
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "3": {
-            "radius": 137,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "groundZone",
                 "params": {
-                  "damageMul": 1,
-                  "radius": 137
+                  "radius": 100,
+                  "duration": 5,
+                  "tickInterval": 0.5,
+                  "effects": [
+                    {
+                      "atom": "dot",
+                      "params": {
+                        "damageRatio": 0.2
+                      }
+                    },
+                    {
+                      "atom": "mortarMorph",
+                      "params": {
+                        "radius": 80,
+                        "damageRatio": 1.4
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "6": {
-            "radius": 152,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "groundZone",
                 "params": {
-                  "damageMul": 1.3,
-                  "radius": 152
+                  "radius": 100,
+                  "duration": 5,
+                  "tickInterval": 0.5,
+                  "effects": [
+                    {
+                      "atom": "dot",
+                      "params": {
+                        "damageRatio": 0.2
+                      }
+                    },
+                    {
+                      "atom": "mortarMorph",
+                      "params": {
+                        "radius": 80,
+                        "damageRatio": 1.4
+                      }
+                    }
+                  ]
                 }
               }
             ]
           }
         }
       },
-      "designNotes": "B0 灰盒占位；正式产物按 B1 同神、B2 正向、B3 反向分批替换。",
+      "designNotes": "正式配方产物；批次 B1。",
       "affixPool": {
         "count": 2,
         "candidates": [
@@ -21572,27 +22796,25 @@
       "recipeOnly": true,
       "category": "defense",
       "synergyTags": [
-        "defense"
+        "defense",
+        "domain"
       ],
-      "identityContract": "灰盒占位：以 2.5 秒周期爆发验证 燃烧护城河 的配方终态管线。",
+      "identityContract": "护盾外环持续燃烧，盾档越高火势越强，破盾时爆燃。",
       "textKey": "cards.emberMoat",
       "teaching": false,
-      "implementationBatch": 1,
+      "implementationBatch": 2,
       "stars": {
         "6": {
           "tier": "transform",
           "equip": [
             {
-              "trigger": "interval",
-              "triggerParams": {
-                "seconds": 2.5
-              },
+              "trigger": "onWaveStart",
               "effects": [
                 {
-                  "atom": "burstDamage",
+                  "atom": "shield",
                   "params": {
-                    "damageMul": 1.55,
-                    "radius": 130
+                    "absorbHits": 2,
+                    "regenSeconds": 10
                   }
                 }
               ]
@@ -21601,13 +22823,51 @@
               "trigger": "passive",
               "effects": [
                 {
-                  "atom": "statBuff",
+                  "atom": "aura",
                   "params": {
-                    "stat": "fireRate",
-                    "operation": "mul",
-                    "value": 1.07,
-                    "duration": 3,
-                    "maxStacks": 1
+                    "radius": 150,
+                    "shape": "ring",
+                    "innerRadius": 110,
+                    "tickInterval": 0.5,
+                    "duration": 999,
+                    "effects": [
+                      {
+                        "atom": "dot",
+                        "params": {
+                          "damageRatio": 0.18
+                        },
+                        "scaleBy": {
+                          "source": "shieldTier",
+                          "param": "damageRatio",
+                          "perUnit": 0.054,
+                          "cap": 2
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "trigger": "passive",
+              "effects": [
+                {
+                  "atom": "novaOnBreak",
+                  "params": {
+                    "damage": 36,
+                    "knockbackDistance": 45
+                  }
+                }
+              ]
+            },
+            {
+              "trigger": "onHit",
+              "effects": [
+                {
+                  "atom": "dot",
+                  "params": {
+                    "damageRatio": 0.12,
+                    "duration": 3
                   }
                 }
               ]
@@ -21616,54 +22876,89 @@
         }
       },
       "amplifyAxis": {
-        "description": "B0 灰盒占位",
+        "description": "终极形态按正式机制完整生效。",
         "params": {
-          "damageMul": "+0.05"
+          "formal": "+0"
         }
       },
       "consumable": {
         "placement": "point",
-        "interpolation": "linear",
         "anchors": {
           "1": {
-            "radius": 130,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "groundZone",
                 "params": {
-                  "damageMul": 0.8,
-                  "radius": 130
+                  "radius": 150,
+                  "shape": "ring",
+                  "innerRadius": 110,
+                  "duration": 5,
+                  "tickInterval": 0.4,
+                  "effects": [
+                    {
+                      "atom": "dot",
+                      "params": {
+                        "damageRatio": 0.3
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "3": {
-            "radius": 145,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "groundZone",
                 "params": {
-                  "damageMul": 1,
-                  "radius": 145
+                  "radius": 150,
+                  "shape": "ring",
+                  "innerRadius": 110,
+                  "duration": 5,
+                  "tickInterval": 0.4,
+                  "effects": [
+                    {
+                      "atom": "dot",
+                      "params": {
+                        "damageRatio": 0.3
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "6": {
             "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "groundZone",
                 "params": {
-                  "damageMul": 1.3,
-                  "radius": 160
+                  "radius": 150,
+                  "shape": "ring",
+                  "innerRadius": 110,
+                  "duration": 5,
+                  "tickInterval": 0.4,
+                  "effects": [
+                    {
+                      "atom": "dot",
+                      "params": {
+                        "damageRatio": 0.3
+                      }
+                    }
+                  ]
                 }
               }
             ]
           }
         }
       },
-      "designNotes": "B0 灰盒占位；正式产物按 B1 同神、B2 正向、B3 反向分批替换。",
+      "designNotes": "正式配方产物；批次 B2。",
       "affixPool": {
         "count": 2,
         "candidates": [
@@ -21705,27 +23000,25 @@
       "recipeOnly": true,
       "category": "economy",
       "synergyTags": [
-        "utility"
+        "utility",
+        "domain"
       ],
-      "identityContract": "灰盒占位：以 2.5 秒周期爆发验证 余烬收成 的配方终态管线。",
+      "identityContract": "灼烧与赏印双持击杀产出安全余烬，拾取继续放大火势。",
       "textKey": "cards.emberYield",
       "teaching": false,
-      "implementationBatch": 1,
+      "implementationBatch": 2,
       "stars": {
         "6": {
           "tier": "transform",
           "equip": [
             {
-              "trigger": "interval",
-              "triggerParams": {
-                "seconds": 2.5
-              },
+              "trigger": "onHit",
               "effects": [
                 {
-                  "atom": "burstDamage",
+                  "atom": "dot",
                   "params": {
-                    "damageMul": 1.25,
-                    "radius": 138
+                    "damageRatio": 0.14,
+                    "duration": 3
                   }
                 }
               ]
@@ -21734,13 +23027,44 @@
               "trigger": "passive",
               "effects": [
                 {
+                  "atom": "focusPriority",
+                  "params": {
+                    "priorityWeight": 2,
+                    "duration": 4
+                  }
+                }
+              ]
+            },
+            {
+              "trigger": "onKill",
+              "triggerParams": {
+                "requiresStatus": [
+                  "dot",
+                  "brand"
+                ]
+              },
+              "at": "point",
+              "effects": [
+                {
+                  "atom": "extraDrop",
+                  "params": {
+                    "count": 1,
+                    "secure": true
+                  }
+                }
+              ]
+            },
+            {
+              "trigger": "onPickup",
+              "effects": [
+                {
                   "atom": "statBuff",
                   "params": {
-                    "stat": "damage",
+                    "stat": "dotDamageMul",
                     "operation": "mul",
-                    "value": 1.08,
-                    "duration": 3,
-                    "maxStacks": 1
+                    "value": 1.05,
+                    "duration": 6,
+                    "maxStacks": 5
                   }
                 }
               ]
@@ -21749,54 +23073,80 @@
         }
       },
       "amplifyAxis": {
-        "description": "B0 灰盒占位",
+        "description": "终极形态按正式机制完整生效。",
         "params": {
-          "damageMul": "+0.05"
+          "formal": "+0"
         }
       },
       "consumable": {
         "placement": "point",
-        "interpolation": "linear",
         "anchors": {
           "1": {
-            "radius": 138,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "dot",
                 "params": {
-                  "damageMul": 0.8,
-                  "radius": 138
+                  "radius": 999,
+                  "damageRatio": 0.16,
+                  "duration": 4
+                }
+              },
+              {
+                "atom": "extraDrop",
+                "params": {
+                  "count": 2,
+                  "secure": true
                 }
               }
             ]
           },
           "3": {
-            "radius": 153,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "dot",
                 "params": {
-                  "damageMul": 1,
-                  "radius": 153
+                  "radius": 999,
+                  "damageRatio": 0.16,
+                  "duration": 4
+                }
+              },
+              {
+                "atom": "extraDrop",
+                "params": {
+                  "count": 2,
+                  "secure": true
                 }
               }
             ]
           },
           "6": {
-            "radius": 168,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "dot",
                 "params": {
-                  "damageMul": 1.3,
-                  "radius": 168
+                  "radius": 999,
+                  "damageRatio": 0.16,
+                  "duration": 4
+                }
+              },
+              {
+                "atom": "extraDrop",
+                "params": {
+                  "count": 2,
+                  "secure": true
                 }
               }
             ]
           }
         }
       },
-      "designNotes": "B0 灰盒占位；正式产物按 B1 同神、B2 正向、B3 反向分批替换。",
+      "designNotes": "正式配方产物；批次 B2。",
       "affixPool": {
         "count": 2,
         "candidates": [
@@ -21838,42 +23188,55 @@
       "recipeOnly": true,
       "category": "projectile",
       "synergyTags": [
-        "projectile"
+        "projectile",
+        "domain"
       ],
-      "identityContract": "灰盒占位：以 2.5 秒周期爆发验证 雷枢方阵 的配方终态管线。",
+      "identityContract": "三座雷枢作为链路中继并以自身光环维持感电阵型。",
       "textKey": "cards.pylonCircuit",
       "teaching": false,
-      "implementationBatch": 1,
+      "implementationBatch": 3,
       "stars": {
         "6": {
           "tier": "transform",
           "equip": [
             {
-              "trigger": "interval",
-              "triggerParams": {
-                "seconds": 2.5
-              },
+              "trigger": "onWaveStart",
               "effects": [
                 {
-                  "atom": "burstDamage",
+                  "atom": "summon",
                   "params": {
-                    "damageMul": 1.3,
-                    "radius": 109
+                    "kind": "pylon",
+                    "count": 3,
+                    "maxCount": 3,
+                    "hp": 90,
+                    "placement": "ring",
+                    "distanceFromTurret": 155,
+                    "chainRelay": true,
+                    "auraRadius": 70,
+                    "auraEffects": [
+                      {
+                        "atom": "vulnerable",
+                        "params": {
+                          "ratio": 0.15,
+                          "duration": 1.2
+                        }
+                      }
+                    ]
                   }
                 }
               ]
             },
             {
-              "trigger": "passive",
+              "trigger": "onHit",
               "effects": [
                 {
-                  "atom": "statBuff",
+                  "atom": "chain",
                   "params": {
-                    "stat": "fireRate",
-                    "operation": "mul",
-                    "value": 1.09,
-                    "duration": 3,
-                    "maxStacks": 1
+                    "bounces": 3,
+                    "spreadStatus": "vulnerable",
+                    "preferRelay": true,
+                    "relayDamageBonus": 0.15,
+                    "relayBonusCap": 0.45
                   }
                 }
               ]
@@ -21882,54 +23245,98 @@
         }
       },
       "amplifyAxis": {
-        "description": "B0 灰盒占位",
+        "description": "终极形态按正式机制完整生效。",
         "params": {
-          "damageMul": "+0.05"
+          "formal": "+0"
         }
       },
       "consumable": {
         "placement": "point",
-        "interpolation": "linear",
         "anchors": {
           "1": {
-            "radius": 109,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "summon",
                 "params": {
-                  "damageMul": 0.8,
-                  "radius": 109
+                  "kind": "pylon",
+                  "count": 1,
+                  "maxCount": 3,
+                  "hp": 100,
+                  "duration": 5,
+                  "chainRelay": true,
+                  "auraRadius": 70,
+                  "auraEffects": [
+                    {
+                      "atom": "vulnerable",
+                      "params": {
+                        "ratio": 0.2,
+                        "duration": 1.2
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "3": {
-            "radius": 124,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "summon",
                 "params": {
-                  "damageMul": 1,
-                  "radius": 124
+                  "kind": "pylon",
+                  "count": 1,
+                  "maxCount": 3,
+                  "hp": 100,
+                  "duration": 5,
+                  "chainRelay": true,
+                  "auraRadius": 70,
+                  "auraEffects": [
+                    {
+                      "atom": "vulnerable",
+                      "params": {
+                        "ratio": 0.2,
+                        "duration": 1.2
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "6": {
-            "radius": 139,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "summon",
                 "params": {
-                  "damageMul": 1.3,
-                  "radius": 139
+                  "kind": "pylon",
+                  "count": 1,
+                  "maxCount": 3,
+                  "hp": 100,
+                  "duration": 5,
+                  "chainRelay": true,
+                  "auraRadius": 70,
+                  "auraEffects": [
+                    {
+                      "atom": "vulnerable",
+                      "params": {
+                        "ratio": 0.2,
+                        "duration": 1.2
+                      }
+                    }
+                  ]
                 }
               }
             ]
           }
         }
       },
-      "designNotes": "B0 灰盒占位；正式产物按 B1 同神、B2 正向、B3 反向分批替换。",
+      "designNotes": "正式配方产物；批次 B3。",
       "affixPool": {
         "count": 2,
         "candidates": [
@@ -21971,12 +23378,13 @@
       "recipeOnly": true,
       "category": "control",
       "synergyTags": [
-        "control"
+        "control",
+        "domain"
       ],
-      "identityContract": "灰盒占位：以 2.5 秒周期爆发验证 冰像阵 的配方终态管线。",
+      "identityContract": "周期落锤在敌群中砸出嘲讽冰像，冰像消亡后冻结周围。",
       "textKey": "cards.glacialEffigy",
       "teaching": false,
-      "implementationBatch": 1,
+      "implementationBatch": 3,
       "stars": {
         "6": {
           "tier": "transform",
@@ -21984,29 +23392,51 @@
             {
               "trigger": "interval",
               "triggerParams": {
-                "seconds": 2.5
+                "seconds": 3
               },
+              "at": "densestCluster",
               "effects": [
                 {
-                  "atom": "burstDamage",
+                  "atom": "mortarMorph",
                   "params": {
-                    "damageMul": 1.35,
-                    "radius": 117
+                    "radius": 70,
+                    "damageRatio": 1.1
+                  }
+                },
+                {
+                  "atom": "summon",
+                  "params": {
+                    "kind": "iceDecoy",
+                    "count": 1,
+                    "maxCount": 2,
+                    "hp": 90,
+                    "duration": 8,
+                    "tauntRadius": 130,
+                    "onDeathEffects": [
+                      {
+                        "atom": "freeze",
+                        "params": {
+                          "radius": 90,
+                          "duration": 1.5,
+                          "stacksToTrigger": 2
+                        }
+                      }
+                    ]
                   }
                 }
               ]
             },
             {
-              "trigger": "passive",
+              "trigger": "onHit",
+              "triggerParams": {
+                "requiresStatus": "frozen"
+              },
               "effects": [
                 {
-                  "atom": "statBuff",
+                  "atom": "burstDamage",
                   "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.1,
-                    "duration": 3,
-                    "maxStacks": 1
+                    "damageMul": 1.4,
+                    "radius": 55
                   }
                 }
               ]
@@ -22015,54 +23445,116 @@
         }
       },
       "amplifyAxis": {
-        "description": "B0 灰盒占位",
+        "description": "终极形态按正式机制完整生效。",
         "params": {
-          "damageMul": "+0.05"
+          "formal": "+0"
         }
       },
       "consumable": {
         "placement": "point",
-        "interpolation": "linear",
         "anchors": {
           "1": {
-            "radius": 117,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "mortarMorph",
                 "params": {
-                  "damageMul": 0.8,
-                  "radius": 117
+                  "radius": 80,
+                  "damageRatio": 1.4
+                }
+              },
+              {
+                "atom": "summon",
+                "params": {
+                  "kind": "iceDecoy",
+                  "count": 1,
+                  "maxCount": 2,
+                  "hp": 110,
+                  "duration": 5,
+                  "tauntRadius": 140,
+                  "onDeathEffects": [
+                    {
+                      "atom": "freeze",
+                      "params": {
+                        "radius": 90,
+                        "duration": 1.5
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "3": {
-            "radius": 132,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "mortarMorph",
                 "params": {
-                  "damageMul": 1,
-                  "radius": 132
+                  "radius": 80,
+                  "damageRatio": 1.4
+                }
+              },
+              {
+                "atom": "summon",
+                "params": {
+                  "kind": "iceDecoy",
+                  "count": 1,
+                  "maxCount": 2,
+                  "hp": 110,
+                  "duration": 5,
+                  "tauntRadius": 140,
+                  "onDeathEffects": [
+                    {
+                      "atom": "freeze",
+                      "params": {
+                        "radius": 90,
+                        "duration": 1.5
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "6": {
-            "radius": 147,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "mortarMorph",
                 "params": {
-                  "damageMul": 1.3,
-                  "radius": 147
+                  "radius": 80,
+                  "damageRatio": 1.4
+                }
+              },
+              {
+                "atom": "summon",
+                "params": {
+                  "kind": "iceDecoy",
+                  "count": 1,
+                  "maxCount": 2,
+                  "hp": 110,
+                  "duration": 5,
+                  "tauntRadius": 140,
+                  "onDeathEffects": [
+                    {
+                      "atom": "freeze",
+                      "params": {
+                        "radius": 90,
+                        "duration": 1.5
+                      }
+                    }
+                  ]
                 }
               }
             ]
           }
         }
       },
-      "designNotes": "B0 灰盒占位；正式产物按 B1 同神、B2 正向、B3 反向分批替换。",
+      "designNotes": "正式配方产物；批次 B3。",
       "affixPool": {
         "count": 2,
         "candidates": [
@@ -22102,44 +23594,111 @@
         "inferno"
       ],
       "recipeOnly": true,
-      "category": "domain",
+      "category": "projectile",
       "synergyTags": [
-        "domain"
+        "projectile",
+        "defense"
       ],
-      "identityContract": "灰盒占位：以 2.5 秒周期爆发验证 罪火迫击 的配方终态管线。",
+      "identityContract": "每次突破装填罪火弹药，周期按存量齐射并清空弹舱。",
       "textKey": "cards.wrathMortar",
       "teaching": false,
-      "implementationBatch": 1,
+      "implementationBatch": 3,
       "stars": {
         "6": {
           "tier": "transform",
           "equip": [
             {
-              "trigger": "interval",
-              "triggerParams": {
-                "seconds": 2.5
-              },
+              "trigger": "onBreach",
               "effects": [
                 {
-                  "atom": "burstDamage",
+                  "atom": "charge",
                   "params": {
-                    "damageMul": 1.4,
-                    "radius": 125
+                    "by": "breach",
+                    "perEvent": 1,
+                    "max": 4,
+                    "releaseAt": "interval",
+                    "chargeKey": "magazine",
+                    "effects": [
+                      {
+                        "atom": "mortarMorph",
+                        "params": {
+                          "radius": 70,
+                          "damageRatio": 1.2
+                        }
+                      },
+                      {
+                        "atom": "groundZone",
+                        "params": {
+                          "radius": 60,
+                          "duration": 4,
+                          "tickInterval": 0.5,
+                          "effects": [
+                            {
+                              "atom": "dot",
+                              "params": {
+                                "damageRatio": 0.15
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
                   }
                 }
               ]
             },
             {
-              "trigger": "passive",
+              "trigger": "interval",
+              "triggerParams": {
+                "seconds": 4
+              },
+              "at": "densestCluster",
               "effects": [
                 {
-                  "atom": "statBuff",
+                  "atom": "charge",
                   "params": {
-                    "stat": "fireRate",
-                    "operation": "mul",
-                    "value": 1.11,
-                    "duration": 3,
-                    "maxStacks": 1
+                    "by": "breach",
+                    "perEvent": 1,
+                    "max": 4,
+                    "releaseAt": "interval",
+                    "chargeKey": "magazine",
+                    "effects": [
+                      {
+                        "atom": "mortarMorph",
+                        "params": {
+                          "radius": 70,
+                          "damageRatio": 1.2
+                        }
+                      },
+                      {
+                        "atom": "groundZone",
+                        "params": {
+                          "radius": 60,
+                          "duration": 4,
+                          "tickInterval": 0.5,
+                          "effects": [
+                            {
+                              "atom": "dot",
+                              "params": {
+                                "damageRatio": 0.15
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "trigger": "onHit",
+              "effects": [
+                {
+                  "atom": "dot",
+                  "params": {
+                    "damageRatio": 0.12,
+                    "duration": 3
                   }
                 }
               ]
@@ -22148,54 +23707,104 @@
         }
       },
       "amplifyAxis": {
-        "description": "B0 灰盒占位",
+        "description": "终极形态按正式机制完整生效。",
         "params": {
-          "damageMul": "+0.05"
+          "formal": "+0"
         }
       },
       "consumable": {
         "placement": "point",
-        "interpolation": "linear",
         "anchors": {
           "1": {
-            "radius": 125,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "mortarMorph",
                 "params": {
-                  "damageMul": 0.8,
-                  "radius": 125
+                  "radius": 90,
+                  "damageRatio": 2
+                }
+              },
+              {
+                "atom": "groundZone",
+                "params": {
+                  "radius": 70,
+                  "duration": 4,
+                  "tickInterval": 0.5,
+                  "effects": [
+                    {
+                      "atom": "dot",
+                      "params": {
+                        "damageRatio": 0.2
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "3": {
-            "radius": 140,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "mortarMorph",
                 "params": {
-                  "damageMul": 1,
-                  "radius": 140
+                  "radius": 90,
+                  "damageRatio": 2
+                }
+              },
+              {
+                "atom": "groundZone",
+                "params": {
+                  "radius": 70,
+                  "duration": 4,
+                  "tickInterval": 0.5,
+                  "effects": [
+                    {
+                      "atom": "dot",
+                      "params": {
+                        "damageRatio": 0.2
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "6": {
-            "radius": 155,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "mortarMorph",
                 "params": {
-                  "damageMul": 1.3,
-                  "radius": 155
+                  "radius": 90,
+                  "damageRatio": 2
+                }
+              },
+              {
+                "atom": "groundZone",
+                "params": {
+                  "radius": 70,
+                  "duration": 4,
+                  "tickInterval": 0.5,
+                  "effects": [
+                    {
+                      "atom": "dot",
+                      "params": {
+                        "damageRatio": 0.2
+                      }
+                    }
+                  ]
                 }
               }
             ]
           }
         }
       },
-      "designNotes": "B0 灰盒占位；正式产物按 B1 同神、B2 正向、B3 反向分批替换。",
+      "designNotes": "正式配方产物；批次 B3。",
       "affixPool": {
         "count": 2,
         "candidates": [
@@ -22236,9 +23845,10 @@
       "recipeOnly": true,
       "category": "defense",
       "synergyTags": [
-        "defense"
+        "defense",
+        "domain"
       ],
-      "identityContract": "灰盒占位：以 2.5 秒周期爆发验证 永固圣域 的配方终态管线。",
+      "identityContract": "壁垒实体化为环形圣墙，塌墙即反击。",
       "textKey": "cards.aegisCitadel",
       "teaching": false,
       "implementationBatch": 1,
@@ -22247,16 +23857,33 @@
           "tier": "transform",
           "equip": [
             {
-              "trigger": "interval",
-              "triggerParams": {
-                "seconds": 2.5
-              },
+              "trigger": "onWaveStart",
               "effects": [
                 {
-                  "atom": "burstDamage",
+                  "atom": "summon",
                   "params": {
-                    "damageMul": 1.45,
-                    "radius": 133
+                    "kind": "wall",
+                    "count": 4,
+                    "maxCount": 4,
+                    "hp": 180,
+                    "placement": "ring",
+                    "distanceFromTurret": 125,
+                    "onDeathEffects": [
+                      {
+                        "atom": "burstDamage",
+                        "params": {
+                          "radius": 90,
+                          "damageMul": 1.2
+                        }
+                      },
+                      {
+                        "atom": "knockback",
+                        "params": {
+                          "radius": 90,
+                          "distance": 40
+                        }
+                      }
+                    ]
                   }
                 }
               ]
@@ -22265,13 +23892,44 @@
               "trigger": "passive",
               "effects": [
                 {
-                  "atom": "statBuff",
+                  "atom": "breachReduction",
                   "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.06,
-                    "duration": 3,
-                    "maxStacks": 1
+                    "ratio": 0.15
+                  }
+                }
+              ]
+            },
+            {
+              "trigger": "interval",
+              "triggerParams": {
+                "seconds": 9
+              },
+              "effects": [
+                {
+                  "atom": "summon",
+                  "params": {
+                    "kind": "wall",
+                    "count": 1,
+                    "maxCount": 4,
+                    "hp": 180,
+                    "placement": "ring",
+                    "distanceFromTurret": 125,
+                    "onDeathEffects": [
+                      {
+                        "atom": "burstDamage",
+                        "params": {
+                          "radius": 90,
+                          "damageMul": 1.2
+                        }
+                      },
+                      {
+                        "atom": "knockback",
+                        "params": {
+                          "radius": 90,
+                          "distance": 40
+                        }
+                      }
+                    ]
                   }
                 }
               ]
@@ -22280,54 +23938,98 @@
         }
       },
       "amplifyAxis": {
-        "description": "B0 灰盒占位",
+        "description": "终极形态按正式机制完整生效。",
         "params": {
-          "damageMul": "+0.05"
+          "formal": "+0"
         }
       },
       "consumable": {
         "placement": "point",
-        "interpolation": "linear",
         "anchors": {
           "1": {
-            "radius": 133,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "summon",
                 "params": {
-                  "damageMul": 0.8,
-                  "radius": 133
+                  "kind": "wall",
+                  "count": 4,
+                  "maxCount": 4,
+                  "hp": 220,
+                  "duration": 5,
+                  "placement": "ring",
+                  "distanceFromTurret": 125,
+                  "onDeathEffects": [
+                    {
+                      "atom": "burstDamage",
+                      "params": {
+                        "radius": 90,
+                        "damageMul": 1.2
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "3": {
-            "radius": 148,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "summon",
                 "params": {
-                  "damageMul": 1,
-                  "radius": 148
+                  "kind": "wall",
+                  "count": 4,
+                  "maxCount": 4,
+                  "hp": 220,
+                  "duration": 5,
+                  "placement": "ring",
+                  "distanceFromTurret": 125,
+                  "onDeathEffects": [
+                    {
+                      "atom": "burstDamage",
+                      "params": {
+                        "radius": 90,
+                        "damageMul": 1.2
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "6": {
-            "radius": 163,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "summon",
                 "params": {
-                  "damageMul": 1.3,
-                  "radius": 163
+                  "kind": "wall",
+                  "count": 4,
+                  "maxCount": 4,
+                  "hp": 220,
+                  "duration": 5,
+                  "placement": "ring",
+                  "distanceFromTurret": 125,
+                  "onDeathEffects": [
+                    {
+                      "atom": "burstDamage",
+                      "params": {
+                        "radius": 90,
+                        "damageMul": 1.2
+                      }
+                    }
+                  ]
                 }
               }
             ]
           }
         }
       },
-      "designNotes": "B0 灰盒占位；正式产物按 B1 同神、B2 正向、B3 反向分批替换。",
+      "designNotes": "正式配方产物；批次 B1。",
       "affixPool": {
         "count": 2,
         "candidates": [
@@ -22369,42 +24071,64 @@
       "recipeOnly": true,
       "category": "economy",
       "synergyTags": [
-        "utility"
+        "utility",
+        "defense"
       ],
-      "identityContract": "灰盒占位：以 2.5 秒周期爆发验证 根脉织网 的配方终态管线。",
+      "identityContract": "每次合成长出根脉段，安稳波次会让整张根网继续强化。",
       "textKey": "cards.rootLoom",
       "teaching": false,
-      "implementationBatch": 1,
+      "implementationBatch": 2,
       "stars": {
         "6": {
           "tier": "transform",
           "equip": [
             {
-              "trigger": "interval",
-              "triggerParams": {
-                "seconds": 2.5
-              },
+              "trigger": "onMerge",
               "effects": [
                 {
-                  "atom": "burstDamage",
+                  "atom": "mergePulse",
                   "params": {
-                    "damageMul": 1.5,
-                    "radius": 141
+                    "damagePerMergeCount": 5,
+                    "radius": 180
+                  }
+                },
+                {
+                  "atom": "summon",
+                  "params": {
+                    "kind": "rootSegment",
+                    "count": 1,
+                    "maxCount": 6,
+                    "hp": 100,
+                    "placement": "threatDirection",
+                    "auraRadius": 75,
+                    "auraEffects": [
+                      {
+                        "atom": "dot",
+                        "params": {
+                          "damageRatio": 0.08
+                        }
+                      },
+                      {
+                        "atom": "knockback",
+                        "params": {
+                          "distance": 10
+                        }
+                      }
+                    ]
                   }
                 }
               ]
             },
             {
-              "trigger": "passive",
+              "trigger": "onWaveStart",
               "effects": [
                 {
-                  "atom": "statBuff",
+                  "atom": "summonBuff",
                   "params": {
-                    "stat": "fireRate",
-                    "operation": "mul",
-                    "value": 1.07,
-                    "duration": 3,
-                    "maxStacks": 1
+                    "target": "all",
+                    "kind": "rootSegment",
+                    "damageMul": 1.15,
+                    "capLevels": 4
                   }
                 }
               ]
@@ -22413,54 +24137,110 @@
         }
       },
       "amplifyAxis": {
-        "description": "B0 灰盒占位",
+        "description": "终极形态按正式机制完整生效。",
         "params": {
-          "damageMul": "+0.05"
+          "formal": "+0"
         }
       },
       "consumable": {
         "placement": "point",
-        "interpolation": "linear",
         "anchors": {
           "1": {
-            "radius": 141,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "summon",
                 "params": {
-                  "damageMul": 0.8,
-                  "radius": 141
+                  "kind": "rootSegment",
+                  "count": 2,
+                  "maxCount": 6,
+                  "hp": 120,
+                  "duration": 5,
+                  "auraRadius": 75,
+                  "auraEffects": [
+                    {
+                      "atom": "dot",
+                      "params": {
+                        "damageRatio": 0.1
+                      }
+                    },
+                    {
+                      "atom": "knockback",
+                      "params": {
+                        "distance": 10
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "3": {
-            "radius": 156,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "summon",
                 "params": {
-                  "damageMul": 1,
-                  "radius": 156
+                  "kind": "rootSegment",
+                  "count": 2,
+                  "maxCount": 6,
+                  "hp": 120,
+                  "duration": 5,
+                  "auraRadius": 75,
+                  "auraEffects": [
+                    {
+                      "atom": "dot",
+                      "params": {
+                        "damageRatio": 0.1
+                      }
+                    },
+                    {
+                      "atom": "knockback",
+                      "params": {
+                        "distance": 10
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "6": {
-            "radius": 171,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "summon",
                 "params": {
-                  "damageMul": 1.3,
-                  "radius": 171
+                  "kind": "rootSegment",
+                  "count": 2,
+                  "maxCount": 6,
+                  "hp": 120,
+                  "duration": 5,
+                  "auraRadius": 75,
+                  "auraEffects": [
+                    {
+                      "atom": "dot",
+                      "params": {
+                        "damageRatio": 0.1
+                      }
+                    },
+                    {
+                      "atom": "knockback",
+                      "params": {
+                        "distance": 10
+                      }
+                    }
+                  ]
                 }
               }
             ]
           }
         }
       },
-      "designNotes": "B0 灰盒占位；正式产物按 B1 同神、B2 正向、B3 反向分批替换。",
+      "designNotes": "正式配方产物；批次 B2。",
       "affixPool": {
         "count": 2,
         "candidates": [
@@ -22502,42 +24282,64 @@
       "recipeOnly": true,
       "category": "projectile",
       "synergyTags": [
-        "projectile"
+        "projectile",
+        "utility"
       ],
-      "identityContract": "灰盒占位：以 2.5 秒周期爆发验证 点金链 的配方终态管线。",
+      "identityContract": "每次链跳铺设赏印，标记击杀会在整条链上铸造掉落。",
       "textKey": "cards.midasChain",
       "teaching": false,
-      "implementationBatch": 1,
+      "implementationBatch": 3,
       "stars": {
         "6": {
           "tier": "transform",
           "equip": [
             {
-              "trigger": "interval",
-              "triggerParams": {
-                "seconds": 2.5
-              },
+              "trigger": "onHit",
               "effects": [
                 {
-                  "atom": "burstDamage",
+                  "atom": "chain",
                   "params": {
-                    "damageMul": 1.55,
-                    "radius": 112
+                    "bounces": 4,
+                    "spreadStatus": "brand",
+                    "spreadParams": {
+                      "ratio": 2,
+                      "duration": 5
+                    }
                   }
                 }
               ]
             },
             {
-              "trigger": "passive",
+              "trigger": "onKill",
+              "triggerParams": {
+                "requiresStatus": "brand"
+              },
+              "at": "point",
               "effects": [
                 {
-                  "atom": "statBuff",
+                  "atom": "extraDrop",
                   "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.08,
-                    "duration": 3,
-                    "maxStacks": 1
+                    "count": 1
+                  }
+                },
+                {
+                  "atom": "extraDrop",
+                  "forEach": {
+                    "set": {
+                      "kind": "enemiesWithStatus",
+                      "status": "brand"
+                    },
+                    "maxTargets": 6,
+                    "order": "nearest",
+                    "effects": [
+                      {
+                        "atom": "extraDrop",
+                        "params": {
+                          "count": 1,
+                          "chance": 0.35
+                        }
+                      }
+                    ]
                   }
                 }
               ]
@@ -22546,54 +24348,74 @@
         }
       },
       "amplifyAxis": {
-        "description": "B0 灰盒占位",
+        "description": "终极形态按正式机制完整生效。",
         "params": {
-          "damageMul": "+0.05"
+          "formal": "+0"
         }
       },
       "consumable": {
         "placement": "point",
-        "interpolation": "linear",
         "anchors": {
           "1": {
-            "radius": 112,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "chain",
                 "params": {
-                  "damageMul": 0.8,
-                  "radius": 112
+                  "targets": 1,
+                  "bounces": 6,
+                  "damageMul": 1.2,
+                  "spreadStatus": "brand",
+                  "spreadParams": {
+                    "ratio": 2,
+                    "duration": 5
+                  }
                 }
               }
             ]
           },
           "3": {
-            "radius": 127,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "chain",
                 "params": {
-                  "damageMul": 1,
-                  "radius": 127
+                  "targets": 1,
+                  "bounces": 6,
+                  "damageMul": 1.2,
+                  "spreadStatus": "brand",
+                  "spreadParams": {
+                    "ratio": 2,
+                    "duration": 5
+                  }
                 }
               }
             ]
           },
           "6": {
-            "radius": 142,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "chain",
                 "params": {
-                  "damageMul": 1.3,
-                  "radius": 142
+                  "targets": 1,
+                  "bounces": 6,
+                  "damageMul": 1.2,
+                  "spreadStatus": "brand",
+                  "spreadParams": {
+                    "ratio": 2,
+                    "duration": 5
+                  }
                 }
               }
             ]
           }
         }
       },
-      "designNotes": "B0 灰盒占位；正式产物按 B1 同神、B2 正向、B3 反向分批替换。",
+      "designNotes": "正式配方产物；批次 B3。",
       "affixPool": {
         "count": 2,
         "candidates": [
@@ -22633,44 +24455,79 @@
         "winter"
       ],
       "recipeOnly": true,
-      "category": "control",
+      "category": "defense",
       "synergyTags": [
-        "control"
+        "defense",
+        "utility"
       ],
-      "identityContract": "灰盒占位：以 2.5 秒周期爆发验证 回春霜露 的配方终态管线。",
+      "identityContract": "减速圈内每多一个受控目标，就按上限提高周期回复。",
       "textKey": "cards.frostDew",
       "teaching": false,
-      "implementationBatch": 1,
+      "implementationBatch": 3,
       "stars": {
         "6": {
           "tier": "transform",
           "equip": [
             {
-              "trigger": "interval",
-              "triggerParams": {
-                "seconds": 2.5
-              },
+              "trigger": "passive",
               "effects": [
                 {
-                  "atom": "burstDamage",
+                  "atom": "aura",
                   "params": {
-                    "damageMul": 1.25,
-                    "radius": 120
+                    "radius": 130,
+                    "tickInterval": 0.5,
+                    "duration": 999,
+                    "effects": [
+                      {
+                        "atom": "slow",
+                        "params": {
+                          "ratio": 0.25,
+                          "duration": 1
+                        }
+                      }
+                    ]
                   }
                 }
               ]
             },
             {
-              "trigger": "passive",
+              "trigger": "interval",
+              "triggerParams": {
+                "seconds": 3
+              },
               "effects": [
                 {
-                  "atom": "statBuff",
+                  "atom": "restore",
                   "params": {
-                    "stat": "fireRate",
-                    "operation": "mul",
-                    "value": 1.09,
-                    "duration": 3,
-                    "maxStacks": 1
+                    "amount": 1
+                  },
+                  "scaleBy": {
+                    "source": "controlledInAura",
+                    "param": "amount",
+                    "perUnit": 1,
+                    "cap": 6
+                  }
+                }
+              ]
+            },
+            {
+              "trigger": "onKill",
+              "triggerParams": {
+                "requiresStatus": "frozen"
+              },
+              "at": "point",
+              "effects": [
+                {
+                  "atom": "extraDrop",
+                  "params": {
+                    "count": 1,
+                    "secure": true
+                  }
+                },
+                {
+                  "atom": "restore",
+                  "params": {
+                    "amount": 4
                   }
                 }
               ]
@@ -22679,54 +24536,71 @@
         }
       },
       "amplifyAxis": {
-        "description": "B0 灰盒占位",
+        "description": "终极形态按正式机制完整生效。",
         "params": {
-          "damageMul": "+0.05"
+          "formal": "+0"
         }
       },
       "consumable": {
         "placement": "point",
-        "interpolation": "linear",
         "anchors": {
           "1": {
-            "radius": 120,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "restore",
                 "params": {
-                  "damageMul": 0.8,
-                  "radius": 120
+                  "amount": 2
+                },
+                "scaleBy": {
+                  "source": "controlledInAura",
+                  "param": "amount",
+                  "perUnit": 2,
+                  "cap": 6
                 }
               }
             ]
           },
           "3": {
-            "radius": 135,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "restore",
                 "params": {
-                  "damageMul": 1,
-                  "radius": 135
+                  "amount": 2
+                },
+                "scaleBy": {
+                  "source": "controlledInAura",
+                  "param": "amount",
+                  "perUnit": 2,
+                  "cap": 6
                 }
               }
             ]
           },
           "6": {
-            "radius": 150,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "restore",
                 "params": {
-                  "damageMul": 1.3,
-                  "radius": 150
+                  "amount": 2
+                },
+                "scaleBy": {
+                  "source": "controlledInAura",
+                  "param": "amount",
+                  "perUnit": 2,
+                  "cap": 6
                 }
               }
             ]
           }
         }
       },
-      "designNotes": "B0 灰盒占位；正式产物按 B1 同神、B2 正向、B3 反向分批替换。",
+      "designNotes": "正式配方产物；批次 B3。",
       "affixPool": {
         "count": 2,
         "candidates": [
@@ -22766,44 +24640,133 @@
         "inferno"
       ],
       "recipeOnly": true,
-      "category": "domain",
+      "category": "control",
       "synergyTags": [
-        "domain"
+        "control",
+        "utility"
       ],
-      "identityContract": "灰盒占位：以 2.5 秒周期爆发验证 悬赏烙印 的配方终态管线。",
+      "identityContract": "周期烙印高价值目标，带火击杀后把烙印接力给最近的新宿主。",
       "textKey": "cards.pyreBrand",
       "teaching": false,
-      "implementationBatch": 1,
+      "implementationBatch": 3,
       "stars": {
         "6": {
           "tier": "transform",
           "equip": [
             {
-              "trigger": "interval",
-              "triggerParams": {
-                "seconds": 2.5
-              },
+              "trigger": "onWaveStart",
               "effects": [
                 {
-                  "atom": "burstDamage",
-                  "params": {
-                    "damageMul": 1.3,
-                    "radius": 128
+                  "atom": "dot",
+                  "forEach": {
+                    "set": {
+                      "kind": "enemiesWithoutStatus",
+                      "status": "dot"
+                    },
+                    "maxTargets": 2,
+                    "order": "nearest",
+                    "effects": [
+                      {
+                        "atom": "dot",
+                        "params": {
+                          "damageRatio": 0.14,
+                          "duration": 6
+                        }
+                      },
+                      {
+                        "atom": "focusPriority",
+                        "params": {
+                          "priorityWeight": 3,
+                          "duration": 6
+                        }
+                      }
+                    ]
                   }
                 }
               ]
             },
             {
-              "trigger": "passive",
+              "trigger": "interval",
+              "triggerParams": {
+                "seconds": 4
+              },
               "effects": [
                 {
-                  "atom": "statBuff",
+                  "atom": "dot",
+                  "forEach": {
+                    "set": {
+                      "kind": "enemiesWithoutStatus",
+                      "status": "dot"
+                    },
+                    "maxTargets": 2,
+                    "order": "nearest",
+                    "effects": [
+                      {
+                        "atom": "dot",
+                        "params": {
+                          "damageRatio": 0.14,
+                          "duration": 6
+                        }
+                      },
+                      {
+                        "atom": "focusPriority",
+                        "params": {
+                          "priorityWeight": 3,
+                          "duration": 6
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "trigger": "onHit",
+              "triggerParams": {
+                "requiresStatus": "dot"
+              },
+              "effects": [
+                {
+                  "atom": "burstDamage",
                   "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.1,
-                    "duration": 3,
-                    "maxStacks": 1
+                    "damageMul": 0.3,
+                    "radius": 45
+                  }
+                }
+              ]
+            },
+            {
+              "trigger": "onKill",
+              "triggerParams": {
+                "requiresStatus": "dot"
+              },
+              "at": "point",
+              "effects": [
+                {
+                  "atom": "dot",
+                  "forEach": {
+                    "set": {
+                      "kind": "enemiesWithoutStatus",
+                      "status": "dot"
+                    },
+                    "maxTargets": 1,
+                    "order": "nearest",
+                    "effects": [
+                      {
+                        "atom": "dot",
+                        "params": {
+                          "damageRatio": 0.14,
+                          "duration": 6
+                        }
+                      },
+                      {
+                        "atom": "focusPriority",
+                        "params": {
+                          "priorityWeight": 3,
+                          "duration": 6
+                        }
+                      }
+                    ]
                   }
                 }
               ]
@@ -22812,54 +24775,83 @@
         }
       },
       "amplifyAxis": {
-        "description": "B0 灰盒占位",
+        "description": "终极形态按正式机制完整生效。",
         "params": {
-          "damageMul": "+0.05"
+          "formal": "+0"
         }
       },
       "consumable": {
         "placement": "point",
-        "interpolation": "linear",
         "anchors": {
           "1": {
-            "radius": 128,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "dot",
                 "params": {
-                  "damageMul": 0.8,
-                  "radius": 128
+                  "radius": 260,
+                  "damageRatio": 0.16,
+                  "duration": 6
+                }
+              },
+              {
+                "atom": "focusPriority",
+                "params": {
+                  "radius": 260,
+                  "priorityWeight": 4,
+                  "duration": 6
                 }
               }
             ]
           },
           "3": {
-            "radius": 143,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "dot",
                 "params": {
-                  "damageMul": 1,
-                  "radius": 143
+                  "radius": 260,
+                  "damageRatio": 0.16,
+                  "duration": 6
+                }
+              },
+              {
+                "atom": "focusPriority",
+                "params": {
+                  "radius": 260,
+                  "priorityWeight": 4,
+                  "duration": 6
                 }
               }
             ]
           },
           "6": {
-            "radius": 158,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "dot",
                 "params": {
-                  "damageMul": 1.3,
-                  "radius": 158
+                  "radius": 260,
+                  "damageRatio": 0.16,
+                  "duration": 6
+                }
+              },
+              {
+                "atom": "focusPriority",
+                "params": {
+                  "radius": 260,
+                  "priorityWeight": 4,
+                  "duration": 6
                 }
               }
             ]
           }
         }
       },
-      "designNotes": "B0 灰盒占位；正式产物按 B1 同神、B2 正向、B3 反向分批替换。",
+      "designNotes": "正式配方产物；批次 B3。",
       "affixPool": {
         "count": 2,
         "candidates": [
@@ -22901,42 +24893,76 @@
       "recipeOnly": true,
       "category": "defense",
       "synergyTags": [
-        "defense"
+        "defense",
+        "utility"
       ],
-      "identityContract": "灰盒占位：以 2.5 秒周期爆发验证 福祸相生 的配方终态管线。",
+      "identityContract": "荆棘伤害积蓄福缘，满档掉落并获得短时减伤，突破坐标直接分红。",
       "textKey": "cards.fortuneThorns",
       "teaching": false,
-      "implementationBatch": 1,
+      "implementationBatch": 3,
       "stars": {
         "6": {
           "tier": "transform",
           "equip": [
             {
-              "trigger": "interval",
-              "triggerParams": {
-                "seconds": 2.5
-              },
+              "trigger": "passive",
               "effects": [
                 {
-                  "atom": "burstDamage",
+                  "atom": "thorns",
                   "params": {
-                    "damageMul": 1.35,
-                    "radius": 136
+                    "ratio": 0.35
                   }
                 }
               ]
             },
             {
-              "trigger": "passive",
+              "trigger": "onBreach",
               "effects": [
                 {
-                  "atom": "statBuff",
+                  "atom": "charge",
                   "params": {
-                    "stat": "fireRate",
-                    "operation": "mul",
-                    "value": 1.11,
-                    "duration": 3,
-                    "maxStacks": 1
+                    "by": "breach",
+                    "perEvent": 25,
+                    "max": 100,
+                    "releaseAt": "full",
+                    "effects": [
+                      {
+                        "atom": "extraDrop",
+                        "params": {
+                          "count": 1,
+                          "at": "turret"
+                        }
+                      },
+                      {
+                        "atom": "statBuff",
+                        "params": {
+                          "stat": "retaliationMul",
+                          "operation": "mul",
+                          "value": 1.2,
+                          "duration": 6,
+                          "maxStacks": 1
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "trigger": "onBreach",
+              "at": "point",
+              "effects": [
+                {
+                  "atom": "extraDrop",
+                  "params": {
+                    "count": 2
+                  }
+                },
+                {
+                  "atom": "burstDamage",
+                  "params": {
+                    "radius": 80,
+                    "damageMul": 0.6
                   }
                 }
               ]
@@ -22945,54 +24971,80 @@
         }
       },
       "amplifyAxis": {
-        "description": "B0 灰盒占位",
+        "description": "终极形态按正式机制完整生效。",
         "params": {
-          "damageMul": "+0.05"
+          "formal": "+0"
         }
       },
       "consumable": {
         "placement": "point",
-        "interpolation": "linear",
         "anchors": {
           "1": {
-            "radius": 136,
+            "radius": 160,
+            "duration": 5,
             "effects": [
+              {
+                "atom": "extraDrop",
+                "params": {
+                  "count": 2,
+                  "at": "turret",
+                  "secure": true
+                }
+              },
               {
                 "atom": "burstDamage",
                 "params": {
-                  "damageMul": 0.8,
-                  "radius": 136
+                  "radius": 100,
+                  "damageMul": 1
                 }
               }
             ]
           },
           "3": {
-            "radius": 151,
+            "radius": 160,
+            "duration": 5,
             "effects": [
+              {
+                "atom": "extraDrop",
+                "params": {
+                  "count": 2,
+                  "at": "turret",
+                  "secure": true
+                }
+              },
               {
                 "atom": "burstDamage",
                 "params": {
-                  "damageMul": 1,
-                  "radius": 151
+                  "radius": 100,
+                  "damageMul": 1
                 }
               }
             ]
           },
           "6": {
-            "radius": 166,
+            "radius": 160,
+            "duration": 5,
             "effects": [
+              {
+                "atom": "extraDrop",
+                "params": {
+                  "count": 2,
+                  "at": "turret",
+                  "secure": true
+                }
+              },
               {
                 "atom": "burstDamage",
                 "params": {
-                  "damageMul": 1.3,
-                  "radius": 166
+                  "radius": 100,
+                  "damageMul": 1
                 }
               }
             ]
           }
         }
       },
-      "designNotes": "B0 灰盒占位；正式产物按 B1 同神、B2 正向、B3 反向分批替换。",
+      "designNotes": "正式配方产物；批次 B3。",
       "affixPool": {
         "count": 2,
         "candidates": [
@@ -23033,9 +25085,10 @@
       "recipeOnly": true,
       "category": "economy",
       "synergyTags": [
-        "utility"
+        "utility",
+        "domain"
       ],
-      "identityContract": "灰盒占位：以 2.5 秒周期爆发验证 丰饶圣林 的配方终态管线。",
+      "identityContract": "拾取点长出金树，金树标记敌人并持续产出。",
       "textKey": "cards.goldenGrove",
       "teaching": false,
       "implementationBatch": 1,
@@ -23044,31 +25097,54 @@
           "tier": "transform",
           "equip": [
             {
-              "trigger": "interval",
-              "triggerParams": {
-                "seconds": 2.5
-              },
+              "trigger": "onPickup",
+              "at": "point",
               "effects": [
                 {
-                  "atom": "burstDamage",
+                  "atom": "summon",
                   "params": {
-                    "damageMul": 1.4,
-                    "radius": 144
+                    "kind": "goldenTree",
+                    "count": 1,
+                    "maxCount": 3,
+                    "hp": 100,
+                    "intervalSeconds": 4,
+                    "fireInterval": 4,
+                    "intervalEffects": [
+                      {
+                        "atom": "focusPriority",
+                        "params": {
+                          "priorityWeight": 1,
+                          "duration": 4,
+                          "radius": 150
+                        }
+                      },
+                      {
+                        "atom": "extraDrop",
+                        "params": {
+                          "count": 1,
+                          "chance": 0.5
+                        }
+                      }
+                    ]
                   }
                 }
               ]
             },
             {
-              "trigger": "passive",
+              "trigger": "onKill",
+              "triggerParams": {
+                "requiresStatus": "brand"
+              },
+              "at": "point",
               "effects": [
                 {
-                  "atom": "statBuff",
+                  "atom": "summonBuff",
                   "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.06,
-                    "duration": 3,
-                    "maxStacks": 1
+                    "target": "nearestToPoint",
+                    "kind": "goldenTree",
+                    "radiusAdd": 10,
+                    "dropChanceAdd": 0.05,
+                    "capLevels": 5
                   }
                 }
               ]
@@ -23077,54 +25153,122 @@
         }
       },
       "amplifyAxis": {
-        "description": "B0 灰盒占位",
+        "description": "终极形态按正式机制完整生效。",
         "params": {
-          "damageMul": "+0.05"
+          "formal": "+0"
         }
       },
       "consumable": {
         "placement": "point",
-        "interpolation": "linear",
         "anchors": {
           "1": {
-            "radius": 144,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "summon",
                 "params": {
-                  "damageMul": 0.8,
-                  "radius": 144
+                  "kind": "goldenTree",
+                  "count": 1,
+                  "maxCount": 3,
+                  "hp": 140,
+                  "duration": 5,
+                  "intervalSeconds": 1,
+                  "fireInterval": 1,
+                  "intervalEffects": [
+                    {
+                      "atom": "focusPriority",
+                      "params": {
+                        "priorityWeight": 2,
+                        "duration": 4,
+                        "radius": 170
+                      }
+                    },
+                    {
+                      "atom": "extraDrop",
+                      "params": {
+                        "count": 1,
+                        "chance": 0.5
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "3": {
-            "radius": 159,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "summon",
                 "params": {
-                  "damageMul": 1,
-                  "radius": 159
+                  "kind": "goldenTree",
+                  "count": 1,
+                  "maxCount": 3,
+                  "hp": 140,
+                  "duration": 5,
+                  "intervalSeconds": 1,
+                  "fireInterval": 1,
+                  "intervalEffects": [
+                    {
+                      "atom": "focusPriority",
+                      "params": {
+                        "priorityWeight": 2,
+                        "duration": 4,
+                        "radius": 170
+                      }
+                    },
+                    {
+                      "atom": "extraDrop",
+                      "params": {
+                        "count": 1,
+                        "chance": 0.5
+                      }
+                    }
+                  ]
                 }
               }
             ]
           },
           "6": {
-            "radius": 174,
+            "radius": 160,
+            "duration": 5,
             "effects": [
               {
-                "atom": "burstDamage",
+                "atom": "summon",
                 "params": {
-                  "damageMul": 1.3,
-                  "radius": 174
+                  "kind": "goldenTree",
+                  "count": 1,
+                  "maxCount": 3,
+                  "hp": 140,
+                  "duration": 5,
+                  "intervalSeconds": 1,
+                  "fireInterval": 1,
+                  "intervalEffects": [
+                    {
+                      "atom": "focusPriority",
+                      "params": {
+                        "priorityWeight": 2,
+                        "duration": 4,
+                        "radius": 170
+                      }
+                    },
+                    {
+                      "atom": "extraDrop",
+                      "params": {
+                        "count": 1,
+                        "chance": 0.5
+                      }
+                    }
+                  ]
                 }
               }
             ]
           }
         }
       },
-      "designNotes": "B0 灰盒占位；正式产物按 B1 同神、B2 正向、B3 反向分批替换。",
+      "designNotes": "正式配方产物；批次 B1。",
       "affixPool": {
         "count": 2,
         "candidates": [

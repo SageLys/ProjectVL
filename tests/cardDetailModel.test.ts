@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { cfg } from '../src/config';
 import { buildCardDetailViewModel } from '../src/ui/cardDetailModel';
-import { cardDisplayName } from '../src/ui/cardMeta';
 
 describe('card detail view model', () => {
   it('uses resolved current effects and marks the selected 3★/5★ routes', () => {
@@ -39,33 +38,20 @@ describe('card detail view model', () => {
     expect(model.affixes[1].consumable).toContain('持续 5 秒');
   });
 
-  it('renders recipe-only cards as recipes instead of a normal tree', () => {
+  it('renders recipe-only cards as an accurate terminal form without a material formula', () => {
     const model = buildCardDetailViewModel({ id: 12, type: 'stormLattice', star: 6 }, 'equipment');
-    expect(model.tree.nodes).toHaveLength(0);
-    expect(model.tree.recipe?.notice).toContain('原分支被终极形态替代');
-    expect(model.tree.recipe?.ingredientA).toContain('≥5★');
+    expect(model.currentRoute).toBe('终极形态');
+    expect(model.tree.nodes).toHaveLength(1);
+    expect(model.tree.nodes[0].label).toBe('终极形态效果');
+    expect(model.tree.nodes[0].exactEffects?.length).toBeGreaterThan(0);
   });
 
-  it('previews both ingredient sides of all 25 fixed recipes from 1★', () => {
+  it('does not expose partner or output recipes from ordinary card details', () => {
     expect(cfg.evolutionRecipes.recipes).toHaveLength(25);
     for (const recipe of cfg.evolutionRecipes.recipes) {
-      for (const [self, partner] of [
-        [recipe.ingredientVariable, recipe.ingredientAnchor],
-        [recipe.ingredientAnchor, recipe.ingredientVariable],
-      ] as const) {
-        const model = buildCardDetailViewModel({ id: 100, type: self.cardId, star: 1 }, 'cards');
-        const preview = model.tree.asIngredient.find(item => item.recipeId === recipe.id);
-        expect(preview).toMatchObject({
-          selfMinStar: self.minStar,
-          partnerCardId: partner.cardId,
-          partnerMinStar: partner.minStar,
-          outputCardId: recipe.outputCardId,
-          outputStar: recipe.outputStar,
-        });
-        expect(preview?.notice).toContain(`本卡达到 ${self.minStar}★ 后`);
-        expect(preview?.notice).toContain(cardDisplayName(partner.cardId));
-        expect(preview?.notice).toContain(cardDisplayName(recipe.outputCardId));
-      }
+      const model = buildCardDetailViewModel({ id: 100, type: recipe.ingredientVariable.cardId, star: 1 }, 'cards');
+      expect(JSON.stringify(model.tree)).not.toContain(recipe.ingredientAnchor.cardId);
+      expect(JSON.stringify(model.tree)).not.toContain(recipe.outputCardId);
     }
   });
 });

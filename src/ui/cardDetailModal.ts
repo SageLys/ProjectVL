@@ -1,11 +1,10 @@
 import type { Card } from '../core/types';
-import { buildCardDetailViewModel, type CardDetailViewModel, type EffectSection, type RecipeDisplayContext } from './cardDetailModel';
+import { buildCardDetailViewModel, type CardDetailViewModel, type EffectSection } from './cardDetailModel';
 import type { EffectTextBlock } from './effectText';
 
 export interface CardDetailModalHooks {
   onOpen(): void;
   onClose(): void;
-  recipeContext?(): RecipeDisplayContext;
 }
 
 export interface CardDetailModal {
@@ -183,29 +182,9 @@ export function createCardDetailModal(hooks: CardDetailModalHooks): CardDetailMo
     const tree = document.createElement('section');
     tree.className = 'card-detail-group';
     const treeTitle = document.createElement('h3');
-    treeTitle.textContent = '完整技能树与进化配方';
+    treeTitle.textContent = model.currentRoute === '终极形态' ? '终极形态效果' : '完整技能树';
     tree.append(treeTitle);
-    for (const ingredient of model.tree.asIngredient) {
-      const preview = document.createElement('article');
-      preview.className = `skill-recipe-ingredient${ingredient.compatible ? '' : ' unavailable'}`;
-      preview.dataset.recipeId = ingredient.recipeId;
-      const heading = document.createElement('h4');
-      heading.textContent = '进化配方（作为材料）';
-      const notice = document.createElement('p');
-      notice.textContent = ingredient.notice;
-      preview.append(heading, notice);
-      tree.append(preview);
-    }
-    if (model.tree.recipe) {
-      const recipe = document.createElement('article');
-      recipe.className = 'skill-recipe';
-      const formula = document.createElement('strong');
-      formula.textContent = `${model.tree.recipe.ingredientA} + ${model.tree.recipe.ingredientB} → ${model.tree.recipe.output}`;
-      const notice = document.createElement('p');
-      notice.textContent = model.tree.recipe.notice;
-      recipe.append(formula, notice, renderBlocks(model.tree.recipe.exactEffects));
-      tree.append(recipe);
-    } else {
+    {
       const track = document.createElement('div');
       track.className = 'skill-tree';
       for (const node of model.tree.nodes) {
@@ -250,7 +229,7 @@ export function createCardDetailModal(hooks: CardDetailModalHooks): CardDetailMo
   return {
     open(card, source, returnFocus) {
       focusTarget = returnFocus ?? document.activeElement as HTMLElement | null;
-      renderModel(buildCardDetailViewModel(card, source, hooks.recipeContext?.()));
+      renderModel(buildCardDetailViewModel(card, source));
       if (!open) {
         open = true;
         overlay.hidden = false;

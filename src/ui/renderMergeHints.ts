@@ -2,9 +2,7 @@ import { cfg } from '../config';
 import { getActiveMergeCopies } from '../core/systems/cardSystem';
 import type { Card, GameState } from '../core/types';
 import { availableRecipes } from '../core/systems/recipeEvolutionSystem';
-import { texts } from '../data';
 import { cardDisplayName } from './cardMeta';
-import { fmt } from './format';
 
 type HintCard = Card & { source: 'cards' | 'equipment' };
 
@@ -107,15 +105,7 @@ function appendRecipePath(svg: SVGSVGElement, d: string, className: string, pair
 }
 
 function recipeHintText(pair: RecipeHintPair): string {
-  const recipe = cfg.evolutionRecipes.recipes.find(item => item.id === pair.recipeId)!;
-  return fmt(texts.evolution.recipeCombatHint, {
-    a: cardDisplayName(recipe.ingredientVariable.cardId),
-    aStar: recipe.ingredientVariable.minStar,
-    b: cardDisplayName(recipe.ingredientAnchor.cardId),
-    bStar: recipe.ingredientAnchor.minStar,
-    output: cardDisplayName(pair.outputCardId),
-    outputStar: pair.outputStar,
-  });
+  return `卡间进化就绪：拖动任一材料至另一张，进化为「${cardDisplayName(pair.outputCardId)}」${pair.outputStar}★`;
 }
 
 function renderRecipeHints(dock: HTMLElement, pairs: RecipeHintPair[]): void {

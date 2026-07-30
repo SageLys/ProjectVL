@@ -199,7 +199,9 @@ export function validateGodConfig(
       visitBindings(outputCard.stars['6'].equip, binding => {
         if (binding.trigger !== 'onKill' && binding.trigger !== 'onBreach') return;
         for (const effect of binding.effects as Record<string, unknown>[]) {
-          if (['burstDamage', 'slow', 'freeze', 'stun', 'vulnerable', 'dot', 'knockback', 'execute'].includes(String(effect.atom))) {
+          const effectiveAt = effect.at ?? binding.at;
+          if (['burstDamage', 'slow', 'freeze', 'stun', 'vulnerable', 'dot', 'knockback', 'execute'].includes(String(effect.atom))
+            && effectiveAt !== 'point') {
             fail(`${path}.outputCardId`, `${String(binding.trigger)} 产物效果必须使用坐标类原子`);
           }
         }

@@ -139,6 +139,13 @@ function tickAuras(state: GameState, config: Config, rng: Rng, dt: number, event
 }
 
 function explodeSummon(state: GameState, config: Config, rng: Rng, summon: Summon, events: GameEvent[]): void {
+  if (summon.onDeathEffects?.length) {
+    runEffects({
+      state, config, rng, events, origin: { x: summon.x, y: summon.y }, star: 6,
+      baseDamage: summon.baseDamage ?? totalDamage(state, config), sourceCardId: summon.sourceCardId,
+      sourceCardType: summon.sourceCardType, sourceBindingIndex: summon.sourceBindingIndex,
+    }, summon.onDeathEffects);
+  }
   if (!summon.explodeOnDeath) return;
   const { damage, knockbackDistance } = summon.explodeOnDeath;
   const maxRange = totalRange(state, config);
@@ -156,6 +163,29 @@ function tickSummons(state: GameState, config: Config, rng: Rng, dt: number, eve
   for (let i = state.summons.length - 1; i >= 0; i--) {
     const s = state.summons[i];
     if (s.remaining != null) s.remaining -= dt;
+    if (s.intervalEffects?.length && s.intervalTimer != null) {
+      s.intervalTimer -= dt;
+      if (s.intervalTimer <= 0) {
+        const interval = Math.max(0.05, s.intervalSeconds || 1);
+        s.intervalTimer += interval;
+        runEffects({
+          state, config, rng, events, origin: { x: s.x, y: s.y }, star: 6,
+          baseDamage: (s.baseDamage ?? totalDamage(state, config)) * (s.damageRatio ?? 1),
+          sourceCardId: s.sourceCardId, sourceCardType: s.sourceCardType, sourceBindingIndex: s.sourceBindingIndex,
+        }, s.intervalEffects);
+      }
+    }
+    if (s.auraEffects?.length && (s.auraRadius ?? 0) > 0) {
+      for (const enemy of state.enemies) {
+        if (Math.hypot(enemy.x - s.x, enemy.y - s.y) > (s.auraRadius ?? 0) + enemy.r) continue;
+        runEffects({
+          state, config, rng, events, origin: { x: s.x, y: s.y }, star: 6,
+          baseDamage: (s.baseDamage ?? totalDamage(state, config)) * (s.damageRatio ?? 1),
+          sourceCardId: s.sourceCardId, sourceCardType: s.sourceCardType, sourceBindingIndex: s.sourceBindingIndex,
+          enemy, scaleEnemy: enemy, zoneTick: true,
+        }, s.auraEffects);
+      }
+    }
     // 镜像炮台：按冷却向最近敌人开火（本体伤害 × damageRatio）。
     if (s.kind === 'mirrorTurret') {
       s.fireCd = (s.fireCd ?? 0) - dt;

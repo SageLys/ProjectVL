@@ -36,7 +36,7 @@ function recipeAssistReward(state: GameState): { cardType: string; star: number 
   if (state.recipes.assistClosed
     || state.recipes.assistBudgetUsed >= cfg.economy.evolution.assistMaxCorrections
     || state.wave <= cfg.economy.evolution.assistCheckpoints[1]) return null;
-  const recipe = cfg.evolutionRecipes.recipes.find(item => item.id === state.recipes.pinnedRecipeId);
+  const recipe = cfg.evolutionRecipes.recipes.find(item => item.id === state.recipes.directedRecipeId);
   if (!recipe) return null;
   const materials = [recipe.ingredientVariable.cardId, recipe.ingredientAnchor.cardId]
     .filter(type => (state.recipes.assistCorrectionsByMaterial[type] ?? 0)

@@ -113,8 +113,11 @@ export const ATOM_CONTRACT = {
       searchRange: { type: 'number', default: 130, min: 0 },
       targets: { type: 'integer', default: 1, min: 0, note: '无敌人载荷时取 origin 附近的起点数' },
       damageMul: { type: 'number', default: 1, min: 0, note: '无 attack/bullet 载荷时的伤害基准倍率' },
-      spreadStatus: { type: 'enum', enum: ['vulnerable', 'slow', 'dot'], note: '每次链伤后施加的状态；不发送 onHit' },
+      spreadStatus: { type: 'enum', enum: ['vulnerable', 'slow', 'dot', 'brand'], note: '每次链伤后施加的状态；不发送 onHit' },
       spreadParams: { type: 'record', default: {}, note: '状态强度 ratio 与持续时间 duration' },
+      preferRelay: { type: 'boolean', default: false, note: '链路优先经过本卡生成的中继召唤物' },
+      relayDamageBonus: { type: 'number', default: 0, min: 0 },
+      relayBonusCap: { type: 'number', default: 0.45, min: 0 },
       ...CHANCE,
     },
     allowedTriggers: ['onFire', 'onHit', 'onKill', 'interval'],
@@ -330,11 +333,11 @@ export const ATOM_CONTRACT = {
   summon: {
     category: 'domain',
     params: {
-      kind: { type: 'enum', default: 'decoy', enum: ['decoy', 'mirrorTurret', 'orbital'] },
+      kind: { type: 'enum', default: 'decoy', enum: ['decoy', 'mirrorTurret', 'orbital', 'wall', 'goldenTree', 'rootSegment', 'crystal', 'pylon', 'iceSpire', 'iceDecoy'] },
       count: { type: 'integer', default: 1, min: 0, note: '仅非装备态；装备态每(卡,绑定)严格单实例' },
       hp: { type: 'number', default: 40, min: 0 },
       duration: { type: 'number', default: 4, min: 0, note: '仅非装备态；装备态召唤物常驻至来源消失' },
-      placement: { type: 'enum', enum: ['threatDirection'], note: '仅装备态：按威胁方向放置于炮台外围' },
+      placement: { type: 'enum', enum: ['threatDirection', 'ring'], note: '装备态按威胁方向或环形放置' },
       distanceFromTurret: { type: 'number', default: 150, min: 0 },
       tauntRadius: {
         type: 'number', default: 140, min: 0,
@@ -353,11 +356,19 @@ export const ATOM_CONTRACT = {
         variantDefaults: { on: 'kind', cases: { orbital: 0.25, decoy: 0 } },
         note: '召唤物开火冷却；decoy 不开火。0.05s 防御性下限避免每帧开火',
       },
+      maxCount: { type: 'integer', default: 1, min: 1, max: 8 },
+      chainRelay: { type: 'boolean', default: false },
+      onDeathEffects: { type: 'effects' },
+      intervalSeconds: { type: 'number', default: 0, min: 0 },
+      intervalEffects: { type: 'effects' },
+      auraRadius: { type: 'number', default: 0, min: 0 },
+      auraEffects: { type: 'effects' },
       ...CHANCE,
     },
     allowedTriggers: 'any',
     supports: { equip: true, consume: true },
-    emitsEvents: false,
+    emitsEvents: true,
+    allowsNestedEffects: true,
   },
 
   // —— 经济 ——
@@ -403,6 +414,7 @@ export const ATOM_CONTRACT = {
         type: 'enum', default: 'point', enum: ['point', 'turret', 'killPoint'],
         note: "'turret' 落在炮台；其余落在 ctx.origin（命中点/击杀点/消耗落点）",
       },
+      secure: { type: 'boolean', default: false },
       ...CHANCE,
     },
     allowedTriggers: 'any',
@@ -584,6 +596,37 @@ export const ATOM_CONTRACT = {
     supports: { equip: true, consume: true },
     emitsEvents: false,
   },
+  charge: {
+    category: 'shared',
+    params: {
+      by: { type: 'enum', default: 'breach', enum: ['breach', 'shieldAbsorb', 'thornsDamage', 'killWithSource:dot'] },
+      perEvent: { type: 'number', default: 1, min: 0 },
+      max: { type: 'number', default: 3, min: 1 },
+      releaseAt: { type: 'enum', default: 'full', enum: ['full', 'interval', 'onShieldBreak'] },
+      chargeKey: { type: 'string', default: 'main' },
+      effects: { type: 'effects' },
+      ...CHANCE,
+    },
+    allowedTriggers: 'any',
+    supports: { equip: true, consume: true },
+    emitsEvents: true,
+    allowsNestedEffects: true,
+  },
+  summonBuff: {
+    category: 'shared',
+    params: {
+      target: { type: 'enum', default: 'nearestToPoint', enum: ['nearestToPoint', 'all'] },
+      kind: { type: 'string', required: true },
+      damageMul: { type: 'number', default: 1, min: 0 },
+      radiusAdd: { type: 'number', default: 0 },
+      dropChanceAdd: { type: 'number', default: 0 },
+      capLevels: { type: 'integer', default: 5, min: 1 },
+      ...CHANCE,
+    },
+    allowedTriggers: 'any',
+    supports: { equip: true, consume: true },
+    emitsEvents: false,
+  },
 } satisfies Record<AtomName, AtomContract>;
 
 /** 全部原子名（运行时可枚举，来源仍是 ATOM_CONTRACT 本身）。 */
@@ -655,8 +698,9 @@ export function effectParams(effect: { params?: object }): Record<string, unknow
 
 /** 嵌套效果数组（仅 allowsNestedEffects 的原子会有）。 */
 export function nestedEffectsOf<T extends { params?: object }>(effect: T): unknown[] {
-  const nested = effectParams(effect).effects;
-  return Array.isArray(nested) ? nested : [];
+  const params = effectParams(effect);
+  return ['effects', 'onDeathEffects', 'intervalEffects', 'auraEffects']
+    .flatMap(key => Array.isArray(params[key]) ? params[key] as unknown[] : []);
 }
 
 type AssertKeysEqual<A extends string | number | symbol, B extends string | number | symbol> =

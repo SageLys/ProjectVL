@@ -61,6 +61,8 @@ export const ATOM_LABELS: Record<AtomName, string> = {
   focusPriority: '索敌优先',
   restore: '恢复',
   statBuff: '属性强化',
+  charge: '计量释放',
+  summonBuff: '召唤强化',
 };
 
 type Lexicon = {
@@ -117,7 +119,10 @@ export function formatTrigger(trigger: Trigger, params?: BindingDef['triggerPara
     : lexicon?.triggers?.[trigger] ?? FALLBACK_TRIGGERS[trigger];
   const conditions: string[] = [];
   if (params?.requiresSource) conditions.push(`由${sourceLabel(params.requiresSource)}造成`);
-  if (params?.requiresStatus) conditions.push(`目标处于${statusLabel(params.requiresStatus)}状态`);
+  const statuses = Array.isArray(params?.requiresStatus)
+    ? params.requiresStatus
+    : params?.requiresStatus ? [params.requiresStatus] : [];
+  if (statuses.length) conditions.push(`目标同时处于${statuses.map(statusLabel).join('与')}状态`);
   if (conditions.length) result += `（${conditions.join('且')}）`;
   if (params?.cooldownSeconds != null) result += `（每 ${shown(params.cooldownSeconds)} 秒至多一次）`;
   return result;

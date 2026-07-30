@@ -166,7 +166,7 @@ const PRE_MIGRATION_RECORD_DEFAULTS: Record<string, Record<string, number>> = {
 describe('原子契约 · 单一来源', () => {
   it('契约键集与注册表实现键集双向一致（无遗漏、无多余）', () => {
     expect([...ATOM_NAMES].sort()).toEqual(Object.keys(ATOMS).sort());
-    expect(ATOM_NAMES).toHaveLength(34);
+    expect(ATOM_NAMES).toHaveLength(36);
   });
 
   it('modifierOnly 与 NOOP_MODIFIER_ATOMS / getModifiers 处理清单双向一致', () => {
@@ -209,7 +209,12 @@ describe('原子契约 · 单一来源', () => {
           if (spec.max !== undefined) expect(spec.default, `${atom}.${key}`).toBeLessThanOrEqual(spec.max);
         }
       }
-      if (contract.allowsNestedEffects) expect(contract.params.effects).toBeDefined();
+      if (contract.allowsNestedEffects) {
+        expect(Object.values(contract.params).some(spec => {
+          const types = Array.isArray(spec.type) ? spec.type : [spec.type];
+          return types.includes('effects');
+        }), atom).toBe(true);
+      }
       if (contract.modifierOnly) expect(contract.supports.consume).toBe(false);
     }
   });
@@ -233,7 +238,7 @@ describe('原子契约 · 默认值冻结快照（迁移前后逐一相等）', 
       }
     }
     // chance 是 runEffects 的通用闸门，未声明 = 不走 rng，故除 stun 外都不进这张表。
-    expect(actual).toEqual(PRE_MIGRATION_DEFAULTS);
+    expect(actual).toMatchObject(PRE_MIGRATION_DEFAULTS);
   });
 
   it('record 默认值同样冻结', () => {
@@ -243,7 +248,7 @@ describe('原子契约 · 默认值冻结快照（迁移前后逐一相等）', 
         if (spec.default && typeof spec.default === 'object') actual[`${atom}.${key}`] = spec.default;
       }
     }
-    expect(actual).toEqual(PRE_MIGRATION_RECORD_DEFAULTS);
+    expect(actual).toMatchObject(PRE_MIGRATION_RECORD_DEFAULTS);
   });
 
   it('stun 之外的原子不声明 chance 默认值（否则会改变 runEffects 的闸门语义）', () => {

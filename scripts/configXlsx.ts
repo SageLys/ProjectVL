@@ -837,7 +837,11 @@ function parseAtomParamValue(spec: AtomParamSpec | undefined, value: unknown, lo
     throw new Error(`${location}: 必须是数值`);
   }
   if (types.includes('string') || types.includes('enum')) return String(value);
-  if (types.includes('effects')) throw new Error(`${location}: effects 参数必须通过 skills.effects 表重建`);
+  if (types.includes('effects')) {
+    const parsed = parseJson(value, location);
+    if (!Array.isArray(parsed)) throw new Error(`${location}: effects 参数必须是 JSON 数组`);
+    return parsed;
+  }
   return value;
 }
 

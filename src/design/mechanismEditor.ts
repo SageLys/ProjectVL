@@ -76,7 +76,10 @@ function renderTriggerParams(container: HTMLElement, binding: BindingDef, path: 
     const params = ensure(); if (value === undefined) delete params.cooldownSeconds; else params.cooldownSeconds = value;
   }, onChange);
   for (const key of ['requiresSource', 'requiresStatus'] as const) {
-    const input = el('input'); input.type = 'text'; input.value = binding.triggerParams?.[key] ?? ''; input.placeholder = '未设置';
+    const input = el('input'); input.type = 'text';
+    const current = binding.triggerParams?.[key];
+    input.value = Array.isArray(current) ? current.join(',') : current ?? '';
+    input.placeholder = '未设置';
     input.addEventListener('input', () => { const params = ensure(); if (!input.value) delete params[key]; else params[key] = input.value; onChange(); });
     body.append(labeled(fieldLabel(key), input, `${path}.triggerParams.${key}`));
   }
