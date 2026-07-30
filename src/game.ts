@@ -16,9 +16,9 @@ import { collectNearest, spawnTestDrops, spawnGroundDrop } from './core/systems/
 import { recordCardDropShown, selectUniformCardType } from './core/systems/dropTypePolicy';
 import { acceptBountyOfferAt, calculateOfferChance } from './core/systems/bountySystem';
 import { resolveCurrentDecision } from './core/systems/decisionQueueSystem';
-import { beginOpeningIntermission, confirmIntermissionReady } from './core/systems/intermissionSystem';
+import { beginOpeningIntermission, confirmIntermissionReady, confirmValidationRewardSettle } from './core/systems/intermissionSystem';
 import { checkWildcardTarget, grantWildcards, useWildcardOnSlot, type WildcardGrant } from './core/systems/wildcardSystem';
-import { confirmRecipe } from './core/systems/recipeEvolutionSystem';
+import { evolveRecipePair, matchRecipeDrop, setPinnedRecipe } from './core/systems/recipeEvolutionSystem';
 import { createCardWithAffixes } from './core/systems/cardAffixSystem';
 import { totalRange } from './core/stats';
 import { createRenderer } from './render/canvasRenderer';
@@ -43,6 +43,8 @@ import type { DevTelemetry } from './telemetry/devTelemetry';
 import type { DifficultyId } from './config/types';
 import { resyncEnemyStats, type EnemyStatConfigKey } from './core/systems/enemySystem';
 import { DEV_TOOLS_ENABLED } from './debug/devToolsMode';
+import { cardDisplayName } from './ui/cardMeta';
+import { createRecipeGraph } from './ui/recipeGraph';
 
 // 技能 = 数据 + 解释器：把配置里的卡定义注入解释器（P5 实装 12 张正式卡后自动生效）。
 registerSkillDefs(cfg.skills.cards);
@@ -140,6 +142,10 @@ const modals = createModals(refs, {
 });
 
 const cardDetail = createCardDetailModal({
+  recipeContext: () => ({
+    mode: state.recipes.compatibleRecipeIds.length ? 'run' : 'compendium',
+    compatibleRecipeIds: state.recipes.compatibleRecipeIds,
+  }),
   onOpen() {
     uiPauseReasons.add('cardDetail');
     syncPauseState();
@@ -154,8 +160,13 @@ const intermissionPanel = createIntermissionPanel(refs.arena, {
   onReady() {
     dispatch(confirmIntermissionReady(state));
   },
-  onRecipe(recipeId, aCardId, bCardId) {
-    dispatch(confirmRecipe(state, config, rng, recipeId, aCardId, bCardId));
+});
+const recipeGraph = createRecipeGraph(refs.dock, {
+  onPin(recipeId) {
+    if (setPinnedRecipe(state, recipeId)) {
+      refreshSlots();
+      recipeGraph.render(state);
+    }
   },
 });
 
@@ -184,26 +195,61 @@ const pointerRouter = createPointerRouter({
     dispatch(events);
     if (DEV_TOOLS_ENABLED && events.some(event => event.type === 'collected')) telemetry?.recordInput('pickupClick');
   },
-  onDrop: (source, index, target) => {
+  onDrop: (source, index, target, context) => {
     let events: GameEvent[] = [];
     if (source === 'wildcard') {
       if (target.kind === 'slot') events = useWildcardOnSlot(state, config, rng, target.slotKind, target.index);
     } else if (target.kind === 'arena') events = consumeCard(state, config, rng, index, target.x, target.y, source);
-    else if (target.kind === 'slot' && target.slotKind === 'equipment' && source === 'cards') {
-      events = moveOrSwap(state, config, rng, source, index, 'equipment', target.index);
-      if (events.some(event => event.type === 'equipRejected' || event.type === 'equipFull')) state.equipTelemetry.rejects++;
-    } else if (target.kind === 'slot') events = moveOrSwap(state, config, rng, source, index, target.slotKind, target.index);
+    else if (target.kind === 'slot') {
+      const sourceCard = (source === 'cards' ? state.cards : state.equipment)[index];
+      const targetCard = (target.slotKind === 'cards' ? state.cards : state.equipment)[target.index];
+      const sourceRef = sourceCard ? { slotKind: source, index, cardId: sourceCard.id } : null;
+      const targetRef = targetCard ? { slotKind: target.slotKind, index: target.index, cardId: targetCard.id } : null;
+      const recipe = sourceRef && targetRef ? matchRecipeDrop(state, sourceRef, targetRef) : null;
+      if (recipe) events = evolveRecipePair(state, config, rng, recipe.recipeId, recipe.source, recipe.target);
+      else if (context?.recipeIntent) {
+        events = [{ type: 'recipeRejected', recipeId: context.recipeId ?? '', reason: 'stale' }];
+      }
+      else if (target.slotKind === 'equipment' && source === 'cards') {
+        events = moveOrSwap(state, config, rng, source, index, 'equipment', target.index);
+        if (events.some(event => event.type === 'equipRejected' || event.type === 'equipFull')) state.equipTelemetry.rejects++;
+      } else events = moveOrSwap(state, config, rng, source, index, target.slotKind, target.index);
+    }
     dispatch(events);
     if (DEV_TOOLS_ENABLED && events.some(event => event.type === 'skillConsumed')) telemetry?.recordInput('consumeRelease');
     else if (DEV_TOOLS_ENABLED && events.some(event => SLOT_CHANGING.has(event.type))) telemetry?.recordInput('dragDrop');
   },
   previewFor,
   getDropValidity: (source, _index, target) => source !== 'wildcard' || checkWildcardTarget(state, target.slotKind, target.index).ok,
+  getWildcardDropWarning: target => {
+    const card = (target.slotKind === 'cards' ? state.cards : state.equipment)[target.index];
+    if (!card || card.star !== 5) return null;
+    const materialOfReadyRecipe = state.recipes.readyRecipeIds.some(recipeId => {
+      const recipe = cfg.evolutionRecipes.recipes.find(item => item.id === recipeId);
+      return recipe?.ingredientVariable.cardId === card.type || recipe?.ingredientAnchor.cardId === card.type;
+    });
+    return materialOfReadyRecipe ? '升到 6★ 不会提升进化产物' : null;
+  },
+  getRecipeDropPreview: (source, index, target) => {
+    if (source === 'wildcard') return null;
+    const sourceCard = (source === 'cards' ? state.cards : state.equipment)[index];
+    const targetCard = (target.slotKind === 'cards' ? state.cards : state.equipment)[target.index];
+    if (!sourceCard || !targetCard) return null;
+    const match = matchRecipeDrop(
+      state,
+      { slotKind: source, index, cardId: sourceCard.id },
+      { slotKind: target.slotKind, index: target.index, cardId: targetCard.id },
+    );
+    if (!match) return null;
+    const recipe = cfg.evolutionRecipes.recipes.find(item => item.id === match.recipeId);
+    return recipe ? { recipeId: recipe.id, label: `立即进化：${cardDisplayName(recipe.outputCardId)}` } : null;
+  },
 });
 createKeyboard(togglePause);
 
 refs.startBtn.addEventListener('click', start);
 refs.pauseBtn.addEventListener('click', togglePause);
+refs.validationSettleBtn.addEventListener('click', () => dispatch(confirmValidationRewardSettle(state)));
 refs.speedBtn.addEventListener('click', () => setTimeScale(nextPlaySpeed(timeScale)));
 refs.testCardBtn.addEventListener('click', () => dispatch(spawnTestDrops(state, config, rng)));
 refs.testWildcardBtn.addEventListener('click', () => {
@@ -246,6 +292,7 @@ function reset(): void {
   refreshSlots();
   renderHud(refs, state, config);
   intermissionPanel.render(state);
+  recipeGraph.render(state);
 }
 
 function start(): void {
@@ -310,6 +357,7 @@ function loop(now: number): void {
   dispatch(events);
   renderHud(refs, state, config);
   intermissionPanel.render(state);
+  recipeGraph.render(state);
   render(state, config);
   if (DEV_TOOLS_ENABLED) telemetry?.updateFrame(now);
   requestAnimationFrame(loop);

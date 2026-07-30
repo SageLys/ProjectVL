@@ -21,20 +21,20 @@ describe('统一构筑决策队列', () => {
     expect(enqueueDecision(state, { kind: 'relic', relicIndex: 0, options: ['r1', 'r2'] })).toEqual([
       { type: 'decisionOffered', kind: 'relic' },
     ]);
-    expect(enqueueDecision(state, { kind: 'recipeEvolution', recipeId: 'recipe1' })).toEqual([]);
+    expect(enqueueDecision(state, { kind: 'recipePin', candidates: ['recipe1'] })).toEqual([]);
     expect(state.paused).toBe(true);
     expect(state.decisions.current).toMatchObject({ kind: 'relic' });
     expect(state.decisions.pending).toHaveLength(1);
 
     expect(resolveCurrentDecision(state, createDefaultConfig(), constRng(0), 'r2')).toEqual([
       { type: 'decisionResolved', kind: 'relic', choice: 'r2' },
-      { type: 'decisionOffered', kind: 'recipeEvolution' },
+      { type: 'decisionOffered', kind: 'recipePin' },
     ]);
-    expect(state.decisions.current).toMatchObject({ kind: 'recipeEvolution' });
+    expect(state.decisions.current).toMatchObject({ kind: 'recipePin' });
     expect(state.paused).toBe(true);
 
     expect(resolveCurrentDecision(state, createDefaultConfig(), constRng(0), 'recipe1')).toEqual([
-      { type: 'decisionResolved', kind: 'recipeEvolution', choice: 'recipe1' },
+      { type: 'decisionResolved', kind: 'recipePin', choice: 'recipe1' },
     ]);
     expect(state.decisions).toEqual({ current: null, pending: [] });
     expect(state.paused).toBe(false);

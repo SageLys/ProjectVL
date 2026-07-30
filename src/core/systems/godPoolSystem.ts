@@ -6,6 +6,7 @@ import {
   registerDecisionResolver,
 } from './decisionQueueSystem';
 import { getDroppableCardTypes, isDroppableCardType } from './cardPoolEligibility';
+import { initializeRecipesAfterRosterLock } from './recipeEvolutionSystem';
 
 function randomIndex(length: number, rng: Rng): number {
   return Math.min(length - 1, Math.floor(rng() * length));
@@ -168,6 +169,7 @@ function applyGodDraft(
     state.godPool.bootstrapDropsRemaining = cfg.economy.normalDropTypePolicy.bootstrapForcedDrops;
     if (state.godPool.subGods.length === 2) {
       events.push({ type: 'runRosterCreated', cardTypes: lockRunRoster(state) });
+      events.push(...initializeRecipesAfterRosterLock(state));
     }
   }
   return events;
