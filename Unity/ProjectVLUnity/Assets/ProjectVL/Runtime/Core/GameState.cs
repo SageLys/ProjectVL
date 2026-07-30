@@ -126,6 +126,11 @@ namespace ProjectVL.Core
         public int ExcludedEquipmentAffixCardId { get; internal set; }
         public float AffixMaxHpAdd { get; private set; }
         public int OrdinaryDropCount { get; internal set; }
+        public float OrdinaryDropCredit { get; internal set; }
+        public float OrdinaryDropActiveRegularSeconds { get; internal set; }
+        public int OrdinaryDropsShownThisWave { get; internal set; }
+        public int OrdinaryDropEligibleKillsThisWave { get; internal set; }
+        public float OrdinaryDropBuildStageSeconds { get; internal set; }
         public GodChoice PendingGodChoice { get; private set; }
         public int LastGodDecisionAfterWave { get; internal set; } = -1;
         public Dictionary<string, int> RelicStacks { get; } =
@@ -319,6 +324,9 @@ namespace ProjectVL.Core
             PendingBossReward = null;
             IntermissionRemaining = 0f;
             IntermissionReady = false;
+            OrdinaryDropActiveRegularSeconds = 0f;
+            OrdinaryDropsShownThisWave = 0;
+            OrdinaryDropEligibleKillsThisWave = 0;
         }
 
         internal void PrepareWaveJump(int targetWave)

@@ -89,6 +89,52 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void OrdinaryDropBudgetAccruesByTimeAndSpendsOnKill()
+        {
+            EconomyConfig economy = GameConfigLoader.LoadEconomy();
+            var drops = new DropSystem(
+                economy,
+                new ConstantRandomSource(0f),
+                null,
+                null,
+                _waves);
+            _state.BeginWave(1);
+
+            drops.TickOrdinaryDropBudget(_state, 60f / 35f);
+            GroundDropState drop = drops.TrySpawnOnKill(
+                _state,
+                CreateEnemy(1, 100f, 100f));
+
+            Assert.That(economy.ordinaryDropRate.enabled, Is.True);
+            Assert.That(drop, Is.Not.Null);
+            Assert.That(_state.OrdinaryDropCredit, Is.EqualTo(0f).Within(0.001f));
+            Assert.That(_state.OrdinaryDropsShownThisWave, Is.EqualTo(1));
+            Assert.That(_state.OrdinaryDropEligibleKillsThisWave, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void ValidationStageDoesNotAccrueOrSpendOrdinaryDrops()
+        {
+            EconomyConfig economy = GameConfigLoader.LoadEconomy();
+            var drops = new DropSystem(
+                economy,
+                new ConstantRandomSource(0f),
+                null,
+                null,
+                _waves);
+            _state.BeginWave(9);
+
+            drops.TickOrdinaryDropBudget(_state, 10f);
+            GroundDropState drop = drops.TrySpawnOnKill(
+                _state,
+                CreateEnemy(1, 100f, 100f));
+
+            Assert.That(_state.OrdinaryDropCredit, Is.Zero);
+            Assert.That(drop, Is.Null);
+            Assert.That(_state.OrdinaryDropEligibleKillsThisWave, Is.Zero);
+        }
+
+        [Test]
         public void GroundCardCanBeCollectedIntoHand()
         {
             var drops = new DropSystem(

@@ -1,12 +1,27 @@
 {
   "maxStar": 6,
   "mergeCopies": 2,
+  "mergeCopiesWhenTwoCopyDisabled": 3,
   "equipThreshold": 3,
   "handSlots": 7,
   "equipSlots": 3,
+  "equipIrreversible": false,
+  "unequipPolicy": "consume",
   "equipSwappable": true,
+  "inRunSlotExpansion": false,
   "equipDistinctTypes": true,
   "feedEquipped": true,
+  "placeholderAssumptions": {
+    "twoCopyMerge": true,
+    "normalDropsOnlyOneStar": true,
+    "feedEquipped": true,
+    "distinctEquippedTypes": true
+  },
+  "dropStarPolicy": {
+    "normal": 1,
+    "bountyBossMax": 2,
+    "star2Share": 0.05
+  },
   "drops": {
     "pickupRadius": 34,
     "chanceCap": 0.95
@@ -14,6 +29,14 @@
   "defaults": {
     "dropChance": 0.27,
     "dropLifetime": 5
+  },
+  "ordinaryDropRate": {
+    "enabled": true,
+    "selectionPerMinute": 35,
+    "buildPerMinute": 40,
+    "buildTransitionSeconds": 20,
+    "carryCap": 1.5,
+    "modifiersAffectTarget": true
   },
   "normalDropTypePolicy": {
     "enabled": true,

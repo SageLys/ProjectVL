@@ -32,17 +32,20 @@ namespace ProjectVL.Systems
         private readonly IRandomSource _random;
         private readonly ProgressionSystem _progression;
         private readonly CardPoolSystem _cardPool;
+        private readonly WavesConfig _waves;
 
         public DropSystem(
             EconomyConfig economy,
             IRandomSource random,
             ProgressionSystem progression = null,
-            CardPoolSystem cardPool = null)
+            CardPoolSystem cardPool = null,
+            WavesConfig waves = null)
         {
             _economy = economy ?? throw new ArgumentNullException(nameof(economy));
             _random = random ?? throw new ArgumentNullException(nameof(random));
             _progression = progression;
             _cardPool = cardPool;
+            _waves = waves;
         }
 
         public GroundDropState TrySpawnOnKill(
@@ -56,23 +59,43 @@ namespace ProjectVL.Systems
                 return null;
             }
 
-            float chance = Math.Min(
-                _economy.drops.chanceCap,
-                _economy.defaults.dropChance
-                    * state.DropRateMultiplier);
-            if (_random.NextFloat() >= chance)
+            if (_economy.ordinaryDropRate.enabled)
             {
-                return null;
+                if (StageForWave(state.Wave) == RunStage.Validation)
+                {
+                    return null;
+                }
+
+                state.OrdinaryDropEligibleKillsThisWave++;
+                if (state.OrdinaryDropCredit < 1f)
+                {
+                    return null;
+                }
+
+                state.OrdinaryDropCredit -= 1f;
+            }
+            else
+            {
+                float chance = Math.Min(
+                    _economy.drops.chanceCap,
+                    _economy.defaults.dropChance
+                        * state.DropRateMultiplier);
+                if (_random.NextFloat() >= chance)
+                {
+                    return null;
+                }
             }
 
             string cardType = _cardPool?.SelectNormalEnemyDropType(state)
                 ?? SelectActiveType(state);
-            return Spawn(
+            GroundDropState drop = Spawn(
                 state,
                 enemy.Position,
                 cardType,
-                1,
+                NormalDropStar(),
                 true);
+            state.OrdinaryDropsShownThisWave++;
+            return drop;
         }
 
         public GroundDropState SpawnTestDrop(
@@ -161,6 +184,7 @@ namespace ProjectVL.Systems
 
         public void Step(GameState state, float deltaTime)
         {
+            TickOrdinaryDropBudget(state, deltaTime);
             for (int index = state.GroundDrops.Count - 1; index >= 0; index--)
             {
                 GroundDropState drop = state.GroundDrops[index];
@@ -186,6 +210,46 @@ namespace ProjectVL.Systems
                     }
                 }
             }
+        }
+
+        public void TickOrdinaryDropBudget(
+            GameState state,
+            float deltaTime)
+        {
+            OrdinaryDropRateConfig rate = _economy.ordinaryDropRate;
+            if (!rate.enabled
+                || state == null
+                || state.Mode != GameMode.Playing
+                || state.Paused
+                || state.WavePhase != WavePhase.Regular
+                || StageForWave(state.Wave) == RunStage.Validation)
+            {
+                return;
+            }
+
+            float perMinute = rate.selectionPerMinute;
+            if (StageForWave(state.Wave) == RunStage.Build)
+            {
+                float transition = rate.buildTransitionSeconds <= 0f
+                    ? 1f
+                    : Math.Min(
+                        1f,
+                        state.OrdinaryDropBuildStageSeconds
+                            / rate.buildTransitionSeconds);
+                perMinute +=
+                    (rate.buildPerMinute - rate.selectionPerMinute)
+                    * transition;
+                state.OrdinaryDropBuildStageSeconds += deltaTime;
+            }
+
+            float multiplier = rate.modifiersAffectTarget
+                ? state.DropRateMultiplier
+                : 1f;
+            state.OrdinaryDropCredit = Math.Min(
+                Math.Max(1f, rate.carryCap),
+                state.OrdinaryDropCredit
+                    + perMinute * multiplier / 60f * deltaTime);
+            state.OrdinaryDropActiveRegularSeconds += deltaTime;
         }
 
         public DropCollectResult CollectNearest(
@@ -255,6 +319,37 @@ namespace ProjectVL.Systems
                 CardTypes.Length - 1,
                 (int)(_random.NextFloat() * CardTypes.Length));
             return CardTypes[typeIndex];
+        }
+
+        private int NormalDropStar()
+        {
+            DropStarPolicyConfig policy = _economy.dropStarPolicy;
+            if (_economy.placeholderAssumptions.normalDropsOnlyOneStar)
+            {
+                return Math.Max(1, policy.normal);
+            }
+
+            return _random.NextFloat() < policy.star2Share
+                ? Math.Max(1, policy.normal + 1)
+                : Math.Max(1, policy.normal);
+        }
+
+        private RunStage StageForWave(int wave)
+        {
+            if (_waves == null)
+            {
+                return RunStage.Selection;
+            }
+
+            if (wave <= _waves.stagePlan.selectionWaves)
+            {
+                return RunStage.Selection;
+            }
+
+            return wave
+                > _waves.totalWaves - _waves.stagePlan.validationWaves
+                ? RunStage.Validation
+                : RunStage.Build;
         }
     }
 }

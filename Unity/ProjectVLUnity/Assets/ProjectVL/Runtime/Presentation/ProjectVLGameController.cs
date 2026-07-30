@@ -229,7 +229,8 @@ namespace ProjectVL.Presentation
                 economy,
                 random,
                 _progressionSystem,
-                cardPoolSystem);
+                cardPoolSystem,
+                waves);
             _bountySystem = new BountySystem(
                 bounty,
                 combat,

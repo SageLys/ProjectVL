@@ -13,10 +13,48 @@ namespace ProjectVL.Config
         public bool equipSwappable = true;
         public bool equipDistinctTypes = true;
         public bool feedEquipped = true;
+        public EconomyPlaceholderAssumptions placeholderAssumptions =
+            new EconomyPlaceholderAssumptions();
+        public int mergeCopiesWhenTwoCopyDisabled = 3;
+        public bool equipIrreversible;
+        public string unequipPolicy = "consume";
+        public bool inRunSlotExpansion;
+        public DropStarPolicyConfig dropStarPolicy =
+            new DropStarPolicyConfig();
         public EconomyDropsConfig drops = new EconomyDropsConfig();
         public EconomyDefaultsConfig defaults = new EconomyDefaultsConfig();
+        public OrdinaryDropRateConfig ordinaryDropRate =
+            new OrdinaryDropRateConfig();
         public NormalDropTypePolicyConfig normalDropTypePolicy =
             new NormalDropTypePolicyConfig();
+    }
+
+    [Serializable]
+    public sealed class EconomyPlaceholderAssumptions
+    {
+        public bool twoCopyMerge = true;
+        public bool normalDropsOnlyOneStar = true;
+        public bool feedEquipped = true;
+        public bool distinctEquippedTypes = true;
+    }
+
+    [Serializable]
+    public sealed class DropStarPolicyConfig
+    {
+        public int normal = 1;
+        public int bountyBossMax = 2;
+        public float star2Share = 0.05f;
+    }
+
+    [Serializable]
+    public sealed class OrdinaryDropRateConfig
+    {
+        public bool enabled;
+        public float selectionPerMinute = 35f;
+        public float buildPerMinute = 40f;
+        public float buildTransitionSeconds = 20f;
+        public float carryCap = 1.5f;
+        public bool modifiersAffectTarget = true;
     }
 
     [Serializable]
