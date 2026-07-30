@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using ProjectVL.Config;
 using ProjectVL.Core;
@@ -40,6 +41,7 @@ namespace ProjectVL.Presentation
         public int BountyOfferViewCount => _bountyOfferViews.Count;
         public int GroundZoneViewCount => _groundZoneViews.Count;
         public int VfxViewCount => _vfxViews.Count;
+        public event Action<string> AudioCue;
         public int TransientViewCount =>
             EnemyViewCount
             + BulletViewCount
@@ -103,6 +105,7 @@ namespace ProjectVL.Presentation
             if (_state == null || string.IsNullOrEmpty(id))
                 return;
 
+            AudioCue?.Invoke(id);
             GameObject prefab =
                 _visualCatalog?.ResolveVfxPrefab(id);
             GameObject root;
@@ -584,6 +587,7 @@ namespace ProjectVL.Presentation
                 activeIds.Add(bullet.Id);
                 if (!_bulletViews.TryGetValue(bullet.Id, out SpriteRenderer view))
                 {
+                    AudioCue?.Invoke("fire");
                     view = CreateSpriteView(
                         $"Bullet {bullet.Id}",
                         CatalogSprite(
@@ -930,7 +934,7 @@ namespace ProjectVL.Presentation
                 0f);
         }
 
-        private static void DestroyRuntimeObject(Object target)
+        private static void DestroyRuntimeObject(UnityEngine.Object target)
         {
             if (target == null)
                 return;

@@ -22,6 +22,7 @@ namespace ProjectVL.Presentation
         private DeveloperToolsSystem _developerTools;
         private RuntimeTuningSystem _runtimeTuning;
         private DeveloperTelemetrySystem _telemetry;
+        private AudioDirector _audio;
         private TuningPresetStore _tuningPresets;
         private static int? _requestedSeed;
         private CardSlotKind? _selectedSlotKind;
@@ -161,6 +162,7 @@ namespace ProjectVL.Presentation
         public RuntimeTuningSystem RuntimeTuning => _runtimeTuning;
         public DeveloperTelemetrySystem Telemetry => _telemetry;
         public VisualCatalog VisualCatalog => _presenter?.VisualCatalog;
+        public AudioDirector Audio => _audio;
         public string LastTelemetryExportPath { get; private set; }
         public System.Collections.Generic.IReadOnlyList<TuningPreset>
             TuningPresets => _tuningPresets?.Presets;
@@ -318,6 +320,8 @@ namespace ProjectVL.Presentation
 
             _presenter = gameObject.AddComponent<ArenaPresenter>();
             _presenter.Initialize(combat, state);
+            _audio = gameObject.AddComponent<AudioDirector>();
+            _audio.Initialize(state, _presenter);
             gameObject.AddComponent<GameHud>().Initialize(this);
             _presenter.Sync();
         }
@@ -332,6 +336,7 @@ namespace ProjectVL.Presentation
 
         public void StartGame()
         {
+            _audio?.Play("ui.button", AudioBus.Ui);
             if (State.Mode != GameMode.Ready)
             {
                 return;
@@ -362,6 +367,7 @@ namespace ProjectVL.Presentation
             if (_progressionSystem != null
                 && _progressionSystem.Choose(State, optionIndex))
             {
+                _audio?.Play("sfx.level");
                 _telemetry?.RecordInput(
                     State,
                     "decision_resolved",
@@ -378,6 +384,7 @@ namespace ProjectVL.Presentation
                 return;
             }
 
+            _audio?.Play("ui.button", AudioBus.Ui);
             _telemetry?.RecordInput(
                 State,
                 "decision_resolved",
@@ -403,6 +410,7 @@ namespace ProjectVL.Presentation
 
         public void TogglePause()
         {
+            _audio?.Play("ui.button", AudioBus.Ui);
             if (State.Mode == GameMode.Playing)
             {
                 State.SetPaused(!State.Paused);
@@ -487,11 +495,13 @@ namespace ProjectVL.Presentation
         public void ClaimBossReward()
         {
             _waveSystem.ClaimBossReward(State);
+            _audio?.Play("sfx.reward");
             _telemetry?.RecordInput(State, "bossRewardGranted");
         }
 
         public void ConfirmNextWave()
         {
+            _audio?.Play("ui.button", AudioBus.Ui);
             _waveSystem.ConfirmIntermissionReady(State);
         }
 
@@ -502,6 +512,7 @@ namespace ProjectVL.Presentation
 
         public void SelectCardSlot(CardSlotKind kind, int index)
         {
+            _audio?.Play("ui.button", AudioBus.Ui);
             CardState card = CardAt(kind, index);
             if (_selectedSlotKind == null)
             {
@@ -769,6 +780,7 @@ namespace ProjectVL.Presentation
             EvolutionChoice choice = State.PendingEvolution;
             if (_cardInventory.ResolveEvolutionChoice(State, optionIndex))
             {
+                _audio?.Play("sfx.level");
                 _telemetry?.RecordInput(
                     State,
                     "decision_resolved",
