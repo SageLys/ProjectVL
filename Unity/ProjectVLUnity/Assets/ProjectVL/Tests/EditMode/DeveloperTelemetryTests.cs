@@ -88,6 +88,82 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void ExportsCompleteMetadataAndAutoClosesIdempotently()
+        {
+            CombatConfig combat = CombatConfigLoader.LoadDefault();
+            EnemiesConfig enemies = GameConfigLoader.LoadEnemies();
+            WavesConfig waves = GameConfigLoader.LoadWaves();
+            EconomyConfig economy = GameConfigLoader.LoadEconomy();
+            BountyConfig bounty = GameConfigLoader.LoadBounty();
+            ProgressionConfig progression =
+                GameConfigLoader.LoadProgression();
+            DifficultyConfig difficulty =
+                GameConfigLoader.LoadDifficulty();
+            GodsConfig gods = GameConfigLoader.LoadGods();
+            CardsConfig cards = GameConfigLoader.LoadCards();
+            CardAffixesConfig affixes =
+                GameConfigLoader.LoadCardAffixes();
+            RelicsConfig relics = GameConfigLoader.LoadRelics();
+            EvolutionRecipesConfig recipes =
+                GameConfigLoader.LoadEvolutionRecipes();
+            EvolutionTextConfig evolutionText =
+                GameConfigLoader.LoadEvolutionText();
+            WaveRewardsConfig waveRewards =
+                GameConfigLoader.LoadWaveRewards();
+            GameState state = GameStateFactory.Create(combat, economy);
+            state.SelectDifficulty(DifficultyId.Hard);
+            string directory = Path.Combine(
+                Path.GetTempPath(),
+                "ProjectVLTelemetryAutoCloseTests-"
+                    + Guid.NewGuid().ToString("N"));
+
+            try
+            {
+                var telemetry = new DeveloperTelemetrySystem(
+                    state,
+                    42,
+                    "test-build",
+                    combat,
+                    enemies,
+                    waves,
+                    economy,
+                    bounty,
+                    progression,
+                    difficulty,
+                    gods,
+                    cards,
+                    affixes,
+                    relics,
+                    recipes,
+                    evolutionText,
+                    waveRewards,
+                    () => "stress-preset",
+                    "abc123",
+                    directory);
+
+                state.EndRun();
+                telemetry.Step(state, 0.016f);
+                string autoPath = telemetry.LastExportPath;
+                string manualPath = telemetry.Export(directory);
+                string json = File.ReadAllText(autoPath);
+
+                Assert.That(File.Exists(autoPath), Is.True);
+                Assert.That(manualPath, Is.EqualTo(autoPath));
+                StringAssert.Contains("\"presetName\": \"stress-preset\"", json);
+                StringAssert.Contains("\"gitCommit\": \"abc123\"", json);
+                StringAssert.Contains("\"id\": \"hard\"", json);
+                StringAssert.Contains("\"progression\":", json);
+                StringAssert.Contains("\"cards\":", json);
+                StringAssert.Contains("\"waveRewards\":", json);
+            }
+            finally
+            {
+                if (Directory.Exists(directory))
+                    Directory.Delete(directory, true);
+            }
+        }
+
+        [Test]
         public void ComputesWebCompatibleE1ThroughE7Metrics()
         {
             var session = new TelemetrySession();

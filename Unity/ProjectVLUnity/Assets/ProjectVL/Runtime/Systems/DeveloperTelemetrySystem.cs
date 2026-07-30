@@ -15,6 +15,23 @@ namespace ProjectVL.Systems
         public WavesConfig waves;
         public EconomyConfig economy;
         public BountyConfig bounty;
+        public ProgressionConfig progression;
+        public DifficultyConfig difficulty;
+        public GodsConfig gods;
+        public CardsConfig cards;
+        public CardAffixesConfig cardAffixes;
+        public RelicsConfig relics;
+        public EvolutionRecipesConfig evolutionRecipes;
+        public EvolutionTextConfig evolutionText;
+        public WaveRewardsConfig waveRewards;
+    }
+
+    [Serializable]
+    public sealed class TelemetryDifficultyMeta
+    {
+        public string id;
+        public float hpMultiplierAtWave1;
+        public float damageMultiplierAtWave1;
     }
 
     [Serializable]
@@ -24,6 +41,9 @@ namespace ProjectVL.Systems
         public string exportedAt;
         public int seed;
         public string build;
+        public string presetName;
+        public string gitCommit;
+        public TelemetryDifficultyMeta difficulty;
         public TelemetryConfigSnapshot config;
     }
 
@@ -91,6 +111,11 @@ namespace ProjectVL.Systems
         private readonly HashSet<int> _encounterIds = new HashSet<int>();
         private readonly HashSet<int> _dangerEnemyIds = new HashSet<int>();
         private readonly CombatConfig _combat;
+        private readonly GameState _state;
+        private readonly DifficultySystem _difficultySystem;
+        private readonly Func<string> _presetName;
+        private readonly string _autoExportDirectory;
+        private readonly string _filename;
         private int _lastWave;
         private int _lastKills;
         private WavePhase _lastWavePhase;
@@ -98,8 +123,10 @@ namespace ProjectVL.Systems
         private float _lastEventAt;
         private float _currentTime;
         private int _dangerEntriesThisWave;
+        private bool _autoClosed;
 
         public TelemetrySession Session => _session;
+        public string LastExportPath { get; private set; }
         public float IdleSeconds => Math.Max(0f, _currentTime - _lastEventAt);
         public int DangerEntriesThisWave => _dangerEntriesThisWave;
         public int First90SecondInputs =>
@@ -118,24 +145,58 @@ namespace ProjectVL.Systems
             EnemiesConfig enemies,
             WavesConfig waves,
             EconomyConfig economy,
-            BountyConfig bounty)
+            BountyConfig bounty,
+            ProgressionConfig progression = null,
+            DifficultyConfig difficulty = null,
+            GodsConfig gods = null,
+            CardsConfig cards = null,
+            CardAffixesConfig cardAffixes = null,
+            RelicsConfig relics = null,
+            EvolutionRecipesConfig evolutionRecipes = null,
+            EvolutionTextConfig evolutionText = null,
+            WaveRewardsConfig waveRewards = null,
+            Func<string> presetName = null,
+            string gitCommit = null,
+            string autoExportDirectory = null)
         {
             if (state == null) throw new ArgumentNullException(nameof(state));
+            _state = state;
             _combat = combat ?? throw new ArgumentNullException(nameof(combat));
+            _difficultySystem = difficulty == null
+                ? null
+                : new DifficultySystem(difficulty, waves.totalWaves);
+            _presetName = presetName;
+            _autoExportDirectory = autoExportDirectory;
             _lastWave = state.Wave;
             _lastKills = state.Kills;
             _lastWavePhase = state.WavePhase;
             _session.meta.startedAt = DateTime.UtcNow.ToString("O");
             _session.meta.seed = seed;
             _session.meta.build = build ?? "unknown";
+            _session.meta.gitCommit =
+                string.IsNullOrWhiteSpace(gitCommit)
+                    ? ResolveGitCommit()
+                    : gitCommit;
+            _filename =
+                $"session_{DateTime.UtcNow:yyyy-MM-ddTHH-mm-ss.fffZ}_{seed}.json";
             _session.meta.config = new TelemetryConfigSnapshot
             {
                 combat = combat,
                 enemies = enemies,
                 waves = waves,
                 economy = economy,
-                bounty = bounty
+                bounty = bounty,
+                progression = progression,
+                difficulty = difficulty,
+                gods = gods,
+                cards = cards,
+                cardAffixes = cardAffixes,
+                relics = relics,
+                evolutionRecipes = evolutionRecipes,
+                evolutionText = evolutionText,
+                waveRewards = waveRewards
             };
+            RefreshMetadata();
         }
 
         public void Step(GameState state, float deltaTime)
@@ -260,6 +321,14 @@ namespace ProjectVL.Systems
                 });
                 _nextSampleAt = state.Time + SampleInterval;
             }
+
+            if (!_autoClosed
+                && state.Mode == GameMode.Ended
+                && !string.IsNullOrEmpty(_autoExportDirectory))
+            {
+                Export(_autoExportDirectory);
+                _autoClosed = true;
+            }
         }
 
         public void RecordInput(GameState state, string type, string detail = null)
@@ -299,6 +368,7 @@ namespace ProjectVL.Systems
 
         public string ToJson(bool prettyPrint = true)
         {
+            RefreshMetadata();
             _session.meta.exportedAt = DateTime.UtcNow.ToString("O");
             return JsonUtility.ToJson(_session, prettyPrint);
         }
@@ -313,13 +383,89 @@ namespace ProjectVL.Systems
             }
 
             Directory.CreateDirectory(directory);
-            string timestamp =
-                DateTime.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss.fffZ");
-            string filename =
-                $"session_{timestamp}_{_session.meta.seed}.json";
-            string path = Path.Combine(directory, filename);
-            File.WriteAllText(path, ToJson(true) + Environment.NewLine);
-            return path;
+            if (string.IsNullOrEmpty(LastExportPath))
+                LastExportPath = Path.Combine(directory, _filename);
+            File.WriteAllText(
+                LastExportPath,
+                ToJson(true) + Environment.NewLine);
+            return LastExportPath;
+        }
+
+        private void RefreshMetadata()
+        {
+            _session.meta.presetName = _presetName?.Invoke() ?? "Default";
+            if (_difficultySystem == null)
+                return;
+
+            DifficultyMultipliers multipliers = _difficultySystem.Get(
+                _state.Difficulty,
+                EnemyKind.Normal,
+                1);
+            _session.meta.difficulty = new TelemetryDifficultyMeta
+            {
+                id = DifficultySystem.ToConfigId(_state.Difficulty),
+                hpMultiplierAtWave1 = multipliers.Hp,
+                damageMultiplierAtWave1 = multipliers.Damage
+            };
+        }
+
+        private static string ResolveGitCommit()
+        {
+            string fromEnvironment =
+                Environment.GetEnvironmentVariable("PROJECTVL_GIT_COMMIT");
+            if (!string.IsNullOrWhiteSpace(fromEnvironment))
+                return fromEnvironment.Trim();
+
+            try
+            {
+                DirectoryInfo directory =
+                    new DirectoryInfo(Application.dataPath);
+                while (directory != null)
+                {
+                    string gitDirectory =
+                        Path.Combine(directory.FullName, ".git");
+                    string headPath = Path.Combine(gitDirectory, "HEAD");
+                    if (File.Exists(headPath))
+                    {
+                        string head = File.ReadAllText(headPath).Trim();
+                        if (!head.StartsWith("ref: ", StringComparison.Ordinal))
+                            return head;
+
+                        string reference = head.Substring(5).Trim();
+                        string referencePath = Path.Combine(
+                            gitDirectory,
+                            reference.Replace('/', Path.DirectorySeparatorChar));
+                        if (File.Exists(referencePath))
+                            return File.ReadAllText(referencePath).Trim();
+
+                        string packedRefs = Path.Combine(
+                            gitDirectory,
+                            "packed-refs");
+                        if (File.Exists(packedRefs))
+                        {
+                            foreach (string line in File.ReadAllLines(packedRefs))
+                            {
+                                if (!line.StartsWith("#")
+                                    && !line.StartsWith("^")
+                                    && line.EndsWith(
+                                        " " + reference,
+                                        StringComparison.Ordinal))
+                                    return line.Split(' ')[0];
+                            }
+                        }
+                    }
+
+                    directory = directory.Parent;
+                }
+            }
+            catch (IOException)
+            {
+            }
+            catch (UnauthorizedAccessException)
+            {
+            }
+
+            return "unknown";
         }
 
         private void AddEvent(

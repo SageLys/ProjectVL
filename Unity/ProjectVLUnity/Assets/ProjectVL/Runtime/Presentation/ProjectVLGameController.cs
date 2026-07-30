@@ -174,6 +174,8 @@ namespace ProjectVL.Presentation
             CardsConfig cards = GameConfigLoader.LoadCards();
             CardAffixesConfig affixes =
                 GameConfigLoader.LoadCardAffixes();
+            EvolutionTextConfig evolutionText =
+                GameConfigLoader.LoadEvolutionText();
             RelicsConfig relics = GameConfigLoader.LoadRelics();
             BountyConfig bounty = GameConfigLoader.LoadBounty();
             WaveRewardsConfig waveRewards =
@@ -290,7 +292,20 @@ namespace ProjectVL.Presentation
                     enemies,
                     waves,
                     economy,
-                    bounty);
+                    bounty,
+                    progression,
+                    difficulty,
+                    gods,
+                    cards,
+                    affixes,
+                    relics,
+                    recipes,
+                    evolutionText,
+                    waveRewards,
+                    () => _runtimeTuning.AppliedPresetName,
+                    autoExportDirectory: System.IO.Path.Combine(
+                        Application.persistentDataPath,
+                        "telemetry"));
                 _simulation.SimulationStep += _telemetry.Step;
             }
 
