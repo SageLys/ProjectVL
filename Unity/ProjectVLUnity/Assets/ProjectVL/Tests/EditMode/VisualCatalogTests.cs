@@ -139,6 +139,84 @@ namespace ProjectVL.Tests
             }
         }
 
+        [Test]
+        public void ArenaPresenterInstantiatesEnemyPrefabAndStatusOverlay()
+        {
+            Sprite bodySprite = CreateSprite();
+            Sprite overlaySprite = CreateSprite();
+            var prefab = new GameObject("Enemy Prefab Template");
+            var authoredMarker = new GameObject("Authored Marker");
+            authoredMarker.transform.SetParent(prefab.transform, false);
+            authoredMarker.AddComponent<SpriteRenderer>().sprite = bodySprite;
+            var catalog = ScriptableObject.CreateInstance<VisualCatalog>();
+            catalog.enemies = new[]
+            {
+                new VisualResourceEntry
+                {
+                    id = "normal",
+                    sprite = bodySprite,
+                    prefab = prefab,
+                    statusOverlay = overlaySprite
+                }
+            };
+            var root = new GameObject("Visual Catalog Presenter Test");
+            GameObject createdCamera = null;
+            if (Camera.main == null)
+            {
+                createdCamera = new GameObject("Visual Catalog Test Camera");
+                createdCamera.tag = "MainCamera";
+                createdCamera.AddComponent<Camera>();
+            }
+
+            try
+            {
+                CombatConfig combat = CombatConfigLoader.LoadDefault();
+                GameState state = GameStateFactory.Create(
+                    combat,
+                    GameConfigLoader.LoadEconomy());
+                var presenter = root.AddComponent<ArenaPresenter>();
+                presenter.Initialize(combat, state, catalog);
+                state.Enemies.Add(new EnemyState(
+                    7,
+                    EnemyKind.Normal,
+                    new Float2(0f, 0f),
+                    100f,
+                    0f,
+                    12f,
+                    1f));
+
+                presenter.Sync();
+
+                Transform enemyRoot = root.transform.Find("Normal 7");
+                Assert.That(enemyRoot, Is.Not.Null);
+                Transform marker = enemyRoot.Find(
+                    "Authored Visual/Authored Marker");
+                Assert.That(marker, Is.Not.Null);
+                Assert.That(
+                    marker.GetComponent<SpriteRenderer>().sprite,
+                    Is.SameAs(bodySprite));
+                Assert.That(
+                    enemyRoot.Find("Status Outline")
+                        .GetComponent<SpriteRenderer>()
+                        .sprite,
+                    Is.SameAs(overlaySprite));
+
+                state.Enemies.Clear();
+                presenter.Sync();
+                Assert.That(root.transform.Find("Normal 7"), Is.Null);
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+                Object.DestroyImmediate(prefab);
+                Object.DestroyImmediate(catalog);
+                if (createdCamera != null)
+                    Object.DestroyImmediate(createdCamera);
+                DestroySprite(overlaySprite);
+                DestroySprite(bodySprite);
+            }
+        }
+
         private static EnemyState Enemy(
             EnemyKind kind,
             EnemySpawnKind spawnKind)

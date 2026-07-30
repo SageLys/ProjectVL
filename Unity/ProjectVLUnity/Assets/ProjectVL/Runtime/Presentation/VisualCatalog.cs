@@ -106,44 +106,28 @@ namespace ProjectVL.Presentation
 
         public Sprite ResolveEnemySprite(EnemyState enemy)
         {
-            if (enemy == null)
-                return ResolveSprite(enemies, "default");
+            return ResolveSprite(enemies, EnemyIds(enemy));
+        }
 
-            string kind = EnemyKindId(enemy.Kind);
-            if (enemy.Kind == EnemyKind.Boss)
-            {
-                string phase = enemy.BossPhase == BossPhase.Contact
-                    ? "boss.contact"
-                    : "boss.approach";
-                return ResolveSprite(
-                    enemies,
-                    phase,
-                    "boss",
-                    kind,
-                    "default");
-            }
+        public Sprite ResolveEnemyStatusOverlay(EnemyState enemy)
+        {
+            return ResolveStatusOverlay(enemies, EnemyIds(enemy));
+        }
 
-            if (enemy.SpawnKind == EnemySpawnKind.ValidationElite)
-            {
-                return ResolveSprite(
-                    enemies,
-                    "elite." + kind,
-                    "elite",
-                    kind,
-                    "default");
-            }
+        public GameObject ResolveEnemyPrefab(EnemyState enemy)
+        {
+            return ResolvePrefab(enemies, EnemyIds(enemy));
+        }
 
-            if (enemy.SpawnKind == EnemySpawnKind.Bounty)
-            {
-                return ResolveSprite(
-                    enemies,
-                    "bounty." + kind,
-                    "bounty",
-                    kind,
-                    "default");
-            }
+        public RuntimeAnimatorController ResolveEnemyAnimator(
+            EnemyState enemy)
+        {
+            return ResolveAnimator(enemies, EnemyIds(enemy));
+        }
 
-            return ResolveSprite(enemies, kind, "default");
+        public Material ResolveEnemyMaterial(EnemyState enemy)
+        {
+            return ResolveMaterial(enemies, EnemyIds(enemy));
         }
 
         public VisualResourceEntry FindProjectile(string id)
@@ -156,6 +140,11 @@ namespace ProjectVL.Presentation
             return ResolveSprite(projectiles, id, "default");
         }
 
+        public GameObject ResolveProjectilePrefab(string id)
+        {
+            return ResolvePrefab(projectiles, id, "default");
+        }
+
         public VisualResourceEntry FindDrop(string id)
         {
             return Find(drops, id, "default");
@@ -166,6 +155,11 @@ namespace ProjectVL.Presentation
             return ResolveSprite(drops, id, "default");
         }
 
+        public GameObject ResolveDropPrefab(string id)
+        {
+            return ResolvePrefab(drops, id, "default");
+        }
+
         public VisualResourceEntry FindCard(string id)
         {
             return Find(cards, id, "default");
@@ -174,6 +168,11 @@ namespace ProjectVL.Presentation
         public Sprite ResolveCardSprite(string id)
         {
             return ResolveSprite(cards, id, "default");
+        }
+
+        public GameObject ResolveCardPrefab(string id)
+        {
+            return ResolvePrefab(cards, id, "default");
         }
 
         public VisualResourceEntry FindVfx(string id)
@@ -285,6 +284,118 @@ namespace ProjectVL.Presentation
             }
 
             return null;
+        }
+
+        private static Sprite ResolveStatusOverlay(
+            VisualResourceEntry[] entries,
+            params string[] ids)
+        {
+            if (entries == null || ids == null)
+                return null;
+
+            foreach (string id in ids)
+            {
+                VisualResourceEntry entry = FindExact(entries, id);
+                if (entry != null && entry.statusOverlay != null)
+                    return entry.statusOverlay;
+            }
+
+            return null;
+        }
+
+        private static GameObject ResolvePrefab(
+            VisualResourceEntry[] entries,
+            params string[] ids)
+        {
+            if (entries == null || ids == null)
+                return null;
+
+            foreach (string id in ids)
+            {
+                VisualResourceEntry entry = FindExact(entries, id);
+                if (entry != null && entry.prefab != null)
+                    return entry.prefab;
+            }
+
+            return null;
+        }
+
+        private static RuntimeAnimatorController ResolveAnimator(
+            VisualResourceEntry[] entries,
+            params string[] ids)
+        {
+            if (entries == null || ids == null)
+                return null;
+
+            foreach (string id in ids)
+            {
+                VisualResourceEntry entry = FindExact(entries, id);
+                if (entry != null && entry.animator != null)
+                    return entry.animator;
+            }
+
+            return null;
+        }
+
+        private static Material ResolveMaterial(
+            VisualResourceEntry[] entries,
+            params string[] ids)
+        {
+            if (entries == null || ids == null)
+                return null;
+
+            foreach (string id in ids)
+            {
+                VisualResourceEntry entry = FindExact(entries, id);
+                if (entry != null && entry.material != null)
+                    return entry.material;
+            }
+
+            return null;
+        }
+
+        private static string[] EnemyIds(EnemyState enemy)
+        {
+            if (enemy == null)
+                return new[] { "default" };
+
+            string kind = EnemyKindId(enemy.Kind);
+            if (enemy.Kind == EnemyKind.Boss)
+            {
+                return new[]
+                {
+                    enemy.BossPhase == BossPhase.Contact
+                        ? "boss.contact"
+                        : "boss.approach",
+                    "boss",
+                    kind,
+                    "default"
+                };
+            }
+
+            if (enemy.SpawnKind == EnemySpawnKind.ValidationElite)
+            {
+                return new[]
+                {
+                    "elite." + kind,
+                    "elite",
+                    kind,
+                    "default"
+                };
+            }
+
+            if (enemy.SpawnKind == EnemySpawnKind.Bounty)
+            {
+                return new[]
+                {
+                    "bounty." + kind,
+                    "bounty",
+                    kind,
+                    "default"
+                };
+            }
+
+            return new[] { kind, "default" };
         }
 
         private static string EnemyKindId(EnemyKind kind)

@@ -281,10 +281,13 @@ namespace ProjectVL.Presentation
                 {
                     view.Body.sprite = catalogSprite;
                     view.Outline.sprite = catalogSprite;
-                    SetWorldSize(
-                        view.Body,
-                        enemy.Radius * 2f,
-                        enemy.Radius * 2f);
+                    if (!view.UsesPrefab)
+                    {
+                        SetWorldSize(
+                            view.Body,
+                            enemy.Radius * 2f,
+                            enemy.Radius * 2f);
+                    }
                     float outlineSize =
                         enemy.Radius * 2f
                         + (enemy.Kind == EnemyKind.Boss ? 10f : 7f);
@@ -293,9 +296,31 @@ namespace ProjectVL.Presentation
                         outlineSize,
                         outlineSize);
                 }
+                Sprite statusOverlay =
+                    _visualCatalog?.ResolveEnemyStatusOverlay(enemy);
+                if (statusOverlay != null)
+                    view.Outline.sprite = statusOverlay;
+                Material material =
+                    _visualCatalog?.ResolveEnemyMaterial(enemy);
+                if (material != null
+                    && view.Body.sharedMaterial != material)
+                    view.Body.sharedMaterial = material;
+                RuntimeAnimatorController animatorController =
+                    _visualCatalog?.ResolveEnemyAnimator(enemy);
+                if (animatorController != null)
+                {
+                    Animator animator =
+                        view.VisualRoot.GetComponentInChildren<Animator>(true);
+                    if (animator == null)
+                        animator = view.VisualRoot.gameObject.AddComponent<Animator>();
+                    if (animator.runtimeAnimatorController
+                        != animatorController)
+                        animator.runtimeAnimatorController =
+                            animatorController;
+                }
                 view.Body.color = Color.Lerp(
                     new Color(0.35f, 0.1f, 0.15f),
-                    catalogSprite == null
+                    !view.UsesAuthoredVisual
                         ? EnemyColor(enemy)
                         : Color.white,
                     healthRatio);
@@ -322,12 +347,43 @@ namespace ProjectVL.Presentation
                 $"{enemy.Label} {enemy.Id}");
             rootObject.transform.SetParent(transform, false);
 
+            GameObject prefab =
+                _visualCatalog?.ResolveEnemyPrefab(enemy);
             Sprite catalogSprite =
                 _visualCatalog?.ResolveEnemySprite(enemy);
-            Sprite sprite = catalogSprite ?? EnemySprite(enemy.Sides);
+            Transform visualRoot = rootObject.transform;
+            SpriteRenderer body = null;
+            bool usesAuthoredVisual = prefab != null
+                || catalogSprite != null;
+            if (prefab != null)
+            {
+                GameObject instance = Instantiate(
+                    prefab,
+                    rootObject.transform,
+                    false);
+                instance.name = "Authored Visual";
+                visualRoot = instance.transform;
+                body = instance.GetComponentInChildren<SpriteRenderer>(true);
+                if (body == null)
+                    body = instance.AddComponent<SpriteRenderer>();
+                if (catalogSprite != null)
+                    body.sprite = catalogSprite;
+                if (body.sprite == null)
+                    body.sprite = EnemySprite(enemy.Sides);
+                NormalizeAuthoredVisual(
+                    visualRoot,
+                    enemy.Radius * 2f);
+            }
+
+            Sprite sprite = catalogSprite
+                ?? body?.sprite
+                ?? EnemySprite(enemy.Sides);
+            Sprite outlineSprite =
+                _visualCatalog?.ResolveEnemyStatusOverlay(enemy)
+                ?? sprite;
             SpriteRenderer outline = CreateSpriteView(
                 "Status Outline",
-                sprite,
+                outlineSprite,
                 EnemyOutlineColor(enemy));
             outline.transform.SetParent(rootObject.transform, false);
             float outlineSize =
@@ -336,24 +392,53 @@ namespace ProjectVL.Presentation
             SetWorldSize(outline, outlineSize, outlineSize);
             outline.sortingOrder = 9;
 
-            SpriteRenderer body = CreateSpriteView(
-                "Body",
-                sprite,
-                catalogSprite == null ? EnemyColor(enemy) : Color.white);
-            body.transform.SetParent(rootObject.transform, false);
-            SetWorldSize(body, enemy.Radius * 2f, enemy.Radius * 2f);
-            body.sortingOrder = 10;
+            if (body == null)
+            {
+                body = CreateSpriteView(
+                    "Body",
+                    sprite,
+                    usesAuthoredVisual
+                        ? Color.white
+                        : EnemyColor(enemy));
+                body.transform.SetParent(rootObject.transform, false);
+                SetWorldSize(
+                    body,
+                    enemy.Radius * 2f,
+                    enemy.Radius * 2f);
+            }
+            else
+            {
+                body.color = Color.white;
+            }
+            body.sortingOrder = Mathf.Max(body.sortingOrder, 10);
+            Material material =
+                _visualCatalog?.ResolveEnemyMaterial(enemy);
+            if (material != null)
+                body.sharedMaterial = material;
+            RuntimeAnimatorController animatorController =
+                _visualCatalog?.ResolveEnemyAnimator(enemy);
+            if (animatorController != null)
+            {
+                Animator animator =
+                    visualRoot.GetComponentInChildren<Animator>(true);
+                if (animator == null)
+                    animator = visualRoot.gameObject.AddComponent<Animator>();
+                animator.runtimeAnimatorController = animatorController;
+            }
 
-            SpriteRenderer core = CreateSpriteView(
-                "Core",
-                _circleSprite,
-                new Color(0.02f, 0.06f, 0.11f, 0.9f));
-            core.transform.SetParent(rootObject.transform, false);
-            core.transform.localScale = new Vector3(
-                enemy.Radius * 0.76f,
-                enemy.Radius * 0.76f,
-                1f);
-            core.sortingOrder = 11;
+            if (!usesAuthoredVisual)
+            {
+                SpriteRenderer core = CreateSpriteView(
+                    "Core",
+                    _circleSprite,
+                    new Color(0.02f, 0.06f, 0.11f, 0.9f));
+                core.transform.SetParent(rootObject.transform, false);
+                core.transform.localScale = new Vector3(
+                    enemy.Radius * 0.76f,
+                    enemy.Radius * 0.76f,
+                    1f);
+                core.sortingOrder = 11;
+            }
 
             SpriteRenderer healthBackground = CreateSpriteView(
                 "Health Background",
@@ -381,9 +466,12 @@ namespace ProjectVL.Presentation
 
             return new EnemyView(
                 rootObject.transform,
+                visualRoot,
                 outline,
                 body,
-                healthFill);
+                healthFill,
+                usesAuthoredVisual,
+                prefab != null);
         }
 
         private void SyncBullets()
@@ -762,6 +850,26 @@ namespace ProjectVL.Presentation
                 1f);
         }
 
+        private static void NormalizeAuthoredVisual(
+            Transform visualRoot,
+            float targetDiameter)
+        {
+            SpriteRenderer[] renderers =
+                visualRoot.GetComponentsInChildren<SpriteRenderer>(true);
+            if (renderers.Length == 0)
+                return;
+
+            Bounds bounds = renderers[0].bounds;
+            for (int index = 1; index < renderers.Length; index++)
+                bounds.Encapsulate(renderers[index].bounds);
+            float diameter = Mathf.Max(bounds.size.x, bounds.size.y);
+            if (diameter <= 0.0001f)
+                return;
+
+            float scale = targetDiameter / diameter;
+            visualRoot.localScale *= scale;
+        }
+
         private static Color EnemyColor(EnemyState enemy)
         {
             if (enemy.FrozenRemaining > 0f)
@@ -945,20 +1053,29 @@ namespace ProjectVL.Presentation
         private sealed class EnemyView
         {
             public Transform Root { get; }
+            public Transform VisualRoot { get; }
             public SpriteRenderer Outline { get; }
             public SpriteRenderer Body { get; }
             public SpriteRenderer HealthFill { get; }
+            public bool UsesAuthoredVisual { get; }
+            public bool UsesPrefab { get; }
 
             public EnemyView(
                 Transform root,
+                Transform visualRoot,
                 SpriteRenderer outline,
                 SpriteRenderer body,
-                SpriteRenderer healthFill)
+                SpriteRenderer healthFill,
+                bool usesAuthoredVisual,
+                bool usesPrefab)
             {
                 Root = root;
+                VisualRoot = visualRoot;
                 Outline = outline;
                 Body = body;
                 HealthFill = healthFill;
+                UsesAuthoredVisual = usesAuthoredVisual;
+                UsesPrefab = usesPrefab;
             }
         }
 
