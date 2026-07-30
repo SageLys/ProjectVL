@@ -46,20 +46,41 @@ type RouterOptions = {
   isPaused?: () => boolean;
   onArenaTap(x: number, y: number): void;
   onBountyOfferTap?: (x: number, y: number) => boolean;
-  onDrop(source: SlotSource, index: number, target: Exclude<DropTarget, { kind: 'cancel' }>): void;
+  onDrop(
+    source: SlotSource,
+    index: number,
+    target: Exclude<DropTarget, { kind: 'cancel' }>,
+    context?: { recipeIntent: boolean; recipeId?: string },
+  ): void;
   previewFor(source: SlotSource, index: number): PreviewSpec;
   getDropValidity?(source: SlotSource, index: number, target: Extract<DropTarget, { kind: 'slot' }>): boolean;
+  getRecipeDropPreview?(
+    source: SlotSource,
+    index: number,
+    target: Extract<DropTarget, { kind: 'slot' }>,
+  ): { recipeId: string; label: string } | null;
+  getWildcardDropWarning?(target: Extract<DropTarget, { kind: 'slot' }>): string | null;
 };
 
 export function createPointerRouter(options: RouterOptions) {
-  let active: { pointerId: number; start: PointerSample; maxDistance: number; source?: SlotSource; index?: number; el?: HTMLElement; dragging: boolean } | null = null;
+  let active: {
+    pointerId: number;
+    start: PointerSample;
+    maxDistance: number;
+    source?: SlotSource;
+    index?: number;
+    el?: HTMLElement;
+    dragging: boolean;
+    recipeIntent?: { targetKey: string; recipeId: string };
+  } | null = null;
   let hot: Element | null = null;
   let suppressClick = false;
 
   function hidePreview(): void {
     options.aimPreview.classList.remove('show');
     options.screenPreview.classList.remove('show');
-    hot?.classList.remove('hot', 'equip-warning', 'wildcard-valid', 'wildcard-invalid');
+    hot?.classList.remove('hot', 'equip-warning', 'wildcard-valid', 'wildcard-invalid', 'wildcard-warning', 'recipe-evolve-hot');
+    if (hot instanceof HTMLElement) delete hot.dataset.recipePreview;
     hot = null;
   }
 
@@ -68,11 +89,33 @@ export function createPointerRouter(options: RouterOptions) {
     const preview = options.previewFor(active.source, active.index);
     const target = targetAt(options.canvas, clientX, clientY);
     const slot = document.elementFromPoint(clientX, clientY)?.closest?.('[data-testid="card-slot"], [data-testid="equipment-slot"]') ?? null;
-    if (hot !== slot) { hot?.classList.remove('hot', 'equip-warning', 'wildcard-valid', 'wildcard-invalid'); hot = slot; hot?.classList.add('hot'); }
+    if (hot !== slot) {
+      hot?.classList.remove('hot', 'equip-warning', 'wildcard-valid', 'wildcard-invalid', 'wildcard-warning', 'recipe-evolve-hot');
+      if (hot instanceof HTMLElement) delete hot.dataset.recipePreview;
+      hot = slot;
+      hot?.classList.add('hot');
+    }
     if (slot && active.source === 'cards' && (slot as HTMLElement).dataset.testid === 'equipment-slot') slot.classList.add('equip-warning');
     if (slot && active.source === 'wildcard' && target.kind === 'slot') {
-      slot.classList.remove('wildcard-valid', 'wildcard-invalid');
+      slot.classList.remove('wildcard-valid', 'wildcard-invalid', 'wildcard-warning');
+      if (slot instanceof HTMLElement) delete slot.dataset.recipePreview;
       slot.classList.add(options.getDropValidity?.(active.source, active.index, target) ? 'wildcard-valid' : 'wildcard-invalid');
+      const warning = options.getWildcardDropWarning?.(target);
+      if (warning && slot instanceof HTMLElement) {
+        slot.classList.add('wildcard-warning');
+        slot.dataset.recipePreview = warning;
+      }
+    }
+    if (slot instanceof HTMLElement && target.kind === 'slot' && active.source !== 'wildcard') {
+      const recipe = options.getRecipeDropPreview?.(active.source, active.index, target);
+      if (recipe) {
+        slot.classList.add('recipe-evolve-hot');
+        slot.dataset.recipePreview = recipe.label;
+        active.recipeIntent = {
+          targetKey: `${target.slotKind}:${target.index}`,
+          recipeId: recipe.recipeId,
+        };
+      }
     }
     options.aimPreview.classList.remove('show');
     options.screenPreview.classList.remove('show');
@@ -114,7 +157,14 @@ export function createPointerRouter(options: RouterOptions) {
     if (!current.source || !current.dragging || current.index == null) return;
     suppressClick = true;
     const target = targetAt(options.canvas, event.clientX, event.clientY);
-    if (target.kind !== 'cancel') options.onDrop(current.source, current.index, target);
+    if (target.kind !== 'cancel') {
+      const targetKey = target.kind === 'slot' ? `${target.slotKind}:${target.index}` : '';
+      const intent = current.recipeIntent?.targetKey === targetKey ? current.recipeIntent : undefined;
+      options.onDrop(current.source, current.index, target, {
+        recipeIntent: !!intent,
+        recipeId: intent?.recipeId,
+      });
+    }
   }
 
   document.addEventListener('pointermove', onMove);

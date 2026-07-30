@@ -25,12 +25,11 @@ function validChoices(decision: RunDecision): string[] {
     case 'godDraft':
     case 'godFocus':
     case 'waveBaseReward':
+    case 'recipePin':
       return decision.candidates;
     case 'evolutionBranch':
     case 'relic':
       return decision.options;
-    case 'recipeEvolution':
-      return [decision.recipeId];
   }
 }
 
