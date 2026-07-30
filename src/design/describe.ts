@@ -61,7 +61,7 @@ export interface RecipeView {
   a: { cardId: string; name: string; minStar: number };
   b: { cardId: string; name: string; minStar: number };
   outputStar: number;
-  allowedPhase: string;
+  recipeType: 'sameGod' | 'crossGod';
 }
 export interface CardView {
   id: string;
@@ -206,10 +206,10 @@ function describeRecipe(card: CardDef, ctx: DescribeContext): RecipeView | undef
   if (!recipe) return undefined;
   return {
     id: recipe.id,
-    a: { ...recipe.ingredientA, name: cardName(ctx.texts, recipe.ingredientA.cardId) },
-    b: { ...recipe.ingredientB, name: cardName(ctx.texts, recipe.ingredientB.cardId) },
+    a: { ...recipe.ingredientVariable, name: cardName(ctx.texts, recipe.ingredientVariable.cardId) },
+    b: { ...recipe.ingredientAnchor, name: cardName(ctx.texts, recipe.ingredientAnchor.cardId) },
     outputStar: recipe.outputStar,
-    allowedPhase: labelWithKey('enumValue', `phase.${recipe.allowedPhase}`, recipe.allowedPhase),
+    recipeType: recipe.recipeType,
   };
 }
 

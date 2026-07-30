@@ -102,6 +102,8 @@ const ATOM_PARAM_LABELS: Record<string, string> = {
   'breachReduction.ratio': '突破减免比例',
   'chain.damageMul': '伤害基准倍率',
   'chain.targets': '起点数',
+  'chain.spreadStatus': '每跳扩散状态',
+  'chain.spreadParams': '扩散状态参数',
   'dropLifetimeMul.mul': '掉落时限乘数',
   'dropRateMul.mul': '掉率乘数',
   'execute.hpThresholdRatio': '处决血量阈值',
@@ -189,7 +191,7 @@ const DOMAIN_FIELD_LABELS: Record<EditorDomain, Record<string, string>> = {
     unequipPolicy: '卸下策略', equipSwappable: '装备可替换', inRunSlotExpansion: '局内槽位扩展',
     equipDistinctTypes: '装备类型互斥', feedEquipped: '可喂养已装备卡',
     placeholderAssumptions: '占位假设', dropStarPolicy: '掉落星级策略', drops: '掉落物',
-    defaults: '默认数值', ordinaryDropRate: '普通掉落节奏（每分钟）', normalDropTypePolicy: '普通掉落类型策略',
+    defaults: '默认数值', ordinaryDropRate: '普通掉落节奏（每分钟）', evolution: '配方进化', normalDropTypePolicy: '普通掉落类型策略',
   },
   bounty: {
     enabled: '启用', rewardBias: '奖励偏置', offer: '委托发放', encounter: '遭遇',
@@ -212,7 +214,7 @@ const DOMAIN_FIELD_LABELS: Record<EditorDomain, Record<string, string>> = {
 
 // 跨域通用字段名：域内没有精确项时按末段兜底（结构树深层节点大多命中这里）。
 const COMMON_FIELD_LABELS: Record<string, string> = {
-  add: '加值', affixPool: '词条池', allowedPhase: '允许阶段', amplifyAxis: '强化轴',
+  add: '加值', affixPool: '词条池', amplifyAxis: '强化轴', identityContract: '身份契约', interfaceRole: '接口角色',
   anchorCardIds: '锚点卡', anchors: '档位', applyPolicy: '生效策略', axis: '作用轴',
   base: '基准值', batchMax: '单批上限', bindingIndex: '绑定序号', boss: 'Boss', bossReward: 'Boss 奖励', build: '构筑',
   bootstrapForcedDrops: '开局强制发牌次数', bootstrapMinDiscovery: '冷启动探索保底', buildPerMinute: '构筑期每分钟掉落',
@@ -226,13 +228,13 @@ const COMMON_FIELD_LABELS: Record<string, string> = {
   god: '神祇', godAffinity: '神祇亲和', godWeightAdd: '神祇权重加值', group: '分组', hard: '困难', height: '高度',
   historicalMergeCap: '历史合成封顶', historicalMergeWeight: '历史合成权重',
   hp: '生命', hpBase: '基础生命', hpMul: '生命倍率', hpPerWave: '每波生命增量', id: '标识',
-  ingredientA: '材料 A', ingredientB: '材料 B', inputs: '输入', interval: '间隔',
+  ingredientA: '材料 A', ingredientB: '材料 B', ingredientVariable: '可变卡材料', ingredientAnchor: '锚点卡材料', inputs: '输入', interval: '间隔',
   kind: '种类', knockbackResist: '击退抗性', knockbackResistOverride: '击退抗性覆盖',
   implementationBatch: '实现批次', label: '显示名', labelKey: '文案键', life: '存活时间', mainRosterSize: '主池规模',
   max: '最大值', maxAlive: '同时存活上限', maxSameTypeStreak: '同型连发上限', maxStacks: '最大层数', maxWeightRatio: '权重比上限', min: '最小值',
   maturity: '构筑成熟度', mergeReadyMultiplier: '可合成加权', mergeWeight: '合成权重', modifiersAffectTarget: '词条加成是否影响目标速率',
   minStar: '最低星级', milestones: '里程碑文案', mode: '模式', mul: '乘数', multiplier: '倍率', name: '名称', options: '选项',
-  outputCardId: '产出卡', outputStar: '产出星级', overview: '概览', paramName: '参数名', params: '参数', parentEffectPath: '父效果路径', path: '配置路径',
+  outputCardId: '产出卡', outputStar: '产出星级', primaryGod: '主归属神', sourceGods: '来源神', recipeType: '配方类型', variableGod: '可变卡神', anchorGod: '锚点神', overview: '概览', paramName: '参数名', params: '参数', parentEffectPath: '父效果路径', path: '配置路径',
   perWave: '每波增量', pityDrops: '保底掉落次数', pivot: '拐点', poolInfluence: '池影响',
   power: '曲线指数', r: '半径', radius: '半径', range: '射程', rare: '稀有', rarity: '稀有度',
   ratio: '比例', recipeOnly: '仅配方产物', relaxed: '轻松', reward: '奖励', roleBagSize: '角色袋容量', scale: '缩放', scoreCap: '加分封顶',

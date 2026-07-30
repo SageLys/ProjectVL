@@ -596,8 +596,11 @@ function skillsCardColumns(textLeafPointers: string[]): ColumnSpec[] {
   return [
     { key: 'id', label: fieldLabel('skills', 'id'), width: 23 },
     { key: 'god', label: fieldLabel('skills', 'god'), width: 15 },
+    { key: 'primaryGod', label: fieldLabel('skills', 'primaryGod'), width: 15 },
+    { key: 'sourceGods', label: fieldLabel('skills', 'sourceGods'), width: 24 },
     { key: 'category', label: fieldLabel('skills', 'category'), width: 15 },
     { key: 'synergyTags', label: fieldLabel('skills', 'synergyTags'), width: 24 },
+    { key: 'identityContract', label: fieldLabel('skills', 'identityContract'), width: 48 },
     { key: 'textKey', label: fieldLabel('skills', 'textKey'), width: 28 },
     { key: 'teaching', label: fieldLabel('skills', 'teaching'), width: 13 },
     { key: 'implementationBatch', label: fieldLabel('skills', 'implementationBatch'), width: 13 },
@@ -720,8 +723,11 @@ export function writeSkillsSheets(
     const row: Record<string, Scalar | undefined> = {
       id: card.id,
       god: card.god,
+      primaryGod: card.primaryGod,
+      sourceGods: card.sourceGods ? JSON.stringify(card.sourceGods) : undefined,
       category: card.category,
       synergyTags: JSON.stringify(card.synergyTags),
+      identityContract: card.identityContract,
       textKey: card.textKey,
       teaching: card.teaching,
       implementationBatch: card.implementationBatch,
@@ -935,7 +941,7 @@ function readSkillRelations(workbook: ExcelJS.Workbook): ImportedRelations {
 }
 
 function parseCardField(key: string, value: unknown, type: NodeType | 'json' | undefined, location: string): unknown {
-  if (key === 'synergyTags' || key === 'amplifyAxis' || key === 'affixPool' || key === 'evolutionTree' || key === 'fusionPolicy') {
+  if (key === 'sourceGods' || key === 'synergyTags' || key === 'amplifyAxis' || key === 'affixPool' || key === 'evolutionTree' || key === 'fusionPolicy') {
     return parseJson(value, location);
   }
   if (type) return parseRecordValue(value, type, location);
@@ -953,7 +959,7 @@ export function readSkillsSheets(workbook: ExcelJS.Workbook): ReadSkills {
     const fieldOrder = parseStringArray(row.values.get('__fieldOrder'), `skills.cards!${row.row}`);
     const fieldTypes = parseTypeMap(row.values.get('__fieldTypes'), `skills.cards!${row.row}`);
     const id = requiredString(row.values.get('id'), `skills.cards!A${row.row}`);
-    const optionalColumns = ['god', 'implementationBatch', 'recipeOnly', 'designNotes', 'affixPool', 'evolutionTree', 'fusionPolicy'];
+    const optionalColumns = ['god', 'primaryGod', 'sourceGods', 'implementationBatch', 'recipeOnly', 'designNotes', 'affixPool', 'evolutionTree', 'fusionPolicy'];
     for (const key of optionalColumns) if (!fieldOrder.includes(key) && !blank(row.values.get(key))) fieldOrder.push(key);
     const starsMeta = parseJson(row.values.get('starsMeta'), `skills.cards!I${row.row}`);
     const consumableMeta = parseJson(row.values.get('consumableMeta'), `skills.cards!K${row.row}`);

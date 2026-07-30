@@ -26,7 +26,7 @@ function issuePrefixes(options: ContextPanelOptions): string[] {
   const { selection } = options;
   if (selection.kind === 'card') {
     const index = options.cards.findIndex(card => card.id === selection.id);
-    const recipeIndex = options.recipes.recipes.findIndex(recipe => recipe.outputCardId === selection.id || recipe.ingredientA.cardId === selection.id || recipe.ingredientB.cardId === selection.id);
+    const recipeIndex = options.recipes.recipes.findIndex(recipe => recipe.outputCardId === selection.id || recipe.ingredientVariable.cardId === selection.id || recipe.ingredientAnchor.cardId === selection.id);
     return [`$.skills.cards[${index}]`, `$.texts.cards.${selection.id}`, `$.texts.evolution.${selection.id}`, ...(recipeIndex >= 0 ? [`$.evolutionRecipes.recipes[${recipeIndex}]`] : [])];
   }
   if (selection.kind === 'relic') {
@@ -58,7 +58,7 @@ function renderReverseReferences(container: HTMLElement, options: ContextPanelOp
   if (options.selection.kind === 'card') {
     const card = options.cards.find(item => item.id === options.selection.id);
     for (const recipe of options.recipes.recipes) {
-      if (recipe.ingredientA.cardId === options.selection.id || recipe.ingredientB.cardId === options.selection.id) lines.push(`被配方 ${recipe.id} 消耗`);
+      if (recipe.ingredientVariable.cardId === options.selection.id || recipe.ingredientAnchor.cardId === options.selection.id) lines.push(`被配方 ${recipe.id} 消耗`);
       if (recipe.outputCardId === options.selection.id) lines.push(`由配方 ${recipe.id} 产出`);
     }
     for (const god of options.gods) {
