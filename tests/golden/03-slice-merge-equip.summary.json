@@ -15,7 +15,7 @@
   "wave": {
     "wave": 1,
     "phase": "regular",
-    "spawnLeft": 38,
+    "spawnLeft": 39,
     "waveSpawnQuota": 60,
     "intermission": {
       "active": false,
@@ -24,16 +24,16 @@
     }
   },
   "enemiesRemaining": 7,
-  "cumulativeDamageDealt": 836.9999999999995,
+  "cumulativeDamageDealt": 799.1999999999996,
   "cumulativeDamageTaken": 0,
   "counters": {
-    "kills": 15,
+    "kills": 14,
     "collected": 4,
     "expired": 8,
     "merges": 3,
     "consumes": 0,
     "equipOps": 1,
-    "xp": 19,
+    "xp": 18,
     "level": 2
   },
   "cards": [],
@@ -143,7 +143,7 @@
       "star": 1
     },
     {
-      "frame": 323,
+      "frame": 321,
       "action": "spawned",
       "dropId": 7,
       "kind": "card",
@@ -175,7 +175,7 @@
       "star": 1
     },
     {
-      "frame": 473,
+      "frame": 471,
       "action": "expired",
       "dropId": 7,
       "kind": "card",
@@ -183,19 +183,19 @@
       "star": 1
     },
     {
-      "frame": 495,
+      "frame": 499,
       "action": "spawned",
       "dropId": 9,
       "kind": "card",
-      "cardType": "aegis",
+      "cardType": "overcharge",
       "star": 1
     },
     {
-      "frame": 560,
+      "frame": 540,
       "action": "spawned",
       "dropId": 10,
       "kind": "card",
-      "cardType": "bountyCall",
+      "cardType": "flashfire",
       "star": 1
     },
     {
@@ -207,7 +207,7 @@
       "star": 1
     },
     {
-      "frame": 645,
+      "frame": 649,
       "action": "expired",
       "dropId": 9,
       "kind": "card",
@@ -219,11 +219,11 @@
       "action": "spawned",
       "dropId": 11,
       "kind": "card",
-      "cardType": "hoarfrostTithe",
+      "cardType": "scorch",
       "star": 1
     },
     {
-      "frame": 710,
+      "frame": 690,
       "action": "expired",
       "dropId": 10,
       "kind": "card",
@@ -231,7 +231,7 @@
       "star": 1
     },
     {
-      "frame": 718,
+      "frame": 717,
       "action": "spawned",
       "dropId": 12,
       "kind": "card",
@@ -243,7 +243,7 @@
       "action": "spawned",
       "dropId": 13,
       "kind": "card",
-      "cardType": "chainLightning",
+      "cardType": "frost",
       "star": 1
     },
     {
@@ -255,27 +255,19 @@
       "star": 1
     },
     {
-      "frame": 824,
+      "frame": 836,
       "action": "spawned",
       "dropId": 14,
       "kind": "card",
-      "cardType": "ashHarvest",
+      "cardType": "sentinel",
       "star": 1
     },
     {
-      "frame": 868,
+      "frame": 867,
       "action": "expired",
       "dropId": 12,
       "kind": "card",
       "cardType": null,
-      "star": 1
-    },
-    {
-      "frame": 890,
-      "action": "spawned",
-      "dropId": 15,
-      "kind": "card",
-      "cardType": "decoy",
       "star": 1
     }
   ],
@@ -349,27 +341,27 @@
       "type": "dropExpired"
     },
     {
-      "frame": 473,
+      "frame": 471,
       "type": "dropExpired"
     },
     {
-      "frame": 572,
+      "frame": 569,
       "type": "levelUp"
     },
     {
-      "frame": 572,
+      "frame": 569,
       "type": "relicOffered"
     },
     {
-      "frame": 572,
+      "frame": 569,
       "type": "decisionOffered"
     },
     {
-      "frame": 572,
+      "frame": 569,
       "type": "relicSelected"
     },
     {
-      "frame": 572,
+      "frame": 569,
       "type": "decisionResolved"
     },
     {
@@ -381,11 +373,11 @@
       "type": "bountyOfferExpired"
     },
     {
-      "frame": 645,
+      "frame": 649,
       "type": "dropExpired"
     },
     {
-      "frame": 710,
+      "frame": 690,
       "type": "dropExpired"
     },
     {
@@ -397,7 +389,7 @@
       "type": "bountyOfferSpawned"
     },
     {
-      "frame": 868,
+      "frame": 867,
       "type": "dropExpired"
     }
   ],
@@ -419,7 +411,7 @@
     "bountyOfferExpired": 1
   },
   "rng": {
-    "draws": 2154,
-    "last": 0.3501579868607223
+    "draws": 1994,
+    "last": 0.49590663495473564
   }
 }
