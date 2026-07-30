@@ -14,6 +14,7 @@ namespace ProjectVL.Systems
         private readonly BountySystem _bounties;
         private readonly WaveRewardSystem _waveRewards;
         private ResolvedWavePlan _activePlan;
+        private int _lastClearedWave;
 
         public WaveSystem(
             WavesConfig waves,
@@ -48,6 +49,14 @@ namespace ProjectVL.Systems
             state.WaveSpawnQuota = _activePlan.Quota;
             state.SpawnTimer = _waves.firstSpawnDelay;
             _bounties?.OnWaveStarted(state);
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "waveStart",
+                stage = _activePlan.Stage.ToString(),
+                maturity = BuildMaturity(state),
+                highestStar = HighestStar(state),
+                equippedCount = EquippedCount(state)
+            });
 
             if (_activePlan.Validation != null)
             {
@@ -119,9 +128,19 @@ namespace ProjectVL.Systems
                     EnemyState boss = _enemyFactory.SpawnWaveBoss(state);
                     state.WavePhase = WavePhase.Boss;
                     state.BossId = boss.Id;
+                    state.EmitTelemetry(new TelemetryEventRecord
+                    {
+                        type = "waveBossSpawned",
+                        enemyId = boss.Id,
+                        entityId = boss.Id,
+                        x = boss.Position.X,
+                        y = boss.Position.Y,
+                        stage = _activePlan.Stage.ToString()
+                    });
                 }
                 else if (state.Wave >= _waves.totalWaves)
                 {
+                    EmitWaveCleared(state);
                     state.EndRun(true);
                 }
                 else
@@ -174,6 +193,17 @@ namespace ProjectVL.Systems
             }
 
             state.GrantReward(state.PendingBossReward);
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "bossRewardGranted",
+                rewardKind = state.PendingBossReward.Kind == RewardKind.Card
+                    ? "card"
+                    : "wildcard",
+                star = state.PendingBossReward.Star,
+                wildcardCount = state.PendingBossReward.Count,
+                source = "boss",
+                typePolicy = state.PendingBossReward.TypePolicy
+            });
             state.PendingBossReward = null;
             state.RefreshDecisionLock();
 
@@ -193,6 +223,11 @@ namespace ProjectVL.Systems
                 && state.PendingWaveReward == null)
             {
                 state.IntermissionReady = true;
+                state.EmitTelemetry(new TelemetryEventRecord
+                {
+                    type = "intermission_ready",
+                    automatic = false
+                });
             }
         }
 
@@ -212,6 +247,7 @@ namespace ProjectVL.Systems
             int wave = Math.Max(
                 1,
                 Math.Min(_waves.totalWaves, targetWave));
+            _lastClearedWave = Math.Min(_lastClearedWave, wave - 1);
             state.PrepareWaveJump(wave);
             StartNextWave(state);
         }
@@ -228,6 +264,13 @@ namespace ProjectVL.Systems
 
         private void OfferBossReward(GameState state)
         {
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "waveBossKilled",
+                enemyId = state.BossId ?? 0,
+                entityId = state.BossId ?? 0
+            });
+            EmitWaveCleared(state);
             state.PendingBossReward = ComputeBossReward(state.Wave);
             state.WavePhase = WavePhase.BossReward;
             state.SetDecisionLocked(true);
@@ -235,6 +278,7 @@ namespace ProjectVL.Systems
 
         private void BeginIntermission(GameState state)
         {
+            EmitWaveCleared(state);
             state.Bullets.Clear();
             _bounties?.ClearOffers(state);
             state.LastFloorRewards.Clear();
@@ -270,6 +314,14 @@ namespace ProjectVL.Systems
                 return;
             }
 
+            if (!state.IntermissionReady)
+            {
+                state.EmitTelemetry(new TelemetryEventRecord
+                {
+                    type = "intermission_ready",
+                    automatic = true
+                });
+            }
             state.IntermissionActive = false;
             state.IntermissionReady = false;
             state.IntermissionRemaining = 0f;
@@ -309,6 +361,62 @@ namespace ProjectVL.Systems
             return Math.Max(
                 0,
                 wave - (_waves.totalWaves - _waves.stagePlan.validationWaves + 1));
+        }
+
+        private void EmitWaveCleared(GameState state)
+        {
+            if (state.Wave <= 0 || _lastClearedWave == state.Wave)
+                return;
+
+            _lastClearedWave = state.Wave;
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "waveCleared",
+                stage = _planResolver.StageForWave(state.Wave).ToString(),
+                activeRegularSeconds =
+                    state.OrdinaryDropActiveRegularSeconds,
+                ordinaryDropsShown =
+                    state.OrdinaryDropsShownThisWave,
+                eligibleKills =
+                    state.OrdinaryDropEligibleKillsThisWave,
+                maturity = BuildMaturity(state),
+                highestStar = HighestStar(state),
+                equippedCount = EquippedCount(state)
+            });
+        }
+
+        private static int HighestStar(GameState state)
+        {
+            int highest = 0;
+            foreach (CardState card in state.Hand)
+                highest = Math.Max(highest, card?.Star ?? 0);
+            foreach (CardState card in state.Equipment)
+                highest = Math.Max(highest, card?.Star ?? 0);
+            return highest;
+        }
+
+        private static int EquippedCount(GameState state)
+        {
+            int count = 0;
+            foreach (CardState card in state.Equipment)
+            {
+                if (card != null)
+                    count++;
+            }
+
+            return count;
+        }
+
+        private static float BuildMaturity(GameState state)
+        {
+            int highest = HighestStar(state);
+            int equipped = EquippedCount(state);
+            float mergeProgress = Math.Min(1f, state.Merges / 12f);
+            float starProgress = Math.Min(1f, highest / 6f);
+            float equipProgress = Math.Min(1f, equipped / 3f);
+            return mergeProgress * 0.4f
+                + starProgress * 0.35f
+                + equipProgress * 0.25f;
         }
     }
 }

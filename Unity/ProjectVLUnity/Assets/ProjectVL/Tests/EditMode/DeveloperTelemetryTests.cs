@@ -164,6 +164,67 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void EventContractMatchesWebAndCoreSystemsPublishIntoSession()
+        {
+            Assert.That(TelemetryEventContract.Types.Length, Is.EqualTo(43));
+            Assert.That(
+                new HashSet<string>(TelemetryEventContract.Types).Count,
+                Is.EqualTo(43));
+            Assert.That(TelemetryEventContract.Contains("spawn"), Is.True);
+            Assert.That(
+                TelemetryEventContract.Contains("affix_rolled"),
+                Is.True);
+            Assert.That(
+                TelemetryEventContract.Contains("wavePhase"),
+                Is.False);
+
+            CombatConfig combat = CombatConfigLoader.LoadDefault();
+            EconomyConfig economy = GameConfigLoader.LoadEconomy();
+            GameState state = GameStateFactory.Create(combat, economy);
+            var telemetry = new DeveloperTelemetrySystem(
+                state,
+                42,
+                "test",
+                combat,
+                GameConfigLoader.LoadEnemies(),
+                GameConfigLoader.LoadWaves(),
+                economy,
+                GameConfigLoader.LoadBounty());
+            var drops = new DropSystem(
+                economy,
+                new SystemRandomSource(42));
+
+            GroundDropState drop = drops.SpawnTestDrop(
+                state,
+                new Float2(10f, 20f));
+            drops.Step(state, drop.MaxLife + 0.1f);
+            var gods = new GodPoolSystem(
+                GameConfigLoader.LoadGods(),
+                new SystemRandomSource(42));
+            Assert.That(gods.OfferInitial(state), Is.True);
+
+            Assert.That(
+                telemetry.Session.events.Exists(
+                    item => item.type == "dropLanded"
+                        && item.dropId == drop.Id),
+                Is.True);
+            Assert.That(
+                telemetry.Session.events.Exists(
+                    item => item.type == "dropExpired"
+                        && item.dropId == drop.Id),
+                Is.True);
+            Assert.That(
+                telemetry.Session.events.Exists(
+                    item => item.type == "god_offer"),
+                Is.True);
+            Assert.That(
+                telemetry.Session.events.Exists(
+                    item => item.type == "decision_offered"
+                        && item.decisionKind == "god"),
+                Is.True);
+        }
+
+        [Test]
         public void ComputesWebCompatibleE1ThroughE7Metrics()
         {
             var session = new TelemetrySession();

@@ -43,6 +43,28 @@ namespace ProjectVL.Systems
                 granted = true;
             }
 
+            if (granted)
+            {
+                var records = new TelemetryWaveRewardRecord[
+                    state.LastFloorRewards.Count];
+                for (int index = 0; index < records.Length; index++)
+                {
+                    WaveRewardEffectConfig reward =
+                        state.LastFloorRewards[index];
+                    records[index] = new TelemetryWaveRewardRecord
+                    {
+                        id = reward.id,
+                        stat = reward.stat,
+                        add = reward.add
+                    };
+                }
+
+                state.EmitTelemetry(new TelemetryEventRecord
+                {
+                    type = "wave_rewards_granted",
+                    waveRewards = records
+                });
+            }
             return granted;
         }
 
@@ -77,6 +99,20 @@ namespace ProjectVL.Systems
                 options,
                 capped);
             state.SetDecisionLocked(true);
+            var candidates = new string[options.Count];
+            for (int index = 0; index < options.Count; index++)
+                candidates[index] = options[index].id;
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "wave_base_reward_offered",
+                candidates = candidates
+            });
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "decision_offered",
+                decisionKind = "waveReward",
+                candidates = candidates
+            });
             return true;
         }
 
@@ -98,6 +134,21 @@ namespace ProjectVL.Systems
 
             Apply(state, reward);
             state.ChosenWaveRewards.Add(reward);
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "wave_base_reward_resolved",
+                choice = reward.id,
+                waveRewardStat = reward.stat,
+                waveRewardAdd = reward.add
+            });
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "decision_resolved",
+                decisionKind = "waveReward",
+                choice = reward.id,
+                waveRewardStat = reward.stat,
+                waveRewardAdd = reward.add
+            });
             state.PendingWaveReward = null;
             state.RefreshDecisionLock();
             return true;

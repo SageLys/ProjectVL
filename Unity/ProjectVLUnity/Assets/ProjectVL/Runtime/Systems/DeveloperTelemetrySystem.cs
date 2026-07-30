@@ -7,6 +7,64 @@ using UnityEngine;
 
 namespace ProjectVL.Systems
 {
+    public static class TelemetryEventContract
+    {
+        public static readonly string[] Types =
+        {
+            "spawn",
+            "kill",
+            "dropLanded",
+            "pickup",
+            "dropExpired",
+            "dropRejectedFullHand",
+            "validationRewardLanded",
+            "validationRewardPickup",
+            "dangerEnter",
+            "waveStart",
+            "waveCleared",
+            "waveBossSpawned",
+            "waveBossKilled",
+            "bossRewardGranted",
+            "perkPopup",
+            "mergeOpportunity",
+            "bountyOffer",
+            "bountyOfferExpired",
+            "bountyAccepted",
+            "bountyMemberSpawned",
+            "bountyCompleted",
+            "bountyFailed",
+            "bountyRewardLanded",
+            "bountyRewardPickup",
+            "decision_offered",
+            "decision_resolved",
+            "intermission_ready",
+            "wave_rewards_granted",
+            "wave_base_reward_offered",
+            "wave_base_reward_resolved",
+            "god_offer",
+            "god_selected",
+            "run_roster_created",
+            "active_pool_created",
+            "card_shown_by_god",
+            "card_collected_by_god",
+            "relic_offered",
+            "relic_selected",
+            "evolution_branch_offered",
+            "evolution_branch_selected",
+            "recipe_available",
+            "recipe_completed",
+            "affix_rolled"
+        };
+
+        private static readonly HashSet<string> TypeSet =
+            new HashSet<string>(Types);
+
+        public static bool Contains(string type)
+        {
+            return !string.IsNullOrEmpty(type) && TypeSet.Contains(type);
+        }
+    }
+
     [Serializable]
     public sealed class TelemetryConfigSnapshot
     {
@@ -48,12 +106,24 @@ namespace ProjectVL.Systems
     }
 
     [Serializable]
+    public sealed class TelemetryWaveRewardRecord
+    {
+        public string id;
+        public string stat;
+        public float add;
+    }
+
+    [Serializable]
     public sealed class TelemetryEventRecord
     {
         public string type;
         public float at;
         public int wave;
         public int entityId;
+        public int enemyId;
+        public int dropId;
+        public int offerId;
+        public int encounterId;
         public float value;
         public string detail;
         public float x;
@@ -66,6 +136,55 @@ namespace ProjectVL.Systems
         public float activeRegularSeconds;
         public int ordinaryDropsShown;
         public int eligibleKills;
+        public string cardType;
+        public string rewardCardType;
+        public int rewardCardStar;
+        public int wildcardStar;
+        public int wildcardCount;
+        public bool guaranteed;
+        public int memberCount;
+        public float decisionSeconds;
+        public float clearSeconds;
+        public float hpAtAccept;
+        public float hpAtComplete;
+        public string lane;
+        public bool laneMatch;
+        public float difficultyHpMultiplier;
+        public float difficultyDamageMultiplier;
+        public int star;
+        public bool secure;
+        public string rewardKind;
+        public string typePolicy;
+        public string firstOperation;
+        public float firstOperationSeconds;
+        public bool reached5BeforeFinalBoss;
+        public bool reached6BeforeFinalBoss;
+        public float maturity;
+        public int highestStar;
+        public int equippedCount;
+        public string decisionKind;
+        public string choice;
+        public bool automatic;
+        public TelemetryWaveRewardRecord[] waveRewards;
+        public string waveRewardStat;
+        public float waveRewardAdd;
+        public string godId;
+        public string focusGod;
+        public string godRole;
+        public string[] candidates;
+        public string[] cardTypes;
+        public string relicId;
+        public int relicIndex;
+        public string rarity;
+        public int checkpointStar;
+        public string optionId;
+        public int provisionalCardId;
+        public string recipeId;
+        public string[] recipeIds;
+        public int outputStar;
+        public string affixStat;
+        public float affixValue;
+        public float consumableDuration;
     }
 
     [Serializable]
@@ -110,6 +229,8 @@ namespace ProjectVL.Systems
         private readonly HashSet<int> _offerIds = new HashSet<int>();
         private readonly HashSet<int> _encounterIds = new HashSet<int>();
         private readonly HashSet<int> _dangerEnemyIds = new HashSet<int>();
+        private readonly Dictionary<int, TelemetryEventRecord> _dangerEntries =
+            new Dictionary<int, TelemetryEventRecord>();
         private readonly CombatConfig _combat;
         private readonly GameState _state;
         private readonly DifficultySystem _difficultySystem;
@@ -135,7 +256,10 @@ namespace ProjectVL.Systems
             _session.events.FindAll(item =>
                 item.at >= _currentTime - 10f
                 && (item.type == "dropLanded"
-                    || item.type == "bountyOffer")).Count;
+                    || item.type == "perkPopup"
+                    || item.type == "mergeOpportunity"
+                    || item.type == "decision_offered"
+                    || item.type == "god_offer")).Count;
 
         public DeveloperTelemetrySystem(
             GameState state,
@@ -196,6 +320,7 @@ namespace ProjectVL.Systems
                 evolutionText = evolutionText,
                 waveRewards = waveRewards
             };
+            _state.TelemetryEvent += RecordCoreEvent;
             RefreshMetadata();
         }
 
@@ -210,6 +335,7 @@ namespace ProjectVL.Systems
             if (state.Wave != _lastWave)
             {
                 _dangerEnemyIds.Clear();
+                _dangerEntries.Clear();
                 _dangerEntriesThisWave = 0;
                 AddEvent(state, "waveStart", detail: state.WavePhase.ToString());
                 _lastWave = state.Wave;
@@ -217,13 +343,6 @@ namespace ProjectVL.Systems
 
             if (state.WavePhase != _lastWavePhase)
             {
-                AddEvent(state, "wavePhase", detail: state.WavePhase.ToString());
-                if (state.WavePhase == WavePhase.BossReward
-                    || state.WavePhase == WavePhase.Intermission)
-                {
-                    AddEvent(state, "waveCleared");
-                }
-
                 _lastWavePhase = state.WavePhase;
             }
 
@@ -257,13 +376,26 @@ namespace ProjectVL.Systems
                 {
                     _dangerEnemyIds.Add(enemy.Id);
                     _dangerEntriesThisWave++;
-                    AddEvent(
+                    _dangerEntries[enemy.Id] = AddEvent(
                         state,
                         "dangerEnter",
                         enemy.Id,
                         enemy.Kind.ToString(),
                         enemy.Position.X,
                         enemy.Position.Y);
+                }
+            }
+
+            foreach (KeyValuePair<int, TelemetryEventRecord> entry
+                in _dangerEntries)
+            {
+                if (entry.Value.visibleSeconds <= 0f
+                    && !state.Enemies.Exists(
+                        enemy => enemy.Id == entry.Key))
+                {
+                    entry.Value.visibleSeconds = Math.Max(
+                        0f,
+                        state.Time - entry.Value.at);
                 }
             }
 
@@ -468,7 +600,7 @@ namespace ProjectVL.Systems
             return "unknown";
         }
 
-        private void AddEvent(
+        private TelemetryEventRecord AddEvent(
             GameState state,
             string type,
             int entityId = 0,
@@ -477,7 +609,7 @@ namespace ProjectVL.Systems
             float y = 0f,
             float value = 0f)
         {
-            _session.events.Add(new TelemetryEventRecord
+            var item = new TelemetryEventRecord
             {
                 type = type,
                 at = state.Time,
@@ -487,8 +619,34 @@ namespace ProjectVL.Systems
                 detail = detail,
                 x = x,
                 y = y
-            });
+            };
+            _session.events.Add(item);
             _lastEventAt = state.Time;
+            return item;
+        }
+
+        private void RecordCoreEvent(TelemetryEventRecord item)
+        {
+            if (item == null || string.IsNullOrEmpty(item.type))
+                return;
+            if (!TelemetryEventContract.Contains(item.type))
+                throw new InvalidOperationException(
+                    $"Unsupported telemetry event type: {item.type}");
+
+            _session.events.Add(item);
+            _lastEventAt = item.at;
+            if (item.type == "waveStart")
+                _lastWave = item.wave;
+            if (item.type == "kill")
+                _lastKills = Math.Max(_lastKills, _state.Kills);
+            if (item.enemyId > 0)
+                _enemyIds.Add(item.enemyId);
+            if (item.dropId > 0)
+                _dropIds.Add(item.dropId);
+            if (item.offerId > 0)
+                _offerIds.Add(item.offerId);
+            if (item.encounterId > 0)
+                _encounterIds.Add(item.encounterId);
         }
 
         private static float Percentile(List<int> values, float ratio)

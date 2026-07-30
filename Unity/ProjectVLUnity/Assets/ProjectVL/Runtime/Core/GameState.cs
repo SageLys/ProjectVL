@@ -7,6 +7,7 @@ namespace ProjectVL.Core
 {
     public sealed class GameState
     {
+        public event Action<TelemetryEventRecord> TelemetryEvent;
         public GameMode Mode { get; private set; }
         public bool Paused { get; private set; }
         public bool Invincible { get; private set; }
@@ -394,6 +395,16 @@ namespace ProjectVL.Core
         internal int TakeNextEnemyId()
         {
             return _nextEnemyId++;
+        }
+
+        internal void EmitTelemetry(TelemetryEventRecord item)
+        {
+            if (item == null || string.IsNullOrEmpty(item.type))
+                return;
+
+            item.at = Time;
+            item.wave = Wave;
+            TelemetryEvent?.Invoke(item);
         }
 
         internal int TakeNextBulletId()

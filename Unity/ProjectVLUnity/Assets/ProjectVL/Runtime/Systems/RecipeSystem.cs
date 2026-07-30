@@ -8,6 +8,8 @@ namespace ProjectVL.Systems
     {
         private readonly EvolutionRecipesConfig _config;
         private readonly CardAffixSystem _affixes;
+        private readonly HashSet<string> _announced =
+            new HashSet<string>();
 
         public RecipeSystem(
             EvolutionRecipesConfig config,
@@ -34,6 +36,16 @@ namespace ProjectVL.Systems
                         out CardLocation second)
                     && OutputHandSlot(state, first, second) >= 0)
                 {
+                    string key = state.Wave + ":" + recipe.id;
+                    if (_announced.Add(key))
+                    {
+                        state.EmitTelemetry(new TelemetryEventRecord
+                        {
+                            type = "recipe_available",
+                            recipeId = recipe.id,
+                            recipeIds = new[] { recipe.id }
+                        });
+                    }
                     return recipe.id;
                 }
             }
@@ -87,6 +99,13 @@ namespace ProjectVL.Systems
             state.EquipmentEffectWave = 0;
             CardAffixSystem.ReconcileMaxHp(state);
             state.CompletedRecipes.Add(recipe.id);
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "recipe_completed",
+                recipeId = recipe.id,
+                cardType = recipe.outputCardId,
+                outputStar = recipe.outputStar
+            });
             return RecipeCraftResult.Crafted;
         }
 

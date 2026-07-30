@@ -162,7 +162,11 @@ namespace ProjectVL.Systems
             Float2 position,
             string cardType,
             int star,
-            float lifetime)
+            float lifetime,
+            string source = "bonus",
+            bool secure = false,
+            int? bountyEncounterId = null,
+            int? validationRewardWave = null)
         {
             if (state == null
                 || string.IsNullOrEmpty(cardType)
@@ -176,9 +180,14 @@ namespace ProjectVL.Systems
                 position,
                 cardType,
                 Math.Max(1, star),
-                Math.Max(0.1f, lifetime));
+                Math.Max(0.1f, lifetime),
+                source,
+                secure,
+                bountyEncounterId,
+                validationRewardWave);
             state.GroundDrops.Add(drop);
             _cardPool?.RecordDropShown(state, cardType, false);
+            EmitDropLanded(state, drop);
             return drop;
         }
 
@@ -192,6 +201,20 @@ namespace ProjectVL.Systems
                 if (drop.LifeRemaining <= 0f)
                 {
                     state.GroundDrops.RemoveAt(index);
+                    state.EmitTelemetry(new TelemetryEventRecord
+                    {
+                        type = "dropExpired",
+                        dropId = drop.Id,
+                        entityId = drop.Id,
+                        cardType = drop.CardType,
+                        source = drop.Source,
+                        stage = StageForWave(state.Wave).ToString(),
+                        star = drop.Star,
+                        secure = drop.Secure,
+                        x = drop.Position.X,
+                        y = drop.Position.Y,
+                        visibleSeconds = drop.MaxLife
+                    });
                     if (state.ExpiryConvertRatio > 0f
                         && _random.NextFloat()
                             < state.ExpiryConvertRatio)
@@ -278,10 +301,60 @@ namespace ProjectVL.Systems
                 nearest.Star);
             if (!granted)
             {
+                state.EmitTelemetry(new TelemetryEventRecord
+                {
+                    type = "dropRejectedFullHand",
+                    dropId = nearest.Id,
+                    entityId = nearest.Id,
+                    cardType = nearest.CardType,
+                    source = nearest.Source,
+                    stage = StageForWave(state.Wave).ToString(),
+                    star = nearest.Star,
+                    secure = nearest.Secure
+                });
                 return DropCollectResult.HandFull;
             }
 
             state.GroundDrops.Remove(nearest);
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "pickup",
+                dropId = nearest.Id,
+                entityId = nearest.Id,
+                cardType = nearest.CardType,
+                source = nearest.Source,
+                stage = StageForWave(state.Wave).ToString(),
+                star = nearest.Star,
+                secure = nearest.Secure,
+                x = nearest.Position.X,
+                y = nearest.Position.Y
+            });
+            if (nearest.BountyEncounterId.HasValue)
+            {
+                state.EmitTelemetry(new TelemetryEventRecord
+                {
+                    type = "bountyRewardPickup",
+                    dropId = nearest.Id,
+                    encounterId = nearest.BountyEncounterId.Value,
+                    rewardCardType = nearest.CardType,
+                    rewardCardStar = nearest.Star
+                });
+            }
+            if (nearest.ValidationRewardWave.HasValue)
+            {
+                state.EmitTelemetry(new TelemetryEventRecord
+                {
+                    type = "validationRewardPickup",
+                    dropId = nearest.Id,
+                    cardType = nearest.CardType,
+                    rewardKind = "card",
+                    source = nearest.Source,
+                    stage = StageForWave(
+                        nearest.ValidationRewardWave.Value).ToString(),
+                    star = nearest.Star,
+                    secure = true
+                });
+            }
             CardCombatProfile profile = CardEffectResolver.Resolve(state);
             state.RestoreHp(profile.PickupRestore);
             return DropCollectResult.Collected;
@@ -301,10 +374,86 @@ namespace ProjectVL.Systems
                 position,
                 cardType,
                 star,
-                lifetime);
+                lifetime,
+                ordinary ? "normalKill" : "bonus");
             state.GroundDrops.Add(drop);
             _cardPool?.RecordDropShown(state, cardType, ordinary);
+            EmitDropLanded(state, drop);
             return drop;
+        }
+
+        private void EmitDropLanded(
+            GameState state,
+            GroundDropState drop)
+        {
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "dropLanded",
+                dropId = drop.Id,
+                entityId = drop.Id,
+                cardType = drop.CardType,
+                source = drop.Source,
+                stage = StageForWave(state.Wave).ToString(),
+                star = drop.Star,
+                secure = drop.Secure,
+                x = drop.Position.X,
+                y = drop.Position.Y
+            });
+            string god = FindGodForCard(state, drop.CardType);
+            if (!string.IsNullOrEmpty(god))
+            {
+                state.EmitTelemetry(new TelemetryEventRecord
+                {
+                    type = "card_shown_by_god",
+                    cardType = drop.CardType,
+                    godId = god,
+                    source = drop.Source,
+                    stage = StageForWave(state.Wave).ToString()
+                });
+            }
+            if (drop.BountyEncounterId.HasValue)
+            {
+                state.EmitTelemetry(new TelemetryEventRecord
+                {
+                    type = "bountyRewardLanded",
+                    dropId = drop.Id,
+                    encounterId = drop.BountyEncounterId.Value,
+                    rewardCardType = drop.CardType,
+                    rewardCardStar = drop.Star,
+                    x = drop.Position.X,
+                    y = drop.Position.Y
+                });
+            }
+            if (drop.ValidationRewardWave.HasValue)
+            {
+                state.EmitTelemetry(new TelemetryEventRecord
+                {
+                    type = "validationRewardLanded",
+                    dropId = drop.Id,
+                    cardType = drop.CardType,
+                    rewardKind = "card",
+                    source = drop.Source,
+                    stage = StageForWave(
+                        drop.ValidationRewardWave.Value).ToString(),
+                    star = drop.Star,
+                    secure = true,
+                    x = drop.Position.X,
+                    y = drop.Position.Y
+                });
+            }
+        }
+
+        private static string FindGodForCard(
+            GameState state,
+            string cardType)
+        {
+            foreach (var entry in state.RosterByGod)
+            {
+                if (entry.Value.Contains(cardType))
+                    return entry.Key;
+            }
+
+            return null;
         }
 
         private string SelectActiveType(GameState state)

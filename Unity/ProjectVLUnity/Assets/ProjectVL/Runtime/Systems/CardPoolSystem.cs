@@ -160,6 +160,12 @@ namespace ProjectVL.Systems
                 int.MaxValue);
             state.ActiveCardPoolWave = wave;
             state.NormalDropRoleBag.Clear();
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "active_pool_created",
+                focusGod = state.FocusGod,
+                cardTypes = state.ActiveCardPool.ToArray()
+            });
             return state.ActiveCardPool;
         }
 

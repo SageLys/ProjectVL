@@ -65,6 +65,7 @@ namespace ProjectVL.Systems
                 knockbackResist: definition.knockbackResist,
                 ccResist: definition.ccResist);
             state.Enemies.Add(enemy);
+            EmitSpawn(state, enemy, multipliers);
             return enemy;
         }
 
@@ -95,6 +96,7 @@ namespace ProjectVL.Systems
                 ccResist: definition.ccResist);
             boss.ContactTickRemaining = _enemies.bossBehavior.contactWarmup;
             state.Enemies.Add(boss);
+            EmitSpawn(state, boss, multipliers);
             return boss;
         }
 
@@ -133,6 +135,7 @@ namespace ProjectVL.Systems
                 validation.knockbackResistOverride,
                 validation.ccResistOverride);
             state.Enemies.Add(enemy);
+            EmitSpawn(state, enemy, multipliers);
             return enemy;
         }
 
@@ -174,6 +177,7 @@ namespace ProjectVL.Systems
             enemy.BountyEncounterId = encounter.Id;
             enemy.BountyRewardType = encounter.RewardCardType;
             state.Enemies.Add(enemy);
+            EmitSpawn(state, enemy, multipliers);
             return enemy;
         }
 
@@ -234,6 +238,25 @@ namespace ProjectVL.Systems
                 default:
                     return new Float2(-_waves.spawnMargin, vertical);
             }
+        }
+
+        private static void EmitSpawn(
+            GameState state,
+            EnemyState enemy,
+            DifficultyMultipliers multipliers)
+        {
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "spawn",
+                enemyId = enemy.Id,
+                entityId = enemy.Id,
+                detail = enemy.Kind.ToString(),
+                source = enemy.SpawnKind.ToString(),
+                x = enemy.Position.X,
+                y = enemy.Position.Y,
+                difficultyHpMultiplier = multipliers.Hp,
+                difficultyDamageMultiplier = multipliers.Damage
+            });
         }
     }
 }

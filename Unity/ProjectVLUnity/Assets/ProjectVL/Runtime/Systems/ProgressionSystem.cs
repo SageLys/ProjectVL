@@ -52,6 +52,28 @@ namespace ProjectVL.Systems
                 {
                     state.EnqueueLevelUpgrade(
                         new LevelUpgradeChoice(state.Level, options));
+                    var candidates = new string[options.Length];
+                    for (int index = 0; index < options.Length; index++)
+                        candidates[index] = options[index].Id;
+                    state.EmitTelemetry(new TelemetryEventRecord
+                    {
+                        type = "relic_offered",
+                        relicIndex = relicIndex,
+                        candidates = candidates,
+                        focusGod = state.FocusGod
+                    });
+                    state.EmitTelemetry(new TelemetryEventRecord
+                    {
+                        type = "perkPopup",
+                        relicIndex = relicIndex,
+                        candidates = candidates
+                    });
+                    state.EmitTelemetry(new TelemetryEventRecord
+                    {
+                        type = "decision_offered",
+                        decisionKind = "relic",
+                        candidates = candidates
+                    });
                 }
             }
         }
@@ -75,6 +97,22 @@ namespace ProjectVL.Systems
             }
 
             state.RecordRelic(relic);
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "relic_selected",
+                relicId = relic.id,
+                relicIndex = state.Level - 2,
+                rarity = relic.rarity,
+                godId = relic.god,
+                choice = relic.id
+            });
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "decision_resolved",
+                decisionKind = "relic",
+                choice = relic.id,
+                relicId = relic.id
+            });
             state.CompleteLevelUpgrade();
             return true;
         }

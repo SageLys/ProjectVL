@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using ProjectVL.Config;
 using ProjectVL.Core;
 
@@ -79,6 +80,16 @@ namespace ProjectVL.Systems
             _affixes?.Attach(state, card);
             state.Hand[slot] = card;
             state.RecordCardCollected(type, card.Star);
+            EmitCardCollected(state, card);
+            if (HasMergePair(state, card.Type, card.Star))
+            {
+                state.EmitTelemetry(new TelemetryEventRecord
+                {
+                    type = "mergeOpportunity",
+                    cardType = card.Type,
+                    star = card.Star
+                });
+            }
             QueueEvolutionChoice(state, card);
             AutoMergeHand(state);
             return true;
@@ -232,6 +243,23 @@ namespace ProjectVL.Systems
                 (left, right) =>
                     ParseCheckpoint(left).CompareTo(ParseCheckpoint(right)));
             card.Provisional = false;
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "evolution_branch_selected",
+                cardType = choice.CardType,
+                checkpointStar = choice.CheckpointStar,
+                optionId = choice.Options[optionIndex],
+                provisionalCardId = choice.CardId,
+                choice = choice.Options[optionIndex]
+            });
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "decision_resolved",
+                decisionKind = "evolution",
+                choice = choice.Options[optionIndex],
+                cardType = choice.CardType,
+                checkpointStar = choice.CheckpointStar
+            });
             state.PendingEvolution = null;
             state.RefreshDecisionLock();
             state.EquipmentEffectWave = 0;
@@ -443,7 +471,58 @@ namespace ProjectVL.Systems
                 checkpoint,
                 options);
             state.SetDecisionLocked(true);
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "evolution_branch_offered",
+                cardType = card.Type,
+                checkpointStar = checkpoint,
+                candidates = options,
+                provisionalCardId = card.Id
+            });
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "decision_offered",
+                decisionKind = "evolution",
+                cardType = card.Type,
+                checkpointStar = checkpoint,
+                candidates = options
+            });
             return true;
+        }
+
+        private static void EmitCardCollected(
+            GameState state,
+            CardState card)
+        {
+            foreach (KeyValuePair<string, List<string>> entry
+                in state.RosterByGod)
+            {
+                if (!entry.Value.Contains(card.Type))
+                    continue;
+                state.EmitTelemetry(new TelemetryEventRecord
+                {
+                    type = "card_collected_by_god",
+                    cardType = card.Type,
+                    star = card.Star,
+                    godId = entry.Key
+                });
+                return;
+            }
+        }
+
+        private static bool HasMergePair(
+            GameState state,
+            string cardType,
+            int star)
+        {
+            int count = 0;
+            foreach (CardState card in state.Hand)
+            {
+                if (card?.Type == cardType && card.Star == star)
+                    count++;
+            }
+
+            return count >= 2;
         }
 
         private static bool MissingCheckpoint(CardState card, int checkpoint)

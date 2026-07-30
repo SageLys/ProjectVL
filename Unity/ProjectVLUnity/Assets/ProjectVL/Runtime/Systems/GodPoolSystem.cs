@@ -106,6 +106,22 @@ namespace ProjectVL.Systems
             _cardPool.UpdateRunRoster(
                 state,
                 state.SubGods.Count >= 2);
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "god_selected",
+                godId = godId,
+                focusGod = state.FocusGod,
+                godRole = choice.Role.ToString().ToLowerInvariant(),
+                choice = godId
+            });
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "decision_resolved",
+                decisionKind = "god",
+                choice = godId,
+                godId = godId,
+                godRole = choice.Role.ToString().ToLowerInvariant()
+            });
             state.CompleteGodChoice();
             return true;
         }
@@ -129,6 +145,13 @@ namespace ProjectVL.Systems
             Shuffle(variables);
             AddUnique(roster, variables, target);
             state.RosterByGod[god.id] = roster;
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "run_roster_created",
+                godId = god.id,
+                godRole = main ? "main" : "sub",
+                cardTypes = roster.ToArray()
+            });
         }
 
         private void Shuffle(List<string> values)
@@ -178,6 +201,23 @@ namespace ProjectVL.Systems
             }
 
             state.SetGodChoice(new GodChoice(role, afterWave, options));
+            var ids = new string[options.Length];
+            for (int index = 0; index < options.Length; index++)
+                ids[index] = options[index].id;
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "god_offer",
+                godRole = role.ToString().ToLowerInvariant(),
+                candidates = ids,
+                focusGod = state.FocusGod
+            });
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "decision_offered",
+                decisionKind = "god",
+                godRole = role.ToString().ToLowerInvariant(),
+                candidates = ids
+            });
             return true;
         }
 

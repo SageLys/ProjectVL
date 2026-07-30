@@ -199,6 +199,19 @@ namespace ProjectVL.Systems
             state.TotalBountyOffers++;
             state.GuaranteedBountyThisWave |= guaranteed;
             state.BountyCooldownRemaining = _config.offer.cooldownSeconds;
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "bountyOffer",
+                offerId = offer.Id,
+                entityId = offer.Id,
+                rewardCardType = offer.RewardCardType,
+                rewardCardStar = offer.RewardCardStar,
+                wildcardStar = offer.WildcardStar,
+                wildcardCount = offer.WildcardCount,
+                guaranteed = offer.Guaranteed,
+                x = offer.Position.X,
+                y = offer.Position.Y
+            });
             return offer;
         }
 
@@ -220,14 +233,31 @@ namespace ProjectVL.Systems
                         + (int)Math.Floor(
                             (state.Wave - 1)
                             * _config.encounter.enemyCountPerWave));
-                state.BountyEncounters.Add(
-                    new BountyEncounterState(
+                var encounter = new BountyEncounterState(
                         state.TakeNextBountyEncounterId(),
                         offer,
                         memberCount,
-                        state.Time));
+                        state.Time,
+                        state.Hp);
+                state.BountyEncounters.Add(encounter);
                 state.BountiesAcceptedThisWave++;
                 state.TotalBountiesAccepted++;
+                state.EmitTelemetry(new TelemetryEventRecord
+                {
+                    type = "bountyAccepted",
+                    offerId = offer.Id,
+                    encounterId = encounter.Id,
+                    rewardCardType = encounter.RewardCardType,
+                    rewardCardStar = encounter.RewardCardStar,
+                    wildcardStar = encounter.WildcardStar,
+                    wildcardCount = encounter.WildcardCount,
+                    guaranteed = encounter.Guaranteed,
+                    memberCount = memberCount,
+                    decisionSeconds = Math.Max(
+                        0f,
+                        state.Time - offer.CreatedAt),
+                    hpAtAccept = state.Hp
+                });
                 return true;
             }
 
@@ -262,6 +292,21 @@ namespace ProjectVL.Systems
             encounter.Status = BountyEncounterStatus.Completed;
             state.BountiesCompletedThisWave++;
             state.TotalBountiesCompleted++;
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "bountyCompleted",
+                encounterId = encounter.Id,
+                rewardCardType = encounter.RewardCardType,
+                rewardCardStar = encounter.RewardCardStar,
+                wildcardStar = encounter.WildcardStar,
+                wildcardCount = encounter.WildcardCount,
+                guaranteed = encounter.Guaranteed,
+                clearSeconds = Math.Max(
+                    0f,
+                    state.Time - encounter.AcceptedAt),
+                hpAtAccept = encounter.HpAtAccept,
+                hpAtComplete = state.Hp
+            });
             SpawnReward(state, encounter);
             return true;
         }
@@ -287,6 +332,17 @@ namespace ProjectVL.Systems
             encounter.Status = BountyEncounterStatus.Failed;
             encounter.PendingSpawnCount = 0;
             encounter.MemberIds.Clear();
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "bountyFailed",
+                encounterId = encounter.Id,
+                rewardCardType = encounter.RewardCardType,
+                rewardCardStar = encounter.RewardCardStar,
+                wildcardStar = encounter.WildcardStar,
+                wildcardCount = encounter.WildcardCount,
+                guaranteed = encounter.Guaranteed,
+                hpAtAccept = encounter.HpAtAccept
+            });
             foreach (EnemyState member in state.Enemies)
             {
                 if (member.BountyEncounterId != encounterId)
@@ -363,6 +419,14 @@ namespace ProjectVL.Systems
                 if (offer.Remaining <= 0f)
                 {
                     state.BountyOffers.RemoveAt(index);
+                    state.EmitTelemetry(new TelemetryEventRecord
+                    {
+                        type = "bountyOfferExpired",
+                        offerId = offer.Id,
+                        entityId = offer.Id,
+                        rewardCardType = offer.RewardCardType,
+                        guaranteed = offer.Guaranteed
+                    });
                 }
             }
         }
@@ -392,6 +456,15 @@ namespace ProjectVL.Systems
                     encounter.MemberIds.Add(member.Id);
                     encounter.PendingSpawnCount--;
                     encounter.SpawnTimer += interval;
+                    state.EmitTelemetry(new TelemetryEventRecord
+                    {
+                        type = "bountyMemberSpawned",
+                        encounterId = encounter.Id,
+                        enemyId = member.Id,
+                        entityId = member.Id,
+                        x = member.Position.X,
+                        y = member.Position.Y
+                    });
                 }
 
                 if (encounter.PendingSpawnCount == 0)
@@ -414,7 +487,10 @@ namespace ProjectVL.Systems
                     encounter.LastKillPosition + new Float2(offset, -28f),
                     encounter.RewardCardType,
                     encounter.RewardCardStar,
-                    _config.reward.dropLifetimeSeconds);
+                    _config.reward.dropLifetimeSeconds,
+                    "bounty",
+                    true,
+                    encounter.Id);
             }
 
             if (encounter.WildcardCount > 0)
@@ -425,6 +501,24 @@ namespace ProjectVL.Systems
                         encounter.WildcardStar,
                         encounter.WildcardCount,
                         "bounty"));
+                state.EmitTelemetry(new TelemetryEventRecord
+                {
+                    type = "bountyRewardLanded",
+                    encounterId = encounter.Id,
+                    rewardKind = "wildcard",
+                    wildcardStar = encounter.WildcardStar,
+                    wildcardCount = encounter.WildcardCount,
+                    secure = true
+                });
+                state.EmitTelemetry(new TelemetryEventRecord
+                {
+                    type = "bountyRewardPickup",
+                    encounterId = encounter.Id,
+                    rewardKind = "wildcard",
+                    wildcardStar = encounter.WildcardStar,
+                    wildcardCount = encounter.WildcardCount,
+                    secure = true
+                });
             }
         }
 

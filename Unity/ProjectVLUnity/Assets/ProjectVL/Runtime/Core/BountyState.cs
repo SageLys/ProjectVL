@@ -77,13 +77,15 @@ namespace ProjectVL.Core
         public float SpawnTimer { get; set; }
         public bool Guaranteed { get; }
         public float AcceptedAt { get; }
+        public float HpAtAccept { get; }
         public Float2 LastKillPosition { get; set; }
 
         public BountyEncounterState(
             int id,
             BountyOfferState offer,
             int pendingSpawnCount,
-            float acceptedAt)
+            float acceptedAt,
+            float hpAtAccept = 0f)
         {
             Id = id;
             OfferId = offer.Id;
@@ -97,6 +99,7 @@ namespace ProjectVL.Core
             PendingSpawnCount = pendingSpawnCount;
             Guaranteed = offer.Guaranteed;
             AcceptedAt = acceptedAt;
+            HpAtAccept = hpAtAccept;
             LastKillPosition = offer.Position;
         }
     }

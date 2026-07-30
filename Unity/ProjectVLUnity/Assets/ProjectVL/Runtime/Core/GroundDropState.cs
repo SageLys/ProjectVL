@@ -8,13 +8,21 @@ namespace ProjectVL.Core
         public int Star { get; }
         public float LifeRemaining { get; set; }
         public float MaxLife { get; }
+        public string Source { get; }
+        public bool Secure { get; }
+        public int? BountyEncounterId { get; }
+        public int? ValidationRewardWave { get; }
 
         public GroundDropState(
             int id,
             Float2 position,
             string cardType,
             int star,
-            float lifetime)
+            float lifetime,
+            string source = "bonus",
+            bool secure = false,
+            int? bountyEncounterId = null,
+            int? validationRewardWave = null)
         {
             Id = id;
             Position = position;
@@ -22,6 +30,10 @@ namespace ProjectVL.Core
             Star = star;
             LifeRemaining = lifetime;
             MaxLife = lifetime;
+            Source = source ?? "bonus";
+            Secure = secure;
+            BountyEncounterId = bountyEncounterId;
+            ValidationRewardWave = validationRewardWave;
         }
     }
 }

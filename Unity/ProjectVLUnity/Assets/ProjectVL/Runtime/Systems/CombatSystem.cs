@@ -2271,9 +2271,62 @@ namespace ProjectVL.Systems
 
             if (state.Enemies.Remove(enemy))
             {
-                _bounties?.NotifyKilled(state, enemy);
                 state.Kills++;
+                state.EmitTelemetry(new TelemetryEventRecord
+                {
+                    type = "kill",
+                    enemyId = enemy.Id,
+                    entityId = enemy.Id,
+                    detail = enemy.Kind.ToString(),
+                    source = enemy.SpawnKind.ToString(),
+                    x = enemy.Position.X,
+                    y = enemy.Position.Y,
+                    distance = Float2.Distance(
+                        enemy.Position,
+                        new Float2(_combat.turret.x, _combat.turret.y)),
+                    range = AttackRange(state)
+                });
+                _bounties?.NotifyKilled(state, enemy);
                 _drops?.TrySpawnOnKill(state, enemy);
+                if (enemy.Reward != null)
+                {
+                    string rewardKind =
+                        enemy.Reward.Kind == RewardKind.Card
+                            ? "card"
+                            : "wildcard";
+                    state.EmitTelemetry(new TelemetryEventRecord
+                    {
+                        type = "validationRewardLanded",
+                        rewardKind = rewardKind,
+                        cardType = rewardKind == "card"
+                            ? enemy.BountyRewardType
+                            : "wildcard",
+                        star = enemy.Reward.Star,
+                        wildcardCount = rewardKind == "wildcard"
+                            ? enemy.Reward.Count
+                            : 0,
+                        typePolicy = enemy.Reward.TypePolicy,
+                        source = "validation",
+                        stage = RunStage.Validation.ToString(),
+                        secure = true
+                    });
+                    state.EmitTelemetry(new TelemetryEventRecord
+                    {
+                        type = "validationRewardPickup",
+                        rewardKind = rewardKind,
+                        cardType = rewardKind == "card"
+                            ? enemy.BountyRewardType
+                            : "wildcard",
+                        star = enemy.Reward.Star,
+                        wildcardCount = rewardKind == "wildcard"
+                            ? enemy.Reward.Count
+                            : 0,
+                        typePolicy = enemy.Reward.TypePolicy,
+                        source = "validation",
+                        stage = RunStage.Validation.ToString(),
+                        secure = true
+                    });
+                }
                 state.GrantReward(enemy.Reward);
                 float experience = enemy.XpReward
                     * profile.XpMultiplier

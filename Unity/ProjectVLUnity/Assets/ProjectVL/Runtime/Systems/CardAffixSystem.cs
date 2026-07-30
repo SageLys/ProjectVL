@@ -67,6 +67,17 @@ namespace ProjectVL.Systems
             }
 
             state.CardAffixRolls[cardType] = rolls;
+            foreach (CardAffixRoll roll in rolls)
+            {
+                state.EmitTelemetry(new TelemetryEventRecord
+                {
+                    type = "affix_rolled",
+                    cardType = cardType,
+                    affixStat = roll.Stat,
+                    affixValue = roll.Value,
+                    consumableDuration = roll.ConsumableDuration
+                });
+            }
             return rolls;
         }
 
