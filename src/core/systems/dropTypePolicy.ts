@@ -158,9 +158,25 @@ function buildCandidatesByCommitment(state: GameState): Array<{ type: CardType; 
     .sort((left, right) => right.score - left.score);
 }
 
+function trackedRecipeMaterials(state: GameState): CardType[] {
+  if (state.wave < cfg.economy.evolution.assistWindowWaves[0]
+    || state.wave > cfg.economy.evolution.assistWindowWaves[1]
+    || state.recipes.assistClosed) return [];
+  const recipe = cfg.evolutionRecipes.recipes.find(item => item.id === state.recipes.pinnedRecipeId);
+  return recipe ? [recipe.ingredientVariable.cardId, recipe.ingredientAnchor.cardId] : [];
+}
+
 function buildCandidatesForBuildRole(state: GameState): Array<{ type: CardType; score: number }> {
+  const tracked = new Set(trackedRecipeMaterials(state));
   return getActivePool(state)
-    .map(type => ({ type, score: calculateCommitmentScore(state, type) + calculateAffinityScore(state, type) }))
+    .map(type => {
+      const commitment = calculateCommitmentScore(state, type);
+      const baseScore = commitment + calculateAffinityScore(state, type);
+      return {
+        type,
+        score: tracked.has(type) ? Math.max(0, 16 - commitment) : baseScore,
+      };
+    })
     .sort((left, right) => right.score - left.score);
 }
 
@@ -205,6 +221,15 @@ function selectBuildTypeBase(state: GameState, rng: Rng, excludedType?: CardType
 
   const policy = cfg.economy.normalDropTypePolicy.build;
   let candidates = scored.slice(0, Math.max(1, Math.round(policy.topK)));
+  const tracked = trackedRecipeMaterials(state)
+    .map(type => scored.find(entry => entry.type === type))
+    .filter(entry => entry !== undefined)
+    .sort((left, right) => right.score - left.score);
+  for (const entry of tracked) {
+    if (candidates.some(candidate => candidate.type === entry.type)) continue;
+    if (candidates.length >= Math.max(1, Math.round(policy.topK))) candidates.pop();
+    candidates.push(entry);
+  }
   const allowedTypes = new Set(withoutTypeIfPossible(candidates.map(entry => entry.type), excludedType));
   candidates = candidates.filter(entry => allowedTypes.has(entry.type));
   return weightedBuildChoice(state, candidates, rng);

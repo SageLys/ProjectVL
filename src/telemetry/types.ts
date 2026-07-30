@@ -44,6 +44,8 @@ export type TelemetryEventType =
   | 'evolution_branch_selected'
   | 'recipe_available'
   | 'recipe_completed'
+  | 'validation_reward_granted'
+  | 'validation_reward_settle_started'
   | 'affix_rolled';
 
 export interface TelemetryEvent {
@@ -110,6 +112,13 @@ export interface TelemetryEvent {
   recipeId?: string;
   recipeIds?: string[];
   outputStar?: number;
+  outputCardId?: number;
+  targetSlotKind?: 'cards' | 'equipment';
+  targetSlotIndex?: number;
+  materialCardIds?: [number, number];
+  delivery?: 'hand' | 'drop';
+  assistBudgetUsed?: number;
+  settleSeconds?: number;
   affixStat?: string;
   affixValue?: number;
   consumableDuration?: number;

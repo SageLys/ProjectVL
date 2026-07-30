@@ -24,6 +24,7 @@ describe('wave Boss rewards', () => {
     state.godPool.rosterByGod.winter = ['frost', 'impact'];
     state.godPool.rosterByGod.inferno = ['scorch', 'splitBlast'];
     state.godPool.runRoster = ['pierce', 'chainLightning', 'frost', 'impact', 'scorch', 'splitBlast'];
+    state.cards.fill(card('pierce', 1));
     const elite = enemy({
       validationReward: { kind: 'card', star: 4, count: 4, typePolicy: 'focusGod' },
     });
@@ -62,6 +63,10 @@ describe('wave Boss rewards', () => {
   it('finishes the final wave after reward so settlement includes its wildcard value', () => {
     const state = freshState();
     state.wave = cfg.waves.totalWaves; state.spawnLeft = 0;
+    expect(advanceWavePhase(state, config, rng)).toEqual([
+      { type: 'validationRewardSettleStarted', wave: 10, seconds: 12 },
+    ]);
+    state.validationRewardSettleRemaining = 0;
     const spawned = advanceWavePhase(state, config, rng);
     expect(spawned).toEqual([{ type: 'waveBossSpawned', wave: 10 }]);
     const boss = state.enemies[0];

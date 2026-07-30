@@ -147,11 +147,12 @@ function snapshotSlots(slots: GameState['cards']): ReplaySlotSnapshot[] {
 function choiceFor(state: GameState, policy: ReplayDecisionPolicy): string | null {
   const decision = state.decisions.current;
   if (!decision) return null;
-  const options = decision.kind === 'godDraft' || decision.kind === 'godFocus' || decision.kind === 'waveBaseReward'
+  const options = decision.kind === 'godDraft' || decision.kind === 'godFocus'
+    || decision.kind === 'waveBaseReward' || decision.kind === 'recipePin'
     ? decision.candidates
     : decision.kind === 'evolutionBranch' || decision.kind === 'relic'
       ? decision.options
-      : [decision.recipeId];
+      : [];
   if (!options.length) return null;
   return policy === 'lastCandidate' ? options[options.length - 1] : options[0];
 }

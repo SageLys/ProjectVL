@@ -19,6 +19,12 @@ describe('validation fixed encounters', () => {
     expect(state.enemies.map(enemy => enemy.spawnKind)).toEqual(['validationElite']);
     expect(advanceWavePhase(state, runtime, constRng(0.25))).toEqual([]);
     state.enemies.length = 0;
+    expect(advanceWavePhase(state, runtime, constRng(0.25))).toEqual([
+      { type: 'validationRewardSettleStarted', wave: 9, seconds: 12 },
+    ]);
+    expect(state.wavePhase).toBe('validationRewardSettle');
+    expect(state.enemies).toHaveLength(0);
+    state.validationRewardSettleRemaining = 0;
     expect(advanceWavePhase(state, runtime, constRng(0.25))).toContainEqual({ type: 'waveBossSpawned', wave: 9 });
     expect(state.enemies).toHaveLength(1);
     expect(state.enemies[0].spawnKind).toBe('waveBoss');
@@ -70,37 +76,48 @@ describe('validation fixed encounters', () => {
     const runtime = createDefaultConfig();
     const rewardsFor = (wave: 9 | 10) => {
       const state = freshState();
+      const events = [] as ReturnType<typeof killEnemy>;
       jumpToWave(state, runtime, constRng(0.25), wave);
       for (const elite of [...state.enemies]) {
         state.enemies.splice(state.enemies.indexOf(elite), 1);
-        killEnemy(state, runtime, constRng(0.25), elite);
+        events.push(...killEnemy(state, runtime, constRng(0.25), elite));
       }
+      advanceWavePhase(state, runtime, constRng(0.25));
+      state.validationRewardSettleRemaining = 0;
       advanceWavePhase(state, runtime, constRng(0.25));
       const boss = state.enemies.find(enemy => enemy.spawnKind === 'waveBoss')!;
       state.enemies.splice(state.enemies.indexOf(boss), 1);
-      killEnemy(state, runtime, constRng(0.25), boss);
-      return state;
+      events.push(...killEnemy(state, runtime, constRng(0.25), boss));
+      return { state, events };
     };
     const wave9 = rewardsFor(9);
     const wave10 = rewardsFor(10);
-    expect(wave9.groundDrops).toHaveLength(2);
-    expect(wave10.groundDrops).toHaveLength(3);
-    expect(wave9.groundDrops).toEqual([
-      expect.objectContaining({ kind: 'card', star: 4, validationTypePolicy: 'focusGod', source: 'validationElite' }),
+    expect(wave9.state.cards.filter(Boolean)).toEqual([
+      expect.objectContaining({ star: 4 }),
+    ]);
+    expect(wave10.state.cards.filter(Boolean).map(card => card!.star)).toEqual([5, 3]);
+    expect(wave9.state.groundDrops).toEqual([
       expect.objectContaining({ kind: 'wildcard', star: 5, count: 1, source: 'bossKill' }),
     ]);
-    expect(wave10.groundDrops).toEqual([
-      expect.objectContaining({ kind: 'card', star: 5, validationTypePolicy: 'focusGod', source: 'validationElite' }),
-      expect.objectContaining({ kind: 'card', star: 3, validationTypePolicy: 'focusGod', source: 'validationElite' }),
+    expect(wave10.state.groundDrops).toEqual([
       expect.objectContaining({ kind: 'wildcard', star: 5, count: 1, source: 'bossKill' }),
     ]);
-    expect([...wave9.groundDrops, ...wave10.groundDrops].every(drop => drop.secure)).toBe(true);
+    expect([...wave9.state.groundDrops, ...wave10.state.groundDrops].every(drop => drop.secure)).toBe(true);
+    expect(wave9.events).toContainEqual(expect.objectContaining({
+      type: 'validationRewardGranted', star: 4, delivery: 'hand',
+    }));
+    expect(wave10.events.filter(event => event.type === 'validationRewardGranted'))
+      .toEqual(expect.arrayContaining([
+        expect.objectContaining({ star: 5, delivery: 'hand' }),
+        expect.objectContaining({ star: 3, delivery: 'hand' }),
+      ]));
   });
 
   it('keeps secure rewards forever, lets wildcards bypass a full hand, and holds concrete cards until space exists', () => {
     const state = freshState();
     const runtime = createDefaultConfig();
     jumpToWave(state, runtime, constRng(0.25), 9);
+    state.cards.fill(card('pierce', 1));
     const elite = state.enemies.pop()!;
     killEnemy(state, runtime, constRng(0.25), elite);
     const secure = state.groundDrops[0];
@@ -108,6 +125,8 @@ describe('validation fixed encounters', () => {
     tickDrops(state, runtime, constRng(0.25), life + 100);
     expect(secure.life).toBe(life);
     expect(state.expired).toBe(0);
+    advanceWavePhase(state, runtime, constRng(0.25));
+    state.validationRewardSettleRemaining = 0;
     advanceWavePhase(state, runtime, constRng(0.25));
     const boss = state.enemies.pop()!;
     killEnemy(state, runtime, constRng(0.25), boss);

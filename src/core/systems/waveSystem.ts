@@ -6,7 +6,7 @@ import { fireTrigger, reconcileEquipmentPassives } from '../effects/interpreter'
 import { budgetAdmission, budgetWaveQuotaFor } from './budgetRules';
 import { resolveActiveWavePlan } from '../runStage';
 import { clearDecisionQueue } from './decisionQueueSystem';
-import { beginIntermission, endIntermission, tickIntermission } from './intermissionSystem';
+import { beginIntermission, beginValidationRewardSettle, endIntermission, tickIntermission } from './intermissionSystem';
 import { generateActivePool } from './activePoolSystem';
 export { budgetAdmission } from './budgetRules';
 
@@ -35,6 +35,8 @@ export function startNextWave(state: GameState, config: Config, rng: Rng): GameE
   state.spawnTimer = cfg.waves.firstSpawnDelay;
   state.lastSpawnCheckCount = 0;
   state.wavePhase = 'regular';
+  state.validationRewardSettleRemaining = 0;
+  state.validationRewardSettleConfirmed = false;
   state.waveBossId = null;
   state.waveBossSpawnedAt = null;
   state.bountyOffers.length = 0;
@@ -141,11 +143,23 @@ export function advanceWavePhase(state: GameState, _config: Config, rng: Rng): G
     const events: GameEvent[] = state.bountyOffers.map(offer => ({ type: 'bountyOfferExpired' as const, offerId: offer.id }));
     state.bountyOffers.length = 0;
     if (!cfg.waves.bossWaves.includes(state.wave)) return [...events, ...finishWave(state)];
+    if (resolveActiveWavePlan(cfg, state.wave).validation) {
+      return [...events, ...beginValidationRewardSettle(state)];
+    }
     const boss = spawnWaveBoss(state, rng);
     state.wavePhase = 'boss';
     state.waveBossId = boss.id;
     state.waveBossSpawnedAt = state.time;
     return [...events, { type: 'waveBossSpawned', wave: state.wave }];
+  }
+  if (state.wavePhase === 'validationRewardSettle') {
+    if (!state.validationRewardSettleConfirmed && state.validationRewardSettleRemaining > 0) return [];
+    const boss = spawnWaveBoss(state, rng);
+    state.wavePhase = 'boss';
+    state.waveBossId = boss.id;
+    state.waveBossSpawnedAt = state.time;
+    state.validationRewardSettleRemaining = 0;
+    return [{ type: 'waveBossSpawned', wave: state.wave }];
   }
   if (state.wavePhase === 'boss'
     && state.waveBossId !== null
@@ -194,6 +208,8 @@ export function jumpToWave(state: GameState, config: Config, rng: Rng, targetWav
   state.waveRewardsClaimedWave = Math.max(state.waveRewardsClaimedWave, wave - 1);
   state.waveChoiceOfferedWave = Math.max(state.waveChoiceOfferedWave ?? 0, wave - 1);
   state.wavePhase = 'regular';
+  state.validationRewardSettleRemaining = 0;
+  state.validationRewardSettleConfirmed = false;
   state.waveBossId = null;
   state.waveBossSpawnedAt = null;
   state.bossRewardClaimedWave = 0;
