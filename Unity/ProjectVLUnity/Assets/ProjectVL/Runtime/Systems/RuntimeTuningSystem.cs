@@ -11,6 +11,7 @@ namespace ProjectVL.Systems
         private readonly float _baseline;
 
         public string Group { get; }
+        public string Key { get; }
         public string Label { get; }
         public float Min { get; }
         public float Max { get; }
@@ -20,6 +21,7 @@ namespace ProjectVL.Systems
 
         public TuningParameter(
             string group,
+            string key,
             string label,
             float min,
             float max,
@@ -29,6 +31,7 @@ namespace ProjectVL.Systems
             Action<float> setter)
         {
             Group = group;
+            Key = key;
             Label = label;
             Min = min;
             Max = max;
@@ -57,9 +60,12 @@ namespace ProjectVL.Systems
             new List<TuningParameter>();
         private readonly BountyConfig _bounty;
         private readonly bool _bountyBaseline;
+        private readonly HashSet<string> _lastAppliedDifferences =
+            new HashSet<string>();
 
         public IReadOnlyList<TuningParameter> Parameters => _parameters;
         public bool BountyEnabled => _bounty.enabled;
+        public string AppliedPresetName { get; private set; } = "Default";
 
         public RuntimeTuningSystem(
             CombatConfig combat,
@@ -75,16 +81,16 @@ namespace ProjectVL.Systems
             _bounty = bounty ?? throw new ArgumentNullException(nameof(bounty));
             _bountyBaseline = bounty.enabled;
 
-            Add("Combat", "Damage", 1f, 100f, false, false,
+            Add("Combat", "combat.damage", "Damage", 1f, 100f, false, false,
                 () => combat.defaults.damage, value => combat.defaults.damage = value);
-            Add("Combat", "Fire rate", 0.5f, 20f, false, false,
+            Add("Combat", "combat.fireRate", "Fire rate", 0.5f, 20f, false, false,
                 () => combat.defaults.fireRate, value => combat.defaults.fireRate = value);
-            Add("Combat", "Range", 50f, 350f, false, false,
+            Add("Combat", "combat.range", "Range", 50f, 350f, false, false,
                 () => combat.defaults.range, value => combat.defaults.range = value);
-            Add("Combat", "Bullet speed", 100f, 900f, false, false,
+            Add("Combat", "combat.bulletSpeed", "Bullet speed", 100f, 900f, false, false,
                 () => combat.bullet.speed, value => combat.bullet.speed = value);
 
-            Add("Enemies", "Global speed", 0.1f, 3f, false, false,
+            Add("Enemies", "enemies.globalSpeed", "Global speed", 0.1f, 3f, false, false,
                 () => enemies.defaults.enemySpeed, value => enemies.defaults.enemySpeed = value);
             AddEnemy("Enemies", "Normal", enemies.types.normal);
             AddEnemy("Enemies", "Fast", enemies.types.fast);
@@ -94,27 +100,27 @@ namespace ProjectVL.Systems
             AddStage("Waves", "Selection", waves.stagePlan.selection);
             AddStage("Waves", "Build", waves.stagePlan.build);
 
-            Add("Economy", "Drop chance", 0f, 1f, false, false,
+            Add("Economy", "economy.dropChance", "Drop chance", 0f, 1f, false, false,
                 () => economy.defaults.dropChance, value => economy.defaults.dropChance = value);
-            Add("Economy", "Drop lifetime", 1f, 30f, false, false,
+            Add("Economy", "economy.dropLifetime", "Drop lifetime", 1f, 30f, false, false,
                 () => economy.defaults.dropLifetime, value => economy.defaults.dropLifetime = value);
-            Add("Economy", "Pickup radius", 10f, 120f, false, false,
+            Add("Economy", "economy.pickupRadius", "Pickup radius", 10f, 120f, false, false,
                 () => economy.drops.pickupRadius, value => economy.drops.pickupRadius = value);
 
-            Add("Bounty", "Offer chance", 0f, 1f, false, false,
+            Add("Bounty", "bounty.offerChance", "Offer chance", 0f, 1f, false, false,
                 () => bounty.offer.baseChancePerCheck,
                 value => bounty.offer.baseChancePerCheck = value);
-            Add("Bounty", "Offer chance max", 0f, 1f, false, false,
+            Add("Bounty", "bounty.offerChanceMax", "Offer chance max", 0f, 1f, false, false,
                 () => bounty.offer.maxChancePerCheck,
                 value => bounty.offer.maxChancePerCheck = value);
-            Add("Bounty", "Enemy count", 1f, 15f, true, false,
+            Add("Bounty", "bounty.enemyCount", "Enemy count", 1f, 15f, true, false,
                 () => bounty.encounter.enemyCountBase,
                 value => bounty.encounter.enemyCountBase = (int)value);
-            Add("Bounty", "Enemy HP multiplier", 0.5f, 4f, false, false,
+            Add("Bounty", "bounty.enemyHpMul", "Enemy HP multiplier", 0.5f, 4f, false, false,
                 () => bounty.encounter.hpMul, value => bounty.encounter.hpMul = value);
-            Add("Bounty", "Enemy damage multiplier", 0.5f, 4f, false, false,
+            Add("Bounty", "bounty.enemyDamageMul", "Enemy damage multiplier", 0.5f, 4f, false, false,
                 () => bounty.encounter.damageMul, value => bounty.encounter.damageMul = value);
-            Add("Bounty", "Reward lifetime", 2f, 30f, false, false,
+            Add("Bounty", "bounty.rewardLifetime", "Reward lifetime", 2f, 30f, false, false,
                 () => bounty.reward.dropLifetimeSeconds,
                 value => bounty.reward.dropLifetimeSeconds = value);
         }
@@ -148,6 +154,76 @@ namespace ProjectVL.Systems
             }
 
             _bounty.enabled = _bountyBaseline;
+            AppliedPresetName = "Default";
+            _lastAppliedDifferences.Clear();
+        }
+
+        public TuningPreset CapturePreset(string name)
+        {
+            var preset = new TuningPreset
+            {
+                name = name?.Trim(),
+                savedAt = DateTime.UtcNow.ToString("O"),
+                bountyEnabled = _bounty.enabled
+            };
+            foreach (TuningParameter parameter in _parameters)
+            {
+                preset.values.Add(new TuningPresetValue
+                {
+                    key = parameter.Key,
+                    value = parameter.Value
+                });
+            }
+
+            return preset;
+        }
+
+        public int ApplyPreset(TuningPreset preset)
+        {
+            if (preset == null)
+            {
+                throw new ArgumentNullException(nameof(preset));
+            }
+
+            _lastAppliedDifferences.Clear();
+            var values = new Dictionary<string, float>();
+            foreach (TuningPresetValue value in preset.values)
+            {
+                if (value != null && !string.IsNullOrEmpty(value.key))
+                {
+                    values[value.key] = value.value;
+                }
+            }
+
+            foreach (TuningParameter parameter in _parameters)
+            {
+                if (values.TryGetValue(parameter.Key, out float value))
+                {
+                    if (Math.Abs(parameter.Value - value) > 0.0001f)
+                    {
+                        _lastAppliedDifferences.Add(parameter.Key);
+                    }
+
+                    parameter.Set(value);
+                }
+            }
+
+            if (_bounty.enabled != preset.bountyEnabled)
+            {
+                _lastAppliedDifferences.Add("bounty.enabled");
+            }
+
+            _bounty.enabled = preset.bountyEnabled;
+            AppliedPresetName = string.IsNullOrWhiteSpace(preset.name)
+                ? "Imported"
+                : preset.name;
+            return _lastAppliedDifferences.Count;
+        }
+
+        public bool WasChangedByLastPreset(TuningParameter parameter)
+        {
+            return parameter != null
+                && _lastAppliedDifferences.Contains(parameter.Key);
         }
 
         private void AddEnemy(
@@ -155,9 +231,10 @@ namespace ProjectVL.Systems
             string prefix,
             EnemyTypeConfig enemy)
         {
-            Add(group, prefix + " HP", 1f, 3000f, false, false,
+            string keyPrefix = "enemies." + prefix.ToLowerInvariant();
+            Add(group, keyPrefix + ".hp", prefix + " HP", 1f, 3000f, false, false,
                 () => enemy.hpBase, value => enemy.hpBase = value);
-            Add(group, prefix + " damage", 0f, 100f, false, false,
+            Add(group, keyPrefix + ".damage", prefix + " damage", 0f, 100f, false, false,
                 () => enemy.damage, value => enemy.damage = value);
         }
 
@@ -166,22 +243,24 @@ namespace ProjectVL.Systems
             string prefix,
             RegularStageConfig stage)
         {
-            Add(group, prefix + " quota start", 1f, 300f, false, true,
+            string keyPrefix = "waves." + prefix.ToLowerInvariant();
+            Add(group, keyPrefix + ".quotaStart", prefix + " quota start", 1f, 300f, false, true,
                 () => stage.waveQuota.start, value => stage.waveQuota.start = value);
-            Add(group, prefix + " quota end", 1f, 500f, false, true,
+            Add(group, keyPrefix + ".quotaEnd", prefix + " quota end", 1f, 500f, false, true,
                 () => stage.waveQuota.end, value => stage.waveQuota.end = value);
-            Add(group, prefix + " target start", 1f, 100f, false, true,
+            Add(group, keyPrefix + ".targetStart", prefix + " target start", 1f, 100f, false, true,
                 () => stage.targetOnScreen.start,
                 value => stage.targetOnScreen.start = value);
-            Add(group, prefix + " target end", 1f, 150f, false, true,
+            Add(group, keyPrefix + ".targetEnd", prefix + " target end", 1f, 150f, false, true,
                 () => stage.targetOnScreen.end,
                 value => stage.targetOnScreen.end = value);
-            Add(group, prefix + " max alive", 1f, 200f, true, true,
+            Add(group, keyPrefix + ".maxAlive", prefix + " max alive", 1f, 200f, true, true,
                 () => stage.maxAlive, value => stage.maxAlive = (int)value);
         }
 
         private void Add(
             string group,
+            string key,
             string label,
             float min,
             float max,
@@ -192,6 +271,7 @@ namespace ProjectVL.Systems
         {
             _parameters.Add(new TuningParameter(
                 group,
+                key,
                 label,
                 min,
                 max,

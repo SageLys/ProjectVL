@@ -8,24 +8,25 @@ namespace ProjectVL.Systems
         private readonly GameState _state;
         private readonly GameSimulation _simulation;
         private readonly WaveSystem _waves;
+        private readonly SystemRandomSource _random;
 
         public bool Enabled { get; }
         public bool Visible { get; private set; }
-        public int Seed { get; }
+        public int Seed => _random.Seed;
         public float TimeScale => _simulation.TimeScale;
 
         public DeveloperToolsSystem(
             GameState state,
             GameSimulation simulation,
             WaveSystem waves,
-            int seed,
+            SystemRandomSource random,
             bool enabled)
         {
             _state = state ?? throw new ArgumentNullException(nameof(state));
             _simulation = simulation
                 ?? throw new ArgumentNullException(nameof(simulation));
             _waves = waves ?? throw new ArgumentNullException(nameof(waves));
-            Seed = seed;
+            _random = random ?? throw new ArgumentNullException(nameof(random));
             Enabled = enabled;
         }
 

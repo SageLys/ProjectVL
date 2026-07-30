@@ -22,6 +22,8 @@ namespace ProjectVL.Presentation
         private DeveloperToolsSystem _developerTools;
         private RuntimeTuningSystem _runtimeTuning;
         private DeveloperTelemetrySystem _telemetry;
+        private TuningPresetStore _tuningPresets;
+        private static int? _requestedSeed;
         private CardSlotKind? _selectedSlotKind;
         private int _selectedSlotIndex = -1;
         private CardSlotKind? _pendingCastSlotKind;
@@ -153,6 +155,9 @@ namespace ProjectVL.Presentation
         public RuntimeTuningSystem RuntimeTuning => _runtimeTuning;
         public DeveloperTelemetrySystem Telemetry => _telemetry;
         public string LastTelemetryExportPath { get; private set; }
+        public System.Collections.Generic.IReadOnlyList<TuningPreset>
+            TuningPresets => _tuningPresets?.Presets;
+        public string TuningImportPath => _tuningPresets?.ImportPath;
 
         private void Awake()
         {
@@ -188,7 +193,8 @@ namespace ProjectVL.Presentation
                     progression,
                     relics,
                     waves.totalWaves));
-            int seed = System.Environment.TickCount;
+            int seed = _requestedSeed ?? System.Environment.TickCount;
+            _requestedSeed = null;
             var random = new SystemRandomSource(seed);
             var cardAffixSystem = new CardAffixSystem(
                 cardAffixCatalog,
@@ -260,7 +266,7 @@ namespace ProjectVL.Presentation
                 state,
                 _simulation,
                 _waveSystem,
-                seed,
+                random,
                 Application.isEditor || Debug.isDebugBuild);
             _runtimeTuning = new RuntimeTuningSystem(
                 combat,
@@ -270,6 +276,10 @@ namespace ProjectVL.Presentation
                 bounty);
             if (_developerTools.Enabled)
             {
+                _tuningPresets = new TuningPresetStore(
+                    System.IO.Path.Combine(
+                        Application.persistentDataPath,
+                        "tuning"));
                 _telemetry = new DeveloperTelemetrySystem(
                     state,
                     seed,
@@ -393,6 +403,56 @@ namespace ProjectVL.Presentation
                     Application.persistentDataPath,
                     "telemetry"));
             return LastTelemetryExportPath;
+        }
+
+        public void RestartWithSeed(int seed)
+        {
+            if (!_developerTools.Enabled)
+            {
+                return;
+            }
+
+            _requestedSeed = seed;
+            SceneManager.LoadScene(
+                SceneManager.GetActiveScene().buildIndex);
+        }
+
+        public string SaveTuningPreset(string name)
+        {
+            if (_tuningPresets == null || string.IsNullOrWhiteSpace(name))
+            {
+                return "Enter a preset name.";
+            }
+
+            TuningPreset preset = _runtimeTuning.CapturePreset(name);
+            return _tuningPresets.Save(preset);
+        }
+
+        public int LoadTuningPreset(int index)
+        {
+            if (_tuningPresets == null
+                || index < 0
+                || index >= _tuningPresets.Presets.Count)
+            {
+                return -1;
+            }
+
+            return _runtimeTuning.ApplyPreset(
+                _tuningPresets.Presets[index]);
+        }
+
+        public bool DeleteTuningPreset(int index)
+        {
+            return _tuningPresets != null
+                && _tuningPresets.DeleteAt(index);
+        }
+
+        public int ImportTuningPreset()
+        {
+            TuningPreset preset = _tuningPresets?.Import();
+            return preset == null
+                ? -1
+                : _runtimeTuning.ApplyPreset(preset);
         }
 
         public void RestartGame()

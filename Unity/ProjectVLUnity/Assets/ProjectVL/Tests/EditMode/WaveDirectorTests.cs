@@ -267,7 +267,7 @@ namespace ProjectVL.Tests
                 _state,
                 simulation,
                 waveSystem,
-                42,
+                new SystemRandomSource(42),
                 true);
 
             tools.ToggleVisible();
@@ -291,7 +291,7 @@ namespace ProjectVL.Tests
                 _state,
                 simulation,
                 waveSystem,
-                7,
+                new SystemRandomSource(7),
                 false);
 
             tools.ToggleVisible();

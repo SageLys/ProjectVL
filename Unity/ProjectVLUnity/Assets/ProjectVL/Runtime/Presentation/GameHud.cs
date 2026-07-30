@@ -20,6 +20,10 @@ namespace ProjectVL.Presentation
         private int _pressedSlotIndex = -1;
         private Vector2 _pressPoint;
         private int _tuningGroup;
+        private string _seedInput;
+        private string _presetName = "playtest";
+        private int _presetIndex;
+        private string _presetStatus;
         private static readonly string[] TuningGroups =
             { "Combat", "Enemies", "Waves", "Economy", "Bounty" };
 
@@ -156,7 +160,7 @@ namespace ProjectVL.Presentation
                 return;
             }
 
-            Rect panel = new Rect(8f, 48f, 386f, 684f);
+            Rect panel = new Rect(8f, 48f, 386f, 818f);
             Color previous = GUI.backgroundColor;
             GUI.backgroundColor = new Color(0.035f, 0.075f, 0.12f, 0.98f);
             GUI.Box(panel, GUIContent.none);
@@ -208,6 +212,90 @@ namespace ProjectVL.Presentation
                 tuning.ResetAll();
 
             y += 34f;
+            if (string.IsNullOrEmpty(_seedInput))
+                _seedInput = tools.Seed.ToString();
+            GUI.Label(new Rect(panel.x + 10f, y, 42f, 24f),
+                "Seed", _leftStyle);
+            _seedInput = GUI.TextField(
+                new Rect(panel.x + 52f, y, 148f, 24f),
+                _seedInput);
+            if (GUI.Button(new Rect(panel.x + 206f, y, 170f, 24f),
+                "Apply seed & restart", _buttonStyle))
+            {
+                if (int.TryParse(_seedInput, out int seed))
+                    _controller.RestartWithSeed(seed);
+                else
+                    _presetStatus = "Seed must be an integer.";
+            }
+
+            y += 30f;
+            GUI.Label(new Rect(panel.x + 10f, y, 48f, 24f),
+                "Preset", _leftStyle);
+            _presetName = GUI.TextField(
+                new Rect(panel.x + 58f, y, 142f, 24f),
+                _presetName);
+            if (GUI.Button(new Rect(panel.x + 206f, y, 170f, 24f),
+                "Save & export JSON", _buttonStyle))
+            {
+                string path = _controller.SaveTuningPreset(_presetName);
+                _presetStatus = System.IO.Path.GetFileName(path);
+                int count = _controller.TuningPresets?.Count ?? 0;
+                _presetIndex = Mathf.Max(0, count - 1);
+            }
+
+            y += 30f;
+            var presets = _controller.TuningPresets;
+            int presetCount = presets?.Count ?? 0;
+            if (presetCount > 0)
+                _presetIndex = Mathf.Clamp(_presetIndex, 0, presetCount - 1);
+            if (GUI.Button(new Rect(panel.x + 10f, y, 30f, 24f),
+                "<", _buttonStyle) && presetCount > 0)
+                _presetIndex = (_presetIndex - 1 + presetCount) % presetCount;
+            GUI.Label(
+                new Rect(panel.x + 44f, y, 112f, 24f),
+                presetCount == 0
+                    ? "No presets"
+                    : presets[_presetIndex].name,
+                _leftStyle);
+            if (GUI.Button(new Rect(panel.x + 158f, y, 30f, 24f),
+                ">", _buttonStyle) && presetCount > 0)
+                _presetIndex = (_presetIndex + 1) % presetCount;
+            if (GUI.Button(new Rect(panel.x + 192f, y, 54f, 24f),
+                "Load", _buttonStyle))
+            {
+                int changed = _controller.LoadTuningPreset(_presetIndex);
+                _presetStatus = changed < 0
+                    ? "No preset selected."
+                    : $"Loaded, {changed} changed.";
+            }
+            if (GUI.Button(new Rect(panel.x + 250f, y, 56f, 24f),
+                "Delete", _buttonStyle))
+            {
+                _presetStatus = _controller.DeleteTuningPreset(_presetIndex)
+                    ? "Preset deleted."
+                    : "No preset selected.";
+                _presetIndex = Mathf.Max(0, _presetIndex - 1);
+            }
+            if (GUI.Button(new Rect(panel.x + 310f, y, 66f, 24f),
+                "Import", _buttonStyle))
+            {
+                int changed = _controller.ImportTuningPreset();
+                _presetStatus = changed < 0
+                    ? "Place JSON at tuning-import.json."
+                    : $"Imported, {changed} changed.";
+            }
+
+            y += 26f;
+            GUI.Label(
+                new Rect(panel.x + 10f, y, 366f, 22f),
+                string.IsNullOrEmpty(_presetStatus)
+                    ? "Import path: "
+                        + System.IO.Path.GetFileName(
+                            _controller.TuningImportPath)
+                    : _presetStatus,
+                _leftStyle);
+
+            y += 26f;
             float tabWidth = 72f;
             for (int i = 0; i < TuningGroups.Length; i++)
             {
@@ -253,6 +341,8 @@ namespace ProjectVL.Presentation
                     continue;
 
                 string suffix = parameter.AppliesNextWave ? " *" : string.Empty;
+                if (tuning.WasChangedByLastPreset(parameter))
+                    suffix += " Δ";
                 GUI.Label(
                     new Rect(panel.x + 12f, y, 190f, 22f),
                     parameter.Label + suffix,

@@ -4,10 +4,17 @@ namespace ProjectVL.Core
 {
     public sealed class SystemRandomSource : IRandomSource
     {
-        private readonly Random _random;
+        private Random _random;
+        public int Seed { get; private set; }
 
         public SystemRandomSource(int seed)
         {
+            Reset(seed);
+        }
+
+        public void Reset(int seed)
+        {
+            Seed = seed;
             _random = new Random(seed);
         }
 
