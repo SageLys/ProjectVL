@@ -19,6 +19,27 @@ function walk(effects: readonly EffectDef[]): EffectDef[] {
   });
 }
 
+function baseCard(id: string) {
+  const card = cfg.skills.cards.find(item => item.id === id && !item.recipeOnly);
+  expect(card, id).toBeDefined();
+  return card!;
+}
+
+function branch(cardId: string, star: 3 | 5, optionId: string) {
+  const checkpoint = baseCard(cardId).evolutionTree!.checkpoints.find(item => item.star === star);
+  const option = checkpoint?.options.find(item => item.id === optionId);
+  expect(option, `${cardId}:${star}:${optionId}`).toBeDefined();
+  return option!;
+}
+
+function effectParams(cardId: string, star: 3 | 5, optionId: string, atom: string) {
+  const effect = branch(cardId, star, optionId).equip
+    .flatMap(binding => walk(binding.effects))
+    .find(item => item.atom === atom);
+  expect(effect, `${cardId}:${star}:${optionId}:${atom}`).toBeDefined();
+  return effect!.params as Record<string, unknown>;
+}
+
 describe('v4 full-card matrix contract', () => {
   it('loads exactly 35 base cards plus 25 B0 recipe products and rejects every retired product', () => {
     const base = cfg.skills.cards.filter(card => !card.recipeOnly);
@@ -93,5 +114,46 @@ describe('v4 full-card matrix contract', () => {
         }),
       ]);
     }
+  });
+
+  it('preserves explicit source-table carrier values, timers, and consumable anchors', () => {
+    expect(effectParams('aegis', 3, 'aegisA', 'shield')).toMatchObject({ absorbHits: 2 });
+    expect(effectParams('aegis', 3, 'aegisB', 'shield')).toMatchObject({ absorbHits: 1, regenSeconds: 8 });
+    expect(branch('aegis', 3, 'aegisC').equip[0].triggerParams).toMatchObject({ seconds: 9 });
+
+    expect(branch('chainLightning', 3, 'chainLightningC').equip[0].triggerParams)
+      .toMatchObject({ seconds: 2.2 });
+    expect(effectParams('chainLightning', 3, 'chainLightningC', 'chain'))
+      .toMatchObject({ targets: 3 });
+    expect(branch('chainLightning', 5, 'chainLightning3x').equip[0].triggerParams)
+      .toMatchObject({ requiresStatus: 'vulnerable', cooldownSeconds: 1.5 });
+
+    const chainSix = baseCard('chainLightning').evolutionTree!.sharedNodes.find(node => node.star === 6)!;
+    const chainSixEquip = chainSix.equip!;
+    expect(chainSixEquip[0].triggerParams).toMatchObject({ seconds: 1.2 });
+    expect(chainSixEquip[0].effects).toEqual([
+      expect.objectContaining({ atom: 'chain', params: expect.objectContaining({ targets: 3 }) }),
+    ]);
+
+    expect(effectParams('arcSplitter', 3, 'arcSplitterA', 'split')).toMatchObject({ count: 2 });
+    expect(effectParams('arcSplitter', 3, 'arcSplitterB', 'split')).toMatchObject({ count: 4 });
+    expect(effectParams('frost', 3, 'frostC', 'freeze')).toMatchObject({ stacksToTrigger: 3 });
+    expect(branch('frost', 3, 'frostC').equip[0].triggerParams).toMatchObject({ seconds: 2.5 });
+
+    const chainConsume = baseCard('chainLightning').consumable.anchors;
+    expect([chainConsume['1'].radius, chainConsume['3'].radius, chainConsume['6'].radius])
+      .toEqual([120, 140, 160]);
+    expect([
+      (chainConsume['1'].effects[0].params as Record<string, unknown>)?.bounces,
+      (chainConsume['3'].effects[0].params as Record<string, unknown>)?.bounces,
+      (chainConsume['6'].effects[0].params as Record<string, unknown>)?.bounces,
+    ]).toEqual([4, 7, 12]);
+
+    const aegisConsume = baseCard('aegis').consumable.anchors;
+    expect([
+      (aegisConsume['1'].effects[0].params as Record<string, unknown>)?.absorbHits,
+      (aegisConsume['3'].effects[0].params as Record<string, unknown>)?.absorbHits,
+      (aegisConsume['6'].effects[0].params as Record<string, unknown>)?.absorbHits,
+    ]).toEqual([2, 4, 6]);
   });
 });

@@ -15,7 +15,7 @@
   "wave": {
     "wave": 1,
     "phase": "regular",
-    "spawnLeft": 35,
+    "spawnLeft": 36,
     "waveSpawnQuota": 60,
     "intermission": {
       "active": false,
@@ -24,16 +24,16 @@
     }
   },
   "enemiesRemaining": 7,
-  "cumulativeDamageDealt": 667.8,
+  "cumulativeDamageDealt": 613.8,
   "cumulativeDamageTaken": 0,
   "counters": {
-    "kills": 18,
+    "kills": 17,
     "collected": 3,
-    "expired": 11,
+    "expired": 9,
     "merges": 1,
     "consumes": 2,
     "equipOps": 0,
-    "xp": 19,
+    "xp": 18,
     "level": 2
   },
   "cards": [],
@@ -46,7 +46,7 @@
     "5": 0
   },
   "relics": [
-    "neutral_calibrator"
+    "neutral_redundant_armor"
   ],
   "dropSequence": [
     {
@@ -98,25 +98,25 @@
       "star": 1
     },
     {
-      "frame": 300,
+      "frame": 299,
       "action": "spawned",
       "dropId": 5,
+      "kind": "card",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 300,
+      "action": "spawned",
+      "dropId": 6,
       "kind": "card",
       "cardType": "frost",
       "star": 1
     },
     {
-      "frame": 302,
-      "action": "spawned",
-      "dropId": 6,
-      "kind": "card",
-      "cardType": "hoarfrostTithe",
-      "star": 1
-    },
-    {
       "frame": 310,
       "action": "collected",
-      "dropId": 5,
+      "dropId": 6,
       "kind": "card",
       "cardType": "frost",
       "star": 1
@@ -146,7 +146,7 @@
       "star": 1
     },
     {
-      "frame": 338,
+      "frame": 336,
       "action": "spawned",
       "dropId": 8,
       "kind": "card",
@@ -170,23 +170,15 @@
       "star": 1
     },
     {
-      "frame": 452,
+      "frame": 449,
       "action": "expired",
-      "dropId": 6,
+      "dropId": 5,
       "kind": "card",
       "cardType": null,
       "star": 1
     },
     {
-      "frame": 462,
-      "action": "spawned",
-      "dropId": 10,
-      "kind": "card",
-      "cardType": "overcharge",
-      "star": 1
-    },
-    {
-      "frame": 488,
+      "frame": 486,
       "action": "expired",
       "dropId": 8,
       "kind": "card",
@@ -196,9 +188,9 @@
     {
       "frame": 519,
       "action": "spawned",
-      "dropId": 11,
+      "dropId": 10,
       "kind": "card",
-      "cardType": "ironvine",
+      "cardType": "iceTomb",
       "star": 1
     },
     {
@@ -210,15 +202,23 @@
       "star": 1
     },
     {
-      "frame": 605,
+      "frame": 617,
       "action": "spawned",
-      "dropId": 12,
+      "dropId": 11,
       "kind": "card",
-      "cardType": "bountyCall",
+      "cardType": "stormcall",
       "star": 1
     },
     {
-      "frame": 612,
+      "frame": 667,
+      "action": "spawned",
+      "dropId": 12,
+      "kind": "card",
+      "cardType": "sanctum",
+      "star": 1
+    },
+    {
+      "frame": 669,
       "action": "expired",
       "dropId": 10,
       "kind": "card",
@@ -226,15 +226,7 @@
       "star": 1
     },
     {
-      "frame": 667,
-      "action": "spawned",
-      "dropId": 13,
-      "kind": "card",
-      "cardType": "meteor",
-      "star": 1
-    },
-    {
-      "frame": 669,
+      "frame": 767,
       "action": "expired",
       "dropId": 11,
       "kind": "card",
@@ -242,15 +234,15 @@
       "star": 1
     },
     {
-      "frame": 693,
+      "frame": 795,
       "action": "spawned",
-      "dropId": 14,
+      "dropId": 13,
       "kind": "card",
-      "cardType": "frost",
+      "cardType": "overcharge",
       "star": 1
     },
     {
-      "frame": 755,
+      "frame": 817,
       "action": "expired",
       "dropId": 12,
       "kind": "card",
@@ -258,35 +250,11 @@
       "star": 1
     },
     {
-      "frame": 779,
+      "frame": 877,
       "action": "spawned",
-      "dropId": 15,
-      "kind": "card",
-      "cardType": "galvanicWard",
-      "star": 1
-    },
-    {
-      "frame": 817,
-      "action": "expired",
-      "dropId": 13,
-      "kind": "card",
-      "cardType": null,
-      "star": 1
-    },
-    {
-      "frame": 841,
-      "action": "spawned",
-      "dropId": 16,
-      "kind": "card",
-      "cardType": "sentinel",
-      "star": 1
-    },
-    {
-      "frame": 843,
-      "action": "expired",
       "dropId": 14,
       "kind": "card",
-      "cardType": null,
+      "cardType": "retribution",
       "star": 1
     }
   ],
@@ -336,11 +304,11 @@
       "type": "skillConsumed"
     },
     {
-      "frame": 452,
+      "frame": 449,
       "type": "dropExpired"
     },
     {
-      "frame": 488,
+      "frame": 486,
       "type": "dropExpired"
     },
     {
@@ -368,27 +336,15 @@
       "type": "dropExpired"
     },
     {
-      "frame": 612,
-      "type": "dropExpired"
-    },
-    {
       "frame": 669,
       "type": "dropExpired"
     },
     {
-      "frame": 755,
+      "frame": 767,
       "type": "dropExpired"
     },
     {
       "frame": 817,
-      "type": "dropExpired"
-    },
-    {
-      "frame": 841,
-      "type": "bountyOfferSpawned"
-    },
-    {
-      "frame": 843,
       "type": "dropExpired"
     }
   ],
@@ -397,17 +353,16 @@
     "collected": 3,
     "affixRolled": 1,
     "skillConsumed": 2,
-    "dropExpired": 11,
+    "dropExpired": 9,
     "merged": 1,
     "levelUp": 1,
     "relicOffered": 1,
     "decisionOffered": 1,
     "relicSelected": 1,
-    "decisionResolved": 1,
-    "bountyOfferSpawned": 1
+    "decisionResolved": 1
   },
   "rng": {
-    "draws": 2217,
-    "last": 0.44163364963606
+    "draws": 2014,
+    "last": 0.8087961538694799
   }
 }

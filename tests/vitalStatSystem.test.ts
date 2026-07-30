@@ -180,7 +180,7 @@ describe('affix contracts, discrete scaling and HUD', () => {
     expect(() => validateSkillsConfig(missing)).toThrow(/xpMul.*no reachable equipment/);
   });
 
-  it('makes the minimum defenseDurabilityMul roll round the one-hit shield up by one', () => {
+  it('makes the minimum defenseDurabilityMul roll the source-table two-hit shield up to three', () => {
     const state = freshState();
     state.runBuild.cardAffixRolls.aegis = [
       { stat: 'defenseDurabilityMul', value: 0.1, consumableDuration: 5 },
@@ -190,7 +190,7 @@ describe('affix contracts, discrete scaling and HUD', () => {
     const raw = resolveCardBindings(def, state.equipment[0]!.evolutionPath ?? [], 3);
     const scaled = applyBuildScalingToBindings(state, def, structuredClone(raw), 'aegis');
     const shield = scaled.flatMap(binding => binding.effects).find(effect => effect.atom === 'shield');
-    expect(shield?.params?.absorbHits).toBe(2);
+    expect(shield?.params?.absorbHits).toBe(3);
   });
 
   it('renders current and maximum HP together', () => {
