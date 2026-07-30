@@ -43,14 +43,15 @@ describe('design describe layer', () => {
   });
 
   it('branches recipeOnly cards into one fixed 6-star tier with recipe provenance', () => {
-    const card = skills.cards.find(item => item.id === 'frozenThunder');
+    const recipe = recipesJson.recipes[0];
+    const card = skills.cards.find(item => item.id === recipe.outputCardId);
     expect(card).toBeTruthy();
     const view = describeCard(card!, ctx);
 
     expect(view.tiers).toHaveLength(1);
     expect(view.tiers[0]).toMatchObject({ star: 6, kind: 'fixed', options: [] });
     expect(view.tiers.some(tier => tier.kind === 'checkpoint')).toBe(false);
-    expect(view.recipe).toMatchObject({ id: 'frozenThunder', outputStar: 6 });
+    expect(view.recipe).toMatchObject({ id: recipe.id, outputStar: 6 });
   });
 
   it('describes every atom contract entry without throwing or losing its label', () => {

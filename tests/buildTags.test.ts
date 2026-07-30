@@ -5,7 +5,7 @@ import { validateSkillsConfig } from '../src/config/skillValidator';
 describe('skill synergyTags', () => {
   it('assigns 1~2 valid, unique tags to every card', () => {
     const valid = new Set(['projectile', 'control', 'domain', 'defense', 'utility']);
-    expect(cfg.skills.cards).toHaveLength(41);
+    expect(cfg.skills.cards).toHaveLength(60);
     for (const card of cfg.skills.cards) {
       expect(card.synergyTags.length).toBeGreaterThanOrEqual(1);
       expect(card.synergyTags.length).toBeLessThanOrEqual(2);

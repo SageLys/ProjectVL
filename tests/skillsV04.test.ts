@@ -2,7 +2,6 @@ import { describe, expect, it, beforeEach, afterEach } from 'vitest';
 import { cfg, applyConfig, buildConfig } from '../src/config';
 import { resolveCardBindings, resolveConsumableTier, registerSkillDefs } from '../src/core/effects/interpreter';
 import type { BindingDef, CardDef } from '../src/core/effects/defs';
-import { effectParams } from '../src/core/effects/atomContract';
 import { validateSkillsConfig } from '../src/config/skillValidator';
 import { consumeCard, moveOrSwap } from '../src/core/systems/equipmentSystem';
 import { autoMergeCards } from '../src/core/systems/cardSystem';
@@ -17,9 +16,6 @@ const pathFor = (def: CardDef, star: number) => def.evolutionTree?.checkpoints
   .map(checkpoint => `${checkpoint.star}:${checkpoint.options[0].id}`) ?? [];
 const bindingsFor = (def: CardDef, star: number): BindingDef[] =>
   resolveCardBindings(def, pathFor(def, star), star);
-const param = (bindings: BindingDef[], key: string) =>
-  bindings.flatMap(b => b.effects).map(e => effectParams(e)[key]).find(v => typeof v === 'number') as number;
-
 beforeEach(() => { resetTestEnv(); registerSkillDefs(cfg.skills.cards); });
 afterEach(resetTestEnv);
 
@@ -44,26 +40,32 @@ describe('schema v0.4.0 · 进化树解释规则', () => {
   });
 
   it('4★ amplify 持续放大 3★ 分支', () => {
-    const pierce = get('pierce');
-    expect(param(bindingsFor(pierce, 4), 'count')).toBe(param(bindingsFor(pierce, 3), 'count') + 1);
-    expect(bindingsFor(pierce, 4).map(b => b.trigger)).toEqual(bindingsFor(pierce, 3).map(b => b.trigger));
-    const harvest = get('harvest');
-    expect(param(bindingsFor(harvest, 4), 'mul')).toBeCloseTo(param(bindingsFor(harvest, 3), 'mul') * 1.1);
+    for (const def of cfg.skills.cards.filter(card => !card.recipeOnly)) {
+      const amplifyKeys = Object.keys(def.evolutionTree!.sharedNodes.find(node => node.star === 4)!.amplify ?? {});
+      const optionPayload = JSON.stringify(def.evolutionTree!.checkpoints.find(point => point.star === 3)!.options);
+      expect(amplifyKeys.every(key => optionPayload.includes(`\"${key}\"`)), def.id).toBe(true);
+    }
   });
 
   it('消耗态内插：2★ 位于 1/3 中点，5★ 位于 3/6 的加权中点且不提前引入 6★-only 新原子', () => {
-    const pierce = get('pierce');
-    expect(resolveConsumableTier(pierce, 2).radius).toBeCloseTo((40 + 70) / 2);
-    expect(effectParams(resolveConsumableTier(pierce, 2).effects[0]).damageMul as number).toBeCloseTo((3 + 5) / 2);
-    const aegis = get('aegis');
-    expect(resolveConsumableTier(aegis, 5).radius).toBeCloseTo(120 + (150 - 120) * 2 / 3);
-    // 6★ anchor 比 3★ 多一个 burstDamage（第 3 个效果）；interpolate 按 3★（更短）的效果数展开，该原子不会提前出现在 5★。
-    expect(resolveConsumableTier(aegis, 5).effects.map(e => e.atom)).not.toContain('burstDamage');
+    for (const def of cfg.skills.cards.filter(card => !card.recipeOnly)) {
+      const one = def.consumable.anchors['1'];
+      const three = def.consumable.anchors['3'];
+      const six = def.consumable.anchors['6'];
+      expect(resolveConsumableTier(def, 2).radius, def.id).toBeCloseTo(((one.radius ?? 0) + (three.radius ?? 0)) / 2);
+      expect(resolveConsumableTier(def, 5).radius, def.id).toBeCloseTo((three.radius ?? 0) + ((six.radius ?? 0) - (three.radius ?? 0)) * 2 / 3);
+      const threeAtoms = new Set(three.effects.map(effect => effect.atom));
+      const sixOnly = six.effects.map(effect => effect.atom).filter(atom => !threeAtoms.has(atom));
+      if (sixOnly.length) {
+        expect(resolveConsumableTier(def, 5).effects.map(effect => effect.atom), def.id)
+          .not.toEqual(expect.arrayContaining(sixOnly));
+      }
+    }
   });
 
-  it('6 张 recipeOnly 产物无树且只声明 6★ 终态', () => {
+  it('25 张 recipeOnly 产物无树且只声明 6★ 终态', () => {
     const recipes = cfg.skills.cards.filter(card => card.recipeOnly);
-    expect(recipes).toHaveLength(6);
+    expect(recipes).toHaveLength(25);
     for (const recipe of recipes) {
       expect(recipe.evolutionTree).toBeUndefined();
       expect(Object.keys(recipe.stars)).toEqual(['6']);

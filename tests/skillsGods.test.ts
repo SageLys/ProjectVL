@@ -76,9 +76,9 @@ beforeEach(() => {
 });
 
 describe('C8 five-god formal card matrix', () => {
-  it('contains exactly five gods × seven formal cards plus six recipe terminals', () => {
+  it('contains exactly five gods × seven formal cards plus 25 recipe terminals', () => {
     expect(formalCards()).toHaveLength(35);
-    expect(cfg.skills.cards.filter(def => def.recipeOnly)).toHaveLength(6);
+    expect(cfg.skills.cards.filter(def => def.recipeOnly)).toHaveLength(25);
     expect(cfg.gods.gods).toHaveLength(5);
     for (const god of cfg.gods.gods) {
       expect(god.anchorCardIds).toHaveLength(2);
@@ -145,12 +145,13 @@ describe('C8 five-god formal card matrix', () => {
 });
 
 describe('C8 recipe, relic and telemetry coverage', () => {
-  it('completes all six recipes and makes every output equipable and consumable', () => {
-    expect(cfg.evolutionRecipes.recipes).toHaveLength(6);
+  it('completes all 25 recipes and makes every output equipable and consumable', () => {
+    expect(cfg.evolutionRecipes.recipes).toHaveLength(25);
     for (const recipe of cfg.evolutionRecipes.recipes) {
       const state = enterFreeIntermission();
-      const materialA = card(recipe.ingredientA.cardId, recipe.ingredientA.minStar);
-      const materialB = card(recipe.ingredientB.cardId, recipe.ingredientB.minStar);
+      state.recipes.compatibleRecipeIds = [recipe.id];
+      const materialA = card(recipe.ingredientVariable.cardId, recipe.ingredientVariable.minStar);
+      const materialB = card(recipe.ingredientAnchor.cardId, recipe.ingredientAnchor.minStar);
       state.cards[0] = materialA;
       state.cards[1] = materialB;
       const events = confirmRecipe(state, config, rng, recipe.id, materialA.id, materialB.id);
