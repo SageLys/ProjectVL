@@ -166,7 +166,10 @@ function chainFrom(ctx: EffectCtx, p: Record<string, unknown>, start: Enemy, ini
   let dmg = ctx.attack?.damage ?? (ctx.bullet ? ctx.bullet.damage : ctx.baseDamage * cNum('chain', p, 'damageMul'));
   const visited = new Set<number>([start.id]);
   let current = start;
-  if (initialHit) ctx.events.push(...dealDamage(ctx.state, ctx.config, ctx.rng, start, dmg, 'chain'));
+  if (initialHit) {
+    ctx.events.push(...dealDamage(ctx.state, ctx.config, ctx.rng, start, dmg, 'chain'));
+    spreadChainStatus(ctx, p, start);
+  }
   for (let i = 0; i < cNum('chain', p, 'bounces'); i++) {
     const next = nearestEnemy(ctx.state, current.x, current.y, searchRange, visited);
     if (!next) break;
@@ -174,8 +177,24 @@ function chainFrom(ctx: EffectCtx, p: Record<string, unknown>, start: Enemy, ini
     spawnParticle(ctx.state, ctx.rng, (current.x + next.x) / 2, (current.y + next.y) / 2, '#8cecff', 90);
     visited.add(next.id);
     ctx.events.push(...dealDamage(ctx.state, ctx.config, ctx.rng, next, dmg, 'chain'));
+    spreadChainStatus(ctx, p, next);
     current = next;
   }
+}
+
+/** chain 专用状态传播：直接走 statusSystem，不经 fireTrigger('onHit')。 */
+function spreadChainStatus(ctx: EffectCtx, p: Record<string, unknown>, enemy: Enemy): void {
+  const status = p.spreadStatus;
+  if (status !== 'vulnerable' && status !== 'slow' && status !== 'dot') return;
+  const raw = p.spreadParams;
+  const params = raw && typeof raw === 'object' && !Array.isArray(raw)
+    ? raw as Record<string, unknown>
+    : {};
+  const ratio = typeof params.ratio === 'number' ? params.ratio : status === 'dot' ? 0.12 : 0.15;
+  const duration = typeof params.duration === 'number' ? params.duration : 2;
+  if (status === 'vulnerable') applyVulnerable(enemy, ratio, duration);
+  else if (status === 'slow') applySlow(enemy, ratio, duration);
+  else applyDot(enemy, ctx.baseDamage * ratio, duration);
 }
 
 /** 命中点爆炸（aoeOnHit / mortar 落点共用）。 */
