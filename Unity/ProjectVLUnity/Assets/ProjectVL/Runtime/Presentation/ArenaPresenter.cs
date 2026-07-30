@@ -22,6 +22,7 @@ namespace ProjectVL.Presentation
 
         private CombatConfig _combat;
         private GameState _state;
+        private VisualCatalog _visualCatalog;
         private Sprite _circleSprite;
         private Sprite _squareSprite;
         private Transform _turret;
@@ -44,11 +45,17 @@ namespace ProjectVL.Presentation
             + (_decoyView == null ? 0 : 1)
             + (_secondaryDecoyView == null ? 0 : 1)
             + (_beamView == null ? 0 : 1);
+        public VisualCatalog VisualCatalog => _visualCatalog;
 
-        public void Initialize(CombatConfig combat, GameState state)
+        public void Initialize(
+            CombatConfig combat,
+            GameState state,
+            VisualCatalog visualCatalog = null)
         {
             _combat = combat;
             _state = state;
+            _visualCatalog = visualCatalog
+                ?? Resources.Load<VisualCatalog>("VisualCatalog");
             _circleSprite = CreateCircleSprite();
             _squareSprite = CreateSquareSprite();
 
@@ -230,10 +237,12 @@ namespace ProjectVL.Presentation
 
             SpriteRenderer body = CreateSpriteView(
                 "Turret Body",
-                _circleSprite,
+                CatalogSprite(
+                    _visualCatalog?.ResolveTurretSprite("main"),
+                    _circleSprite),
                 new Color(0.25f, 0.88f, 1f));
             body.transform.SetParent(_turret, false);
-            body.transform.localScale = new Vector3(30f, 30f, 1f);
+            SetWorldSize(body, 30f, 30f);
             body.sortingOrder = 20;
 
             SpriteRenderer barrel = CreateSpriteView(
@@ -265,9 +274,30 @@ namespace ProjectVL.Presentation
                     : 1f;
                 view.Root.localScale = new Vector3(pulse, pulse, 1f);
                 float healthRatio = Mathf.Clamp01(enemy.Hp / enemy.MaxHp);
+                Sprite catalogSprite =
+                    _visualCatalog?.ResolveEnemySprite(enemy);
+                if (catalogSprite != null
+                    && view.Body.sprite != catalogSprite)
+                {
+                    view.Body.sprite = catalogSprite;
+                    view.Outline.sprite = catalogSprite;
+                    SetWorldSize(
+                        view.Body,
+                        enemy.Radius * 2f,
+                        enemy.Radius * 2f);
+                    float outlineSize =
+                        enemy.Radius * 2f
+                        + (enemy.Kind == EnemyKind.Boss ? 10f : 7f);
+                    SetWorldSize(
+                        view.Outline,
+                        outlineSize,
+                        outlineSize);
+                }
                 view.Body.color = Color.Lerp(
                     new Color(0.35f, 0.1f, 0.15f),
-                    EnemyColor(enemy),
+                    catalogSprite == null
+                        ? EnemyColor(enemy)
+                        : Color.white,
                     healthRatio);
                 Color outline = EnemyOutlineColor(enemy);
                 view.Outline.color = outline;
@@ -292,27 +322,26 @@ namespace ProjectVL.Presentation
                 $"{enemy.Label} {enemy.Id}");
             rootObject.transform.SetParent(transform, false);
 
-            Sprite sprite = EnemySprite(enemy.Sides);
+            Sprite catalogSprite =
+                _visualCatalog?.ResolveEnemySprite(enemy);
+            Sprite sprite = catalogSprite ?? EnemySprite(enemy.Sides);
             SpriteRenderer outline = CreateSpriteView(
                 "Status Outline",
                 sprite,
                 EnemyOutlineColor(enemy));
             outline.transform.SetParent(rootObject.transform, false);
-            outline.transform.localScale = new Vector3(
-                enemy.Radius * 2f + (enemy.Kind == EnemyKind.Boss ? 10f : 7f),
-                enemy.Radius * 2f + (enemy.Kind == EnemyKind.Boss ? 10f : 7f),
-                1f);
+            float outlineSize =
+                enemy.Radius * 2f
+                + (enemy.Kind == EnemyKind.Boss ? 10f : 7f);
+            SetWorldSize(outline, outlineSize, outlineSize);
             outline.sortingOrder = 9;
 
             SpriteRenderer body = CreateSpriteView(
                 "Body",
                 sprite,
-                EnemyColor(enemy));
+                catalogSprite == null ? EnemyColor(enemy) : Color.white);
             body.transform.SetParent(rootObject.transform, false);
-            body.transform.localScale = new Vector3(
-                enemy.Radius * 2f,
-                enemy.Radius * 2f,
-                1f);
+            SetWorldSize(body, enemy.Radius * 2f, enemy.Radius * 2f);
             body.sortingOrder = 10;
 
             SpriteRenderer core = CreateSpriteView(
@@ -367,13 +396,15 @@ namespace ProjectVL.Presentation
                 {
                     view = CreateSpriteView(
                         $"Bullet {bullet.Id}",
-                        _circleSprite,
+                        CatalogSprite(
+                            _visualCatalog?.ResolveProjectileSprite("default"),
+                            _circleSprite),
                         new Color(0.55f, 0.95f, 1f));
                     view.transform.SetParent(transform, false);
-                    view.transform.localScale = new Vector3(
+                    SetWorldSize(
+                        view,
                         bullet.Radius * 2f,
-                        bullet.Radius * 2f,
-                        1f);
+                        bullet.Radius * 2f);
                     view.sortingOrder = 15;
                     _bulletViews.Add(bullet.Id, view);
                 }
@@ -394,11 +425,12 @@ namespace ProjectVL.Presentation
                 {
                     SpriteRenderer renderer = CreateSpriteView(
                         $"Card Drop {drop.Id}",
-                        _squareSprite,
+                        CatalogSprite(
+                            _visualCatalog?.ResolveDropSprite(drop.CardType),
+                            _squareSprite),
                         new Color(0.25f, 0.9f, 0.72f));
                     renderer.transform.SetParent(transform, false);
-                    renderer.transform.localScale =
-                        new Vector3(30f, 38f, 1f);
+                    SetWorldSize(renderer, 30f, 38f);
                     renderer.sortingOrder = 16;
 
                     var labelObject = new GameObject("Drop Label");
@@ -457,11 +489,12 @@ namespace ProjectVL.Presentation
                 {
                     SpriteRenderer renderer = CreateSpriteView(
                         $"Bounty Offer {offer.Id}",
-                        _circleSprite,
+                        CatalogSprite(
+                            _visualCatalog?.ResolveDropSprite("bounty"),
+                            _circleSprite),
                         new Color(1f, 0.68f, 0.12f, 0.82f));
                     renderer.transform.SetParent(transform, false);
-                    renderer.transform.localScale =
-                        new Vector3(60f, 60f, 1f);
+                    SetWorldSize(renderer, 60f, 60f);
                     renderer.sortingOrder = 18;
 
                     var labelObject = new GameObject("Bounty Label");
@@ -489,8 +522,10 @@ namespace ProjectVL.Presentation
                     offer.Remaining / offer.MaxRemaining);
                 float pulse = 1f
                     + Mathf.Sin(_state.Time * 6f) * 0.08f;
-                view.Renderer.transform.localScale =
-                    new Vector3(60f * pulse, 60f * pulse, 1f);
+                SetWorldSize(
+                    view.Renderer,
+                    60f * pulse,
+                    60f * pulse);
                 view.Renderer.color = Color.Lerp(
                     new Color(1f, 0.2f, 0.12f, 0.72f),
                     offer.Guaranteed
@@ -704,6 +739,27 @@ namespace ProjectVL.Presentation
                 Destroy(target);
             else
                 DestroyImmediate(target);
+        }
+
+        private static Sprite CatalogSprite(
+            Sprite sprite,
+            Sprite fallback)
+        {
+            return sprite != null ? sprite : fallback;
+        }
+
+        private static void SetWorldSize(
+            SpriteRenderer renderer,
+            float width,
+            float height)
+        {
+            Vector2 spriteSize = renderer.sprite == null
+                ? Vector2.one
+                : renderer.sprite.bounds.size;
+            renderer.transform.localScale = new Vector3(
+                width / Mathf.Max(0.0001f, spriteSize.x),
+                height / Mathf.Max(0.0001f, spriteSize.y),
+                1f);
         }
 
         private static Color EnemyColor(EnemyState enemy)
