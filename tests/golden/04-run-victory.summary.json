@@ -9,7 +9,7 @@
     "frames": 12000,
     "start": "run"
   },
-  "framesRun": 5086,
+  "framesRun": 5596,
   "mode": "ended",
   "win": true,
   "hp": 1000000,
@@ -26,16 +26,16 @@
     }
   },
   "enemiesRemaining": 0,
-  "cumulativeDamageDealt": 6364.6164,
+  "cumulativeDamageDealt": 5738,
   "cumulativeDamageTaken": 0,
   "counters": {
     "kills": 249,
-    "collected": 71,
+    "collected": 80,
     "expired": 0,
-    "merges": 10,
-    "consumes": 52,
+    "merges": 14,
+    "consumes": 57,
     "equipOps": 0,
-    "xp": 325.30000000000035,
+    "xp": 313,
     "level": 9
   },
   "cards": [
@@ -56,28 +56,30 @@
       "cardType": "ashHarvest",
       "star": 2,
       "affixes": [
-        "rangeAdd:10",
-        "damageAdd:3"
+        "damageAdd:2",
+        "dotDamageMul:0.2"
       ],
       "evolutionPath": []
     },
     {
       "slot": 2,
       "cardType": "flashfire",
-      "star": 2,
+      "star": 3,
       "affixes": [
-        "controlPotencyMul:0.05",
-        "retaliationMul:0.1"
+        "dotDamageMul:0.1",
+        "damageAdd:1"
       ],
-      "evolutionPath": []
+      "evolutionPath": [
+        "3:flashfireA"
+      ]
     },
     {
       "slot": 3,
       "cardType": "meteor",
       "star": 3,
       "affixes": [
-        "damageAdd:3",
-        "dotDamageMul:0.05"
+        "dotDamageMul:0.15",
+        "damageAdd:1"
       ],
       "evolutionPath": [
         "3:meteorA"
@@ -88,18 +90,18 @@
       "cardType": "splitBlast",
       "star": 2,
       "affixes": [
-        "effectDamageMul:0.15",
-        "damageAdd:2"
+        "areaScaleMul:0.15",
+        "dotDamageMul:0.15"
       ],
       "evolutionPath": []
     },
     {
       "slot": 5,
-      "cardType": "scorch",
+      "cardType": "meteor",
       "star": 2,
       "affixes": [
-        "dotDamageMul:0.1",
-        "damageAdd:2"
+        "dotDamageMul:0.15",
+        "damageAdd:1"
       ],
       "evolutionPath": []
     }
@@ -117,10 +119,10 @@
     "domain_area",
     "domain_dot",
     "domain_dot",
-    "domain_dot",
-    "bulwark_wall_doctrine",
-    "bulwark_wall_doctrine",
-    "def_durability"
+    "domain_area",
+    "proj_damage",
+    "storm_judgment",
+    "storm_overload_coil"
   ],
   "dropSequence": [
     {
@@ -340,55 +342,55 @@
       "star": 1
     },
     {
-      "frame": 980,
+      "frame": 1024,
       "action": "spawned",
       "dropId": 15,
-      "kind": "card",
-      "cardType": "splitBlast",
-      "star": 1
-    },
-    {
-      "frame": 990,
-      "action": "collected",
-      "dropId": 15,
-      "kind": "card",
-      "cardType": "splitBlast",
-      "star": 1
-    },
-    {
-      "frame": 1049,
-      "action": "spawned",
-      "dropId": 16,
       "kind": "card",
       "cardType": "ashHarvest",
       "star": 1
     },
     {
-      "frame": 1050,
+      "frame": 1035,
       "action": "collected",
-      "dropId": 16,
+      "dropId": 15,
       "kind": "card",
       "cardType": "ashHarvest",
       "star": 1
     },
     {
-      "frame": 1089,
+      "frame": 1058,
+      "action": "spawned",
+      "dropId": 16,
+      "kind": "card",
+      "cardType": "scorch",
+      "star": 1
+    },
+    {
+      "frame": 1065,
+      "action": "collected",
+      "dropId": 16,
+      "kind": "card",
+      "cardType": "scorch",
+      "star": 1
+    },
+    {
+      "frame": 1126,
       "action": "spawned",
       "dropId": 17,
       "kind": "card",
-      "cardType": "flashfire",
+      "cardType": "meteor",
       "star": 1
     },
     {
-      "frame": 1095,
+      "frame": 1140,
       "action": "collected",
       "dropId": 17,
       "kind": "card",
-      "cardType": "flashfire",
+      "cardType": "meteor",
       "star": 1
     },
     {
-      "frame": 1122,
+      "frame": 1233,
       "action": "spawned",
       "dropId": 18,
       "kind": "card",
@@ -396,7 +398,7 @@
       "star": 1
     },
     {
-      "frame": 1125,
+      "frame": 1245,
       "action": "collected",
       "dropId": 18,
       "kind": "card",
@@ -404,7 +406,7 @@
       "star": 1
     },
     {
-      "frame": 1172,
+      "frame": 1306,
       "action": "spawned",
       "dropId": 19,
       "kind": "card",
@@ -412,7 +414,7 @@
       "star": 1
     },
     {
-      "frame": 1185,
+      "frame": 1320,
       "action": "collected",
       "dropId": 19,
       "kind": "card",
@@ -420,7 +422,7 @@
       "star": 1
     },
     {
-      "frame": 1268,
+      "frame": 1340,
       "action": "spawned",
       "dropId": 20,
       "kind": "card",
@@ -428,7 +430,7 @@
       "star": 1
     },
     {
-      "frame": 1275,
+      "frame": 1350,
       "action": "collected",
       "dropId": 20,
       "kind": "card",
@@ -436,647 +438,655 @@
       "star": 1
     },
     {
-      "frame": 1294,
+      "frame": 1456,
       "action": "spawned",
       "dropId": 21,
       "kind": "card",
-      "cardType": "meteor",
-      "star": 1
-    },
-    {
-      "frame": 1305,
-      "action": "collected",
-      "dropId": 21,
-      "kind": "card",
-      "cardType": "meteor",
-      "star": 1
-    },
-    {
-      "frame": 1363,
-      "action": "spawned",
-      "dropId": 22,
-      "kind": "card",
-      "cardType": "scorch",
-      "star": 1
-    },
-    {
-      "frame": 1365,
-      "action": "collected",
-      "dropId": 22,
-      "kind": "card",
-      "cardType": "scorch",
-      "star": 1
-    },
-    {
-      "frame": 1429,
-      "action": "spawned",
-      "dropId": 23,
-      "kind": "card",
-      "cardType": "scorch",
-      "star": 1
-    },
-    {
-      "frame": 1440,
-      "action": "collected",
-      "dropId": 23,
-      "kind": "card",
-      "cardType": "scorch",
-      "star": 1
-    },
-    {
-      "frame": 1462,
-      "action": "spawned",
-      "dropId": 24,
-      "kind": "card",
-      "cardType": "meteor",
+      "cardType": "flashfire",
       "star": 1
     },
     {
       "frame": 1470,
       "action": "collected",
+      "dropId": 21,
+      "kind": "card",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 1533,
+      "action": "spawned",
+      "dropId": 22,
+      "kind": "card",
+      "cardType": "splitBlast",
+      "star": 1
+    },
+    {
+      "frame": 1545,
+      "action": "collected",
+      "dropId": 22,
+      "kind": "card",
+      "cardType": "splitBlast",
+      "star": 1
+    },
+    {
+      "frame": 1643,
+      "action": "spawned",
+      "dropId": 23,
+      "kind": "card",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 1650,
+      "action": "collected",
+      "dropId": 23,
+      "kind": "card",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 1675,
+      "action": "spawned",
       "dropId": 24,
       "kind": "card",
       "cardType": "meteor",
       "star": 1
     },
     {
-      "frame": 1559,
-      "action": "spawned",
-      "dropId": 25,
-      "kind": "card",
-      "cardType": "splitBlast",
-      "star": 1
-    },
-    {
-      "frame": 1560,
+      "frame": 1680,
       "action": "collected",
-      "dropId": 25,
-      "kind": "card",
-      "cardType": "splitBlast",
-      "star": 1
-    },
-    {
-      "frame": 1607,
-      "action": "spawned",
-      "dropId": 26,
-      "kind": "card",
-      "cardType": "ashHarvest",
-      "star": 1
-    },
-    {
-      "frame": 1620,
-      "action": "collected",
-      "dropId": 26,
-      "kind": "card",
-      "cardType": "ashHarvest",
-      "star": 1
-    },
-    {
-      "frame": 1644,
-      "action": "spawned",
-      "dropId": 27,
+      "dropId": 24,
       "kind": "card",
       "cardType": "meteor",
       "star": 1
     },
     {
-      "frame": 1650,
-      "action": "collected",
-      "dropId": 27,
-      "kind": "card",
-      "cardType": "meteor",
-      "star": 1
-    },
-    {
-      "frame": 1723,
+      "frame": 1778,
       "action": "spawned",
-      "dropId": 28,
+      "dropId": 25,
       "kind": "card",
-      "cardType": "flashfire",
-      "star": 1
-    },
-    {
-      "frame": 1725,
-      "action": "collected",
-      "dropId": 28,
-      "kind": "card",
-      "cardType": "flashfire",
-      "star": 1
-    },
-    {
-      "frame": 1776,
-      "action": "spawned",
-      "dropId": 29,
-      "kind": "card",
-      "cardType": "splitBlast",
+      "cardType": "scorch",
       "star": 1
     },
     {
       "frame": 1785,
       "action": "collected",
-      "dropId": 29,
+      "dropId": 25,
       "kind": "card",
-      "cardType": "splitBlast",
+      "cardType": "scorch",
       "star": 1
     },
     {
-      "frame": 1869,
-      "action": "spawned",
-      "dropId": 30,
-      "kind": "card",
-      "cardType": "ashHarvest",
-      "star": 1
-    },
-    {
-      "frame": 1875,
+      "frame": 1845,
       "action": "collected",
-      "dropId": 30,
+      "dropId": 26,
       "kind": "card",
-      "cardType": "ashHarvest",
+      "cardType": "meteor",
       "star": 1
     },
     {
-      "frame": 1893,
+      "frame": 1900,
       "action": "spawned",
-      "dropId": 31,
+      "dropId": 27,
       "kind": "card",
-      "cardType": "flashfire",
+      "cardType": "ashHarvest",
       "star": 1
     },
     {
       "frame": 1905,
       "action": "collected",
-      "dropId": 31,
+      "dropId": 27,
+      "kind": "card",
+      "cardType": "ashHarvest",
+      "star": 1
+    },
+    {
+      "frame": 1981,
+      "action": "spawned",
+      "dropId": 28,
+      "kind": "card",
+      "cardType": "meteor",
+      "star": 1
+    },
+    {
+      "frame": 1995,
+      "action": "collected",
+      "dropId": 28,
+      "kind": "card",
+      "cardType": "meteor",
+      "star": 1
+    },
+    {
+      "frame": 2013,
+      "action": "spawned",
+      "dropId": 29,
       "kind": "card",
       "cardType": "flashfire",
       "star": 1
     },
     {
-      "frame": 1952,
-      "action": "spawned",
-      "dropId": 32,
-      "kind": "card",
-      "cardType": "ashHarvest",
-      "star": 1
-    },
-    {
-      "frame": 1965,
-      "action": "collected",
-      "dropId": 32,
-      "kind": "card",
-      "cardType": "ashHarvest",
-      "star": 1
-    },
-    {
-      "frame": 2023,
-      "action": "spawned",
-      "dropId": 33,
-      "kind": "card",
-      "cardType": "splitBlast",
-      "star": 1
-    },
-    {
       "frame": 2025,
       "action": "collected",
-      "dropId": 33,
+      "dropId": 29,
+      "kind": "card",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 2077,
+      "action": "spawned",
+      "dropId": 30,
       "kind": "card",
       "cardType": "splitBlast",
       "star": 1
     },
     {
-      "frame": 2094,
-      "action": "spawned",
-      "dropId": 34,
-      "kind": "card",
-      "cardType": "scorch",
-      "star": 1
-    },
-    {
-      "frame": 2100,
+      "frame": 2085,
       "action": "collected",
-      "dropId": 34,
+      "dropId": 30,
       "kind": "card",
-      "cardType": "scorch",
+      "cardType": "splitBlast",
       "star": 1
     },
     {
-      "frame": 2248,
+      "frame": 2138,
       "action": "spawned",
-      "dropId": 35,
+      "dropId": 31,
+      "kind": "card",
+      "cardType": "ashHarvest",
+      "star": 1
+    },
+    {
+      "frame": 2145,
+      "action": "collected",
+      "dropId": 31,
+      "kind": "card",
+      "cardType": "ashHarvest",
+      "star": 1
+    },
+    {
+      "frame": 2188,
+      "action": "spawned",
+      "dropId": 32,
+      "kind": "card",
+      "cardType": "splitBlast",
+      "star": 1
+    },
+    {
+      "frame": 2190,
+      "action": "collected",
+      "dropId": 32,
+      "kind": "card",
+      "cardType": "splitBlast",
+      "star": 1
+    },
+    {
+      "frame": 2451,
+      "action": "spawned",
+      "dropId": 33,
       "kind": "wildcard",
       "cardType": null,
       "star": 1
     },
     {
-      "frame": 2458,
+      "frame": 2671,
       "action": "spawned",
-      "dropId": 36,
+      "dropId": 34,
       "kind": "card",
-      "cardType": "aegis",
-      "star": 1
-    },
-    {
-      "frame": 2460,
-      "action": "collected",
-      "dropId": 36,
-      "kind": "card",
-      "cardType": "aegis",
-      "star": 1
-    },
-    {
-      "frame": 2486,
-      "action": "spawned",
-      "dropId": 37,
-      "kind": "card",
-      "cardType": "thorns",
-      "star": 1
-    },
-    {
-      "frame": 2490,
-      "action": "collected",
-      "dropId": 37,
-      "kind": "card",
-      "cardType": "thorns",
-      "star": 1
-    },
-    {
-      "frame": 2541,
-      "action": "spawned",
-      "dropId": 38,
-      "kind": "card",
-      "cardType": "decoy",
-      "star": 1
-    },
-    {
-      "frame": 2550,
-      "action": "collected",
-      "dropId": 38,
-      "kind": "card",
-      "cardType": "decoy",
-      "star": 1
-    },
-    {
-      "frame": 2584,
-      "action": "spawned",
-      "dropId": 39,
-      "kind": "card",
-      "cardType": "scorch",
-      "star": 1
-    },
-    {
-      "frame": 2595,
-      "action": "collected",
-      "dropId": 39,
-      "kind": "card",
-      "cardType": "scorch",
-      "star": 1
-    },
-    {
-      "frame": 2634,
-      "action": "spawned",
-      "dropId": 40,
-      "kind": "card",
-      "cardType": "scorch",
-      "star": 1
-    },
-    {
-      "frame": 2640,
-      "action": "collected",
-      "dropId": 40,
-      "kind": "card",
-      "cardType": "scorch",
-      "star": 1
-    },
-    {
-      "frame": 2681,
-      "action": "spawned",
-      "dropId": 41,
-      "kind": "card",
-      "cardType": "ashHarvest",
+      "cardType": "chainLightning",
       "star": 1
     },
     {
       "frame": 2685,
       "action": "collected",
-      "dropId": 41,
+      "dropId": 34,
       "kind": "card",
-      "cardType": "ashHarvest",
+      "cardType": "chainLightning",
       "star": 1
     },
     {
-      "frame": 2725,
-      "action": "spawned",
-      "dropId": 42,
-      "kind": "card",
-      "cardType": "thorns",
-      "star": 1
-    },
-    {
-      "frame": 2730,
+      "frame": 2700,
       "action": "collected",
-      "dropId": 42,
+      "dropId": 35,
       "kind": "card",
-      "cardType": "thorns",
+      "cardType": "pierce",
       "star": 1
     },
     {
-      "frame": 2764,
+      "frame": 2750,
       "action": "spawned",
-      "dropId": 43,
+      "dropId": 36,
       "kind": "card",
-      "cardType": "meteor",
+      "cardType": "arcSplitter",
       "star": 1
     },
     {
-      "frame": 2775,
+      "frame": 2760,
       "action": "collected",
-      "dropId": 43,
+      "dropId": 36,
       "kind": "card",
-      "cardType": "meteor",
+      "cardType": "arcSplitter",
       "star": 1
     },
     {
-      "frame": 2809,
+      "frame": 2797,
       "action": "spawned",
-      "dropId": 44,
+      "dropId": 37,
       "kind": "card",
-      "cardType": "decoy",
+      "cardType": "flashfire",
       "star": 1
     },
     {
-      "frame": 2820,
+      "frame": 2805,
       "action": "collected",
-      "dropId": 44,
+      "dropId": 37,
       "kind": "card",
-      "cardType": "decoy",
+      "cardType": "flashfire",
       "star": 1
     },
     {
-      "frame": 2847,
+      "frame": 2871,
       "action": "spawned",
-      "dropId": 45,
+      "dropId": 38,
       "kind": "card",
-      "cardType": "aegis",
+      "cardType": "pierce",
       "star": 1
     },
     {
-      "frame": 2850,
+      "frame": 2880,
       "action": "collected",
-      "dropId": 45,
+      "dropId": 38,
       "kind": "card",
-      "cardType": "aegis",
+      "cardType": "pierce",
       "star": 1
     },
     {
       "frame": 2895,
-      "action": "collected",
-      "dropId": 46,
+      "action": "spawned",
+      "dropId": 39,
       "kind": "card",
-      "cardType": "meteor",
+      "cardType": "flashfire",
       "star": 1
     },
     {
-      "frame": 2945,
-      "action": "spawned",
-      "dropId": 47,
+      "frame": 2910,
+      "action": "collected",
+      "dropId": 39,
       "kind": "card",
-      "cardType": "scorch",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 2943,
+      "action": "spawned",
+      "dropId": 40,
+      "kind": "card",
+      "cardType": "flashfire",
       "star": 1
     },
     {
       "frame": 2955,
       "action": "collected",
-      "dropId": 47,
+      "dropId": 40,
       "kind": "card",
-      "cardType": "scorch",
+      "cardType": "flashfire",
       "star": 1
     },
     {
-      "frame": 2987,
+      "frame": 2999,
       "action": "spawned",
-      "dropId": 48,
+      "dropId": 41,
       "kind": "card",
-      "cardType": "ashHarvest",
+      "cardType": "meteor",
       "star": 1
     },
     {
       "frame": 3000,
       "action": "collected",
+      "dropId": 41,
+      "kind": "card",
+      "cardType": "meteor",
+      "star": 1
+    },
+    {
+      "frame": 3035,
+      "action": "spawned",
+      "dropId": 42,
+      "kind": "card",
+      "cardType": "arcSplitter",
+      "star": 1
+    },
+    {
+      "frame": 3045,
+      "action": "collected",
+      "dropId": 42,
+      "kind": "card",
+      "cardType": "arcSplitter",
+      "star": 1
+    },
+    {
+      "frame": 3087,
+      "action": "spawned",
+      "dropId": 43,
+      "kind": "card",
+      "cardType": "chainLightning",
+      "star": 1
+    },
+    {
+      "frame": 3090,
+      "action": "collected",
+      "dropId": 43,
+      "kind": "card",
+      "cardType": "chainLightning",
+      "star": 1
+    },
+    {
+      "frame": 3129,
+      "action": "spawned",
+      "dropId": 44,
+      "kind": "card",
+      "cardType": "arcSplitter",
+      "star": 1
+    },
+    {
+      "frame": 3135,
+      "action": "collected",
+      "dropId": 44,
+      "kind": "card",
+      "cardType": "arcSplitter",
+      "star": 1
+    },
+    {
+      "frame": 3170,
+      "action": "spawned",
+      "dropId": 45,
+      "kind": "card",
+      "cardType": "meteor",
+      "star": 1
+    },
+    {
+      "frame": 3180,
+      "action": "collected",
+      "dropId": 45,
+      "kind": "card",
+      "cardType": "meteor",
+      "star": 1
+    },
+    {
+      "frame": 3220,
+      "action": "spawned",
+      "dropId": 46,
+      "kind": "card",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 3225,
+      "action": "collected",
+      "dropId": 46,
+      "kind": "card",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 3260,
+      "action": "spawned",
+      "dropId": 47,
+      "kind": "card",
+      "cardType": "chainLightning",
+      "star": 1
+    },
+    {
+      "frame": 3270,
+      "action": "collected",
+      "dropId": 47,
+      "kind": "card",
+      "cardType": "chainLightning",
+      "star": 1
+    },
+    {
+      "frame": 3317,
+      "action": "spawned",
       "dropId": 48,
       "kind": "card",
-      "cardType": "ashHarvest",
+      "cardType": "meteor",
       "star": 1
     },
     {
-      "frame": 3026,
+      "frame": 3330,
+      "action": "collected",
+      "dropId": 48,
+      "kind": "card",
+      "cardType": "meteor",
+      "star": 1
+    },
+    {
+      "frame": 3354,
       "action": "spawned",
       "dropId": 49,
       "kind": "card",
-      "cardType": "aegis",
+      "cardType": "pierce",
       "star": 1
     },
     {
-      "frame": 3030,
+      "frame": 3360,
       "action": "collected",
       "dropId": 49,
       "kind": "card",
-      "cardType": "aegis",
+      "cardType": "pierce",
       "star": 1
     },
     {
-      "frame": 3074,
+      "frame": 3399,
       "action": "spawned",
       "dropId": 50,
       "kind": "card",
-      "cardType": "scorch",
+      "cardType": "meteor",
       "star": 1
     },
     {
-      "frame": 3075,
+      "frame": 3405,
       "action": "collected",
       "dropId": 50,
       "kind": "card",
-      "cardType": "scorch",
+      "cardType": "meteor",
       "star": 1
     },
     {
-      "frame": 3105,
+      "frame": 3441,
+      "action": "spawned",
+      "dropId": 51,
+      "kind": "card",
+      "cardType": "meteor",
+      "star": 1
+    },
+    {
+      "frame": 3450,
       "action": "collected",
       "dropId": 51,
       "kind": "card",
-      "cardType": "decoy",
+      "cardType": "meteor",
       "star": 1
     },
     {
-      "frame": 3160,
+      "frame": 3496,
       "action": "spawned",
       "dropId": 52,
       "kind": "card",
-      "cardType": "thorns",
-      "star": 1
-    },
-    {
-      "frame": 3165,
-      "action": "collected",
-      "dropId": 52,
-      "kind": "card",
-      "cardType": "thorns",
-      "star": 1
-    },
-    {
-      "frame": 3201,
-      "action": "spawned",
-      "dropId": 53,
-      "kind": "card",
-      "cardType": "aegis",
-      "star": 1
-    },
-    {
-      "frame": 3210,
-      "action": "collected",
-      "dropId": 53,
-      "kind": "card",
-      "cardType": "aegis",
-      "star": 1
-    },
-    {
-      "frame": 3240,
-      "action": "collected",
-      "dropId": 54,
-      "kind": "card",
-      "cardType": "meteor",
-      "star": 1
-    },
-    {
-      "frame": 3287,
-      "action": "spawned",
-      "dropId": 55,
-      "kind": "card",
-      "cardType": "ashHarvest",
-      "star": 1
-    },
-    {
-      "frame": 3300,
-      "action": "collected",
-      "dropId": 55,
-      "kind": "card",
-      "cardType": "ashHarvest",
-      "star": 1
-    },
-    {
-      "frame": 3335,
-      "action": "spawned",
-      "dropId": 56,
-      "kind": "card",
-      "cardType": "meteor",
-      "star": 1
-    },
-    {
-      "frame": 3345,
-      "action": "collected",
-      "dropId": 56,
-      "kind": "card",
-      "cardType": "meteor",
-      "star": 1
-    },
-    {
-      "frame": 3367,
-      "action": "spawned",
-      "dropId": 57,
-      "kind": "card",
-      "cardType": "scorch",
-      "star": 1
-    },
-    {
-      "frame": 3375,
-      "action": "collected",
-      "dropId": 57,
-      "kind": "card",
-      "cardType": "scorch",
-      "star": 1
-    },
-    {
-      "frame": 3407,
-      "action": "spawned",
-      "dropId": 58,
-      "kind": "card",
-      "cardType": "meteor",
-      "star": 1
-    },
-    {
-      "frame": 3420,
-      "action": "collected",
-      "dropId": 58,
-      "kind": "card",
-      "cardType": "meteor",
-      "star": 1
-    },
-    {
-      "frame": 3458,
-      "action": "spawned",
-      "dropId": 59,
-      "kind": "card",
-      "cardType": "decoy",
-      "star": 1
-    },
-    {
-      "frame": 3465,
-      "action": "collected",
-      "dropId": 59,
-      "kind": "card",
-      "cardType": "decoy",
-      "star": 1
-    },
-    {
-      "frame": 3502,
-      "action": "spawned",
-      "dropId": 60,
-      "kind": "card",
-      "cardType": "aegis",
+      "cardType": "arcSplitter",
       "star": 1
     },
     {
       "frame": 3510,
       "action": "collected",
-      "dropId": 60,
+      "dropId": 52,
       "kind": "card",
-      "cardType": "aegis",
+      "cardType": "arcSplitter",
       "star": 1
     },
     {
-      "frame": 3558,
+      "frame": 3530,
       "action": "spawned",
-      "dropId": 61,
+      "dropId": 53,
       "kind": "card",
-      "cardType": "scorch",
+      "cardType": "flashfire",
       "star": 1
     },
     {
-      "frame": 3570,
+      "frame": 3540,
       "action": "collected",
-      "dropId": 61,
+      "dropId": 53,
       "kind": "card",
-      "cardType": "scorch",
+      "cardType": "flashfire",
       "star": 1
     },
     {
-      "frame": 3588,
+      "frame": 3586,
       "action": "spawned",
-      "dropId": 62,
+      "dropId": 54,
       "kind": "card",
-      "cardType": "thorns",
+      "cardType": "chainLightning",
       "star": 1
     },
     {
       "frame": 3600,
       "action": "collected",
+      "dropId": 54,
+      "kind": "card",
+      "cardType": "chainLightning",
+      "star": 1
+    },
+    {
+      "frame": 3629,
+      "action": "spawned",
+      "dropId": 55,
+      "kind": "card",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 3630,
+      "action": "collected",
+      "dropId": 55,
+      "kind": "card",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 3671,
+      "action": "spawned",
+      "dropId": 56,
+      "kind": "card",
+      "cardType": "pierce",
+      "star": 1
+    },
+    {
+      "frame": 3675,
+      "action": "collected",
+      "dropId": 56,
+      "kind": "card",
+      "cardType": "pierce",
+      "star": 1
+    },
+    {
+      "frame": 3712,
+      "action": "spawned",
+      "dropId": 57,
+      "kind": "card",
+      "cardType": "meteor",
+      "star": 1
+    },
+    {
+      "frame": 3720,
+      "action": "collected",
+      "dropId": 57,
+      "kind": "card",
+      "cardType": "meteor",
+      "star": 1
+    },
+    {
+      "frame": 3760,
+      "action": "spawned",
+      "dropId": 58,
+      "kind": "card",
+      "cardType": "pierce",
+      "star": 1
+    },
+    {
+      "frame": 3765,
+      "action": "collected",
+      "dropId": 58,
+      "kind": "card",
+      "cardType": "pierce",
+      "star": 1
+    },
+    {
+      "frame": 3832,
+      "action": "spawned",
+      "dropId": 59,
+      "kind": "card",
+      "cardType": "arcSplitter",
+      "star": 1
+    },
+    {
+      "frame": 3840,
+      "action": "collected",
+      "dropId": 59,
+      "kind": "card",
+      "cardType": "arcSplitter",
+      "star": 1
+    },
+    {
+      "frame": 3855,
+      "action": "spawned",
+      "dropId": 60,
+      "kind": "card",
+      "cardType": "chainLightning",
+      "star": 1
+    },
+    {
+      "frame": 3870,
+      "action": "collected",
+      "dropId": 60,
+      "kind": "card",
+      "cardType": "chainLightning",
+      "star": 1
+    },
+    {
+      "frame": 3913,
+      "action": "spawned",
+      "dropId": 61,
+      "kind": "card",
+      "cardType": "pierce",
+      "star": 1
+    },
+    {
+      "frame": 3915,
+      "action": "collected",
+      "dropId": 61,
+      "kind": "card",
+      "cardType": "pierce",
+      "star": 1
+    },
+    {
+      "frame": 3947,
+      "action": "spawned",
       "dropId": 62,
       "kind": "card",
-      "cardType": "thorns",
+      "cardType": "scorch",
       "star": 1
     },
     {
-      "frame": 3638,
+      "frame": 3960,
+      "action": "collected",
+      "dropId": 62,
+      "kind": "card",
+      "cardType": "scorch",
+      "star": 1
+    },
+    {
+      "frame": 4007,
       "action": "spawned",
       "dropId": 63,
       "kind": "card",
@@ -1084,7 +1094,7 @@
       "star": 1
     },
     {
-      "frame": 3645,
+      "frame": 4020,
       "action": "collected",
       "dropId": 63,
       "kind": "card",
@@ -1092,113 +1102,241 @@
       "star": 1
     },
     {
-      "frame": 3680,
+      "frame": 4049,
       "action": "spawned",
       "dropId": 64,
+      "kind": "card",
+      "cardType": "chainLightning",
+      "star": 1
+    },
+    {
+      "frame": 4050,
+      "action": "collected",
+      "dropId": 64,
+      "kind": "card",
+      "cardType": "chainLightning",
+      "star": 1
+    },
+    {
+      "frame": 4084,
+      "action": "spawned",
+      "dropId": 65,
+      "kind": "card",
+      "cardType": "arcSplitter",
+      "star": 1
+    },
+    {
+      "frame": 4095,
+      "action": "collected",
+      "dropId": 65,
+      "kind": "card",
+      "cardType": "arcSplitter",
+      "star": 1
+    },
+    {
+      "frame": 4160,
+      "action": "spawned",
+      "dropId": 66,
       "kind": "card",
       "cardType": "meteor",
       "star": 1
     },
     {
-      "frame": 3690,
+      "frame": 4170,
       "action": "collected",
-      "dropId": 64,
+      "dropId": 66,
       "kind": "card",
       "cardType": "meteor",
       "star": 1
     },
     {
-      "frame": 3724,
-      "action": "spawned",
-      "dropId": 65,
-      "kind": "card",
-      "cardType": "decoy",
-      "star": 1
-    },
-    {
-      "frame": 3735,
-      "action": "collected",
-      "dropId": 65,
-      "kind": "card",
-      "cardType": "decoy",
-      "star": 1
-    },
-    {
-      "frame": 3767,
-      "action": "spawned",
-      "dropId": 66,
-      "kind": "card",
-      "cardType": "thorns",
-      "star": 1
-    },
-    {
-      "frame": 3780,
-      "action": "collected",
-      "dropId": 66,
-      "kind": "card",
-      "cardType": "thorns",
-      "star": 1
-    },
-    {
-      "frame": 3884,
+      "frame": 4418,
       "action": "spawned",
       "dropId": 67,
-      "kind": "card",
-      "cardType": "ashHarvest",
-      "star": 1
-    },
-    {
-      "frame": 3885,
-      "action": "collected",
-      "dropId": 67,
-      "kind": "card",
-      "cardType": "ashHarvest",
-      "star": 1
-    },
-    {
-      "frame": 3965,
-      "action": "spawned",
-      "dropId": 68,
-      "kind": "card",
-      "cardType": "scorch",
-      "star": 1
-    },
-    {
-      "frame": 3975,
-      "action": "collected",
-      "dropId": 68,
-      "kind": "card",
-      "cardType": "scorch",
-      "star": 1
-    },
-    {
-      "frame": 4191,
-      "action": "spawned",
-      "dropId": 69,
       "kind": "wildcard",
       "cardType": null,
       "star": 2
     },
     {
-      "frame": 4825,
+      "frame": 4970,
+      "action": "spawned",
+      "dropId": 68,
+      "kind": "card",
+      "cardType": "luckyStar",
+      "star": 1
+    },
+    {
+      "frame": 4970,
+      "action": "spawned",
+      "dropId": 69,
+      "kind": "card",
+      "cardType": "luckyStar",
+      "star": 1
+    },
+    {
+      "frame": 4970,
       "action": "spawned",
       "dropId": 70,
       "kind": "card",
-      "cardType": "chainLightning",
-      "star": 4
+      "cardType": "splitBlast",
+      "star": 1
     },
     {
-      "frame": 4830,
+      "frame": 4970,
+      "action": "spawned",
+      "dropId": 71,
+      "kind": "card",
+      "cardType": "harvest",
+      "star": 1
+    },
+    {
+      "frame": 4980,
+      "action": "collected",
+      "dropId": 68,
+      "kind": "card",
+      "cardType": "luckyStar",
+      "star": 1
+    },
+    {
+      "frame": 4995,
+      "action": "collected",
+      "dropId": 69,
+      "kind": "card",
+      "cardType": "luckyStar",
+      "star": 1
+    },
+    {
+      "frame": 5000,
+      "action": "spawned",
+      "dropId": 72,
+      "kind": "card",
+      "cardType": "fateLoom",
+      "star": 1
+    },
+    {
+      "frame": 5000,
+      "action": "spawned",
+      "dropId": 73,
+      "kind": "card",
+      "cardType": "fateLoom",
+      "star": 1
+    },
+    {
+      "frame": 5010,
       "action": "collected",
       "dropId": 70,
       "kind": "card",
-      "cardType": "chainLightning",
-      "star": 4
+      "cardType": "splitBlast",
+      "star": 1
     },
     {
-      "frame": 5082,
-      "action": "spawned",
+      "frame": 5040,
+      "action": "collected",
       "dropId": 71,
+      "kind": "card",
+      "cardType": "harvest",
+      "star": 1
+    },
+    {
+      "frame": 5060,
+      "action": "spawned",
+      "dropId": 74,
+      "kind": "card",
+      "cardType": "harvest",
+      "star": 1
+    },
+    {
+      "frame": 5070,
+      "action": "collected",
+      "dropId": 72,
+      "kind": "card",
+      "cardType": "fateLoom",
+      "star": 1
+    },
+    {
+      "frame": 5085,
+      "action": "collected",
+      "dropId": 73,
+      "kind": "card",
+      "cardType": "fateLoom",
+      "star": 1
+    },
+    {
+      "frame": 5090,
+      "action": "spawned",
+      "dropId": 75,
+      "kind": "card",
+      "cardType": "ashHarvest",
+      "star": 1
+    },
+    {
+      "frame": 5090,
+      "action": "spawned",
+      "dropId": 76,
+      "kind": "card",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 5100,
+      "action": "collected",
+      "dropId": 74,
+      "kind": "card",
+      "cardType": "harvest",
+      "star": 1
+    },
+    {
+      "frame": 5120,
+      "action": "spawned",
+      "dropId": 77,
+      "kind": "card",
+      "cardType": "harvest",
+      "star": 1
+    },
+    {
+      "frame": 5130,
+      "action": "collected",
+      "dropId": 75,
+      "kind": "card",
+      "cardType": "ashHarvest",
+      "star": 1
+    },
+    {
+      "frame": 5160,
+      "action": "collected",
+      "dropId": 76,
+      "kind": "card",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 5190,
+      "action": "collected",
+      "dropId": 77,
+      "kind": "card",
+      "cardType": "harvest",
+      "star": 1
+    },
+    {
+      "frame": 5210,
+      "action": "spawned",
+      "dropId": 78,
+      "kind": "card",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 5220,
+      "action": "collected",
+      "dropId": 78,
+      "kind": "card",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 5582,
+      "action": "spawned",
+      "dropId": 79,
       "kind": "wildcard",
       "cardType": null,
       "star": 5
@@ -1395,6 +1533,10 @@
     },
     {
       "frame": 963,
+      "type": "bountyOfferSpawned"
+    },
+    {
+      "frame": 963,
       "type": "relicSelected"
     },
     {
@@ -1406,135 +1548,111 @@
       "type": "skillConsumed"
     },
     {
-      "frame": 990,
+      "frame": 1035,
       "type": "collected"
     },
     {
-      "frame": 1010,
+      "frame": 1040,
       "type": "skillConsumed"
     },
     {
-      "frame": 1050,
+      "frame": 1065,
       "type": "collected"
     },
     {
-      "frame": 1070,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 1095,
-      "type": "collected"
-    },
-    {
-      "frame": 1100,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 1125,
-      "type": "collected"
-    },
-    {
-      "frame": 1130,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 1185,
-      "type": "collected"
-    },
-    {
-      "frame": 1185,
+      "frame": 1065,
       "type": "merged"
     },
     {
-      "frame": 1185,
+      "frame": 1065,
       "type": "merged"
     },
     {
-      "frame": 1185,
+      "frame": 1065,
       "type": "evolutionBranchOffered"
     },
     {
-      "frame": 1185,
+      "frame": 1065,
       "type": "decisionOffered"
     },
     {
-      "frame": 1186,
+      "frame": 1066,
       "type": "evolutionBranchSelected"
     },
     {
-      "frame": 1186,
+      "frame": 1066,
       "type": "decisionResolved"
     },
     {
-      "frame": 1204,
-      "type": "bountyOfferSpawned"
-    },
-    {
-      "frame": 1275,
+      "frame": 1140,
       "type": "collected"
     },
     {
-      "frame": 1305,
-      "type": "collected"
-    },
-    {
-      "frame": 1305,
-      "type": "merged"
-    },
-    {
-      "frame": 1305,
-      "type": "merged"
-    },
-    {
-      "frame": 1305,
-      "type": "evolutionBranchOffered"
-    },
-    {
-      "frame": 1305,
-      "type": "decisionOffered"
-    },
-    {
-      "frame": 1306,
-      "type": "evolutionBranchSelected"
-    },
-    {
-      "frame": 1306,
-      "type": "decisionResolved"
-    },
-    {
-      "frame": 1365,
-      "type": "collected"
-    },
-    {
-      "frame": 1440,
-      "type": "collected"
-    },
-    {
-      "frame": 1440,
-      "type": "merged"
-    },
-    {
-      "frame": 1446,
+      "frame": 1205,
       "type": "bountyOfferExpired"
     },
     {
-      "frame": 1448,
-      "type": "levelUp"
+      "frame": 1245,
+      "type": "collected"
     },
     {
-      "frame": 1448,
-      "type": "relicOffered"
+      "frame": 1250,
+      "type": "skillConsumed"
     },
     {
-      "frame": 1448,
+      "frame": 1320,
+      "type": "collected"
+    },
+    {
+      "frame": 1340,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 1350,
+      "type": "collected"
+    },
+    {
+      "frame": 1350,
+      "type": "merged"
+    },
+    {
+      "frame": 1350,
+      "type": "merged"
+    },
+    {
+      "frame": 1350,
+      "type": "evolutionBranchOffered"
+    },
+    {
+      "frame": 1350,
       "type": "decisionOffered"
     },
     {
-      "frame": 1448,
+      "frame": 1351,
+      "type": "evolutionBranchSelected"
+    },
+    {
+      "frame": 1351,
+      "type": "decisionResolved"
+    },
+    {
+      "frame": 1456,
+      "type": "levelUp"
+    },
+    {
+      "frame": 1456,
+      "type": "relicOffered"
+    },
+    {
+      "frame": 1456,
+      "type": "decisionOffered"
+    },
+    {
+      "frame": 1456,
       "type": "relicSelected"
     },
     {
-      "frame": 1448,
+      "frame": 1456,
       "type": "decisionResolved"
     },
     {
@@ -1542,23 +1660,11 @@
       "type": "collected"
     },
     {
-      "frame": 1490,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 1560,
+      "frame": 1545,
       "type": "collected"
     },
     {
-      "frame": 1580,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 1620,
-      "type": "collected"
-    },
-    {
-      "frame": 1640,
+      "frame": 1550,
       "type": "skillConsumed"
     },
     {
@@ -1566,16 +1672,32 @@
       "type": "collected"
     },
     {
-      "frame": 1670,
-      "type": "skillConsumed"
+      "frame": 1650,
+      "type": "merged"
     },
     {
-      "frame": 1725,
+      "frame": 1650,
+      "type": "merged"
+    },
+    {
+      "frame": 1650,
+      "type": "evolutionBranchOffered"
+    },
+    {
+      "frame": 1650,
+      "type": "decisionOffered"
+    },
+    {
+      "frame": 1651,
+      "type": "evolutionBranchSelected"
+    },
+    {
+      "frame": 1651,
+      "type": "decisionResolved"
+    },
+    {
+      "frame": 1680,
       "type": "collected"
-    },
-    {
-      "frame": 1730,
-      "type": "skillConsumed"
     },
     {
       "frame": 1785,
@@ -1586,12 +1708,12 @@
       "type": "skillConsumed"
     },
     {
-      "frame": 1875,
+      "frame": 1845,
       "type": "collected"
     },
     {
-      "frame": 1880,
-      "type": "skillConsumed"
+      "frame": 1845,
+      "type": "merged"
     },
     {
       "frame": 1905,
@@ -1602,11 +1724,11 @@
       "type": "skillConsumed"
     },
     {
-      "frame": 1965,
+      "frame": 1995,
       "type": "collected"
     },
     {
-      "frame": 1970,
+      "frame": 2000,
       "type": "skillConsumed"
     },
     {
@@ -1618,224 +1740,200 @@
       "type": "skillConsumed"
     },
     {
-      "frame": 2094,
+      "frame": 2085,
+      "type": "collected"
+    },
+    {
+      "frame": 2090,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 2145,
+      "type": "collected"
+    },
+    {
+      "frame": 2150,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 2188,
       "type": "waveBossSpawned"
     },
     {
-      "frame": 2100,
+      "frame": 2190,
       "type": "collected"
     },
     {
-      "frame": 2120,
+      "frame": 2210,
       "type": "skillConsumed"
     },
     {
-      "frame": 2248,
+      "frame": 2451,
       "type": "levelUp"
     },
     {
-      "frame": 2248,
+      "frame": 2451,
       "type": "relicOffered"
     },
     {
-      "frame": 2248,
+      "frame": 2451,
       "type": "decisionOffered"
     },
     {
-      "frame": 2248,
+      "frame": 2451,
       "type": "relicSelected"
     },
     {
-      "frame": 2248,
+      "frame": 2451,
       "type": "decisionResolved"
     },
     {
-      "frame": 2250,
+      "frame": 2460,
       "type": "wildcardsGranted"
     },
     {
-      "frame": 2250,
+      "frame": 2460,
       "type": "bossRewardGranted"
     },
     {
-      "frame": 2251,
+      "frame": 2461,
       "type": "waveCleared"
     },
     {
-      "frame": 2252,
+      "frame": 2462,
       "type": "waveRewardsGranted"
     },
     {
-      "frame": 2268,
+      "frame": 2478,
       "type": "godOffer"
     },
     {
-      "frame": 2268,
+      "frame": 2478,
       "type": "decisionOffered"
     },
     {
-      "frame": 2268,
+      "frame": 2478,
       "type": "godSelected"
     },
     {
-      "frame": 2268,
+      "frame": 2478,
       "type": "decisionResolved"
     },
     {
-      "frame": 2269,
+      "frame": 2479,
       "type": "waveBaseRewardOffered"
     },
     {
-      "frame": 2269,
+      "frame": 2479,
       "type": "decisionOffered"
     },
     {
-      "frame": 2269,
+      "frame": 2479,
       "type": "waveBaseRewardChosen"
     },
     {
-      "frame": 2269,
+      "frame": 2479,
       "type": "decisionResolved"
     },
     {
-      "frame": 2290,
+      "frame": 2500,
       "type": "intermissionReady"
     },
     {
-      "frame": 2291,
+      "frame": 2501,
       "type": "waveStart"
     },
     {
-      "frame": 2291,
+      "frame": 2501,
       "type": "activePoolCreated"
-    },
-    {
-      "frame": 2460,
-      "type": "collected"
-    },
-    {
-      "frame": 2460,
-      "type": "affixRolled"
-    },
-    {
-      "frame": 2480,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 2490,
-      "type": "collected"
-    },
-    {
-      "frame": 2490,
-      "type": "affixRolled"
-    },
-    {
-      "frame": 2510,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 2550,
-      "type": "collected"
-    },
-    {
-      "frame": 2550,
-      "type": "affixRolled"
-    },
-    {
-      "frame": 2570,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 2595,
-      "type": "collected"
-    },
-    {
-      "frame": 2600,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 2640,
-      "type": "collected"
-    },
-    {
-      "frame": 2652,
-      "type": "bountyOfferSpawned"
-    },
-    {
-      "frame": 2660,
-      "type": "skillConsumed"
     },
     {
       "frame": 2685,
       "type": "collected"
     },
     {
+      "frame": 2685,
+      "type": "affixRolled"
+    },
+    {
       "frame": 2690,
       "type": "skillConsumed"
     },
     {
-      "frame": 2704,
-      "type": "levelUp"
-    },
-    {
-      "frame": 2704,
-      "type": "relicOffered"
-    },
-    {
-      "frame": 2704,
-      "type": "decisionOffered"
-    },
-    {
-      "frame": 2704,
-      "type": "relicSelected"
-    },
-    {
-      "frame": 2704,
-      "type": "decisionResolved"
-    },
-    {
-      "frame": 2730,
+      "frame": 2700,
       "type": "collected"
     },
     {
-      "frame": 2750,
+      "frame": 2700,
+      "type": "affixRolled"
+    },
+    {
+      "frame": 2720,
       "type": "skillConsumed"
     },
     {
-      "frame": 2775,
+      "frame": 2760,
       "type": "collected"
+    },
+    {
+      "frame": 2760,
+      "type": "affixRolled"
     },
     {
       "frame": 2780,
       "type": "skillConsumed"
     },
     {
-      "frame": 2820,
+      "frame": 2805,
       "type": "collected"
     },
     {
-      "frame": 2840,
+      "frame": 2810,
       "type": "skillConsumed"
     },
     {
-      "frame": 2850,
+      "frame": 2862,
+      "type": "bountyOfferSpawned"
+    },
+    {
+      "frame": 2880,
       "type": "collected"
-    },
-    {
-      "frame": 2870,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 2893,
-      "type": "bountyOfferExpired"
     },
     {
       "frame": 2895,
-      "type": "collected"
+      "type": "cardsFull"
     },
     {
       "frame": 2900,
       "type": "skillConsumed"
+    },
+    {
+      "frame": 2910,
+      "type": "collected"
+    },
+    {
+      "frame": 2930,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 2943,
+      "type": "levelUp"
+    },
+    {
+      "frame": 2943,
+      "type": "relicOffered"
+    },
+    {
+      "frame": 2943,
+      "type": "decisionOffered"
+    },
+    {
+      "frame": 2943,
+      "type": "relicSelected"
+    },
+    {
+      "frame": 2943,
+      "type": "decisionResolved"
     },
     {
       "frame": 2955,
@@ -1854,7 +1952,7 @@
       "type": "skillConsumed"
     },
     {
-      "frame": 3030,
+      "frame": 3045,
       "type": "collected"
     },
     {
@@ -1862,55 +1960,35 @@
       "type": "skillConsumed"
     },
     {
-      "frame": 3075,
+      "frame": 3090,
       "type": "collected"
     },
     {
-      "frame": 3080,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 3081,
-      "type": "levelUp"
-    },
-    {
-      "frame": 3081,
-      "type": "relicOffered"
-    },
-    {
-      "frame": 3081,
-      "type": "decisionOffered"
-    },
-    {
-      "frame": 3081,
-      "type": "relicSelected"
-    },
-    {
-      "frame": 3081,
-      "type": "decisionResolved"
-    },
-    {
-      "frame": 3105,
-      "type": "collected"
+      "frame": 3103,
+      "type": "bountyOfferExpired"
     },
     {
       "frame": 3110,
       "type": "skillConsumed"
     },
     {
-      "frame": 3132,
-      "type": "bountyOfferSpawned"
-    },
-    {
-      "frame": 3165,
+      "frame": 3135,
       "type": "collected"
     },
     {
-      "frame": 3170,
+      "frame": 3140,
       "type": "skillConsumed"
     },
     {
-      "frame": 3210,
+      "frame": 3180,
+      "type": "collected"
+    },
+    {
+      "frame": 3200,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 3225,
       "type": "collected"
     },
     {
@@ -1918,23 +1996,15 @@
       "type": "skillConsumed"
     },
     {
-      "frame": 3240,
+      "frame": 3270,
       "type": "collected"
     },
     {
-      "frame": 3260,
+      "frame": 3290,
       "type": "skillConsumed"
     },
     {
-      "frame": 3300,
-      "type": "collected"
-    },
-    {
-      "frame": 3320,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 3345,
+      "frame": 3330,
       "type": "collected"
     },
     {
@@ -1942,11 +2012,7 @@
       "type": "skillConsumed"
     },
     {
-      "frame": 3373,
-      "type": "bountyOfferExpired"
-    },
-    {
-      "frame": 3375,
+      "frame": 3360,
       "type": "collected"
     },
     {
@@ -1954,15 +2020,35 @@
       "type": "skillConsumed"
     },
     {
-      "frame": 3420,
+      "frame": 3405,
+      "type": "levelUp"
+    },
+    {
+      "frame": 3405,
+      "type": "relicOffered"
+    },
+    {
+      "frame": 3405,
+      "type": "decisionOffered"
+    },
+    {
+      "frame": 3405,
+      "type": "relicSelected"
+    },
+    {
+      "frame": 3405,
+      "type": "decisionResolved"
+    },
+    {
+      "frame": 3405,
       "type": "collected"
     },
     {
-      "frame": 3440,
+      "frame": 3410,
       "type": "skillConsumed"
     },
     {
-      "frame": 3465,
+      "frame": 3450,
       "type": "collected"
     },
     {
@@ -1978,11 +2064,11 @@
       "type": "skillConsumed"
     },
     {
-      "frame": 3570,
+      "frame": 3540,
       "type": "collected"
     },
     {
-      "frame": 3590,
+      "frame": 3560,
       "type": "skillConsumed"
     },
     {
@@ -1994,7 +2080,7 @@
       "type": "skillConsumed"
     },
     {
-      "frame": 3645,
+      "frame": 3630,
       "type": "collected"
     },
     {
@@ -2002,35 +2088,15 @@
       "type": "skillConsumed"
     },
     {
-      "frame": 3665,
-      "type": "levelUp"
-    },
-    {
-      "frame": 3665,
-      "type": "relicOffered"
-    },
-    {
-      "frame": 3665,
-      "type": "decisionOffered"
-    },
-    {
-      "frame": 3665,
-      "type": "relicSelected"
-    },
-    {
-      "frame": 3665,
-      "type": "decisionResolved"
-    },
-    {
-      "frame": 3690,
+      "frame": 3675,
       "type": "collected"
     },
     {
-      "frame": 3710,
+      "frame": 3680,
       "type": "skillConsumed"
     },
     {
-      "frame": 3735,
+      "frame": 3720,
       "type": "collected"
     },
     {
@@ -2038,160 +2104,360 @@
       "type": "skillConsumed"
     },
     {
-      "frame": 3780,
+      "frame": 3765,
       "type": "collected"
     },
     {
-      "frame": 3800,
+      "frame": 3770,
       "type": "skillConsumed"
     },
     {
-      "frame": 3885,
+      "frame": 3840,
       "type": "collected"
+    },
+    {
+      "frame": 3855,
+      "type": "cardsFull"
+    },
+    {
+      "frame": 3860,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 3870,
+      "type": "collected"
+    },
+    {
+      "frame": 3876,
+      "type": "levelUp"
+    },
+    {
+      "frame": 3876,
+      "type": "relicOffered"
+    },
+    {
+      "frame": 3876,
+      "type": "decisionOffered"
+    },
+    {
+      "frame": 3876,
+      "type": "relicSelected"
+    },
+    {
+      "frame": 3876,
+      "type": "decisionResolved"
     },
     {
       "frame": 3890,
       "type": "skillConsumed"
     },
     {
-      "frame": 3975,
+      "frame": 3915,
       "type": "collected"
     },
     {
-      "frame": 3976,
-      "type": "waveBossSpawned"
+      "frame": 3920,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 3960,
+      "type": "collected"
     },
     {
       "frame": 3980,
       "type": "skillConsumed"
     },
     {
-      "frame": 4200,
-      "type": "wildcardsGranted"
-    },
-    {
-      "frame": 4200,
-      "type": "bossRewardGranted"
-    },
-    {
-      "frame": 4201,
-      "type": "waveCleared"
-    },
-    {
-      "frame": 4202,
-      "type": "waveRewardsGranted"
-    },
-    {
-      "frame": 4218,
-      "type": "godOffer"
-    },
-    {
-      "frame": 4218,
-      "type": "decisionOffered"
-    },
-    {
-      "frame": 4218,
-      "type": "godSelected"
-    },
-    {
-      "frame": 4218,
-      "type": "runRosterCreated"
-    },
-    {
-      "frame": 4218,
-      "type": "decisionResolved"
-    },
-    {
-      "frame": 4219,
-      "type": "waveBaseRewardOffered"
-    },
-    {
-      "frame": 4219,
-      "type": "decisionOffered"
-    },
-    {
-      "frame": 4219,
-      "type": "waveBaseRewardChosen"
-    },
-    {
-      "frame": 4219,
-      "type": "decisionResolved"
-    },
-    {
-      "frame": 4240,
-      "type": "intermissionReady"
-    },
-    {
-      "frame": 4241,
-      "type": "waveStart"
-    },
-    {
-      "frame": 4241,
-      "type": "activePoolCreated"
-    },
-    {
-      "frame": 4825,
-      "type": "waveBossSpawned"
-    },
-    {
-      "frame": 4830,
+      "frame": 4020,
       "type": "collected"
     },
     {
-      "frame": 4830,
-      "type": "affixRolled"
-    },
-    {
-      "frame": 4830,
-      "type": "evolutionBranchOffered"
-    },
-    {
-      "frame": 4830,
-      "type": "decisionOffered"
-    },
-    {
-      "frame": 4831,
-      "type": "evolutionBranchSelected"
-    },
-    {
-      "frame": 4831,
-      "type": "decisionResolved"
-    },
-    {
-      "frame": 4850,
+      "frame": 4040,
       "type": "skillConsumed"
     },
     {
-      "frame": 5085,
+      "frame": 4050,
+      "type": "collected"
+    },
+    {
+      "frame": 4070,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 4095,
+      "type": "collected"
+    },
+    {
+      "frame": 4100,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 4160,
+      "type": "waveBossSpawned"
+    },
+    {
+      "frame": 4170,
+      "type": "collected"
+    },
+    {
+      "frame": 4190,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 4425,
       "type": "wildcardsGranted"
     },
     {
-      "frame": 5085,
+      "frame": 4425,
       "type": "bossRewardGranted"
     },
     {
-      "frame": 5086,
+      "frame": 4426,
+      "type": "waveCleared"
+    },
+    {
+      "frame": 4427,
+      "type": "waveRewardsGranted"
+    },
+    {
+      "frame": 4443,
+      "type": "godOffer"
+    },
+    {
+      "frame": 4443,
+      "type": "decisionOffered"
+    },
+    {
+      "frame": 4443,
+      "type": "godSelected"
+    },
+    {
+      "frame": 4443,
+      "type": "runRosterCreated"
+    },
+    {
+      "frame": 4443,
+      "type": "decisionResolved"
+    },
+    {
+      "frame": 4443,
+      "type": "decisionOffered"
+    },
+    {
+      "frame": 4443,
+      "type": "decisionResolved"
+    },
+    {
+      "frame": 4444,
+      "type": "waveBaseRewardOffered"
+    },
+    {
+      "frame": 4444,
+      "type": "decisionOffered"
+    },
+    {
+      "frame": 4444,
+      "type": "waveBaseRewardChosen"
+    },
+    {
+      "frame": 4444,
+      "type": "decisionResolved"
+    },
+    {
+      "frame": 4450,
+      "type": "intermissionReady"
+    },
+    {
+      "frame": 4451,
+      "type": "waveStart"
+    },
+    {
+      "frame": 4451,
+      "type": "activePoolCreated"
+    },
+    {
+      "frame": 4962,
+      "type": "validationRewardGranted"
+    },
+    {
+      "frame": 4962,
+      "type": "affixRolled"
+    },
+    {
+      "frame": 4962,
+      "type": "evolutionBranchOffered"
+    },
+    {
+      "frame": 4962,
+      "type": "decisionOffered"
+    },
+    {
+      "frame": 4962,
+      "type": "validationRewardSettleStarted"
+    },
+    {
+      "frame": 4962,
+      "type": "evolutionBranchSelected"
+    },
+    {
+      "frame": 4962,
+      "type": "decisionResolved"
+    },
+    {
+      "frame": 4970,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 4980,
+      "type": "collected"
+    },
+    {
+      "frame": 4980,
+      "type": "affixRolled"
+    },
+    {
+      "frame": 4995,
+      "type": "collected"
+    },
+    {
+      "frame": 4995,
+      "type": "merged"
+    },
+    {
+      "frame": 5000,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 5010,
+      "type": "collected"
+    },
+    {
+      "frame": 5025,
+      "type": "cardsFull"
+    },
+    {
+      "frame": 5030,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 5040,
+      "type": "collected"
+    },
+    {
+      "frame": 5055,
+      "type": "cardsFull"
+    },
+    {
+      "frame": 5060,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 5070,
+      "type": "collected"
+    },
+    {
+      "frame": 5070,
+      "type": "affixRolled"
+    },
+    {
+      "frame": 5085,
+      "type": "collected"
+    },
+    {
+      "frame": 5085,
+      "type": "merged"
+    },
+    {
+      "frame": 5090,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 5100,
+      "type": "collected"
+    },
+    {
+      "frame": 5115,
+      "type": "cardsFull"
+    },
+    {
+      "frame": 5120,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 5130,
+      "type": "collected"
+    },
+    {
+      "frame": 5145,
+      "type": "cardsFull"
+    },
+    {
+      "frame": 5150,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 5160,
+      "type": "collected"
+    },
+    {
+      "frame": 5175,
+      "type": "cardsFull"
+    },
+    {
+      "frame": 5180,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 5190,
+      "type": "collected"
+    },
+    {
+      "frame": 5210,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 5220,
+      "type": "collected"
+    },
+    {
+      "frame": 5240,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 5323,
+      "type": "waveBossSpawned"
+    },
+    {
+      "frame": 5595,
+      "type": "wildcardsGranted"
+    },
+    {
+      "frame": 5595,
+      "type": "bossRewardGranted"
+    },
+    {
+      "frame": 5596,
       "type": "gameEnd"
     }
   ],
   "eventCounts": {
     "godOffer": 3,
-    "decisionOffered": 16,
+    "decisionOffered": 18,
     "godSelected": 3,
-    "decisionResolved": 16,
+    "decisionResolved": 18,
     "waveStart": 3,
     "activePoolCreated": 3,
-    "collected": 68,
-    "affixRolled": 9,
-    "bountyOfferSpawned": 4,
-    "merged": 10,
+    "collected": 76,
+    "affixRolled": 11,
+    "bountyOfferSpawned": 3,
+    "merged": 14,
     "levelUp": 8,
     "relicOffered": 8,
     "relicSelected": 8,
-    "bountyOfferExpired": 4,
-    "skillConsumed": 52,
-    "evolutionBranchOffered": 3,
-    "evolutionBranchSelected": 3,
+    "bountyOfferExpired": 3,
+    "skillConsumed": 57,
+    "evolutionBranchOffered": 4,
+    "evolutionBranchSelected": 4,
     "waveBossSpawned": 3,
     "wildcardsGranted": 3,
     "bossRewardGranted": 3,
@@ -2200,11 +2466,14 @@
     "waveBaseRewardOffered": 2,
     "waveBaseRewardChosen": 2,
     "intermissionReady": 2,
+    "cardsFull": 7,
     "runRosterCreated": 1,
+    "validationRewardGranted": 1,
+    "validationRewardSettleStarted": 1,
     "gameEnd": 1
   },
   "rng": {
-    "draws": 19776,
-    "last": 0.4603842101059854
+    "draws": 21427,
+    "last": 0.607704324182123
   }
 }
