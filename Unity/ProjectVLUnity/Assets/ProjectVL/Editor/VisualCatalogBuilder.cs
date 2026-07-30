@@ -50,9 +50,12 @@ namespace ProjectVL.Editor
             "default",
             "hit",
             "death",
+            "death.boss",
+            "boss.spawn",
             "boss.phase",
             "drop.land",
             "drop.pickup",
+            "hook",
             "card.cast"
         };
 

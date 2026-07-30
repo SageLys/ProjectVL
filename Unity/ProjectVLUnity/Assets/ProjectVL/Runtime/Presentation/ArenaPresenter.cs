@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using ProjectVL.Config;
 using ProjectVL.Core;
+using ProjectVL.Systems;
 using UnityEngine;
 
 namespace ProjectVL.Presentation
@@ -19,6 +20,8 @@ namespace ProjectVL.Presentation
             new Dictionary<int, DropView>();
         private readonly List<SpriteRenderer> _groundZoneViews =
             new List<SpriteRenderer>();
+        private readonly List<VfxView> _vfxViews =
+            new List<VfxView>();
 
         private CombatConfig _combat;
         private GameState _state;
@@ -36,12 +39,14 @@ namespace ProjectVL.Presentation
         public int DropViewCount => _dropViews.Count;
         public int BountyOfferViewCount => _bountyOfferViews.Count;
         public int GroundZoneViewCount => _groundZoneViews.Count;
+        public int VfxViewCount => _vfxViews.Count;
         public int TransientViewCount =>
             EnemyViewCount
             + BulletViewCount
             + DropViewCount
             + BountyOfferViewCount
             + GroundZoneViewCount
+            + VfxViewCount
             + (_decoyView == null ? 0 : 1)
             + (_secondaryDecoyView == null ? 0 : 1)
             + (_beamView == null ? 0 : 1);
@@ -56,6 +61,7 @@ namespace ProjectVL.Presentation
             _state = state;
             _visualCatalog = visualCatalog
                 ?? Resources.Load<VisualCatalog>("VisualCatalog");
+            _state.TelemetryEvent += HandleTelemetryEvent;
             _circleSprite = CreateCircleSprite();
             _squareSprite = CreateSquareSprite();
 
@@ -84,6 +90,76 @@ namespace ProjectVL.Presentation
             SyncGroundZones();
             SyncDecoy();
             SyncBeam();
+            SyncVfx();
+        }
+
+        public void PlayVfx(
+            string id,
+            Float2 position,
+            Color fallbackColor,
+            float size = 36f,
+            float duration = 0.35f)
+        {
+            if (_state == null || string.IsNullOrEmpty(id))
+                return;
+
+            GameObject prefab =
+                _visualCatalog?.ResolveVfxPrefab(id);
+            GameObject root;
+            SpriteRenderer renderer;
+            bool authored = prefab != null;
+            if (prefab != null)
+            {
+                root = Instantiate(prefab, transform, false);
+                root.name = $"VFX {id}";
+                renderer = root.GetComponentInChildren<SpriteRenderer>(true);
+                if (renderer == null)
+                    renderer = root.AddComponent<SpriteRenderer>();
+            }
+            else
+            {
+                root = new GameObject($"VFX {id}");
+                root.transform.SetParent(transform, false);
+                renderer = root.AddComponent<SpriteRenderer>();
+            }
+
+            Sprite catalogSprite =
+                _visualCatalog?.ResolveVfxSprite(id);
+            if (catalogSprite != null)
+            {
+                renderer.sprite = catalogSprite;
+                authored = true;
+            }
+            if (renderer.sprite == null)
+                renderer.sprite = _circleSprite;
+            Material material =
+                _visualCatalog?.ResolveVfxMaterial(id);
+            if (material != null)
+                renderer.sharedMaterial = material;
+            RuntimeAnimatorController animatorController =
+                _visualCatalog?.ResolveVfxAnimator(id);
+            if (animatorController != null)
+            {
+                Animator animator =
+                    root.GetComponentInChildren<Animator>(true);
+                if (animator == null)
+                    animator = root.AddComponent<Animator>();
+                animator.runtimeAnimatorController = animatorController;
+            }
+
+            if (authored)
+                NormalizeAuthoredVisual(root.transform, size);
+            else
+                SetWorldSize(renderer, size, size);
+            if (!authored)
+                renderer.color = fallbackColor;
+            renderer.sortingOrder = Mathf.Max(renderer.sortingOrder, 40);
+            root.transform.position = PixelToWorld(position);
+            _vfxViews.Add(new VfxView(
+                root.transform,
+                renderer,
+                _state.Time,
+                Mathf.Max(0.05f, duration)));
         }
 
         public bool TryScreenToArenaPoint(
@@ -274,6 +350,25 @@ namespace ProjectVL.Presentation
                     : 1f;
                 view.Root.localScale = new Vector3(pulse, pulse, 1f);
                 float healthRatio = Mathf.Clamp01(enemy.Hp / enemy.MaxHp);
+                if (enemy.Hp < view.LastHp - 0.0001f)
+                {
+                    PlayVfx(
+                        "hit",
+                        enemy.Position,
+                        new Color(1f, 0.86f, 0.42f, 0.9f),
+                        enemy.Radius * 1.6f,
+                        0.18f);
+                }
+                if (enemy.Kind == EnemyKind.Boss
+                    && enemy.BossPhase != view.LastBossPhase)
+                {
+                    PlayVfx(
+                        "boss.phase",
+                        enemy.Position,
+                        new Color(1f, 0.32f, 0.18f, 0.9f),
+                        enemy.Radius * 3.2f,
+                        0.65f);
+                }
                 Sprite catalogSprite =
                     _visualCatalog?.ResolveEnemySprite(enemy);
                 if (catalogSprite != null
@@ -336,6 +431,9 @@ namespace ProjectVL.Presentation
                     -enemy.Radius + healthWidth / 2f,
                     enemy.Radius + 9f,
                     -0.2f);
+                view.LastHp = enemy.Hp;
+                view.LastBossPhase = enemy.BossPhase;
+                view.LastPosition = enemy.Position;
             }
 
             RemoveMissingEnemyViews(activeIds);
@@ -471,7 +569,11 @@ namespace ProjectVL.Presentation
                 body,
                 healthFill,
                 usesAuthoredVisual,
-                prefab != null);
+                prefab != null,
+                enemy.Hp,
+                enemy.BossPhase,
+                enemy.Position,
+                enemy.Kind);
         }
 
         private void SyncBullets()
@@ -799,6 +901,16 @@ namespace ProjectVL.Presentation
             {
                 if (!activeIds.Contains(pair.Key))
                 {
+                    PlayVfx(
+                        pair.Value.Kind == EnemyKind.Boss
+                            ? "death.boss"
+                            : "death",
+                        pair.Value.LastPosition,
+                        pair.Value.Kind == EnemyKind.Boss
+                            ? new Color(1f, 0.3f, 0.16f, 0.95f)
+                            : new Color(0.9f, 0.95f, 1f, 0.85f),
+                        pair.Value.Kind == EnemyKind.Boss ? 90f : 34f,
+                        pair.Value.Kind == EnemyKind.Boss ? 0.8f : 0.32f);
                     DestroyRuntimeObject(pair.Value.Root.gameObject);
                     removedIds.Add(pair.Key);
                 }
@@ -827,6 +939,72 @@ namespace ProjectVL.Presentation
                 Destroy(target);
             else
                 DestroyImmediate(target);
+        }
+
+        private void HandleTelemetryEvent(TelemetryEventRecord item)
+        {
+            if (item == null)
+                return;
+
+            var position = new Float2(item.x, item.y);
+            switch (item.type)
+            {
+                case "dropLanded":
+                case "validationRewardLanded":
+                case "bountyRewardLanded":
+                    PlayVfx(
+                        "drop.land",
+                        position,
+                        new Color(0.32f, 1f, 0.72f, 0.9f),
+                        42f,
+                        0.38f);
+                    break;
+                case "pickup":
+                    PlayVfx(
+                        "drop.pickup",
+                        position,
+                        new Color(1f, 0.86f, 0.26f, 0.95f),
+                        48f,
+                        0.42f);
+                    break;
+                case "waveBossSpawned":
+                    PlayVfx(
+                        "boss.spawn",
+                        position,
+                        new Color(1f, 0.28f, 0.16f, 0.95f),
+                        100f,
+                        0.85f);
+                    break;
+            }
+        }
+
+        private void SyncVfx()
+        {
+            for (int index = _vfxViews.Count - 1; index >= 0; index--)
+            {
+                VfxView view = _vfxViews[index];
+                float progress = Mathf.Clamp01(
+                    (_state.Time - view.StartedAt) / view.Duration);
+                if (progress >= 1f)
+                {
+                    DestroyRuntimeObject(view.Root.gameObject);
+                    _vfxViews.RemoveAt(index);
+                    continue;
+                }
+
+                float pulse = 0.78f
+                    + Mathf.Sin(progress * Mathf.PI) * 0.34f;
+                view.Root.localScale = view.BaseScale * pulse;
+                Color color = view.BaseColor;
+                color.a *= 1f - progress;
+                view.Renderer.color = color;
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (_state != null)
+                _state.TelemetryEvent -= HandleTelemetryEvent;
         }
 
         private static Sprite CatalogSprite(
@@ -1059,6 +1237,10 @@ namespace ProjectVL.Presentation
             public SpriteRenderer HealthFill { get; }
             public bool UsesAuthoredVisual { get; }
             public bool UsesPrefab { get; }
+            public float LastHp { get; set; }
+            public BossPhase LastBossPhase { get; set; }
+            public Float2 LastPosition { get; set; }
+            public EnemyKind Kind { get; }
 
             public EnemyView(
                 Transform root,
@@ -1067,7 +1249,11 @@ namespace ProjectVL.Presentation
                 SpriteRenderer body,
                 SpriteRenderer healthFill,
                 bool usesAuthoredVisual,
-                bool usesPrefab)
+                bool usesPrefab,
+                float lastHp,
+                BossPhase lastBossPhase,
+                Float2 lastPosition,
+                EnemyKind kind)
             {
                 Root = root;
                 VisualRoot = visualRoot;
@@ -1076,6 +1262,34 @@ namespace ProjectVL.Presentation
                 HealthFill = healthFill;
                 UsesAuthoredVisual = usesAuthoredVisual;
                 UsesPrefab = usesPrefab;
+                LastHp = lastHp;
+                LastBossPhase = lastBossPhase;
+                LastPosition = lastPosition;
+                Kind = kind;
+            }
+        }
+
+        private sealed class VfxView
+        {
+            public Transform Root { get; }
+            public SpriteRenderer Renderer { get; }
+            public float StartedAt { get; }
+            public float Duration { get; }
+            public Vector3 BaseScale { get; }
+            public Color BaseColor { get; }
+
+            public VfxView(
+                Transform root,
+                SpriteRenderer renderer,
+                float startedAt,
+                float duration)
+            {
+                Root = root;
+                Renderer = renderer;
+                StartedAt = startedAt;
+                Duration = duration;
+                BaseScale = root.localScale;
+                BaseColor = renderer.color;
             }
         }
 

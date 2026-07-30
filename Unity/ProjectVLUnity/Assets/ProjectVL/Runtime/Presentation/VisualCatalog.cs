@@ -180,6 +180,26 @@ namespace ProjectVL.Presentation
             return Find(vfx, id, "default");
         }
 
+        public Sprite ResolveVfxSprite(string id)
+        {
+            return ResolveSprite(vfx, id, "default");
+        }
+
+        public GameObject ResolveVfxPrefab(string id)
+        {
+            return ResolvePrefab(vfx, id, "default");
+        }
+
+        public RuntimeAnimatorController ResolveVfxAnimator(string id)
+        {
+            return ResolveAnimator(vfx, id, "default");
+        }
+
+        public Material ResolveVfxMaterial(string id)
+        {
+            return ResolveMaterial(vfx, id, "default");
+        }
+
         public VisualResourceEntry FindUi(string id)
         {
             return Find(ui, id, "default");

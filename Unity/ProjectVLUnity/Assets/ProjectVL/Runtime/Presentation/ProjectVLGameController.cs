@@ -681,6 +681,12 @@ namespace ProjectVL.Presentation
                     arenaPoint);
             if (cast)
             {
+                _presenter.PlayVfx(
+                    "card.cast",
+                    arenaPoint,
+                    new Color(0.68f, 0.9f, 1f, 0.95f),
+                    56f,
+                    0.48f);
                 _cardInventory.Consume(State, kind, index);
                 _telemetry?.RecordInput(
                     State,
@@ -1027,6 +1033,12 @@ namespace ProjectVL.Presentation
                     arenaPoint);
                 if (cast)
                 {
+                    _presenter.PlayVfx(
+                        "card.cast",
+                        arenaPoint,
+                        new Color(0.68f, 0.9f, 1f, 0.95f),
+                        56f,
+                        0.48f);
                     _cardInventory.Consume(
                         State,
                         _pendingCastSlotKind.Value,
@@ -1057,6 +1069,12 @@ namespace ProjectVL.Presentation
                 _dropSystem.CollectNearest(State, arenaPoint);
             if (result == DropCollectResult.Collected)
             {
+                _presenter.PlayVfx(
+                    "hook",
+                    arenaPoint,
+                    new Color(1f, 0.86f, 0.26f, 0.9f),
+                    42f,
+                    0.34f);
                 _telemetry?.RecordInput(State, "pickupClick");
                 LastCardAction = "已拾取掉落卡牌。";
             }

@@ -967,6 +967,18 @@ MonoBehaviour:
     animator: {fileID: 0}
     material: {fileID: 0}
     statusOverlay: {fileID: 0}
+  - id: death.boss
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: boss.spawn
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
   - id: boss.phase
     sprite: {fileID: 0}
     prefab: {fileID: 0}
@@ -980,6 +992,12 @@ MonoBehaviour:
     material: {fileID: 0}
     statusOverlay: {fileID: 0}
   - id: drop.pickup
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: hook
     sprite: {fileID: 0}
     prefab: {fileID: 0}
     animator: {fileID: 0}

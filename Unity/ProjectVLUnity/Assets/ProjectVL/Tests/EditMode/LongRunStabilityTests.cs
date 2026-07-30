@@ -125,6 +125,8 @@ namespace ProjectVL.Tests
             CombatConfig combat = CombatConfigLoader.LoadDefault();
             EconomyConfig economy = GameConfigLoader.LoadEconomy();
             GameState state = GameStateFactory.Create(combat, economy);
+            state.StartRun();
+            var simulation = new GameSimulation(state, combat);
             var root = new GameObject("Long Run Presenter Test");
             GameObject createdCamera = null;
             if (Camera.main == null)
@@ -198,6 +200,9 @@ namespace ProjectVL.Tests
                     state.GroundDrops.Clear();
                     state.BountyOffers.Clear();
                     state.GroundZones.Clear();
+                    presenter.Sync();
+                    simulation.AdvanceFrame(0.4f);
+                    simulation.AdvanceFrame(0.4f);
                     presenter.Sync();
 
                     Assert.That(presenter.TransientViewCount, Is.Zero);
