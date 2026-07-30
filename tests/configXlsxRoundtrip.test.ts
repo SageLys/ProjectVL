@@ -11,6 +11,7 @@ import {
 function minimalCard(): CardDef {
   return {
     id: 'demoZone',
+    identityContract: 'test fixture',
     category: 'domain',
     synergyTags: ['domain'],
     textKey: 'cards.demoZone',

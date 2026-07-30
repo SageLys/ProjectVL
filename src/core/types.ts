@@ -8,7 +8,7 @@ import type { ValidationRewardSpec, ValidationRewardTypePolicy } from '../config
 export type CardType = string;
 export type EnemyType = 'normal' | 'fast' | 'tank' | 'boss';
 export type GameMode = 'ready' | 'playing' | 'ended';
-export type WavePhase = 'regular' | 'boss' | 'between';
+export type WavePhase = 'regular' | 'validationRewardSettle' | 'boss' | 'between';
 export type EnemySpawnKind = 'regular' | 'waveBoss' | 'bounty' | 'validationElite';
 export type BountySide = 'top' | 'right' | 'bottom' | 'left';
 
@@ -108,6 +108,20 @@ export interface Card {
   /** Checkpoint merge product waiting for this card's branch choice. */
   provisional?: boolean;
   affixes?: CardAffixRoll[];
+  /** recipeOnly 产物的静态归属快照；不参与遗物或双神加成结算。 */
+  primaryGod?: GodId;
+  sourceGods?: GodId[];
+  recipeLineage?: RecipeLineage;
+}
+
+export interface RecipeLineageMaterial {
+  cardType: CardType;
+  evolutionPath: string[];
+}
+
+export interface RecipeLineage {
+  recipeId: string;
+  materials: [RecipeLineageMaterial, RecipeLineageMaterial];
 }
 
 export interface CardRef {
@@ -120,7 +134,7 @@ export type RunDecision =
   | { kind: 'godDraft'; wave: number; candidates: GodId[]; role: 'main' | 'sub' }
   | { kind: 'godFocus'; wave: number; candidates: GodId[] }
   | { kind: 'evolutionBranch'; cardType: CardType; checkpointStar: number; options: string[]; provisionalCardId: number }
-  | { kind: 'recipeEvolution'; recipeId: string }
+  | { kind: 'recipePin'; candidates: string[] }
   | { kind: 'relic'; relicIndex: number; options: string[] }
   | { kind: 'waveBaseReward'; wave: number; candidates: string[]; capped: string[] };
 
@@ -144,6 +158,19 @@ export interface GodPoolState {
   activePoolWave: number;
   lastDecisionAfterWave: number;
   offerRosterPreviews: Record<GodId, CardType[]>;
+}
+
+export interface RecipeRunState {
+  compatibleRecipeIds: string[];
+  pinnedRecipeId: string | null;
+  readyRecipeIds: string[];
+  notifiedRecipeIds: string[];
+  completedRecipeIds: string[];
+  assistBudgetUsed: number;
+  /** 每种材料已消耗的定向修正次数。 */
+  assistCorrectionsByMaterial: Record<CardType, number>;
+  assistClosed: boolean;
+  firstReadyWave: number | null;
 }
 
 export interface RunBaseStats {
@@ -522,6 +549,7 @@ export interface GameState {
   /** Run-scoped build data; evolution routes themselves are stored per card instance. */
   runBuild: RunBuildState;
   godPool: GodPoolState;
+  recipes: RecipeRunState;
   intermission: IntermissionState;
   enemies: Enemy[];
   bullets: Bullet[];
@@ -558,6 +586,8 @@ export interface GameState {
   /** DEV-visible result of the latest Budget admission check (not configuration). */
   lastSpawnCheckCount: number;
   wavePhase: WavePhase;
+  validationRewardSettleRemaining: number;
+  validationRewardSettleConfirmed: boolean;
   waveBossId: number | null;
   waveBossSpawnedAt: number | null;
   bossRewardClaimedWave: number;
@@ -584,8 +614,6 @@ export interface GameState {
   rangeBonus: number;
   kills: number;
   merges: number;
-  /** Fixed recipes completed during this run, in completion order. */
-  completedRecipes: string[];
   /** 遥测拆分（原 uses）：consumes=消耗释放次数；equipOps=装备操作次数。 */
   consumes: number;
   equipOps: number;
@@ -626,6 +654,8 @@ export type GameEvent =
   | { type: 'waveBaseRewardOffered'; wave: number; candidates: string[] }
   | { type: 'waveBaseRewardChosen'; wave: number; stat: WaveChoiceStatKind; add: number }
   | { type: 'bossRewardGranted'; wave: number; grants: Array<{ star: number; count: number }> }
+  | { type: 'validationRewardGranted'; wave: number; cardType: CardType; star: number; delivery: 'hand' | 'drop' }
+  | { type: 'validationRewardSettleStarted'; wave: number; seconds: number }
   | { type: 'levelUp' }
   | { type: 'relicOffered'; relicIndex: number; options: string[] }
   // 只带 id：显示名属皮肤层，由 ui/relicMeta 依 textKey 解析（core 不得依赖 texts）。
@@ -633,8 +663,21 @@ export type GameEvent =
   | { type: 'evolutionBranchOffered'; cardType: CardType; checkpointStar: number; options: string[]; provisionalCardId: number }
   | { type: 'evolutionBranchSelected'; cardType: CardType; checkpointStar: number; optionId: string; provisionalCardId: number }
   | { type: 'recipeAvailable'; recipeIds: string[] }
-  | { type: 'recipeCompleted'; recipeId: string; outputCardType: CardType; outputStar: number }
-  | { type: 'recipeRejected'; recipeId: string; reason: 'phase' | 'materials' | 'slots' }
+  | {
+    type: 'recipeCompleted';
+    recipeId: string;
+    outputCardType: CardType;
+    outputStar: number;
+    outputCardId: number;
+    target: { slotKind: SlotKind; index: number };
+    materialCardIds: [number, number];
+  }
+  | {
+    type: 'recipeRejected';
+    recipeId: string;
+    reason: 'mode' | 'paused' | 'decision' | 'intermission' | 'phase' | 'limit' | 'completed'
+      | 'materials' | 'star' | 'provisional' | 'stale' | 'slots';
+  }
   | { type: 'affixRolled'; cardType: CardType; affixes: CardAffixRoll[] }
   | { type: 'gameEnd'; win: boolean }
   | { type: 'breakthrough'; damage: number }

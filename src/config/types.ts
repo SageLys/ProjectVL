@@ -296,11 +296,15 @@ export interface CardRequirement {
 
 export interface EvolutionRecipeDef {
   id: string;
-  ingredientA: CardRequirement;
-  ingredientB: CardRequirement;
+  recipeType: 'sameGod' | 'crossGod';
+  /** 有向矩阵的行：提供可变卡的神。 */
+  variableGod: GodId;
+  /** 有向矩阵的列：提供锚点卡的神，也是产物 primaryGod。 */
+  anchorGod: GodId;
+  ingredientVariable: CardRequirement;
+  ingredientAnchor: CardRequirement;
   outputCardId: string;
-  outputStar: number;
-  allowedPhase: 'intermission';
+  outputStar: 6;
 }
 
 export interface EvolutionRecipesConfig {
@@ -334,6 +338,8 @@ export interface WaveRewardsConfig {
 export interface EvolutionOptionDef {
   id: string;
   textKey: string;
+  /** 5★ 分支接口；3★ 选项不声明。 */
+  interfaceRole?: 'payoff' | 'spread' | 'convert';
   equip: BindingDef[];
 }
 
@@ -429,6 +435,20 @@ export interface NormalDropTypePolicyConfig {
   maxSameTypeStreak: number;
 }
 
+export interface EvolutionEconomyConfig {
+  maxRecipeCompletions: number;
+  completionLimitPerRecipe: number;
+  assistWindowWaves: [number, number];
+  assistCheckpoints: [number, number];
+  assistMaxCorrections: number;
+  assistMaxCorrectionsPerMaterial: number;
+  assistRewardPolicy: 'minimumMergeCompletion';
+  allowDirectFiveStarAssist: false;
+  recipeProtectionSlots: number;
+  bountyRecipeMaterialBonus: number;
+  bountyReadySideMultiplier: number;
+}
+
 export interface EconomyConfig {
   maxStar: number;
   mergeCopies: number;
@@ -453,6 +473,7 @@ export interface EconomyConfig {
   defaults: { dropChance: number; dropLifetime: number };
   normalDropTypePolicy: NormalDropTypePolicyConfig;
   ordinaryDropRate: OrdinaryDropRateConfig;
+  evolution: EvolutionEconomyConfig;
 }
 
 export type TunerGroup = 'waves' | 'combat' | 'enemies' | 'drops' | 'progression' | 'bounty' | 'p2';

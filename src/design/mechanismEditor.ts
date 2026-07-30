@@ -293,15 +293,13 @@ export function renderRecipeForm(container: HTMLElement, recipe: EvolutionRecipe
   const onChange = (): void => options.onChange('evolutionRecipes');
   const cards = [...(referenceOptions('cardId', options.references) ?? [])];
   const grid = el('div', 'field-grid');
-  for (const [key, requirement] of [['ingredientA', recipe.ingredientA], ['ingredientB', recipe.ingredientB]] as const) {
+  for (const [key, requirement] of [['ingredientVariable', recipe.ingredientVariable], ['ingredientAnchor', recipe.ingredientAnchor]] as const) {
     const card = selectControl(cards, requirement.cardId, false, cardOptionLabel); card.addEventListener('change', () => { requirement.cardId = card.value; onChange(); });
     const minStar = numberControl(requirement.minStar, 1, 6, 1); minStar.addEventListener('input', () => { requirement.minStar = minStar.valueAsNumber; onChange(); });
     grid.append(labeled(`${key} 卡牌`, card, `${path}.${key}.cardId`), labeled(`${key} 最低星级`, minStar, `${path}.${key}.minStar`));
   }
   const output = selectControl(cards, recipe.outputCardId, false, cardOptionLabel); output.addEventListener('change', () => { recipe.outputCardId = output.value; onChange(); });
-  const outputStar = numberControl(recipe.outputStar, 1, 6, 1); outputStar.addEventListener('input', () => { recipe.outputStar = outputStar.valueAsNumber; onChange(); });
-  const phase = selectControl(['intermission'], recipe.allowedPhase, false, value => labelWithKey('enumValue', `phase.${value}`, value));
-  phase.addEventListener('change', () => { recipe.allowedPhase = phase.value as EvolutionRecipeDef['allowedPhase']; onChange(); });
-  grid.append(labeled('产出卡', output, `${path}.outputCardId`), labeled('产出星级', outputStar, `${path}.outputStar`), labeled('允许阶段', phase, `${path}.allowedPhase`));
+  const outputStar = numberControl(recipe.outputStar, 6, 6, 1);
+  grid.append(labeled('产出卡', output, `${path}.outputCardId`), labeled('产出星级', outputStar, `${path}.outputStar`));
   container.append(grid);
 }

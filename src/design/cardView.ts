@@ -211,7 +211,7 @@ export function renderCardView(
     editableMechanismBlock(metaRead, `${cardPath}.category`, mechanism, editor => { if (mechanism) renderCardMetaForm(editor, card, cardPath, mechanism); }, 'card-meta-editor', '编辑属性'),
   ); article.append(title);
   if (view.recipe) {
-    const recipeRead = el('p', 'recipe-banner', `配方 ${view.recipe.id}：${view.recipe.a.name || view.recipe.a.cardId}（${view.recipe.a.cardId} ≥${view.recipe.a.minStar}★） + ${view.recipe.b.name || view.recipe.b.cardId}（${view.recipe.b.cardId} ≥${view.recipe.b.minStar}★） → ${view.recipe.outputStar}★，仅限 ${view.recipe.allowedPhase}`);
+    const recipeRead = el('p', 'recipe-banner', `配方 ${view.recipe.id}：${view.recipe.a.name || view.recipe.a.cardId}（${view.recipe.a.cardId} ≥${view.recipe.a.minStar}★） + ${view.recipe.b.name || view.recipe.b.cardId}（${view.recipe.b.cardId} ≥${view.recipe.b.minStar}★） → ${view.recipe.outputStar}★ · ${view.recipe.recipeType}`);
     const recipeIndex = ctx.recipes.recipes.findIndex(recipe => recipe.id === view.recipe?.id);
     const recipe = ctx.recipes.recipes[recipeIndex]; const recipePath = `$.evolutionRecipes.recipes[${recipeIndex}]`;
     article.append(editableMechanismBlock(recipeRead, recipePath, mechanism, editor => { if (recipe && mechanism) renderRecipeForm(editor, recipe, recipePath, mechanism); }, '', '编辑配方'));
