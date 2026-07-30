@@ -53,7 +53,13 @@ export type AtomName =
 export interface EffectParamsMap {
   // —— 弹道 ——
   pierce: { count?: number; damageRetention?: number; rampPerPierce?: number; width?: number; damageMul?: number; chance?: number };
-  chain: { bounces?: number; damageRetention?: number; searchRange?: number; targets?: number; damageMul?: number; chance?: number };
+  chain: {
+    bounces?: number; damageRetention?: number; searchRange?: number; targets?: number; damageMul?: number;
+    /** 每次链伤结算后直接施加状态；不会重新发送完整 onHit。 */
+    spreadStatus?: 'vulnerable' | 'slow' | 'dot';
+    spreadParams?: { ratio?: number; duration?: number };
+    chance?: number;
+  };
   split: { count?: number; damageRatio?: number; maxDepth?: number; chance?: number };
   ricochet: { bounces?: number; chance?: number };
   aoeOnHit: { radius?: number; damageRatio?: number; falloff?: number; chance?: number };
@@ -134,6 +140,12 @@ export interface ConsumableTierDef {
 export interface CardDef {
   id: string;
   god?: GodId;
+  /** 跨全部九宫格分支不变的核心机制。 */
+  identityContract: string;
+  /** recipeOnly 产物专用；锚点方神。 */
+  primaryGod?: GodId;
+  /** recipeOnly 产物专用；仅用于存档、图鉴与遥测。 */
+  sourceGods?: GodId[];
   category: Category;
   /** 机制标签（1~2 个，非空、去重）；与 category 和神身份独立，仅用于效果协同。 */
   synergyTags: BuildTag[];

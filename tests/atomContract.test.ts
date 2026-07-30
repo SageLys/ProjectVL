@@ -156,8 +156,9 @@ const PRE_MIGRATION_DEFAULTS: Record<string, number | string | boolean> = {
   'statBuff.maxStacks': 1,
 };
 
-/** extraDrop.starWeights 是唯一的 record 默认值，单列断言。 */
+/** record 默认值单列断言。 */
 const PRE_MIGRATION_RECORD_DEFAULTS: Record<string, Record<string, number>> = {
+  'chain.spreadParams': {},
   'extraDrop.starWeights': { '1': 1 },
 };
 
@@ -376,14 +377,11 @@ describe('原子契约 · 校验器由契约驱动', () => {
   it('必填参数缺失被拒绝（statBuff.stat）', () => {
     const clone = structuredClone(cfg.skills) as unknown as Record<string, unknown>;
     const cards = clone.cards as Record<string, unknown>[];
-    const target = cards.find(card => {
-      const anchors = (card.consumable as { anchors: Record<string, { effects: { atom: string }[] }> }).anchors;
-      return anchors['6'].effects.some(effect => effect.atom === 'statBuff');
-    })!;
+    const target = cards.find(card => card.consumable)!;
     const anchors = (target.consumable as {
       anchors: Record<string, { effects: { atom: string; params: Record<string, unknown> }[] }>;
     }).anchors;
-    delete anchors['6'].effects.find(effect => effect.atom === 'statBuff')!.params.stat;
+    anchors['6'].effects[0] = { atom: 'statBuff', params: { operation: 'add', value: 1 } };
     expect(() => validateSkillsConfig(clone)).toThrow(/必填参数缺失/);
   });
 

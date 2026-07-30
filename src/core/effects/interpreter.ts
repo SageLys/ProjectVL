@@ -9,6 +9,8 @@
 //   slow/vulnerable/freeze/stun 交给 statusSystem 取最强并延长；aura 按来源并行；
 //   所有触发绑定独立触发且所有攻击形态必须经过统一攻击管线；summon 每(卡,绑定)单实例（B2）；
 //   shield 的 absorbHits 取最大、regenSeconds 取最小；weaponForm 按正交轴确定性融合。
+//   chain.spreadStatus 在每次链伤后直接交给 statusSystem；跨卡仍按状态既有规则取最强/最长，
+//   且绝不发送完整 onHit，避免 chain → onHit → chain 的递归套娃。
 import { cfg } from '../../config';
 import type { RunBaseStatKind } from '../../config/types';
 import type { AttackInstance, Bullet, Card, CardType, Config, Enemy, GameEvent, GameState, GroundDrop, Rng, Summon, WeaponImpactSpec } from '../types';
@@ -30,6 +32,7 @@ export const FUSION_RULES = [
   '过期转化(expiryConvert): 卡内后写覆盖，跨卡按规范来源顺序连乘失败概率',
   '嘲讽(taunt): 同来源 upsert，跨来源按 priorityWeight/remaining/sourceKey 仲裁并回退',
   '状态(slow/vulnerable/freeze/stun): statusSystem 取最强，时长取最大',
+  '链传播状态(chain.spreadStatus): 每次链伤后直写 statusSystem，不发送 onHit，跨卡取最强/最长',
   '光环/领域(aura): 按来源独立并行',
   '触发绑定: 所有装备独立触发，所有攻击形态经过统一攻击管线',
   '召唤物(summon): 每个(卡,绑定)单实例（B2）',
@@ -171,6 +174,11 @@ function clone<T>(value: T): T { return structuredClone(value); }
 function applyAmplify(value: unknown, axes: Record<string, string>, key = ''): unknown {
   if (typeof value === 'number' && axes[key]) {
     const expr = axes[key].trim();
+    if (expr.startsWith('*')) {
+      const multiplier = Number(expr.slice(1));
+      if (!Number.isFinite(multiplier)) throw new Error(`[skills] 非法 amplifyAxis: ${key}=${expr}`);
+      return value * multiplier;
+    }
     const n = Number(expr.replace(/^\+/, '').replace(/%$/, ''));
     if (!Number.isFinite(n)) throw new Error(`[skills] 非法 amplifyAxis: ${key}=${expr}`);
     return expr.endsWith('%') ? value * (1 + n / 100) : value + n;

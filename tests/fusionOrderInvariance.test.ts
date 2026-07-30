@@ -36,6 +36,7 @@ function fixtureDef(id: string, equip: BindingDef[], options: DefOptions = {}): 
   const emptyTier = { radius: 120, duration: 3, effects: options.consumeEffects ?? [] };
   return {
     id,
+    identityContract: 'test fixture',
     category: options.category ?? 'defense',
     synergyTags: options.tags ?? ['defense'],
     textKey: `test.${id}`,
@@ -301,6 +302,50 @@ describe('taunt 候选仲裁与来源链路', () => {
     state.summons = [{ id: 5, kind: 'decoy', x: 0, y: 0, hp: 10, maxHp: 10, tauntRadius: 100, fireInterval: 0 }];
     expect(moveTargetFor(state, environmentOnly).summon?.id).toBe(5);
     expect(isControlled(environmentOnly)).toBe(false);
+  });
+});
+
+describe('chain spreadStatus fusion contract', () => {
+  it('takes strongest ratio and longest duration across cards without emitting nested onHit', () => {
+    const chainDef = (type: string, ratio: number, duration: number) => fixtureDef(type, [{
+      trigger: 'interval',
+      triggerParams: { seconds: 0.1 },
+      effects: [{
+        atom: 'chain',
+        params: {
+          targets: 1, bounces: 1, searchRange: 500, damageMul: 0.1, damageRetention: 1,
+          spreadStatus: 'vulnerable', spreadParams: { ratio, duration },
+        },
+      }],
+    }]);
+    const detector = fixtureDef('onHitDetector', [{
+      trigger: 'onHit', effects: [{ atom: 'burstDamage', params: { damageMul: 100, radius: 999 } }],
+    }]);
+    registerSkillDefs([
+      chainDef('weakLongChain', 0.2, 4),
+      chainDef('strongShortChain', 0.4, 2),
+      detector,
+    ]);
+
+    const run = (reverse: boolean) => {
+      const state = freshState();
+      const chains = [fixedCard('weakLongChain', 801), fixedCard('strongShortChain', 802)];
+      if (reverse) chains.reverse();
+      state.equipment = [...chains, fixedCard('onHitDetector', 803)];
+      state.enemies = [
+        enemy({ id: 901, x: cfg.combat.turret.x + 30, y: cfg.combat.turret.y, hp: 10_000, maxHp: 10_000 }),
+        enemy({ id: 902, x: cfg.combat.turret.x + 60, y: cfg.combat.turret.y, hp: 10_000, maxHp: 10_000 }),
+      ];
+      tickEffects(state, config, constRng(0), 0.11);
+      return state.enemies.map(target => ({ hp: target.hp, vulnerable: target.status.vulnerable }));
+    };
+
+    const forward = run(false);
+    expect(run(true)).toEqual(forward);
+    expect(forward.every(target => target.vulnerable?.ratio === 0.4)).toBe(true);
+    // The status clock advances in the same 0.11s simulation tick that applies it.
+    expect(forward.every(target => Math.abs((target.vulnerable?.remaining ?? 0) - 3.89) < 1e-9)).toBe(true);
+    expect(forward.every(target => target.hp > 9_000)).toBe(true);
   });
 });
 

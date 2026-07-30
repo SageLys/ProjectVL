@@ -113,6 +113,8 @@ export const ATOM_CONTRACT = {
       searchRange: { type: 'number', default: 130, min: 0 },
       targets: { type: 'integer', default: 1, min: 0, note: '无敌人载荷时取 origin 附近的起点数' },
       damageMul: { type: 'number', default: 1, min: 0, note: '无 attack/bullet 载荷时的伤害基准倍率' },
+      spreadStatus: { type: 'enum', enum: ['vulnerable', 'slow', 'dot'], note: '每次链伤后施加的状态；不发送 onHit' },
+      spreadParams: { type: 'record', default: {}, note: '状态强度 ratio 与持续时间 duration' },
       ...CHANCE,
     },
     allowedTriggers: ['onFire', 'onHit', 'onKill', 'interval'],
