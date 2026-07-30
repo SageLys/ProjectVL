@@ -434,6 +434,9 @@ export interface Zone {
   x: number;
   y: number;
   radius: number;
+  initialRadius?: number;
+  radiusOverTime?: { from: number; to: number; easing?: 'linear' };
+  totalDuration?: number;
   /** 环带内径（shape=ring 时生效）。 */
   innerRadius?: number;
   shape: 'circle' | 'ring' | 'line';
@@ -444,6 +447,7 @@ export interface Zone {
   lineDirY?: number;
   lineLength?: number;
   lineWidth?: number;
+  lineFrom?: 'turretToPoint' | 'bulletPath';
   remaining: number;
   tickInterval: number;
   tickTimer: number;
@@ -572,6 +576,13 @@ export interface GameState {
   intervalClocks: Record<string, number>;
   /** 任意触发器绑定的冷却截止时刻（state.time 基准；key = cd:卡id:绑定序号），供 triggerParams.cooldownSeconds 使用。 */
   cooldowns: Record<string, number>;
+  /** Shared counters/state for generic effect primitives; never card-specific. */
+  effectRuntime: {
+    lastBreachAt: number;
+    killsAtLastRelease: number;
+    pickupsThisWave: number;
+    auraOrigins: Record<string, { x: number; y: number; startedAt: number }>;
+  };
   nextCardId: number;
   nextDropId: number;
   nextEnemyId: number;

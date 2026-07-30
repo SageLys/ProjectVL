@@ -94,6 +94,7 @@ export function consumeCard(state: GameState, config: Config, rng: Rng, sourceIn
   if (!card || card.provisional) return [];
   source[sourceIndex] = null;
   state.consumes++;
+  state.effectRuntime.killsAtLastRelease = state.kills;
   const events: GameEvent[] = [{ type: 'skillConsumed', cardType: card.type, star: card.star, x, y }];
   if (getSkillDef(card.type)) events.push(...releaseConsumable(state, config, rng, card.type, card.star, x, y));
   if (sourceKind === 'equipment') {

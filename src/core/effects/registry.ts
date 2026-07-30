@@ -6,14 +6,14 @@
 // 纯修饰类原子（掉率乘数/反伤/换形等）在 interpreter.getModifiers 聚合，这里是 no-op。
 import { cfg } from '../../config';
 import type { AttackInstance, AttackRider, Bullet, CardType, Config, Enemy, GameEvent, GameState, GroundDrop, Rng, Summon, Zone } from '../types';
-import type { AtomName, EffectDef } from './defs';
+import type { AtomicEffectDef, AtomName, EffectDef, ForEachEffectDef, OriginSelector, ScaleByDef } from './defs';
 import {
   atomBooleanDefault, atomNumberDefault, atomRecordDefault, atomStringDefault, effectParams,
   type AtomDefaultOptions,
 } from './atomContract';
 import {
   applyBrand, applyDot, applyFreeze, applyKnockback, applySlow, applyStun, applyTaunt, applyVulnerable,
-  controlBudgetDenies,
+  controlBudgetDenies, isControlled,
 } from './statusSystem';
 import { dealDamage, tryExecute } from '../systems/damageSystem';
 import { spawnGroundDrop } from '../systems/dropSystem';
@@ -51,8 +51,12 @@ export interface EffectCtx {
   sourceEffectIndex?: number;
   bullet?: Bullet;
   enemy?: Enemy;
+  /** Event/member subject retained for scaleBy when spatial `at` clears direct targeting. */
+  scaleEnemy?: Enemy;
   drop?: GroundDrop;
   merge?: { cardType: CardType; resultStar: number };
+  /** Snapshot supplied by the interpreter so scaleBy never reaches back into card arbitration. */
+  dynamic?: { thornsRatio: number; auraReduction: number };
 }
 
 export type AtomHandler = (ctx: EffectCtx, params: Record<string, unknown>) => void;
@@ -103,13 +107,137 @@ function nearestEnemy(state: GameState, x: number, y: number, maxDist: number, e
   return best;
 }
 
+const clusterCache = new WeakMap<GameState, { time: number; point: { x: number; y: number } }>();
+
+/** T1: deterministic 8×6 density grid, cached once for a state/time frame. */
+function densestCluster(state: GameState): { x: number; y: number } {
+  const cached = clusterCache.get(state);
+  if (cached?.time === state.time) return cached.point;
+  const { width, height } = cfg.combat.canvas;
+  const cols = 8;
+  const rows = 6;
+  const cells = Array.from({ length: cols * rows }, () => ({ count: 0, x: 0, y: 0 }));
+  for (const enemy of state.enemies) {
+    const col = Math.max(0, Math.min(cols - 1, Math.floor(enemy.x / width * cols)));
+    const row = Math.max(0, Math.min(rows - 1, Math.floor(enemy.y / height * rows)));
+    const cell = cells[row * cols + col];
+    cell.count++;
+    cell.x += enemy.x;
+    cell.y += enemy.y;
+  }
+  const turret = cfg.combat.turret;
+  let best = -1;
+  let bestCount = -1;
+  let bestDistance = Infinity;
+  cells.forEach((cell, index) => {
+    if (!cell.count) return;
+    const x = cell.x / cell.count;
+    const y = cell.y / cell.count;
+    const distance = Math.hypot(x - turret.x, y - turret.y);
+    if (cell.count > bestCount || (cell.count === bestCount && distance < bestDistance)) {
+      best = index;
+      bestCount = cell.count;
+      bestDistance = distance;
+    }
+  });
+  const cell = best >= 0 ? cells[best] : null;
+  const point = cell ? { x: cell.x / cell.count, y: cell.y / cell.count } : { x: turret.x, y: turret.y };
+  clusterCache.set(state, { time: state.time, point });
+  return point;
+}
+
+export function selectEffectOrigin(ctx: EffectCtx, at: OriginSelector | undefined): { x: number; y: number } {
+  if (!at) return ctx.origin;
+  if (at === 'turret') return { x: cfg.combat.turret.x, y: cfg.combat.turret.y };
+  if (at === 'point') return ctx.triggerPoint ?? ctx.origin;
+  if (at === 'densestCluster') return densestCluster(ctx.state);
+  const anchor = at === 'nearestToBreachLine' ? cfg.combat.turret : ctx.origin;
+  const enemy = nearestEnemy(ctx.state, anchor.x, anchor.y, Infinity);
+  return enemy ? { x: enemy.x, y: enemy.y } : ctx.origin;
+}
+
+function hasStatus(enemy: Enemy, status: string): boolean {
+  switch (status) {
+    case 'controlled': return isControlled(enemy);
+    case 'frozen': return enemy.status.frozen > 0;
+    case 'slow': return enemy.status.slow !== null;
+    case 'stun': case 'stunned': return enemy.status.stunned > 0;
+    case 'vulnerable': return enemy.status.vulnerable !== null;
+    case 'dot': return enemy.status.dots.length > 0;
+    case 'brand': return enemy.status.brand !== null;
+    default: return false;
+  }
+}
+
+function scaleUnits(ctx: EffectCtx, scale: ScaleByDef): number {
+  const source = scale.source;
+  if (source.startsWith('concurrentStatus:')) {
+    const status = source.slice('concurrentStatus:'.length);
+    return ctx.state.enemies.filter(enemy => hasStatus(enemy, status)).length;
+  }
+  switch (source) {
+    case 'statusStacks': return (ctx.scaleEnemy ?? ctx.enemy)?.status.freezeStacks ?? 0;
+    case 'shieldTier': return ctx.state.shield?.hits ?? 0;
+    case 'thornsRatio': return ctx.dynamic?.thornsRatio ?? 0;
+    case 'auraReduction': return ctx.dynamic?.auraReduction ?? 0;
+    case 'enemiesOnField': return ctx.state.enemies.length;
+    case 'enemiesInAura': {
+      const radius = ctx.radius ?? totalRange(ctx.state, ctx.config);
+      return enemiesInRadius(ctx.state, ctx.origin.x, ctx.origin.y, radius).length;
+    }
+    case 'controlledInAura': {
+      const radius = ctx.radius ?? totalRange(ctx.state, ctx.config);
+      return enemiesInRadius(ctx.state, ctx.origin.x, ctx.origin.y, radius).filter(isControlled).length;
+    }
+    case 'secondsSinceLastBreach': return Math.max(0, ctx.state.time - ctx.state.effectRuntime.lastBreachAt);
+    case 'killsSinceLastRelease': return Math.max(0, ctx.state.kills - ctx.state.effectRuntime.killsAtLastRelease);
+    case 'mergesThisRun': return ctx.state.merges;
+    case 'pickupsThisWave': return ctx.state.effectRuntime.pickupsThisWave;
+    case 'summonsAlive': return ctx.state.summons.length;
+  }
+  return 0;
+}
+
+function scaledParams(ctx: EffectCtx, effect: AtomicEffectDef): Record<string, unknown> {
+  const params = effectParams(effect);
+  if (!effect.scaleBy) return params;
+  const base = params[effect.scaleBy.param];
+  if (typeof base !== 'number') return params;
+  const units = Math.min(effect.scaleBy.cap, scaleUnits(ctx, effect.scaleBy));
+  return { ...params, [effect.scaleBy.param]: base + units * effect.scaleBy.perUnit };
+}
+
+function forEachMembers(ctx: EffectCtx, effect: ForEachEffectDef): Array<{ x: number; y: number; enemy?: Enemy }> {
+  const set = effect.forEach.set;
+  let members: Array<{ x: number; y: number; enemy?: Enemy }> = [];
+  if (set.kind === 'enemiesWithStatus') {
+    const statuses = Array.isArray(set.status) ? set.status : [set.status];
+    members = ctx.state.enemies.filter(enemy => statuses.every(status => hasStatus(enemy, status)))
+      .map(enemy => ({ x: enemy.x, y: enemy.y, enemy }));
+  } else if (set.kind === 'ownZones') {
+    members = ctx.state.zones.filter(zone => zone.sourceCardId === ctx.sourceCardId
+      && zone.sourceBindingIndex === ctx.sourceBindingIndex).map(zone => ({ x: zone.x, y: zone.y }));
+  } else {
+    members = ctx.state.summons.filter(summon => summon.sourceCardId === ctx.sourceCardId
+      && summon.sourceBindingIndex === ctx.sourceBindingIndex
+      && (!set.summonKind || summon.kind === set.summonKind)).map(summon => ({ x: summon.x, y: summon.y }));
+  }
+  const direction = effect.forEach.order === 'farthest' ? -1 : 1;
+  return members.sort((a, b) => direction * (Math.hypot(a.x - ctx.origin.x, a.y - ctx.origin.y)
+    - Math.hypot(b.x - ctx.origin.x, b.y - ctx.origin.y))).slice(0, effect.forEach.maxTargets);
+}
+
 /** 消耗态持续时长（R4：≤5s）。 */
 function cappedDuration(ctx: EffectCtx, want: number): number {
   return ctx.consume ? Math.min(5, want) : want;
 }
 
-function lineZoneDirection(ctx: EffectCtx): { x: number; y: number } {
+function lineZoneDirection(ctx: EffectCtx, lineFrom?: 'turretToPoint' | 'bulletPath'): { x: number; y: number } {
   const turret = cfg.combat.turret;
+  if (lineFrom === 'bulletPath' && ctx.bullet) {
+    const length = Math.hypot(ctx.bullet.vx, ctx.bullet.vy);
+    if (length > 1e-9) return { x: ctx.bullet.vx / length, y: ctx.bullet.vy / length };
+  }
   if (ctx.triggerPoint) {
     const dx = ctx.triggerPoint.x - turret.x;
     const dy = ctx.triggerPoint.y - turret.y;
@@ -127,14 +255,20 @@ function lineZoneDirection(ctx: EffectCtx): { x: number; y: number } {
 }
 
 function makeZone(ctx: EffectCtx, atom: 'aura' | 'groundZone', p: Record<string, unknown>): Zone {
-  const radius = num(p, 'radius', ctx.radius ?? atomNumberDefault(atom, 'radius'));
+  const radiusOverTime = p.radiusOverTime as Zone['radiusOverTime'] | undefined;
+  const radius = radiusOverTime?.from ?? num(p, 'radius', ctx.radius ?? atomNumberDefault(atom, 'radius'));
   const shape = cStr(atom, p, 'shape') as Zone['shape'];
-  const direction = shape === 'line' ? lineZoneDirection(ctx) : null;
+  const lineFrom = typeof p.lineFrom === 'string' ? p.lineFrom as Zone['lineFrom'] : undefined;
+  const direction = shape === 'line' ? lineZoneDirection(ctx, lineFrom) : null;
+  const duration = cappedDuration(ctx, num(p, 'duration', ctx.duration ?? atomNumberDefault(atom, 'duration')));
   const zone: Zone = {
     id: ctx.state.nextZoneId++,
     x: ctx.origin.x,
     y: ctx.origin.y,
     radius,
+    initialRadius: radius,
+    radiusOverTime,
+    totalDuration: duration,
     innerRadius: typeof p.innerRadius === 'number' ? (p.innerRadius as number) : undefined,
     shape,
     lineStartX: direction ? ctx.origin.x : undefined,
@@ -143,7 +277,8 @@ function makeZone(ctx: EffectCtx, atom: 'aura' | 'groundZone', p: Record<string,
     lineDirY: direction?.y,
     lineLength: direction ? radius * LINE_ZONE_LENGTH_MUL : undefined,
     lineWidth: direction ? radius * LINE_ZONE_WIDTH_MUL : undefined,
-    remaining: cappedDuration(ctx, num(p, 'duration', ctx.duration ?? atomNumberDefault(atom, 'duration'))),
+    lineFrom,
+    remaining: duration,
     tickInterval: cNum(atom, p, 'tickInterval'),
     tickTimer: 0,
     effects: (Array.isArray(p.effects) ? (p.effects as EffectDef[]) : []),
@@ -480,8 +615,8 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
 
   // —— 领域 ——
   aura(ctx, p) {
-    // 装备态常驻光环由 getModifiers 聚合 + runtime 周期脉冲；消耗态 = 落点临时区域。
-    if (!ctx.consume && !ctx.zoneTick) return;
+    // passive 常驻光环由 getModifiers 聚合；触发态/消耗态均创建临时区域。
+    if (ctx.zoneTick) return;
     makeZone(ctx, 'aura', p);
   },
   groundZone(ctx, p) {
@@ -668,12 +803,32 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
 /** 依序执行一组效果。 */
 export function runEffects(ctx: EffectCtx, effects: EffectDef[], effectIndexOffset = 0): void {
   for (let effectIndex = 0; effectIndex < effects.length; effectIndex++) {
-    const ef = effects[effectIndex];
+    const executable = effects[effectIndex] as EffectDef | ForEachEffectDef;
     ctx.sourceEffectIndex = effectIndexOffset + effectIndex;
+    if ('forEach' in executable && executable.forEach) {
+      const fanoutEffect = executable as ForEachEffectDef;
+      for (const member of forEachMembers(ctx, fanoutEffect)) {
+        const nestedCtx: EffectCtx = {
+          ...ctx,
+          origin: { x: member.x, y: member.y },
+          enemy: member.enemy,
+          scaleEnemy: member.enemy,
+        };
+        runEffects(nestedCtx, fanoutEffect.forEach.effects);
+      }
+      continue;
+    }
+    if (!('atom' in executable)) continue;
+    const ef = executable as AtomicEffectDef;
     const handler = ATOMS[ef.atom];
     if (!handler) continue;
-    const params = effectParams(ef);
+    const effectCtx: EffectCtx = {
+      ...ctx,
+      origin: selectEffectOrigin(ctx, ef.at),
+      enemy: ef.at ? undefined : ctx.enemy,
+    };
+    const params = scaledParams(effectCtx, ef);
     if (ef.atom !== 'stun' && typeof params.chance === 'number' && ctx.rng() >= params.chance) continue;
-    handler(ctx, params);
+    handler(effectCtx, params);
   }
 }

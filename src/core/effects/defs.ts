@@ -16,6 +16,50 @@ export type Category = 'projectile' | 'control' | 'domain' | 'economy' | 'defens
 /** 机制标签：描述效果协同与缩放目标，与神（GodId）流派身份无关。 */
 export type BuildTag = 'projectile' | 'control' | 'domain' | 'defense' | 'utility';
 
+export type OriginSelector =
+  | 'turret'
+  | 'point'
+  | 'densestCluster'
+  | 'nearestEnemy'
+  | 'nearestToBreachLine';
+
+export type ScaleSource =
+  | `concurrentStatus:${string}`
+  | 'statusStacks'
+  | 'shieldTier'
+  | 'thornsRatio'
+  | 'auraReduction'
+  | 'enemiesOnField'
+  | 'enemiesInAura'
+  | 'controlledInAura'
+  | 'secondsSinceLastBreach'
+  | 'killsSinceLastRelease'
+  | 'mergesThisRun'
+  | 'pickupsThisWave'
+  | 'summonsAlive';
+
+export interface ScaleByDef {
+  source: ScaleSource;
+  param: string;
+  perUnit: number;
+  cap: number;
+}
+
+export type ForEachSetDef =
+  | { kind: 'enemiesWithStatus'; status: string | string[] }
+  | { kind: 'ownZones' }
+  | { kind: 'ownSummons'; summonKind?: string };
+
+export interface ForEachEffectDef {
+  forEach: {
+    set: ForEachSetDef;
+    maxTargets: number;
+    order?: 'nearest' | 'farthest';
+    effects: EffectDef[];
+  };
+  at?: OriginSelector;
+}
+
 /** 触发器库。装备态效果绑定到其一；passive = 常驻修饰（无事件，聚合读取）。 */
 export type Trigger =
   | 'onFire'
@@ -76,10 +120,14 @@ export interface EffectParamsMap {
   aura: {
     radius?: number; radiusRatioOfRange?: number; tickInterval?: number; duration?: number;
     shape?: 'circle' | 'ring'; innerRadius?: number; color?: string; effects?: EffectDef[]; chance?: number;
+    follow?: 'densestCluster' | 'nearestEnemy'; followLerp?: number;
+    radiusOverTime?: { from: number; to: number; easing?: 'linear' };
   };
   groundZone: {
     radius?: number; duration?: number; tickInterval?: number;
     shape?: 'circle' | 'ring' | 'line'; innerRadius?: number; color?: string; effects?: EffectDef[]; chance?: number;
+    radiusOverTime?: { from: number; to: number; easing?: 'linear' };
+    lineFrom?: 'turretToPoint' | 'bulletPath';
   };
   dot: { damageRatio?: number; damagePerTick?: number; tickInterval?: number; duration?: number; radius?: number; chance?: number };
   summon: {
@@ -111,11 +159,24 @@ export interface EffectParamsMap {
 }
 
 /** 单条效果：按 atom 判别的联合类型，参数形状由 EffectParamsMap 决定。 */
-export type EffectDef = { [A in AtomName]: { atom: A; params?: EffectParamsMap[A] } }[AtomName];
+export type AtomicEffectDef = {
+  [A in AtomName]: {
+    atom: A;
+    params?: EffectParamsMap[A];
+    at?: OriginSelector;
+    scaleBy?: ScaleByDef;
+    /** Representative atom metadata plus the generic fan-out wrapper payload. */
+    forEach?: ForEachEffectDef['forEach'];
+  }
+}[AtomName];
+/** Public atomic effect shape. Generic wrappers are validated at the JSON boundary and interpreted recursively. */
+export type EffectDef = AtomicEffectDef;
 
 /** 装备态绑定：触发器 + 效果原子列表。 */
 export interface BindingDef {
   trigger: Trigger;
+  /** Binding-level origin. Effects may override this with their own `at`. */
+  at?: OriginSelector;
   /**
    * interval 用 seconds；onKill 可选 requiresSource（击杀来源标签）/requiresStatus（死亡时刻状态，'frozen'|'dot'）过滤；
    * cooldownSeconds 通用于任意触发器：限制该绑定的最短再触发间隔（如冲击 5★ 破门反制每 6s 至多一次）。

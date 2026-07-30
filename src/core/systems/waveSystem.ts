@@ -21,6 +21,7 @@ export function enemyCountFor(wave: number): number {
 export function startNextWave(state: GameState, config: Config, rng: Rng): GameEvent[] {
   endIntermission(state);
   state.wave++;
+  state.effectRuntime.pickupsThisWave = 0;
   const activePool = generateActivePool(state, state.wave, rng);
   state.combatTelemetry = { wave: state.wave, perCard: {} };
   state.ordinaryDrop.credit = Math.min(cfg.economy.ordinaryDropRate.carryCap, state.ordinaryDrop.credit);

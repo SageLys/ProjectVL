@@ -186,6 +186,7 @@ export function collectDrop(state: GameState, config: Config, rng: Rng, drop: Gr
   };
   if (drop.bountyEncounterId !== undefined) collected.bountyEncounterId = drop.bountyEncounterId;
   const events: GameEvent[] = [collected];
+  state.effectRuntime.pickupsThisWave++;
   events.push(...created.events);
   events.push(...evolutionEvents);
   events.push(...mergeEvents);

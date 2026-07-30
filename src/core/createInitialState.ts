@@ -98,6 +98,12 @@ export function createInitialState(difficultyId: DifficultyId = 'hell'): GameSta
     statModifiers: [],
     intervalClocks: {},
     cooldowns: {},
+    effectRuntime: {
+      lastBreachAt: 0,
+      killsAtLastRelease: 0,
+      pickupsThisWave: 0,
+      auraOrigins: {},
+    },
     nextCardId: 1,
     nextDropId: 1,
     nextEnemyId: 1,
