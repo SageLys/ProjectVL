@@ -15,12 +15,14 @@ describe('decision queue', () => {
     expect(resolveCurrentDecision(state, createDefaultConfig(), constRng(0), 'recipe1')).toContainEqual({ type: 'decisionResolved', kind: 'recipePin', choice: 'recipe1' });
     expect(state.decisions.current).toBeNull();
   });
-  it('pauses updates for decisions and reward receipts', () => {
+  it('pauses updates for decisions but not reward celebrations', () => {
     const state = freshState(); state.mode = 'playing';
     enqueueDecision(state, { kind: 'godFocus', wave: 2, candidates: ['storm'] });
     expect(updateGame(state, createDefaultConfig(), constRng(0), 1)).toEqual([]);
     state.decisions.current = null; state.paused = false;
     state.rewardMeter.currentReceipt = { rewardId: 'x', activationIndex: 0, result: {} };
-    expect(updateGame(state, createDefaultConfig(), constRng(0), 1)).toEqual([]);
+    const before = state.time;
+    updateGame(state, createDefaultConfig(), constRng(0), 0.25);
+    expect(state.time).toBeGreaterThan(before);
   });
 });

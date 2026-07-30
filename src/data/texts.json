@@ -4751,8 +4751,6 @@
     }
   },
   "rewardReceipt": {
-    "title": "奖励已执行",
-    "confirm": "确认",
     "damage": "造成 {damage} 伤害 · 消灭 {kills} 名敌人",
     "control": "冻结并削弱 {count} 名敌人",
     "healing": "恢复 {healing} 心防 · 获得 {hits} 次突破吸收",

@@ -19,7 +19,7 @@ export function renderHud(refs: DomRefs, state: GameState, config: Config): void
     refs.evolutionHudText.textContent = `进化 ${state.recipes.completedRecipeIds.length}/${cfg.economy.evolution.maxRecipeCompletions}`;
   }
   if (refs.validationSettleBtn) {
-    refs.validationSettleBtn.hidden = state.wavePhase !== 'validationRewardSettle' || meter.currentReceipt !== null;
+    refs.validationSettleBtn.hidden = state.wavePhase !== 'validationRewardSettle';
     refs.validationSettleBtn.textContent = `奖励结算 ${Math.ceil(state.validationRewardSettleRemaining)}s · 继续`;
   }
   const godCopy = texts.gods as Record<string, { name: string }>;

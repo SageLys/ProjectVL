@@ -19,7 +19,6 @@ export function updateGame(state: GameState, config: Config, rng: Rng, dt: numbe
     || state.paused
     || state.decisions.current !== null
     || state.decisions.pending.length > 0
-    || state.rewardMeter.currentReceipt !== null
   ) return [];
   if (state.intermission.active) {
     state.time += dt;

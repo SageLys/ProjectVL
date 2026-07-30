@@ -31,7 +31,7 @@ import { renderEquipment } from './ui/renderEquipment';
 import { renderMergeHints } from './ui/renderMergeHints';
 import type { TunerPanel } from './ui/tunerPanel';
 import { createModals } from './ui/modals';
-import { createRewardReceiptModal } from './ui/rewardReceiptModal';
+import { createRewardCelebration } from './ui/rewardCelebration';
 import { confirmRewardReceipt } from './core/systems/rewardMeterSystem';
 import { createCardDetailModal } from './ui/cardDetailModal';
 import { resolvePauseState } from './ui/pauseState';
@@ -116,14 +116,10 @@ function refreshSlots(): void {
 }
 
 function syncDecisionUi(): void {
-  if (state.rewardMeter.currentReceipt) {
-    modals.hideDecision();
-    receiptModal.show(state.rewardMeter.currentReceipt);
-  } else {
-    receiptModal.hide();
-    if (state.decisions.current) modals.showDecision(state.decisions.current, state);
-    else modals.hideDecision();
-  }
+  if (state.rewardMeter.currentReceipt) rewardCelebration.show(state.rewardMeter.currentReceipt);
+  else rewardCelebration.hide();
+  if (state.decisions.current) modals.showDecision(state.decisions.current, state);
+  else modals.hideDecision();
 }
 
 window.addEventListener('resize', () => renderMergeHints(refs.dock, state));
@@ -148,7 +144,7 @@ const modals = createModals(refs, {
     start();
   },
 });
-const receiptModal = createRewardReceiptModal(() => dispatch(confirmRewardReceipt(state, config, rng)));
+const rewardCelebration = createRewardCelebration(() => dispatch(confirmRewardReceipt(state, config, rng)));
 
 const cardDetail = createCardDetailModal({
   recipeContext: () => ({
@@ -190,8 +186,7 @@ function previewFor(source: SlotSource, index: number): PreviewSpec {
 const pointerRouter = createPointerRouter({
   canvas: refs.canvas, dock: refs.dock, aimPreview: refs.aimPreview, screenPreview: refs.screenPreview,
   input: cfg.input,
-  isPaused: () => state.paused || state.rewardMeter.currentReceipt !== null
-    || (state.intermission.active && state.intermission.step !== 'free'),
+  isPaused: () => state.paused || (state.intermission.active && state.intermission.step !== 'free'),
   onBountyOfferTap: (x, y) => {
     if (!cfg.bounty.enabled) return false;
     const events = acceptBountyOfferAt(state, x, y);
@@ -290,7 +285,7 @@ function reset(): void {
   }
   modals.hideResult();
   modals.hideDecision();
-  receiptModal.hide();
+  rewardCelebration.hide();
   refs.startBtn.textContent = texts.buttons.start;
   refs.startBtn.parentElement?.removeAttribute('hidden');
   refs.pauseBtn.textContent = texts.buttons.pause;
@@ -323,7 +318,7 @@ function start(): void {
 }
 
 function togglePause(): void {
-  if (state.mode !== 'playing' || state.intermission.active || state.decisions.current || state.rewardMeter.currentReceipt) return;
+  if (state.mode !== 'playing' || state.intermission.active || state.decisions.current) return;
   manualPaused = !manualPaused;
   syncPauseState();
 }
