@@ -141,10 +141,44 @@ function makeBindings(trigger: string, effects: Effect[], triggerParams?: Record
 function parseCarrierAtoms(raw: string): string[] {
   const found: string[] = [];
   for (const name of atomNames) {
+    if (raw.includes(`spreadStatus:'${name}'`) || raw.includes(`spreadStatus: '${name}'`)) continue;
+    if (raw.includes(`groundZone(${name})`) || raw.includes(`aura(${name})`)) continue;
     const re = new RegExp(`(^|[^a-zA-Z])${name}([^a-zA-Z]|$)`);
     if (re.test(raw) && !found.includes(name)) found.push(name);
   }
   return found;
+}
+
+function sourceParams(name: string, raw: string, variant: number): Record<string, any> {
+  const params = defaultParams(name, variant);
+  const contract = ATOM_CONTRACT[name as keyof typeof ATOM_CONTRACT] as AtomContract | undefined;
+  const match = raw.match(new RegExp(`${name}\\(([^)]*)\\)`));
+  if (!match || !contract) return params;
+  const parts = match[1].split(',').map(value => value.trim()).filter(Boolean);
+  for (const part of parts) {
+    const assignment = part.match(/^([a-zA-Z][a-zA-Z0-9]*)\s*=\s*(.+)$/);
+    if (assignment && contract.params[assignment[1]]) {
+      const rawValue = assignment[2].trim();
+      const numeric = Number(rawValue.replace(/s$/, ''));
+      params[assignment[1]] = Number.isFinite(numeric)
+        ? numeric
+        : rawValue.replace(/^['"]|['"]$/g, '');
+      continue;
+    }
+    const positive = part.match(/^([a-zA-Z][a-zA-Z0-9]*)\s*>\s*0$/);
+    if (positive && contract.params[positive[1]]) {
+      params[positive[1]] = positive[1] === 'explodeDamageMul' ? 0.4 : 1;
+      if (positive[1] === 'explodeDamageMul' && contract.params.explode) params.explode = true;
+      continue;
+    }
+    const seconds = Number(part.replace(/s$/, ''));
+    if (Number.isFinite(seconds) && contract.params.duration) {
+      params.duration = seconds;
+      continue;
+    }
+    if (name === 'summon' && ['decoy', 'mirrorTurret', 'orbital'].includes(part)) params.kind = part;
+  }
+  return params;
 }
 
 function parseTriggers(raw: string): Array<{ trigger: string; seconds?: number }> {
@@ -175,7 +209,7 @@ function resourceEffect(god: string, variant: number): Effect {
 function carrierBindings(god: string, carrier: string, description: string, variant: number): Binding[] {
   const atoms = parseCarrierAtoms(carrier);
   const triggers = parseTriggers(`${carrier} ${description}`);
-  const effects = atoms.map(name => atom(name, defaultParams(name, variant)));
+  const effects = atoms.map(name => atom(name, sourceParams(name, carrier, variant)));
 
   const chain = effects.find(effect => effect.atom === 'chain');
   if (chain && god === 'storm') {
@@ -192,6 +226,9 @@ function carrierBindings(god: string, carrier: string, description: string, vari
   for (const t of triggers) {
     const params = t.trigger === 'interval' ? { seconds: t.seconds ?? 3 } : undefined;
     let eventEffects = deepClone(effects.length ? effects : [resourceEffect(god, variant)]);
+    if (t.trigger !== 'passive') eventEffects = eventEffects.map(effect => effect.atom === 'aura'
+      ? atom('groundZone', { ...effect.params })
+      : effect);
     if (t.trigger === 'onKill' || t.trigger === 'onBreach') {
       // Both events carry an enemy object that has already left state.enemies.
       // Convert direct damage to the coordinate-class explosion carrier and
@@ -280,10 +317,12 @@ function keepAmplifyOrthogonal(
   });
   if (!candidates.length) {
     outer: for (const branch of branches3) for (const b of branch) for (const e of b.effects) {
-      const contract = ATOM_CONTRACT[e.atom as keyof AtomContract];
-      if (contract?.params.chance) {
-        e.params = { ...(e.params ?? {}), chance: 1 };
-        candidates.push('chance');
+      const contract = ATOM_CONTRACT[e.atom as keyof typeof ATOM_CONTRACT];
+      for (const [key, spec] of Object.entries(contract.params)) {
+        const types = Array.isArray(spec.type) ? spec.type : [spec.type];
+        if (used5.has(key) || candidates.includes(key) || !types.includes('number')) continue;
+        e.params = { ...(e.params ?? {}), [key]: typeof spec.default === 'number' ? spec.default : 1 };
+        candidates.push(key);
         break outer;
       }
     }
@@ -297,12 +336,15 @@ function keepAmplifyOrthogonal(
   return { ...amplify, params: Object.keys(result).length ? result : amplify.params };
 }
 
-function gatedStatus(god: string): string {
-  return god === 'storm' ? 'vulnerable' : god === 'winter' ? 'controlled' : god === 'inferno' ? 'dot' : god === 'plenty' ? 'brand' : '';
-}
-
-function branch5Bindings(cardId: string, god: string, role: 'payoff' | 'spread' | 'convert', variant: number, prose: string): Binding[] {
-  const status = gatedStatus(god);
+function branch5Bindings(
+  cardId: string,
+  god: string,
+  role: 'payoff' | 'spread' | 'convert',
+  variant: number,
+  prose: string,
+  _fallback: string,
+): Binding[] {
+  const status = prose.match(/requiresStatus:'([^']+)'/)?.[1];
   const event = prose.includes('onBreach') ? 'onBreach'
     : prose.includes('onKill') ? 'onKill'
       : prose.includes('onPickup') ? 'onPickup'
@@ -311,57 +353,80 @@ function branch5Bindings(cardId: string, god: string, role: 'payoff' | 'spread' 
             : prose.includes('interval') ? 'interval'
               : prose.includes('passive') ? 'passive'
                 : 'onHit';
-  const triggerParams: Record<string, any> = event === 'interval' ? { seconds: 3 + variant } : {};
-  if (status && ['onHit', 'onKill'].includes(event)) triggerParams.requiresStatus = status;
-  if (prose.includes("requiresSource:'chain'")) triggerParams.requiresSource = 'chain';
-  if (prose.includes("requiresSource:'dot'")) triggerParams.requiresSource = 'dot';
-  if (prose.includes("requiresSource:'weapon'")) triggerParams.requiresSource = 'weapon';
+  const triggerParams: Record<string, any> = event === 'interval'
+    ? { seconds: Number(prose.match(/interval\s*([0-9.]+)s/)?.[1] ?? 3 + variant) }
+    : {};
+  if (status) triggerParams.requiresStatus = status;
+  const source = prose.match(/requiresSource:'([^']+)'/)?.[1];
+  if (source) triggerParams.requiresSource = source;
+  const cooldown = Number(prose.match(/cd\s*([0-9.]+)s/)?.[1]);
+  if (Number.isFinite(cooldown)) triggerParams.cooldownSeconds = cooldown;
   const gated = Object.keys(triggerParams).some(key => key.startsWith('requires'));
-  let main: Effect[];
+  const explicitAtoms = parseCarrierAtoms(prose);
+  let main = explicitAtoms.map(name => atom(name, sourceParams(name, prose, variant)));
 
-  if (role === 'payoff') {
+  if (!main.length && role === 'payoff') {
     main = event === 'onKill' || event === 'onBreach'
       ? [atom('aoeOnHit', { damageRatio: 0.8 + variant * 0.15, radius: 95 + variant * 10 })]
       : [atom('burstDamage', { damageMul: 1.05 + variant * 0.25 })];
-    if (god === 'bulwark') {
-      if (cardId === 'aegis') return [binding('passive', [atom('novaOnBreak', defaultParams('novaOnBreak', variant))])];
-      main.push(atom('thorns', defaultParams('thorns', variant)));
-    }
-  } else if (role === 'spread') {
+  } else if (!main.length && role === 'spread') {
     const resource = resourceEffect(god, variant);
-    if (event === 'onKill' || event === 'onBreach' || event === 'passive') {
+    if (cardId === 'sentinel') {
+      main = [atom('summon', { kind: 'mirrorTurret', count: 1, hp: 70, duration: 8, damageRatio: 0.4, fireInterval: 0.8 })];
+    } else if (event === 'onKill' || event === 'onBreach' || event === 'passive') {
       main = [atom('aura', { duration: 2.5 + variant, tickInterval: 0.5, effects: [resource] })];
     } else {
       main = [atom('aoeOnHit', { damageRatio: 0, falloff: 0 }), resource];
     }
-    // The primary-god affix template requires a real durability sink. The
-    // shared decoy carrier is generic and does not create a second shield source.
-    if (god === 'bulwark') main.push(atom('summon', { kind: 'decoy', hp: 55 + variant * 15, duration: 6, count: 1 }));
-  } else {
+  } else if (!main.length) {
     main = [atom('restore', { amountRatio: 0.04 + variant * 0.02 })];
-    if (prose.includes('extraDrop')) main.push(atom('extraDrop', defaultParams('extraDrop', variant)));
-    else main.push(atom('statBuff', defaultParams('statBuff', variant)));
+    main.push(atom('statBuff', defaultParams('statBuff', variant)));
   }
 
-  if (cardId === 'ironvine' && role === 'convert') {
-    return [binding('passive', [atom('mergeMaterialRefund', defaultParams('mergeMaterialRefund', variant))])];
+  for (const effect of main) {
+    if (effect.atom === 'chain') effect.params = { ...effect.params, spreadStatus: 'vulnerable', spreadParams: { ratio: 0.12, duration: 2.4 } };
+    if (effect.atom === 'groundZone') effect.params = { ...effect.params, effects: [resourceEffect(god, variant)] };
+    if (effect.atom === 'aura') effect.params = { ...effect.params, effects: [resourceEffect(god, variant)] };
   }
-  if (cardId === 'fateLoom' && role === 'convert') {
-    return [binding('passive', [atom('wildcardRewardBonus', defaultParams('wildcardRewardBonus', variant))])];
+  if (role === 'spread' && !main.some(effect => IDENTITY_ATOMS[god].includes(effect.atom))) {
+    const resource = resourceEffect(god, variant);
+    const area = main.find(effect => effect.atom === 'aura' || effect.atom === 'groundZone');
+    if (area) area.params = { ...area.params, effects: [resource] };
+    else if (event !== 'onKill' && event !== 'onBreach') main.push(resource);
   }
-  if (cardId === 'harvest' && role === 'convert') {
-    return [binding('passive', [
-      atom('dropLifetimeMul', defaultParams('dropLifetimeMul', variant)),
-      atom('expiryConvert', defaultParams('expiryConvert', variant)),
-    ])];
+  // Bulwark's affix template always includes durability. A shared decoy is the
+  // generic durability carrier for non-shield cards and avoids creating a
+  // second shield supplier.
+  if (god === 'bulwark' && role === 'spread'
+    && !main.some(effect => effect.atom === 'shield' || effect.atom === 'summon')) {
+    main.push(atom('summon', { kind: 'decoy', count: 1, hp: 70, duration: 6 }));
   }
-  const result = makeBindings(event, main, triggerParams);
+
+  let eventEffects = deepClone(main);
+  if (event !== 'passive') eventEffects = eventEffects.map(effect => effect.atom === 'aura'
+    ? atom('groundZone', { ...effect.params })
+    : effect);
+  if (event === 'onKill' || event === 'onBreach') eventEffects = eventEffects.flatMap(effect => {
+    if (effect.atom === 'burstDamage') return [atom('aoeOnHit', {
+      damageRatio: Number(effect.params?.damageMul ?? 1), radius: Number(effect.params?.radius ?? 100), falloff: 0.35,
+    })];
+    if (['slow', 'freeze', 'stun', 'knockback', 'vulnerable', 'dot', 'execute'].includes(effect.atom)) return [];
+    return [effect];
+  });
+  if (!eventEffects.length) eventEffects = [atom('aoeOnHit', { radius: 100, damageRatio: 0.8, falloff: 0.35 })];
+  const result = makeBindings(event, eventEffects, triggerParams);
+  if (prose.includes('interval') && event !== 'interval') {
+    const periodic = main.filter(effect => ['restore', 'statBuff', 'burstDamage', 'focusPriority'].includes(effect.atom));
+    if (periodic.length) result.push(...makeBindings('interval', periodic, {
+      seconds: Number(prose.match(/interval\s*([0-9.]+)s/)?.[1] ?? 5),
+    }));
+  }
   if (gated) {
     // Zero-resource fallback without a new engine primitive: a separate low
     // unconditional player-side benefit. It remains useful when the gate is empty.
     result.push(binding(event, [atom('statBuff', {
       stat: 'damage', operation: 'mul', value: 1.03, duration: 1.5, maxStacks: 1,
-    })], event === 'interval' ? { seconds: 3 + variant } : undefined));
+    })], event === 'interval' ? { seconds: triggerParams.seconds } : undefined));
   }
   return result;
 }
@@ -370,7 +435,7 @@ function sixStarBinding(_cardId: string, god: string, section: string, variant: 
   const line = section.split(/\r?\n/).find(value => value.startsWith('**6★ 公共**')) ?? '';
   // Parenthetical prose explains exclusions or arbitration; it is not an
   // additional effect declaration.
-  const declaration = line.split(/[（(]/, 1)[0];
+  const declaration = line.split('（', 1)[0];
   const names = [...new Set(parseCarrierAtoms(declaration))];
   if (!names.length) names.push(god === 'storm' ? 'ricochet' : god === 'winter' ? 'beamMorph' : god === 'inferno' ? 'mortarMorph' : god === 'bulwark' ? 'breachReduction' : 'xpMul');
   const localNames = names.filter(name => {
@@ -388,7 +453,7 @@ function sixStarBinding(_cardId: string, god: string, section: string, variant: 
           : declaration.includes('passive') ? 'passive'
             : preferredTrigger(localNames[0]);
   const params = trigger === 'interval' ? { seconds: Number(declaration.match(/interval\s*([0-9.]+)s/)?.[1] ?? 2.5) } : undefined;
-  const effects = localNames.map(name => atom(name, defaultParams(name, variant)));
+  const effects = localNames.map(name => atom(name, sourceParams(name, declaration, variant)));
   for (const effect of effects) {
     if (effect.atom === 'chain') effect.params = { ...effect.params, spreadStatus: 'vulnerable', spreadParams: { ratio: 0.12, duration: 2.4 } };
     if (effect.atom === 'aura') effect.params = { ...effect.params, effects: [resourceEffect(god, variant)] };
@@ -402,17 +467,66 @@ function sixStarBinding(_cardId: string, god: string, section: string, variant: 
       if (!effects.some(item => item.atom === economic)) effects.push(atom(economic, defaultParams(economic, variant)));
     }
   }
-  return makeBindings(trigger, effects, params);
+  const result = makeBindings(trigger, effects, params);
+  if (declaration.includes('interval') && trigger !== 'interval') {
+    result.push(binding('interval', [resourceEffect(god, variant)], {
+      seconds: Number(declaration.match(/interval\s*([0-9.]+)s/)?.[1] ?? 2.5),
+    }));
+  }
+  return result;
 }
 
-function consumableFor(god: string, variant: number): Json {
-  const radii = [100 + variant * 4, 135 + variant * 4, 175 + variant * 4];
+function consumableFor(
+  cardId: string,
+  god: string,
+  variant: number,
+  option3: Array<{ equip: Binding[] }>,
+  shared6: Binding[],
+): Json {
+  const radii = [120, 140, 160];
+  if (cardId === 'chainLightning') return {
+    placement: 'point', interpolation: 'linear', anchors: {
+      '1': { radius: 120, effects: [atom('chain', { bounces: 4, searchRange: 120, damageRetention: 0.72, targets: 1, spreadStatus: 'vulnerable', spreadParams: { ratio: 0.1, duration: 2 } })] },
+      '3': { radius: 140, effects: [atom('chain', { bounces: 7, searchRange: 140, damageRetention: 0.72, targets: 1, spreadStatus: 'vulnerable', spreadParams: { ratio: 0.12, duration: 2.5 } }), atom('vulnerable', { ratio: 0.12, duration: 2.5, radius: 140 })] },
+      '6': { radius: 160, effects: [atom('chain', { bounces: 12, searchRange: 160, damageRetention: 0.72, targets: 1, spreadStatus: 'vulnerable', spreadParams: { ratio: 0.15, duration: 3 } }), atom('burstDamage', { damageMul: 1.5, radius: 160 })] },
+    },
+  };
+  if (cardId === 'aegis') return {
+    placement: 'point', interpolation: 'linear', anchors: {
+      '1': { radius: 120, effects: [atom('shield', { absorbHits: 2 })] },
+      '3': { radius: 140, effects: [atom('shield', { absorbHits: 4 })] },
+      '6': { radius: 160, effects: [atom('shield', { absorbHits: 6, regenSeconds: 8 })] },
+    },
+  };
+
+  const effectsFrom = (bindings: Binding[]): Effect[] => {
+    const result: Effect[] = [];
+    for (const item of bindings.flatMap(value => value.effects)) {
+      if (!ATOM_CONTRACT[item.atom as keyof typeof ATOM_CONTRACT].supports.consume) continue;
+      const cloned = deepClone(item);
+      if (Array.isArray(cloned.params?.effects)) {
+        cloned.params.effects = (cloned.params.effects as Effect[]).filter(nested =>
+          ATOM_CONTRACT[nested.atom as keyof typeof ATOM_CONTRACT].supports.consume);
+        if (!cloned.params.effects.length) cloned.params.effects = [atom('burstDamage', { damageMul: 0.35 })];
+      }
+      if (!result.some(existing => existing.atom === cloned.atom)) result.push(cloned);
+    }
+    return result;
+  };
   const starEffects = (tier: number): Effect[] => {
-    if (god === 'storm') return [atom('burstDamage', { damageMul: 1 + tier * 0.5, radius: radii[tier] }), atom('vulnerable', { ratio: 0.1 + tier * 0.04, duration: 2 + tier })];
-    if (god === 'winter') return [atom('slow', { ratio: 0.25 + tier * 0.08, duration: 2 + tier }), atom('freeze', { duration: 0.6 + tier * 0.3, stacksToTrigger: Math.max(1, 3 - tier) })];
-    if (god === 'inferno') return [atom('burstDamage', { damageMul: 1 + tier * 0.5, radius: radii[tier] }), atom('dot', { damageRatio: 0.1 + tier * 0.05, tickInterval: 0.5, duration: 2 + tier })];
-    if (god === 'bulwark') return [atom('summon', { kind: 'decoy', count: 1 + tier, hp: 50 + tier * 30, duration: 4 + tier }), atom('restore', { amountRatio: 0.04 + tier * 0.03 })];
-    return [atom('focusPriority', { priorityWeight: 1.5 + tier * 0.5, duration: 3 + tier, radius: radii[tier] }), atom('extraDrop', { count: 1 + tier * 2, at: 'point', chance: 1 })];
+    const bindings = tier === 0
+      ? option3[0].equip
+      : tier === 1
+        ? [...option3[0].equip, ...option3[1].equip]
+        : [...option3.flatMap(option => option.equip), ...shared6];
+    const effects = effectsFrom(bindings);
+    if (god === 'plenty' && !effects.some(effect => effect.atom === 'extraDrop')) {
+      effects.push(atom('extraDrop', { count: 1 + tier * 2, at: 'point', chance: 1 }));
+    }
+    if (god === 'bulwark' && effects.every(effect => ['thorns', 'breachReduction', 'statBuff'].includes(effect.atom))) {
+      effects.push(atom('restore', { amountRatio: 0.04 + tier * 0.03 }));
+    }
+    return effects.length ? effects : [resourceEffect(god, variant)];
   };
   return {
     placement: 'point', interpolation: 'linear', anchors: {
@@ -449,7 +563,7 @@ interface ParsedCard {
   id: string; name: string; god: string; category: string; tags: string[]; section: string;
   identity: string; overview: string;
   branch3: Array<{ letter: string; name: string; carrier: string; description: string }>;
-  branch5: Array<{ number: string; name: string; prose: string }>;
+  branch5: Array<{ number: string; name: string; prose: string; fallback: string }>;
 }
 
 function optionSignature(equip: Binding[]): string {
@@ -481,7 +595,7 @@ function parseCards(): ParsedCard[] {
     const end = headings[index + 1]?.index ?? design.indexOf('\n## 7.', start);
     const section = design.slice(start, end > start ? end : design.length);
     const rows3 = [...section.matchAll(/^\| ([ABC]) ([^|]+) \| [^|]+ \| ([^|]+) \| ([^|]+) \|.*$/gm)];
-    const rows5 = [...section.matchAll(/^\| ([123]) ([^|]+) \| [^|]+ \| ([^|]+) \|.*$/gm)];
+    const rows5 = [...section.matchAll(/^\| ([123]) ([^|]+) \| [^|]+ \| ([^|]+) \| ([^|]+) \|$/gm)];
     if (rows3.length !== 3 || rows5.length !== 3) throw new Error(`${heading[4]} branch parse failed: ${rows3.length}/${rows5.length}`);
     return {
       id: heading[4], name: clean(heading[3]), god: SECTION_GOD[heading[1]], category: heading[5],
@@ -489,7 +603,7 @@ function parseCards(): ParsedCard[] {
       identity: clean(section.match(/^\| 身份契约 \| (.+?) \|$/m)?.[1] ?? ''),
       overview: clean(section.match(/^\| overview \| (.+?) \|$/m)?.[1] ?? ''),
       branch3: rows3.map(row => ({ letter: row[1], name: clean(row[2]), carrier: row[3], description: row[4] })),
-      branch5: rows5.map(row => ({ number: row[1], name: clean(row[2]), prose: row[3] })),
+      branch5: rows5.map(row => ({ number: row[1], name: clean(row[2]), prose: row[3], fallback: clean(row[4] ?? '') })),
     };
   });
 }
@@ -555,7 +669,7 @@ const cards = parsedCards.map((parsed, cardIndex) => {
     id: `${parsed.id}${index + 1}x`,
     textKey: `evolution.${parsed.id}.${parsed.id}${index + 1}x`,
     interfaceRole: roles[index],
-    equip: branch5Bindings(parsed.id, parsed.god, roles[index], index, row.prose),
+    equip: branch5Bindings(parsed.id, parsed.god, roles[index], index, row.prose, row.fallback),
   }));
   const amplify = keepAmplifyOrthogonal(
     parseAmplify(parsed.section, option3.map(option => option.equip)),
@@ -581,7 +695,7 @@ const cards = parsedCards.map((parsed, cardIndex) => {
     implementationBatch: 1,
     stars,
     amplifyAxis: amplify,
-    consumable: consumableFor(parsed.god, cardIndex % 5),
+    consumable: consumableFor(parsed.id, parsed.god, cardIndex % 5, option3, shared6),
     designNotes: clean(parsed.section.match(/^\*\*affixPool\*\*：[^\r\n]*\*\*修复与自检\*\*：([^\r\n]+)/m)?.[1] ?? '按 v4 全字段表重写并通过 V1–V14。'),
     affixPool: affixPool(parsed.god, parsed.id === 'springOfLife'),
     evolutionTree: {
