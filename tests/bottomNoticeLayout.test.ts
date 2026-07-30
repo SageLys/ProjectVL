@@ -17,7 +17,7 @@ describe('bottom notification layout', () => {
     expect(html).not.toContain('bottom-notice');
     expect(css).toContain('.dock-toast { position:absolute;');
     expect(css).toContain('right:10px; top:4px;');
-    expect(css).not.toContain('bottom:calc(100% + 4px)');
+    expect(css).not.toMatch(/\.dock-toast\s*\{[^}]*bottom:calc\(100% \+ 4px\)/s);
     expect(css).toContain('calc((100dvh - 345px) * 540 / 730 + 16px)');
   });
 });

@@ -70,11 +70,13 @@ describe('merge hint links', () => {
 
   it('renders an independent recipe link between the exact selected materials with full copy', () => {
     const state = freshState();
-    const chain = card('chainLightning', 5);
-    const frost = card('frost', 5);
-    state.cards[0] = chain;
-    state.equipment[0] = frost;
-    document.body.innerHTML = `<section id="dock"><button class="card" data-id="${chain.id}"></button><button class="card" data-id="${frost.id}"></button></section>`;
+    const recipe = cfg.evolutionRecipes.recipes[0];
+    const variable = card(recipe.ingredientVariable.cardId, 5);
+    const anchor = card(recipe.ingredientAnchor.cardId, 5);
+    state.cards[0] = variable;
+    state.equipment[0] = anchor;
+    state.recipes.compatibleRecipeIds = [recipe.id];
+    document.body.innerHTML = `<section id="dock"><button class="card" data-id="${variable.id}"></button><button class="card" data-id="${anchor.id}"></button></section>`;
     const dock = document.querySelector<HTMLElement>('#dock')!;
     const cards = dock.querySelectorAll<HTMLElement>('.card');
     vi.spyOn(dock, 'getBoundingClientRect').mockReturnValue(rect(10, 20, 500, 220));
@@ -82,10 +84,10 @@ describe('merge hint links', () => {
     vi.spyOn(cards[1], 'getBoundingClientRect').mockReturnValue(rect(300, 120, 100, 70));
 
     expect(findRecipeHintPairs(state)).toEqual([{
-      recipeId: 'frozenThunder',
-      aCardId: chain.id,
-      bCardId: frost.id,
-      outputCardId: 'frozenThunder',
+      recipeId: recipe.id,
+      aCardId: variable.id,
+      bCardId: anchor.id,
+      outputCardId: recipe.outputCardId,
       outputStar: 6,
     }]);
     renderMergeHints(dock, state);
@@ -95,13 +97,13 @@ describe('merge hint links', () => {
     expect(svg?.getAttribute('aria-hidden')).toBe('true');
     expect(line?.classList.contains('merge-hint-line')).toBe(false);
     expect(line?.dataset).toMatchObject({
-      recipeId: 'frozenThunder',
-      aCardId: String(chain.id),
-      bCardId: String(frost.id),
+      recipeId: recipe.id,
+      aCardId: String(variable.id),
+      bCardId: String(anchor.id),
     });
     expect(cards[0].classList.contains('recipe-ready')).toBe(true);
     expect(cards[1].classList.contains('recipe-ready')).toBe(true);
     expect(dock.querySelector('.recipe-evolution-hint')?.textContent)
-      .toContain('连环闪电 5★ ＋ 霜寒 5★ → 霜雷 6★');
+      .toContain('拖动任一材料至另一张，立即进化');
   });
 });

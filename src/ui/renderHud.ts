@@ -3,6 +3,7 @@ import { totalDamage, totalFireRate, totalMulti } from '../core/stats';
 import type { DomRefs } from './domRefs';
 import { texts } from '../data';
 import { formatRuntimeModifier } from './cardMeta';
+import { cfg } from '../config';
 
 /** 刷新 HUD：血/经验/等级/波次/实时数值 + 调参回显 + 当前可执行操作提示。 */
 export function renderHud(refs: DomRefs, state: GameState, config: Config): void {
@@ -14,6 +15,13 @@ export function renderHud(refs: DomRefs, state: GameState, config: Config): void
   refs.xpBar.style.width = `${(state.xp / state.xpNeed) * 100}%`;
   refs.levelText.textContent = String(state.level);
   refs.waveText.textContent = String(state.wave);
+  if (refs.evolutionHudText) {
+    refs.evolutionHudText.textContent = `进化 ${state.recipes.completedRecipeIds.length}/${cfg.economy.evolution.maxRecipeCompletions}`;
+  }
+  if (refs.validationSettleBtn) {
+    refs.validationSettleBtn.hidden = state.wavePhase !== 'validationRewardSettle';
+    refs.validationSettleBtn.textContent = `奖励结算 ${Math.ceil(state.validationRewardSettleRemaining)}s · 继续`;
+  }
   const godCopy = texts.gods as Record<string, { name: string }>;
   const selectedGods = [
     ...(state.godPool.mainGod ? [state.godPool.mainGod] : []),

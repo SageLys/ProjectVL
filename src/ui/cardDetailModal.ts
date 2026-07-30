@@ -1,10 +1,11 @@
 import type { Card } from '../core/types';
-import { buildCardDetailViewModel, type CardDetailViewModel, type EffectSection } from './cardDetailModel';
+import { buildCardDetailViewModel, type CardDetailViewModel, type EffectSection, type RecipeDisplayContext } from './cardDetailModel';
 import type { EffectTextBlock } from './effectText';
 
 export interface CardDetailModalHooks {
   onOpen(): void;
   onClose(): void;
+  recipeContext?(): RecipeDisplayContext;
 }
 
 export interface CardDetailModal {
@@ -186,7 +187,7 @@ export function createCardDetailModal(hooks: CardDetailModalHooks): CardDetailMo
     tree.append(treeTitle);
     for (const ingredient of model.tree.asIngredient) {
       const preview = document.createElement('article');
-      preview.className = 'skill-recipe-ingredient';
+      preview.className = `skill-recipe-ingredient${ingredient.compatible ? '' : ' unavailable'}`;
       preview.dataset.recipeId = ingredient.recipeId;
       const heading = document.createElement('h4');
       heading.textContent = '进化配方（作为材料）';
@@ -249,7 +250,7 @@ export function createCardDetailModal(hooks: CardDetailModalHooks): CardDetailMo
   return {
     open(card, source, returnFocus) {
       focusTarget = returnFocus ?? document.activeElement as HTMLElement | null;
-      renderModel(buildCardDetailViewModel(card, source));
+      renderModel(buildCardDetailViewModel(card, source, hooks.recipeContext?.()));
       if (!open) {
         open = true;
         overlay.hidden = false;
