@@ -1,6 +1,6 @@
 # Codex 任务：验证波重做 —— 终局敌潮 + 基础掉落隔离
 
-> 本文档为完整实施指令。所有文件路径、行号、行为描述均已对照当前 `main` 分支实际代码核实（2026-07-30，HEAD = `0a5c06c`）。
+> 本文档为完整实施指令。所有文件路径、行号、行为描述均已对照当前 `main` 分支实际代码核实（2026-07-30，HEAD = `600362b`）。
 > 按「九、实施顺序」的 7 个 Step 依次完成，每个 Step 结束时保持 `npm test` 与 `npm run build`（含 `tsc --noEmit`）通过。
 > 设计已拍板，见「二、已拍板的设计决策」。**不要用其他方案替代，不要自行加码「二」里没写的机制。**
 
@@ -17,6 +17,7 @@
 | 同屏敌人 | 1–2 | 第 9 波 P50 ≈ 32–40、第 10 波 P50 ≈ 42–50 |
 | 基础掉落 | 已关闭（阶段门控） | 继续严格为 0，且改为按敌人来源硬门控（不依赖阶段判断） |
 | 手动拾取 | 第 9 波 2 个 / 第 10 波 3 个安全奖励 | 保持「少量高星」：数量不变，最低星级从 3★ 提到 4★，且 `reward` 改为可选以便调参 |
+| 奖励蓄力条 | 验证期几乎不转（击杀太少） | 第 9 波约 3 次、第 10 波约 4 次自动触发，全程零点击 |
 | 波间静默 | 验证期波间自由时间 17 秒 | 6 秒 |
 
 体验判据：**构筑成型 → 持续割草；构筑失败 → 被淹死。** 验证波保留完整致死能力。
@@ -31,10 +32,10 @@
 4. **杂兵属性倍率不做削弱**。`hpMul` / `damageMul` / `speedMul` 一律 ≥ 1。漏怪按全额扣血、可以打死玩家——验证波本质与前面的波一致，只是敌人更多更难。**不要引入「验证波不致死」「验证波降低伤害」之类的保护。**
 5. **精英血量必须从 14/20 倍下调到 4–6 倍**。理由：敌潮同时在消耗玩家火力，20 倍血的精英会重新制造长时间停滞，把刚做出来的割草节奏又切断。精英的定位改为「敌潮中的硬点」，不是「整波的唯一内容」。
 6. **基础掉落逻辑独立**：验证波杂兵不产生任何普通掉落、不产生任何 Bounty。整波只有少量高星安全奖励（卡牌 / 万能卡），沿用现有 `secure` 机制（不过期、等玩家拾取后波次才真正结束）。
-7. **技能自带的掉落/收益效果一律不屏蔽**。`extraDrop` 等原子是玩家自己的构筑选择，本次不管它对验证波掉落数量的影响。**不要给 `extraDrop` 加阶段门控、上限或折算。**
-8. **不加「验证波关闭经验」开关**。已核实：`progression.xpThresholds` 只有 8 档、最高累计 280；第 1–3 波配额合计约 202 个击杀（`tank.xp = 2`，其余 1），第 4 波内 8 个遗物就全部发完，之后 `addXp` 恒返回空事件。第 9、10 波不可能因为经验弹出遗物三选一，所以这不是问题，也不需要新配置字段。
-9. **不改验证奖励的生成坐标**。已核实拾取是 `onArenaTap → collectNearest(state, …, x, y, pickupRadius)`（`src/game.ts` L193-197），玩家没有位移，点哪儿都能拾取。「奖励掉在屏幕角落要跑过去」的问题在本项目不存在。
-10. **`dev-short` variant 必须同步覆写验证敌潮**。`dev-short` 是 `totalWaves 3 / selectionWaves 1 / validationWaves 1`，第 3 波就是验证波，而黄金 fixture `04-run-victory` 与 `05-run-defeat` 都用它。若不覆写，第 3 波会变成 240 只敌潮，`04-run-victory` 的 `win: true` 语义会崩。注意 `deepMerge` 对数组是**整体替换**，所以 variant 必须提供完整的 `validation` 数组。
+7. **技能自带的掉落/收益效果一律不屏蔽**。`extraDrop` 等原子是玩家自己的构筑选择，本次不管它对验证波掉落数量的影响。**不要给 `extraDrop` 加阶段门控、上限或折算。**（风险已量化，见三之「onKill 掉落洪水」，是知情接受，不是遗漏。）
+8. **奖励蓄力条系统整体不改**。`e8d839c` 已把经验/遗物换成蓄力条自动抽奖，验证波的海量击杀现在会持续把蓄力条推满 → 自动触发全屏轰炸 / 全屏冰冻 / 回血护盾 / 万能卡 / 流派激增。这正是「构筑兑现」想要的终局演出，而且庆祝横幅是非阻塞、无按钮、2.2 秒自动完成的，完全不占用玩家双手。**不要为验证波加任何「关闭奖励积分」的开关。**
+9. **不改验证奖励的生成坐标**。已核实拾取是 `onArenaTap → collectNearest(state, …, x, y, pickupRadius)`（`src/game.ts`），玩家没有位移，点哪儿都能拾取。「奖励掉在屏幕角落要跑过去」的问题在本项目不存在。
+10. **`dev-short` variant 必须同步覆写验证敌潮**。`dev-short` 是 `totalWaves 3 / selectionWaves 1 / validationWaves 1`，第 3 波就是验证波，而黄金 fixture `04-run-victory`（当前 `win: true`、`framesRun 5506`、`kills 249`）与 `05-run-defeat` 都用它。若不覆写，第 3 波会变成 240 只敌潮，`04-run-victory` 的胜利语义会崩。注意 `deepMerge` 对数组是**整体替换**，所以 variant 必须提供完整的 `validation` 数组。
 
 ---
 
@@ -51,7 +52,7 @@ if (stage === 'validation') {
 }
 ```
 
-`src/core/systems/waveSystem.ts` L48-62，开波时清零配额并一次性塞入全部精英：
+`src/core/systems/waveSystem.ts` L49-62，开波时清零配额并一次性塞入全部精英：
 
 ```ts
 if (wavePlan.validation) {
@@ -67,22 +68,41 @@ if (wavePlan.validation) {
 
 ### 已经做对、需要保留的部分
 
-- **普通掉落已在验证阶段关闭**：`dropSystem.ts` L75（击杀路径）与 L90（时间额度积累）都对 `stage === 'validation'` 提前 return。
-- **Bounty 已在验证阶段关闭**：`bountySystem.ts` L161。
-- **验证奖励已是安全掉落**：`waveBossSystem.ts` L82-83、L143-144 打 `secure = true` + `validationRewardWave`；`dropSystem.ts` L111 `if (drop.secure) continue` 跳过寿命倒计时；`waveSystem.ts` L169 让安全奖励未拾取时阻塞波次结束。
-- **相位机已有奖励结算窗**：`advanceWavePhase` 在验证波清场后进 `validationRewardSettle`（`intermissionSystem.ts` L15-25，12 秒，可由玩家提前确认），再出 Boss。这正好是「割草结束 → 安静收奖 → Boss」的节拍，保留不动。
+- **普通掉落已在验证阶段关闭**：`dropSystem.ts` L74（击杀路径）与 L89（时间额度积累）都对 `stage === 'validation'` 提前 return。
+- **Bounty 已在验证阶段关闭**：`bountySystem.ts`（`stageForWave(...) !== 'validation'` 条件）。
+- **验证奖励已是安全掉落**：`waveBossSystem.ts` 的 `deliverValidationCard` / `spawnValidationReward` 打 `secure = true` + `validationRewardWave`；`dropSystem.ts` L110 `if (drop.secure) continue` 跳过寿命倒计时；`waveSystem.ts` L170 让安全奖励未拾取时阻塞波次结束。
+- **相位机已有奖励结算窗**：`advanceWavePhase` 在验证波清场后进 `validationRewardSettle`（`intermissionSystem.ts`，`VALIDATION_REWARD_SETTLE_SECONDS = 12`，可由玩家提前确认），再出 Boss。这正好是「割草结束 → 安静收奖 → Boss」的节拍，保留不动。
+- **战斗中已经没有强制决策**：`RunDecision` 现在只剩 `godDraft` / `godFocus` / `waveBaseReward` / `evolutionBranch` 四种，前三种只在波间入队；`evolutionBranch` 由玩家拾取卡牌触发，属于玩家自己按下的暂停。遗物三选一已随 `e8d839c` 一起删除。
+
+### 奖励蓄力条在验证波的定量表现（拍板 8 的依据，不要"修"它）
+
+- `src/config/base/rewardMeter.json`：`thresholds = [10,12,16,24,33,45,60,80]`，`afterSchedule = "repeatLast"` → 第 9 波时阈值恒为 **80**。
+- 积分来源：`damageSystem.killEnemy` 里 `points = enemy.xp * getModifiers(state).xpMul`，`pointMul = 1`。`normal.xp = 1`、`fast.xp = 1`、`tank.xp = 2`。
+- 第 9 波敌潮 240 只、构成 0.6/0.3/0.1 → 平均 1.1 分/只 → 约 **264 分 ≈ 3 次触发**；第 10 波 320 只、构成 0.55/0.33/0.12 → 约 **358 分 ≈ 4 次触发**。
+- 触发闸门：`addRewardPoints` 在 `currentReceipt` 非空时只累积不触发；`createRewardCelebration` 是非阻塞横幅、**无按钮**、`REWARD_CELEBRATION_MS = 2200` 后自动 `confirmRewardReceipt`。即最快 2.2 秒可再触发一次，而我们的节奏约 10 秒一次——**不存在积压或饥饿，不需要额外排队逻辑**。
+- 奖励自身造成的击杀不回灌积分：`executeReward` 全程包在 `withRewardPointsSuppressed` 里，且 `rewardKillsGrantPoints: false`。**没有正反馈死循环，不要去"修"。**
+- `heartbreakNova`（全屏 ×8 伤害、Boss 封顶 10% 最大生命）在 46 人同屏时是一次清屏。这是刻意的终局爽点。
+
+### onKill 掉落洪水（知情接受的已知风险）
+
+`extraDrop` 原子在 `skills.json` 里出现 **71 次**，其中作为效果挂在绑定上的有 34 处，触发器分布：**`onKill` 28 处**、`onHit` 1 处、`passive` / `interval` / `onPickup` / `onBreach` 各 1 处。`chance` 集中在 0.2–0.65，多数带 `requiresStatus`（frozen / vulnerable / dot）或 `requiresSource` 前置。
+
+- 量级：若玩家构筑里有一个 `chance 0.45` 的 onKill 掉落，且该波敌人普遍带冰冻/灼烧，第 10 波 320 次击杀 → 期望 **100+ 张地面卡**。
+- 缓解（已经存在，不需要新代码）：`skillExtra` 掉落**不是** `secure`，走 `tickDrops` 的正常寿命倒计时（`config.dropLifetime` 默认 5 秒 × `dropLifetimeMul`）。所以它们是「持续冒出、持续消失」的流水，同屏存量大致是 `产出速率 × 5 秒`，不会累积成满地静止卡牌。
+- **本次不做任何处理**（拍板 7）。但在校准阶段若玩家反馈「地上还是很多卡」，来源是这里，不是基础掉落逻辑——不要把它误判成第 4 章门控没生效。
 
 ### 恢复敌潮后必须一并处理的点
 
-- `dropSystem.ts` L65-73：`ordinaryDropRate.enabled === false` 时走的**旧概率分支在阶段判断之前**，会给验证杂兵掷普通掉落。必须在函数最前面按来源硬门控。
-- `waveSystem.ts` L141：`blockingEnemy` 只认 `regular | bounty | validationElite`，新的杂兵来源必须加入，否则杂兵还活着就提前进 Boss。
+- `dropSystem.ts` L64-72：`ordinaryDropRate.enabled === false` 时走的**旧概率分支在阶段判断之前**（L73-74）。必须在函数最前面按来源硬门控，否则该分支会给验证杂兵掷普通掉落。
+- `waveSystem.ts` L142：`blockingEnemy` 只认 `regular | bounty | validationElite`，新的杂兵来源必须加入，否则杂兵还活着就提前进 Boss。
 - `enemySystem.ts` L113-118：`spawnEnemy` 无条件调 `determineType`（全局 `typeRoll`），验证波必须换成独立构成表。
 - `enemySystem.ts` L44-46：`createEnemy` 里 `difficultyMultipliersFor` 的难度倍率**乘在配置倍率之外**（standard 难度第 10 波敌人 hp 约 ×0.95）。配置里的 `hpMul` 是难度之上的额外倍率。
-- Boss 阶段结束判定（`waveSystem.ts` L164-169）**不检查场上是否还有敌人**，而 `beginIntermission` / `startNextWave` 都不清空 `state.enemies`。所以 Boss 召唤的护卫如果不显式清理，会泄漏到下一波。
+- Boss 阶段结束判定（`waveSystem.ts` L165-170）**不检查场上是否还有敌人**，而 `beginIntermission` / `startNextWave` 都不清空 `state.enemies`。所以 Boss 召唤的护卫如果不显式清理，会泄漏到下一波。
 - `src/ui/derivedMetrics.ts` L109-120：`simulateBudgetWave` 用 `if (!plan.regular)` 判断验证波并读 `plan.validation.enemies`。验证 plan 带上 `regular` 后这个分支永远不会命中，投影里的 `validationEncounter` 会消失，必须改写。
 - `src/config/stagePlanValidator.ts` L75-82：当前**强制每个验证精英都必须有 `reward`**，`reward` 改可选后要解除。
-- `src/config/loader.ts` L41-50 `normalizeValidationRewards`：遍历 `wave.enemies` 补 `kind`，字段改名后要跟着迁移。
-- `src/config/validateAll.ts` L256-260：`semantic:validationRewardKinds` 同样遍历 `wave.enemies`。
+- `src/config/loader.ts` L42-51 `normalizeValidationRewards`：遍历 `wave.enemies` 补 `kind`，字段改名后要跟着迁移。
+- `src/config/validateAll.ts` L254-258：`semantic:validationRewardKinds` 同样遍历 `wave.enemies`。
+- `dropSystem.collectDrop` 会 `state.effectRuntime.pickupsThisWave++`，验证奖励拾取也计入。新增的护卫/杂兵不经过这条路径，无需处理。
 
 ### 其他相关常量（供数值判断，不要在本次改）
 
@@ -99,7 +119,7 @@ if (wavePlan.validation) {
 
 ### 4.1 `src/config/types.ts`
 
-替换 `ValidationEnemySpec` / `ValidationWaveConfig`，新增两个类型。**保留 `ValidationRewardSpec` 与 `ValidationRewardTypePolicy` 不动。**
+替换 `ValidationEnemySpec` / `ValidationWaveConfig`，新增三个类型。**保留 `ValidationRewardSpec` 与 `ValidationRewardTypePolicy` 不动。**
 
 ```ts
 /** 验证波杂兵构成权重。三项 >= 0 且总和 > 0；按 normal → fast → tank 固定顺序做累积抽取。 */
@@ -259,7 +279,7 @@ export interface ValidationWaveConfig {
 "intermission": { "freeSeconds": { …, "validation": 6 }, … }
 ```
 
-数值意图（写进 `$comment` 或提交说明，便于后续校准时理解）：
+数值意图（写进提交说明，便于后续校准时理解）：
 
 - 手动拾取物数量：第 9 波 2 个（精英 4★ 卡 + Boss 5★ 万能卡），第 10 波 3 个（精英 4★ 万能卡 + 精英 5★ 卡 + Boss 5★ 万能卡）。全部 ≥ 4★。若实测仍觉得拾取偏多，删掉第 10 波第一个精英的 `reward` 即可降到 2 个，不需要改代码。
 - `targetOnScreen` 明显高于构筑期末值 28；`maxAlive` 留出 `sprint = ceil(target × 1.5)` 的余量（36→54 ≤ 56；46→69 ≤ 72）。
@@ -320,11 +340,11 @@ export interface ValidationWaveConfig {
 
 ### 4.5 `src/config/validateAll.ts`
 
-`semantic:validationRewardKinds`（L256-260）改为遍历 `wave.elites`，且 `reward === undefined` 时跳过（不报 warning）。
+`semantic:validationRewardKinds`（L254-258）改为遍历 `wave.elites`，且 `reward === undefined` 时跳过（不报 warning）。
 
 ### 4.6 `src/config/loader.ts` 兼容层
 
-`normalizeValidationRewards`（L41-50）改造为 `normalizeValidationStage`，承担字段迁移：
+`normalizeValidationRewards`（L42-51）改造为 `normalizeValidationStage`，承担字段迁移：
 
 1. 若某个验证波条目有 `enemies` 而没有 `elites`：把 `enemies` 搬到 `elites`，并按数组下标均匀分配 `spawnAtProgress`（第 i 项 = `i / (n + 1)`，保证落在 `[0, 1)` 且互不相同）。
 2. 若没有 `swarm`：补一个 `quota: 0` 的最小 swarm（`targetOnScreen: 0`、`checkInterval: 1`、`batchMax: 1`、`maxAlive: 1`、`waveEndSprint {0, 1}`、三个倍率 1、`composition { normal: 1, fast: 0, tank: 0 }`）。这样旧配置行为回落成「只有固定精英」，与今天完全一致。
@@ -361,7 +381,7 @@ validationRuntime: {
 };
 ```
 
-`src/core/createInitialState.ts` 在 `validationRewardSettleRemaining`（L113）附近补上初值 `{ spawnedEliteIndexes: [], bossEscortTimer: 0, bossEscortsCleared: false }`。
+`src/core/createInitialState.ts` 在 `validationRewardSettleRemaining` 附近补上初值 `{ spawnedEliteIndexes: [], bossEscortTimer: 0, bossEscortsCleared: false }`。
 
 **为什么用独立的 `validationMinion` 而不是复用 `regular`**：`regular` 是「参与普通经济循环的敌人」的语义标记，`dropSystem` 与遥测都靠它区分。独立来源让掉落门控变成一行来源判断，不再依赖「当前波恰好是验证阶段」这种间接推理，也让 `ordinaryDropRate.enabled` 的两条分支都被同一个门控覆盖。全项目 `spawnKind` 判断点只有 6 处，改动面很小。
 
@@ -392,7 +412,7 @@ if (stage === 'validation') {
 
 ### 5.3 `src/core/systems/waveSystem.ts`
 
-**删除** L48-62 整段验证特判（`spawnLeft = 0` / `waveSpawnQuota = 0` / 一次性塞精英）。`state.spawnLeft = budgetWaveQuotaFor(wavePlan)` 现在会自然拿到 swarm 的 quota。
+**删除** L49-62 整段验证特判（`spawnLeft = 0` / `waveSpawnQuota = 0` / 一次性塞精英）。`state.spawnLeft = budgetWaveQuotaFor(wavePlan)` 现在会自然拿到 swarm 的 quota。
 
 在 `startNextWave` 里重置运行态：
 
@@ -414,15 +434,15 @@ export function tickValidationDirector(state: GameState, config: Config, rng: Rn
 1. `if (state.mode !== 'playing') return []`。取 `plan = resolveActiveWavePlan(cfg, state.wave)`，`if (!plan.validation) return []`。
 2. **里程碑精英**（仅 `state.wavePhase === 'regular'`）：
    - `const quota = state.waveSpawnQuota; const progress = quota > 0 ? 1 - state.spawnLeft / quota : 1;`
-   - 遍历 `plan.validation.elites`，对未在 `spawnedEliteIndexes` 中且 `spawnAtProgress <= progress` 的项，用 `createEnemy(state, spec.type, state.wave, randomEdgeSpawnPosition(rng), { hpMul, damageMul, speedMul, spawnKind: 'validationElite', ccResistOverride, knockbackResistOverride, validationReward: spec.reward })` 生成，push 进 `state.enemies`，记录下标，产出事件 `{ type: 'validationEliteSpawned', wave, eliteIndex, enemyId }`（新增事件类型，见 5.6）。
+   - 遍历 `plan.validation.elites`，对未在 `spawnedEliteIndexes` 中且 `spawnAtProgress <= progress` 的项，用 `createEnemy(state, spec.type, state.wave, randomEdgeSpawnPosition(rng), { hpMul, damageMul, speedMul, spawnKind: 'validationElite', ccResistOverride, knockbackResistOverride, validationReward: spec.reward })` 生成，push 进 `state.enemies`，记录下标，产出事件 `{ type: 'validationEliteSpawned', wave, eliteIndex, enemyId }`（新增事件类型，见 5.7）。
    - 遍历顺序按配置数组下标，保证同帧多个精英的 RNG 消耗顺序确定。
 3. **Boss 护卫召唤**（仅 `state.wavePhase === 'boss'`，且 `plan.validation.bossEscort` 存在，且 `state.waveBossId !== null` 且该 Boss 仍在 `state.enemies` 中）：
    - `state.validationRuntime.bossEscortTimer -= dt`；`while (timer <= 0)` 时：统计现存 `spawnKind === 'validationMinion'` 数量，按 `maxAlive` 余量截断 `count`，逐只生成（类型走 `determineValidationType(escort.composition, rng())`，倍率取 escort 的三个 mul，`spawnKind: 'validationMinion'`，不带 `validationReward`），然后 `timer += intervalSeconds`。产出 `{ type: 'validationEscortSpawned', wave, count }`。
    - 进入 Boss 相位那一帧要把 `bossEscortTimer` 设为 `intervalSeconds`（在 `advanceWavePhase` 里两处 `state.wavePhase = 'boss'` 之后各设一次，或统一抽一个 `enterBossPhase()` 小函数），避免开场瞬间就刷一批。
-4. **Boss 死亡清场**：若 `state.wavePhase === 'boss'` 且 `state.waveBossId !== null` 且 Boss 已不在 `state.enemies` 中且 `!bossEscortsCleared`：把所有 `spawnKind === 'validationMinion'` 从 `state.enemies` 移除（**直接移除，不走 `killEnemy`**，刻意不给击杀奖励与 `onKill`，与 `moveEnemies` 里撞嘲讽召唤物的既有处理一致），置 `bossEscortsCleared = true`，产出 `{ type: 'validationEscortsCleared', wave, removed }`。
+4. **Boss 死亡清场**：若 `state.wavePhase === 'boss'` 且 `state.waveBossId !== null` 且 Boss 已不在 `state.enemies` 中且 `!bossEscortsCleared`：把所有 `spawnKind === 'validationMinion'` 从 `state.enemies` 移除（**直接移除，不走 `killEnemy`**，刻意不给击杀奖励、不给奖励积分、不触发 `onKill`，与 `moveEnemies` 里撞嘲讽召唤物的既有处理一致），置 `bossEscortsCleared = true`，产出 `{ type: 'validationEscortsCleared', wave, removed }`。
    - 这一步是必需的：Boss 相位结束判定不检查场上敌人，而 `beginIntermission` / `startNextWave` 都不清空 `state.enemies`，护卫会泄漏到第 10 波。
 
-`advanceWavePhase` L141 的 `blockingEnemy` 增加 `validationMinion`：
+`advanceWavePhase` L142 的 `blockingEnemy` 增加 `validationMinion`：
 
 ```ts
 const blockingEnemy = state.enemies.some(enemy =>
@@ -434,7 +454,7 @@ const blockingEnemy = state.enemies.some(enemy =>
 
 ### 5.4 `src/core/updateGame.ts`
 
-在 `tickSpawns(state, rng, dt);`（L36）之后插入：
+在 `tickSpawns(state, rng, dt);` 之后插入：
 
 ```ts
 events.push(...tickValidationDirector(state, config, rng, dt));
@@ -484,7 +504,7 @@ export function spawnEnemy(state: GameState, rng: Rng): void {
 
 ### 5.6 `src/core/systems/dropSystem.ts`
 
-`rollDropOnKill`（L65）**最前面**加来源硬门控，覆盖 `ordinaryDropRate.enabled` 的两条分支：
+`rollDropOnKill`（L64）**最前面**加来源硬门控，覆盖 `ordinaryDropRate.enabled` 的两条分支：
 
 ```ts
 export function rollDropOnKill(state: GameState, config: Config, rng: Rng, enemy: Enemy): void {
@@ -496,7 +516,7 @@ export function rollDropOnKill(state: GameState, config: Config, rng: Rng, enemy
 }
 ```
 
-L74-75 的两行现有门控**保留**（`spawnKind !== 'regular'` 与阶段判断），作为第二道防线。
+L73-74 的两行现有门控**保留**（`spawnKind !== 'regular'` 与阶段判断），作为第二道防线。
 
 ### 5.7 事件类型
 
@@ -512,7 +532,7 @@ L74-75 的两行现有门控**保留**（`spawnKind !== 'regular'` 与阶段判�
 
 ### 5.8 `src/core/systems/damageSystem.ts`
 
-**不改。** `killEnemy` L26 的 `validationElite → grantValidationEliteReward` 分流已经正确；`grantValidationEliteReward`（`waveBossSystem.ts` L197-205）在 `!enemy.validationReward` 时返回 `[]`，天然支持「无奖励精英」。`validationMinion` 落到 `else` 分支进 `rollDropOnKill`，被 5.6 的门控拦住。经验结算（L30-31）保持无条件执行——见拍板决策 8。
+**不改。** `killEnemy` 的 `validationElite → grantValidationEliteReward` 分流已经正确；`grantValidationEliteReward` 在 `!enemy.validationReward` 时返回 `[]`，天然支持「无奖励精英」。`validationMinion` 落到 `else` 分支进 `rollDropOnKill`，被 5.6 的门控拦住。奖励积分结算（`addRewardPoints`）保持无条件执行——见拍板决策 8，这是验证波的核心兑现来源。
 
 ---
 
@@ -542,7 +562,7 @@ if (plan.validation) {
 
 ### 6.2 `src/telemetry/metrics.ts`
 
-`WaveMetrics` 新增三个字段（都从**现有**遥测事件计算，不新增遥测事件类型）：
+`WaveMetrics` 新增四个字段（都从**现有**遥测事件计算，不新增遥测事件类型）：
 
 ```ts
 /** 本波击杀速度，用于验收「割草感」。 */
@@ -551,9 +571,11 @@ killsPerSecond: number | null;   // kills.length / (end - start)，分母 <= 0 �
 manualPickups: number;
 /** 本波战斗中被迫弹出的决策次数（decision_offered + perkPopup）。 */
 decisionPopups: number;
+/** 本波奖励蓄力条触发次数（reward_triggered）。 */
+rewardActivations: number;
 ```
 
-`tests/experienceMetrics.test.ts` 的期望对象要跟着补齐；`scripts/computeExperienceMetrics.ts` 的输出表加上这三列。
+`tests/experienceMetrics.test.ts` 的期望对象要跟着补齐；`scripts/computeExperienceMetrics.ts` 的输出表加上这四列。
 
 已有的 `validationRewardDrops`、`validationOrdinaryDrops`、`e1.p50/p95`（同屏敌人分位）、`e2`（最大事件空窗）足以覆盖其余 KPI，不要重复造字段。
 
@@ -577,7 +599,7 @@ decisionPopups: number;
 
 8. Boss 相位下经过 `intervalSeconds` 后生成 `count` 只 `validationMinion`；再经过若干周期，存活护卫数不超过 `bossEscort.maxAlive`。
 9. 进入 Boss 相位那一帧不立即生成护卫（`bossEscortTimer` 被初始化为 `intervalSeconds`）。
-10. Boss 死亡后护卫被清场（`state.enemies` 中无 `validationMinion`），且 `state.kills` **不因清场增加**、不触发 `onKill`。
+10. Boss 死亡后护卫被清场（`state.enemies` 中无 `validationMinion`），且 `state.kills` **不因清场增加**、不触发 `onKill`、`state.rewardMeter.points` **不增加**。
 11. 护卫不阻塞波次结束：Boss 死亡 + 奖励拾取后 `advanceWavePhase` 产出 `waveCleared`。
 12. `bossEscort` 省略时（用 `dev-short`）Boss 相位不生成任何 `validationMinion`。
 
@@ -586,7 +608,7 @@ decisionPopups: number;
 13. 杀死 100 只 `validationMinion` 后 `state.groundDrops` 中 `source === 'normalKill'` 的掉落数为 0，且 `state.ordinaryDrop.shownThisWave === 0`。
 14. 同上，但把 `cfg.economy.ordinaryDropRate.enabled` 设为 `false`（走旧概率分支）并把 `dropChance` 拉到 1 —— 仍然为 0。**这条是回归 5.6 那道硬门控的关键用例。**
 15. `validationMinion` 仍触发 `onKill`（挂一个 fixture 技能，断言触发计数等于击杀数）。
-16. `validationMinion` 击杀仍计入 `state.kills`。
+16. `validationMinion` 击杀仍计入 `state.kills`，且**仍然给奖励蓄力条加分**（断言 `state.rewardMeter.points` 或 `activationCount` 随击杀增长）——这是拍板 8 的回归锚点，防止后人误加屏蔽。
 17. 验证波不产生 Bounty offer（保留现有用例）。
 18. 每波手动拾取物数量等于配置里 `reward` 存在的精英数 + 1（Boss）：第 9 波 2 个、第 10 波 3 个，且全部 `secure === true`、`star >= 4`。
 19. 精英 `reward` 省略时不产生任何掉落（新建一个只含无奖励精英的临时配置）。
@@ -594,7 +616,7 @@ decisionPopups: number;
 
 ### 7.4 回归
 
-21. 选择期 / 构筑期的出怪类型、普通掉落、经验行为完全不变（`tests/dropSystem.test.ts`、`tests/waveBudgetSystem.test.ts`、`tests/bossWaves.test.ts` 应无需修改即通过；若需修改，说明改动越界了）。
+21. 选择期 / 构筑期的出怪类型、普通掉落、奖励积分行为完全不变（`tests/dropSystem.test.ts`、`tests/waveBudgetSystem.test.ts`、`tests/bossWaves.test.ts`、`tests/rewardMeterSystem.test.ts` 应无需修改即通过；若需修改，说明改动越界了）。
 22. `cfg.waves.stagePlan.enabled = false` 时仍走 legacy 线性 Budget，验证波无精英无护卫（保留现有用例）。
 23. `tests/configLoader.test.ts` 新增：旧格式（只有 `enemies` + 无 `swarm`）能被 `normalizeValidationStage` 迁移成 `elites` + `quota: 0` 的 swarm，且 `spawnAtProgress` 互不相同、均在 `[0, 1)`。
 24. `tests/runStage.test.ts` 新增：验证波的 `ResolvedWavePlan` 同时带 `regular` 与 `validation`，且 `regular` 各字段等于 `swarm` 对应字段。
@@ -605,7 +627,7 @@ decisionPopups: number;
 
 ## 八、黄金回放
 
-`04-run-victory` 与 `05-run-defeat` 都用 `dev-short`，而 `dev-short` 的第 3 波就是验证波，所以两个 fixture 的 summary 必然变化。
+`04-run-victory` 与 `05-run-defeat` 都用 `dev-short`，而 `dev-short` 的第 3 波就是验证波，所以两个 fixture 的 summary 必然变化。当前基线：`04-run-victory` = `win true / framesRun 5506 / kills 249 / wave 3`；`05-run-defeat` = `win false / framesRun 625 / kills 4 / wave 1`。
 
 流程：
 
@@ -614,7 +636,8 @@ decisionPopups: number;
 3. **人工核对 diff 的语义合理性**，尤其是：
    - `04-run-victory` 的 `win` 必须仍为 `true`（若变成 `false`，说明 4.3 的 `dev-short` 敌潮压得不够小，调低 `quota` / `targetOnScreen` 后重录，不要改 fixture 的 spec）。
    - `05-run-defeat` 的 `win` 必须仍为 `false`。
-   - `enemiesRemaining`、`kills`、`rngDraws` 的变化方向要能被「第 3 波多了 24 只敌潮」解释。
+   - `enemiesRemaining`、`kills`、`rngDraws` 的变化方向要能被「第 3 波多了 24 只敌潮」解释；`kills` 应从 249 上升到 270 上下。
+   - `record.ts` 里有 `for (let guard = 0; state.rewardMeter.currentReceipt && guard < 16; guard++)` 的收据自动确认循环。敌潮让蓄力条转得更快，若出现 guard 打满的迹象（同帧连续 16 次确认），说明阈值配置或积分量级需要复核——但按三之定量测算不应发生。
 4. `npm run validate` 通过（`schema:stagePlan` 与 `semantic:validationRewardKinds` 两条检查项要覆盖新字段）。
 
 `tests/headlessRun.test.ts` 的三个用例预期仍能通过（base 用例把 `hp` 设成 1,000,000、`damage` 设成 200；`dev-short` 用例只断言 `mode === 'ended'` 与 `wave <= 3`，死亡也满足）。若 `reproduces the 10-wave validation-entry snapshot` 用例的快照变了，按实际值更新——它断言的是 `wave: 9` 与自我一致性，不是具体数值。
@@ -625,7 +648,7 @@ decisionPopups: number;
 
 每个 Step 结束时 `npm test` + `npm run build` 通过（Step 6 之前允许 `goldenReplay.test.ts` 失败）。
 
-- **Step 1 · 配置契约**：4.1 类型 + 4.4 校验器 + 4.5 语义校验 + 4.6 兼容层。此时 `waves.json` 还没改，靠兼容层让旧格式继续跑，测试应全绿（含 7.3 的 #23、#25）。
+- **Step 1 · 配置契约**：4.1 类型 + 4.4 校验器 + 4.5 语义校验 + 4.6 兼容层。此时 `waves.json` 还没改，靠兼容层让旧格式继续跑，测试应全绿（含 7.4 的 #23、#25）。
 - **Step 2 · 配置数值**：4.2 `waves.json` + 4.3 `dev-short.json` + 波间时长。此时行为已变，`validationStage.test.ts` 会红——正常。
 - **Step 3 · 敌潮接通**：5.1 `core/types.ts` + `createInitialState` + 5.2 `runStage.ts` + 5.3 `waveSystem.ts` 的删除与 `blockingEnemy` + 5.5 `enemySystem.ts`。跑 7.1 的 #1–#4、#6、7.4 的 #24。
 - **Step 4 · 掉落隔离**：5.6 `dropSystem.ts` 门控。跑 7.3 的 #13–#16。
@@ -637,7 +660,7 @@ decisionPopups: number;
 
 `waves.json` 里的 240/320、36/46 是**起点**，不是定稿。校准方式：
 
-1. 用 `npm run metrics` 跑一局带遥测的实测，读第 9、10 波的 `e1.p50`（同屏敌人）、`killsPerSecond`、`e2`（最大事件空窗）、`manualPickups`、`decisionPopups`、`validationOrdinaryDrops`。
+1. 用 `npm run metrics` 跑一局带遥测的实测，读第 9、10 波的 `e1.p50`（同屏敌人）、`killsPerSecond`、`e2`（最大事件空窗）、`manualPickups`、`decisionPopups`、`rewardActivations`、`validationOrdinaryDrops`。
 2. 目标区间（成型构筑）：
 
 | 指标 | 第 9 波 | 第 10 波 |
@@ -645,6 +668,7 @@ decisionPopups: number;
 | 同屏敌人 P50 | 32–40 | 42–50 |
 | 击杀速度 | 4–8 /秒 | 6–12 /秒 |
 | 最大事件空窗 | ≤ 1.5 秒 | ≤ 1.5 秒 |
+| 奖励蓄力条触发 | 2–4 次 | 3–5 次 |
 | 普通地面掉落 | 严格 0 | 严格 0 |
 | 主动拾取次数 | 2 | 3 |
 | 战斗中决策弹窗 | 0 | 0 |
@@ -662,7 +686,7 @@ decisionPopups: number;
 ## 十、明确不要做的事
 
 1. **不要**为验证波写第二套刷怪算法。敌潮必须走 `budgetAdmission` + `budgetSpawnStrategy`。
-2. **不要**新增 `xpRewards` / `ordinaryDrops` 之类的验证波布尔开关。经验路径不改（拍板 8），普通掉落靠 `spawnKind` 门控而不是配置开关。
+2. **不要**给奖励蓄力条加验证波开关、上限或屏蔽。海量击杀推满蓄力条是本次设计要的效果（拍板 8）；`withRewardPointsSuppressed` + `rewardKillsGrantPoints: false` 已经堵死了正反馈死循环，不需要再加防护。
 3. **不要**给 `extraDrop` 或任何技能原子加阶段门控、数量上限或折算（拍板 7）。
 4. **不要**降低验证波杂兵的 `hpMul` / `damageMul`，也不要加「验证波不致死」「HP 保底」之类的保护（拍板 4）。
 5. **不要**改验证奖励的生成坐标或加自动拾取（拍板 9）。
@@ -670,4 +694,4 @@ decisionPopups: number;
 7. **不要**手改 `tests/golden/*.summary.json`，只能通过 `npm run replay:record` 重生成。
 8. **不要**改 `determineType`、`typeRoll` 配置、`budgetRules.ts` 的准入公式，以及选择期 / 构筑期的任何数值。
 9. **不要**在本次加入击杀连击数、屏幕震动、精英入场特写、粒子批处理、验证期专属 HUD。这些属于第二阶段的终局演出，等敌潮版本试玩过再决定。
-10. **不要**改 `VALIDATION_REWARD_SETTLE_SECONDS`（12 秒，玩家可提前确认）。割草结束后的这段安静收奖窗口是刻意保留的节拍。
+10. **不要**改 `VALIDATION_REWARD_SETTLE_SECONDS`（12 秒，玩家可提前确认）与 `REWARD_CELEBRATION_MS`（2200 毫秒）。割草结束后的安静收奖窗口与非阻塞庆祝节奏都是刻意保留的。
