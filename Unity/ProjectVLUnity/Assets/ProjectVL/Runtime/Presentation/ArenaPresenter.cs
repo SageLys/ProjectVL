@@ -7,8 +7,10 @@ namespace ProjectVL.Presentation
 {
     public sealed class ArenaPresenter : MonoBehaviour
     {
-        private readonly Dictionary<int, SpriteRenderer> _enemyViews =
-            new Dictionary<int, SpriteRenderer>();
+        private readonly Dictionary<int, EnemyView> _enemyViews =
+            new Dictionary<int, EnemyView>();
+        private readonly Dictionary<int, Sprite> _enemySprites =
+            new Dictionary<int, Sprite>();
         private readonly Dictionary<int, SpriteRenderer> _bulletViews =
             new Dictionary<int, SpriteRenderer>();
         private readonly Dictionary<int, DropView> _dropViews =
@@ -235,30 +237,109 @@ namespace ProjectVL.Presentation
             foreach (EnemyState enemy in _state.Enemies)
             {
                 activeIds.Add(enemy.Id);
-                if (!_enemyViews.TryGetValue(enemy.Id, out SpriteRenderer view))
+                if (!_enemyViews.TryGetValue(enemy.Id, out EnemyView view))
                 {
-                    view = CreateSpriteView(
-                        $"Enemy {enemy.Id}",
-                        _circleSprite,
-                        EnemyColor(enemy));
-                    view.transform.SetParent(transform, false);
-                    view.transform.localScale = new Vector3(
-                        enemy.Radius * 2f,
-                        enemy.Radius * 2f,
-                        1f);
-                    view.sortingOrder = 10;
+                    view = CreateEnemyView(enemy);
                     _enemyViews.Add(enemy.Id, view);
                 }
 
-                view.transform.position = PixelToWorld(enemy.Position);
+                view.Root.position = PixelToWorld(enemy.Position);
+                float pulse = enemy.Kind == EnemyKind.Boss
+                    && enemy.BossPhase == BossPhase.Contact
+                    ? 1f + Mathf.Sin(_state.Time * 12f) * 0.08f
+                    : 1f;
+                view.Root.localScale = new Vector3(pulse, pulse, 1f);
                 float healthRatio = Mathf.Clamp01(enemy.Hp / enemy.MaxHp);
-                view.color = Color.Lerp(
+                view.Body.color = Color.Lerp(
                     new Color(0.35f, 0.1f, 0.15f),
                     EnemyColor(enemy),
                     healthRatio);
+                Color outline = EnemyOutlineColor(enemy);
+                view.Outline.color = outline;
+                view.Outline.gameObject.SetActive(outline.a > 0f);
+                float healthWidth = enemy.Radius * 2f * healthRatio;
+                view.HealthFill.transform.localScale = new Vector3(
+                    healthWidth,
+                    4f,
+                    1f);
+                view.HealthFill.transform.localPosition = new Vector3(
+                    -enemy.Radius + healthWidth / 2f,
+                    enemy.Radius + 9f,
+                    -0.2f);
             }
 
-            RemoveMissingViews(_enemyViews, activeIds);
+            RemoveMissingEnemyViews(activeIds);
+        }
+
+        private EnemyView CreateEnemyView(EnemyState enemy)
+        {
+            var rootObject = new GameObject(
+                $"{enemy.Label} {enemy.Id}");
+            rootObject.transform.SetParent(transform, false);
+
+            Sprite sprite = EnemySprite(enemy.Sides);
+            SpriteRenderer outline = CreateSpriteView(
+                "Status Outline",
+                sprite,
+                EnemyOutlineColor(enemy));
+            outline.transform.SetParent(rootObject.transform, false);
+            outline.transform.localScale = new Vector3(
+                enemy.Radius * 2f + (enemy.Kind == EnemyKind.Boss ? 10f : 7f),
+                enemy.Radius * 2f + (enemy.Kind == EnemyKind.Boss ? 10f : 7f),
+                1f);
+            outline.sortingOrder = 9;
+
+            SpriteRenderer body = CreateSpriteView(
+                "Body",
+                sprite,
+                EnemyColor(enemy));
+            body.transform.SetParent(rootObject.transform, false);
+            body.transform.localScale = new Vector3(
+                enemy.Radius * 2f,
+                enemy.Radius * 2f,
+                1f);
+            body.sortingOrder = 10;
+
+            SpriteRenderer core = CreateSpriteView(
+                "Core",
+                _circleSprite,
+                new Color(0.02f, 0.06f, 0.11f, 0.9f));
+            core.transform.SetParent(rootObject.transform, false);
+            core.transform.localScale = new Vector3(
+                enemy.Radius * 0.76f,
+                enemy.Radius * 0.76f,
+                1f);
+            core.sortingOrder = 11;
+
+            SpriteRenderer healthBackground = CreateSpriteView(
+                "Health Background",
+                _squareSprite,
+                new Color(1f, 1f, 1f, 0.14f));
+            healthBackground.transform.SetParent(rootObject.transform, false);
+            healthBackground.transform.localPosition = new Vector3(
+                0f,
+                enemy.Radius + 9f,
+                -0.2f);
+            healthBackground.transform.localScale = new Vector3(
+                enemy.Radius * 2f,
+                4f,
+                1f);
+            healthBackground.sortingOrder = 12;
+
+            SpriteRenderer healthFill = CreateSpriteView(
+                "Health Fill",
+                _squareSprite,
+                enemy.Kind == EnemyKind.Boss
+                    ? new Color(0.94f, 0.86f, 0.64f)
+                    : new Color(0.72f, 0.78f, 0.84f));
+            healthFill.transform.SetParent(rootObject.transform, false);
+            healthFill.sortingOrder = 13;
+
+            return new EnemyView(
+                rootObject.transform,
+                outline,
+                body,
+                healthFill);
         }
 
         private void SyncBullets()
@@ -573,6 +654,24 @@ namespace ProjectVL.Presentation
             }
         }
 
+        private void RemoveMissingEnemyViews(HashSet<int> activeIds)
+        {
+            var removedIds = new List<int>();
+            foreach (KeyValuePair<int, EnemyView> pair in _enemyViews)
+            {
+                if (!activeIds.Contains(pair.Key))
+                {
+                    Destroy(pair.Value.Root.gameObject);
+                    removedIds.Add(pair.Key);
+                }
+            }
+
+            foreach (int id in removedIds)
+            {
+                _enemyViews.Remove(id);
+            }
+        }
+
         private Vector3 PixelToWorld(Float2 point)
         {
             return new Vector3(
@@ -620,6 +719,50 @@ namespace ProjectVL.Presentation
                 default:
                     return new Color(0.55f, 0.65f, 0.75f);
             }
+        }
+
+        private static Color EnemyOutlineColor(EnemyState enemy)
+        {
+            if (enemy.FrozenRemaining > 0f)
+            {
+                return new Color(0.55f, 0.93f, 1f, 0.95f);
+            }
+
+            if (enemy.SlowRemaining > 0f)
+            {
+                return new Color(0.45f, 0.78f, 1f, 0.65f);
+            }
+
+            if (enemy.Kind == EnemyKind.Boss)
+            {
+                return enemy.BossPhase == BossPhase.Contact
+                    ? new Color(1f, 0.35f, 0.22f, 0.95f)
+                    : new Color(0.94f, 0.86f, 0.64f, 0.9f);
+            }
+
+            if (enemy.SpawnKind == EnemySpawnKind.ValidationElite)
+            {
+                return new Color(1f, 0.78f, 0.22f, 0.9f);
+            }
+
+            if (enemy.SpawnKind == EnemySpawnKind.Bounty)
+            {
+                return new Color(1f, 0.45f, 0.08f, 0.8f);
+            }
+
+            return Color.clear;
+        }
+
+        private Sprite EnemySprite(int sides)
+        {
+            int clampedSides = Mathf.Max(3, sides);
+            if (!_enemySprites.TryGetValue(clampedSides, out Sprite sprite))
+            {
+                sprite = CreatePolygonSprite(clampedSides);
+                _enemySprites[clampedSides] = sprite;
+            }
+
+            return sprite;
         }
 
         private static SpriteRenderer CreateSpriteView(
@@ -674,6 +817,67 @@ namespace ProjectVL.Presentation
                 new Rect(0f, 0f, size, size),
                 new Vector2(0.5f, 0.5f),
                 size);
+        }
+
+        private static Sprite CreatePolygonSprite(int sides)
+        {
+            const int size = 64;
+            var texture = new Texture2D(
+                size,
+                size,
+                TextureFormat.RGBA32,
+                false);
+            texture.name = $"Runtime Polygon {sides}";
+            var pixels = new Color[size * size];
+            float half = (size - 1) / 2f;
+            float sectorSize = Mathf.PI * 2f / sides;
+            float apothem = Mathf.Cos(Mathf.PI / sides);
+
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float px = (x - half) / half;
+                    float py = (y - half) / half;
+                    float radius = Mathf.Sqrt(px * px + py * py);
+                    float angle = Mathf.Atan2(py, px) + Mathf.PI / 2f;
+                    float localAngle = Mathf.Repeat(
+                        angle + sectorSize / 2f,
+                        sectorSize) - sectorSize / 2f;
+                    float boundary = apothem / Mathf.Cos(localAngle);
+                    pixels[y * size + x] = radius <= boundary
+                        ? Color.white
+                        : Color.clear;
+                }
+            }
+
+            texture.SetPixels(pixels);
+            texture.Apply();
+            return Sprite.Create(
+                texture,
+                new Rect(0f, 0f, size, size),
+                new Vector2(0.5f, 0.5f),
+                size);
+        }
+
+        private sealed class EnemyView
+        {
+            public Transform Root { get; }
+            public SpriteRenderer Outline { get; }
+            public SpriteRenderer Body { get; }
+            public SpriteRenderer HealthFill { get; }
+
+            public EnemyView(
+                Transform root,
+                SpriteRenderer outline,
+                SpriteRenderer body,
+                SpriteRenderer healthFill)
+            {
+                Root = root;
+                Outline = outline;
+                Body = body;
+                HealthFill = healthFill;
+            }
         }
 
         private sealed class DropView
