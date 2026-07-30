@@ -274,7 +274,8 @@ namespace ProjectVL.Presentation
                 enemies,
                 waves,
                 economy,
-                bounty);
+                bounty,
+                progression);
             if (_developerTools.Enabled)
             {
                 _tuningPresets = new TuningPresetStore(

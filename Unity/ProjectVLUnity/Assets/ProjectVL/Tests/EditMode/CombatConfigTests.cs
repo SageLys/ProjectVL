@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
 using ProjectVL.Core;
@@ -86,6 +87,49 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void RuntimeTuningMatchesCompleteWebP0P1Contract()
+        {
+            ProgressionConfig progression = GameConfigLoader.LoadProgression();
+            var tuning = new RuntimeTuningSystem(
+                CombatConfigLoader.LoadDefault(),
+                GameConfigLoader.LoadEnemies(),
+                GameConfigLoader.LoadWaves(),
+                GameConfigLoader.LoadEconomy(),
+                GameConfigLoader.LoadBounty(),
+                progression);
+            var keys = new HashSet<string>();
+            foreach (TuningParameter parameter in tuning.Parameters)
+            {
+                Assert.That(
+                    keys.Add(parameter.Key),
+                    Is.True,
+                    $"Duplicate tuning key: {parameter.Key}");
+            }
+
+            Assert.That(tuning.Parameters.Count, Is.EqualTo(152));
+            Assert.That(FindByKey(tuning, "combat.defaults.damage"), Is.Not.Null);
+            Assert.That(
+                FindByKey(tuning, "enemies.types.boss.hpPerWave"),
+                Is.Not.Null);
+            Assert.That(
+                FindByKey(tuning, "waves.stagePlan.build.maxAlive"),
+                Is.Not.Null);
+            Assert.That(
+                FindByKey(
+                    tuning,
+                    "economy.normalDropTypePolicy.pivot.candidateFraction"),
+                Is.Not.Null);
+            Assert.That(
+                FindByKey(tuning, "bounty.encounter.composition.tankWeight"),
+                Is.Not.Null);
+
+            TuningParameter relicChoices =
+                FindByKey(tuning, "progression.relicChoices");
+            relicChoices.Set(4f);
+            Assert.That(progression.relicChoices, Is.EqualTo(4));
+        }
+
+        [Test]
         public void TuningPresetStorePersistsExportsImportsAndDeletes()
         {
             string directory = Path.Combine(
@@ -150,6 +194,20 @@ namespace ProjectVL.Tests
             }
 
             Assert.Fail($"Missing tuning parameter {group}/{label}");
+            return null;
+        }
+
+        private static TuningParameter FindByKey(
+            RuntimeTuningSystem tuning,
+            string key)
+        {
+            foreach (TuningParameter parameter in tuning.Parameters)
+            {
+                if (parameter.Key == key)
+                    return parameter;
+            }
+
+            Assert.Fail($"Missing tuning parameter key {key}");
             return null;
         }
     }

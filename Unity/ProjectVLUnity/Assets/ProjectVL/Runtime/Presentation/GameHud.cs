@@ -20,12 +20,14 @@ namespace ProjectVL.Presentation
         private int _pressedSlotIndex = -1;
         private Vector2 _pressPoint;
         private int _tuningGroup;
+        private int _tuningPage;
         private string _seedInput;
         private string _presetName = "playtest";
         private int _presetIndex;
         private string _presetStatus;
         private static readonly string[] TuningGroups =
-            { "Combat", "Enemies", "Waves", "Economy", "Bounty" };
+            { "Combat", "Enemies", "Waves", "Drops", "Progression", "Bounty" };
+        private const int TuningPageSize = 10;
 
         public void Initialize(ProjectVLGameController controller)
         {
@@ -296,7 +298,7 @@ namespace ProjectVL.Presentation
                 _leftStyle);
 
             y += 26f;
-            float tabWidth = 72f;
+            float tabWidth = 59f;
             for (int i = 0; i < TuningGroups.Length; i++)
             {
                 Color tabColor = GUI.backgroundColor;
@@ -307,7 +309,10 @@ namespace ProjectVL.Presentation
                         tabWidth, 25f),
                     TuningGroups[i],
                     _buttonStyle))
+                {
                     _tuningGroup = i;
+                    _tuningPage = 0;
+                }
                 GUI.backgroundColor = tabColor;
             }
 
@@ -335,10 +340,28 @@ namespace ProjectVL.Presentation
                 y += 48f;
             }
 
+            int groupCount = 0;
+            foreach (TuningParameter parameter in tuning.Parameters)
+            {
+                if (parameter.Group == group)
+                    groupCount++;
+            }
+
+            int pageCount = Mathf.Max(
+                1,
+                Mathf.CeilToInt(groupCount / (float)TuningPageSize));
+            _tuningPage = Mathf.Clamp(_tuningPage, 0, pageCount - 1);
+            int firstParameter = _tuningPage * TuningPageSize;
+            int groupIndex = 0;
+            int rendered = 0;
             foreach (TuningParameter parameter in tuning.Parameters)
             {
                 if (parameter.Group != group)
                     continue;
+                if (groupIndex++ < firstParameter)
+                    continue;
+                if (rendered++ >= TuningPageSize)
+                    break;
 
                 string suffix = parameter.AppliesNextWave ? " *" : string.Empty;
                 if (tuning.WasChangedByLastPreset(parameter))
@@ -361,6 +384,22 @@ namespace ProjectVL.Presentation
                     _leftStyle);
                 y += 29f;
             }
+
+            if (GUI.Button(
+                new Rect(panel.x + 12f, y, 54f, 25f),
+                "< Page",
+                _buttonStyle))
+                _tuningPage = (_tuningPage - 1 + pageCount) % pageCount;
+            GUI.Label(
+                new Rect(panel.x + 72f, y, 92f, 25f),
+                $"{_tuningPage + 1} / {pageCount}",
+                _centerStyle);
+            if (GUI.Button(
+                new Rect(panel.x + 170f, y, 54f, 25f),
+                "Page >",
+                _buttonStyle))
+                _tuningPage = (_tuningPage + 1) % pageCount;
+            y += 31f;
 
             if (group == "Bounty")
             {
