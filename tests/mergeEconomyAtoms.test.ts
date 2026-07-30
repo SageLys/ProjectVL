@@ -27,6 +27,7 @@ function fixtureDef(id: string, effects: EffectDef[]): CardDef {
   const emptyTier = { radius: 100, effects: [] as EffectDef[] };
   return {
     id,
+    identityContract: 'test fixture',
     category: 'economy',
     synergyTags: ['utility'],
     textKey: `test.${id}`,
@@ -103,12 +104,12 @@ function countingSequence(...values: number[]): { rng: Rng; draws: number[] } {
 beforeEach(resetTestEnv);
 
 describe('merge economy atom contract', () => {
-  it('loads all 41 existing cards without adding either new atom to skills.json', () => {
-    expect(cfg.skills.cards).toHaveLength(41);
+  it('loads all 60 v4 cards and enables both previously dormant economy atoms', () => {
+    expect(cfg.skills.cards).toHaveLength(60);
     expect(() => validateSkillsConfig(structuredClone(cfg.skills))).not.toThrow();
     const source = JSON.stringify(cfg.skills);
-    expect(source).not.toContain('mergeMaterialRefund');
-    expect(source).not.toContain('wildcardRewardBonus');
+    expect(source).toContain('mergeMaterialRefund');
+    expect(source).toContain('wildcardRewardBonus');
   });
 
   it('retires mergeRule from the atom set and rejects it as an illegal atom', () => {
@@ -320,14 +321,17 @@ describe('wildcard reward bonus consumer', () => {
       state.wave = 9;
       if (withBonus) equip(state, def.id);
       const counting = makeCountingRng(99);
-      grantWaveBossReward(state, config, counting.rng, 100, 100);
-      return { draws: counting.draws(), drops: state.groundDrops };
+      const events = grantWaveBossReward(state, config, counting.rng, 100, 100);
+      return { draws: counting.draws(), drops: state.groundDrops, cards: state.cards.filter(Boolean), events };
     };
     const baseline = run(false);
     const equipped = run(true);
     expect(equipped.draws).toBe(baseline.draws);
-    expect(equipped.drops.every(drop => drop.kind === 'card')).toBe(true);
-    expect(equipped.drops).toHaveLength(1);
+    expect(equipped.drops).toHaveLength(0);
+    expect(equipped.cards).toHaveLength(1);
+    expect(equipped.events).toContainEqual(expect.objectContaining({
+      type: 'validationRewardGranted', delivery: 'hand', star: 4,
+    }));
   });
 
   it('keeps bonus wildcards on the ground and out of settlement until pickup', () => {

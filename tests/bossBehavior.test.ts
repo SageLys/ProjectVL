@@ -38,7 +38,7 @@ function triggerDef(id: string, atom: 'groundZone' | 'novaOnBreak', params: Reco
     : [{ trigger: 'passive' as const, effects: [{ atom, params }] }];
   const tier = { radius: 1, effects: [{ atom: 'burstDamage' as const, params: { damageMul: 0, radius: 1 } }] };
   return {
-    id, category: 'defense', synergyTags: ['defense'], textKey: `t.${id}`, teaching: false,
+    id, identityContract: 'test fixture', category: 'defense', synergyTags: ['defense'], textKey: `t.${id}`, teaching: false,
     stars: {
       '3': { tier: 'core', equip },
       '5': { tier: 'dual', equip },

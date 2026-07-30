@@ -17,10 +17,10 @@ const ctx: DescribeContext = {
 };
 
 describe('design cross-view analysis', () => {
-  it('finds existing homogeneous branch pairs in the current library', () => {
+  it('finds no copied branch summaries after the v4 full rewrite', () => {
     const entries = analyzeBranchHomogeneity(skills.cards, ctx);
     expect(entries.length).toBeGreaterThan(0);
-    expect(entries.some(entry => entry.sameSummary)).toBe(true);
+    expect(entries.some(entry => entry.sameSummary)).toBe(false);
   });
 
   it('keeps the copy matrix dimensions aligned with the card library', () => {
