@@ -200,6 +200,7 @@ function enterBossContact(
     damage: 0,
     point: { x: boss.x, y: boss.y },
   }));
+  state.effectRuntime.lastBreachAt = state.time;
   events.push({ type: 'bossContactStarted', enemyId: boss.id });
 }
 
@@ -441,6 +442,7 @@ export function moveEnemies(state: GameState, config: Config, rng: Rng, dt: numb
         events.push({ type: 'breakthrough', damage });
       }
       events.push(...fireTrigger(state, config, rng, 'onBreach', { enemy: e, damage: damage ?? 0, point: { x: e.x, y: e.y } }));
+      state.effectRuntime.lastBreachAt = state.time;
       if (state.hp <= 0) events.push(...endGame(state, false));
     }
   }

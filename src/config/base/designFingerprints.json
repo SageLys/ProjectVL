@@ -1,0 +1,2419 @@
+{
+  "version": "1",
+  "cards": {
+    "chainLightning": {
+      "identityContract": "雷链在敌人之间跳跃，并沿途施加感电（跨全部九宫格不变）",
+      "branches": {
+        "chainLightningA": {
+          "star": 3,
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "chain"
+          ]
+        },
+        "chainLightningB": {
+          "star": 3,
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "beamMorph"
+          ]
+        },
+        "chainLightningC": {
+          "star": 3,
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "chain"
+          ],
+          "at": "densestCluster",
+          "requires": []
+        },
+        "chainLightning1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "burstDamage"
+          ]
+        },
+        "chainLightning2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onKill"
+          ],
+          "atoms": [
+            "groundZone"
+          ]
+        },
+        "chainLightning3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "statBuff"
+          ]
+        }
+      }
+    },
+    "pierce": {
+      "identityContract": "贯穿弹逐个穿透敌人，每穿一个新敌人各触发一次 onHit——并发兑现的载体",
+      "branches": {
+        "pierceA": {
+          "star": 3,
+          "triggers": [
+            "onFire"
+          ],
+          "atoms": [
+            "pierce"
+          ]
+        },
+        "pierceB": {
+          "star": 3,
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "split"
+          ]
+        },
+        "pierceC": {
+          "star": 3,
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "mortarMorph"
+          ]
+        },
+        "pierce1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "burstDamage"
+          ],
+          "requires": [
+            "scaleBy:concurrentStatus:vulnerable"
+          ]
+        },
+        "pierce2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "aoeOnHit"
+          ]
+        },
+        "pierce3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "extraDrop",
+            "restore"
+          ]
+        }
+      }
+    },
+    "staticSurge": {
+      "identityContract": "把感电堆叠转换为硬控（眩晕/拒止）",
+      "branches": {
+        "staticSurgeA": {
+          "star": 3,
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "vulnerable"
+          ]
+        },
+        "staticSurgeB": {
+          "star": 3,
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "aura"
+          ]
+        },
+        "staticSurgeC": {
+          "star": 3,
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "burstDamage",
+            "vulnerable"
+          ],
+          "at": "nearestEnemy",
+          "requires": []
+        },
+        "staticSurge1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "stun"
+          ]
+        },
+        "staticSurge2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "aoeOnHit"
+          ]
+        },
+        "staticSurge3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "statBuff"
+          ]
+        }
+      }
+    },
+    "stormcall": {
+      "identityContract": "从天而降的落雷/雷云，对区域内目标铺设感电",
+      "branches": {
+        "stormcallA": {
+          "star": 3,
+          "triggers": [
+            "onFire"
+          ],
+          "atoms": [
+            "mortarMorph"
+          ]
+        },
+        "stormcallB": {
+          "star": 3,
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "aura"
+          ],
+          "requires": [
+            "follow"
+          ]
+        },
+        "stormcallC": {
+          "star": 3,
+          "triggers": [
+            "onWaveStart",
+            "interval"
+          ],
+          "atoms": [
+            "chain"
+          ],
+          "at": "densestCluster",
+          "requires": []
+        },
+        "stormcall1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "burstDamage"
+          ]
+        },
+        "stormcall2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "aoeOnHit"
+          ],
+          "requires": [
+            "forEach:enemiesWithStatus"
+          ]
+        },
+        "stormcall3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "onKill"
+          ],
+          "atoms": [
+            "aura"
+          ]
+        }
+      }
+    },
+    "arcSplitter": {
+      "identityContract": "分裂弹片各自命中各自铺设感电——并发铺设的另一条路",
+      "branches": {
+        "arcSplitterA": {
+          "star": 3,
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "split"
+          ]
+        },
+        "arcSplitterB": {
+          "star": 3,
+          "triggers": [
+            "onFire"
+          ],
+          "atoms": [
+            "split"
+          ]
+        },
+        "arcSplitterC": {
+          "star": 3,
+          "triggers": [
+            "onFire"
+          ],
+          "atoms": [
+            "ricochet"
+          ]
+        },
+        "arcSplitter1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "statBuff"
+          ],
+          "requires": [
+            "scaleBy:concurrentStatus:vulnerable"
+          ]
+        },
+        "arcSplitter2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "split"
+          ]
+        },
+        "arcSplitter3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "onKill"
+          ],
+          "atoms": [
+            "extraDrop"
+          ]
+        }
+      }
+    },
+    "galvanicWard": {
+      "identityContract": "迅霆的防御＝拒止：用击退/眩晕/放电把敌人挡在外面，不承受（不使用 shield，归磐垒）",
+      "branches": {
+        "galvanicWardA": {
+          "star": 3,
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "vulnerable",
+            "knockback"
+          ]
+        },
+        "galvanicWardB": {
+          "star": 3,
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "aura"
+          ]
+        },
+        "galvanicWardC": {
+          "star": 3,
+          "triggers": [
+            "onBreach"
+          ],
+          "atoms": [
+            "burstDamage",
+            "vulnerable"
+          ]
+        },
+        "galvanicWard1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "stun"
+          ]
+        },
+        "galvanicWard2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onBreach"
+          ],
+          "atoms": [
+            "aura"
+          ],
+          "requires": [
+            "radiusOverTime"
+          ]
+        },
+        "galvanicWard3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "onBreach"
+          ],
+          "atoms": [
+            "restore"
+          ],
+          "requires": [
+            "scaleBy:concurrentStatus:vulnerable"
+          ]
+        }
+      }
+    },
+    "overcharge": {
+      "identityContract": "在场感电目标数直接转化为炮台输出/产出加成——连续战斗奖励，不掌握掉落规则",
+      "branches": {
+        "overchargeA": {
+          "star": 3,
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "vulnerable",
+            "statBuff"
+          ],
+          "requires": [
+            "scaleBy:enemiesOnField"
+          ]
+        },
+        "overchargeB": {
+          "star": 3,
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "aura"
+          ],
+          "requires": [
+            "scaleBy:enemiesInAura"
+          ]
+        },
+        "overchargeC": {
+          "star": 3,
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "burstDamage",
+            "vulnerable"
+          ],
+          "at": "densestCluster",
+          "requires": [
+            "scaleBy:killsSinceLastRelease"
+          ]
+        },
+        "overcharge1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "burstDamage"
+          ],
+          "requires": [
+            "scaleBy:concurrentStatus:vulnerable"
+          ]
+        },
+        "overcharge2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "aoeOnHit"
+          ],
+          "requires": [
+            "scaleBy:concurrentStatus:vulnerable"
+          ]
+        },
+        "overcharge3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "onKill"
+          ],
+          "atoms": [
+            "extraDrop",
+            "statBuff"
+          ]
+        }
+      }
+    },
+    "frost": {
+      "identityContract": "命中持续施加寒意（slow），把敌群整体拖进冰封阈值",
+      "branches": {
+        "frostA": {
+          "star": 3,
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "slow"
+          ]
+        },
+        "frostB": {
+          "star": 3,
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "aura"
+          ]
+        },
+        "frostC": {
+          "star": 3,
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "freeze"
+          ],
+          "at": "densestCluster",
+          "requires": []
+        },
+        "frost1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "burstDamage"
+          ]
+        },
+        "frost2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "slow"
+          ]
+        },
+        "frost3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "restore"
+          ]
+        }
+      }
+    },
+    "impact": {
+      "identityContract": "对冰封/受控目标的重击兑现（碎冰+处决）",
+      "branches": {
+        "impactA": {
+          "star": 3,
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "knockback",
+            "slow"
+          ]
+        },
+        "impactB": {
+          "star": 3,
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "aoeOnHit",
+            "slow"
+          ]
+        },
+        "impactC": {
+          "star": 3,
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "mortarMorph",
+            "freeze"
+          ]
+        },
+        "impact1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "burstDamage",
+            "execute"
+          ]
+        },
+        "impact2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "slow",
+            "knockback"
+          ]
+        },
+        "impact3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "restore"
+          ]
+        }
+      }
+    },
+    "glacialSpike": {
+      "identityContract": "弹道载体逐个命中逐个施加寒意（贯穿/分裂/光束）",
+      "branches": {
+        "glacialSpikeA": {
+          "star": 3,
+          "triggers": [
+            "onFire",
+            "onHit"
+          ],
+          "atoms": [
+            "pierce",
+            "slow"
+          ]
+        },
+        "glacialSpikeB": {
+          "star": 3,
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "split",
+            "slow"
+          ]
+        },
+        "glacialSpikeC": {
+          "star": 3,
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "beamMorph",
+            "freeze"
+          ]
+        },
+        "glacialSpike1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "burstDamage"
+          ]
+        },
+        "glacialSpike2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "groundZone",
+            "slow"
+          ],
+          "requires": [
+            "shape:line"
+          ]
+        },
+        "glacialSpike3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "onKill"
+          ],
+          "atoms": [
+            "extraDrop"
+          ]
+        }
+      }
+    },
+    "permafrost": {
+      "identityContract": "以炮台为中心的持续寒意领域（aura）",
+      "branches": {
+        "permafrostA": {
+          "star": 3,
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "aura"
+          ]
+        },
+        "permafrostB": {
+          "star": 3,
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "aura"
+          ],
+          "requires": [
+            "radiusOverTime"
+          ]
+        },
+        "permafrostC": {
+          "star": 3,
+          "triggers": [
+            "onWaveStart",
+            "interval"
+          ],
+          "atoms": [
+            "freeze"
+          ],
+          "at": "densestCluster",
+          "requires": []
+        },
+        "permafrost1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "burstDamage"
+          ],
+          "requires": [
+            "forEach:enemiesWithStatus"
+          ]
+        },
+        "permafrost2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "aura"
+          ]
+        },
+        "permafrost3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "restore"
+          ]
+        }
+      }
+    },
+    "iceTomb": {
+      "identityContract": "把单体目标直接封进冰棺（快速触发冰封）",
+      "branches": {
+        "iceTombA": {
+          "star": 3,
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "freeze"
+          ]
+        },
+        "iceTombB": {
+          "star": 3,
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "aoeOnHit",
+            "freeze"
+          ]
+        },
+        "iceTombC": {
+          "star": 3,
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "freeze"
+          ],
+          "at": "nearestEnemy",
+          "requires": []
+        },
+        "iceTomb1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onKill"
+          ],
+          "atoms": [
+            "aura"
+          ]
+        },
+        "iceTomb2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "aoeOnHit"
+          ]
+        },
+        "iceTomb3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "onKill"
+          ],
+          "atoms": [
+            "extraDrop",
+            "restore"
+          ]
+        }
+      }
+    },
+    "frozenBulwark": {
+      "identityContract": "凛冬的防御＝阻止到达：冰墙、击退、突破点冰封（不使用 shield，归磐垒）",
+      "branches": {
+        "frozenBulwarkA": {
+          "star": 3,
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "knockback",
+            "freeze"
+          ]
+        },
+        "frozenBulwarkB": {
+          "star": 3,
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "aura"
+          ]
+        },
+        "frozenBulwarkC": {
+          "star": 3,
+          "triggers": [
+            "onBreach"
+          ],
+          "atoms": [
+            "knockback",
+            "freeze"
+          ]
+        },
+        "frozenBulwark1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onBreach"
+          ],
+          "atoms": [
+            "burstDamage"
+          ],
+          "at": "point",
+          "requires": [
+            "scaleBy:statusStacks"
+          ]
+        },
+        "frozenBulwark2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onBreach"
+          ],
+          "atoms": [
+            "aura"
+          ],
+          "requires": [
+            "radiusOverTime"
+          ]
+        },
+        "frozenBulwark3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "onBreach"
+          ],
+          "atoms": [
+            "restore"
+          ]
+        }
+      }
+    },
+    "hoarfrostTithe": {
+      "identityContract": "从受控/冰封目标身上征税：控制数量转化为产出",
+      "branches": {
+        "hoarfrostTitheA": {
+          "star": 3,
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "statBuff",
+            "slow"
+          ],
+          "requires": [
+            "scaleBy:concurrentStatus:frozen"
+          ]
+        },
+        "hoarfrostTitheB": {
+          "star": 3,
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "aura"
+          ],
+          "requires": [
+            "scaleBy:enemiesInAura"
+          ]
+        },
+        "hoarfrostTitheC": {
+          "star": 3,
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "freeze"
+          ],
+          "requires": [
+            "scaleBy:concurrentStatus:frozen"
+          ]
+        },
+        "hoarfrostTithe1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onKill"
+          ],
+          "atoms": [
+            "extraDrop"
+          ]
+        },
+        "hoarfrostTithe2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "slow",
+            "burstDamage"
+          ],
+          "requires": [
+            "forEach:enemiesWithStatus",
+            "scaleBy:controlledInAura"
+          ]
+        },
+        "hoarfrostTithe3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "onKill"
+          ],
+          "atoms": [
+            "statBuff",
+            "restore"
+          ]
+        }
+      }
+    },
+    "scorch": {
+      "identityContract": "命中直接施加灼烧（可引燃的 dot），维持全场燃烧覆盖率",
+      "branches": {
+        "scorchA": {
+          "star": 3,
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "dot"
+          ]
+        },
+        "scorchB": {
+          "star": 3,
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "groundZone"
+          ]
+        },
+        "scorchC": {
+          "star": 3,
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "dot"
+          ]
+        },
+        "scorch1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "burstDamage"
+          ]
+        },
+        "scorch2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "dot"
+          ]
+        },
+        "scorch3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "onKill"
+          ],
+          "atoms": [
+            "statBuff"
+          ]
+        }
+      }
+    },
+    "splitBlast": {
+      "identityContract": "爆炸/分裂弹药对灼烧目标引爆兑现",
+      "branches": {
+        "splitBlastA": {
+          "star": 3,
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "aoeOnHit",
+            "dot"
+          ]
+        },
+        "splitBlastB": {
+          "star": 3,
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "split",
+            "dot"
+          ]
+        },
+        "splitBlastC": {
+          "star": 3,
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "mortarMorph",
+            "groundZone"
+          ]
+        },
+        "splitBlast1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "burstDamage"
+          ]
+        },
+        "splitBlast2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": []
+        },
+        "splitBlast3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "onKill"
+          ],
+          "atoms": [
+            "extraDrop"
+          ]
+        }
+      }
+    },
+    "meteor": {
+      "identityContract": "从天顶落下的定点轰击，落点成火",
+      "branches": {
+        "meteorA": {
+          "star": 3,
+          "triggers": [
+            "onFire"
+          ],
+          "atoms": [
+            "mortarMorph",
+            "dot"
+          ]
+        },
+        "meteorB": {
+          "star": 3,
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "groundZone",
+            "split"
+          ]
+        },
+        "meteorC": {
+          "star": 3,
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "mortarMorph",
+            "groundZone"
+          ]
+        },
+        "meteor1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "burstDamage",
+            "knockback"
+          ]
+        },
+        "meteor2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "dot",
+            "knockback"
+          ]
+        },
+        "meteor3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "onKill"
+          ],
+          "atoms": [
+            "restore"
+          ]
+        }
+      }
+    },
+    "magmaPool": {
+      "identityContract": "在战场上留下持续的熔岩火场（纯 groundZone 压制）",
+      "branches": {
+        "magmaPoolA": {
+          "star": 3,
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "groundZone"
+          ]
+        },
+        "magmaPoolB": {
+          "star": 3,
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "groundZone"
+          ],
+          "at": "densestCluster",
+          "requires": []
+        },
+        "magmaPoolC": {
+          "star": 3,
+          "triggers": [
+            "onKill"
+          ],
+          "atoms": [
+            "burstDamage",
+            "groundZone"
+          ]
+        },
+        "magmaPool1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "burstDamage"
+          ],
+          "requires": [
+            "forEach:ownZones"
+          ]
+        },
+        "magmaPool2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onKill"
+          ],
+          "atoms": [
+            "groundZone"
+          ],
+          "requires": [
+            "forEach:ownZones"
+          ]
+        },
+        "magmaPool3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "onKill"
+          ],
+          "atoms": [
+            "extraDrop"
+          ],
+          "requires": [
+            "forEach:ownZones"
+          ]
+        }
+      }
+    },
+    "flashfire": {
+      "identityContract": "瞬时爆燃：小范围爆发 + 灼烧 + 击退的脉冲式压制",
+      "branches": {
+        "flashfireA": {
+          "star": 3,
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "burstDamage",
+            "dot"
+          ]
+        },
+        "flashfireB": {
+          "star": 3,
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "knockback",
+            "aoeOnHit",
+            "dot"
+          ]
+        },
+        "flashfireC": {
+          "star": 3,
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "burstDamage",
+            "dot"
+          ],
+          "at": "densestCluster",
+          "requires": []
+        },
+        "flashfire1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "burstDamage",
+            "knockback"
+          ]
+        },
+        "flashfire2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "dot"
+          ],
+          "at": "densestCluster",
+          "requires": [
+            "scaleBy:enemiesOnField"
+          ]
+        },
+        "flashfire3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "statBuff"
+          ]
+        }
+      }
+    },
+    "cinderheart": {
+      "identityContract": "焚狱的防御＝威慑：近核心区域持续燃烧，以伤害换安全（不使用 shield/thorns/breachReduction，归磐垒）",
+      "branches": {
+        "cinderheartA": {
+          "star": 3,
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "aura"
+          ]
+        },
+        "cinderheartB": {
+          "star": 3,
+          "triggers": [
+            "onWaveStart",
+            "interval"
+          ],
+          "atoms": [
+            "groundZone"
+          ]
+        },
+        "cinderheartC": {
+          "star": 3,
+          "triggers": [
+            "onBreach"
+          ],
+          "atoms": [
+            "burstDamage",
+            "groundZone"
+          ]
+        },
+        "cinderheart1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "burstDamage",
+            "dot"
+          ],
+          "requires": [
+            "forEach:ownZones"
+          ]
+        },
+        "cinderheart2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onBreach"
+          ],
+          "atoms": [
+            "groundZone"
+          ],
+          "requires": [
+            "radiusOverTime"
+          ]
+        },
+        "cinderheart3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "onKill"
+          ],
+          "atoms": [
+            "restore"
+          ]
+        }
+      }
+    },
+    "ashHarvest": {
+      "identityContract": "燃烧覆盖率转化为产出：在场灼烧目标越多收益越高",
+      "branches": {
+        "ashHarvestA": {
+          "star": 3,
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "statBuff",
+            "dot"
+          ],
+          "requires": [
+            "scaleBy:concurrentStatus:dot"
+          ]
+        },
+        "ashHarvestB": {
+          "star": 3,
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "groundZone"
+          ],
+          "at": "densestCluster",
+          "requires": [
+            "scaleBy:enemiesInAura"
+          ]
+        },
+        "ashHarvestC": {
+          "star": 3,
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "dot"
+          ]
+        },
+        "ashHarvest1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "burstDamage"
+          ],
+          "requires": [
+            "scaleBy:concurrentStatus:dot"
+          ]
+        },
+        "ashHarvest2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onKill"
+          ],
+          "atoms": [
+            "groundZone"
+          ],
+          "requires": [
+            "scaleBy:concurrentStatus:dot"
+          ]
+        },
+        "ashHarvest3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "onKill"
+          ],
+          "atoms": [
+            "extraDrop",
+            "statBuff"
+          ]
+        }
+      }
+    },
+    "aegis": {
+      "identityContract": "供应壁垒容量（全表唯一 shield 来源），破盾时新星反击",
+      "branches": {
+        "aegisA": {
+          "star": 3,
+          "triggers": [
+            "onWaveStart"
+          ],
+          "atoms": [
+            "shield"
+          ]
+        },
+        "aegisB": {
+          "star": 3,
+          "triggers": [
+            "onWaveStart"
+          ],
+          "atoms": [
+            "shield"
+          ]
+        },
+        "aegisC": {
+          "star": 3,
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "shield"
+          ]
+        },
+        "aegis1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "novaOnBreak"
+          ]
+        },
+        "aegis2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "aura"
+          ]
+        },
+        "aegis3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "onWaveStart"
+          ],
+          "atoms": [
+            "statBuff",
+            "restore"
+          ]
+        }
+      }
+    },
+    "thorns": {
+      "identityContract": "把承受转化为反击：反伤与突破点爆发",
+      "branches": {
+        "thornsA": {
+          "star": 3,
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "thorns"
+          ]
+        },
+        "thornsB": {
+          "star": 3,
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "aura"
+          ]
+        },
+        "thornsC": {
+          "star": 3,
+          "triggers": [
+            "onBreach"
+          ],
+          "atoms": [
+            "burstDamage"
+          ]
+        },
+        "thorns1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onBreach"
+          ],
+          "atoms": [
+            "burstDamage"
+          ],
+          "at": "point",
+          "requires": [
+            "scaleBy:thornsRatio"
+          ]
+        },
+        "thorns2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "thorns",
+            "aura"
+          ],
+          "requires": [
+            "radiusOverTime"
+          ]
+        },
+        "thorns3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "onBreach"
+          ],
+          "atoms": [
+            "restore"
+          ]
+        }
+      }
+    },
+    "decoy": {
+      "identityContract": "召唤诱饵实体分摊压力、改写敌人仇恨",
+      "branches": {
+        "decoyA": {
+          "star": 3,
+          "triggers": [
+            "onWaveStart"
+          ],
+          "atoms": [
+            "summon"
+          ]
+        },
+        "decoyB": {
+          "star": 3,
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "summon"
+          ]
+        },
+        "decoyC": {
+          "star": 3,
+          "triggers": [
+            "onWaveStart"
+          ],
+          "atoms": [
+            "summon"
+          ]
+        },
+        "decoy1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "summon"
+          ]
+        },
+        "decoy2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onWaveStart"
+          ],
+          "atoms": [
+            "aura"
+          ]
+        },
+        "decoy3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "passive",
+            "interval"
+          ],
+          "atoms": [
+            "breachReduction",
+            "restore"
+          ]
+        }
+      }
+    },
+    "sanctum": {
+      "identityContract": "以炮台为心的减伤圣域（aura），用空间换生存",
+      "branches": {
+        "sanctumA": {
+          "star": 3,
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "aura"
+          ]
+        },
+        "sanctumB": {
+          "star": 3,
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "aura"
+          ],
+          "requires": [
+            "radiusOverTime"
+          ]
+        },
+        "sanctumC": {
+          "star": 3,
+          "triggers": [
+            "onWaveStart"
+          ],
+          "atoms": [
+            "breachReduction",
+            "aura"
+          ]
+        },
+        "sanctum1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onBreach"
+          ],
+          "atoms": [
+            "burstDamage"
+          ],
+          "at": "point",
+          "requires": [
+            "scaleBy:auraReduction"
+          ]
+        },
+        "sanctum2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "aura"
+          ],
+          "requires": [
+            "scaleBy:enemiesOnField"
+          ]
+        },
+        "sanctum3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "restore"
+          ]
+        }
+      }
+    },
+    "sentinel": {
+      "identityContract": "召唤协同射击的哨戒单位，用编队火力换防线厚度",
+      "branches": {
+        "sentinelA": {
+          "star": 3,
+          "triggers": [
+            "onWaveStart"
+          ],
+          "atoms": [
+            "summon"
+          ]
+        },
+        "sentinelB": {
+          "star": 3,
+          "triggers": [
+            "onWaveStart"
+          ],
+          "atoms": [
+            "summon"
+          ]
+        },
+        "sentinelC": {
+          "star": 3,
+          "triggers": [
+            "onBreach"
+          ],
+          "atoms": [
+            "summon"
+          ]
+        },
+        "sentinel1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "passive"
+          ],
+          "atoms": []
+        },
+        "sentinel2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onWaveStart"
+          ],
+          "atoms": []
+        },
+        "sentinel3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "breachReduction"
+          ]
+        }
+      }
+    },
+    "retribution": {
+      "identityContract": "突破事件本身是弹药：每次突破在突破点触发审判打击",
+      "branches": {
+        "retributionA": {
+          "star": 3,
+          "triggers": [
+            "onBreach"
+          ],
+          "atoms": [
+            "burstDamage"
+          ],
+          "at": "point"
+        },
+        "retributionB": {
+          "star": 3,
+          "triggers": [
+            "onBreach"
+          ],
+          "atoms": [
+            "knockback",
+            "aoeOnHit"
+          ],
+          "at": "point"
+        },
+        "retributionC": {
+          "star": 3,
+          "triggers": [
+            "onBreach"
+          ],
+          "atoms": [
+            "burstDamage"
+          ],
+          "at": "point",
+          "requires": [
+            "scaleBy:secondsSinceLastBreach"
+          ]
+        },
+        "retribution1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onBreach"
+          ],
+          "atoms": [
+            "burstDamage"
+          ],
+          "at": "point",
+          "requires": [
+            "scaleBy:shieldTier"
+          ]
+        },
+        "retribution2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onBreach"
+          ],
+          "atoms": [
+            "aura"
+          ],
+          "at": "point"
+        },
+        "retribution3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "onBreach"
+          ],
+          "atoms": [
+            "statBuff",
+            "restore"
+          ],
+          "at": "point"
+        }
+      }
+    },
+    "ironvine": {
+      "identityContract": "守成经济：无突破的时间与投入返还转化为产出",
+      "branches": {
+        "ironvineA": {
+          "star": 3,
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "statBuff",
+            "thorns"
+          ],
+          "requires": [
+            "scaleBy:secondsSinceLastBreach"
+          ]
+        },
+        "ironvineB": {
+          "star": 3,
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "aura"
+          ],
+          "requires": [
+            "scaleBy:secondsSinceLastBreach"
+          ]
+        },
+        "ironvineC": {
+          "star": 3,
+          "triggers": [
+            "onWaveStart"
+          ],
+          "atoms": [
+            "statBuff"
+          ]
+        },
+        "ironvine1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onBreach"
+          ],
+          "atoms": [
+            "burstDamage"
+          ],
+          "at": "point",
+          "requires": [
+            "scaleBy:secondsSinceLastBreach"
+          ]
+        },
+        "ironvine2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "thorns",
+            "aura"
+          ],
+          "requires": [
+            "scaleBy:secondsSinceLastBreach"
+          ]
+        },
+        "ironvine3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "mergeMaterialRefund",
+            "extraDrop"
+          ]
+        }
+      }
+    },
+    "harvest": {
+      "identityContract": "持续标记高价值目标（赏印）并改善掉落规则——丰饶身份的稳定供给方",
+      "branches": {
+        "harvestA": {
+          "star": 3,
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "focusPriority",
+            "dropRateMul"
+          ]
+        },
+        "harvestB": {
+          "star": 3,
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "focusPriority"
+          ]
+        },
+        "harvestC": {
+          "star": 3,
+          "triggers": [
+            "onPickup"
+          ],
+          "atoms": [
+            "focusPriority"
+          ]
+        },
+        "harvest1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onKill"
+          ],
+          "atoms": [
+            "extraDrop"
+          ]
+        },
+        "harvest2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onPickup"
+          ],
+          "atoms": [
+            "focusPriority"
+          ]
+        },
+        "harvest3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "dropLifetimeMul",
+            "expiryConvert"
+          ]
+        }
+      }
+    },
+    "fateLoom": {
+      "identityContract": "合成事件（onMerge）触发战场脉冲——把经济动作变成武器",
+      "branches": {
+        "fateLoomA": {
+          "star": 3,
+          "triggers": [
+            "onMerge"
+          ],
+          "atoms": [
+            "mergePulse"
+          ]
+        },
+        "fateLoomB": {
+          "star": 3,
+          "triggers": [
+            "onMerge"
+          ],
+          "atoms": [
+            "mergePulse",
+            "aura"
+          ]
+        },
+        "fateLoomC": {
+          "star": 3,
+          "triggers": [
+            "onWaveStart"
+          ],
+          "atoms": [
+            "mergePulse"
+          ]
+        },
+        "fateLoom1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onKill"
+          ],
+          "atoms": [
+            "burstDamage",
+            "extraDrop"
+          ],
+          "requires": [
+            "scaleBy:mergesThisRun"
+          ]
+        },
+        "fateLoom2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onMerge"
+          ],
+          "atoms": [
+            "aura"
+          ]
+        },
+        "fateLoom3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "onMerge"
+          ],
+          "atoms": [
+            "wildcardRewardBonus"
+          ]
+        }
+      }
+    },
+    "goldenVolley": {
+      "identityContract": "弹道载体逐个命中逐个铺设赏印",
+      "branches": {
+        "goldenVolleyA": {
+          "star": 3,
+          "triggers": [
+            "onFire",
+            "onHit"
+          ],
+          "atoms": [
+            "focusPriority",
+            "pierce"
+          ]
+        },
+        "goldenVolleyB": {
+          "star": 3,
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "focusPriority",
+            "split"
+          ]
+        },
+        "goldenVolleyC": {
+          "star": 3,
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "focusPriority",
+            "beamMorph"
+          ]
+        },
+        "goldenVolley1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "burstDamage"
+          ]
+        },
+        "goldenVolley2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onHit"
+          ],
+          "atoms": [
+            "aoeOnHit"
+          ]
+        },
+        "goldenVolley3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "onKill"
+          ],
+          "atoms": [
+            "extraDrop"
+          ]
+        }
+      }
+    },
+    "bountyCall": {
+      "identityContract": "主动点名：批量施加赏印并引导集火",
+      "branches": {
+        "bountyCallA": {
+          "star": 3,
+          "triggers": [
+            "onWaveStart"
+          ],
+          "atoms": [
+            "focusPriority"
+          ]
+        },
+        "bountyCallB": {
+          "star": 3,
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "focusPriority"
+          ]
+        },
+        "bountyCallC": {
+          "star": 3,
+          "triggers": [
+            "onPickup"
+          ],
+          "atoms": [
+            "focusPriority"
+          ],
+          "at": "nearestToBreachLine",
+          "requires": []
+        },
+        "bountyCall1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onKill"
+          ],
+          "atoms": [
+            "burstDamage",
+            "extraDrop"
+          ],
+          "requires": [
+            "scaleBy:concurrentStatus:brand"
+          ]
+        },
+        "bountyCall2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onKill"
+          ],
+          "atoms": [
+            "aura"
+          ]
+        },
+        "bountyCall3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "dropRateMul",
+            "xpMul"
+          ]
+        }
+      }
+    },
+    "overgrowth": {
+      "identityContract": "常驻蔓生领域：范围伤害 + 延长掉落存续",
+      "branches": {
+        "overgrowthA": {
+          "star": 3,
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "aura"
+          ]
+        },
+        "overgrowthB": {
+          "star": 3,
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "aura"
+          ],
+          "requires": [
+            "radiusOverTime"
+          ]
+        },
+        "overgrowthC": {
+          "star": 3,
+          "triggers": [
+            "onWaveStart"
+          ],
+          "atoms": [
+            "dropLifetimeMul",
+            "aura"
+          ]
+        },
+        "overgrowth1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "burstDamage"
+          ],
+          "requires": [
+            "forEach:enemiesWithStatus"
+          ]
+        },
+        "overgrowth2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onPickup"
+          ],
+          "atoms": [
+            "aura"
+          ],
+          "requires": [
+            "scaleBy:pickupsThisWave"
+          ]
+        },
+        "overgrowth3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "onPickup",
+            "passive"
+          ],
+          "atoms": [
+            "dropLifetimeMul",
+            "restore"
+          ]
+        }
+      }
+    },
+    "springOfLife": {
+      "identityContract": "丰饶的防御＝资源转化：拾取与赏印事件直接变成回复（不使用 shield，归磐垒）",
+      "branches": {
+        "springOfLifeA": {
+          "star": 3,
+          "triggers": [
+            "onPickup"
+          ],
+          "atoms": [
+            "restore"
+          ]
+        },
+        "springOfLifeB": {
+          "star": 3,
+          "triggers": [
+            "passive",
+            "interval"
+          ],
+          "atoms": [
+            "restore",
+            "aura"
+          ]
+        },
+        "springOfLifeC": {
+          "star": 3,
+          "triggers": [
+            "onWaveStart"
+          ],
+          "atoms": [
+            "statBuff",
+            "restore"
+          ]
+        },
+        "springOfLife1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onKill"
+          ],
+          "atoms": [
+            "restore"
+          ]
+        },
+        "springOfLife2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onPickup"
+          ],
+          "atoms": [
+            "aura",
+            "restore"
+          ],
+          "requires": [
+            "radiusOverTime"
+          ]
+        },
+        "springOfLife3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "expiryConvert"
+          ]
+        }
+      }
+    },
+    "luckyStar": {
+      "identityContract": "掉落规则的乘数中心：掉率/经验/连锁拾取",
+      "branches": {
+        "luckyStarA": {
+          "star": 3,
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "dropRateMul",
+            "xpMul"
+          ]
+        },
+        "luckyStarB": {
+          "star": 3,
+          "triggers": [
+            "interval"
+          ],
+          "atoms": [
+            "extraDrop"
+          ],
+          "at": "densestCluster",
+          "requires": []
+        },
+        "luckyStarC": {
+          "star": 3,
+          "triggers": [
+            "onPickup"
+          ],
+          "atoms": [
+            "extraDrop"
+          ]
+        },
+        "luckyStar1x": {
+          "star": 5,
+          "interfaceRole": "payoff",
+          "triggers": [
+            "onKill"
+          ],
+          "atoms": [
+            "extraDrop"
+          ]
+        },
+        "luckyStar2x": {
+          "star": 5,
+          "interfaceRole": "spread",
+          "triggers": [
+            "onMerge"
+          ],
+          "atoms": [
+            "focusPriority",
+            "mergePulse"
+          ]
+        },
+        "luckyStar3x": {
+          "star": 5,
+          "interfaceRole": "convert",
+          "triggers": [
+            "passive"
+          ],
+          "atoms": [
+            "expiryConvert",
+            "xpMul"
+          ]
+        }
+      }
+    }
+  }
+}

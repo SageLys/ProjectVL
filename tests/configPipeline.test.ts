@@ -39,7 +39,9 @@ describe('配置管线 · 当前配置必须通过', () => {
 
 describe('配置管线 · 域注册表', () => {
   it('base 下每个配置文件都有对应的可写域，没有遗漏', () => {
-    const files = readdirSync(BASE_DIR).filter(name => name.endsWith('.json')).sort();
+    const files = readdirSync(BASE_DIR)
+      .filter(name => name.endsWith('.json') && name !== 'designFingerprints.json')
+      .sort();
     const registered = Object.values(WRITABLE_DOMAINS)
       .filter(path => path.startsWith(BASE_DIR))
       .map(path => path.slice(BASE_DIR.length + 1))

@@ -70,29 +70,7 @@
                   "atom": "burstDamage",
                   "params": {
                     "damageMul": 0.8,
-                    "radius": 85
-                  }
-                },
-                {
-                  "atom": "vulnerable",
-                  "params": {
-                    "ratio": 0.08,
-                    "duration": 2
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "radius": 55
                   }
                 }
               ]
@@ -131,29 +109,7 @@
                   "atom": "burstDamage",
                   "params": {
                     "damageMul": 0.8,
-                    "radius": 85
-                  }
-                },
-                {
-                  "atom": "vulnerable",
-                  "params": {
-                    "ratio": 0.08,
-                    "duration": 2
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "radius": 55
                   }
                 }
               ]
@@ -386,7 +342,8 @@
                           }
                         }
                       }
-                    ]
+                    ],
+                    "at": "densestCluster"
                   }
                 ]
               }
@@ -410,29 +367,7 @@
                         "atom": "burstDamage",
                         "params": {
                           "damageMul": 0.8,
-                          "radius": 85
-                        }
-                      },
-                      {
-                        "atom": "vulnerable",
-                        "params": {
-                          "ratio": 0.08,
-                          "duration": 2
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
+                          "radius": 55
                         }
                       }
                     ]
@@ -667,30 +602,14 @@
                 {
                   "atom": "burstDamage",
                   "params": {
-                    "damageMul": 0.8,
-                    "radius": 85
-                  }
-                },
-                {
-                  "atom": "vulnerable",
-                  "params": {
-                    "ratio": 0.08,
-                    "duration": 2
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "damageMul": 0.55,
+                    "radius": 0
+                  },
+                  "scaleBy": {
+                    "source": "concurrentStatus:vulnerable",
+                    "param": "damageMul",
+                    "perUnit": 0.05,
+                    "cap": 8
                   }
                 }
               ]
@@ -733,30 +652,14 @@
                 {
                   "atom": "burstDamage",
                   "params": {
-                    "damageMul": 0.8,
-                    "radius": 85
-                  }
-                },
-                {
-                  "atom": "vulnerable",
-                  "params": {
-                    "ratio": 0.08,
-                    "duration": 2
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "damageMul": 0.55,
+                    "radius": 0
+                  },
+                  "scaleBy": {
+                    "source": "concurrentStatus:vulnerable",
+                    "param": "damageMul",
+                    "perUnit": 0.05,
+                    "cap": 8
                   }
                 }
               ]
@@ -1018,30 +921,14 @@
                       {
                         "atom": "burstDamage",
                         "params": {
-                          "damageMul": 0.8,
-                          "radius": 85
-                        }
-                      },
-                      {
-                        "atom": "vulnerable",
-                        "params": {
-                          "ratio": 0.08,
-                          "duration": 2
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
+                          "damageMul": 0.55,
+                          "radius": 0
+                        },
+                        "scaleBy": {
+                          "source": "concurrentStatus:vulnerable",
+                          "param": "damageMul",
+                          "perUnit": 0.05,
+                          "cap": 8
                         }
                       }
                     ]
@@ -1060,33 +947,18 @@
                     },
                     "effects": [
                       {
-                        "atom": "vulnerable",
+                        "atom": "aoeOnHit",
                         "params": {
-                          "ratio": 0.11,
-                          "duration": 2.5
+                          "radius": 80,
+                          "damageRatio": 0.5,
+                          "falloff": 0.4
                         }
                       },
                       {
-                        "atom": "aoeOnHit",
+                        "atom": "vulnerable",
                         "params": {
-                          "radius": 85,
-                          "damageRatio": 0.55,
-                          "falloff": 0.4
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
+                          "ratio": 0.1,
+                          "duration": 2.4
                         }
                       }
                     ]
@@ -1489,29 +1361,17 @@
                         "atom": "aura",
                         "params": {
                           "radius": 145,
-                          "tickInterval": 0.6,
+                          "tickInterval": 0.35,
                           "duration": 4,
                           "effects": [
                             {
                               "atom": "vulnerable",
                               "params": {
-                                "ratio": 0.11,
-                                "duration": 2.5
+                                "ratio": 0.1,
+                                "duration": 2
                               }
                             }
                           ]
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "vulnerable",
-                        "params": {
-                          "ratio": 0.11,
-                          "duration": 2.5
                         }
                       }
                     ]
@@ -1531,15 +1391,17 @@
                       {
                         "atom": "burstDamage",
                         "params": {
-                          "damageMul": 1.3,
-                          "radius": 115
-                        }
+                          "damageMul": 1.15,
+                          "radius": 90
+                        },
+                        "at": "nearestEnemy"
                       },
                       {
                         "atom": "vulnerable",
                         "params": {
                           "ratio": 0.14,
-                          "duration": 3
+                          "duration": 3,
+                          "radius": 90
                         }
                       }
                     ]
@@ -1607,33 +1469,18 @@
                     },
                     "effects": [
                       {
-                        "atom": "vulnerable",
+                        "atom": "aoeOnHit",
                         "params": {
-                          "ratio": 0.11,
-                          "duration": 2.5
+                          "radius": 105,
+                          "damageRatio": 0,
+                          "falloff": 0
                         }
                       },
                       {
-                        "atom": "aoeOnHit",
+                        "atom": "vulnerable",
                         "params": {
-                          "radius": 85,
-                          "damageRatio": 0.55,
-                          "falloff": 0.4
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
+                          "ratio": 0.13,
+                          "duration": 2.8
                         }
                       }
                     ]
@@ -1811,30 +1658,8 @@
                 {
                   "atom": "burstDamage",
                   "params": {
-                    "damageMul": 0.8,
-                    "radius": 85
-                  }
-                },
-                {
-                  "atom": "vulnerable",
-                  "params": {
-                    "ratio": 0.08,
-                    "duration": 2
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "damageMul": 0.45,
+                    "radius": 150
                   }
                 }
               ]
@@ -1879,30 +1704,8 @@
                 {
                   "atom": "burstDamage",
                   "params": {
-                    "damageMul": 0.8,
-                    "radius": 85
-                  }
-                },
-                {
-                  "atom": "vulnerable",
-                  "params": {
-                    "ratio": 0.08,
-                    "duration": 2
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "damageMul": 0.45,
+                    "radius": 150
                   }
                 }
               ]
@@ -1976,7 +1779,7 @@
                 }
               },
               {
-                "atom": "groundZone",
+                "atom": "aura",
                 "params": {
                   "radius": 145,
                   "tickInterval": 0.6,
@@ -2014,7 +1817,7 @@
                 }
               },
               {
-                "atom": "groundZone",
+                "atom": "aura",
                 "params": {
                   "radius": 145,
                   "tickInterval": 0.6,
@@ -2130,22 +1933,21 @@
                 "textKey": "evolution.stormcall.stormcallB",
                 "equip": [
                   {
-                    "trigger": "interval",
-                    "triggerParams": {
-                      "seconds": 3
-                    },
+                    "trigger": "passive",
                     "effects": [
                       {
-                        "atom": "groundZone",
+                        "atom": "aura",
                         "params": {
-                          "radius": 145,
-                          "tickInterval": 0.6,
+                          "radius": 135,
+                          "tickInterval": 0.55,
                           "duration": 4,
+                          "follow": "densestCluster",
+                          "followLerp": 0.5,
                           "effects": [
                             {
                               "atom": "vulnerable",
                               "params": {
-                                "ratio": 0.11,
+                                "ratio": 0.12,
                                 "duration": 2.5
                               }
                             }
@@ -2155,13 +1957,26 @@
                     ]
                   },
                   {
-                    "trigger": "onHit",
+                    "trigger": "interval",
+                    "triggerParams": {
+                      "seconds": 3
+                    },
                     "effects": [
                       {
-                        "atom": "vulnerable",
+                        "atom": "groundZone",
                         "params": {
-                          "ratio": 0.11,
-                          "duration": 2.5
+                          "radius": 110,
+                          "duration": 2.5,
+                          "tickInterval": 0.6,
+                          "effects": [
+                            {
+                              "atom": "vulnerable",
+                              "params": {
+                                "ratio": 0.09,
+                                "duration": 2
+                              }
+                            }
+                          ]
                         }
                       }
                     ]
@@ -2189,7 +2004,8 @@
                           }
                         }
                       }
-                    ]
+                    ],
+                    "at": "densestCluster"
                   },
                   {
                     "trigger": "interval",
@@ -2209,6 +2025,22 @@
                             "ratio": 0.14,
                             "duration": 2.8
                           }
+                        }
+                      }
+                    ],
+                    "at": "densestCluster"
+                  },
+                  {
+                    "trigger": "onWaveStart",
+                    "effects": [
+                      {
+                        "atom": "statBuff",
+                        "params": {
+                          "stat": "fireRate",
+                          "operation": "mul",
+                          "value": 1.08,
+                          "duration": 3,
+                          "maxStacks": 1
                         }
                       }
                     ]
@@ -2234,30 +2066,8 @@
                       {
                         "atom": "burstDamage",
                         "params": {
-                          "damageMul": 0.8,
-                          "radius": 85
-                        }
-                      },
-                      {
-                        "atom": "vulnerable",
-                        "params": {
-                          "ratio": 0.08,
-                          "duration": 2
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
+                          "damageMul": 0.45,
+                          "radius": 150
                         }
                       }
                     ]
@@ -2278,16 +2088,27 @@
                       {
                         "atom": "aoeOnHit",
                         "params": {
-                          "radius": 85,
-                          "damageRatio": 0.55,
+                          "radius": 75,
+                          "damageRatio": 0.45,
                           "falloff": 0.4
-                        }
-                      },
-                      {
-                        "atom": "vulnerable",
-                        "params": {
-                          "ratio": 0.11,
-                          "duration": 2.5
+                        },
+                        "forEach": {
+                          "set": {
+                            "kind": "enemiesWithStatus",
+                            "status": "vulnerable"
+                          },
+                          "maxTargets": 6,
+                          "order": "nearest",
+                          "effects": [
+                            {
+                              "atom": "aoeOnHit",
+                              "params": {
+                                "radius": 75,
+                                "damageRatio": 0.45,
+                                "falloff": 0.4
+                              }
+                            }
+                          ]
                         }
                       }
                     ]
@@ -2320,7 +2141,7 @@
                         }
                       },
                       {
-                        "atom": "groundZone",
+                        "atom": "aura",
                         "params": {
                           "radius": 165,
                           "tickInterval": 0.6,
@@ -2479,6 +2300,12 @@
                     "value": 1.08,
                     "duration": 3,
                     "maxStacks": 2
+                  },
+                  "scaleBy": {
+                    "source": "concurrentStatus:vulnerable",
+                    "param": "value",
+                    "perUnit": 0.02,
+                    "cap": 10
                   }
                 }
               ]
@@ -2549,6 +2376,12 @@
                     "value": 1.08,
                     "duration": 3,
                     "maxStacks": 2
+                  },
+                  "scaleBy": {
+                    "source": "concurrentStatus:vulnerable",
+                    "param": "value",
+                    "perUnit": 0.02,
+                    "cap": 10
                   }
                 }
               ]
@@ -2807,6 +2640,12 @@
                           "value": 1.08,
                           "duration": 3,
                           "maxStacks": 2
+                        },
+                        "scaleBy": {
+                          "source": "concurrentStatus:vulnerable",
+                          "param": "value",
+                          "perUnit": 0.02,
+                          "cap": 10
                         }
                       }
                     ]
@@ -3318,30 +3157,25 @@
                       {
                         "atom": "aura",
                         "params": {
-                          "radius": 145,
-                          "tickInterval": 0.6,
+                          "radius": 130,
+                          "tickInterval": 0.75,
                           "duration": 4,
                           "effects": [
                             {
                               "atom": "vulnerable",
                               "params": {
-                                "ratio": 0.11,
-                                "duration": 2.5
+                                "ratio": 0.1,
+                                "duration": 2
+                              }
+                            },
+                            {
+                              "atom": "stun",
+                              "params": {
+                                "duration": 0.12,
+                                "chance": 0.2
                               }
                             }
                           ]
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "vulnerable",
-                        "params": {
-                          "ratio": 0.11,
-                          "duration": 2.5
                         }
                       }
                     ]
@@ -3353,7 +3187,7 @@
                 "textKey": "evolution.galvanicWard.galvanicWardC",
                 "equip": [
                   {
-                    "trigger": "onHit",
+                    "trigger": "onBreach",
                     "effects": [
                       {
                         "atom": "aoeOnHit",
@@ -3362,8 +3196,16 @@
                           "damageRatio": 1.3,
                           "falloff": 0.35
                         }
+                      },
+                      {
+                        "atom": "burstDamage",
+                        "params": {
+                          "damageMul": 0.65,
+                          "radius": 105
+                        }
                       }
-                    ]
+                    ],
+                    "at": "point"
                   },
                   {
                     "trigger": "onHit",
@@ -3440,9 +3282,9 @@
                     },
                     "effects": [
                       {
-                        "atom": "groundZone",
+                        "atom": "aura",
                         "params": {
-                          "radius": 145,
+                          "radius": 75,
                           "tickInterval": 0.6,
                           "duration": 4,
                           "effects": [
@@ -3453,10 +3295,16 @@
                                 "duration": 2.5
                               }
                             }
-                          ]
+                          ],
+                          "radiusOverTime": {
+                            "from": 75,
+                            "to": 155,
+                            "easing": "linear"
+                          }
                         }
                       }
-                    ]
+                    ],
+                    "at": "point"
                   }
                 ]
               },
@@ -3470,11 +3318,18 @@
                     "triggerParams": {
                       "cooldownSeconds": 6
                     },
+                    "at": "point",
                     "effects": [
                       {
                         "atom": "restore",
                         "params": {
-                          "amountRatio": 0.07
+                          "amountRatio": 0.025
+                        },
+                        "scaleBy": {
+                          "source": "concurrentStatus:vulnerable",
+                          "param": "amountRatio",
+                          "perUnit": 0.008,
+                          "cap": 8
                         }
                       }
                     ]
@@ -3548,6 +3403,12 @@
                   "params": {
                     "ratio": 0.08,
                     "duration": 2
+                  },
+                  "scaleBy": {
+                    "source": "enemiesOnField",
+                    "param": "ratio",
+                    "perUnit": 0.02,
+                    "cap": 10
                   }
                 },
                 {
@@ -3575,6 +3436,12 @@
                   "params": {
                     "ratio": 0.08,
                     "duration": 2
+                  },
+                  "scaleBy": {
+                    "source": "enemiesOnField",
+                    "param": "ratio",
+                    "perUnit": 0.02,
+                    "cap": 10
                   }
                 },
                 {
@@ -3601,6 +3468,12 @@
                   "params": {
                     "damageMul": 0.8,
                     "radius": 85
+                  },
+                  "scaleBy": {
+                    "source": "concurrentStatus:vulnerable",
+                    "param": "damageMul",
+                    "perUnit": 0.02,
+                    "cap": 10
                   }
                 },
                 {
@@ -3640,6 +3513,12 @@
                   "params": {
                     "ratio": 0.08,
                     "duration": 2
+                  },
+                  "scaleBy": {
+                    "source": "enemiesOnField",
+                    "param": "ratio",
+                    "perUnit": 0.02,
+                    "cap": 10
                   }
                 },
                 {
@@ -3666,6 +3545,12 @@
                   "params": {
                     "damageMul": 0.8,
                     "radius": 85
+                  },
+                  "scaleBy": {
+                    "source": "concurrentStatus:vulnerable",
+                    "param": "damageMul",
+                    "perUnit": 0.02,
+                    "cap": 10
                   }
                 },
                 {
@@ -3891,6 +3776,12 @@
                         "params": {
                           "ratio": 0.08,
                           "duration": 2
+                        },
+                        "scaleBy": {
+                          "source": "enemiesOnField",
+                          "param": "ratio",
+                          "perUnit": 0.02,
+                          "cap": 10
                         }
                       },
                       {
@@ -3917,30 +3808,34 @@
                       {
                         "atom": "aura",
                         "params": {
-                          "radius": 145,
-                          "tickInterval": 0.6,
+                          "radius": 125,
+                          "tickInterval": 0.8,
                           "duration": 4,
                           "effects": [
                             {
                               "atom": "vulnerable",
                               "params": {
-                                "ratio": 0.11,
-                                "duration": 2.5
+                                "ratio": 0.08,
+                                "duration": 2
+                              }
+                            },
+                            {
+                              "atom": "statBuff",
+                              "params": {
+                                "stat": "damage",
+                                "operation": "mul",
+                                "value": 1.02,
+                                "duration": 1,
+                                "maxStacks": 4
+                              },
+                              "scaleBy": {
+                                "source": "enemiesInAura",
+                                "param": "value",
+                                "perUnit": 0.01,
+                                "cap": 6
                               }
                             }
                           ]
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "vulnerable",
-                        "params": {
-                          "ratio": 0.11,
-                          "duration": 2.5
                         }
                       }
                     ]
@@ -3960,15 +3855,23 @@
                       {
                         "atom": "burstDamage",
                         "params": {
-                          "damageMul": 1.3,
-                          "radius": 115
-                        }
+                          "damageMul": 0.95,
+                          "radius": 75
+                        },
+                        "scaleBy": {
+                          "source": "killsSinceLastRelease",
+                          "param": "radius",
+                          "perUnit": 7,
+                          "cap": 10
+                        },
+                        "at": "densestCluster"
                       },
                       {
                         "atom": "vulnerable",
                         "params": {
-                          "ratio": 0.14,
-                          "duration": 3
+                          "ratio": 0.13,
+                          "duration": 3,
+                          "radius": 75
                         }
                       }
                     ]
@@ -3997,6 +3900,12 @@
                         "params": {
                           "damageMul": 0.8,
                           "radius": 85
+                        },
+                        "scaleBy": {
+                          "source": "concurrentStatus:vulnerable",
+                          "param": "damageMul",
+                          "perUnit": 0.02,
+                          "cap": 10
                         }
                       },
                       {
@@ -4037,33 +3946,31 @@
                     },
                     "effects": [
                       {
-                        "atom": "vulnerable",
+                        "atom": "aoeOnHit",
                         "params": {
-                          "ratio": 0.11,
-                          "duration": 2.5
+                          "radius": 70,
+                          "damageRatio": 0,
+                          "falloff": 0
+                        },
+                        "scaleBy": {
+                          "source": "concurrentStatus:vulnerable",
+                          "param": "radius",
+                          "perUnit": 8,
+                          "cap": 8
                         }
                       },
                       {
-                        "atom": "aoeOnHit",
+                        "atom": "vulnerable",
                         "params": {
-                          "radius": 85,
-                          "damageRatio": 0.55,
-                          "falloff": 0.4
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
+                          "ratio": 0.12,
+                          "duration": 2.6,
+                          "maxStacks": 2
+                        },
+                        "scaleBy": {
+                          "source": "concurrentStatus:vulnerable",
+                          "param": "maxStacks",
+                          "perUnit": 0.5,
+                          "cap": 6
                         }
                       }
                     ]
@@ -4220,23 +4127,8 @@
                 {
                   "atom": "burstDamage",
                   "params": {
-                    "damageMul": 0.8,
-                    "radius": 85
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "damageMul": 1.25,
+                    "radius": 80
                   }
                 }
               ]
@@ -4267,23 +4159,8 @@
                 {
                   "atom": "burstDamage",
                   "params": {
-                    "damageMul": 0.8,
-                    "radius": 85
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "damageMul": 1.25,
+                    "radius": 80
                   }
                 }
               ]
@@ -4469,30 +4346,18 @@
                       {
                         "atom": "aura",
                         "params": {
-                          "radius": 145,
-                          "tickInterval": 0.6,
+                          "radius": 175,
+                          "tickInterval": 0.8,
                           "duration": 4,
                           "effects": [
                             {
                               "atom": "slow",
                               "params": {
-                                "ratio": 0.26,
-                                "duration": 2.2
+                                "ratio": 0.25,
+                                "duration": 2.5
                               }
                             }
                           ]
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "slow",
-                        "params": {
-                          "ratio": 0.26,
-                          "duration": 2.2
                         }
                       }
                     ]
@@ -4516,7 +4381,8 @@
                           "stacksToTrigger": 3
                         }
                       }
-                    ]
+                    ],
+                    "at": "densestCluster"
                   }
                 ]
               }
@@ -4539,23 +4405,8 @@
                       {
                         "atom": "burstDamage",
                         "params": {
-                          "damageMul": 0.8,
-                          "radius": 85
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
+                          "damageMul": 1.25,
+                          "radius": 80
                         }
                       }
                     ]
@@ -4574,33 +4425,11 @@
                     },
                     "effects": [
                       {
-                        "atom": "aoeOnHit",
-                        "params": {
-                          "radius": 85,
-                          "damageRatio": 0.55,
-                          "falloff": 0.4
-                        }
-                      },
-                      {
                         "atom": "slow",
                         "params": {
-                          "ratio": 0.26,
-                          "duration": 2.2
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
+                          "ratio": 0.3,
+                          "duration": 3,
+                          "radius": 170
                         }
                       }
                     ]
@@ -4850,7 +4679,7 @@
       },
       "amplifyAxis": {
         "params": {
-          "distance": "+20"
+          "damageRatio": "+1"
         },
         "description": ""
       },
@@ -5130,33 +4959,19 @@
                     },
                     "effects": [
                       {
-                        "atom": "aoeOnHit",
+                        "atom": "slow",
                         "params": {
-                          "radius": 85,
-                          "damageRatio": 0.55,
-                          "falloff": 0.4
+                          "ratio": 0.25,
+                          "duration": 2.5,
+                          "radius": 115
                         }
                       },
                       {
-                        "atom": "slow",
+                        "atom": "knockback",
                         "params": {
-                          "ratio": 0.26,
-                          "duration": 2.2
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
+                          "distance": 65,
+                          "collisionDamage": 0.15,
+                          "radius": 115
                         }
                       }
                     ]
@@ -5207,7 +5022,7 @@
           {
             "star": 4,
             "amplify": {
-              "distance": "+20"
+              "damageRatio": "+1"
             }
           },
           {
@@ -5346,23 +5161,14 @@
                 {
                   "atom": "burstDamage",
                   "params": {
-                    "damageMul": 0.8,
-                    "radius": 85
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "damageMul": 0.7,
+                    "radius": 65
+                  },
+                  "scaleBy": {
+                    "source": "statusStacks",
+                    "param": "damageMul",
+                    "perUnit": 0.22,
+                    "cap": 5
                   }
                 }
               ]
@@ -5424,23 +5230,14 @@
                 {
                   "atom": "burstDamage",
                   "params": {
-                    "damageMul": 0.8,
-                    "radius": 85
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "damageMul": 0.7,
+                    "radius": 65
+                  },
+                  "scaleBy": {
+                    "source": "statusStacks",
+                    "param": "damageMul",
+                    "perUnit": 0.22,
+                    "cap": 5
                   }
                 }
               ]
@@ -5729,23 +5526,14 @@
                       {
                         "atom": "burstDamage",
                         "params": {
-                          "damageMul": 0.8,
-                          "radius": 85
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
+                          "damageMul": 0.7,
+                          "radius": 65
+                        },
+                        "scaleBy": {
+                          "source": "statusStacks",
+                          "param": "damageMul",
+                          "perUnit": 0.22,
+                          "cap": 5
                         }
                       }
                     ]
@@ -5764,33 +5552,22 @@
                     },
                     "effects": [
                       {
-                        "atom": "aoeOnHit",
+                        "atom": "groundZone",
                         "params": {
-                          "radius": 85,
-                          "damageRatio": 0.55,
-                          "falloff": 0.4
-                        }
-                      },
-                      {
-                        "atom": "slow",
-                        "params": {
-                          "ratio": 0.26,
-                          "duration": 2.2
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
+                          "radius": 95,
+                          "duration": 2.5,
+                          "tickInterval": 0.5,
+                          "shape": "line",
+                          "lineFrom": "bulletPath",
+                          "effects": [
+                            {
+                              "atom": "slow",
+                              "params": {
+                                "ratio": 0.28,
+                                "duration": 2.5
+                              }
+                            }
+                          ]
                         }
                       }
                     ]
@@ -5965,8 +5742,25 @@
                 {
                   "atom": "burstDamage",
                   "params": {
-                    "damageMul": 0.8,
-                    "radius": 85
+                    "damageMul": 0.75,
+                    "radius": 75
+                  },
+                  "forEach": {
+                    "set": {
+                      "kind": "enemiesWithStatus",
+                      "status": "frozen"
+                    },
+                    "maxTargets": 6,
+                    "order": "nearest",
+                    "effects": [
+                      {
+                        "atom": "burstDamage",
+                        "params": {
+                          "damageMul": 0.75,
+                          "radius": 75
+                        }
+                      }
+                    ]
                   }
                 }
               ]
@@ -6019,8 +5813,25 @@
                 {
                   "atom": "burstDamage",
                   "params": {
-                    "damageMul": 0.8,
-                    "radius": 85
+                    "damageMul": 0.75,
+                    "radius": 75
+                  },
+                  "forEach": {
+                    "set": {
+                      "kind": "enemiesWithStatus",
+                      "status": "frozen"
+                    },
+                    "maxTargets": 6,
+                    "order": "nearest",
+                    "effects": [
+                      {
+                        "atom": "burstDamage",
+                        "params": {
+                          "damageMul": 0.75,
+                          "radius": 75
+                        }
+                      }
+                    ]
                   }
                 }
               ]
@@ -6106,23 +5917,6 @@
                   "ratio": 0.22,
                   "duration": 1.8
                 }
-              },
-              {
-                "atom": "groundZone",
-                "params": {
-                  "radius": 145,
-                  "tickInterval": 0.6,
-                  "duration": 4,
-                  "effects": [
-                    {
-                      "atom": "slow",
-                      "params": {
-                        "ratio": 0.26,
-                        "duration": 2.2
-                      }
-                    }
-                  ]
-                }
               }
             ]
           },
@@ -6151,23 +5945,6 @@
                 "params": {
                   "ratio": 0.22,
                   "duration": 1.8
-                }
-              },
-              {
-                "atom": "groundZone",
-                "params": {
-                  "radius": 145,
-                  "tickInterval": 0.6,
-                  "duration": 4,
-                  "effects": [
-                    {
-                      "atom": "slow",
-                      "params": {
-                        "ratio": 0.26,
-                        "duration": 2.2
-                      }
-                    }
-                  ]
                 }
               },
               {
@@ -6275,9 +6052,9 @@
                     },
                     "effects": [
                       {
-                        "atom": "groundZone",
+                        "atom": "aura",
                         "params": {
-                          "radius": 145,
+                          "radius": 75,
                           "tickInterval": 0.6,
                           "duration": 4,
                           "effects": [
@@ -6288,7 +6065,12 @@
                                 "duration": 2.2
                               }
                             }
-                          ]
+                          ],
+                          "radiusOverTime": {
+                            "from": 75,
+                            "to": 175,
+                            "easing": "linear"
+                          }
                         }
                       }
                     ]
@@ -6321,7 +6103,8 @@
                           "stacksToTrigger": 2
                         }
                       }
-                    ]
+                    ],
+                    "at": "densestCluster"
                   },
                   {
                     "trigger": "interval",
@@ -6336,7 +6119,8 @@
                           "stacksToTrigger": 2
                         }
                       }
-                    ]
+                    ],
+                    "at": "densestCluster"
                   }
                 ]
               }
@@ -6359,8 +6143,25 @@
                       {
                         "atom": "burstDamage",
                         "params": {
-                          "damageMul": 0.8,
-                          "radius": 85
+                          "damageMul": 0.75,
+                          "radius": 75
+                        },
+                        "forEach": {
+                          "set": {
+                            "kind": "enemiesWithStatus",
+                            "status": "frozen"
+                          },
+                          "maxTargets": 6,
+                          "order": "nearest",
+                          "effects": [
+                            {
+                              "atom": "burstDamage",
+                              "params": {
+                                "damageMul": 0.75,
+                                "radius": 75
+                              }
+                            }
+                          ]
                         }
                       }
                     ]
@@ -6379,7 +6180,7 @@
                     },
                     "effects": [
                       {
-                        "atom": "groundZone",
+                        "atom": "aura",
                         "params": {
                           "radius": 145,
                           "tickInterval": 0.6,
@@ -6517,7 +6318,7 @@
               },
               "effects": [
                 {
-                  "atom": "groundZone",
+                  "atom": "aura",
                   "params": {
                     "radius": 125,
                     "tickInterval": 0.6,
@@ -6574,7 +6375,7 @@
               },
               "effects": [
                 {
-                  "atom": "groundZone",
+                  "atom": "aura",
                   "params": {
                     "radius": 125,
                     "tickInterval": 0.6,
@@ -6783,11 +6584,14 @@
                       {
                         "atom": "freeze",
                         "params": {
-                          "duration": 1,
-                          "stacksToTrigger": 2
-                        }
+                          "duration": 1.1,
+                          "stacksToTrigger": 1,
+                          "radius": 45
+                        },
+                        "at": "nearestEnemy"
                       }
-                    ]
+                    ],
+                    "at": "nearestEnemy"
                   }
                 ]
               }
@@ -6808,7 +6612,7 @@
                     },
                     "effects": [
                       {
-                        "atom": "groundZone",
+                        "atom": "aura",
                         "params": {
                           "radius": 125,
                           "tickInterval": 0.6,
@@ -7021,14 +6825,20 @@
               ]
             },
             {
-              "trigger": "onHit",
+              "trigger": "onBreach",
+              "at": "point",
               "effects": [
                 {
-                  "atom": "aoeOnHit",
+                  "atom": "burstDamage",
                   "params": {
-                    "damageRatio": 0.8,
-                    "radius": 85,
-                    "falloff": 0.35
+                    "damageMul": 0.7,
+                    "radius": 90
+                  },
+                  "scaleBy": {
+                    "source": "statusStacks",
+                    "param": "damageMul",
+                    "perUnit": 0.18,
+                    "cap": 5
                   }
                 }
               ]
@@ -7058,14 +6868,20 @@
               ]
             },
             {
-              "trigger": "onHit",
+              "trigger": "onBreach",
+              "at": "point",
               "effects": [
                 {
-                  "atom": "aoeOnHit",
+                  "atom": "burstDamage",
                   "params": {
-                    "damageRatio": 0.8,
-                    "radius": 85,
-                    "falloff": 0.35
+                    "damageMul": 0.7,
+                    "radius": 90
+                  },
+                  "scaleBy": {
+                    "source": "statusStacks",
+                    "param": "damageMul",
+                    "perUnit": 0.18,
+                    "cap": 5
                   }
                 }
               ]
@@ -7309,30 +7125,20 @@
                       {
                         "atom": "aura",
                         "params": {
-                          "radius": 145,
-                          "tickInterval": 0.6,
+                          "radius": 105,
+                          "shape": "ring",
+                          "innerRadius": 65,
+                          "tickInterval": 0.55,
                           "duration": 4,
                           "effects": [
                             {
                               "atom": "slow",
                               "params": {
-                                "ratio": 0.26,
-                                "duration": 2.2
+                                "ratio": 0.34,
+                                "duration": 2
                               }
                             }
                           ]
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "slow",
-                        "params": {
-                          "ratio": 0.26,
-                          "duration": 2.2
                         }
                       }
                     ]
@@ -7344,7 +7150,7 @@
                 "textKey": "evolution.frozenBulwark.frozenBulwarkC",
                 "equip": [
                   {
-                    "trigger": "onHit",
+                    "trigger": "onBreach",
                     "effects": [
                       {
                         "atom": "aoeOnHit",
@@ -7353,11 +7159,20 @@
                           "damageRatio": 0.8,
                           "falloff": 0.35
                         }
+                      },
+                      {
+                        "atom": "knockback",
+                        "params": {
+                          "distance": 55,
+                          "collisionDamage": 0.12,
+                          "radius": 100
+                        }
                       }
-                    ]
+                    ],
+                    "at": "point"
                   },
                   {
-                    "trigger": "onHit",
+                    "trigger": "onBreach",
                     "effects": [
                       {
                         "atom": "freeze",
@@ -7366,7 +7181,8 @@
                           "stacksToTrigger": 2
                         }
                       }
-                    ]
+                    ],
+                    "at": "point"
                   }
                 ]
               }
@@ -7381,14 +7197,20 @@
                 "interfaceRole": "payoff",
                 "equip": [
                   {
-                    "trigger": "onHit",
+                    "trigger": "onBreach",
+                    "at": "point",
                     "effects": [
                       {
-                        "atom": "aoeOnHit",
+                        "atom": "burstDamage",
                         "params": {
-                          "damageRatio": 0.8,
-                          "radius": 85,
-                          "falloff": 0.35
+                          "damageMul": 0.7,
+                          "radius": 90
+                        },
+                        "scaleBy": {
+                          "source": "statusStacks",
+                          "param": "damageMul",
+                          "perUnit": 0.18,
+                          "cap": 5
                         }
                       }
                     ]
@@ -7407,9 +7229,9 @@
                     },
                     "effects": [
                       {
-                        "atom": "groundZone",
+                        "atom": "aura",
                         "params": {
-                          "radius": 145,
+                          "radius": 80,
                           "tickInterval": 0.6,
                           "duration": 4,
                           "effects": [
@@ -7420,10 +7242,16 @@
                                 "duration": 2.2
                               }
                             }
-                          ]
+                          ],
+                          "radiusOverTime": {
+                            "from": 80,
+                            "to": 165,
+                            "easing": "linear"
+                          }
                         }
                       }
-                    ]
+                    ],
+                    "at": "point"
                   }
                 ]
               },
@@ -7437,11 +7265,20 @@
                     "triggerParams": {
                       "cooldownSeconds": 6
                     },
+                    "at": "point",
                     "effects": [
                       {
                         "atom": "restore",
                         "params": {
                           "amountRatio": 0.07
+                        }
+                      },
+                      {
+                        "atom": "freeze",
+                        "params": {
+                          "duration": 0.7,
+                          "stacksToTrigger": 2,
+                          "radius": 105
                         }
                       }
                     ]
@@ -7516,6 +7353,12 @@
                     "value": 1.08,
                     "duration": 3,
                     "maxStacks": 2
+                  },
+                  "scaleBy": {
+                    "source": "concurrentStatus:frozen",
+                    "param": "value",
+                    "perUnit": 0.02,
+                    "cap": 10
                   }
                 },
                 {
@@ -7543,6 +7386,12 @@
                     "value": 1.08,
                     "duration": 3,
                     "maxStacks": 2
+                  },
+                  "scaleBy": {
+                    "source": "concurrentStatus:frozen",
+                    "param": "value",
+                    "perUnit": 0.02,
+                    "cap": 10
                   }
                 },
                 {
@@ -7601,6 +7450,12 @@
                     "value": 1.08,
                     "duration": 3,
                     "maxStacks": 2
+                  },
+                  "scaleBy": {
+                    "source": "concurrentStatus:frozen",
+                    "param": "value",
+                    "perUnit": 0.02,
+                    "cap": 10
                   }
                 },
                 {
@@ -7846,6 +7701,12 @@
                           "value": 1.08,
                           "duration": 3,
                           "maxStacks": 2
+                        },
+                        "scaleBy": {
+                          "source": "concurrentStatus:frozen",
+                          "param": "value",
+                          "perUnit": 0.02,
+                          "cap": 10
                         }
                       },
                       {
@@ -7869,30 +7730,34 @@
                       {
                         "atom": "aura",
                         "params": {
-                          "radius": 145,
-                          "tickInterval": 0.6,
+                          "radius": 135,
+                          "tickInterval": 0.75,
                           "duration": 4,
                           "effects": [
                             {
                               "atom": "slow",
                               "params": {
-                                "ratio": 0.26,
-                                "duration": 2.2
+                                "ratio": 0.18,
+                                "duration": 2
+                              }
+                            },
+                            {
+                              "atom": "statBuff",
+                              "params": {
+                                "stat": "damage",
+                                "operation": "mul",
+                                "value": 1.01,
+                                "duration": 1.2,
+                                "maxStacks": 5
+                              },
+                              "scaleBy": {
+                                "source": "enemiesInAura",
+                                "param": "value",
+                                "perUnit": 0.008,
+                                "cap": 6
                               }
                             }
                           ]
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "slow",
-                        "params": {
-                          "ratio": 0.26,
-                          "duration": 2.2
                         }
                       }
                     ]
@@ -7912,8 +7777,15 @@
                       {
                         "atom": "freeze",
                         "params": {
-                          "duration": 1,
-                          "stacksToTrigger": 2
+                          "duration": 0.8,
+                          "stacksToTrigger": 3,
+                          "radius": 80
+                        },
+                        "scaleBy": {
+                          "source": "concurrentStatus:frozen",
+                          "param": "radius",
+                          "perUnit": 6,
+                          "cap": 8
                         }
                       }
                     ]
@@ -7975,33 +7847,48 @@
                     },
                     "effects": [
                       {
-                        "atom": "aoeOnHit",
-                        "params": {
-                          "radius": 85,
-                          "damageRatio": 0.55,
-                          "falloff": 0.4
-                        }
-                      },
-                      {
                         "atom": "slow",
                         "params": {
-                          "ratio": 0.26,
-                          "duration": 2.2
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
+                          "ratio": 0.2,
+                          "duration": 2.4,
+                          "radius": 70
+                        },
+                        "forEach": {
+                          "set": {
+                            "kind": "enemiesWithStatus",
+                            "status": "controlled"
+                          },
+                          "maxTargets": 4,
+                          "order": "nearest",
+                          "effects": [
+                            {
+                              "atom": "slow",
+                              "params": {
+                                "ratio": 0.2,
+                                "duration": 2.4,
+                                "radius": 70
+                              },
+                              "scaleBy": {
+                                "source": "controlledInAura",
+                                "param": "ratio",
+                                "perUnit": 0.02,
+                                "cap": 4
+                              }
+                            },
+                            {
+                              "atom": "burstDamage",
+                              "params": {
+                                "damageMul": 0.3,
+                                "radius": 55
+                              },
+                              "scaleBy": {
+                                "source": "controlledInAura",
+                                "param": "damageMul",
+                                "perUnit": 0.04,
+                                "cap": 4
+                              }
+                            }
+                          ]
                         }
                       }
                     ]
@@ -8160,31 +8047,16 @@
                 {
                   "atom": "burstDamage",
                   "params": {
-                    "damageMul": 0.8,
-                    "radius": 85
+                    "damageMul": 0.75,
+                    "radius": 90
                   }
                 },
                 {
                   "atom": "dot",
                   "params": {
                     "damageRatio": 0.08,
-                    "tickInterval": 0.5,
-                    "duration": 2.5
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "duration": 2.5,
+                    "tickInterval": 0.5
                   }
                 }
               ]
@@ -8217,31 +8089,16 @@
                 {
                   "atom": "burstDamage",
                   "params": {
-                    "damageMul": 0.8,
-                    "radius": 85
+                    "damageMul": 0.75,
+                    "radius": 90
                   }
                 },
                 {
                   "atom": "dot",
                   "params": {
                     "damageRatio": 0.08,
-                    "tickInterval": 0.5,
-                    "duration": 2.5
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "duration": 2.5,
+                    "tickInterval": 0.5
                   }
                 }
               ]
@@ -8505,31 +8362,16 @@
                       {
                         "atom": "burstDamage",
                         "params": {
-                          "damageMul": 0.8,
-                          "radius": 85
+                          "damageMul": 0.75,
+                          "radius": 90
                         }
                       },
                       {
                         "atom": "dot",
                         "params": {
                           "damageRatio": 0.08,
-                          "tickInterval": 0.5,
-                          "duration": 2.5
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
+                          "duration": 2.5,
+                          "tickInterval": 0.5
                         }
                       }
                     ]
@@ -8548,34 +8390,12 @@
                     },
                     "effects": [
                       {
-                        "atom": "aoeOnHit",
-                        "params": {
-                          "radius": 85,
-                          "damageRatio": 0.55,
-                          "falloff": 0.4
-                        }
-                      },
-                      {
                         "atom": "dot",
                         "params": {
-                          "damageRatio": 0.11,
-                          "tickInterval": 0.5,
-                          "duration": 3
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
+                          "damageRatio": 0.07,
+                          "duration": 3.2,
+                          "radius": 150,
+                          "tickInterval": 0.5
                         }
                       }
                     ]
@@ -8735,31 +8555,16 @@
                 {
                   "atom": "burstDamage",
                   "params": {
-                    "damageMul": 0.8,
-                    "radius": 85
+                    "damageMul": 1.15,
+                    "radius": 60
                   }
                 },
                 {
                   "atom": "dot",
                   "params": {
-                    "damageRatio": 0.08,
-                    "tickInterval": 0.5,
-                    "duration": 2.5
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "damageRatio": 0.09,
+                    "duration": 2.2,
+                    "tickInterval": 0.5
                   }
                 }
               ]
@@ -8799,31 +8604,16 @@
                 {
                   "atom": "burstDamage",
                   "params": {
-                    "damageMul": 0.8,
-                    "radius": 85
+                    "damageMul": 1.15,
+                    "radius": 60
                   }
                 },
                 {
                   "atom": "dot",
                   "params": {
-                    "damageRatio": 0.08,
-                    "tickInterval": 0.5,
-                    "duration": 2.5
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "damageRatio": 0.09,
+                    "duration": 2.2,
+                    "tickInterval": 0.5
                   }
                 }
               ]
@@ -9116,31 +8906,16 @@
                       {
                         "atom": "burstDamage",
                         "params": {
-                          "damageMul": 0.8,
-                          "radius": 85
+                          "damageMul": 1.15,
+                          "radius": 60
                         }
                       },
                       {
                         "atom": "dot",
                         "params": {
-                          "damageRatio": 0.08,
-                          "tickInterval": 0.5,
-                          "duration": 2.5
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
+                          "damageRatio": 0.09,
+                          "duration": 2.2,
+                          "tickInterval": 0.5
                         }
                       }
                     ]
@@ -9195,6 +8970,7 @@
                     "triggerParams": {
                       "requiresSource": "dot"
                     },
+                    "at": "point",
                     "effects": [
                       {
                         "atom": "extraDrop",
@@ -9202,21 +8978,6 @@
                           "count": 1,
                           "at": "point",
                           "chance": 0.45
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onKill",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
                         }
                       }
                     ]
@@ -9326,38 +9087,24 @@
                 {
                   "atom": "burstDamage",
                   "params": {
-                    "damageMul": 0.8,
-                    "radius": 85
+                    "damageMul": 0.65,
+                    "radius": 145
                   }
                 },
                 {
                   "atom": "knockback",
                   "params": {
-                    "distance": 35,
-                    "collisionDamage": 0.15
+                    "distance": 85,
+                    "collisionDamage": 0.2,
+                    "radius": 145
                   }
                 },
                 {
                   "atom": "dot",
                   "params": {
-                    "damageRatio": 0.08,
-                    "tickInterval": 0.5,
-                    "duration": 2.5
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "damageRatio": 0.07,
+                    "duration": 2.5,
+                    "tickInterval": 0.5
                   }
                 }
               ]
@@ -9397,38 +9144,24 @@
                 {
                   "atom": "burstDamage",
                   "params": {
-                    "damageMul": 0.8,
-                    "radius": 85
+                    "damageMul": 0.65,
+                    "radius": 145
                   }
                 },
                 {
                   "atom": "knockback",
                   "params": {
-                    "distance": 35,
-                    "collisionDamage": 0.15
+                    "distance": 85,
+                    "collisionDamage": 0.2,
+                    "radius": 145
                   }
                 },
                 {
                   "atom": "dot",
                   "params": {
-                    "damageRatio": 0.08,
-                    "tickInterval": 0.5,
-                    "duration": 2.5
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "damageRatio": 0.07,
+                    "duration": 2.5,
+                    "tickInterval": 0.5
                   }
                 }
               ]
@@ -9765,38 +9498,24 @@
                       {
                         "atom": "burstDamage",
                         "params": {
-                          "damageMul": 0.8,
-                          "radius": 85
+                          "damageMul": 0.65,
+                          "radius": 145
                         }
                       },
                       {
                         "atom": "knockback",
                         "params": {
-                          "distance": 35,
-                          "collisionDamage": 0.15
+                          "distance": 85,
+                          "collisionDamage": 0.2,
+                          "radius": 145
                         }
                       },
                       {
                         "atom": "dot",
                         "params": {
-                          "damageRatio": 0.08,
-                          "tickInterval": 0.5,
-                          "duration": 2.5
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
+                          "damageRatio": 0.07,
+                          "duration": 2.5,
+                          "tickInterval": 0.5
                         }
                       }
                     ]
@@ -9815,34 +9534,20 @@
                     },
                     "effects": [
                       {
-                        "atom": "aoeOnHit",
+                        "atom": "dot",
                         "params": {
-                          "radius": 85,
-                          "damageRatio": 0.55,
-                          "falloff": 0.4
+                          "damageRatio": 0.08,
+                          "duration": 2.8,
+                          "radius": 115,
+                          "tickInterval": 0.5
                         }
                       },
                       {
-                        "atom": "dot",
+                        "atom": "knockback",
                         "params": {
-                          "damageRatio": 0.11,
-                          "tickInterval": 0.5,
-                          "duration": 3
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
+                          "distance": 70,
+                          "collisionDamage": 0.18,
+                          "radius": 115
                         }
                       }
                     ]
@@ -10001,8 +9706,24 @@
                 {
                   "atom": "burstDamage",
                   "params": {
-                    "damageMul": 0.8,
-                    "radius": 85
+                    "damageMul": 0.55,
+                    "radius": 95
+                  },
+                  "forEach": {
+                    "set": {
+                      "kind": "ownZones"
+                    },
+                    "maxTargets": 5,
+                    "order": "nearest",
+                    "effects": [
+                      {
+                        "atom": "burstDamage",
+                        "params": {
+                          "damageMul": 0.55,
+                          "radius": 95
+                        }
+                      }
+                    ]
                   }
                 }
               ]
@@ -10044,8 +9765,24 @@
                 {
                   "atom": "burstDamage",
                   "params": {
-                    "damageMul": 0.8,
-                    "radius": 85
+                    "damageMul": 0.55,
+                    "radius": 95
+                  },
+                  "forEach": {
+                    "set": {
+                      "kind": "ownZones"
+                    },
+                    "maxTargets": 5,
+                    "order": "nearest",
+                    "effects": [
+                      {
+                        "atom": "burstDamage",
+                        "params": {
+                          "damageMul": 0.55,
+                          "radius": 95
+                        }
+                      }
+                    ]
                   }
                 }
               ]
@@ -10260,20 +9997,21 @@
                       {
                         "atom": "groundZone",
                         "params": {
-                          "radius": 120,
+                          "radius": 155,
                           "duration": 4,
-                          "tickInterval": 0.5,
+                          "tickInterval": 0.6,
                           "effects": [
                             {
                               "atom": "dot",
                               "params": {
-                                "damageRatio": 0.11,
-                                "tickInterval": 0.5,
-                                "duration": 3
+                                "damageRatio": 0.07,
+                                "duration": 3,
+                                "tickInterval": 0.5
                               }
                             }
                           ]
-                        }
+                        },
+                        "at": "densestCluster"
                       }
                     ]
                   }
@@ -10311,8 +10049,16 @@
                             }
                           ]
                         }
+                      },
+                      {
+                        "atom": "burstDamage",
+                        "params": {
+                          "damageMul": 0.8,
+                          "radius": 110
+                        }
                       }
-                    ]
+                    ],
+                    "at": "point"
                   }
                 ]
               }
@@ -10335,8 +10081,24 @@
                       {
                         "atom": "burstDamage",
                         "params": {
-                          "damageMul": 0.8,
-                          "radius": 85
+                          "damageMul": 0.55,
+                          "radius": 95
+                        },
+                        "forEach": {
+                          "set": {
+                            "kind": "ownZones"
+                          },
+                          "maxTargets": 5,
+                          "order": "nearest",
+                          "effects": [
+                            {
+                              "atom": "burstDamage",
+                              "params": {
+                                "damageMul": 0.55,
+                                "radius": 95
+                              }
+                            }
+                          ]
                         }
                       }
                     ]
@@ -10357,34 +10119,46 @@
                       {
                         "atom": "groundZone",
                         "params": {
-                          "radius": 120,
-                          "duration": 4,
+                          "radius": 85,
+                          "duration": 3.5,
                           "tickInterval": 0.5,
                           "effects": [
                             {
                               "atom": "dot",
                               "params": {
-                                "damageRatio": 0.11,
-                                "tickInterval": 0.5,
-                                "duration": 3
+                                "damageRatio": 0.08,
+                                "duration": 3,
+                                "tickInterval": 0.5
                               }
                             }
                           ]
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onKill",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
+                        },
+                        "forEach": {
+                          "set": {
+                            "kind": "ownZones"
+                          },
+                          "maxTargets": 4,
+                          "order": "nearest",
+                          "effects": [
+                            {
+                              "atom": "groundZone",
+                              "params": {
+                                "radius": 85,
+                                "duration": 3.5,
+                                "tickInterval": 0.5,
+                                "effects": [
+                                  {
+                                    "atom": "dot",
+                                    "params": {
+                                      "damageRatio": 0.08,
+                                      "duration": 3,
+                                      "tickInterval": 0.5
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
                         }
                       }
                     ]
@@ -10407,22 +10181,24 @@
                         "params": {
                           "count": 1,
                           "at": "point",
-                          "chance": 0.45
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onKill",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
+                          "chance": 0.28
+                        },
+                        "forEach": {
+                          "set": {
+                            "kind": "ownZones"
+                          },
+                          "maxTargets": 3,
+                          "order": "nearest",
+                          "effects": [
+                            {
+                              "atom": "extraDrop",
+                              "params": {
+                                "count": 1,
+                                "at": "point",
+                                "chance": 0.28
+                              }
+                            }
+                          ]
                         }
                       }
                     ]
@@ -10542,38 +10318,24 @@
                 {
                   "atom": "burstDamage",
                   "params": {
-                    "damageMul": 0.8,
-                    "radius": 85
+                    "damageMul": 1.2,
+                    "radius": 65
                   }
                 },
                 {
                   "atom": "knockback",
                   "params": {
                     "distance": 35,
-                    "collisionDamage": 0.15
+                    "collisionDamage": 0.1,
+                    "radius": 65
                   }
                 },
                 {
                   "atom": "dot",
                   "params": {
-                    "damageRatio": 0.08,
-                    "tickInterval": 0.5,
-                    "duration": 2.5
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "damageRatio": 0.1,
+                    "duration": 2.2,
+                    "tickInterval": 0.5
                   }
                 }
               ]
@@ -10613,38 +10375,24 @@
                 {
                   "atom": "burstDamage",
                   "params": {
-                    "damageMul": 0.8,
-                    "radius": 85
+                    "damageMul": 1.2,
+                    "radius": 65
                   }
                 },
                 {
                   "atom": "knockback",
                   "params": {
                     "distance": 35,
-                    "collisionDamage": 0.15
+                    "collisionDamage": 0.1,
+                    "radius": 65
                   }
                 },
                 {
                   "atom": "dot",
                   "params": {
-                    "damageRatio": 0.08,
-                    "tickInterval": 0.5,
-                    "duration": 2.5
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "damageRatio": 0.1,
+                    "duration": 2.2,
+                    "tickInterval": 0.5
                   }
                 }
               ]
@@ -10919,7 +10667,8 @@
                           "duration": 3.5
                         }
                       }
-                    ]
+                    ],
+                    "at": "densestCluster"
                   }
                 ]
               }
@@ -10942,38 +10691,24 @@
                       {
                         "atom": "burstDamage",
                         "params": {
-                          "damageMul": 0.8,
-                          "radius": 85
+                          "damageMul": 1.2,
+                          "radius": 65
                         }
                       },
                       {
                         "atom": "knockback",
                         "params": {
                           "distance": 35,
-                          "collisionDamage": 0.15
+                          "collisionDamage": 0.1,
+                          "radius": 65
                         }
                       },
                       {
                         "atom": "dot",
                         "params": {
-                          "damageRatio": 0.08,
-                          "tickInterval": 0.5,
-                          "duration": 2.5
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
+                          "damageRatio": 0.1,
+                          "duration": 2.2,
+                          "tickInterval": 0.5
                         }
                       }
                     ]
@@ -10992,35 +10727,20 @@
                     },
                     "effects": [
                       {
-                        "atom": "aoeOnHit",
-                        "params": {
-                          "radius": 85,
-                          "damageRatio": 0.55,
-                          "falloff": 0.4
-                        }
-                      },
-                      {
                         "atom": "dot",
                         "params": {
-                          "damageRatio": 0.11,
-                          "tickInterval": 0.5,
-                          "duration": 3
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
-                        }
+                          "damageRatio": 0.1,
+                          "duration": 2.4,
+                          "radius": 100,
+                          "tickInterval": 0.5
+                        },
+                        "scaleBy": {
+                          "source": "enemiesOnField",
+                          "param": "damageRatio",
+                          "perUnit": 0.01,
+                          "cap": 12
+                        },
+                        "at": "densestCluster"
                       }
                     ]
                   }
@@ -11212,22 +10932,39 @@
             {
               "trigger": "interval",
               "triggerParams": {
-                "seconds": 2
+                "seconds": 3
               },
               "effects": [
                 {
-                  "atom": "burstDamage",
-                  "params": {
-                    "damageMul": 0.8,
-                    "radius": 85
-                  }
-                },
-                {
                   "atom": "dot",
                   "params": {
-                    "damageRatio": 0.08,
-                    "tickInterval": 0.5,
-                    "duration": 2.5
+                    "damageRatio": 0.09,
+                    "duration": 2.5,
+                    "tickInterval": 0.5
+                  },
+                  "forEach": {
+                    "set": {
+                      "kind": "ownZones"
+                    },
+                    "maxTargets": 5,
+                    "order": "nearest",
+                    "effects": [
+                      {
+                        "atom": "dot",
+                        "params": {
+                          "damageRatio": 0.09,
+                          "duration": 2.5,
+                          "tickInterval": 0.5
+                        }
+                      },
+                      {
+                        "atom": "burstDamage",
+                        "params": {
+                          "damageMul": 0.35,
+                          "radius": 65
+                        }
+                      }
+                    ]
                   }
                 }
               ]
@@ -11276,22 +11013,39 @@
             {
               "trigger": "interval",
               "triggerParams": {
-                "seconds": 2
+                "seconds": 3
               },
               "effects": [
                 {
-                  "atom": "burstDamage",
-                  "params": {
-                    "damageMul": 0.8,
-                    "radius": 85
-                  }
-                },
-                {
                   "atom": "dot",
                   "params": {
-                    "damageRatio": 0.08,
-                    "tickInterval": 0.5,
-                    "duration": 2.5
+                    "damageRatio": 0.09,
+                    "duration": 2.5,
+                    "tickInterval": 0.5
+                  },
+                  "forEach": {
+                    "set": {
+                      "kind": "ownZones"
+                    },
+                    "maxTargets": 5,
+                    "order": "nearest",
+                    "effects": [
+                      {
+                        "atom": "dot",
+                        "params": {
+                          "damageRatio": 0.09,
+                          "duration": 2.5,
+                          "tickInterval": 0.5
+                        }
+                      },
+                      {
+                        "atom": "burstDamage",
+                        "params": {
+                          "damageMul": 0.35,
+                          "radius": 65
+                        }
+                      }
+                    ]
                   }
                 }
               ]
@@ -11628,7 +11382,7 @@
                 "textKey": "evolution.cinderheart.cinderheartC",
                 "equip": [
                   {
-                    "trigger": "onHit",
+                    "trigger": "onBreach",
                     "effects": [
                       {
                         "atom": "aoeOnHit",
@@ -11637,12 +11391,7 @@
                           "damageRatio": 1.3,
                           "falloff": 0.35
                         }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onBreach",
-                    "effects": [
+                      },
                       {
                         "atom": "groundZone",
                         "params": {
@@ -11660,8 +11409,16 @@
                             }
                           ]
                         }
+                      },
+                      {
+                        "atom": "burstDamage",
+                        "params": {
+                          "damageMul": 0.75,
+                          "radius": 105
+                        }
                       }
-                    ]
+                    ],
+                    "at": "point"
                   }
                 ]
               }
@@ -11678,22 +11435,39 @@
                   {
                     "trigger": "interval",
                     "triggerParams": {
-                      "seconds": 2
+                      "seconds": 3
                     },
                     "effects": [
                       {
-                        "atom": "burstDamage",
-                        "params": {
-                          "damageMul": 0.8,
-                          "radius": 85
-                        }
-                      },
-                      {
                         "atom": "dot",
                         "params": {
-                          "damageRatio": 0.08,
-                          "tickInterval": 0.5,
-                          "duration": 2.5
+                          "damageRatio": 0.09,
+                          "duration": 2.5,
+                          "tickInterval": 0.5
+                        },
+                        "forEach": {
+                          "set": {
+                            "kind": "ownZones"
+                          },
+                          "maxTargets": 5,
+                          "order": "nearest",
+                          "effects": [
+                            {
+                              "atom": "dot",
+                              "params": {
+                                "damageRatio": 0.09,
+                                "duration": 2.5,
+                                "tickInterval": 0.5
+                              }
+                            },
+                            {
+                              "atom": "burstDamage",
+                              "params": {
+                                "damageMul": 0.35,
+                                "radius": 65
+                              }
+                            }
+                          ]
                         }
                       }
                     ]
@@ -11714,7 +11488,7 @@
                       {
                         "atom": "groundZone",
                         "params": {
-                          "radius": 120,
+                          "radius": 90,
                           "duration": 4,
                           "tickInterval": 0.5,
                           "effects": [
@@ -11726,10 +11500,16 @@
                                 "duration": 3
                               }
                             }
-                          ]
+                          ],
+                          "radiusOverTime": {
+                            "from": 90,
+                            "to": 180,
+                            "easing": "linear"
+                          }
                         }
                       }
-                    ]
+                    ],
+                    "at": "point"
                   }
                 ]
               },
@@ -11848,6 +11628,12 @@
                     "value": 1.08,
                     "duration": 3,
                     "maxStacks": 2
+                  },
+                  "scaleBy": {
+                    "source": "concurrentStatus:dot",
+                    "param": "value",
+                    "perUnit": 0.02,
+                    "cap": 10
                   }
                 },
                 {
@@ -11877,6 +11663,12 @@
                     "value": 1.08,
                     "duration": 3,
                     "maxStacks": 2
+                  },
+                  "scaleBy": {
+                    "source": "concurrentStatus:dot",
+                    "param": "value",
+                    "perUnit": 0.02,
+                    "cap": 10
                   }
                 },
                 {
@@ -11899,31 +11691,22 @@
                 {
                   "atom": "burstDamage",
                   "params": {
-                    "damageMul": 0.8,
-                    "radius": 85
+                    "damageMul": 0.6,
+                    "radius": 95
+                  },
+                  "scaleBy": {
+                    "source": "concurrentStatus:dot",
+                    "param": "damageMul",
+                    "perUnit": 0.07,
+                    "cap": 8
                   }
                 },
                 {
                   "atom": "dot",
                   "params": {
-                    "damageRatio": 0.08,
-                    "tickInterval": 0.5,
-                    "duration": 2.5
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "damageRatio": 0.07,
+                    "duration": 3,
+                    "tickInterval": 0.5
                   }
                 }
               ]
@@ -11944,6 +11727,12 @@
                     "value": 1.08,
                     "duration": 3,
                     "maxStacks": 2
+                  },
+                  "scaleBy": {
+                    "source": "concurrentStatus:dot",
+                    "param": "value",
+                    "perUnit": 0.02,
+                    "cap": 10
                   }
                 },
                 {
@@ -11966,31 +11755,22 @@
                 {
                   "atom": "burstDamage",
                   "params": {
-                    "damageMul": 0.8,
-                    "radius": 85
+                    "damageMul": 0.6,
+                    "radius": 95
+                  },
+                  "scaleBy": {
+                    "source": "concurrentStatus:dot",
+                    "param": "damageMul",
+                    "perUnit": 0.07,
+                    "cap": 8
                   }
                 },
                 {
                   "atom": "dot",
                   "params": {
-                    "damageRatio": 0.08,
-                    "tickInterval": 0.5,
-                    "duration": 2.5
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "damageRatio": 0.07,
+                    "duration": 3,
+                    "tickInterval": 0.5
                   }
                 }
               ]
@@ -12199,6 +11979,12 @@
                           "value": 1.08,
                           "duration": 3,
                           "maxStacks": 2
+                        },
+                        "scaleBy": {
+                          "source": "concurrentStatus:dot",
+                          "param": "value",
+                          "perUnit": 0.02,
+                          "cap": 10
                         }
                       },
                       {
@@ -12227,20 +12013,27 @@
                       {
                         "atom": "groundZone",
                         "params": {
-                          "radius": 120,
-                          "duration": 4,
+                          "radius": 105,
+                          "duration": 3.5,
                           "tickInterval": 0.5,
                           "effects": [
                             {
                               "atom": "dot",
                               "params": {
-                                "damageRatio": 0.11,
-                                "tickInterval": 0.5,
-                                "duration": 3
+                                "damageRatio": 0.07,
+                                "duration": 2.5,
+                                "tickInterval": 0.5
+                              },
+                              "scaleBy": {
+                                "source": "enemiesInAura",
+                                "param": "damageRatio",
+                                "perUnit": 0.012,
+                                "cap": 6
                               }
                             }
                           ]
-                        }
+                        },
+                        "at": "densestCluster"
                       }
                     ]
                   }
@@ -12287,31 +12080,22 @@
                       {
                         "atom": "burstDamage",
                         "params": {
-                          "damageMul": 0.8,
-                          "radius": 85
+                          "damageMul": 0.6,
+                          "radius": 95
+                        },
+                        "scaleBy": {
+                          "source": "concurrentStatus:dot",
+                          "param": "damageMul",
+                          "perUnit": 0.07,
+                          "cap": 8
                         }
                       },
                       {
                         "atom": "dot",
                         "params": {
-                          "damageRatio": 0.08,
-                          "tickInterval": 0.5,
-                          "duration": 2.5
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
+                          "damageRatio": 0.07,
+                          "duration": 3,
+                          "tickInterval": 0.5
                         }
                       }
                     ]
@@ -12328,38 +12112,30 @@
                     "triggerParams": {
                       "requiresSource": "dot"
                     },
+                    "at": "point",
                     "effects": [
                       {
                         "atom": "groundZone",
                         "params": {
-                          "radius": 120,
-                          "duration": 4,
+                          "radius": 75,
+                          "duration": 2.5,
                           "tickInterval": 0.5,
                           "effects": [
                             {
                               "atom": "dot",
                               "params": {
-                                "damageRatio": 0.11,
-                                "tickInterval": 0.5,
-                                "duration": 3
+                                "damageRatio": 0.1,
+                                "duration": 2.5,
+                                "tickInterval": 0.5
                               }
                             }
                           ]
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onKill",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
+                        },
+                        "scaleBy": {
+                          "source": "concurrentStatus:dot",
+                          "param": "duration",
+                          "perUnit": 0.35,
+                          "cap": 8
                         }
                       }
                     ]
@@ -12749,25 +12525,25 @@
                         "atom": "aura",
                         "params": {
                           "radius": 145,
-                          "tickInterval": 0.6,
+                          "tickInterval": 0.7,
                           "duration": 4,
                           "effects": [
                             {
-                              "atom": "thorns",
+                              "atom": "breachReduction",
                               "params": {
-                                "ratio": 0.26
+                                "ratio": 0.12
+                              }
+                            },
+                            {
+                              "atom": "summon",
+                              "params": {
+                                "kind": "decoy",
+                                "count": 1,
+                                "hp": 70,
+                                "duration": 6
                               }
                             }
                           ]
-                        }
-                      },
-                      {
-                        "atom": "summon",
-                        "params": {
-                          "kind": "decoy",
-                          "count": 1,
-                          "hp": 70,
-                          "duration": 6
                         }
                       }
                     ]
@@ -12878,28 +12654,23 @@
               ]
             },
             {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "aoeOnHit",
-                  "params": {
-                    "damageRatio": 0.8,
-                    "radius": 85,
-                    "falloff": 0.35
-                  }
-                }
-              ]
-            },
-            {
               "trigger": "onBreach",
               "triggerParams": {
                 "cooldownSeconds": 3
               },
+              "at": "point",
               "effects": [
                 {
-                  "atom": "thorns",
+                  "atom": "burstDamage",
                   "params": {
-                    "ratio": 0.18
+                    "damageMul": 0.7,
+                    "radius": 90
+                  },
+                  "scaleBy": {
+                    "source": "thornsRatio",
+                    "param": "damageMul",
+                    "perUnit": 1.2,
+                    "cap": 1
                   }
                 }
               ]
@@ -12922,28 +12693,23 @@
               ]
             },
             {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "aoeOnHit",
-                  "params": {
-                    "damageRatio": 0.8,
-                    "radius": 85,
-                    "falloff": 0.35
-                  }
-                }
-              ]
-            },
-            {
               "trigger": "onBreach",
               "triggerParams": {
                 "cooldownSeconds": 3
               },
+              "at": "point",
               "effects": [
                 {
-                  "atom": "thorns",
+                  "atom": "burstDamage",
                   "params": {
-                    "ratio": 0.18
+                    "damageMul": 0.7,
+                    "radius": 90
+                  },
+                  "scaleBy": {
+                    "source": "thornsRatio",
+                    "param": "damageMul",
+                    "perUnit": 1.2,
+                    "cap": 1
                   }
                 }
               ]
@@ -13102,30 +12868,28 @@
                     "trigger": "passive",
                     "effects": [
                       {
+                        "atom": "thorns",
+                        "params": {
+                          "ratio": 0.2
+                        }
+                      },
+                      {
                         "atom": "aura",
                         "params": {
-                          "radius": 145,
-                          "tickInterval": 0.6,
+                          "radius": 95,
+                          "shape": "ring",
+                          "innerRadius": 45,
+                          "tickInterval": 0.35,
                           "duration": 4,
                           "effects": [
                             {
-                              "atom": "thorns",
+                              "atom": "burstDamage",
                               "params": {
-                                "ratio": 0.26
+                                "damageMul": 0.13,
+                                "radius": 0
                               }
                             }
                           ]
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "thorns",
-                        "params": {
-                          "ratio": 0.26
                         }
                       }
                     ]
@@ -13137,7 +12901,7 @@
                 "textKey": "evolution.thorns.thornsC",
                 "equip": [
                   {
-                    "trigger": "onHit",
+                    "trigger": "onBreach",
                     "effects": [
                       {
                         "atom": "aoeOnHit",
@@ -13146,11 +12910,19 @@
                           "damageRatio": 1.3,
                           "falloff": 0.35
                         }
+                      },
+                      {
+                        "atom": "burstDamage",
+                        "params": {
+                          "damageMul": 0.7,
+                          "radius": 105
+                        }
                       }
-                    ]
+                    ],
+                    "at": "point"
                   },
                   {
-                    "trigger": "onHit",
+                    "trigger": "onBreach",
                     "effects": [
                       {
                         "atom": "thorns",
@@ -13158,7 +12930,8 @@
                           "ratio": 0.33999999999999997
                         }
                       }
-                    ]
+                    ],
+                    "at": "point"
                   }
                 ]
               }
@@ -13173,28 +12946,23 @@
                 "interfaceRole": "payoff",
                 "equip": [
                   {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "aoeOnHit",
-                        "params": {
-                          "damageRatio": 0.8,
-                          "radius": 85,
-                          "falloff": 0.35
-                        }
-                      }
-                    ]
-                  },
-                  {
                     "trigger": "onBreach",
                     "triggerParams": {
                       "cooldownSeconds": 3
                     },
+                    "at": "point",
                     "effects": [
                       {
-                        "atom": "thorns",
+                        "atom": "burstDamage",
                         "params": {
-                          "ratio": 0.18
+                          "damageMul": 0.7,
+                          "radius": 90
+                        },
+                        "scaleBy": {
+                          "source": "thornsRatio",
+                          "param": "damageMul",
+                          "perUnit": 1.2,
+                          "cap": 1
                         }
                       }
                     ]
@@ -13210,17 +12978,16 @@
                     "trigger": "passive",
                     "effects": [
                       {
-                        "atom": "thorns",
-                        "params": {
-                          "ratio": 0.26
-                        }
-                      },
-                      {
                         "atom": "aura",
                         "params": {
-                          "radius": 145,
-                          "tickInterval": 0.6,
+                          "radius": 90,
+                          "radiusOverTime": {
+                            "from": 90,
+                            "to": 175,
+                            "easing": "linear"
+                          },
                           "duration": 4,
+                          "tickInterval": 0.6,
                           "effects": [
                             {
                               "atom": "thorns",
@@ -13236,7 +13003,7 @@
                         "params": {
                           "kind": "decoy",
                           "count": 1,
-                          "hp": 70,
+                          "hp": 65,
                           "duration": 6
                         }
                       }
@@ -13261,7 +13028,8 @@
                           "amountRatio": 0.07
                         }
                       }
-                    ]
+                    ],
+                    "at": "point"
                   }
                 ]
               }
@@ -13725,7 +13493,7 @@
                     "trigger": "onWaveStart",
                     "effects": [
                       {
-                        "atom": "groundZone",
+                        "atom": "aura",
                         "params": {
                           "radius": 145,
                           "tickInterval": 0.6,
@@ -13774,6 +13542,17 @@
                         "atom": "restore",
                         "params": {
                           "amountRatio": 0.07
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "breachReduction",
+                        "params": {
+                          "ratio": 0.12
                         }
                       }
                     ]
@@ -13908,14 +13687,20 @@
               ]
             },
             {
-              "trigger": "onHit",
+              "trigger": "onBreach",
+              "at": "point",
               "effects": [
                 {
-                  "atom": "aoeOnHit",
+                  "atom": "burstDamage",
                   "params": {
-                    "damageRatio": 0.8,
-                    "radius": 85,
-                    "falloff": 0.35
+                    "damageMul": 0.65,
+                    "radius": 120
+                  },
+                  "scaleBy": {
+                    "source": "auraReduction",
+                    "param": "damageMul",
+                    "perUnit": 1.5,
+                    "cap": 0.8
                   }
                 }
               ]
@@ -13959,14 +13744,20 @@
               ]
             },
             {
-              "trigger": "onHit",
+              "trigger": "onBreach",
+              "at": "point",
               "effects": [
                 {
-                  "atom": "aoeOnHit",
+                  "atom": "burstDamage",
                   "params": {
-                    "damageRatio": 0.8,
-                    "radius": 85,
-                    "falloff": 0.35
+                    "damageMul": 0.65,
+                    "radius": 120
+                  },
+                  "scaleBy": {
+                    "source": "auraReduction",
+                    "param": "damageMul",
+                    "perUnit": 1.5,
+                    "cap": 0.8
                   }
                 }
               ]
@@ -14046,22 +13837,6 @@
                   ],
                   "radiusRatioOfRange": 0.5
                 }
-              },
-              {
-                "atom": "groundZone",
-                "params": {
-                  "radius": 145,
-                  "tickInterval": 0.6,
-                  "duration": 4,
-                  "effects": [
-                    {
-                      "atom": "burstDamage",
-                      "params": {
-                        "damageMul": 0.35
-                      }
-                    }
-                  ]
-                }
               }
             ]
           },
@@ -14083,22 +13858,6 @@
                     }
                   ],
                   "radiusRatioOfRange": 0.5
-                }
-              },
-              {
-                "atom": "groundZone",
-                "params": {
-                  "radius": 145,
-                  "tickInterval": 0.6,
-                  "duration": 4,
-                  "effects": [
-                    {
-                      "atom": "burstDamage",
-                      "params": {
-                        "damageMul": 0.35
-                      }
-                    }
-                  ]
                 }
               },
               {
@@ -14200,9 +13959,9 @@
                     },
                     "effects": [
                       {
-                        "atom": "groundZone",
+                        "atom": "aura",
                         "params": {
-                          "radius": 145,
+                          "radius": 90,
                           "tickInterval": 0.6,
                           "duration": 4,
                           "effects": [
@@ -14212,7 +13971,12 @@
                                 "ratio": 0.26
                               }
                             }
-                          ]
+                          ],
+                          "radiusOverTime": {
+                            "from": 90,
+                            "to": 180,
+                            "easing": "linear"
+                          }
                         }
                       }
                     ]
@@ -14244,7 +14008,7 @@
                         }
                       },
                       {
-                        "atom": "groundZone",
+                        "atom": "aura",
                         "params": {
                           "radius": 165,
                           "tickInterval": 0.6,
@@ -14274,14 +14038,20 @@
                 "interfaceRole": "payoff",
                 "equip": [
                   {
-                    "trigger": "onHit",
+                    "trigger": "onBreach",
+                    "at": "point",
                     "effects": [
                       {
-                        "atom": "aoeOnHit",
+                        "atom": "burstDamage",
                         "params": {
-                          "damageRatio": 0.8,
-                          "radius": 85,
-                          "falloff": 0.35
+                          "damageMul": 0.65,
+                          "radius": 120
+                        },
+                        "scaleBy": {
+                          "source": "auraReduction",
+                          "param": "damageMul",
+                          "perUnit": 1.5,
+                          "cap": 0.8
                         }
                       }
                     ]
@@ -14299,26 +14069,35 @@
                       {
                         "atom": "aura",
                         "params": {
-                          "radius": 145,
-                          "tickInterval": 0.6,
+                          "radius": 125,
+                          "tickInterval": 0.7,
                           "duration": 4,
                           "effects": [
                             {
-                              "atom": "thorns",
+                              "atom": "breachReduction",
                               "params": {
-                                "ratio": 0.26
+                                "ratio": 0.14
                               }
                             }
                           ]
+                        },
+                        "scaleBy": {
+                          "source": "enemiesOnField",
+                          "param": "radius",
+                          "perUnit": 5,
+                          "cap": 10
                         }
-                      },
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "onWaveStart",
+                    "effects": [
                       {
-                        "atom": "summon",
+                        "atom": "shield",
                         "params": {
-                          "kind": "decoy",
-                          "count": 1,
-                          "hp": 70,
-                          "duration": 6
+                          "absorbHits": 1,
+                          "regenSeconds": 10
                         }
                       }
                     ]
@@ -14753,10 +14532,11 @@
                           "fireInterval": 0.8
                         }
                       }
-                    ]
+                    ],
+                    "at": "point"
                   },
                   {
-                    "trigger": "onHit",
+                    "trigger": "onBreach",
                     "effects": [
                       {
                         "atom": "thorns",
@@ -14764,7 +14544,8 @@
                           "ratio": 0.33999999999999997
                         }
                       }
-                    ]
+                    ],
+                    "at": "point"
                   }
                 ]
               }
@@ -14894,25 +14675,14 @@
           "tier": "core",
           "equip": [
             {
-              "trigger": "onHit",
+              "trigger": "onBreach",
+              "at": "point",
               "effects": [
                 {
-                  "atom": "aoeOnHit",
+                  "atom": "burstDamage",
                   "params": {
-                    "radius": 85,
-                    "damageRatio": 0.8,
-                    "falloff": 0.35
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "thorns",
-                  "params": {
-                    "ratio": 0.18
+                    "damageMul": 0.9,
+                    "radius": 90
                   }
                 }
               ]
@@ -14923,38 +14693,33 @@
           "tier": "dual",
           "equip": [
             {
-              "trigger": "onHit",
+              "trigger": "onBreach",
+              "at": "point",
               "effects": [
                 {
-                  "atom": "aoeOnHit",
+                  "atom": "burstDamage",
                   "params": {
-                    "radius": 85,
-                    "damageRatio": 0.8,
-                    "falloff": 0.35
+                    "damageMul": 0.9,
+                    "radius": 90
                   }
                 }
               ]
             },
             {
-              "trigger": "onHit",
+              "trigger": "onBreach",
+              "at": "point",
               "effects": [
                 {
-                  "atom": "thorns",
+                  "atom": "burstDamage",
                   "params": {
-                    "ratio": 0.18
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "aoeOnHit",
-                  "params": {
-                    "damageRatio": 0.8,
-                    "radius": 85,
-                    "falloff": 0.35
+                    "damageMul": 0.8,
+                    "radius": 105
+                  },
+                  "scaleBy": {
+                    "source": "shieldTier",
+                    "param": "damageMul",
+                    "perUnit": 0.18,
+                    "cap": 5
                   }
                 }
               ]
@@ -14965,38 +14730,33 @@
           "tier": "transform",
           "equip": [
             {
-              "trigger": "onHit",
+              "trigger": "onBreach",
+              "at": "point",
               "effects": [
                 {
-                  "atom": "aoeOnHit",
+                  "atom": "burstDamage",
                   "params": {
-                    "radius": 85,
-                    "damageRatio": 0.8,
-                    "falloff": 0.35
+                    "damageMul": 0.9,
+                    "radius": 90
                   }
                 }
               ]
             },
             {
-              "trigger": "onHit",
+              "trigger": "onBreach",
+              "at": "point",
               "effects": [
                 {
-                  "atom": "thorns",
+                  "atom": "burstDamage",
                   "params": {
-                    "ratio": 0.18
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "aoeOnHit",
-                  "params": {
-                    "damageRatio": 0.8,
-                    "radius": 85,
-                    "falloff": 0.35
+                    "damageMul": 0.8,
+                    "radius": 105
+                  },
+                  "scaleBy": {
+                    "source": "shieldTier",
+                    "param": "damageMul",
+                    "perUnit": 0.18,
+                    "cap": 5
                   }
                 }
               ]
@@ -15023,7 +14783,7 @@
       },
       "amplifyAxis": {
         "params": {
-          "damageRetention": "+1"
+          "damageRatio": "+1"
         },
         "description": ""
       },
@@ -15126,25 +14886,14 @@
                 "textKey": "evolution.retribution.retributionA",
                 "equip": [
                   {
-                    "trigger": "onHit",
+                    "trigger": "onBreach",
+                    "at": "point",
                     "effects": [
                       {
-                        "atom": "aoeOnHit",
+                        "atom": "burstDamage",
                         "params": {
-                          "radius": 85,
-                          "damageRatio": 0.8,
-                          "falloff": 0.35
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "thorns",
-                        "params": {
-                          "ratio": 0.18
+                          "damageMul": 0.9,
+                          "radius": 90
                         }
                       }
                     ]
@@ -15156,37 +14905,23 @@
                 "textKey": "evolution.retribution.retributionB",
                 "equip": [
                   {
-                    "trigger": "onHit",
+                    "trigger": "onBreach",
+                    "at": "point",
                     "effects": [
                       {
                         "atom": "aoeOnHit",
                         "params": {
-                          "radius": 85,
-                          "damageRatio": 0.55,
-                          "falloff": 0.4
+                          "radius": 130,
+                          "damageRatio": 0.7,
+                          "falloff": 0.35
                         }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
+                      },
                       {
-                        "atom": "thorns",
+                        "atom": "knockback",
                         "params": {
-                          "ratio": 0.26
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onFire",
-                    "effects": [
-                      {
-                        "atom": "pierce",
-                        "params": {
-                          "count": 1,
-                          "damageRetention": 0.9
+                          "distance": 70,
+                          "collisionDamage": 0.15,
+                          "radius": 130
                         }
                       }
                     ]
@@ -15198,38 +14933,20 @@
                 "textKey": "evolution.retribution.retributionC",
                 "equip": [
                   {
-                    "trigger": "onHit",
+                    "trigger": "onBreach",
+                    "at": "point",
                     "effects": [
                       {
-                        "atom": "aoeOnHit",
+                        "atom": "burstDamage",
                         "params": {
-                          "radius": 115,
-                          "damageRatio": 1.3,
-                          "falloff": 0.35
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "thorns",
-                        "params": {
-                          "ratio": 0.33999999999999997
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "aoeOnHit",
-                        "params": {
-                          "radius": 55,
-                          "damageRatio": 0.25,
-                          "falloff": 0.5
+                          "damageMul": 0.75,
+                          "radius": 105
+                        },
+                        "scaleBy": {
+                          "source": "secondsSinceLastBreach",
+                          "param": "damageMul",
+                          "perUnit": 0.06,
+                          "cap": 20
                         }
                       }
                     ]
@@ -15247,14 +14964,20 @@
                 "interfaceRole": "payoff",
                 "equip": [
                   {
-                    "trigger": "onHit",
+                    "trigger": "onBreach",
+                    "at": "point",
                     "effects": [
                       {
-                        "atom": "aoeOnHit",
+                        "atom": "burstDamage",
                         "params": {
-                          "damageRatio": 0.8,
-                          "radius": 85,
-                          "falloff": 0.35
+                          "damageMul": 0.8,
+                          "radius": 105
+                        },
+                        "scaleBy": {
+                          "source": "shieldTier",
+                          "param": "damageMul",
+                          "perUnit": 0.18,
+                          "cap": 5
                         }
                       }
                     ]
@@ -15271,18 +14994,23 @@
                     "triggerParams": {
                       "cooldownSeconds": 5
                     },
+                    "at": "point",
                     "effects": [
                       {
-                        "atom": "groundZone",
+                        "atom": "aura",
                         "params": {
-                          "radius": 145,
+                          "radius": 150,
+                          "duration": 3.5,
                           "tickInterval": 0.6,
-                          "duration": 4,
                           "effects": [
                             {
-                              "atom": "thorns",
+                              "atom": "statBuff",
                               "params": {
-                                "ratio": 0.26
+                                "stat": "damage",
+                                "operation": "mul",
+                                "value": 1.12,
+                                "duration": 1,
+                                "maxStacks": 2
                               }
                             }
                           ]
@@ -15293,8 +15021,8 @@
                         "params": {
                           "kind": "decoy",
                           "count": 1,
-                          "hp": 70,
-                          "duration": 6
+                          "hp": 65,
+                          "duration": 5
                         }
                       }
                     ]
@@ -15311,21 +15039,22 @@
                     "triggerParams": {
                       "cooldownSeconds": 6
                     },
+                    "at": "point",
                     "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "maxHpAdd",
-                          "operation": "mul",
-                          "value": 1.1600000000000001,
-                          "duration": 5,
-                          "maxStacks": 4
-                        }
-                      },
                       {
                         "atom": "restore",
                         "params": {
                           "amountRatio": 0.07
+                        }
+                      },
+                      {
+                        "atom": "statBuff",
+                        "params": {
+                          "stat": "damage",
+                          "operation": "mul",
+                          "value": 1.16,
+                          "duration": 5,
+                          "maxStacks": 4
                         }
                       }
                     ]
@@ -15339,7 +15068,7 @@
           {
             "star": 4,
             "amplify": {
-              "damageRetention": "+1"
+              "damageRatio": "+1"
             }
           },
           {
@@ -15394,6 +15123,12 @@
                     "value": 1.08,
                     "duration": 3,
                     "maxStacks": 2
+                  },
+                  "scaleBy": {
+                    "source": "secondsSinceLastBreach",
+                    "param": "value",
+                    "perUnit": 0.02,
+                    "cap": 10
                   }
                 },
                 {
@@ -15420,6 +15155,12 @@
                     "value": 1.08,
                     "duration": 3,
                     "maxStacks": 2
+                  },
+                  "scaleBy": {
+                    "source": "secondsSinceLastBreach",
+                    "param": "value",
+                    "perUnit": 0.02,
+                    "cap": 10
                   }
                 },
                 {
@@ -15431,28 +15172,23 @@
               ]
             },
             {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "aoeOnHit",
-                  "params": {
-                    "damageRatio": 0.8,
-                    "radius": 85,
-                    "falloff": 0.35
-                  }
-                }
-              ]
-            },
-            {
               "trigger": "onBreach",
               "triggerParams": {
                 "cooldownSeconds": 3
               },
+              "at": "point",
               "effects": [
                 {
-                  "atom": "thorns",
+                  "atom": "burstDamage",
                   "params": {
-                    "ratio": 0.18
+                    "damageMul": 0.65,
+                    "radius": 105
+                  },
+                  "scaleBy": {
+                    "source": "secondsSinceLastBreach",
+                    "param": "damageMul",
+                    "perUnit": 0.05,
+                    "cap": 20
                   }
                 }
               ]
@@ -15473,6 +15209,12 @@
                     "value": 1.08,
                     "duration": 3,
                     "maxStacks": 2
+                  },
+                  "scaleBy": {
+                    "source": "secondsSinceLastBreach",
+                    "param": "value",
+                    "perUnit": 0.02,
+                    "cap": 10
                   }
                 },
                 {
@@ -15484,28 +15226,23 @@
               ]
             },
             {
-              "trigger": "onHit",
-              "effects": [
-                {
-                  "atom": "aoeOnHit",
-                  "params": {
-                    "damageRatio": 0.8,
-                    "radius": 85,
-                    "falloff": 0.35
-                  }
-                }
-              ]
-            },
-            {
               "trigger": "onBreach",
               "triggerParams": {
                 "cooldownSeconds": 3
               },
+              "at": "point",
               "effects": [
                 {
-                  "atom": "thorns",
+                  "atom": "burstDamage",
                   "params": {
-                    "ratio": 0.18
+                    "damageMul": 0.65,
+                    "radius": 105
+                  },
+                  "scaleBy": {
+                    "source": "secondsSinceLastBreach",
+                    "param": "damageMul",
+                    "perUnit": 0.05,
+                    "cap": 20
                   }
                 }
               ]
@@ -15680,6 +15417,12 @@
                           "value": 1.08,
                           "duration": 3,
                           "maxStacks": 2
+                        },
+                        "scaleBy": {
+                          "source": "secondsSinceLastBreach",
+                          "param": "value",
+                          "perUnit": 0.02,
+                          "cap": 10
                         }
                       },
                       {
@@ -15700,30 +15443,32 @@
                     "trigger": "passive",
                     "effects": [
                       {
+                        "atom": "thorns",
+                        "params": {
+                          "ratio": 0.12
+                        }
+                      },
+                      {
                         "atom": "aura",
                         "params": {
-                          "radius": 145,
-                          "tickInterval": 0.6,
+                          "radius": 170,
+                          "tickInterval": 0.8,
                           "duration": 4,
                           "effects": [
                             {
-                              "atom": "thorns",
+                              "atom": "burstDamage",
                               "params": {
-                                "ratio": 0.26
+                                "damageMul": 0.045,
+                                "radius": 0
+                              },
+                              "scaleBy": {
+                                "source": "secondsSinceLastBreach",
+                                "param": "damageMul",
+                                "perUnit": 0.004,
+                                "cap": 20
                               }
                             }
                           ]
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "thorns",
-                        "params": {
-                          "ratio": 0.26
                         }
                       }
                     ]
@@ -15773,28 +15518,23 @@
                 "interfaceRole": "payoff",
                 "equip": [
                   {
-                    "trigger": "onHit",
-                    "effects": [
-                      {
-                        "atom": "aoeOnHit",
-                        "params": {
-                          "damageRatio": 0.8,
-                          "radius": 85,
-                          "falloff": 0.35
-                        }
-                      }
-                    ]
-                  },
-                  {
                     "trigger": "onBreach",
                     "triggerParams": {
                       "cooldownSeconds": 3
                     },
+                    "at": "point",
                     "effects": [
                       {
-                        "atom": "thorns",
+                        "atom": "burstDamage",
                         "params": {
-                          "ratio": 0.18
+                          "damageMul": 0.65,
+                          "radius": 105
+                        },
+                        "scaleBy": {
+                          "source": "secondsSinceLastBreach",
+                          "param": "damageMul",
+                          "perUnit": 0.05,
+                          "cap": 20
                         }
                       }
                     ]
@@ -15812,23 +15552,29 @@
                       {
                         "atom": "thorns",
                         "params": {
-                          "ratio": 0.26
+                          "ratio": 0.32
                         }
                       },
                       {
                         "atom": "aura",
                         "params": {
-                          "radius": 145,
-                          "tickInterval": 0.6,
+                          "radius": 120,
                           "duration": 4,
+                          "tickInterval": 0.7,
                           "effects": [
                             {
                               "atom": "thorns",
                               "params": {
-                                "ratio": 0.26
+                                "ratio": 0.12
                               }
                             }
                           ]
+                        },
+                        "scaleBy": {
+                          "source": "secondsSinceLastBreach",
+                          "param": "radius",
+                          "perUnit": 3,
+                          "cap": 20
                         }
                       },
                       {
@@ -15978,28 +15724,14 @@
               "triggerParams": {
                 "requiresStatus": "brand"
               },
+              "at": "point",
               "effects": [
                 {
                   "atom": "extraDrop",
                   "params": {
                     "count": 1,
                     "at": "point",
-                    "chance": 0.25
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onKill",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "chance": 0.35
                   }
                 }
               ]
@@ -16034,28 +15766,14 @@
               "triggerParams": {
                 "requiresStatus": "brand"
               },
+              "at": "point",
               "effects": [
                 {
                   "atom": "extraDrop",
                   "params": {
                     "count": 1,
                     "at": "point",
-                    "chance": 0.25
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onKill",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "chance": 0.35
                   }
                 }
               ]
@@ -16238,9 +15956,20 @@
                       {
                         "atom": "focusPriority",
                         "params": {
-                          "priorityWeight": 1.7,
+                          "priorityWeight": 1.6,
                           "duration": 4,
-                          "radius": 120
+                          "radius": 125
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "passive",
+                    "effects": [
+                      {
+                        "atom": "dropRateMul",
+                        "params": {
+                          "mul": 1.16
                         }
                       }
                     ]
@@ -16253,13 +15982,20 @@
                 "equip": [
                   {
                     "trigger": "onPickup",
+                    "at": "point",
                     "effects": [
                       {
                         "atom": "focusPriority",
                         "params": {
-                          "priorityWeight": 2,
-                          "duration": 5,
-                          "radius": 140
+                          "priorityWeight": 1,
+                          "duration": 2.5,
+                          "radius": 105
+                        }
+                      },
+                      {
+                        "atom": "dropLifetimeMul",
+                        "params": {
+                          "mul": 1.22
                         }
                       }
                     ]
@@ -16281,28 +16017,14 @@
                     "triggerParams": {
                       "requiresStatus": "brand"
                     },
+                    "at": "point",
                     "effects": [
                       {
                         "atom": "extraDrop",
                         "params": {
                           "count": 1,
                           "at": "point",
-                          "chance": 0.25
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onKill",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
+                          "chance": 0.35
                         }
                       }
                     ]
@@ -16340,13 +16062,13 @@
                       {
                         "atom": "dropLifetimeMul",
                         "params": {
-                          "mul": 1.3099999999999998
+                          "mul": 1.65
                         }
                       },
                       {
                         "atom": "expiryConvert",
                         "params": {
-                          "ratio": 0.31
+                          "ratio": 0.12
                         }
                       }
                     ]
@@ -16444,13 +16166,19 @@
               "triggerParams": {
                 "requiresStatus": "brand"
               },
+              "at": "point",
               "effects": [
                 {
-                  "atom": "aoeOnHit",
+                  "atom": "burstDamage",
                   "params": {
-                    "damageRatio": 0.8,
-                    "radius": 85,
-                    "falloff": 0.35
+                    "damageMul": 0.6,
+                    "radius": 95
+                  },
+                  "scaleBy": {
+                    "source": "mergesThisRun",
+                    "param": "damageMul",
+                    "perUnit": 0.04,
+                    "cap": 20
                   }
                 },
                 {
@@ -16458,22 +16186,7 @@
                   "params": {
                     "count": 1,
                     "at": "point",
-                    "chance": 0.25
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onKill",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "chance": 0.22
                   }
                 }
               ]
@@ -16500,13 +16213,19 @@
               "triggerParams": {
                 "requiresStatus": "brand"
               },
+              "at": "point",
               "effects": [
                 {
-                  "atom": "aoeOnHit",
+                  "atom": "burstDamage",
                   "params": {
-                    "damageRatio": 0.8,
-                    "radius": 85,
-                    "falloff": 0.35
+                    "damageMul": 0.6,
+                    "radius": 95
+                  },
+                  "scaleBy": {
+                    "source": "mergesThisRun",
+                    "param": "damageMul",
+                    "perUnit": 0.04,
+                    "cap": 20
                   }
                 },
                 {
@@ -16514,22 +16233,7 @@
                   "params": {
                     "count": 1,
                     "at": "point",
-                    "chance": 0.25
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onKill",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "chance": 0.22
                   }
                 }
               ]
@@ -16604,7 +16308,7 @@
             "radius": 140,
             "effects": [
               {
-                "atom": "groundZone",
+                "atom": "aura",
                 "params": {
                   "radius": 145,
                   "tickInterval": 0.6,
@@ -16635,7 +16339,7 @@
             "radius": 160,
             "effects": [
               {
-                "atom": "groundZone",
+                "atom": "aura",
                 "params": {
                   "radius": 145,
                   "tickInterval": 0.6,
@@ -16742,7 +16446,7 @@
                         }
                       },
                       {
-                        "atom": "groundZone",
+                        "atom": "aura",
                         "params": {
                           "radius": 145,
                           "tickInterval": 0.6,
@@ -16796,13 +16500,19 @@
                     "triggerParams": {
                       "requiresStatus": "brand"
                     },
+                    "at": "point",
                     "effects": [
                       {
-                        "atom": "aoeOnHit",
+                        "atom": "burstDamage",
                         "params": {
-                          "damageRatio": 0.8,
-                          "radius": 85,
-                          "falloff": 0.35
+                          "damageMul": 0.6,
+                          "radius": 95
+                        },
+                        "scaleBy": {
+                          "source": "mergesThisRun",
+                          "param": "damageMul",
+                          "perUnit": 0.04,
+                          "cap": 20
                         }
                       },
                       {
@@ -16810,22 +16520,7 @@
                         "params": {
                           "count": 1,
                           "at": "point",
-                          "chance": 0.25
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onKill",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
+                          "chance": 0.22
                         }
                       }
                     ]
@@ -16841,7 +16536,7 @@
                     "trigger": "onMerge",
                     "effects": [
                       {
-                        "atom": "groundZone",
+                        "atom": "aura",
                         "params": {
                           "radius": 145,
                           "tickInterval": 0.6,
@@ -16876,6 +16571,21 @@
                           "bonusChance": 0.2,
                           "count": 1,
                           "scope": "both"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "onMerge",
+                    "effects": [
+                      {
+                        "atom": "statBuff",
+                        "params": {
+                          "stat": "damage",
+                          "operation": "mul",
+                          "value": 1.05,
+                          "duration": 2,
+                          "maxStacks": 3
                         }
                       }
                     ]
@@ -17690,13 +17400,27 @@
               "triggerParams": {
                 "requiresStatus": "brand"
               },
+              "at": "point",
               "effects": [
                 {
-                  "atom": "aoeOnHit",
+                  "atom": "burstDamage",
                   "params": {
-                    "damageRatio": 0.8,
-                    "radius": 85,
-                    "falloff": 0.35
+                    "damageMul": 0.65,
+                    "radius": 90
+                  },
+                  "scaleBy": {
+                    "source": "concurrentStatus:brand",
+                    "param": "damageMul",
+                    "perUnit": 0.07,
+                    "cap": 8
+                  }
+                },
+                {
+                  "atom": "focusPriority",
+                  "params": {
+                    "priorityWeight": 2,
+                    "duration": 5,
+                    "radius": 100
                   }
                 },
                 {
@@ -17704,22 +17428,7 @@
                   "params": {
                     "count": 1,
                     "at": "point",
-                    "chance": 0.25
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onKill",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "chance": 0.2
                   }
                 }
               ]
@@ -17748,13 +17457,27 @@
               "triggerParams": {
                 "requiresStatus": "brand"
               },
+              "at": "point",
               "effects": [
                 {
-                  "atom": "aoeOnHit",
+                  "atom": "burstDamage",
                   "params": {
-                    "damageRatio": 0.8,
-                    "radius": 85,
-                    "falloff": 0.35
+                    "damageMul": 0.65,
+                    "radius": 90
+                  },
+                  "scaleBy": {
+                    "source": "concurrentStatus:brand",
+                    "param": "damageMul",
+                    "perUnit": 0.07,
+                    "cap": 8
+                  }
+                },
+                {
+                  "atom": "focusPriority",
+                  "params": {
+                    "priorityWeight": 2,
+                    "duration": 5,
+                    "radius": 100
                   }
                 },
                 {
@@ -17762,22 +17485,7 @@
                   "params": {
                     "count": 1,
                     "at": "point",
-                    "chance": 0.25
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onKill",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "chance": 0.2
                   }
                 }
               ]
@@ -17982,9 +17690,24 @@
                       {
                         "atom": "focusPriority",
                         "params": {
-                          "priorityWeight": 1.7,
+                          "priorityWeight": 1.85,
                           "duration": 4,
-                          "radius": 120
+                          "radius": 115
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "onHit",
+                    "triggerParams": {
+                      "requiresStatus": "brand"
+                    },
+                    "effects": [
+                      {
+                        "atom": "burstDamage",
+                        "params": {
+                          "damageMul": 0.22,
+                          "radius": 0
                         }
                       }
                     ]
@@ -18002,9 +17725,10 @@
                         "atom": "focusPriority",
                         "params": {
                           "priorityWeight": 2,
-                          "duration": 5,
-                          "radius": 140
-                        }
+                          "duration": 4,
+                          "radius": 65
+                        },
+                        "at": "nearestToBreachLine"
                       }
                     ]
                   }
@@ -18025,13 +17749,27 @@
                     "triggerParams": {
                       "requiresStatus": "brand"
                     },
+                    "at": "point",
                     "effects": [
                       {
-                        "atom": "aoeOnHit",
+                        "atom": "burstDamage",
                         "params": {
-                          "damageRatio": 0.8,
-                          "radius": 85,
-                          "falloff": 0.35
+                          "damageMul": 0.65,
+                          "radius": 90
+                        },
+                        "scaleBy": {
+                          "source": "concurrentStatus:brand",
+                          "param": "damageMul",
+                          "perUnit": 0.07,
+                          "cap": 8
+                        }
+                      },
+                      {
+                        "atom": "focusPriority",
+                        "params": {
+                          "priorityWeight": 2,
+                          "duration": 5,
+                          "radius": 100
                         }
                       },
                       {
@@ -18039,22 +17777,7 @@
                         "params": {
                           "count": 1,
                           "at": "point",
-                          "chance": 0.25
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onKill",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
+                          "chance": 0.2
                         }
                       }
                     ]
@@ -18073,7 +17796,7 @@
                     },
                     "effects": [
                       {
-                        "atom": "groundZone",
+                        "atom": "aura",
                         "params": {
                           "radius": 145,
                           "tickInterval": 0.6,
@@ -18302,8 +18025,25 @@
                 {
                   "atom": "burstDamage",
                   "params": {
-                    "damageMul": 0.8,
+                    "damageMul": 0.65,
                     "radius": 85
+                  },
+                  "forEach": {
+                    "set": {
+                      "kind": "enemiesWithStatus",
+                      "status": "brand"
+                    },
+                    "maxTargets": 4,
+                    "order": "nearest",
+                    "effects": [
+                      {
+                        "atom": "burstDamage",
+                        "params": {
+                          "damageMul": 0.65,
+                          "radius": 85
+                        }
+                      }
+                    ]
                   }
                 }
               ]
@@ -18362,8 +18102,25 @@
                 {
                   "atom": "burstDamage",
                   "params": {
-                    "damageMul": 0.8,
+                    "damageMul": 0.65,
                     "radius": 85
+                  },
+                  "forEach": {
+                    "set": {
+                      "kind": "enemiesWithStatus",
+                      "status": "brand"
+                    },
+                    "maxTargets": 4,
+                    "order": "nearest",
+                    "effects": [
+                      {
+                        "atom": "burstDamage",
+                        "params": {
+                          "damageMul": 0.65,
+                          "radius": 85
+                        }
+                      }
+                    ]
                   }
                 }
               ]
@@ -18493,24 +18250,6 @@
                 }
               },
               {
-                "atom": "groundZone",
-                "params": {
-                  "radius": 145,
-                  "tickInterval": 0.6,
-                  "duration": 4,
-                  "effects": [
-                    {
-                      "atom": "focusPriority",
-                      "params": {
-                        "priorityWeight": 1.7,
-                        "duration": 4,
-                        "radius": 120
-                      }
-                    }
-                  ]
-                }
-              },
-              {
                 "atom": "extraDrop",
                 "params": {
                   "count": 3,
@@ -18548,24 +18287,6 @@
                   "priorityWeight": 1.4,
                   "duration": 3,
                   "radius": 100
-                }
-              },
-              {
-                "atom": "groundZone",
-                "params": {
-                  "radius": 145,
-                  "tickInterval": 0.6,
-                  "duration": 4,
-                  "effects": [
-                    {
-                      "atom": "focusPriority",
-                      "params": {
-                        "priorityWeight": 1.7,
-                        "duration": 4,
-                        "radius": 120
-                      }
-                    }
-                  ]
                 }
               },
               {
@@ -18672,9 +18393,9 @@
                     },
                     "effects": [
                       {
-                        "atom": "groundZone",
+                        "atom": "aura",
                         "params": {
-                          "radius": 145,
+                          "radius": 85,
                           "tickInterval": 0.6,
                           "duration": 4,
                           "effects": [
@@ -18686,7 +18407,12 @@
                                 "radius": 120
                               }
                             }
-                          ]
+                          ],
+                          "radiusOverTime": {
+                            "from": 85,
+                            "to": 170,
+                            "easing": "linear"
+                          }
                         }
                       }
                     ]
@@ -18723,7 +18449,7 @@
                         }
                       },
                       {
-                        "atom": "groundZone",
+                        "atom": "aura",
                         "params": {
                           "radius": 165,
                           "tickInterval": 0.6,
@@ -18763,8 +18489,25 @@
                       {
                         "atom": "burstDamage",
                         "params": {
-                          "damageMul": 0.8,
+                          "damageMul": 0.65,
                           "radius": 85
+                        },
+                        "forEach": {
+                          "set": {
+                            "kind": "enemiesWithStatus",
+                            "status": "brand"
+                          },
+                          "maxTargets": 4,
+                          "order": "nearest",
+                          "effects": [
+                            {
+                              "atom": "burstDamage",
+                              "params": {
+                                "damageMul": 0.65,
+                                "radius": 85
+                              }
+                            }
+                          ]
                         }
                       }
                     ]
@@ -18780,21 +18523,27 @@
                     "trigger": "onPickup",
                     "effects": [
                       {
-                        "atom": "groundZone",
+                        "atom": "aura",
                         "params": {
-                          "radius": 145,
-                          "tickInterval": 0.6,
+                          "radius": 100,
                           "duration": 4,
+                          "tickInterval": 0.65,
                           "effects": [
                             {
                               "atom": "focusPriority",
                               "params": {
                                 "priorityWeight": 1.7,
                                 "duration": 4,
-                                "radius": 120
+                                "radius": 100
                               }
                             }
                           ]
+                        },
+                        "scaleBy": {
+                          "source": "pickupsThisWave",
+                          "param": "radius",
+                          "perUnit": 8,
+                          "cap": 8
                         }
                       }
                     ]
@@ -18807,14 +18556,19 @@
                 "interfaceRole": "convert",
                 "equip": [
                   {
-                    "trigger": "onPickup",
+                    "trigger": "passive",
                     "effects": [
                       {
                         "atom": "dropLifetimeMul",
                         "params": {
-                          "mul": 1.3099999999999998
+                          "mul": 1.32
                         }
-                      },
+                      }
+                    ]
+                  },
+                  {
+                    "trigger": "onPickup",
+                    "effects": [
                       {
                         "atom": "restore",
                         "params": {
@@ -19109,8 +18863,7 @@
       },
       "amplifyAxis": {
         "params": {
-          "value": "+10",
-          "maxStacks": "+25"
+          "priorityWeight": "+1"
         },
         "description": ""
       },
@@ -19181,24 +18934,6 @@
                 }
               },
               {
-                "atom": "groundZone",
-                "params": {
-                  "radius": 145,
-                  "tickInterval": 0.6,
-                  "duration": 4,
-                  "effects": [
-                    {
-                      "atom": "focusPriority",
-                      "params": {
-                        "priorityWeight": 1.7,
-                        "duration": 4,
-                        "radius": 120
-                      }
-                    }
-                  ]
-                }
-              },
-              {
                 "atom": "extraDrop",
                 "params": {
                   "count": 3,
@@ -19227,24 +18962,6 @@
               },
               {
                 "atom": "aura",
-                "params": {
-                  "radius": 145,
-                  "tickInterval": 0.6,
-                  "duration": 4,
-                  "effects": [
-                    {
-                      "atom": "focusPriority",
-                      "params": {
-                        "priorityWeight": 1.7,
-                        "duration": 4,
-                        "radius": 120
-                      }
-                    }
-                  ]
-                }
-              },
-              {
-                "atom": "groundZone",
                 "params": {
                   "radius": 145,
                   "tickInterval": 0.6,
@@ -19397,7 +19114,7 @@
                         }
                       },
                       {
-                        "atom": "groundZone",
+                        "atom": "aura",
                         "params": {
                           "radius": 145,
                           "tickInterval": 0.6,
@@ -19525,20 +19242,24 @@
                 "equip": [
                   {
                     "trigger": "onPickup",
+                    "at": "point",
                     "effects": [
                       {
-                        "atom": "groundZone",
+                        "atom": "aura",
                         "params": {
-                          "radius": 145,
-                          "tickInterval": 0.6,
-                          "duration": 4,
+                          "radius": 80,
+                          "radiusOverTime": {
+                            "from": 80,
+                            "to": 165,
+                            "easing": "linear"
+                          },
+                          "duration": 3,
+                          "tickInterval": 0.45,
                           "effects": [
                             {
-                              "atom": "focusPriority",
+                              "atom": "restore",
                               "params": {
-                                "priorityWeight": 1.7,
-                                "duration": 4,
-                                "radius": 120
+                                "amountRatio": 0.06
                               }
                             }
                           ]
@@ -19573,8 +19294,7 @@
           {
             "star": 4,
             "amplify": {
-              "value": "+10",
-              "maxStacks": "+25"
+              "priorityWeight": "+1"
             }
           },
           {
@@ -19699,28 +19419,19 @@
               "triggerParams": {
                 "requiresStatus": "brand"
               },
+              "at": "point",
               "effects": [
                 {
                   "atom": "extraDrop",
                   "params": {
                     "count": 1,
                     "at": "point",
-                    "chance": 0.25
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onKill",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "chance": 0.65,
+                    "starWeights": {
+                      "1": 0.35,
+                      "2": 0.45,
+                      "3": 0.2
+                    }
                   }
                 }
               ]
@@ -19752,28 +19463,19 @@
               "triggerParams": {
                 "requiresStatus": "brand"
               },
+              "at": "point",
               "effects": [
                 {
                   "atom": "extraDrop",
                   "params": {
                     "count": 1,
                     "at": "point",
-                    "chance": 0.25
-                  }
-                }
-              ]
-            },
-            {
-              "trigger": "onKill",
-              "effects": [
-                {
-                  "atom": "statBuff",
-                  "params": {
-                    "stat": "damage",
-                    "operation": "mul",
-                    "value": 1.03,
-                    "duration": 1.5,
-                    "maxStacks": 1
+                    "chance": 0.65,
+                    "starWeights": {
+                      "1": 0.35,
+                      "2": 0.45,
+                      "3": 0.2
+                    }
                   }
                 }
               ]
@@ -19949,7 +19651,8 @@
                           "chance": 0.35
                         }
                       }
-                    ]
+                    ],
+                    "at": "densestCluster"
                   },
                   {
                     "trigger": "interval",
@@ -19966,7 +19669,8 @@
                           "hpThresholdRatio": 1
                         }
                       }
-                    ]
+                    ],
+                    "at": "densestCluster"
                   }
                 ]
               },
@@ -20020,28 +19724,19 @@
                     "triggerParams": {
                       "requiresStatus": "brand"
                     },
+                    "at": "point",
                     "effects": [
                       {
                         "atom": "extraDrop",
                         "params": {
                           "count": 1,
                           "at": "point",
-                          "chance": 0.25
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "trigger": "onKill",
-                    "effects": [
-                      {
-                        "atom": "statBuff",
-                        "params": {
-                          "stat": "damage",
-                          "operation": "mul",
-                          "value": 1.03,
-                          "duration": 1.5,
-                          "maxStacks": 1
+                          "chance": 0.65,
+                          "starWeights": {
+                            "1": 0.35,
+                            "2": 0.45,
+                            "3": 0.2
+                          }
                         }
                       }
                     ]
@@ -20084,15 +19779,15 @@
                     "trigger": "passive",
                     "effects": [
                       {
-                        "atom": "dropLifetimeMul",
+                        "atom": "expiryConvert",
                         "params": {
-                          "mul": 1.3099999999999998
+                          "ratio": 0.42
                         }
                       },
                       {
-                        "atom": "expiryConvert",
+                        "atom": "xpMul",
                         "params": {
-                          "ratio": 0.31
+                          "mul": 1.2
                         }
                       }
                     ]

@@ -14,9 +14,9 @@
 import { cfg } from '../../config';
 import type { RunBaseStatKind } from '../../config/types';
 import type { AttackInstance, Bullet, Card, CardType, Config, Enemy, GameEvent, GameState, GroundDrop, Rng, Summon, WeaponImpactSpec } from '../types';
-import type { AtomName, BindingDef, CardDef, EffectDef, Trigger } from './defs';
+import type { AtomName, BindingDef, CardDef, EffectDef, OriginSelector, Trigger } from './defs';
 import { atomBooleanDefault, atomNumberDefault, atomStringDefault, effectParams } from './atomContract';
-import { ATOMS, runEffects, type EffectCtx } from './registry';
+import { ATOMS, runEffects, selectEffectOrigin, type EffectCtx } from './registry';
 import { totalDamage } from '../stats';
 import { applyBuildScalingToBindings, applyBuildScalingToTier } from '../systems/buildModifierSystem';
 import { recordCardImpact, recordCardTrigger, totalEnemyHp } from '../../telemetry/combatCounters';
@@ -299,8 +299,9 @@ function bindingConditionMet(binding: BindingDef, payload: TriggerPayload): bool
 function baseCtx(
   state: GameState, config: Config, rng: Rng, star: number, payload: TriggerPayload = {},
   source?: { cardId: number; cardType: CardType; bindingIndex: number },
+  at?: OriginSelector,
 ): EffectCtx {
-  return {
+  const ctx: EffectCtx = {
     state, config, rng,
     events: [],
     origin: payload.point ?? { x: cfg.combat.turret.x, y: cfg.combat.turret.y },
@@ -313,9 +314,15 @@ function baseCtx(
     sourceBindingIndex: source?.bindingIndex,
     bullet: payload.bullet,
     enemy: payload.enemy,
+    scaleEnemy: payload.enemy,
     drop: payload.drop,
     merge: payload.merge,
   };
+  if (at) {
+    ctx.origin = selectEffectOrigin(ctx, at);
+    ctx.enemy = undefined;
+  }
+  return ctx;
 }
 
 /**
@@ -359,7 +366,9 @@ function fireTriggerBindings(state: GameState, config: Config, rng: Rng, trigger
     if (binding.trigger !== trigger) continue;
     if (!bindingConditionMet(binding, payload)) continue;
     if (!cooldownReady(state, card.id, bindingIndex, binding)) continue;
-    const ctx = baseCtx(state, config, rng, card.star, payload, { cardId: card.id, cardType: card.type, bindingIndex });
+    const ctx = baseCtx(state, config, rng, card.star, payload, { cardId: card.id, cardType: card.type, bindingIndex }, binding.at);
+    const dynamic = getModifiers(state);
+    ctx.dynamic = { thornsRatio: dynamic.thornsRatio, auraReduction: dynamic.breachReduction };
     const hpBefore = totalEnemyHp(state);
     recordCardTrigger(state, card.id);
     runEffects(ctx, binding.effects);
@@ -383,7 +392,9 @@ export function tickIntervalBindings(state: GameState, config: Config, rng: Rng,
     liveKeys.add(key);
     const clock = (state.intervalClocks[key] ?? seconds) - dt;
     if (clock <= 0) {
-      const ctx = baseCtx(state, config, rng, card.star, {}, { cardId: card.id, cardType: card.type, bindingIndex });
+      const ctx = baseCtx(state, config, rng, card.star, {}, { cardId: card.id, cardType: card.type, bindingIndex }, binding.at);
+      const dynamic = getModifiers(state);
+      ctx.dynamic = { thornsRatio: dynamic.thornsRatio, auraReduction: dynamic.breachReduction };
       const hpBefore = totalEnemyHp(state);
       recordCardTrigger(state, card.id);
       runEffects(ctx, binding.effects);
@@ -423,7 +434,13 @@ export interface Modifiers {
   }[];
   expiryConvert: { ratio: number } | null;
   weaponForms: WeaponFormContribution[];
-  auras: { key: string; sourceCardId: number; sourceCardType: CardType; sourceBindingIndex: number; radius: number | null; radiusRatioOfRange: number | null; tickInterval: number; effects: EffectDef[]; star: number }[];
+  auras: {
+    key: string; sourceCardId: number; sourceCardType: CardType; sourceBindingIndex: number;
+    radius: number | null; radiusRatioOfRange: number | null; tickInterval: number; effects: EffectDef[]; star: number;
+    shape: 'circle' | 'ring'; innerRadius?: number;
+    follow?: 'densestCluster' | 'nearestEnemy'; followLerp: number;
+    duration: number; radiusOverTime?: { from: number; to: number; easing?: 'linear' };
+  }[];
   equipmentAffixAdd: Record<RunBaseStatKind, number>;
 }
 
@@ -483,7 +500,40 @@ export function getModifiers(state: GameState): Modifiers {
   const expiryConvertByCard = new Map<number, number>();
   for (const { card, binding, bindingIndex } of orderedEquippedBindings(state)) {
     for (const ef of binding.effects) {
-      const p = effectParams(ef);
+      if (!('atom' in ef)) continue;
+      const rawParams = effectParams(ef);
+      const scale = ef.scaleBy;
+      let p = rawParams;
+      if (scale && typeof rawParams[scale.param] === 'number') {
+        let units = 0;
+        if (scale.source.startsWith('concurrentStatus:')) {
+          const status = scale.source.slice('concurrentStatus:'.length);
+          units = state.enemies.filter(enemy => enemyHasStatus(enemy, status)).length;
+        } else {
+          switch (scale.source) {
+            case 'shieldTier': units = state.shield?.hits ?? 0; break;
+            case 'thornsRatio': units = m.thornsRatio; break;
+            case 'auraReduction': units = m.breachReduction; break;
+            case 'enemiesOnField': units = state.enemies.length; break;
+            case 'enemiesInAura': case 'controlledInAura': {
+              const radius = typeof rawParams.radius === 'number' ? rawParams.radius as number
+                : (typeof rawParams.radiusRatioOfRange === 'number' ? rawParams.radiusRatioOfRange as number : 0.5)
+                  * cfg.combat.defaults.range;
+              const turret = cfg.combat.turret;
+              const nearby = state.enemies.filter(enemy => Math.hypot(enemy.x - turret.x, enemy.y - turret.y) <= radius + enemy.r);
+              units = scale.source === 'controlledInAura' ? nearby.filter(isControlled).length : nearby.length;
+              break;
+            }
+            case 'secondsSinceLastBreach': units = Math.max(0, state.time - state.effectRuntime.lastBreachAt); break;
+            case 'killsSinceLastRelease': units = Math.max(0, state.kills - state.effectRuntime.killsAtLastRelease); break;
+            case 'mergesThisRun': units = state.merges; break;
+            case 'pickupsThisWave': units = state.effectRuntime.pickupsThisWave; break;
+            case 'summonsAlive': units = state.summons.length; break;
+            case 'statusStacks': units = 0; break;
+          }
+        }
+        p = { ...rawParams, [scale.param]: (rawParams[scale.param] as number) + Math.min(scale.cap, units) * scale.perUnit };
+      }
       switch (ef.atom) {
         case 'dropRateMul': m.dropRateMul *= passiveNum(p, 'dropRateMul', 'mul'); break;
         case 'dropLifetimeMul': m.dropLifetimeMul *= passiveNum(p, 'dropLifetimeMul', 'mul'); break;
@@ -541,6 +591,12 @@ export function getModifiers(state: GameState): Modifiers {
               tickInterval: passiveNum(p, 'aura', 'tickInterval'),
               effects: Array.isArray(p.effects) ? (p.effects as EffectDef[]) : [],
               star: card.star,
+              shape: p.shape === 'ring' ? 'ring' : 'circle',
+              innerRadius: typeof p.innerRadius === 'number' ? p.innerRadius as number : undefined,
+              follow: p.follow === 'densestCluster' || p.follow === 'nearestEnemy' ? p.follow : undefined,
+              followLerp: typeof p.followLerp === 'number' ? p.followLerp as number : 0.5,
+              duration: typeof p.duration === 'number' ? p.duration as number : 3,
+              radiusOverTime: p.radiusOverTime as { from: number; to: number; easing?: 'linear' } | undefined,
             });
           }
           break;

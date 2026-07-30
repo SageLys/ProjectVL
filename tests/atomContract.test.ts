@@ -89,6 +89,7 @@ const PRE_MIGRATION_DEFAULTS: Record<string, number | string | boolean> = {
   'aura.tickInterval': 0.8,
   'aura.tickInterval@passive': 1,
   'aura.duration': 3,
+  'aura.followLerp': 0.5,
   'aura.shape': 'circle',
   'groundZone.radius': 100,
   'groundZone.duration': 3,

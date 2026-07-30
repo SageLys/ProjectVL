@@ -2,12 +2,20 @@ import type { CardAffixCandidateDef, SkillsConfig } from './types';
 import { AFFIX_SINKS, type AffixScalingTarget } from './affixSinks';
 import type { AtomName } from '../core/effects/defs';
 import { ATOM_CONTRACT, TRIGGER_NAMES, atomContract, type AtomParamSpec } from '../core/effects/atomContract';
+import designFingerprints from './base/designFingerprints.json';
 
 const CATEGORIES = new Set(['projectile', 'control', 'domain', 'economy', 'defense']);
 const BUILD_TAGS = new Set(['projectile', 'control', 'domain', 'defense', 'utility']);
 /** 原子清单与参数契约的唯一来源：core/effects/atomContract.ts。此处不得再手抄。 */
 const ATOMS = new Set<string>(Object.keys(ATOM_CONTRACT));
 const TRIGGERS = new Set<string>(TRIGGER_NAMES);
+const ORIGIN_SELECTORS = new Set(['turret', 'point', 'densestCluster', 'nearestEnemy', 'nearestToBreachLine']);
+const SCALE_SOURCES = new Set([
+  'statusStacks', 'shieldTier', 'thornsRatio', 'auraReduction', 'enemiesOnField', 'enemiesInAura',
+  'controlledInAura', 'secondsSinceLastBreach', 'killsSinceLastRelease', 'mergesThisRun',
+  'pickupsThisWave', 'summonsAlive',
+]);
+const STATUS_IDS = new Set(['controlled', 'frozen', 'slow', 'stun', 'stunned', 'vulnerable', 'dot', 'brand']);
 /** 词条属性同理派生自 AFFIX_SINKS（`Record<CardStatKind, …>`），不再手抄第二份。 */
 const CARD_STATS = new Set<string>(Object.keys(AFFIX_SINKS));
 const TIERS: Record<string, string> = { '3': 'core', '5': 'dual', '6': 'transform' };
@@ -29,7 +37,7 @@ function object(value: unknown, path: string): Record<string, unknown> {
   return value as Record<string, unknown>;
 }
 /** 效果所处的结算场景：装备态绑定（带触发器）或消耗态落点释放。 */
-type EffectScope = { kind: 'equip'; trigger: string } | { kind: 'consume' };
+type EffectScope = ({ kind: 'equip'; trigger: string } | { kind: 'consume' }) & { inForEach?: boolean };
 
 function typeMatches(type: AtomParamSpec['type'], value: unknown, spec: AtomParamSpec): boolean {
   const types = Array.isArray(type) ? type : [type];
@@ -66,8 +74,27 @@ function effects(value: unknown, path: string, scope: EffectScope): void {
   value.forEach((item, i) => {
     const at = `${path}[${i}]`;
     const e = object(item, at);
+    if (e.forEach !== undefined) {
+      if (scope.inForEach) fail(`${at}.forEach`, 'forEach 不得递归嵌套');
+      for (const key of Object.keys(e)) if (!['forEach', 'at', 'atom', 'params', 'scaleBy'].includes(key)) fail(`${at}.${key}`, 'forEach 包装器不允许该字段');
+      if (e.at !== undefined && !ORIGIN_SELECTORS.has(String(e.at))) fail(`${at}.at`, '非法投放原点');
+      const fanout = object(e.forEach, `${at}.forEach`);
+      for (const key of Object.keys(fanout)) if (!['set', 'maxTargets', 'order', 'effects'].includes(key)) fail(`${at}.forEach.${key}`, '不允许的字段');
+      const set = object(fanout.set, `${at}.forEach.set`);
+      if (!['enemiesWithStatus', 'ownZones', 'ownSummons'].includes(String(set.kind))) fail(`${at}.forEach.set.kind`, '非法集合');
+      if (set.kind === 'enemiesWithStatus') {
+        const statuses = Array.isArray(set.status) ? set.status : [set.status];
+        if (!statuses.length || statuses.some(status => !STATUS_IDS.has(String(status)))) fail(`${at}.forEach.set.status`, '必须是合法状态或非空状态数组');
+      }
+      if (set.kind === 'ownSummons' && set.summonKind !== undefined && typeof set.summonKind !== 'string') fail(`${at}.forEach.set.summonKind`, '必须是字符串');
+      if (!Number.isInteger(fanout.maxTargets) || Number(fanout.maxTargets) < 1 || Number(fanout.maxTargets) > 8) fail(`${at}.forEach.maxTargets`, '必须是 1..8 的整数');
+      if (fanout.order !== undefined && fanout.order !== 'nearest' && fanout.order !== 'farthest') fail(`${at}.forEach.order`, '必须是 nearest/farthest');
+      effects(fanout.effects, `${at}.forEach.effects`, { ...scope, inForEach: true });
+      return;
+    }
     if (typeof e.atom !== 'string' || !ATOMS.has(e.atom)) fail(`${at}.atom`, '非法效果原子');
-    for (const key of Object.keys(e)) if (key !== 'atom' && key !== 'params') fail(`${at}.${key}`, '不允许的字段');
+    for (const key of Object.keys(e)) if (!['atom', 'params', 'at', 'scaleBy'].includes(key)) fail(`${at}.${key}`, '不允许的字段');
+    if (e.at !== undefined && !ORIGIN_SELECTORS.has(String(e.at))) fail(`${at}.at`, '非法投放原点');
     const atom = e.atom as AtomName;
     const contract = atomContract(atom);
     if (scope.kind === 'equip') {
@@ -93,6 +120,17 @@ function effects(value: unknown, path: string, scope: EffectScope): void {
       effectParam(spec, raw, `${at}.params.${key}`);
     }
 
+    if (e.scaleBy !== undefined) {
+      const scale = object(e.scaleBy, `${at}.scaleBy`);
+      for (const key of Object.keys(scale)) if (!['source', 'param', 'perUnit', 'cap'].includes(key)) fail(`${at}.scaleBy.${key}`, '不允许的字段');
+      const source = String(scale.source);
+      const concurrent = source.startsWith('concurrentStatus:') && STATUS_IDS.has(source.slice('concurrentStatus:'.length));
+      if (!SCALE_SOURCES.has(source) && !concurrent) fail(`${at}.scaleBy.source`, '非法动态量来源');
+      if (typeof scale.param !== 'string' || !(scale.param in params)) fail(`${at}.scaleBy.param`, '必须指向同一效果 params 中已存在的参数');
+      if (typeof scale.perUnit !== 'number' || !Number.isFinite(scale.perUnit)) fail(`${at}.scaleBy.perUnit`, '必须是有限数值');
+      if (typeof scale.cap !== 'number' || !Number.isFinite(scale.cap) || scale.cap < 0) fail(`${at}.scaleBy.cap`, '必须是非负有限数值');
+    }
+
     // 少数原子的跨参数约束，无法由单参数契约表达。
     if (atom === 'restore' && typeof params.amount !== 'number' && typeof params.amountRatio !== 'number') {
       fail(`${at}.params`, 'restore 必须声明 amount 或 amountRatio');
@@ -100,6 +138,11 @@ function effects(value: unknown, path: string, scope: EffectScope): void {
     if (atom === 'statBuff') {
       if (Number(params.duration) <= 0) fail(`${at}.params.duration`, '必须大于 0');
       if (params.operation === 'mul' && Number(params.value) <= 0) fail(`${at}.params.value`, '乘法值必须大于 0');
+    }
+    if ((atom === 'aura' || atom === 'groundZone') && params.radiusOverTime !== undefined) {
+      const radius = object(params.radiusOverTime, `${at}.params.radiusOverTime`);
+      if (typeof radius.from !== 'number' || radius.from < 0 || typeof radius.to !== 'number' || radius.to < 0) fail(`${at}.params.radiusOverTime`, 'from/to 必须是非负数');
+      if (radius.easing !== undefined && radius.easing !== 'linear') fail(`${at}.params.radiusOverTime.easing`, '仅支持 linear');
     }
     if (Array.isArray(params.effects)) effects(params.effects, `${at}.params.effects`, scope);
   });
@@ -111,6 +154,8 @@ function bindings(value: unknown, path: string): void {
     if (typeof binding.trigger !== 'string' || !TRIGGERS.has(binding.trigger)) {
       fail(`${path}[${i}].trigger`, '缺少或非法触发器');
     }
+    for (const key of Object.keys(binding)) if (!['trigger', 'triggerParams', 'effects', 'at'].includes(key)) fail(`${path}[${i}].${key}`, '不允许的字段');
+    if (binding.at !== undefined && !ORIGIN_SELECTORS.has(String(binding.at))) fail(`${path}[${i}].at`, '非法投放原点');
     effects(binding.effects, `${path}[${i}].effects`, { kind: 'equip', trigger: binding.trigger });
   });
 }
@@ -253,6 +298,7 @@ function affixPool(value: unknown, path: string, card: Record<string, unknown>):
 type LooseBinding = {
   trigger?: unknown;
   triggerParams?: Record<string, unknown>;
+  at?: unknown;
   effects?: unknown;
 };
 
@@ -268,13 +314,119 @@ for (const [god, atoms] of Object.entries(GOD_IDENTITY_ATOMS)) for (const atom o
 const OVERWRITE_ATOMS = new Set(['shield', 'novaOnBreak', 'expiryConvert', 'execute']);
 const DIRECT_DEAD_TARGET_ATOMS = new Set(['burstDamage', 'slow', 'freeze', 'stun', 'vulnerable', 'dot', 'knockback', 'execute']);
 const warnedFingerprints = new Set<string>();
+const warnedIdentityContracts = new Set<string>();
+
+function canonical(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonical);
+  if (!value || typeof value !== 'object') return value;
+  const objectValue = value as Record<string, unknown>;
+  return Object.fromEntries(Object.keys(objectValue).sort().map(key => [key, canonical(objectValue[key])]));
+}
+
+function exactBranchFingerprint(equip: unknown): string {
+  if (!Array.isArray(equip)) return '';
+  return equip.map(binding => JSON.stringify(canonical(binding))).sort().join('|');
+}
+
+function branchPrimitiveMarkers(option: Record<string, unknown>): Set<string> {
+  const markers = new Set<string>();
+  visitBindingsInObject(option.equip, binding => {
+    if (typeof binding.at === 'string') markers.add(`at:${binding.at}`);
+  });
+  const walk = (value: unknown): void => {
+    if (Array.isArray(value)) { value.forEach(walk); return; }
+    if (!value || typeof value !== 'object') return;
+    const item = value as Record<string, unknown>;
+    if (typeof item.at === 'string') markers.add(`at:${item.at}`);
+    const scale = item.scaleBy as Record<string, unknown> | undefined;
+    if (typeof scale?.source === 'string') markers.add(`scaleBy:${scale.source}`);
+    const fanout = item.forEach as Record<string, unknown> | undefined;
+    const set = fanout?.set as Record<string, unknown> | undefined;
+    if (typeof set?.kind === 'string') markers.add(`forEach:${set.kind}`);
+    const params = item.params as Record<string, unknown> | undefined;
+    if (params?.radiusOverTime) markers.add('radiusOverTime');
+    if (params?.follow) markers.add('follow');
+    if (params?.shape === 'line') markers.add('shape:line');
+    Object.values(item).forEach(walk);
+  };
+  walk(option.equip);
+  return markers;
+}
+
+function validateCrossCardAndDesignFingerprints(cards: Record<string, unknown>[]): void {
+  const seen = new Map<string, { cardId: string; branchId: string }>();
+  const fixtureCards = designFingerprints.cards as Record<string, {
+    identityContract: string;
+    branches: Record<string, { star: number; triggers: string[]; atoms: string[]; at?: string; requires?: string[] }>;
+  }>;
+  for (const card of cards.filter(candidate => candidate.recipeOnly !== true)) {
+    const cardId = String(card.id);
+    const expectedCard = fixtureCards[cardId];
+    if (!expectedCard) fail('$.cards', `V16：${cardId} 缺少设计指纹卡条目`);
+    const tree = card.evolutionTree as Record<string, unknown>;
+    const checkpoints = tree.checkpoints as Record<string, unknown>[];
+    const actualIds = new Set<string>();
+    for (const checkpoint of checkpoints) for (const rawOption of checkpoint.options as Record<string, unknown>[]) {
+      const option = rawOption as Record<string, unknown>;
+      const branchId = String(option.id);
+      actualIds.add(branchId);
+      const fingerprint = exactBranchFingerprint(option.equip);
+      const prior = seen.get(fingerprint);
+      if (prior && prior.cardId !== cardId) {
+        fail('$.cards', `V15：跨卡分支完全同构 ${prior.cardId}/${prior.branchId} = ${cardId}/${branchId}`);
+      }
+      seen.set(fingerprint, { cardId, branchId });
+
+      const expected = expectedCard.branches[branchId];
+      if (!expected) fail('$.cards', `V16：${cardId}/${branchId} 缺少设计指纹分支条目`);
+      if (expected.star !== checkpoint.star) fail('$.cards', `V16：${cardId}/${branchId} 星级不符`);
+      const triggers = new Set<string>();
+      const atoms = new Set<string>();
+      visitBindingsInObject(option.equip, binding => { if (typeof binding.trigger === 'string') triggers.add(binding.trigger); });
+      visitEffectsInObject(option.equip, effect => { if (typeof effect.atom === 'string') atoms.add(effect.atom); });
+      const missingTriggers = expected.triggers.filter(trigger => !triggers.has(trigger));
+      if (missingTriggers.length) fail('$.cards', `V16：${cardId}/${branchId} 缺触发器 ${missingTriggers.join(',')}`);
+      const missingAtoms = expected.atoms.filter(atom => !atoms.has(atom));
+      if (missingAtoms.length) fail('$.cards', `V16：${cardId}/${branchId} 缺核心原子 ${missingAtoms.join(',')}`);
+      const markers = branchPrimitiveMarkers(option);
+      if (expected.at && !markers.has(`at:${expected.at}`)) fail('$.cards', `V16：${cardId}/${branchId} 投放原点应为 ${expected.at}`);
+      const missingRequirements = (expected.requires ?? []).filter(marker => !markers.has(marker));
+      if (missingRequirements.length) fail('$.cards', `V16：${cardId}/${branchId} 缺原语 ${missingRequirements.join(',')}`);
+    }
+    const missingEntries = Object.keys(expectedCard.branches).filter(id => !actualIds.has(id));
+    if (missingEntries.length) fail('$.cards', `V16：${cardId} 缺实现分支 ${missingEntries.join(',')}`);
+
+    const contract = String(card.identityContract ?? '');
+    const eventWords: Array<[string, string]> = [['突破', 'onBreach'], ['击杀', 'onKill'], ['拾取', 'onPickup'], ['合成', 'onMerge']];
+    for (const [word, trigger] of eventWords) {
+      if (!contract.includes(word)) continue;
+      const hasTrigger = checkpoints.some(checkpoint => (checkpoint.options as Record<string, unknown>[]).some(candidate => {
+        let found = false;
+        visitBindingsInObject(candidate.equip, binding => { if (binding.trigger === trigger) found = true; });
+        return found;
+      }));
+      const warningKey = `${cardId}:${trigger}`;
+      if (!hasTrigger && !warnedIdentityContracts.has(warningKey)) {
+        warnedIdentityContracts.add(warningKey);
+        console.warn(`[skills-schema v${SKILLS_SCHEMA_VERSION}] V17 warning: ${cardId} identityContract 含“${word}”但无 ${trigger}`);
+      }
+    }
+  }
+  for (const fixtureId of Object.keys(fixtureCards)) {
+    if (!cards.some(card => card.recipeOnly !== true && card.id === fixtureId)) fail('$.cards', `V16：设计指纹中的 ${fixtureId} 无实现卡`);
+  }
+}
 
 function visitEffects(value: unknown, visit: (effect: Record<string, unknown>) => void): void {
   if (!Array.isArray(value)) return;
   for (const raw of value) {
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) continue;
     const effect = raw as Record<string, unknown>;
-    visit(effect);
+    if (typeof effect.atom === 'string') visit(effect);
+    const fanout = effect.forEach;
+    if (fanout && typeof fanout === 'object' && !Array.isArray(fanout)) {
+      visitEffects((fanout as Record<string, unknown>).effects, visit);
+    }
     const params = effect.params;
     if (params && typeof params === 'object' && !Array.isArray(params)) {
       visitEffects((params as Record<string, unknown>).effects, visit);
@@ -282,17 +434,18 @@ function visitEffects(value: unknown, visit: (effect: Record<string, unknown>) =
   }
 }
 
-function optionBindings(option: Record<string, unknown>): LooseBinding[] {
-  return Array.isArray(option.equip) ? option.equip as LooseBinding[] : [];
-}
-
 function bindingFingerprint(value: unknown): string {
   if (!Array.isArray(value)) return '';
   return value.map(raw => {
     const binding = raw as LooseBinding;
     const atoms: string[] = [];
-    visitEffects(binding.effects, effect => atoms.push(String(effect.atom)));
-    return `${String(binding.trigger)}:${[...new Set(atoms)].sort().join('+')}`;
+    visitEffects(binding.effects, effect => {
+      atoms.push(String(effect.atom));
+      const scale = effect.scaleBy as Record<string, unknown> | undefined;
+      if (scale?.source) atoms.push(`scaleBy:${String(scale.source)}`);
+      if (effect.at) atoms.push(`at:${String(effect.at)}`);
+    });
+    return `${String(binding.trigger)}@${String(binding.at ?? 'default')}:${[...new Set(atoms)].sort().join('+')}`;
   }).sort().join('|');
 }
 
@@ -354,11 +507,10 @@ function validateDesignRules(card: Record<string, unknown>, path: string): void 
     fail(`${path}.evolutionTree.checkpoints[3].options`, 'V1：3★ 三选项的载体/触发器指纹必须两两不同');
   }
   const god = String(card.god ?? '');
-  options3.forEach((option, index) => {
-    if (!producesGodResource(god, option.equip)) {
-      fail(`${path}.evolutionTree.checkpoints[3].options[${index}]`, `V2：3★ 分支必须产出本神 ${god} 身份资源`);
-    }
-  });
+  // The prose-era V2 heuristic required every 3★ route to carry a god-owned
+  // atom, which forced copied filler onto event-identity cards (notably
+  // retribution). V16 now validates each route against its authored atoms and
+  // trigger, so the heuristic is intentionally retired.
 
   const roles = options5.map(option => option.interfaceRole);
   if (roles.some(role => !['payoff', 'spread', 'convert'].includes(String(role)))
@@ -375,21 +527,27 @@ function validateDesignRules(card: Record<string, unknown>, path: string): void 
   }
   const branch5Params = new Set<string>();
   options5.forEach(option => bindingParamKeys(option.equip, true).forEach(key => branch5Params.add(key)));
-  const collision = Object.keys(amplify ?? {}).filter(key => branch5Params.has(key));
+  const paramAtoms = (options: Record<string, unknown>[], key: string): Set<string> => {
+    const atoms = new Set<string>();
+    options.forEach(option => visitEffectsInObject(option.equip, effect => {
+      const params = effect.params as Record<string, unknown> | undefined;
+      if (params && key in params) atoms.add(String(effect.atom));
+    }));
+    return atoms;
+  };
+  const collision = Object.keys(amplify ?? {}).filter(key => {
+    if (!branch5Params.has(key)) return false;
+    const atoms3 = paramAtoms(options3, key);
+    const atoms5 = paramAtoms(options5, key);
+    return [...atoms3].some(atom => atoms5.has(atom));
+  });
   if (collision.length) fail(`${path}.evolutionTree.sharedNodes[4].amplify`, `V4：不得与 5★ 强化同一参数（${collision.join(',')}）`);
 
-  options5.forEach((option, optionIndex) => {
-    const bindings = optionBindings(option);
-    bindings.forEach((candidate, bindingIndex) => {
-      const tp = candidate.triggerParams;
-      if (!tp?.requiresStatus && !tp?.requiresSource) return;
-      const fallback = bindings.some(other => other !== candidate
-        && other.trigger === candidate.trigger
-        && !other.triggerParams?.requiresStatus
-        && !other.triggerParams?.requiresSource);
-      if (!fallback) fail(`${path}.evolutionTree.checkpoints[5].options[${optionIndex}].equip[${bindingIndex}]`, 'V5：条件效果必须有零资源 fallback');
-    });
-  });
+  // V5's former "second unconditional binding" representation was not an else
+  // branch: it also fired when the condition succeeded and silently added a
+  // copied statBuff to many cards. Conditional fallback requires a dedicated
+  // runtime branch primitive; until then the v4 prose remains descriptive and
+  // V16 validates the required gated carrier without manufacturing extra atoms.
 
   const allowedGods = recipeOnly
     ? new Set((card.sourceGods as unknown[]).map(String))
@@ -472,7 +630,8 @@ function validateDeadTargetBindings(value: unknown, path: string): void {
     for (const raw of Array.isArray(binding.effects) ? binding.effects : []) {
       if (!raw || typeof raw !== 'object' || Array.isArray(raw)) continue;
       const effect = raw as Record<string, unknown>;
-      if (DIRECT_DEAD_TARGET_ATOMS.has(String(effect.atom))) {
+      const spatial = binding.at === 'point' || ORIGIN_SELECTORS.has(String(effect.at));
+      if (DIRECT_DEAD_TARGET_ATOMS.has(String(effect.atom)) && !spatial) {
         fail(path, `V8：${binding.trigger} 不得直接作用已移除的单体敌人（${String(effect.atom)}）`);
       }
     }
@@ -596,4 +755,5 @@ export function validateSkillsConfig(value: unknown): asserts value is SkillsCon
   });
   validateAnchorContracts(root.cards as Record<string, unknown>[]);
   warnCrossGodCategoryFingerprints(root.cards as Record<string, unknown>[]);
+  validateCrossCardAndDesignFingerprints(root.cards as Record<string, unknown>[]);
 }

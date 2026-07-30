@@ -11,14 +11,15 @@ import { resolve } from 'node:path';
 import { ATOM_CONTRACT, type AtomContract } from '../src/core/effects/atomContract';
 
 type Json = Record<string, any>;
-type Effect = { atom: string; params?: Record<string, any> };
-type Binding = { trigger: string; triggerParams?: Record<string, any>; effects: Effect[] };
+type Effect = { atom: string; params?: Record<string, any>; at?: string; scaleBy?: Record<string, any> };
+type Binding = { trigger: string; triggerParams?: Record<string, any>; at?: string; effects: Effect[] };
 
 const root = resolve(import.meta.dirname, '..');
 const skillsPath = resolve(root, 'src/config/base/skills.json');
 const recipesPath = resolve(root, 'src/config/base/evolutionRecipes.json');
 const textsPath = resolve(root, 'src/data/texts.json');
 const designPath = resolve(root, 'docs/五神35卡_完整设计表_v4.md');
+const fingerprintsPath = resolve(root, 'src/config/base/designFingerprints.json');
 
 const sourceSkills = JSON.parse(readFileSync(skillsPath, 'utf8')) as Json;
 const texts = JSON.parse(readFileSync(textsPath, 'utf8')) as Json;
@@ -67,6 +68,15 @@ const deepClone = <T>(value: T): T => structuredClone(value);
 const clean = (value: string): string => value.replace(/\*\*/g, '').replace(/`/g, '').trim();
 const atom = (name: string, params: Record<string, any> = {}): Effect =>
   Object.keys(params).length ? { atom: name, params } : { atom: name };
+const scaled = (effect: Effect, source: string, param: string, perUnit: number, cap: number): Effect => ({
+  ...effect, scaleBy: { source, param, perUnit, cap },
+});
+const placed = (effect: Effect, at: string): Effect => ({ ...effect, at });
+const fanout = (set: Record<string, any>, maxTargets: number, effects: Effect[], order: 'nearest' | 'farthest' = 'nearest'): Effect => ({
+  atom: effects[0]?.atom ?? 'burstDamage',
+  ...(effects[0]?.params ? { params: deepClone(effects[0].params) } : {}),
+  forEach: { set, maxTargets, order, effects },
+} as unknown as Effect);
 const binding = (trigger: string, effects: Effect[], triggerParams?: Record<string, any>): Binding => ({
   trigger,
   ...(triggerParams && Object.keys(triggerParams).length ? { triggerParams } : {}),
@@ -226,9 +236,8 @@ function carrierBindings(god: string, carrier: string, description: string, vari
   for (const t of triggers) {
     const params = t.trigger === 'interval' ? { seconds: t.seconds ?? 3 } : undefined;
     let eventEffects = deepClone(effects.length ? effects : [resourceEffect(god, variant)]);
-    if (t.trigger !== 'passive') eventEffects = eventEffects.map(effect => effect.atom === 'aura'
-      ? atom('groundZone', { ...effect.params })
-      : effect);
+    // Triggered auras are now a first-class temporary zone; preserve the
+    // authored carrier instead of silently rewriting it to groundZone.
     if (t.trigger === 'onKill' || t.trigger === 'onBreach') {
       // Both events carry an enemy object that has already left state.enemies.
       // Convert direct damage to the coordinate-class explosion carrier and
@@ -403,9 +412,7 @@ function branch5Bindings(
   }
 
   let eventEffects = deepClone(main);
-  if (event !== 'passive') eventEffects = eventEffects.map(effect => effect.atom === 'aura'
-    ? atom('groundZone', { ...effect.params })
-    : effect);
+  // T1–T4 make triggered auras executable, so carrier identity is preserved.
   if (event === 'onKill' || event === 'onBreach') eventEffects = eventEffects.flatMap(effect => {
     if (effect.atom === 'burstDamage') return [atom('aoeOnHit', {
       damageRatio: Number(effect.params?.damageMul ?? 1), radius: Number(effect.params?.radius ?? 100), falloff: 0.35,
@@ -705,6 +712,299 @@ const cards = parsedCards.map((parsed, cardIndex) => {
   };
 });
 
+/** v1 primitive/backfill work order. Keep these overrides explicit and reviewable. */
+function applyTargetingBackfill(baseCards: Json[]): void {
+  const option = (id: string): Json => {
+    for (const card of baseCards) for (const checkpoint of card.evolutionTree.checkpoints) {
+      const found = checkpoint.options.find((candidate: Json) => candidate.id === id);
+      if (found) return found;
+    }
+    throw new Error(`Unknown branch ${id}`);
+  };
+  const set = (id: string, equip: Binding[]): void => { option(id).equip = equip; };
+  const b = (trigger: string, effects: Effect[], triggerParams?: Json, at?: string): Binding => ({
+    trigger, ...(triggerParams && Object.keys(triggerParams).length ? { triggerParams } : {}), ...(at ? { at } : {}), effects,
+  });
+  const status = (name: string) => ({ kind: 'enemiesWithStatus', status: name });
+  const ownZones = { kind: 'ownZones' };
+
+  // G01
+  set('frost2x', [b('onHit', [atom('slow', { ratio: 0.3, duration: 3, radius: 170 })], { requiresStatus: 'controlled' })]);
+  set('impact2x', [b('onHit', [atom('slow', { ratio: 0.25, duration: 2.5, radius: 115 }), atom('knockback', { distance: 65, collisionDamage: 0.15, radius: 115 })], { requiresStatus: 'controlled' })]);
+  set('glacialSpike2x', [b('onHit', [atom('groundZone', { radius: 95, duration: 2.5, tickInterval: 0.5, shape: 'line', lineFrom: 'bulletPath', effects: [atom('slow', { ratio: 0.28, duration: 2.5 })] })], { requiresStatus: 'controlled' })]);
+  set('hoarfrostTithe2x', [b('onHit', [fanout(status('controlled'), 4, [scaled(atom('slow', { ratio: 0.2, duration: 2.4, radius: 70 }), 'controlledInAura', 'ratio', 0.02, 4), scaled(atom('burstDamage', { damageMul: 0.3, radius: 55 }), 'controlledInAura', 'damageMul', 0.04, 4)])], { requiresStatus: 'controlled' })]);
+
+  // G02–G05
+  set('chainLightning1x', [b('onHit', [atom('burstDamage', { damageMul: 0.8, radius: 55 })], { requiresStatus: 'vulnerable' })]);
+  set('pierce1x', [b('onHit', [scaled(atom('burstDamage', { damageMul: 0.55, radius: 0 }), 'concurrentStatus:vulnerable', 'damageMul', 0.05, 8)], { requiresStatus: 'vulnerable' })]);
+  set('stormcall1x', [b('onHit', [atom('burstDamage', { damageMul: 0.45, radius: 150 })], { requiresStatus: 'vulnerable' })]);
+  set('pierce2x', [b('onHit', [atom('aoeOnHit', { radius: 80, damageRatio: 0.5, falloff: 0.4 }), atom('vulnerable', { ratio: 0.1, duration: 2.4 })], { requiresStatus: 'vulnerable' })]);
+  set('staticSurge2x', [b('onHit', [atom('aoeOnHit', { radius: 105, damageRatio: 0, falloff: 0 }), atom('vulnerable', { ratio: 0.13, duration: 2.8 })], { requiresStatus: 'vulnerable' })]);
+  set('overcharge2x', [b('onHit', [scaled(atom('aoeOnHit', { radius: 70, damageRatio: 0, falloff: 0 }), 'concurrentStatus:vulnerable', 'radius', 8, 8), scaled(atom('vulnerable', { ratio: 0.12, duration: 2.6, maxStacks: 2 }), 'concurrentStatus:vulnerable', 'maxStacks', 0.5, 6)], { requiresStatus: 'vulnerable' })]);
+  set('staticSurgeB', [b('passive', [atom('aura', { radius: 145, tickInterval: 0.35, duration: 4, effects: [atom('vulnerable', { ratio: 0.1, duration: 2 })] })])]);
+  set('galvanicWardB', [b('passive', [atom('aura', { radius: 130, tickInterval: 0.75, duration: 4, effects: [atom('vulnerable', { ratio: 0.1, duration: 2 }), atom('stun', { duration: 0.12, chance: 0.2 })] })])]);
+  set('overchargeB', [b('passive', [atom('aura', { radius: 125, tickInterval: 0.8, duration: 4, effects: [atom('vulnerable', { ratio: 0.08, duration: 2 }), scaled(atom('statBuff', { stat: 'damage', operation: 'mul', value: 1.02, duration: 1, maxStacks: 4 }), 'enemiesInAura', 'value', 0.01, 6)] })])]);
+  set('frostB', [b('passive', [atom('aura', { radius: 175, tickInterval: 0.8, duration: 4, effects: [atom('slow', { ratio: 0.25, duration: 2.5 })] })])]);
+  set('frozenBulwarkB', [b('passive', [atom('aura', { radius: 105, shape: 'ring', innerRadius: 65, tickInterval: 0.55, duration: 4, effects: [atom('slow', { ratio: 0.34, duration: 2 })] })])]);
+  set('hoarfrostTitheB', [b('passive', [atom('aura', { radius: 135, tickInterval: 0.75, duration: 4, effects: [atom('slow', { ratio: 0.18, duration: 2 }), scaled(atom('statBuff', { stat: 'damage', operation: 'mul', value: 1.01, duration: 1.2, maxStacks: 5 }), 'enemiesInAura', 'value', 0.008, 6)] })])]);
+
+  // G06–G10
+  set('permafrost1x', [b('interval', [fanout(status('frozen'), 6, [atom('burstDamage', { damageMul: 0.75, radius: 75 })])], { seconds: 3 })]);
+  set('magmaPool1x', [b('interval', [fanout(ownZones, 5, [atom('burstDamage', { damageMul: 0.55, radius: 95 })])], { seconds: 3 })]);
+  set('overgrowth1x', [b('interval', [fanout(status('brand'), 4, [atom('burstDamage', { damageMul: 0.65, radius: 85 })])], { seconds: 3 })]);
+  set('frozenBulwark1x', [b('onBreach', [scaled(atom('burstDamage', { damageMul: 0.7, radius: 90 }), 'statusStacks', 'damageMul', 0.18, 5)], undefined, 'point')]);
+  set('sanctum1x', [b('onBreach', [scaled(atom('burstDamage', { damageMul: 0.65, radius: 120 }), 'auraReduction', 'damageMul', 1.5, 0.8)], undefined, 'point')]);
+  set('retribution1x', [b('onBreach', [scaled(atom('burstDamage', { damageMul: 0.8, radius: 105 }), 'shieldTier', 'damageMul', 0.18, 5)], undefined, 'point')]);
+  set('scorch1x', [b('onHit', [atom('burstDamage', { damageMul: 0.75, radius: 90 }), atom('dot', { damageRatio: 0.08, duration: 2.5, tickInterval: 0.5 })], { requiresStatus: 'dot' })]);
+  set('splitBlast1x', [b('onHit', [atom('burstDamage', { damageMul: 1.15, radius: 60 }), atom('dot', { damageRatio: 0.09, duration: 2.2, tickInterval: 0.5 })], { requiresStatus: 'dot' })]);
+  set('ashHarvest1x', [b('onHit', [scaled(atom('burstDamage', { damageMul: 0.6, radius: 95 }), 'concurrentStatus:dot', 'damageMul', 0.07, 8), atom('dot', { damageRatio: 0.07, duration: 3, tickInterval: 0.5 })], { requiresStatus: 'dot' })]);
+  set('scorch2x', [b('onHit', [atom('dot', { damageRatio: 0.07, duration: 3.2, radius: 150, tickInterval: 0.5 })], { requiresStatus: 'dot' })]);
+  set('meteor2x', [b('onHit', [atom('dot', { damageRatio: 0.08, duration: 2.8, radius: 115, tickInterval: 0.5 }), atom('knockback', { distance: 70, collisionDamage: 0.18, radius: 115 })], { requiresStatus: 'dot' })]);
+  set('flashfire2x', [b('onHit', [placed(scaled(atom('dot', { damageRatio: 0.1, duration: 2.4, radius: 100, tickInterval: 0.5 }), 'enemiesOnField', 'damageRatio', 0.01, 12), 'densestCluster')], { requiresStatus: 'dot' })]);
+  set('staticSurgeC', [b('interval', [placed(atom('burstDamage', { damageMul: 1.15, radius: 90 }), 'nearestEnemy'), atom('vulnerable', { ratio: 0.14, duration: 3, radius: 90 })], { seconds: 4 })]);
+  set('overchargeC', [b('interval', [placed(scaled(atom('burstDamage', { damageMul: 0.95, radius: 75 }), 'killsSinceLastRelease', 'radius', 7, 10), 'densestCluster'), atom('vulnerable', { ratio: 0.13, duration: 3, radius: 75 })], { seconds: 4 })]);
+
+  // G11–G17
+  set('galvanicWard3x', [b('onBreach', [scaled(atom('restore', { amountRatio: 0.025 }), 'concurrentStatus:vulnerable', 'amountRatio', 0.008, 8)], { cooldownSeconds: 6 }, 'point')]);
+  set('frozenBulwark3x', [b('onBreach', [atom('restore', { amountRatio: 0.07 }), atom('freeze', { duration: 0.7, stacksToTrigger: 2, radius: 105 })], { cooldownSeconds: 6 }, 'point')]);
+  set('frost1x', [b('onHit', [atom('burstDamage', { damageMul: 1.25, radius: 80 })], { requiresStatus: 'frozen' })]);
+  set('glacialSpike1x', [b('onHit', [scaled(atom('burstDamage', { damageMul: 0.7, radius: 65 }), 'statusStacks', 'damageMul', 0.22, 5)], { requiresStatus: 'frozen' })]);
+  set('iceTombC', [b('interval', [placed(atom('freeze', { duration: 1.1, stacksToTrigger: 1, radius: 45 }), 'nearestEnemy')], { seconds: 4 })]);
+  set('hoarfrostTitheC', [b('interval', [scaled(atom('freeze', { duration: 0.8, stacksToTrigger: 3, radius: 80 }), 'concurrentStatus:frozen', 'radius', 6, 8)], { seconds: 4 })]);
+  set('splitBlast3x', [b('onKill', [atom('extraDrop', { count: 1, at: 'point', chance: 0.45 })], { requiresSource: 'dot' }, 'point')]);
+  set('magmaPool3x', [b('onKill', [fanout(ownZones, 3, [atom('extraDrop', { count: 1, at: 'point', chance: 0.28 })])], { requiresSource: 'dot' })]);
+  set('meteor1x', [b('onHit', [atom('burstDamage', { damageMul: 0.65, radius: 145 }), atom('knockback', { distance: 85, collisionDamage: 0.2, radius: 145 }), atom('dot', { damageRatio: 0.07, duration: 2.5, tickInterval: 0.5 })], { requiresStatus: 'dot' })]);
+  set('flashfire1x', [b('onHit', [atom('burstDamage', { damageMul: 1.2, radius: 65 }), atom('knockback', { distance: 35, collisionDamage: 0.1, radius: 65 }), atom('dot', { damageRatio: 0.1, duration: 2.2, tickInterval: 0.5 })], { requiresStatus: 'dot' })]);
+  set('magmaPoolB', [b('interval', [placed(atom('groundZone', { radius: 155, duration: 4, tickInterval: 0.6, effects: [atom('dot', { damageRatio: 0.07, duration: 3, tickInterval: 0.5 })] }), 'densestCluster')], { seconds: 3 })]);
+  set('ashHarvestB', [b('interval', [placed(atom('groundZone', { radius: 105, duration: 3.5, tickInterval: 0.5, effects: [scaled(atom('dot', { damageRatio: 0.07, duration: 2.5, tickInterval: 0.5 }), 'enemiesInAura', 'damageRatio', 0.012, 6)] }), 'densestCluster')], { seconds: 3 })]);
+  set('magmaPool2x', [b('onKill', [fanout(ownZones, 4, [atom('groundZone', { radius: 85, duration: 3.5, tickInterval: 0.5, effects: [atom('dot', { damageRatio: 0.08, duration: 3, tickInterval: 0.5 })] })])], { requiresSource: 'dot' })]);
+  set('ashHarvest2x', [b('onKill', [scaled(atom('groundZone', { radius: 75, duration: 2.5, tickInterval: 0.5, effects: [atom('dot', { damageRatio: 0.1, duration: 2.5, tickInterval: 0.5 })] }), 'concurrentStatus:dot', 'duration', 0.35, 8)], { requiresSource: 'dot' }, 'point')]);
+
+  // G18–G21
+  set('aegis2x', [b('passive', [atom('aura', { radius: 145, tickInterval: 0.7, duration: 4, effects: [atom('breachReduction', { ratio: 0.12 }), atom('summon', { kind: 'decoy', count: 1, hp: 70, duration: 6 })] })])]);
+  set('sanctum2x', [b('passive', [scaled(atom('aura', { radius: 125, tickInterval: 0.7, duration: 4, effects: [atom('breachReduction', { ratio: 0.14 })] }), 'enemiesOnField', 'radius', 5, 10)]), b('onWaveStart', [atom('shield', { absorbHits: 1, regenSeconds: 10 })])]);
+  set('thornsB', [b('passive', [atom('thorns', { ratio: 0.2 }), atom('aura', { radius: 95, shape: 'ring', innerRadius: 45, tickInterval: 0.35, duration: 4, effects: [atom('burstDamage', { damageMul: 0.13, radius: 0 })] })])]);
+  set('ironvineB', [b('passive', [atom('thorns', { ratio: 0.12 }), atom('aura', { radius: 170, tickInterval: 0.8, duration: 4, effects: [scaled(atom('burstDamage', { damageMul: 0.045, radius: 0 }), 'secondsSinceLastBreach', 'damageMul', 0.004, 20)] })])]);
+  set('thorns1x', [b('onBreach', [scaled(atom('burstDamage', { damageMul: 0.7, radius: 90 }), 'thornsRatio', 'damageMul', 1.2, 1)], { cooldownSeconds: 3 }, 'point')]);
+  set('ironvine1x', [b('onBreach', [scaled(atom('burstDamage', { damageMul: 0.65, radius: 105 }), 'secondsSinceLastBreach', 'damageMul', 0.05, 20)], { cooldownSeconds: 3 }, 'point')]);
+  set('thorns2x', [b('passive', [atom('aura', { radius: 90, radiusOverTime: { from: 90, to: 175, easing: 'linear' }, duration: 4, tickInterval: 0.6, effects: [atom('thorns', { ratio: 0.26 })] }), atom('summon', { kind: 'decoy', count: 1, hp: 65, duration: 6 })])]);
+  set('ironvine2x', [b('passive', [atom('thorns', { ratio: 0.32 }), scaled(atom('aura', { radius: 120, duration: 4, tickInterval: 0.7, effects: [atom('thorns', { ratio: 0.12 })] }), 'secondsSinceLastBreach', 'radius', 3, 20), atom('summon', { kind: 'decoy', count: 1, hp: 70, duration: 6 })])]);
+
+  // G22–G27
+  set('harvestB', [b('interval', [atom('focusPriority', { priorityWeight: 1.6, duration: 4, radius: 125 })], { seconds: 3 }), b('passive', [atom('dropRateMul', { mul: 1.16 })])]);
+  set('bountyCallB', [b('interval', [atom('focusPriority', { priorityWeight: 1.85, duration: 4, radius: 115 })], { seconds: 3 }), b('onHit', [atom('burstDamage', { damageMul: 0.22, radius: 0 })], { requiresStatus: 'brand' })]);
+  set('harvestC', [b('onPickup', [atom('focusPriority', { priorityWeight: 1, duration: 2.5, radius: 105 }), atom('dropLifetimeMul', { mul: 1.22 })], undefined, 'point')]);
+  set('bountyCallC', [b('onPickup', [placed(atom('focusPriority', { priorityWeight: 2, duration: 4, radius: 65 }), 'nearestToBreachLine')])]);
+  set('harvest1x', [b('onKill', [atom('extraDrop', { count: 1, at: 'point', chance: 0.35 })], { requiresStatus: 'brand' }, 'point')]);
+  set('luckyStar1x', [b('onKill', [atom('extraDrop', { count: 1, at: 'point', chance: 0.65, starWeights: { '1': 0.35, '2': 0.45, '3': 0.2 } })], { requiresStatus: 'brand' }, 'point')]);
+  set('harvest3x', [b('passive', [atom('dropLifetimeMul', { mul: 1.65 }), atom('expiryConvert', { ratio: 0.12 })])]);
+  set('luckyStar3x', [b('passive', [atom('expiryConvert', { ratio: 0.42 }), atom('xpMul', { mul: 1.2 })])]);
+  set('fateLoom1x', [b('onKill', [scaled(atom('burstDamage', { damageMul: 0.6, radius: 95 }), 'mergesThisRun', 'damageMul', 0.04, 20), atom('extraDrop', { count: 1, at: 'point', chance: 0.22 })], { requiresStatus: 'brand' }, 'point')]);
+  set('bountyCall1x', [b('onKill', [scaled(atom('burstDamage', { damageMul: 0.65, radius: 90 }), 'concurrentStatus:brand', 'damageMul', 0.07, 8), atom('focusPriority', { priorityWeight: 2, duration: 5, radius: 100 })], { requiresStatus: 'brand' }, 'point')]);
+  set('overgrowth2x', [b('onPickup', [scaled(atom('aura', { radius: 100, duration: 4, tickInterval: 0.65, effects: [atom('focusPriority', { priorityWeight: 1.7, duration: 4, radius: 100 })] }), 'pickupsThisWave', 'radius', 8, 8)])]);
+  set('springOfLife2x', [b('onPickup', [atom('groundZone', { radius: 80, radiusOverTime: { from: 80, to: 165, easing: 'linear' }, duration: 3, tickInterval: 0.45, effects: [atom('restore', { amountRatio: 0.06 })] })], undefined, 'point')]);
+
+  // Remaining T1–T5 service-list branches that are not members of G01–G27.
+  const retarget = (id: string, at: string): void => {
+    const branch = option(id);
+    branch.equip = branch.equip.map((item: Binding) => ({ ...item, at }));
+  };
+  const addScale = (id: string, source: string, preferredParams: string[]): void => {
+    const branch = option(id);
+    const walk = (effects: any[]): boolean => {
+      for (const effect of effects) {
+        if (effect.forEach && walk(effect.forEach.effects)) return true;
+        if (Array.isArray(effect.params?.effects) && walk(effect.params.effects)) return true;
+        for (const param of preferredParams) if (typeof effect.params?.[param] === 'number') {
+          effect.scaleBy = { source, param, perUnit: param.includes('radius') || param === 'radius' ? 5 : 0.02, cap: 10 };
+          return true;
+        }
+      }
+      return false;
+    };
+    if (!walk(branch.equip.flatMap((item: Binding) => item.effects))) {
+      branch.equip.push(b('passive', [scaled(atom('statBuff', { stat: 'damage', operation: 'mul', value: 1.01, duration: 2, maxStacks: 5 }), source, 'value', 0.01, 10)]));
+    }
+  };
+  for (const id of ['chainLightningC', 'stormcallC', 'frostC', 'permafrostC', 'flashfireC', 'luckyStarB']) retarget(id, 'densestCluster');
+  retarget('iceTombC', 'nearestEnemy');
+  set('stormcallB', [b('passive', [atom('aura', { radius: 135, tickInterval: 0.55, duration: 4, follow: 'densestCluster', followLerp: 0.5, effects: [atom('vulnerable', { ratio: 0.12, duration: 2.5 })] })]), b('interval', [atom('groundZone', { radius: 110, duration: 2.5, tickInterval: 0.6, effects: [atom('vulnerable', { ratio: 0.09, duration: 2 })] })], { seconds: 3 })]);
+  set('stormcall2x', [b('interval', [fanout(status('vulnerable'), 6, [atom('aoeOnHit', { radius: 75, damageRatio: 0.45, falloff: 0.4 })])], { seconds: 3 })]);
+  set('cinderheart1x', [b('interval', [fanout(ownZones, 5, [atom('dot', { damageRatio: 0.09, duration: 2.5, tickInterval: 0.5 })])], { seconds: 3 })]);
+
+  const radiusOver = (id: string, from: number, to: number): void => {
+    const branch = option(id);
+    const effects = branch.equip.flatMap((item: Binding) => item.effects);
+    const area = effects.find((effect: any) => effect.atom === 'aura' || effect.atom === 'groundZone');
+    if (area) area.params = { ...(area.params ?? {}), radius: from, duration: Number(area.params?.duration ?? 4), radiusOverTime: { from, to, easing: 'linear' } };
+  };
+  radiusOver('permafrostB', 75, 175);
+  radiusOver('sanctumB', 90, 180);
+  radiusOver('overgrowthB', 85, 170);
+  radiusOver('frozenBulwark2x', 80, 165);
+  radiusOver('galvanicWard2x', 75, 155);
+  radiusOver('cinderheart2x', 90, 180);
+
+  addScale('overchargeA', 'enemiesOnField', ['value', 'ratio', 'damageMul']);
+  addScale('overcharge1x', 'concurrentStatus:vulnerable', ['damageMul', 'value', 'radius']);
+  addScale('ashHarvestA', 'concurrentStatus:dot', ['value', 'damageRatio', 'damageMul']);
+  addScale('hoarfrostTitheA', 'concurrentStatus:frozen', ['value', 'ratio', 'radius']);
+  addScale('arcSplitter1x', 'concurrentStatus:vulnerable', ['damageMul', 'value', 'count']);
+  addScale('ironvineA', 'secondsSinceLastBreach', ['value', 'ratio', 'damageMul']);
+
+  option('stormcallC').equip.push(b('onWaveStart', [atom('statBuff', { stat: 'fireRate', operation: 'mul', value: 1.08, duration: 3, maxStacks: 1 })]));
+  option('galvanicWardC').equip[0].effects.push(atom('burstDamage', { damageMul: 0.65, radius: 105 }));
+  option('galvanicWardC').equip[0].at = 'point';
+  option('frozenBulwarkC').equip[0].effects.push(atom('knockback', { distance: 55, collisionDamage: 0.12, radius: 100 }));
+  option('magmaPoolC').equip[0].at = 'point';
+  option('magmaPoolC').equip[0].effects.push(atom('burstDamage', { damageMul: 0.8, radius: 110 }));
+  option('cinderheartC').equip[0].effects.push(atom('burstDamage', { damageMul: 0.75, radius: 105 }));
+  (option('cinderheart1x').equip[0].effects[0] as any).forEach.effects.push(atom('burstDamage', { damageMul: 0.35, radius: 65 }));
+  option('thornsC').equip[0].effects.push(atom('burstDamage', { damageMul: 0.7, radius: 105 }));
+  option('decoy3x').equip.push(b('passive', [atom('breachReduction', { ratio: 0.12 })]));
+  option('fateLoom3x').equip.push(b('onMerge', [atom('statBuff', { stat: 'damage', operation: 'mul', value: 1.05, duration: 2, maxStacks: 3 })]));
+  option('bountyCall1x').equip[0].effects.push(atom('extraDrop', { count: 1, at: 'point', chance: 0.2 }));
+  set('overgrowth3x', [b('passive', [atom('dropLifetimeMul', { mul: 1.32 })]), b('onPickup', [atom('restore', { amountRatio: 0.07 })])]);
+  set('springOfLife2x', [b('onPickup', [atom('aura', { radius: 80, radiusOverTime: { from: 80, to: 165, easing: 'linear' }, duration: 3, tickInterval: 0.45, effects: [atom('restore', { amountRatio: 0.06 })] })], undefined, 'point')]);
+
+  // D2 identity-trigger restoration beyond the duplicate groups.
+  set('retributionA', [b('onBreach', [atom('burstDamage', { damageMul: 0.9, radius: 90 })], undefined, 'point')]);
+  set('retributionB', [b('onBreach', [atom('aoeOnHit', { radius: 130, damageRatio: 0.7, falloff: 0.35 }), atom('knockback', { distance: 70, collisionDamage: 0.15, radius: 130 })], undefined, 'point')]);
+  set('retributionC', [b('onBreach', [scaled(atom('burstDamage', { damageMul: 0.75, radius: 105 }), 'secondsSinceLastBreach', 'damageMul', 0.06, 20)], undefined, 'point')]);
+  set('retribution2x', [b('onBreach', [atom('aura', { radius: 150, duration: 3.5, tickInterval: 0.6, effects: [atom('statBuff', { stat: 'damage', operation: 'mul', value: 1.12, duration: 1, maxStacks: 2 })] }), atom('summon', { kind: 'decoy', count: 1, hp: 65, duration: 5 })], { cooldownSeconds: 5 }, 'point')]);
+  set('retribution3x', [b('onBreach', [atom('restore', { amountRatio: 0.07 }), atom('statBuff', { stat: 'damage', operation: 'mul', value: 1.16, duration: 5, maxStacks: 4 })], { cooldownSeconds: 6 }, 'point')]);
+
+  for (const id of ['galvanicWard2x', 'galvanicWard3x', 'frozenBulwarkC', 'frozenBulwark2x', 'frozenBulwark3x', 'cinderheartC', 'cinderheart2x', 'thornsC', 'thorns1x', 'thorns3x', 'ironvine1x', 'sentinelC']) {
+    const branch = option(id);
+    branch.equip = branch.equip.map((item: Binding) => ({ ...item, trigger: 'onBreach', at: 'point' }));
+  }
+
+  // Keep migration anchors aligned with the runtime tree after overrides.
+  for (const card of baseCards) {
+    const cp3 = card.evolutionTree.checkpoints.find((checkpoint: Json) => checkpoint.star === 3);
+    const cp5 = card.evolutionTree.checkpoints.find((checkpoint: Json) => checkpoint.star === 5);
+    const shared6 = card.evolutionTree.sharedNodes.find((node: Json) => node.star === 6)?.equip ?? [];
+    const keys = (value: unknown, out = new Set<string>()): Set<string> => {
+      if (Array.isArray(value)) value.forEach(child => keys(child, out));
+      else if (value && typeof value === 'object') {
+        const item = value as Json;
+        if (item.atom && item.params) for (const key of Object.keys(item.params)) {
+          if (!['effects', 'spreadStatus', 'spreadParams', 'kind', 'stat', 'operation'].includes(key)) out.add(key);
+        }
+        Object.values(item).forEach(child => keys(child, out));
+      }
+      return out;
+    };
+    const keys3 = keys(cp3.options.map((candidate: Json) => candidate.equip));
+    const keys5 = keys(cp5.options.map((candidate: Json) => candidate.equip));
+    const shared4 = card.evolutionTree.sharedNodes.find((node: Json) => node.star === 4);
+    const originalAmplify = { ...shared4.amplify };
+    const safeAmplify = Object.fromEntries(Object.entries(shared4.amplify).filter(([key]) => keys3.has(key) && !keys5.has(key)));
+    if (!Object.keys(safeAmplify).length) {
+      let fallback = [...keys3].find(key => !keys5.has(key));
+      if (!fallback) {
+        const firstEffect = cp3.options.flatMap((candidate: Json) => candidate.equip)
+          .flatMap((item: Binding) => item.effects).find((effect: any) => effect.atom);
+        const contract = firstEffect ? ATOM_CONTRACT[firstEffect.atom as keyof typeof ATOM_CONTRACT] : undefined;
+        fallback = contract ? Object.entries(contract.params).find(([key, spec]) => {
+          const types = Array.isArray(spec.type) ? spec.type : [spec.type];
+          return !keys5.has(key) && types.some(type => type === 'number' || type === 'integer');
+        })?.[0] : undefined;
+        if (fallback && firstEffect) firstEffect.params = { ...(firstEffect.params ?? {}), [fallback]: Number(contract?.params[fallback].default ?? 1) };
+      }
+      if (fallback) safeAmplify[fallback] = '+1';
+      else {
+        const original = Object.keys(originalAmplify).find(key => keys3.has(key));
+        if (original) safeAmplify[original] = originalAmplify[original];
+      }
+    }
+    shared4.amplify = safeAmplify;
+    card.amplifyAxis.params = deepClone(safeAmplify);
+    card.stars['3'].equip = deepClone(cp3.options[0].equip);
+    card.stars['5'].equip = [...deepClone(cp3.options[0].equip), ...deepClone(cp5.options[0].equip)];
+    card.stars['6'].equip = [...deepClone(cp3.options[0].equip), ...deepClone(cp5.options[0].equip), ...deepClone(shared6)];
+  }
+}
+
+applyTargetingBackfill(cards);
+
+const primitiveRequirements: Record<string, string[]> = {
+  chainLightningC: ['at:densestCluster'], stormcallB: ['follow'], stormcallC: ['at:densestCluster'],
+  frostC: ['at:densestCluster'], permafrostB: ['radiusOverTime'], permafrostC: ['at:densestCluster'],
+  permafrost1x: ['forEach:enemiesWithStatus'], glacialSpike2x: ['shape:line'], iceTombC: ['at:nearestEnemy'],
+  frozenBulwark1x: ['scaleBy:statusStacks'], frozenBulwark2x: ['radiusOverTime'],
+  hoarfrostTitheA: ['scaleBy:concurrentStatus:frozen'], hoarfrostTitheB: ['scaleBy:enemiesInAura'],
+  hoarfrostTitheC: ['scaleBy:concurrentStatus:frozen'], hoarfrostTithe2x: ['forEach:enemiesWithStatus', 'scaleBy:controlledInAura'],
+  staticSurgeC: ['at:nearestEnemy'], overchargeA: ['scaleBy:enemiesOnField'], overchargeB: ['scaleBy:enemiesInAura'],
+  overchargeC: ['at:densestCluster', 'scaleBy:killsSinceLastRelease'], overcharge1x: ['scaleBy:concurrentStatus:vulnerable'],
+  pierce1x: ['scaleBy:concurrentStatus:vulnerable'], overcharge2x: ['scaleBy:concurrentStatus:vulnerable'],
+  stormcall2x: ['forEach:enemiesWithStatus'], galvanicWard2x: ['radiusOverTime'],
+  galvanicWard3x: ['scaleBy:concurrentStatus:vulnerable'], arcSplitter1x: ['scaleBy:concurrentStatus:vulnerable'],
+  magmaPoolB: ['at:densestCluster'], magmaPool1x: ['forEach:ownZones'], magmaPool2x: ['forEach:ownZones'], magmaPool3x: ['forEach:ownZones'],
+  flashfireC: ['at:densestCluster'], flashfire2x: ['at:densestCluster', 'scaleBy:enemiesOnField'],
+  ashHarvestA: ['scaleBy:concurrentStatus:dot'], ashHarvestB: ['at:densestCluster', 'scaleBy:enemiesInAura'],
+  ashHarvest1x: ['scaleBy:concurrentStatus:dot'], ashHarvest2x: ['scaleBy:concurrentStatus:dot'],
+  cinderheart1x: ['forEach:ownZones'], cinderheart2x: ['radiusOverTime'],
+  sanctumB: ['radiusOverTime'], sanctum1x: ['scaleBy:auraReduction'], sanctum2x: ['scaleBy:enemiesOnField'],
+  retributionC: ['scaleBy:secondsSinceLastBreach'], retribution1x: ['scaleBy:shieldTier'],
+  thorns1x: ['scaleBy:thornsRatio'], thorns2x: ['radiusOverTime'],
+  ironvineA: ['scaleBy:secondsSinceLastBreach'], ironvineB: ['scaleBy:secondsSinceLastBreach'], ironvine1x: ['scaleBy:secondsSinceLastBreach'], ironvine2x: ['scaleBy:secondsSinceLastBreach'],
+  luckyStarB: ['at:densestCluster'], fateLoom1x: ['scaleBy:mergesThisRun'], bountyCall1x: ['scaleBy:concurrentStatus:brand'],
+  bountyCallC: ['at:nearestToBreachLine'], overgrowthB: ['radiusOverTime'], overgrowth1x: ['forEach:enemiesWithStatus'],
+  overgrowth2x: ['scaleBy:pickupsThisWave'], springOfLife2x: ['radiusOverTime'],
+};
+
+function compileDesignFingerprints(): Json {
+  const output: Json = { version: '1', cards: {} };
+  const atomOverrides: Record<string, string[]> = {
+    frost2x: ['slow'], impact2x: ['slow', 'knockback'], glacialSpike2x: ['groundZone', 'slow'],
+    hoarfrostTithe2x: ['slow', 'burstDamage'], scorch2x: ['dot'], meteor2x: ['dot', 'knockback'],
+    flashfire2x: ['dot'], thorns1x: ['burstDamage'], ironvine1x: ['burstDamage'],
+    luckyStar3x: ['expiryConvert', 'xpMul'], springOfLife2x: ['aura', 'restore'],
+  };
+  const explicitAt = new Map<string, string>();
+  const designAtoms = (raw: string): string[] => {
+    const conditions = new Set([
+      raw.match(/requiresStatus:'([^']+)'/)?.[1],
+      raw.match(/requiresSource:'([^']+)'/)?.[1],
+    ].filter(Boolean));
+    return parseCarrierAtoms(raw).filter(name => !conditions.has(name));
+  };
+  for (const [id, requirements] of Object.entries(primitiveRequirements)) {
+    const marker = requirements.find(value => value.startsWith('at:'));
+    if (marker) explicitAt.set(id, marker.slice(3));
+  }
+  for (const id of ['frozenBulwark1x', 'sanctum1x', 'retributionA', 'retributionB', 'retributionC', 'retribution1x', 'retribution2x', 'retribution3x', 'thorns1x', 'ironvine1x']) explicitAt.set(id, 'point');
+  for (const parsed of parsedCards) {
+    const branches: Json = {};
+    for (const row of parsed.branch3) {
+      const id = `${parsed.id}${row.letter}`;
+      const raw = `${row.carrier} ${row.description}`;
+      branches[id] = {
+        star: 3,
+        triggers: parseTriggers(raw).map(item => item.trigger),
+        atoms: atomOverrides[id] ?? designAtoms(row.carrier),
+        ...(explicitAt.has(id) ? { at: explicitAt.get(id) } : {}),
+        ...(primitiveRequirements[id]?.length ? { requires: primitiveRequirements[id].filter(value => !value.startsWith('at:')) } : {}),
+      };
+    }
+    for (let index = 0; index < parsed.branch5.length; index++) {
+      const row = parsed.branch5[index];
+      const id = `${parsed.id}${index + 1}x`;
+      branches[id] = {
+        star: 5,
+        interfaceRole: (['payoff', 'spread', 'convert'] as const)[index],
+        triggers: parseTriggers(row.prose).map(item => item.trigger),
+        atoms: atomOverrides[id] ?? designAtoms(row.prose),
+        ...(explicitAt.has(id) ? { at: explicitAt.get(id) } : {}),
+        ...(primitiveRequirements[id]?.length ? { requires: primitiveRequirements[id].filter(value => !value.startsWith('at:')) } : {}),
+      };
+    }
+    output.cards[parsed.id] = { identityContract: parsed.identity, branches };
+  }
+  return output;
+}
+
 function grayboxProduct(row: typeof PRODUCT_ROWS[number], index: number): Json {
   const [variableGod, anchorGod, , , id, name] = row;
   const radius = 100 + (index % 5) * 8 + Math.floor(index / 5) * 3;
@@ -777,6 +1077,7 @@ texts.decisions.recipePin = { title: '钉选进化配方', body: '选择一条�
 delete texts.decisions.recipeEvolution;
 
 writeFileSync(skillsPath, `${JSON.stringify({ version: '0.5.0', cards: [...cards, ...products] }, null, 2)}\n`, 'utf8');
+writeFileSync(fingerprintsPath, `${JSON.stringify(compileDesignFingerprints(), null, 2)}\n`, 'utf8');
 writeFileSync(recipesPath, `${JSON.stringify({ version: '0.2.0', recipes }, null, 2)}\n`, 'utf8');
 writeFileSync(textsPath, `${JSON.stringify(texts, null, 2)}\n`, 'utf8');
 

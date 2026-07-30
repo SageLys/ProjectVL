@@ -3,7 +3,7 @@
 import { cfg } from '../../config';
 import type { Config, GameEvent, GameState, Rng, Summon, Zone } from '../types';
 import { atomNumberDefault } from './atomContract';
-import { runEffects, threatDirectionSummonPosition, type EffectCtx } from './registry';
+import { runEffects, selectEffectOrigin, threatDirectionSummonPosition, type EffectCtx } from './registry';
 import { fireTrigger, getModifiers, tickIntervalBindings } from './interpreter';
 import { tickStatusTimers, applyKnockback } from './statusSystem';
 import { dealDamage } from '../systems/damageSystem';
@@ -36,9 +36,18 @@ function insideZone(zone: Zone, x: number, y: number, r: number): boolean {
 }
 
 function tickZones(state: GameState, config: Config, rng: Rng, dt: number, events: GameEvent[]): void {
+  const mods = getModifiers(state);
   for (let i = state.zones.length - 1; i >= 0; i--) {
     const zone = state.zones[i];
     zone.remaining -= dt;
+    if (zone.radiusOverTime && zone.totalDuration && zone.totalDuration > 0) {
+      const progress = Math.max(0, Math.min(1, 1 - zone.remaining / zone.totalDuration));
+      zone.radius = zone.radiusOverTime.from + (zone.radiusOverTime.to - zone.radiusOverTime.from) * progress;
+      if (zone.shape === 'line') {
+        zone.lineLength = zone.radius * 2;
+        zone.lineWidth = zone.radius;
+      }
+    }
     zone.tickTimer -= dt;
     if (zone.tickTimer <= 0) {
       zone.tickTimer = zone.tickInterval;
@@ -55,6 +64,8 @@ function tickZones(state: GameState, config: Config, rng: Rng, dt: number, event
           sourceCardType: zone.sourceCardType,
           sourceBindingIndex: zone.sourceBindingIndex,
           enemy,
+          scaleEnemy: enemy,
+          dynamic: { thornsRatio: mods.thornsRatio, auraReduction: mods.breachReduction },
         };
         runEffects(ctx, zone.effects);
       }
@@ -69,17 +80,39 @@ function tickAuras(state: GameState, config: Config, rng: Rng, dt: number, event
   const liveKeys = new Set<string>();
   for (const aura of mods.auras) {
     liveKeys.add(aura.key);
+    const existing = state.effectRuntime.auraOrigins[aura.key] ?? {
+      x: cfg.combat.turret.x,
+      y: cfg.combat.turret.y,
+      startedAt: state.time,
+    };
+    state.effectRuntime.auraOrigins[aura.key] = existing;
+    if (aura.follow) {
+      const probe: EffectCtx = {
+        state, config, rng, events, origin: { x: existing.x, y: existing.y },
+        star: aura.star, baseDamage: totalDamage(state, config),
+      };
+      const target = selectEffectOrigin(probe, aura.follow);
+      const alpha = 1 - Math.pow(1 - Math.max(0, Math.min(1, aura.followLerp)), dt);
+      existing.x += (target.x - existing.x) * alpha;
+      existing.y += (target.y - existing.y) * alpha;
+    }
     const clock = (state.intervalClocks[aura.key] ?? aura.tickInterval) - dt;
     if (clock <= 0) {
       state.intervalClocks[aura.key] = aura.tickInterval;
       const ratioOfRange = aura.radiusRatioOfRange ?? atomNumberDefault('aura', 'radiusRatioOfRange');
-      const radius = aura.radius ?? ratioOfRange * totalRange(state, config);
-      const t = cfg.combat.turret;
+      let radius = aura.radius ?? ratioOfRange * totalRange(state, config);
+      if (aura.radiusOverTime) {
+        const progress = Math.max(0, Math.min(1, (state.time - existing.startedAt) / Math.max(Number.EPSILON, aura.duration)));
+        radius = aura.radiusOverTime.from + (aura.radiusOverTime.to - aura.radiusOverTime.from) * progress;
+      }
       for (const enemy of [...state.enemies]) {
-        if (Math.hypot(enemy.x - t.x, enemy.y - t.y) > radius + enemy.r) continue;
+        const distance = Math.hypot(enemy.x - existing.x, enemy.y - existing.y);
+        if (aura.shape === 'ring') {
+          if (distance + enemy.r < (aura.innerRadius ?? radius * 0.5) || distance - enemy.r > radius) continue;
+        } else if (distance > radius + enemy.r) continue;
         const ctx: EffectCtx = {
           state, config, rng, events,
-          origin: { x: t.x, y: t.y },
+          origin: { x: existing.x, y: existing.y },
           radius,
           star: aura.star,
           baseDamage: totalDamage(state, config),
@@ -88,6 +121,8 @@ function tickAuras(state: GameState, config: Config, rng: Rng, dt: number, event
           sourceCardType: aura.sourceCardType,
           sourceBindingIndex: aura.sourceBindingIndex,
           enemy,
+          scaleEnemy: enemy,
+          dynamic: { thornsRatio: mods.thornsRatio, auraReduction: mods.breachReduction },
         };
         runEffects(ctx, aura.effects);
       }
@@ -97,6 +132,9 @@ function tickAuras(state: GameState, config: Config, rng: Rng, dt: number, event
   }
   for (const key of Object.keys(state.intervalClocks)) {
     if (key.startsWith('aura:') && !liveKeys.has(key)) delete state.intervalClocks[key];
+  }
+  for (const key of Object.keys(state.effectRuntime.auraOrigins)) {
+    if (!liveKeys.has(key)) delete state.effectRuntime.auraOrigins[key];
   }
 }
 
