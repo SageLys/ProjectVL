@@ -2,9 +2,9 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "urn:projectvl:skills-schema",
   "title": "ProjectVL 技能卡数据模型",
-  "version": "0.5.0",
-  "date": "2026-07-29",
-  "description": "v0.5.0 技能卡数据模型。35 张正式卡全部通过 evolutionTree 解析 3/4/5/6★；recipeOnly 产物没有进化树，只声明 6★ 终态。技能行为只由 JSON 触发器与效果原子组成。",
+  "version": "0.6.0",
+  "date": "2026-07-30",
+  "description": "v0.6.0 技能卡数据模型。卡牌基础属性词条仅使用 damageMul/fireRateMul/rangeMul/maxHpMul；永久基础平加由 waveRewards 独占。",
   "type": "object",
   "required": [
     "version",
@@ -600,7 +600,7 @@
       "additionalProperties": false
     },
     "fusionPolicy": {
-      "description": "（v0.4.1 新增）D2 预留结构位：卡间融合时数值词条如何传递。**占位契约，运行时无效果**——loader 与解释器一律忽略，实现见 Stage 5。缺省即当前行为（融合产物按自身 affixPool 重新掷点）。",
+      "description": "（v0.4.1 新增）D2 预留结构位：卡间融合时数值词条如何传递。**占位契约，运行时无效果**——loader 与解释器一律忽略。当前每局每卡型只生成一份共享词条模板；合成、喂养与配方进化均不会重掷或覆盖模板。",
       "type": "object",
       "properties": {
         "affixTransferPolicy": {
