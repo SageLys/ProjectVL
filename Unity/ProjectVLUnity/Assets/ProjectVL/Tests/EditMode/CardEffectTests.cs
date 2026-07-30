@@ -1278,7 +1278,7 @@ namespace ProjectVL.Tests
             Assert.That(spectator.Hp, Is.EqualTo(50f));
             Assert.That(
                 Float2.Distance(turret, spectator.Position),
-                Is.EqualTo(230f));
+                Is.EqualTo(220f));
         }
 
         [Test]
@@ -1584,7 +1584,7 @@ namespace ProjectVL.Tests
             Assert.That(inside.Hp, Is.EqualTo(110f));
             Assert.That(
                 Float2.Distance(center, inside.Position),
-                Is.EqualTo(240f));
+                Is.EqualTo(220f));
         }
 
         [Test]
@@ -1714,7 +1714,7 @@ namespace ProjectVL.Tests
         }
 
         [Test]
-        public void AvalancheConsumableDamagesFreezesAndKnocksBack()
+        public void AvalancheConsumableFreezeBlocksItsKnockback()
         {
             CardState card = _state.CreateCard("avalanche", 6);
             Float2 center = new Float2(200f, 200f);
@@ -1732,7 +1732,7 @@ namespace ProjectVL.Tests
             Assert.That(inside.FrozenRemaining, Is.EqualTo(2f));
             Assert.That(
                 Float2.Distance(center, inside.Position),
-                Is.EqualTo(300f));
+                Is.EqualTo(100f));
         }
 
         [Test]
@@ -1851,7 +1851,7 @@ namespace ProjectVL.Tests
         }
 
         [Test]
-        public void AvalanchePulsesWithDamageFreezeAndKnockback()
+        public void AvalanchePulseFreezeBlocksItsKnockback()
         {
             EquipResolved("avalanche", 6);
             _state.BeginWave(1);
@@ -1872,7 +1872,7 @@ namespace ProjectVL.Tests
             Assert.That(inside.FrozenRemaining, Is.EqualTo(1.2f));
             Assert.That(
                 Float2.Distance(turret, inside.Position),
-                Is.EqualTo(250f));
+                Is.EqualTo(100f));
             Assert.That(outside.Hp, Is.EqualTo(100f));
         }
 

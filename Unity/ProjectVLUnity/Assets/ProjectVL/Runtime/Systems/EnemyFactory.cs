@@ -129,7 +129,9 @@ namespace ProjectVL.Systems
                 definition.color,
                 definition.sides,
                 definition.knockbackResist,
-                definition.ccResist);
+                definition.ccResist,
+                validation.knockbackResistOverride,
+                validation.ccResistOverride);
             state.Enemies.Add(enemy);
             return enemy;
         }

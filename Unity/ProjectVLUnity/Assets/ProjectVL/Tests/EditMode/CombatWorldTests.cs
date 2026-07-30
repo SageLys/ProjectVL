@@ -200,6 +200,68 @@ namespace ProjectVL.Tests
             Assert.That(boss.CcResist, Is.EqualTo(0.5f));
         }
 
+        [Test]
+        public void EnemyResistanceScalesHardControlAndKnockback()
+        {
+            var tank = new EnemyState(
+                1,
+                EnemyKind.Tank,
+                new Float2(10f, 0f),
+                100f,
+                10f,
+                22f,
+                14f,
+                knockbackResist: 0.4f,
+                ccResist: 0.25f);
+
+            tank.FrozenRemaining = 2f;
+            bool movedWhileFrozen = tank.ApplyKnockback(
+                new Float2(1f, 0f),
+                100f,
+                120f);
+
+            Assert.That(tank.FrozenRemaining, Is.EqualTo(1.5f));
+            Assert.That(movedWhileFrozen, Is.False);
+            tank.FrozenRemaining = 0f;
+            tank.StunnedRemaining = 1f;
+            bool moved = tank.ApplyKnockback(
+                new Float2(1f, 0f),
+                200f,
+                120f);
+
+            Assert.That(tank.StunnedRemaining, Is.EqualTo(0.75f));
+            Assert.That(moved, Is.True);
+            Assert.That(tank.Position.X, Is.EqualTo(82f));
+        }
+
+        [Test]
+        public void ValidationResistanceOverridesEnemyArchetype()
+        {
+            var elite = new EnemyState(
+                1,
+                EnemyKind.Tank,
+                new Float2(0f, 0f),
+                100f,
+                10f,
+                22f,
+                14f,
+                knockbackResist: 0.4f,
+                ccResist: 0.25f,
+                knockbackResistOverride: 0.8f,
+                ccResistOverride: 0.7f);
+
+            elite.FrozenRemaining = 2f;
+            elite.FrozenRemaining = 0f;
+            elite.StunnedRemaining = 1f;
+            elite.ApplyKnockback(
+                new Float2(1f, 0f),
+                100f,
+                120f);
+
+            Assert.That(elite.StunnedRemaining, Is.EqualTo(0.3f).Within(0.0001f));
+            Assert.That(elite.Position.X, Is.EqualTo(20f).Within(0.0001f));
+        }
+
         private EnemyState CreateEnemy(
             int id,
             float offsetX,

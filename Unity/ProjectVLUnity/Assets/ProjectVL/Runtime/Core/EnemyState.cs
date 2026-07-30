@@ -1,3 +1,5 @@
+using System;
+
 namespace ProjectVL.Core
 {
     public sealed class EnemyState
@@ -28,7 +30,13 @@ namespace ProjectVL.Core
         public float SlowRatio { get; set; }
         public float SlowRemaining { get; set; }
         public int FreezeStacks { get; set; }
-        public float FrozenRemaining { get; set; }
+        public float FrozenRemaining
+        {
+            get => _frozenRemaining;
+            set => _frozenRemaining = value > _frozenRemaining
+                ? Math.Max(_frozenRemaining, ScaleControlDuration(value))
+                : Math.Max(0f, value);
+        }
         public float VulnerableRatio { get; set; }
         public float VulnerableRemaining { get; set; }
         public float DotDamagePerTick { get; set; }
@@ -39,9 +47,20 @@ namespace ProjectVL.Core
         public float SecondaryDotTickInterval { get; set; }
         public float SecondaryDotTickRemaining { get; set; }
         public float SecondaryDotRemaining { get; set; }
-        public float StunnedRemaining { get; set; }
+        public float StunnedRemaining
+        {
+            get => _stunnedRemaining;
+            set => _stunnedRemaining = value > _stunnedRemaining
+                ? Math.Max(_stunnedRemaining, ScaleControlDuration(value))
+                : Math.Max(0f, value);
+        }
         public float FocusPriorityWeight { get; set; } = 1f;
         public float FocusPriorityRemaining { get; set; }
+        public float? KnockbackResistOverride { get; }
+        public float? CcResistOverride { get; }
+
+        private float _frozenRemaining;
+        private float _stunnedRemaining;
 
         public EnemyState(
             int id,
@@ -59,7 +78,9 @@ namespace ProjectVL.Core
             string color = null,
             int sides = 4,
             float knockbackResist = 0f,
-            float ccResist = 0f)
+            float ccResist = 0f,
+            float? knockbackResistOverride = null,
+            float? ccResistOverride = null)
         {
             Id = id;
             Kind = kind;
@@ -78,8 +99,46 @@ namespace ProjectVL.Core
             Sides = sides;
             KnockbackResist = knockbackResist;
             CcResist = ccResist;
+            KnockbackResistOverride = knockbackResistOverride;
+            CcResistOverride = ccResistOverride;
             BossPhase = BossPhase.Approach;
             OrbitDirection = id % 2 == 0 ? 1 : -1;
+        }
+
+        public bool ApplyKnockback(
+            Float2 direction,
+            float distance,
+            float distanceCeiling)
+        {
+            if (FrozenRemaining > 0f)
+            {
+                return false;
+            }
+
+            float resistance = Clamp01(
+                KnockbackResistOverride ?? KnockbackResist);
+            float effectiveDistance =
+                Math.Min(Math.Max(0f, distance), distanceCeiling)
+                * (1f - resistance);
+            Float2 normalized = direction.Normalized();
+            if (effectiveDistance <= 0f || normalized.Length <= 0f)
+            {
+                return false;
+            }
+
+            Position += normalized * effectiveDistance;
+            return true;
+        }
+
+        private float ScaleControlDuration(float duration)
+        {
+            float resistance = Clamp01(CcResistOverride ?? CcResist);
+            return Math.Max(0f, duration) * (1f - resistance);
+        }
+
+        private static float Clamp01(float value)
+        {
+            return Math.Max(0f, Math.Min(1f, value));
         }
     }
 }

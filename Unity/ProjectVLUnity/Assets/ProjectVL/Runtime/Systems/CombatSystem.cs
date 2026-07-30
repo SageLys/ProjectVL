@@ -303,7 +303,7 @@ namespace ProjectVL.Systems
                     BaseDamage(state) * damageMultiplier);
                 if (knockback > 0f && state.Enemies.Contains(enemy))
                 {
-                    enemy.Position += direction * knockback;
+                    ApplyKnockback(enemy, direction, knockback);
                 }
             }
 
@@ -565,8 +565,10 @@ namespace ProjectVL.Systems
 
             foreach (EnemyState enemy in targets)
             {
-                enemy.Position +=
-                    (enemy.Position - point).Normalized() * knockback;
+                ApplyKnockback(
+                    enemy,
+                    enemy.Position - point,
+                    knockback);
                 enemy.StunnedRemaining = Math.Max(
                     enemy.StunnedRemaining,
                     stunDuration);
@@ -977,13 +979,13 @@ namespace ProjectVL.Systems
                         state,
                         "avalanche",
                         "controlPotencyMul"));
-                enemy.Position +=
-                    (enemy.Position - point).Normalized()
-                    * 200f
-                    * RelicMultiplier(
+                ApplyKnockback(
+                    enemy,
+                    enemy.Position - point,
+                    200f * RelicMultiplier(
                         state,
                         "avalanche",
-                        "controlPotencyMul");
+                        "controlPotencyMul"));
             }
         }
 
@@ -2511,7 +2513,10 @@ namespace ProjectVL.Systems
             {
                 Float2 direction =
                     (primary.Position - TurretPosition).Normalized();
-                primary.Position += direction * bullet.KnockbackDistance;
+                ApplyKnockback(
+                    primary,
+                    direction,
+                    bullet.KnockbackDistance);
                 ApplyKnockbackCollision(
                     state,
                     primary,
@@ -3525,9 +3530,10 @@ namespace ProjectVL.Systems
                 enemy.FrozenRemaining = Math.Max(
                     enemy.FrozenRemaining,
                     profile.AvalancheFreezeDuration);
-                enemy.Position +=
-                    (enemy.Position - TurretPosition).Normalized()
-                    * profile.AvalancheKnockback;
+                ApplyKnockback(
+                    enemy,
+                    enemy.Position - TurretPosition,
+                    profile.AvalancheKnockback);
             }
 
             state.AvalanchePulseRemaining +=
@@ -4781,8 +4787,10 @@ namespace ProjectVL.Systems
 
                 if (knockback > 0f)
                 {
-                    enemy.Position +=
-                        (enemy.Position - center).Normalized() * knockback;
+                    ApplyKnockback(
+                        enemy,
+                        enemy.Position - center,
+                        knockback);
                 }
 
                 if (slowRatio > 0f)
@@ -4797,7 +4805,7 @@ namespace ProjectVL.Systems
             }
         }
 
-        private static void ApplyAreaKnockback(
+        private void ApplyAreaKnockback(
             GameState state,
             Float2 center,
             float radius,
@@ -4811,13 +4819,25 @@ namespace ProjectVL.Systems
                     continue;
                 }
 
-                Float2 direction =
-                    (enemy.Position - center).Normalized();
-                enemy.Position += direction * distance;
+                ApplyKnockback(
+                    enemy,
+                    enemy.Position - center,
+                    distance);
                 enemy.StunnedRemaining = Math.Max(
                     enemy.StunnedRemaining,
                     stunDuration);
             }
+        }
+
+        private void ApplyKnockback(
+            EnemyState enemy,
+            Float2 direction,
+            float distance)
+        {
+            enemy.ApplyKnockback(
+                direction,
+                distance,
+                _combat.controlCeiling.knockbackDistance);
         }
 
         private void StepBoss(
