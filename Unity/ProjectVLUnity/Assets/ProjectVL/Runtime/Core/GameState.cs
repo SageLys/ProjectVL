@@ -315,6 +315,55 @@ namespace ProjectVL.Core
             IntermissionReady = false;
         }
 
+        internal void PrepareWaveJump(int targetWave)
+        {
+            int target = Math.Max(1, targetWave);
+            Enemies.Clear();
+            Bullets.Clear();
+            GroundDrops.Clear();
+            GroundZones.Clear();
+            BountyOffers.Clear();
+            BountyEncounters.Clear();
+            _pendingLevelUpgrades.Clear();
+            PendingGodChoice = null;
+            PendingEvolution = null;
+            PendingBossReward = null;
+            PendingWaveReward = null;
+            DecisionLocked = false;
+            IntermissionActive = false;
+            IntermissionReady = false;
+            IntermissionRemaining = 0f;
+            WavePhase = WavePhase.Regular;
+            BossId = null;
+            SpawnLeft = 0;
+            WaveSpawnQuota = 0;
+            SpawnTimer = 0f;
+            LastSpawnCheckCount = 0;
+            BountyOffersThisWave = 0;
+            BountiesAcceptedThisWave = 0;
+            BountiesCompletedThisWave = 0;
+            GuaranteedBountyThisWave = false;
+            BountyCooldownRemaining = 0f;
+            DecoyActive = false;
+            SecondaryDecoyActive = false;
+            BeamVisualRemaining = 0f;
+            ShotCooldown = 0f;
+            WaveRewardsClaimedWave = Math.Max(
+                WaveRewardsClaimedWave,
+                target - 1);
+            WaveChoiceOfferedWave = Math.Max(
+                WaveChoiceOfferedWave,
+                target - 1);
+            LastGodDecisionAfterWave = Math.Max(
+                LastGodDecisionAfterWave,
+                target - 1);
+            Wave = target - 1;
+            Mode = GameMode.Playing;
+            Paused = false;
+            Won = null;
+            RunSummary = null;
+        }
+
         public void EndRun(bool won = false)
         {
             if (Mode == GameMode.Ended)

@@ -202,6 +202,30 @@ namespace ProjectVL.Systems
                 && _waveRewards.Choose(state, optionIndex);
         }
 
+        public void JumpToWave(GameState state, int targetWave)
+        {
+            if (state == null)
+            {
+                throw new ArgumentNullException(nameof(state));
+            }
+
+            int wave = Math.Max(
+                1,
+                Math.Min(_waves.totalWaves, targetWave));
+            state.PrepareWaveJump(wave);
+            StartNextWave(state);
+        }
+
+        public void RestartWave(GameState state)
+        {
+            if (state == null)
+            {
+                throw new ArgumentNullException(nameof(state));
+            }
+
+            JumpToWave(state, Math.Max(1, state.Wave));
+        }
+
         private void OfferBossReward(GameState state)
         {
             state.PendingBossReward = ComputeBossReward(state.Wave);

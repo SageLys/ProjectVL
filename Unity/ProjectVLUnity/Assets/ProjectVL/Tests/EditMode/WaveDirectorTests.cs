@@ -198,6 +198,66 @@ namespace ProjectVL.Tests
             Assert.That(_enemies.bossBehavior.contactTickInterval, Is.EqualTo(0.5f));
         }
 
+        [Test]
+        public void JumpToWaveClearsTransientCombatAndPreservesBuild()
+        {
+            CardState equipped = _state.CreateCard("pierce", 3);
+            _state.Equipment[0] = equipped;
+            _state.BeginWave(4);
+            _state.Enemies.Add(new EnemyState(
+                99,
+                EnemyKind.Normal,
+                new Float2(10f, 10f),
+                20f,
+                10f,
+                16f,
+                8f));
+            _state.Bullets.Add(new BulletState(
+                99,
+                new Float2(10f, 10f),
+                new Float2(1f, 0f),
+                4f,
+                1f,
+                18f));
+            var waveSystem = new WaveSystem(_waves, _factory);
+
+            waveSystem.JumpToWave(_state, 9);
+
+            Assert.That(_state.Wave, Is.EqualTo(9));
+            Assert.That(_state.WavePhase, Is.EqualTo(WavePhase.Regular));
+            Assert.That(_state.Equipment[0], Is.SameAs(equipped));
+            Assert.That(_state.Bullets, Is.Empty);
+            Assert.That(_state.Enemies, Has.Count.EqualTo(1));
+            Assert.That(
+                _state.Enemies[0].SpawnKind,
+                Is.EqualTo(EnemySpawnKind.ValidationElite));
+            Assert.That(_state.DecisionLocked, Is.False);
+        }
+
+        [Test]
+        public void RestartWaveRebuildsCurrentWavePlan()
+        {
+            var waveSystem = new WaveSystem(_waves, _factory);
+            _state.BeginWave(4);
+            _state.Enemies.Add(new EnemyState(
+                99,
+                EnemyKind.Normal,
+                new Float2(10f, 10f),
+                20f,
+                10f,
+                16f,
+                8f));
+
+            waveSystem.RestartWave(_state);
+
+            Assert.That(_state.Wave, Is.EqualTo(4));
+            Assert.That(_state.Enemies, Is.Empty);
+            Assert.That(
+                _state.SpawnLeft,
+                Is.EqualTo(new WavePlanResolver(_waves).Resolve(4).Quota));
+            Assert.That(_state.SpawnTimer, Is.EqualTo(_waves.firstSpawnDelay));
+        }
+
         private sealed class ConstantRandomSource : IRandomSource
         {
             private readonly float _value;
