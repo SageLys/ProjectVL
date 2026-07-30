@@ -42,9 +42,9 @@ export function createRewardReceiptModal(onConfirm: () => void) {
         title.textContent = copy.name; desc.textContent = copy.desc;
         result.replaceChildren(...resultLines(receipt).map(line => { const p = document.createElement('p'); p.textContent = line; return p; }));
       }
-      modal.classList.add('open');
+      modal.classList.add('show');
       if (document.activeElement !== confirm) confirm.focus();
     },
-    hide() { shown = null; modal.classList.remove('open'); },
+    hide() { shown = null; modal.classList.remove('show'); },
   };
 }
