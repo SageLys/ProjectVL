@@ -3,7 +3,7 @@ import type { CardDropSource, CardType, Config, Enemy, GameEvent, GameState, Gro
 import { totalDropChance, totalDropLifetime } from '../stats';
 import { autoMergeCards, getActiveMergeCopies } from './cardSystem';
 import { fireTrigger, getModifiers } from '../effects/interpreter';
-import { addXp } from './progressionSystem';
+import { addRewardPoints } from './rewardMeterSystem';
 import { grantWildcards } from './wildcardSystem';
 import {
   getCardPool, getOrCreateCardTypeRunStats, recordCardDropShown, selectNormalEnemyDropType,
@@ -15,8 +15,7 @@ import { finalizeEvolutionUpgrade } from './evolutionTreeSystem';
 
 const TAU = Math.PI * 2;
 /** 正式卡池（P5 批次1+批次2，共 11 张技能卡）。 */
-/** 过期折算经验的基准值（丰收 5★ 落穗：expiryConvert.ratio × 星级 × 本常数）。 */
-const EXPIRY_CONVERT_XP_PER_STAR = 4;
+/** 过期折算奖励积分的基准值（丰收 5★ 落穗：expiryConvert.ratio × 星级 × 本常数）。 */
 
 /** 在 (x,y) 生成一枚限时地面掉落。type 缺省随机；star 缺省按掉落星级策略（普通=1★）。 */
 export function spawnGroundDrop(
@@ -101,9 +100,9 @@ export function tickOrdinaryDropBudget(state: GameState, dt: number): void {
 
 /**
  * 推进掉落寿命与浮动相位；超时移除并计入 expired。
- * 丰收 5★ 落穗（expiryConvert）：命中时按 ratio 把过期掉落折算经验，而非纯损失。
+ * 丰收 5★ 落穗（expiryConvert）：命中时按 ratio 把过期掉落折算奖励积分，而非纯损失。
  */
-export function tickDrops(state: GameState, _config: Config, rng: Rng, dt: number): GameEvent[] {
+export function tickDrops(state: GameState, config: Config, rng: Rng, dt: number): GameEvent[] {
   const events: GameEvent[] = [];
   for (let i = state.groundDrops.length - 1; i >= 0; i--) {
     const drop = state.groundDrops[i];
@@ -119,7 +118,7 @@ export function tickDrops(state: GameState, _config: Config, rng: Rng, dt: numbe
       });
       const convert = getModifiers(state).expiryConvert;
       if (convert && rng() < convert.ratio) {
-        events.push(...addXp(state, drop.star * EXPIRY_CONVERT_XP_PER_STAR, rng));
+        events.push(...addRewardPoints(state, config, rng, drop.star * cfg.rewardMeter.expiryConvertPointsPerStar));
       }
     }
   }

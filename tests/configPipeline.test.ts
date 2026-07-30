@@ -98,7 +98,7 @@ describe('配置管线 · 写回先校验后写', () => {
 
   it('文案缺失会被跨引用层抓到', () => {
     const config = buildConfig([]);
-    const stripped = { ...(texts as TextsLike), relics: {} };
+    const stripped = { ...(texts as TextsLike), rewards: {} };
     const report = validateGameConfig(config, stripped);
     expect(report.ok).toBe(false);
     expect(report.issues.some(issue => issue.domain === 'texts' && issue.message.includes('文案缺失'))).toBe(true);

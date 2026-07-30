@@ -144,7 +144,7 @@ describe('C8 five-god formal card matrix', () => {
   });
 });
 
-describe('C8 recipe, relic and telemetry coverage', () => {
+describe('C8 recipe and telemetry coverage', () => {
   it('completes all 25 recipes and makes every output equipable and consumable', () => {
     expect(cfg.evolutionRecipes.recipes).toHaveLength(25);
     for (const recipe of cfg.evolutionRecipes.recipes) {
@@ -170,14 +170,9 @@ describe('C8 recipe, relic and telemetry coverage', () => {
     }
   });
 
-  it('excludes all recipe terminals from ordinary drops and gives every relic at least three tag targets', () => {
+  it('excludes all recipe terminals from ordinary drops', () => {
     const recipeIds = new Set(cfg.skills.cards.filter(def => def.recipeOnly).map(def => def.id));
     expect(getCardPool().every(type => !recipeIds.has(type))).toBe(true);
-    for (const relic of cfg.relics.relics) {
-      const targetCount = formalCards().filter(def =>
-        def.synergyTags.some(tag => relic.targetTags.includes(tag))).length;
-      expect(targetCount, relic.id).toBeGreaterThanOrEqual(3);
-    }
   });
 
   it('emits god-segmented shown/collected telemetry and affix rolls for a new card', () => {

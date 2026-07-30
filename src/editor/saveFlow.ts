@@ -11,7 +11,7 @@ export interface SaveCandidate {
 }
 
 export interface EntityTextSaveBatch {
-  entity: SaveCandidate & { domain: 'skills' | 'gods' | 'relics' };
+  entity: SaveCandidate & { domain: 'skills' | 'gods' };
   texts: SaveCandidate & { domain: 'texts' };
 }
 
@@ -25,7 +25,7 @@ export interface SaveFlowResult {
 
 /**
  * 先把整批候选逐域预检，再开始写。若提交阶段意外失败，则仍经 write 端点补偿已写域。
- * 正常的 422 因此发生在零写入阶段，遗物 + texts 不会只落一半。
+ * 正常的 422 因此发生在零写入阶段，实体 + texts 不会只落一半。
  */
 export class ConfigSaveFlow {
   constructor(private readonly api: ConfigApi) {}
@@ -62,7 +62,7 @@ export class ConfigSaveFlow {
     return { ok: true, stage: 'done', reports, writes };
   }
 
-  /** 卡 / 神 / 遗物的唯一双域保存入口；底层仍复用同一批次预检、写回与补偿逻辑。 */
+  /** 卡 / 神的唯一双域保存入口；底层仍复用同一批次预检、写回与补偿逻辑。 */
   async saveEntityWithTexts(batch: EntityTextSaveBatch): Promise<SaveFlowResult> {
     return await this.save([batch.entity, batch.texts]);
   }

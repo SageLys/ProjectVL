@@ -28,7 +28,6 @@ function validChoices(decision: RunDecision): string[] {
     case 'recipePin':
       return decision.candidates;
     case 'evolutionBranch':
-    case 'relic':
       return decision.options;
   }
 }

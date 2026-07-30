@@ -1,7 +1,5 @@
 import type { AtomName, BindingDef, CardDef, EffectDef, Trigger } from '../core/effects/defs';
-import type {
-  CardStatKind, EvolutionRecipesConfig, GodsConfig, RelicDef,
-} from '../config/types';
+import type { CardStatKind, EvolutionRecipesConfig, GodsConfig } from '../config/types';
 import { describeLabel, labelWithKey } from '../editor/labels';
 
 export interface ParamView { key: string; label: string; value: string }
@@ -78,24 +76,11 @@ export interface CardView {
   designNotes?: string;
   recipe?: RecipeView;
 }
-export interface RelicView {
-  id: string;
-  name: string;
-  desc: string;
-  godId?: string;
-  rarityLabel: string;
-  tagLabels: string[];
-  effects: Array<{ axis: CardStatKind; axisLabel: string; value: number }>;
-  maxStacks: number;
-  poolInfluence?: Record<string, number>;
-}
-
 export interface DescribeContext {
   texts: Record<string, unknown>;
   gods: GodsConfig;
   recipes: EvolutionRecipesConfig;
 }
-
 type UnknownRecord = Record<string, unknown>;
 
 function record(value: unknown): UnknownRecord {
@@ -302,24 +287,5 @@ export function describeCard(card: CardDef, ctx: DescribeContext): CardView {
     affixPool,
     designNotes: card.designNotes,
     recipe: describeRecipe(card, ctx),
-  };
-}
-
-export function describeRelic(relic: RelicDef, ctx: DescribeContext): RelicView {
-  const node = at(ctx.texts, relic.textKey.split('.'));
-  return {
-    id: relic.id,
-    name: text(node, ['name']),
-    desc: text(node, ['desc']),
-    godId: relic.god,
-    rarityLabel: describeLabel('enumValue', `rarity.${relic.rarity}`).label,
-    tagLabels: relic.targetTags.map(tag => describeLabel('enumValue', `tag.${tag}`).label),
-    effects: relic.effects.map(effect => ({
-      axis: effect.axis,
-      axisLabel: describeLabel('enumValue', `stat.${effect.axis}`).label,
-      value: effect.value,
-    })),
-    maxStacks: relic.maxStacks,
-    poolInfluence: relic.poolInfluence ? { ...relic.poolInfluence } : undefined,
   };
 }

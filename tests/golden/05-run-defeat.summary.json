@@ -35,8 +35,8 @@
     "merges": 0,
     "consumes": 0,
     "equipOps": 0,
-    "xp": 4,
-    "level": 1
+    "rewardPoints": 4,
+    "rewardActivations": 0
   },
   "cards": [],
   "equipment": [],
@@ -47,7 +47,7 @@
     "4": 0,
     "5": 0
   },
-  "relics": [],
+  "rewards": [],
   "dropSequence": [
     {
       "frame": 164,
@@ -120,8 +120,24 @@
       "type": "waveStart"
     },
     {
+      "frame": 164,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 198,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 266,
+      "type": "rewardPointsGained"
+    },
+    {
       "frame": 314,
       "type": "dropExpired"
+    },
+    {
+      "frame": 319,
+      "type": "rewardPointsGained"
     },
     {
       "frame": 348,
@@ -174,6 +190,7 @@
   ],
   "eventCounts": {
     "waveStart": 1,
+    "rewardPointsGained": 4,
     "dropExpired": 4,
     "breakthrough": 8,
     "gameEnd": 1

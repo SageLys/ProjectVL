@@ -72,10 +72,6 @@
     },
     "bootstrapMinDiscovery": 6,
     "bootstrapForcedDrops": 9,
-    "godAffinity": {
-      "scorePerStack": 2.5,
-      "scoreCap": 6
-    },
     "maturity": {
       "fullMergeOps": 10,
       "fullHighestStar": 4,

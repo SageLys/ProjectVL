@@ -119,7 +119,7 @@ describe('wildcardSystem', () => {
     grant(state, 1);
     const events = useWildcardOnSlot(state, config, rng, 'cards', 0);
     expect(state.enemies).toHaveLength(0);
-    expect(events.some(event => event.type === 'levelUp')).toBe(true);
+    expect(events.some(event => event.type === 'rewardTriggered')).toBe(true);
   });
 
   it('ordinary auto merge never reads wildcard inventory', () => {

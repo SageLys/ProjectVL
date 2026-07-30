@@ -8,9 +8,9 @@ interface TextsEditorOptions {
   onChange: () => void;
 }
 
-const ENTITY_SECTIONS = new Set(['cards', 'gods', 'relics']);
+const ENTITY_SECTIONS = new Set(['cards', 'gods']);
 
-/** 文案总页只管理非实体段；实体段在卡牌、神祇、遗物表单中就地编辑。 */
+/** 文案总页只管理非实体段；实体段在卡牌、神祇表单中就地编辑。 */
 export function renderTextsEditor(
   container: HTMLElement,
   texts: Record<string, unknown>,
@@ -20,7 +20,7 @@ export function renderTextsEditor(
   container.append(el(
     'p',
     'callout',
-    'cards / gods / relics 已并入对应实体模块；此处只保留全局 UI 与非实体文案，避免双入口冲突。',
+    'cards / gods 已并入对应实体模块；此处只保留全局 UI 与非实体文案，避免双入口冲突。',
   ));
   const sections = el('div', 'global-copy-sections');
   for (const [key, value] of Object.entries(texts)) {

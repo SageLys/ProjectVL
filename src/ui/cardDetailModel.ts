@@ -136,7 +136,7 @@ const GLOBAL_CONSUMERS: Record<string, string> = {
   runtimeScalingFor: '本卡效果',
   'getModifiers.dropRateMul': '掉落概率',
   'getModifiers.dropLifetimeMul': '掉落物存在时间',
-  'getModifiers.xpMul': '经验获取',
+  'getModifiers.xpMul': '奖励积分获取',
 };
 const DEFAULT_GLOSSARY: Record<string, string> = {
   pierce: '弹道命中后继续前进，可再次命中后续目标。',
@@ -158,7 +158,7 @@ const DEFAULT_GLOSSARY: Record<string, string> = {
   summon: '生成拥有独立生命与行为的临时单位。',
   dropRateMul: '乘算调整普通掉落物的生成概率。',
   dropLifetimeMul: '乘算调整掉落物从生成到过期的时间。',
-  xpMul: '乘算调整本局获得的经验。',
+  xpMul: '乘算调整本局获得的奖励积分。',
   extraDrop: '满足触发条件时额外生成掉落物。',
   expiryConvert: '掉落物自然过期时把一部分价值转为其他收益。',
   mergeMaterialRefund: '普通合并或装备喂养后，按规则返还同型低星素材卡。',

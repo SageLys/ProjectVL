@@ -1,18 +1,17 @@
 import type { CardDef } from '../core/effects/defs';
 import { ATOM_NAMES } from '../core/effects/atomContract';
-import type { GodsConfig, RelicDef } from '../config/types';
+import type { GodsConfig } from '../config/types';
 import { button, el } from '../editor/dom';
 import { describeLabel } from '../editor/labels';
 import type { DescribeContext } from './describe';
-import { describeCard, describeRelic } from './describe';
+import { describeCard } from './describe';
 import { cardEffectLocations } from './crossViews/atomUsage';
 import { cardHasCopyDebt } from './crossViews/copyCompleteness';
 
 export type CrossViewId = 'homogeneity' | 'copy' | 'power' | 'atoms' | 'affixes';
 export type DesignSelection =
   | { kind: 'god'; id: string }
-  | { kind: 'card'; id: string }
-  | { kind: 'relic'; id: string };
+  | { kind: 'card'; id: string };
 
 export interface NavFilters {
   query: string;
@@ -26,7 +25,6 @@ export interface NavFilters {
 export interface NavTreeOptions {
   cards: CardDef[];
   gods: GodsConfig;
-  relics: RelicDef[];
   ctx: DescribeContext;
   filters: NavFilters;
   selection: DesignSelection;
@@ -96,7 +94,7 @@ export function renderNavTree(container: HTMLElement, options: NavTreeOptions): 
     next?.focus();
     next?.setSelectionRange(next.value.length, next.value.length);
   });
-  const tags = [...new Set([...options.cards.flatMap(card => card.synergyTags), ...options.relics.flatMap(relic => relic.targetTags)])].sort();
+  const tags = [...new Set(options.cards.flatMap(card => card.synergyTags))].sort();
   const categories = [...new Set(options.cards.map(card => card.category))].sort();
   filters.append(
     search,
@@ -123,13 +121,6 @@ export function renderNavTree(container: HTMLElement, options: NavTreeOptions): 
     if (options.filters.designNotes && !card.designNotes?.trim()) return false;
     return true;
   });
-  const relics = options.relics.filter(relic => {
-    const view = describeRelic(relic, options.ctx);
-    if (needle && !`${view.name} ${view.id}`.toLocaleLowerCase('zh-CN').includes(needle)) return false;
-    if (options.filters.tag && !relic.targetTags.includes(options.filters.tag as RelicDef['targetTags'][number])) return false;
-    if (options.filters.category || options.filters.atom || options.filters.copyDebt || options.filters.designNotes) return false;
-    return true;
-  });
 
   const tree = el('div', 'design-nav__tree');
   const unfiltered = !needle && !options.filters.tag && !options.filters.category && !options.filters.atom && !options.filters.copyDebt && !options.filters.designNotes;
@@ -139,7 +130,6 @@ export function renderNavTree(container: HTMLElement, options: NavTreeOptions): 
     if (unfiltered) section.append(navItem(`${godName}（${god.id}）`, options.selection.kind === 'god' && options.selection.id === god.id, () => options.onSelect({ kind: 'god', id: god.id }), '设计主题与名册'));
     const anchors = cards.filter(card => god.anchorCardIds.includes(card.id));
     const variables = cards.filter(card => god.variableCardIds.includes(card.id));
-    const exclusive = relics.filter(relic => relic.god === god.id);
     const appendSubgroup = (label: string, items: HTMLElement[]): void => {
       if (!items.length) return;
       section.append(el('h3', 'nav-subtitle', label), ...items);
@@ -152,22 +142,12 @@ export function renderNavTree(container: HTMLElement, options: NavTreeOptions): 
       const view = describeCard(card, options.ctx);
       return navItem(view.name || card.id, options.selection.kind === 'card' && options.selection.id === card.id, () => options.onSelect({ kind: 'card', id: card.id }), card.id);
     }));
-    appendSubgroup('专属遗物', exclusive.map(relic => {
-      const view = describeRelic(relic, options.ctx);
-      return navItem(view.name || relic.id, options.selection.kind === 'relic' && options.selection.id === relic.id, () => options.onSelect({ kind: 'relic', id: relic.id }), relic.id);
-    }));
     if (section.childElementCount) tree.append(section);
   }
   const fusion = cards.filter(card => card.recipeOnly);
   if (fusion.length) {
     const section = el('section', 'nav-group'); section.append(el('h3', 'nav-group__title', '融合卡'));
     fusion.forEach(card => { const view = describeCard(card, options.ctx); section.append(navItem(view.name || card.id, options.selection.kind === 'card' && options.selection.id === card.id, () => options.onSelect({ kind: 'card', id: card.id }), view.recipe ? `${view.recipe.a.name} + ${view.recipe.b.name}` : card.id)); });
-    tree.append(section);
-  }
-  const common = relics.filter(relic => !relic.god);
-  if (common.length) {
-    const section = el('section', 'nav-group'); section.append(el('h3', 'nav-group__title', '通用遗物'));
-    common.forEach(relic => { const view = describeRelic(relic, options.ctx); section.append(navItem(view.name || relic.id, options.selection.kind === 'relic' && options.selection.id === relic.id, () => options.onSelect({ kind: 'relic', id: relic.id }), relic.id)); });
     tree.append(section);
   }
   if (!tree.childElementCount) tree.append(el('p', 'empty-state', '没有符合筛选条件的内容。'));

@@ -14,7 +14,6 @@ describe('run settlement', () => {
     state.wildcards[1] = 2; state.wildcards[3] = 1;
     state.buildState.affinity.projectile = 2;
     state.buildState.affinity.control = 2;
-    state.buildState.relicHistory = ['proj_damage', 'storm_judgment', 'storm_overload_coil'];
     const summary = buildRunSummary(state, false);
     expect(summary).toMatchObject({
       win: false,
@@ -22,7 +21,6 @@ describe('run settlement', () => {
       topLane: 'projectile',
       highestCard: { type: 'frost', star: 3 },
       score: { win: 0, waves: 120, kills: 20, hp: 0, build: 130, wildcards: 130, total: 400 },
-      relics: { count: 3, rarity: { common: 1, rare: 1, epic: 1 } },
     });
   });
 

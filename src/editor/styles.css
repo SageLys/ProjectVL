@@ -97,7 +97,7 @@ code { color: #a8bdca; font-family: "SFMono-Regular", Consolas, monospace; font-
 .card-list__id { font-size: 11px; }
 
 .bindings-list, .effects-list { display: grid; gap: 12px; margin-top: 12px; }
-.binding-card, .effect-card, .relic-effect { border: 1px solid var(--line); border-radius: 9px; background: #0c1115; padding: 13px; }
+.binding-card, .effect-card { border: 1px solid var(--line); border-radius: 9px; background: #0c1115; padding: 13px; }
 .binding-card__heading { margin-bottom: 10px; }
 .effect-card__header { display: grid; grid-template-columns: auto minmax(130px, 1fr) auto; }
 .effect-card__index { color: var(--muted); font-size: 12px; }

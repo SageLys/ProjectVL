@@ -108,7 +108,7 @@ export interface Card {
   /** Checkpoint merge product waiting for this card's branch choice. */
   provisional?: boolean;
   affixes?: CardAffixRoll[];
-  /** recipeOnly 产物的静态归属快照；不参与遗物或双神加成结算。 */
+  /** recipeOnly 产物的静态归属快照；不参与双神加成结算。 */
   primaryGod?: GodId;
   sourceGods?: GodId[];
   recipeLineage?: RecipeLineage;
@@ -135,7 +135,6 @@ export type RunDecision =
   | { kind: 'godFocus'; wave: number; candidates: GodId[] }
   | { kind: 'evolutionBranch'; cardType: CardType; checkpointStar: number; options: string[]; provisionalCardId: number }
   | { kind: 'recipePin'; candidates: string[] }
-  | { kind: 'relic'; relicIndex: number; options: string[] }
   | { kind: 'waveBaseReward'; wave: number; candidates: string[]; capped: string[] };
 
 export interface DecisionQueueState {
@@ -511,6 +510,28 @@ export interface RuntimeStatModifier {
   remaining?: number;
 }
 
+export interface RewardExecutionResult {
+  damageDealt?: number;
+  enemiesKilled?: number;
+  healingGranted?: number;
+  shieldHitsGranted?: number;
+  frozenCount?: number;
+  wildcardGrants?: Array<{ star: number; count: number }>;
+  surgeTag?: BuildTag;
+  surgeDuration?: number;
+}
+export interface RewardReceipt { rewardId: string; activationIndex: number; result: RewardExecutionResult; }
+export interface RewardMeterState {
+  points: number;
+  thresholdIndex: number;
+  threshold: number;
+  currentReceipt: RewardReceipt | null;
+  lastRewardId: string | null;
+  activationCount: number;
+  pointGainBonus: number;
+  suppressDepth: number;
+}
+
 /** 运行期可调参数（对应调参面板；由 cfg 各域 defaults 组装）。 */
 export interface Config {
   damage: number;
@@ -524,14 +545,6 @@ export interface Config {
 export interface BuildState {
   /** BuildTag affinity is retained as a read-only compatibility snapshot for one release. */
   affinity: Record<BuildTag, number>;
-  /** Relic routing affinity is god-scoped; neutral relics never increment it. */
-  godAffinity: Record<GodId, number>;
-  /** Relics in selection order. */
-  relicHistory: string[];
-  /** Incremented whenever a relic is applied, invalidating cached build-scaling totals. */
-  scalingVersion: number;
-  /** Forces a card from the selected god within this many build-role drops. */
-  dropPity?: { god: GodId; remaining: number };
 }
 
 export interface RunBuildState {
@@ -615,12 +628,8 @@ export interface GameState {
   multi: number;
   shotCd: number;
   turretAngle: number;
-  xp: number;
-  xpNeed: number;
-  level: number;
-  relicStacks: Record<string, number>;
+  rewardMeter: RewardMeterState;
   buildState: BuildState;
-  xpGainBonus: number;
   /** Legacy perk percentage source; C2 wave growth is pixel-based runBaseStats.rangeAdd. */
   rangeBonus: number;
   kills: number;
@@ -667,10 +676,10 @@ export type GameEvent =
   | { type: 'bossRewardGranted'; wave: number; grants: Array<{ star: number; count: number }> }
   | { type: 'validationRewardGranted'; wave: number; cardType: CardType; star: number; delivery: 'hand' | 'drop' }
   | { type: 'validationRewardSettleStarted'; wave: number; seconds: number }
-  | { type: 'levelUp' }
-  | { type: 'relicOffered'; relicIndex: number; options: string[] }
-  // 只带 id：显示名属皮肤层，由 ui/relicMeta 依 textKey 解析（core 不得依赖 texts）。
-  | { type: 'relicSelected'; relicId: string; rarity: 'common' | 'rare' | 'epic'; god?: GodId }
+  // 只带 id：显示名属表现层，由 UI 文案映射解析（core 不得依赖 texts）。
+  | { type: 'rewardPointsGained'; amount: number; total: number }
+  | { type: 'rewardTriggered'; rewardId: string; activationIndex: number; result: RewardExecutionResult }
+  | { type: 'rewardConfirmed'; rewardId: string }
   | { type: 'evolutionBranchOffered'; cardType: CardType; checkpointStar: number; options: string[]; provisionalCardId: number }
   | { type: 'evolutionBranchSelected'; cardType: CardType; checkpointStar: number; optionId: string; provisionalCardId: number }
   | { type: 'recipeAvailable'; recipeIds: string[] }

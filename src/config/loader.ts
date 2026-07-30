@@ -5,7 +5,8 @@ import waves from './base/waves.json';
 import enemies from './base/enemies.json';
 import difficulty from './base/difficulty.json';
 import skills from './base/skills.json';
-import progression from './base/progression.json';
+import rewardMeter from './base/rewardMeter.json';
+import settlement from './base/settlement.json';
 import economy from './base/economy.json';
 import bounty from './base/bounty.json';
 import tuner from './base/tuner.json';
@@ -13,18 +14,19 @@ import input from './base/input.json';
 import devShort from '../config/variants/dev-short.json';
 import type { DeepPartial, GameConfig } from './types';
 import { validateSkillsConfig } from './skillValidator';
-import { validateProgressionConfig } from './progressionValidator';
+import { validateRewardMeterConfig } from './rewardMeterValidator';
+import { validateSettlementConfig } from './settlementValidator';
 import { validateDifficultyConfig } from './difficultyValidator';
 import { validateIntermissionConfig, validateStagePlanConfig } from './stagePlanValidator';
 import { validateGodConfig } from './godValidator';
 import { validateTunerConfig } from './tunerMeta';
 
 const optionalBaseModules = import.meta.glob<{ default: unknown }>(
-  './base/{gods,relics,evolutionRecipes,waveRewards}.json',
+  './base/{gods,evolutionRecipes,waveRewards}.json',
   { eager: true },
 );
 
-function optionalBaseConfig<K extends 'gods' | 'relics' | 'evolutionRecipes' | 'waveRewards'>(
+function optionalBaseConfig<K extends 'gods' | 'evolutionRecipes' | 'waveRewards'>(
   fileName: string,
   fallback: GameConfig[K],
 ): GameConfig[K] {
@@ -34,7 +36,6 @@ function optionalBaseConfig<K extends 'gods' | 'relics' | 'evolutionRecipes' | '
 
 // C0 兼容层：新文件尚未部署时回落为空域，旧战斗路径仍可启动。
 const gods = optionalBaseConfig('gods.json', { version: '0.1.0', gods: [] });
-const relics = optionalBaseConfig('relics.json', { version: '0.2.0', relics: [] });
 const evolutionRecipes = optionalBaseConfig('evolutionRecipes.json', { version: '0.1.0', recipes: [] });
 const waveRewards = optionalBaseConfig('waveRewards.json', { version: '0.2.0', floor: [], choice: [] });
 
@@ -109,7 +110,8 @@ export function deepMerge<T>(base: T, patch: DeepPartial<T>): T {
 
 function assembleBase(): GameConfig {
   validateSkillsConfig(skills);
-  validateProgressionConfig(progression);
+  validateRewardMeterConfig(rewardMeter);
+  validateSettlementConfig(settlement);
   validateDifficultyConfig(difficulty as GameConfig['difficulty']);
   const config = structuredClone({
     combat,
@@ -118,10 +120,10 @@ function assembleBase(): GameConfig {
     difficulty,
     skills,
     gods,
-    relics,
     evolutionRecipes,
     waveRewards,
-    progression,
+    rewardMeter,
+    settlement,
     economy,
     bounty,
     input,
@@ -155,7 +157,8 @@ export function buildConfig(variantNames: string[] = []): GameConfig {
   validateGodConfig(cfg);
   validateTunerConfig(cfg);
   validateIntermissionConfig(cfg.waves.intermission);
-  validateProgressionConfig(cfg.progression);
+  validateRewardMeterConfig(cfg.rewardMeter);
+  validateSettlementConfig(cfg.settlement);
   validateDifficultyConfig(cfg.difficulty);
   validateStagePlanConfig(cfg.waves.stagePlan, cfg.waves.totalWaves, cfg.economy.maxStar, cfg.waves.waveBoss.reward);
   return cfg;

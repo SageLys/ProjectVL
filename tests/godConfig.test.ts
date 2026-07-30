@@ -14,7 +14,7 @@ describe('神池构筑 C0 数据契约', () => {
     expect(config.skills.cards.filter(card => !card.recipeOnly)).toHaveLength(35);
     expect(config.skills.cards.filter(card => card.recipeOnly)).toHaveLength(25);
     expect(config.skills.cards.every(card => card.god !== undefined && godIds.has(card.god))).toBe(true);
-    expect(config.relics.relics.length).toBeGreaterThanOrEqual(20);
+    expect(config.rewardMeter.rewards).toHaveLength(5);
     expect(config.evolutionRecipes.recipes).toHaveLength(25);
     expect(config.evolutionRecipes.recipes).toEqual(expect.arrayContaining([
       expect.objectContaining({ id: 'r_arcSplitter_pierce', outputCardId: 'stormLattice', outputStar: 6 }),
@@ -59,7 +59,6 @@ describe('神池构筑 C0 数据契约', () => {
   it('配方域为空时按 v2 硬契约拒绝', () => {
     const compatible = structuredClone(buildConfig());
     compatible.gods.gods = [];
-    compatible.relics.relics = [];
     compatible.evolutionRecipes.recipes = [];
 
     expect(() => validateGodConfig(compatible)).toThrow(/必须恰好 25 条/);

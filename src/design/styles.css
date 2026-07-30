@@ -148,8 +148,8 @@ select, input, textarea { min-height: 34px; padding: .35rem .5rem; border: 1px s
 .mechanism-editor .field { display: grid; min-width: 0; gap: .28rem; color: #684c59; font-size: .76rem; font-weight: 700; }
 .mechanism-editor .field__label, .param-field__label { color: #684c59; font-size: .76rem; font-weight: 700; }
 .field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
-.binding-editor-card, .effect-card, .affix-editor-card, .relic-effect-card { min-width: 0; padding: .65rem; border: 1px solid #d9c3cc; border-radius: 6px; background: #fff; }
-.binding-editor-card, .affix-editor-list, .relic-effect-editor, .effects-editor { display: grid; gap: .65rem; }
+.binding-editor-card, .effect-card, .affix-editor-card { min-width: 0; padding: .65rem; border: 1px solid #d9c3cc; border-radius: 6px; background: #fff; }
+.binding-editor-card, .affix-editor-list, .effects-editor { display: grid; gap: .65rem; }
 .binding-editor-card__header, .effect-card__header { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: .55rem; }
 .effect-card__header { grid-template-columns: auto minmax(130px, 1fr) auto; align-items: center; }
 .effect-card__index { color: var(--muted); font-size: .72rem; }
@@ -171,8 +171,6 @@ select, input, textarea { min-height: 34px; padding: .35rem .5rem; border: 1px s
 .reference-list { display: grid; gap: .4rem; }
 .reference-list__row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: .4rem; }
 .affix-editor-card { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: .55rem; }
-.relic-effect-card { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; gap: .55rem; }
-.relic-effect-card h5, .relic-effect-card .reference-list, .relic-effect-card .button { grid-column: 1 / -1; }
 .button--quiet { background: transparent; }
 .button--danger { color: #8a1f2d; border-color: #d7a7ad; background: #fff4f5; }
 .button--add { width: 100%; color: #285f44; border-style: dashed; border-color: #8cbea5; background: #f2fbf6; }
@@ -236,5 +234,5 @@ select, input, textarea { min-height: 34px; padding: .35rem .5rem; border: 1px s
   .workbench-layout { grid-template-columns: 260px minmax(580px, 1fr) 310px; }
   .branch-grid { grid-template-columns: 1fr; }
   .branch-copy { min-height: 0; }
-  .param-grid, .field-grid, .affix-editor-card, .relic-effect-card { grid-template-columns: 1fr; }
+  .param-grid, .field-grid, .affix-editor-card { grid-template-columns: 1fr; }
 }

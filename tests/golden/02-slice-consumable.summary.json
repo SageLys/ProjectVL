@@ -15,7 +15,7 @@
   "wave": {
     "wave": 1,
     "phase": "regular",
-    "spawnLeft": 36,
+    "spawnLeft": 34,
     "waveSpawnQuota": 60,
     "intermission": {
       "active": false,
@@ -24,17 +24,17 @@
     }
   },
   "enemiesRemaining": 7,
-  "cumulativeDamageDealt": 613.8,
+  "cumulativeDamageDealt": 757.8,
   "cumulativeDamageTaken": 0,
   "counters": {
-    "kills": 17,
+    "kills": 19,
     "collected": 3,
-    "expired": 9,
+    "expired": 10,
     "merges": 1,
     "consumes": 2,
     "equipOps": 0,
-    "xp": 18,
-    "level": 2
+    "rewardPoints": 11,
+    "rewardActivations": 1
   },
   "cards": [],
   "equipment": [],
@@ -45,8 +45,8 @@
     "4": 0,
     "5": 0
   },
-  "relics": [
-    "neutral_redundant_armor"
+  "rewards": [
+    "clarityReflux"
   ],
   "dropSequence": [
     {
@@ -206,7 +206,7 @@
       "action": "spawned",
       "dropId": 11,
       "kind": "card",
-      "cardType": "stormcall",
+      "cardType": "harvest",
       "star": 1
     },
     {
@@ -214,7 +214,7 @@
       "action": "spawned",
       "dropId": 12,
       "kind": "card",
-      "cardType": "sanctum",
+      "cardType": "scorch",
       "star": 1
     },
     {
@@ -223,6 +223,14 @@
       "dropId": 10,
       "kind": "card",
       "cardType": null,
+      "star": 1
+    },
+    {
+      "frame": 742,
+      "action": "spawned",
+      "dropId": 13,
+      "kind": "card",
+      "cardType": "permafrost",
       "star": 1
     },
     {
@@ -236,9 +244,9 @@
     {
       "frame": 795,
       "action": "spawned",
-      "dropId": 13,
+      "dropId": 14,
       "kind": "card",
-      "cardType": "overcharge",
+      "cardType": "aegis",
       "star": 1
     },
     {
@@ -250,11 +258,27 @@
       "star": 1
     },
     {
-      "frame": 877,
+      "frame": 830,
       "action": "spawned",
-      "dropId": 14,
+      "dropId": 15,
       "kind": "card",
-      "cardType": "retribution",
+      "cardType": "impact",
+      "star": 1
+    },
+    {
+      "frame": 879,
+      "action": "spawned",
+      "dropId": 16,
+      "kind": "card",
+      "cardType": "glacialSpike",
+      "star": 1
+    },
+    {
+      "frame": 892,
+      "action": "expired",
+      "dropId": 13,
+      "kind": "card",
+      "cardType": null,
       "star": 1
     }
   ],
@@ -262,6 +286,10 @@
     {
       "frame": 0,
       "type": "waveStart"
+    },
+    {
+      "frame": 122,
+      "type": "rewardPointsGained"
     },
     {
       "frame": 130,
@@ -272,16 +300,36 @@
       "type": "affixRolled"
     },
     {
+      "frame": 185,
+      "type": "rewardPointsGained"
+    },
+    {
       "frame": 200,
       "type": "skillConsumed"
+    },
+    {
+      "frame": 210,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 240,
+      "type": "rewardPointsGained"
     },
     {
       "frame": 272,
       "type": "dropExpired"
     },
     {
+      "frame": 299,
+      "type": "rewardPointsGained"
+    },
+    {
       "frame": 310,
       "type": "collected"
+    },
+    {
+      "frame": 317,
+      "type": "rewardPointsGained"
     },
     {
       "frame": 330,
@@ -296,6 +344,10 @@
       "type": "dropExpired"
     },
     {
+      "frame": 336,
+      "type": "rewardPointsGained"
+    },
+    {
       "frame": 390,
       "type": "dropExpired"
     },
@@ -304,8 +356,16 @@
       "type": "skillConsumed"
     },
     {
+      "frame": 435,
+      "type": "rewardPointsGained"
+    },
+    {
       "frame": 449,
       "type": "dropExpired"
+    },
+    {
+      "frame": 458,
+      "type": "rewardPointsGained"
     },
     {
       "frame": 486,
@@ -313,56 +373,86 @@
     },
     {
       "frame": 519,
-      "type": "levelUp"
+      "type": "rewardPointsGained"
     },
     {
       "frame": 519,
-      "type": "relicOffered"
+      "type": "rewardTriggered"
     },
     {
       "frame": 519,
-      "type": "decisionOffered"
+      "type": "rewardConfirmed"
     },
     {
-      "frame": 519,
-      "type": "relicSelected"
-    },
-    {
-      "frame": 519,
-      "type": "decisionResolved"
+      "frame": 531,
+      "type": "rewardPointsGained"
     },
     {
       "frame": 585,
       "type": "dropExpired"
     },
     {
+      "frame": 617,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 667,
+      "type": "rewardPointsGained"
+    },
+    {
       "frame": 669,
       "type": "dropExpired"
+    },
+    {
+      "frame": 694,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 742,
+      "type": "rewardPointsGained"
     },
     {
       "frame": 767,
       "type": "dropExpired"
     },
     {
+      "frame": 795,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 813,
+      "type": "rewardPointsGained"
+    },
+    {
       "frame": 817,
+      "type": "dropExpired"
+    },
+    {
+      "frame": 830,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 879,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 892,
       "type": "dropExpired"
     }
   ],
   "eventCounts": {
     "waveStart": 1,
+    "rewardPointsGained": 19,
     "collected": 3,
     "affixRolled": 1,
     "skillConsumed": 2,
-    "dropExpired": 9,
+    "dropExpired": 10,
     "merged": 1,
-    "levelUp": 1,
-    "relicOffered": 1,
-    "decisionOffered": 1,
-    "relicSelected": 1,
-    "decisionResolved": 1
+    "rewardTriggered": 1,
+    "rewardConfirmed": 1
   },
   "rng": {
-    "draws": 2014,
-    "last": 0.8087961538694799
+    "draws": 2331,
+    "last": 0.6478425033856183
   }
 }

@@ -74,7 +74,7 @@ describe('正式波间阶段', () => {
     const state = freshState();
     state.wave = 2;
     beginIntermission(state);
-    enqueueDecision(state, { kind: 'relic', relicIndex: 0, options: ['r1'] });
+    enqueueDecision(state, { kind: 'godFocus', wave: 2, candidates: ['storm'] });
     enqueueDecision(state, { kind: 'recipePin', candidates: ['recipe1'] });
 
     jumpToWave(state, runtime, constRng(0), 6);

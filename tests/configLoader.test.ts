@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { buildConfig, deepMerge, variantsFromSearch, cfg, applyVariants, VARIANTS } from '../src/config';
 import { resetTestEnv } from './helpers';
-import { validateProgressionConfig } from '../src/config/progressionValidator';
+import { validateRewardMeterConfig } from '../src/config/rewardMeterValidator';
 import { computeWaveBossReward } from '../src/core/systems/waveBossSystem';
 afterEach(resetTestEnv);
 
@@ -60,17 +60,12 @@ describe('config · 方案A base', () => {
   });
 });
 
-describe('config · relic progression', () => {
-  it('rejects non-increasing thresholds, invalid rarity weights, and mismatched cap', () => {
-    const cases: Array<(value: ReturnType<typeof buildConfig>['progression']) => void> = [
-      value => { value.xpThresholds[1] = value.xpThresholds[0]; },
-      value => { value.rarityByRelicIndex[0] = { common: 0 }; },
-      value => { value.targetRelics.max = 7; },
-    ];
-    for (const mutate of cases) {
-      const progression = structuredClone(buildConfig().progression);
-      mutate(progression);
-      expect(() => validateProgressionConfig(progression)).toThrow(/progression-config/);
-    }
+describe('config · reward meter', () => {
+  it('accepts segment thresholds and rejects zero total reward weight', () => {
+    const meter = structuredClone(buildConfig().rewardMeter);
+    meter.thresholds = [10, 5];
+    expect(() => validateRewardMeterConfig(meter)).not.toThrow();
+    meter.rewards.forEach(reward => { reward.weight = 0; });
+    expect(() => validateRewardMeterConfig(meter)).toThrow(/reward-meter-config/);
   });
 });

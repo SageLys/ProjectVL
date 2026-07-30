@@ -2,7 +2,7 @@ import type { EditorDomain } from './contracts';
 import { el, labeled } from './dom';
 import { labelWithKey } from './labels';
 
-export type EntityTextDomain = Extract<EditorDomain, 'skills' | 'gods' | 'relics'>;
+export type EntityTextDomain = Extract<EditorDomain, 'skills' | 'gods'>;
 
 export interface EntityTextChangeHandlers {
   onEntityChange: () => void;
@@ -36,7 +36,7 @@ export function entityTextTitle(texts: Record<string, unknown>, textKey: string,
 }
 
 /**
- * 卡 / 神 / 遗物共用的脏域绑定：任一侧改动都把实体域与 texts 组成同一保存批次。
+ * 卡 / 神共用的脏域绑定：任一侧改动都把实体域与 texts 组成同一保存批次。
  * 保存批次随后由 ConfigSaveFlow.saveEntityWithTexts 统一预检和写回。
  */
 export function entityTextChangeHandlers(

@@ -40,7 +40,7 @@ interface RecordRow {
 
 interface RecordDomainSpec {
   arrays: readonly string[];
-  textRoot?: 'gods' | 'relics';
+  textRoot?: 'gods' | 'rewards';
 }
 
 interface ReadRecordDomain {
@@ -70,17 +70,17 @@ export interface ConfigXlsxImportResult {
 
 const RECORD_DOMAIN_SPECS: Partial<Record<WritableDomain, RecordDomainSpec>> = {
   gods: { arrays: ['gods'], textRoot: 'gods' },
-  relics: { arrays: ['relics'], textRoot: 'relics' },
+  rewardMeter: { arrays: ['rewards'], textRoot: 'rewards' },
   evolutionRecipes: { arrays: ['recipes'] },
   waveRewards: { arrays: ['floor', 'choice'] },
   tuner: { arrays: ['params'] },
 };
 
 const LONG_DOMAINS = [
-  'combat', 'waves', 'enemies', 'difficulty', 'progression', 'economy', 'bounty', 'input',
+  'combat', 'waves', 'enemies', 'difficulty', 'settlement', 'economy', 'bounty', 'input',
 ] as const satisfies readonly WritableDomain[];
 
-const ENTITY_TEXT_ROOTS = ['cards', 'gods', 'relics'] as const;
+const ENTITY_TEXT_ROOTS = ['cards', 'gods', 'rewards'] as const;
 const INTERNAL_PREFIX = '__';
 const TECHNICAL_HEADER_ROW = 3;
 const VISIBLE_HEADER_ROW = 4;
@@ -992,7 +992,7 @@ export function readSkillsSheets(workbook: ExcelJS.Workbook): ReadSkills {
 }
 
 function entityTextIds(snapshot: ConfigSnapshot, root: typeof ENTITY_TEXT_ROOTS[number]): Set<string> {
-  const domain = root === 'cards' ? 'skills' : root;
+  const domain = root === 'cards' ? 'skills' : root === 'rewards' ? 'rewardMeter' : root;
   const data = snapshot[domain];
   if (!isRecord(data)) return new Set();
   const entries = data[root === 'cards' ? 'cards' : root];
@@ -1058,8 +1058,8 @@ function createWorkbook(): ExcelJS.Workbook {
 }
 
 const VISIBLE_DOMAIN_ORDER = [
-  'combat', 'waves', 'enemies', 'difficulty', 'skills', 'gods', 'relics',
-  'evolutionRecipes', 'waveRewards', 'progression', 'economy', 'bounty', 'input', 'tuner',
+  'combat', 'waves', 'enemies', 'difficulty', 'skills', 'gods', 'rewardMeter',
+  'evolutionRecipes', 'waveRewards', 'settlement', 'economy', 'bounty', 'input', 'tuner',
 ] as const satisfies readonly WritableDomain[];
 
 export async function writeConfigWorkbook(snapshot: ConfigSnapshot, outputPath: string): Promise<void> {
@@ -1104,7 +1104,7 @@ function readEntityOrders(meta: Record<string, unknown>): Record<typeof ENTITY_T
   return {
     cards: Array.isArray(parsed.cards) ? parsed.cards.map(String) : [],
     gods: Array.isArray(parsed.gods) ? parsed.gods.map(String) : [],
-    relics: Array.isArray(parsed.relics) ? parsed.relics.map(String) : [],
+    rewards: Array.isArray(parsed.rewards) ? parsed.rewards.map(String) : [],
   };
 }
 
@@ -1115,7 +1115,7 @@ export async function readConfigWorkbook(inputPath: string): Promise<ConfigSnaps
   const snapshot = {} as ConfigSnapshot;
   for (const domain of LONG_DOMAINS) snapshot[domain] = readLongDomain(workbook, domain);
   const importedTexts: Record<typeof ENTITY_TEXT_ROOTS[number], Record<string, unknown>> = {
-    cards: {}, gods: {}, relics: {},
+    cards: {}, gods: {}, rewards: {},
   };
   const skills = readSkillsSheets(workbook);
   snapshot.skills = skills.skills;

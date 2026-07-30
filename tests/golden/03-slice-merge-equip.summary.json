@@ -15,7 +15,7 @@
   "wave": {
     "wave": 1,
     "phase": "regular",
-    "spawnLeft": 39,
+    "spawnLeft": 37,
     "waveSpawnQuota": 60,
     "intermission": {
       "active": false,
@@ -23,18 +23,18 @@
       "afterWave": 0
     }
   },
-  "enemiesRemaining": 7,
-  "cumulativeDamageDealt": 799.1999999999996,
+  "enemiesRemaining": 6,
+  "cumulativeDamageDealt": 525.6000000000001,
   "cumulativeDamageTaken": 0,
   "counters": {
-    "kills": 14,
+    "kills": 17,
     "collected": 4,
-    "expired": 8,
+    "expired": 6,
     "merges": 3,
     "consumes": 0,
     "equipOps": 1,
-    "xp": 18,
-    "level": 2
+    "rewardPoints": 3,
+    "rewardActivations": 1
   },
   "cards": [],
   "equipment": [
@@ -58,8 +58,8 @@
     "4": 0,
     "5": 0
   },
-  "relics": [
-    "neutral_calibrator"
+  "rewards": [
+    "heartbreakNova"
   ],
   "dropSequence": [
     {
@@ -215,14 +215,6 @@
       "star": 1
     },
     {
-      "frame": 671,
-      "action": "spawned",
-      "dropId": 11,
-      "kind": "card",
-      "cardType": "scorch",
-      "star": 1
-    },
-    {
       "frame": 690,
       "action": "expired",
       "dropId": 10,
@@ -231,43 +223,19 @@
       "star": 1
     },
     {
-      "frame": 717,
+      "frame": 777,
       "action": "spawned",
-      "dropId": 12,
-      "kind": "card",
-      "cardType": "frost",
-      "star": 1
-    },
-    {
-      "frame": 789,
-      "action": "spawned",
-      "dropId": 13,
-      "kind": "card",
-      "cardType": "frost",
-      "star": 1
-    },
-    {
-      "frame": 821,
-      "action": "expired",
       "dropId": 11,
       "kind": "card",
-      "cardType": null,
+      "cardType": "decoy",
       "star": 1
     },
     {
-      "frame": 836,
+      "frame": 899,
       "action": "spawned",
-      "dropId": 14,
-      "kind": "card",
-      "cardType": "sentinel",
-      "star": 1
-    },
-    {
-      "frame": 867,
-      "action": "expired",
       "dropId": 12,
       "kind": "card",
-      "cardType": null,
+      "cardType": "frost",
       "star": 1
     }
   ],
@@ -329,6 +297,26 @@
       "type": "equipped"
     },
     {
+      "frame": 175,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 193,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 216,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 228,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 321,
+      "type": "rewardPointsGained"
+    },
+    {
       "frame": 325,
       "type": "dropExpired"
     },
@@ -341,28 +329,32 @@
       "type": "dropExpired"
     },
     {
+      "frame": 446,
+      "type": "rewardPointsGained"
+    },
+    {
       "frame": 471,
       "type": "dropExpired"
     },
     {
-      "frame": 569,
-      "type": "levelUp"
+      "frame": 499,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 540,
+      "type": "rewardPointsGained"
     },
     {
       "frame": 569,
-      "type": "relicOffered"
+      "type": "rewardPointsGained"
     },
     {
       "frame": 569,
-      "type": "decisionOffered"
+      "type": "rewardTriggered"
     },
     {
       "frame": 569,
-      "type": "relicSelected"
-    },
-    {
-      "frame": 569,
-      "type": "decisionResolved"
+      "type": "rewardConfirmed"
     },
     {
       "frame": 596,
@@ -381,16 +373,16 @@
       "type": "dropExpired"
     },
     {
-      "frame": 821,
-      "type": "dropExpired"
+      "frame": 777,
+      "type": "rewardPointsGained"
     },
     {
       "frame": 842,
       "type": "bountyOfferSpawned"
     },
     {
-      "frame": 867,
-      "type": "dropExpired"
+      "frame": 899,
+      "type": "rewardPointsGained"
     }
   ],
   "eventCounts": {
@@ -399,19 +391,19 @@
     "affixRolled": 1,
     "merged": 3,
     "evolutionBranchOffered": 1,
-    "decisionOffered": 2,
+    "decisionOffered": 1,
     "evolutionBranchSelected": 1,
-    "decisionResolved": 2,
+    "decisionResolved": 1,
     "equipped": 1,
-    "dropExpired": 8,
+    "rewardPointsGained": 11,
+    "dropExpired": 6,
     "bountyOfferSpawned": 2,
-    "levelUp": 1,
-    "relicOffered": 1,
-    "relicSelected": 1,
+    "rewardTriggered": 1,
+    "rewardConfirmed": 1,
     "bountyOfferExpired": 1
   },
   "rng": {
-    "draws": 1994,
-    "last": 0.49590663495473564
+    "draws": 1779,
+    "last": 0.9915307918563485
   }
 }

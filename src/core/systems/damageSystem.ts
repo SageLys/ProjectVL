@@ -1,18 +1,18 @@
 // 共享伤害/击杀管线：子弹、连锁、爆发、区域 dot、镜像炮台一律走这里，
-// 保证易伤乘数、击杀结算（计分/掉落/经验/onKill 触发）语义唯一。
+// 保证易伤乘数、击杀结算（计分/掉落/奖励积分/onKill 触发）语义唯一。
 import { cfg } from '../../config';
 import type { Config, Enemy, GameEvent, GameState, Rng } from '../types';
 import { damageTakenMultiplier, isControlled } from '../effects/statusSystem';
 import { spawnParticle } from './particleSystem';
 import { rollDropOnKill } from './dropSystem';
-import { addXp } from './progressionSystem';
+import { addRewardPoints } from './rewardMeterSystem';
 import { fireTrigger, getModifiers } from '../effects/interpreter';
 import { notifyBountyMemberKilled } from './bountySystem';
 import { controlledDamageTakenBonus } from './buildModifierSystem';
 import { grantValidationEliteReward, grantWaveBossReward } from './waveBossSystem';
 
 /**
- * 击杀结算：计分、粒子、掉落判定、经验（×xpMul）、onKill 触发。调用前敌人须已移出数组。
+ * 击杀结算：计分、粒子、掉落判定、奖励积分（×xpMul）、onKill 触发。调用前敌人须已移出数组。
  * source：击杀来源标签（如 'chain'），供 onKill 绑定的 triggerParams.requiresSource 过滤用；
  * 死亡时刻的 enemy.status（frozen/dots 等）原样保留，供 triggerParams.requiresStatus 过滤用。
  */
@@ -27,8 +27,8 @@ export function killEnemy(state: GameState, config: Config, rng: Rng, enemy: Ene
     events.push(...grantValidationEliteReward(state, config, rng, enemy));
   } else if (enemy.bountyEncounterId !== undefined) events.push(...notifyBountyMemberKilled(state, enemy, config, rng));
   else rollDropOnKill(state, config, rng, enemy);
-  const xpGain = enemy.xp * cfg.progression.killXpMul * (1 + state.xpGainBonus) * getModifiers(state).xpMul;
-  events.push(...addXp(state, xpGain, rng));
+  const points = enemy.xp * getModifiers(state).xpMul;
+  events.push(...addRewardPoints(state, config, rng, points));
   events.push(...fireTrigger(state, config, rng, 'onKill', { enemy, point: { x: enemy.x, y: enemy.y }, source }));
   return events;
 }

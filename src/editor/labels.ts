@@ -134,7 +134,7 @@ const ATOM_PARAM_LABELS: Record<string, string> = {
   'summon.kind': '召唤物类型',
   'thorns.ratio': '反伤比例',
   'vulnerable.ratio': '易伤比例',
-  'xpMul.mul': '经验乘数',
+  'xpMul.mul': '奖励积分乘数',
 };
 
 // 参数解释的兜底：仅在契约 `note` 缺省时生效，永远不覆盖 note。
@@ -181,12 +181,16 @@ const DOMAIN_FIELD_LABELS: Record<EditorDomain, Record<string, string>> = {
   difficulty: { defaultDifficulty: '默认难度', profiles: '难度档位' },
   skills: { version: '版本', cards: '卡牌' },
   gods: { version: '版本', gods: '神祇' },
-  relics: { version: '版本', relics: '遗物' },
+  rewardMeter: {
+    version: '版本', pointMul: '奖励点倍率', expiryConvertPointsPerStar: '过期掉落每星奖励点',
+    thresholds: '触发阈值', afterSchedule: '阈值表结束策略', rewardKillsGrantPoints: '奖励击杀是否产点',
+    preventImmediateRepeat: '避免连续重复', lowHpWeightBoost: '低生命奖励权重', rewards: '奖励池',
+  },
   evolutionRecipes: { version: '版本', recipes: '进化配方' },
   waveRewards: { version: '版本', floor: '保底奖励', choice: '奖励选项' },
-  progression: {
-    killXpMul: '击杀经验倍率', relicChoices: '遗物候选数', targetRelics: '目标遗物数',
-    xpThresholds: '升级经验阈值', rarityByRelicIndex: '稀有度曲线', settlement: '结算',
+  settlement: {
+    version: '版本', winBonus: '胜利奖励', perWaveCleared: '每波奖励', perKill: '每击杀奖励',
+    hpRatioBonusMax: '生命比例奖励上限', perEquippedStarSquared: '装备星级平方奖励', wildcardStarValue: '万能牌星级价值',
   },
   economy: {
     maxStar: '最高星级', mergeCopies: '合成所需份数',
@@ -207,11 +211,11 @@ const DOMAIN_FIELD_LABELS: Record<EditorDomain, Record<string, string>> = {
   },
   tuner: { version: '版本', params: '调参项' },
   texts: {
-    center: '中央提示', buttons: '按钮', lanes: '通道', levelup: '升级', affixes: '词条',
+    center: '中央提示', buttons: '按钮', lanes: '通道', affixes: '词条',
     gods: '神祇文案', decisions: '抉择', waveRewardStats: '波末奖励属性',
     waveRewardCapped: '波末奖励封顶', evolution: '进化文案', intermission: '间歇',
     toast: '浮动提示', wildcard: '万用牌', result: '结算', cards: '卡牌文案',
-    effectText: '效果文案', glossary: '术语解释', affixHelp: '词条说明', relics: '遗物文案',
+    effectText: '效果文案', glossary: '术语解释', affixHelp: '词条说明', rewards: '奖励文案', rewardReceipt: '奖励确认',
     tuner: '调参文案',
   },
 };
@@ -229,7 +233,7 @@ const COMMON_FIELD_LABELS: Record<string, string> = {
   damage: '伤害', damageMul: '伤害倍率', desc: '描述', description: '说明', discovery: '探索', dropChance: '基础掉落概率', duration: '持续时间',
   effects: '效果', effectIndex: '效果序号', enabled: '启用', end: '终点值', enemy: '敌人', epic: '史诗', equip: '装备态',
   evolutionTree: '进化树', exposed: '面板可见', fireRate: '攻速', fusionPolicy: '融合策略',
-  god: '神祇', godAffinity: '神祇亲和', godWeightAdd: '神祇权重加值', group: '分组', hard: '困难', height: '高度',
+  god: '神祇', group: '分组', hard: '困难', height: '高度',
   historicalMergeCap: '历史合成封顶', historicalMergeWeight: '历史合成权重',
   hp: '生命', hpBase: '基础生命', hpMul: '生命倍率', hpPerWave: '每波生命增量', id: '标识',
   ingredientA: '材料 A', ingredientB: '材料 B', ingredientVariable: '可变卡材料', ingredientAnchor: '锚点卡材料', inputs: '输入', interval: '间隔',
@@ -253,7 +257,7 @@ const COMMON_FIELD_LABELS: Record<string, string> = {
   validation: '验证局', value: '数值', variableCardIds: '可变卡', version: '版本',
   waveEndSprint: '波末冲刺', waveQuota: '波次配额', weight: '权重', width: '宽度',
   detail: '详情', fx: '演出级别', hand: '手牌态', shortByTier: '分星短文案',
-  x: '横坐标', xp: '经验', y: '纵坐标',
+  x: '横坐标', xp: '奖励积分', y: '纵坐标',
   earlyMix: '局初角色配比', equipWeight: '装备权重', equippedBaseBonus: '装备基础加分', equippedStarBonus: '装备每星加分',
   excludeTopK: '排除前 N 名', fullEquippedTypes: '满值装备类型数', fullHighestStar: '满值最高星', fullMergeOps: '满值合成次数',
   lateMix: '局末角色配比',
@@ -273,7 +277,7 @@ const COMMON_FIELD_HELP: Record<string, string> = {
   impactShare: '范围形态融合到光束上时，每次爆炸从主炮单周期伤害预算中分走的比例。这是控制混装 build 强度的主要旋钮',
   maxWeightRatio: '最高权重不得超过最低权重的这个倍数，防止单一卡型垄断掉落',
   mergeReadyMultiplier: '手上已有该型 1★（再来一张即可合成）时的权重倍率',
-  modifiersAffectTarget: '关闭后，所有提升掉落率的遗物/词条对普通掉落完全失效',
+  modifiersAffectTarget: '关闭后，所有提升掉落率的词条对普通掉落完全失效',
   scorePower: '权重 =（承诺分 + 0.5）的本次方；大于 1 更偏向高分卡，小于 1 更平均',
 };
 
@@ -285,7 +289,7 @@ const STAT_LABELS: Record<typeof RUNTIME_STAT_KINDS[number], string> = {
   effectDamageMul: '效果伤害倍率', quantityAdd: '数量加值', controlPotencyMul: '控制强度倍率',
   controlledDamageTakenMul: '受控增伤倍率', areaScaleMul: '范围倍率', dotDamageMul: '持续伤害倍率',
   defenseDurabilityMul: '防御耐久倍率', retaliationMul: '反击倍率',
-  dropRateMul: '掉率倍率', dropLifetimeMul: '掉落时限倍率', xpMul: '经验倍率',
+  dropRateMul: '掉率倍率', dropLifetimeMul: '掉落时限倍率', xpMul: '奖励积分倍率',
 };
 
 const ENUM_LABELS: Record<string, Record<string, string>> = {

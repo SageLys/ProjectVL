@@ -1,7 +1,7 @@
 /** 浏览器侧只描述端点 DTO；校验结论始终来自 /__config/validate。 */
 export const EDITOR_DOMAINS = [
-  'combat', 'waves', 'enemies', 'difficulty', 'skills', 'gods', 'relics',
-  'evolutionRecipes', 'waveRewards', 'progression', 'economy', 'bounty',
+  'combat', 'waves', 'enemies', 'difficulty', 'skills', 'gods',
+  'evolutionRecipes', 'waveRewards', 'rewardMeter', 'settlement', 'economy', 'bounty',
   'input', 'tuner', 'texts',
 ] as const;
 

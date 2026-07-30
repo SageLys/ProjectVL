@@ -176,7 +176,7 @@ type RecipeRejectionReason = Extract<GameEvent, { type: 'recipeRejected' }>['rea
 
 function executionRejection(state: GameState, recipeId: string): RecipeRejectionReason | null {
   if (state.mode !== 'playing') return 'mode';
-  if (state.decisions.current || state.decisions.pending.length) return 'decision';
+  if (state.decisions.current || state.decisions.pending.length || state.rewardMeter.currentReceipt) return 'decision';
   if (state.paused) return 'paused';
   if (state.wavePhase === 'between'
     && (!state.intermission.active || state.intermission.step !== 'free')) return 'intermission';

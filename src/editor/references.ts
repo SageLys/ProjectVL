@@ -36,9 +36,6 @@ export function buildReferenceCatalog(data: DataMap): ReferenceCatalog {
   for (const card of arrayRecords(records(data.skills).cards)) {
     if (Array.isArray(card.synergyTags)) for (const tag of card.synergyTags) if (typeof tag === 'string') tags.add(tag);
   }
-  for (const relic of arrayRecords(records(data.relics).relics)) {
-    if (Array.isArray(relic.targetTags)) for (const tag of relic.targetTags) if (typeof tag === 'string') tags.add(tag);
-  }
   const textKeys = new Set<string>();
   for (const value of Object.values(data)) collectReferencedTextKeys(value, textKeys);
   return {

@@ -1,6 +1,6 @@
 // 配置层类型：游戏域 + input（T1 输入校准值）+ tuner（调参面板元数据）。
 // P3 配置重组：所有可调数值经此处；variant = 对 base 的深覆盖（见 loader.ts）。
-import type { BuildTag, CardDef } from '../core/effects/defs';
+import type { CardDef } from '../core/effects/defs';
 import type { BindingDef } from '../core/effects/defs';
 
 export type RunStage = 'selection' | 'build' | 'validation';
@@ -265,28 +265,35 @@ export type BuildScalingAxis =
   | 'dropLifetimeMul'
   | 'xpMul';
 
-export interface RelicBuildEffect {
-  kind: 'buildScaling';
-  targetTags: BuildTag[];
-  axis: BuildScalingAxis;
-  value: number;
-}
+/** Reward copy resolves through `${textKey}.name` and `${textKey}.desc` in texts.json. */
+export type RewardAction =
+  | { kind: 'globalDamage'; damageMul: number; bossMaxHpRatioCap: number }
+  | { kind: 'globalControl'; freezeSeconds: number; vulnerableRatio: number; vulnerableSeconds: number }
+  | { kind: 'restoreAndShield'; healRatio: number; shieldHits: number }
+  | { kind: 'grantWildcards'; count: number; starSchedule: number[] }
+  | { kind: 'buildSurge'; duration: number; value: number };
 
-export interface RelicDef {
-  id: string;
-  god?: GodId;
-  rarity: 'common' | 'rare' | 'epic';
-  /** 文案唯一入口：`${textKey}.name` / `${textKey}.desc` 落在 texts.json（配置层不再内联文本）。 */
-  textKey: string;
-  targetTags: BuildTag[];
-  effects: RelicBuildEffect[];
-  poolInfluence?: { godWeightAdd: number; pityDrops?: number };
-  maxStacks: number;
-}
-
-export interface RelicsConfig {
+export interface RewardDef { id: string; textKey: string; weight: number; action: RewardAction; }
+export interface RewardMeterConfig {
   version: string;
-  relics: RelicDef[];
+  pointMul: number;
+  expiryConvertPointsPerStar: number;
+  thresholds: number[];
+  afterSchedule: 'repeatLast' | 'stop';
+  rewardKillsGrantPoints: boolean;
+  preventImmediateRepeat: boolean;
+  lowHpWeightBoost: { hpRatioBelow: number; rewardId: string; weightMul: number };
+  rewards: RewardDef[];
+}
+
+export interface SettlementConfig {
+  version: string;
+  winBonus: number;
+  perWaveCleared: number;
+  perKill: number;
+  hpRatioBonusMax: number;
+  perEquippedStarSquared: number;
+  wildcardStarValue: Record<string, number>;
 }
 
 export interface CardRequirement {
@@ -389,22 +396,6 @@ export interface CardAffixPoolDef {
   candidates: CardAffixCandidateDef[];
 }
 
-export interface ProgressionConfig {
-  killXpMul: number;
-  relicChoices: number;
-  targetRelics: { min: number; max: number };
-  xpThresholds: number[];
-  rarityByRelicIndex: Array<Partial<Record<RelicDef['rarity'], number>>>;
-  settlement: {
-    winBonus: number;
-    perWaveCleared: number;
-    perKill: number;
-    hpRatioBonusMax: number;
-    perEquippedStarSquared: number;
-    wildcardStarValue: Record<string, number>;
-  };
-}
-
 export interface NormalDropTypePolicyConfig {
   enabled: boolean;
   roleBagSize: number;
@@ -412,7 +403,6 @@ export interface NormalDropTypePolicyConfig {
   lateMix: { discovery: number; build: number; pivot: number };
   bootstrapMinDiscovery: number;
   bootstrapForcedDrops: number;
-  godAffinity: { scorePerStack: number; scoreCap: number };
   maturity: {
     fullMergeOps: number;
     fullHighestStar: number;
@@ -529,10 +519,10 @@ export interface GameConfig {
   difficulty: DifficultyConfig;
   skills: SkillsConfig;
   gods: GodsConfig;
-  relics: RelicsConfig;
   evolutionRecipes: EvolutionRecipesConfig;
   waveRewards: WaveRewardsConfig;
-  progression: ProgressionConfig;
+  rewardMeter: RewardMeterConfig;
+  settlement: SettlementConfig;
   economy: EconomyConfig;
   bounty: BountyConfig;
   input: InputConfig;

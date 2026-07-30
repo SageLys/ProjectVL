@@ -3,7 +3,7 @@ import { getModifiers, getSkillDef } from '../effects/interpreter';
 import type { BuildTag } from '../effects/defs';
 import type { BountyEncounter, BountyOffer, BountySide, CardType, Config, Enemy, EnemyType, GameEvent, GameState, Rng } from '../types';
 import { spawnGroundDrop, spawnWildcardDrop } from './dropSystem';
-import { calculateAffinityScore, calculateCommitmentScore, getOrCreateCardTypeRunStats, recordCardDropShown } from './dropTypePolicy';
+import { calculateCommitmentScore, getOrCreateCardTypeRunStats, recordCardDropShown } from './dropTypePolicy';
 import { cardGodInRun, getRunRoster } from './activePoolSystem';
 import { getSelectedGods } from './godPoolSystem';
 import { createEnemy } from './enemySystem';
@@ -75,7 +75,6 @@ function weightedRewardChoice(state: GameState, candidates: CardType[], rng: Rng
       .filter(card => card?.type === type && card.star === 1).length;
     if (oneStarCount === cfg.economy.mergeCopies - 1) weight *= bias.nearMergeBonus;
     if (calculateCommitmentScore(state, type) > 0) weight *= bias.investedBonus;
-    weight *= 1 + calculateAffinityScore(state, type);
     if (cardGodInRun(state, type) === state.godPool.focusGod) weight *= 1.75;
     if (getOrCreateCardTypeRunStats(state, type).totalShown === 0) weight *= bias.droughtBonus;
     if (recipeMaterials.has(type)) {
@@ -107,6 +106,7 @@ export function selectBountyRewardType(state: GameState, rng: Rng): CardType {
     state.bountyDirector.lastRewardType = type;
     return type;
   }
+  // TODO: derive and persist buildState.affinity in a separate behavior-changing fix.
   const maxAffinity = Math.max(...COMBAT_LANES.map(lane => state.buildState.affinity[lane]));
   if (!cfg.bounty.rewardBias.enabled || maxAffinity <= 0) return drawUniformRewardType(state, rng);
 

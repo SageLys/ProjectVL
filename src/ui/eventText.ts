@@ -3,7 +3,6 @@ import { texts } from '../data';
 import type { GameEvent } from '../core/types';
 import { fmt } from './format';
 import { cardDisplayName as name } from './cardMeta';
-import { relicDisplayName } from './relicMeta';
 
 const T = texts.toast;
 const shownRecipeAvailability = new Set<string>();
@@ -41,7 +40,6 @@ export function formatToast(ev: GameEvent): string | null {
     case 'intermissionReady':
     case 'waveRewardsGranted':
     case 'waveBaseRewardOffered':
-    case 'relicOffered':
     case 'evolutionBranchOffered':
     case 'affixRolled':
       return null;
@@ -91,7 +89,13 @@ export function formatToast(ev: GameEvent): string | null {
     case 'shieldBroken': return T.shieldBroken;
     case 'shieldRestored': return T.shieldRestored;
     case 'testDrops': return fmt(T.testDrops, { name: name(ev.cardType) });
-    case 'relicSelected': return fmt(T.perkApplied, { title: relicDisplayName(ev.relicId) });
+    case 'rewardTriggered': {
+      const reward = (texts.rewards as Record<string, { name?: string }>)[ev.rewardId];
+      return `${reward?.name ?? ev.rewardId} 已执行`;
+    }
+    case 'rewardPointsGained':
+    case 'rewardConfirmed':
+      return null;
     case 'waveBaseRewardChosen': {
       const add = ev.stat === 'xpGainPct' ? `${ev.add * 100}%` : String(ev.add);
       const stat = (texts.waveRewardStats as Record<string, string>)[ev.stat] ?? ev.stat;
@@ -118,7 +122,6 @@ export function formatToast(ev: GameEvent): string | null {
     case 'bountyMemberSpawned':
     case 'bountyRewardDropped':
     case 'dropExpired':
-    case 'levelUp':
     case 'gameEnd':
       return null;
   }

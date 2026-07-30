@@ -1,6 +1,5 @@
 import { cfg } from '../config';
 import type { BuildTag } from './effects/defs';
-import type { RelicDef } from '../config/types';
 import type { Card, CardType, GameState } from './types';
 
 export interface RunSummary {
@@ -9,7 +8,6 @@ export interface RunSummary {
   clearedWaves: number;
   topLane: BuildTag | null;
   highestCard: { type: CardType; star: number } | null;
-  relics: { count: number; rarity: Record<RelicDef['rarity'], number> };
   cardEvolutions: Array<{ type: CardType; highestStar: number; path: string[] }>;
   completedRecipes: string[];
   assistBudgetUsed: number;
@@ -24,7 +22,8 @@ function highestCard(cards: Array<Card | null>): RunSummary['highestCard'] {
 }
 
 export function buildRunSummary(state: GameState, win: boolean): RunSummary {
-  const settlement = cfg.progression.settlement;
+  const settlement = cfg.settlement;
+  // TODO: derive and persist buildState.affinity in a separate behavior-changing fix.
   const allCards = [...state.cards, ...state.equipment];
   const clearedWaves = win ? cfg.waves.totalWaves : Math.max(0, state.wave - 1);
   const maxAffinity = Math.max(...BUILD_TAGS.map(tag => state.buildState.affinity[tag]));
@@ -46,11 +45,6 @@ export function buildRunSummary(state: GameState, win: boolean): RunSummary {
     total: 0,
   };
   score.total = score.win + score.waves + score.kills + score.hp + score.build + score.wildcards;
-  const rarity: RunSummary['relics']['rarity'] = { common: 0, rare: 0, epic: 0 };
-  for (const relicId of state.buildState.relicHistory) {
-    const relic = cfg.relics.relics.find(item => item.id === relicId);
-    if (relic) rarity[relic.rarity]++;
-  }
   const highestByType = new Map<CardType, Card>();
   for (const card of allCards) {
     if (!card) continue;
@@ -82,7 +76,6 @@ export function buildRunSummary(state: GameState, win: boolean): RunSummary {
     clearedWaves,
     topLane,
     highestCard: highestCard(allCards),
-    relics: { count: state.buildState.relicHistory.length, rarity },
     cardEvolutions: [...cardEvolutions.values()]
       .sort((a, b) => a.type.localeCompare(b.type)),
     completedRecipes: [...state.recipes.completedRecipeIds],

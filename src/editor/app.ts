@@ -1,4 +1,4 @@
-import type { GodsConfig, RelicsConfig, SkillsConfig, TunerConfig } from '../config/types';
+import type { GodsConfig, SkillsConfig, TunerConfig } from '../config/types';
 import { ConfigApi } from './api';
 import {
   EDITOR_DOMAINS, reportHasErrors,
@@ -8,7 +8,6 @@ import { button, deepClone, el } from './dom';
 import { entityTextChangeHandlers, type EntityTextDomain } from './entityTextEditor';
 import { renderGodsEditor } from './godsEditor';
 import { buildReferenceCatalog } from './references';
-import { renderRelicsEditor } from './relicsEditor';
 import { ConfigSaveFlow } from './saveFlow';
 import { renderSkillsEditor } from './skillsEditor';
 import { renderTreeEditor } from './treeEditor';
@@ -21,12 +20,12 @@ type ReportMap = Partial<Record<EditorDomain, ValidationReportDto>>;
 
 const DOMAIN_LABELS: Record<EditorDomain, string> = {
   combat: '战斗', waves: '波次', enemies: '敌人', difficulty: '难度', skills: '技能',
-  gods: '神池', relics: '遗物', evolutionRecipes: '进化配方', waveRewards: '波末奖励',
-  progression: '成长', economy: '经济', bounty: 'Bounty', input: '输入', tuner: '调参', texts: '文案',
+  gods: '神池', rewardMeter: '奖励蓄力条', evolutionRecipes: '进化配方', waveRewards: '波末奖励',
+  settlement: '结算', economy: '经济', bounty: 'Bounty', input: '输入', tuner: '调参', texts: '文案',
 };
 
-const FORM_DOMAINS = new Set<EditorDomain>(['skills', 'gods', 'tuner', 'relics', 'texts']);
-const TREE_TOGGLE_DOMAINS = new Set<EditorDomain>(['skills', 'gods', 'tuner', 'relics']);
+const FORM_DOMAINS = new Set<EditorDomain>(['skills', 'gods', 'tuner', 'texts']);
+const TREE_TOGGLE_DOMAINS = new Set<EditorDomain>(['skills', 'gods', 'tuner']);
 
 export class ConfigEditorApp {
   private readonly api = new ConfigApi();
@@ -158,14 +157,6 @@ export class ConfigEditorApp {
           onChange('tuner');
         },
       });
-    } else if (domain === 'relics') {
-      const changes = entityTextChangeHandlers('relics', onChange);
-      renderRelicsEditor(this.content, this.data.relics as RelicsConfig, {
-        texts: this.data.texts as Record<string, unknown>,
-        references,
-        onRelicsChange: changes.onEntityChange,
-        onTextsChange: changes.onTextsChange,
-      });
     } else {
       renderTextsEditor(this.content, this.data.texts as Record<string, unknown>, {
         references,
@@ -271,7 +262,7 @@ export class ConfigEditorApp {
     const domains = [...this.dirty];
     try {
       const entityDomains = domains.filter((domain): domain is EntityTextDomain =>
-        domain === 'skills' || domain === 'gods' || domain === 'relics');
+        domain === 'skills' || domain === 'gods');
       const pairedEntity = domains.length === 2 && domains.includes('texts') && entityDomains.length === 1
         ? entityDomains[0]
         : undefined;

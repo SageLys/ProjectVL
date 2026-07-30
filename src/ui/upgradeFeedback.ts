@@ -147,7 +147,7 @@ export function createUpgradeFeedback(refs: DomRefs) {
         card.classList.add('recipe-transform');
         setTimeout(() => card.classList.remove('recipe-transform'), 560);
       }
-      const suppressCelebration = events.some(event => event.type === 'levelUp');
+      const suppressCelebration = events.some(event => event.type === 'rewardTriggered');
       const candidates = resolveUpgradeCandidates(events).map(candidate => ({ ...candidate, suppressCelebration }));
       if (!candidates.length) return;
       if (!active) {

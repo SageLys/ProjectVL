@@ -33,9 +33,9 @@ export function applyRunBaseReward(
     case 'heal':
       state.hp = Math.min(state.maxHp, state.hp + effect.add);
       break;
-    // Sole percentage-based exception: XP gain has no additive base-stat form.
+    // Sole percentage-based exception: reward-point gain has no additive base-stat form.
     case 'xpGainPct':
-      state.xpGainBonus += effect.add;
+      state.rewardMeter.pointGainBonus += effect.add;
       break;
   }
 }

@@ -8,6 +8,7 @@ import { makeRng } from '../src/core/rng';
 import { collectNearest } from '../src/core/systems/dropSystem';
 import { consumeCard, moveOrSwap } from '../src/core/systems/equipmentSystem';
 import { resolveCurrentDecision } from '../src/core/systems/decisionQueueSystem';
+import { confirmRewardReceipt } from '../src/core/systems/rewardMeterSystem';
 import { beginOpeningIntermission, confirmIntermissionReady } from '../src/core/systems/intermissionSystem';
 import type { Config, GameState, Rng } from '../src/core/types';
 import { freshState, createDefaultConfig, resetTestEnv, applyVariants } from './helpers';
@@ -28,6 +29,7 @@ function runBotGame(s: GameState, config: Config, rng: Rng): ValidationEntrySnap
   let validationEntry: ValidationEntrySnapshot | undefined;
   for (let frame = 0; frame < 30 * 60 * 25 && s.mode === 'playing'; frame++) {
     updateGame(s, config, rng, dt);
+    while (s.rewardMeter.currentReceipt) confirmRewardReceipt(s, config, rng);
     if (!validationEntry && stageForWave(s.wave, cfg.waves.totalWaves, cfg.waves.stagePlan) === 'validation') {
       const cards = [...s.cards, ...s.equipment].filter(card => card !== null);
       validationEntry = {
@@ -43,7 +45,7 @@ function runBotGame(s: GameState, config: Config, rng: Rng): ValidationEntrySnap
         ? decision.candidates[0]
         : decision.kind === 'waveBaseReward'
           ? decision.candidates[0]
-        : decision.kind === 'evolutionBranch' || decision.kind === 'relic'
+        : decision.kind === 'evolutionBranch'
           ? decision.options[0]
           : '';
       resolveCurrentDecision(s, config, rng, choice);
@@ -93,14 +95,7 @@ describe('整局冒烟（占位技能卡=配置数据，经通用解释器结算
       .filter(([, stats]) => stats.totalShown > 0)
       .map(([type]) => type);
     expect(shownTypes.every(type => s.godPool.runRoster.includes(type))).toBe(true);
-    expect(s.runSummary?.relics.count).toBeGreaterThanOrEqual(5);
-    expect(s.runSummary?.relics.count).toBeLessThanOrEqual(8);
-    const firstTwoRarities = s.buildState.relicHistory.slice(0, 2).map(
-      id => cfg.relics.relics.find(relic => relic.id === id)?.rarity,
-    );
-    expect(firstTwoRarities).toHaveLength(2);
-    expect(firstTwoRarities.every(rarity => rarity === 'common' || rarity === 'rare' || rarity === 'epic')).toBe(true);
-    expect(cfg.progression.rarityByRelicIndex[cfg.progression.rarityByRelicIndex.length - 1]?.epic).toBeGreaterThan(0);
+    expect(s.rewardMeter.activationCount).toBeGreaterThanOrEqual(5);
   });
 
   it('dev-short variant：3 波短局可跑', () => {

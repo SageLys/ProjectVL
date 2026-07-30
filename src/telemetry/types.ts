@@ -38,8 +38,8 @@ export type TelemetryEventType =
   | 'active_pool_created'
   | 'card_shown_by_god'
   | 'card_collected_by_god'
-  | 'relic_offered'
-  | 'relic_selected'
+  | 'reward_triggered'
+  | 'reward_confirmed'
   | 'evolution_branch_offered'
   | 'evolution_branch_selected'
   | 'recipe_available'
@@ -103,9 +103,9 @@ export interface TelemetryEvent {
   godRole?: 'main' | 'sub' | 'focus';
   candidates?: string[];
   cardTypes?: string[];
-  relicId?: string;
-  relicIndex?: number;
-  rarity?: 'common' | 'rare' | 'epic';
+  rewardId?: string;
+  activationIndex?: number;
+  rewardResult?: Record<string, unknown>;
   checkpointStar?: number;
   optionId?: string;
   provisionalCardId?: number;

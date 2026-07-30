@@ -1,14 +1,12 @@
 import { AFFIX_SINKS } from '../config/affixSinks';
-import type {
-  BuildScalingAxis, CardStatKind, EvolutionRecipeDef, RelicDef,
-} from '../config/types';
+import type { CardStatKind, EvolutionRecipeDef } from '../config/types';
 import type { BindingDef, CardDef, Category, Trigger } from '../core/effects/defs';
 import { button, el, labeled, numberControl, selectControl } from '../editor/dom';
 import { allowedTriggersForEffects, renderEffectsEditor } from '../editor/effectEditor';
 import { cardLabel, labelWithKey } from '../editor/labels';
 import { referenceOptions, type ReferenceCatalog } from '../editor/references';
 
-export type EditableContentDomain = 'skills' | 'relics' | 'evolutionRecipes';
+export type EditableContentDomain = 'skills' | 'evolutionRecipes';
 
 export interface MechanismEditingOptions {
   editingPath?: string;
@@ -251,42 +249,6 @@ export function renderAffixPoolForm(container: HTMLElement, card: CardDef, path:
     const add = button('＋ 添加词条候选', 'button button--add'); add.addEventListener('click', () => { pool.candidates.push({ stat: axes[0], weight: 1, min: 0, max: 1, step: 1, consumableDuration: 5 }); onChange(); render(); }); list.append(add);
   };
   render(); container.append(list);
-}
-
-export function renderRelicForm(
-  container: HTMLElement,
-  relic: RelicDef,
-  path: string,
-  rarityOptions: RelicDef['rarity'][],
-  axisOptions: BuildScalingAxis[],
-  options: MechanismEditingOptions,
-): void {
-  const onChange = (): void => options.onChange('relics');
-  const grid = el('div', 'field-grid');
-  const rarity = selectControl(rarityOptions, relic.rarity, false, value => labelWithKey('enumValue', `rarity.${value}`, value)); rarity.addEventListener('change', () => { relic.rarity = rarity.value as RelicDef['rarity']; onChange(); });
-  const stacks = numberControl(relic.maxStacks, 1, undefined, 1); stacks.addEventListener('input', () => { relic.maxStacks = stacks.valueAsNumber; onChange(); });
-  grid.append(labeled('稀有度', rarity, `${path}.rarity`), labeled('最大层数', stacks, `${path}.maxStacks`)); container.append(grid, el('h4', '', '目标标签'));
-  const tags = el('div', 'reference-list'); renderReferenceList(tags, relic.targetTags, 'targetTags', `${path}.targetTags`, options.references, onChange); container.append(tags, el('h4', '', '构筑效果'));
-  const effects = el('div', 'relic-effect-editor');
-  const renderEffects = (): void => {
-    effects.replaceChildren();
-    relic.effects.forEach((effect, index) => {
-      const effectPath = `${path}.effects[${index}]`; const article = el('article', 'relic-effect-card');
-      const axis = selectControl(axisOptions, effect.axis, false, value => labelWithKey('enumValue', `stat.${value}`, value)); axis.addEventListener('change', () => { effect.axis = axis.value as BuildScalingAxis; onChange(); });
-      const value = numberControl(effect.value); value.addEventListener('input', () => { effect.value = value.valueAsNumber; onChange(); });
-      article.append(labeled('作用轴', axis, `${effectPath}.axis`), labeled('数值', value, `${effectPath}.value`), el('h5', '', '效果目标标签'));
-      const effectTags = el('div', 'reference-list'); renderReferenceList(effectTags, effect.targetTags, 'targetTags', `${effectPath}.targetTags`, options.references, onChange); article.append(effectTags);
-      const remove = button('删除效果', 'button button--danger button--small'); remove.addEventListener('click', () => { relic.effects.splice(index, 1); onChange(); renderEffects(); }); article.append(remove); effects.append(article);
-    });
-    const add = button('＋ 添加构筑效果', 'button button--add'); add.addEventListener('click', () => { relic.effects.push({ kind: 'buildScaling', targetTags: [...relic.targetTags], axis: axisOptions[0], value: 0 }); onChange(); renderEffects(); }); effects.append(add);
-  };
-  renderEffects(); container.append(effects, el('h4', '', '池影响'));
-  const pool = el('div', 'field-grid');
-  for (const key of ['godWeightAdd', 'pityDrops'] as const) renderOptionalNumber(pool, relic.poolInfluence?.[key], fieldLabel(key), `${path}.poolInfluence.${key}`, next => {
-    if (next === undefined) { if (relic.poolInfluence) delete relic.poolInfluence[key]; }
-    else { relic.poolInfluence ??= { godWeightAdd: 0 }; relic.poolInfluence[key] = next; }
-  }, onChange);
-  container.append(pool);
 }
 
 export function renderRecipeForm(container: HTMLElement, recipe: EvolutionRecipeDef, path: string, options: MechanismEditingOptions): void {

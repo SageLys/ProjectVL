@@ -46,7 +46,7 @@ export const ATOM_LABELS: Record<AtomName, string> = {
   summon: '召唤',
   dropRateMul: '掉率',
   dropLifetimeMul: '掉落时限',
-  xpMul: '经验获取',
+  xpMul: '奖励积分获取',
   extraDrop: '额外掉落',
   expiryConvert: '过期转化',
   mergeMaterialRefund: '合成素材返还',
@@ -242,7 +242,7 @@ export function formatEffect(effect: EffectDef, depth = 0): EffectTextLine[] {
       text = `掉落物存在时间 ${plusPctFromMul(p.mul)}`;
       break;
     case 'xpMul':
-      text = `经验获取 ${plusPctFromMul(p.mul)}`;
+      text = `奖励积分获取 ${plusPctFromMul(p.mul)}`;
       break;
     case 'extraDrop':
       text = p.chance != null

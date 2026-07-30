@@ -13,6 +13,7 @@ import { registerSkillDefs } from '../effects/interpreter';
 import { collectNearest, spawnGroundDrop } from '../systems/dropSystem';
 import { consumeCard, moveOrSwap } from '../systems/equipmentSystem';
 import { resolveCurrentDecision } from '../systems/decisionQueueSystem';
+import { confirmRewardReceipt } from '../systems/rewardMeterSystem';
 import { beginOpeningIntermission, confirmIntermissionReady } from '../systems/intermissionSystem';
 import { startNextWave } from '../systems/waveSystem';
 
@@ -114,12 +115,12 @@ export interface ReplaySummary {
   counters: {
     kills: number; collected: number; expired: number;
     merges: number; consumes: number; equipOps: number;
-    xp: number; level: number;
+    rewardPoints: number; rewardActivations: number;
   };
   cards: ReplaySlotSnapshot[];
   equipment: ReplaySlotSnapshot[];
   wildcards: Record<string, number>;
-  relics: string[];
+  rewards: string[];
   dropSequence: ReplayDropEvent[];
   /** 事件类型的帧序列（不含载荷，便于跨引擎比对语义顺序）。 */
   eventSequence: Array<{ frame: number; type: GameEvent['type'] }>;
@@ -150,7 +151,7 @@ function choiceFor(state: GameState, policy: ReplayDecisionPolicy): string | nul
   const options = decision.kind === 'godDraft' || decision.kind === 'godFocus'
     || decision.kind === 'waveBaseReward' || decision.kind === 'recipePin'
     ? decision.candidates
-    : decision.kind === 'evolutionBranch' || decision.kind === 'relic'
+    : decision.kind === 'evolutionBranch'
       ? decision.options
       : [];
   if (!options.length) return null;
@@ -217,12 +218,14 @@ export function runReplay(spec: ReplaySpec): ReplaySummary {
   let cumulativeDamageDealt = 0;
   let cumulativeDamageTaken = 0;
   let win: boolean | null = null;
+  const rewards: string[] = [];
 
   const record = (frame: number, events: readonly GameEvent[]): void => {
     for (const event of events) {
       eventSequence.push({ frame, type: event.type });
       eventCounts[event.type] = (eventCounts[event.type] ?? 0) + 1;
       if (event.type === 'gameEnd') win = event.win;
+      if (event.type === 'rewardTriggered') rewards.push(event.rewardId);
       if (event.type === 'breakthrough' || event.type === 'bossContactDamage') cumulativeDamageTaken += event.damage;
       if (event.type === 'collected' && event.dropId !== undefined) {
         dropSequence.push({
@@ -271,6 +274,9 @@ export function runReplay(spec: ReplaySpec): ReplaySummary {
     record(frame, updateGame(state, config, rng, spec.dt));
 
     // 待决策时 core 不推进时间：同一帧内把队列清空，再执行脚本输入。
+    for (let guard = 0; state.rewardMeter.currentReceipt && guard < 16; guard++) {
+      record(frame, confirmRewardReceipt(state, config, rng));
+    }
     for (let guard = 0; state.decisions.current && guard < 16; guard++) {
       const choice = choiceFor(state, spec.decisionPolicy);
       if (choice === null) break;
@@ -311,12 +317,12 @@ export function runReplay(spec: ReplaySpec): ReplaySummary {
     counters: {
       kills: state.kills, collected: state.collected, expired: state.expired,
       merges: state.merges, consumes: state.consumes, equipOps: state.equipOps,
-      xp: state.xp, level: state.level,
+      rewardPoints: state.rewardMeter.points, rewardActivations: state.rewardMeter.activationCount,
     },
     cards: snapshotSlots(state.cards),
     equipment: snapshotSlots(state.equipment),
     wildcards: Object.fromEntries(Object.entries(state.wildcards).map(([star, count]) => [star, count ?? 0])),
-    relics: [...state.buildState.relicHistory],
+    rewards,
     dropSequence,
     eventSequence,
     eventCounts,

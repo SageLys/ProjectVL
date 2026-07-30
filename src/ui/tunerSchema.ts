@@ -51,6 +51,11 @@ export function formatBossWaves(values: readonly number[]): string {
 /** 兼容旧 Preset；新字段存在时优先使用新字段。 */
 export function migratePresetValues(values: Record<string, number | string | boolean>): Record<string, number | string | boolean> {
   const migrated = { ...values };
+  if (migrated['rewardMeter.pointMul'] === undefined && migrated['progression.killXpMul'] !== undefined) {
+    migrated['rewardMeter.pointMul'] = migrated['progression.killXpMul'];
+  }
+  delete migrated['progression.killXpMul'];
+  delete migrated['progression.relicChoices'];
   if (migrated['waves.bossWaves'] === undefined && migrated['waves.bossWave'] !== undefined) {
     migrated['waves.bossWaves'] = String(migrated['waves.bossWave']);
   }

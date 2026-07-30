@@ -1,4 +1,4 @@
-import type { EvolutionRecipesConfig, GodsConfig, RelicsConfig, SkillsConfig } from '../config/types';
+import type { EvolutionRecipesConfig, GodsConfig, SkillsConfig } from '../config/types';
 import { ConfigApi } from '../editor/api';
 import { collectIssues, EDITOR_DOMAINS, reportHasErrors, type EditorDomain, type ValidationReportDto } from '../editor/contracts';
 import { deepClone, el } from '../editor/dom';
@@ -13,25 +13,23 @@ import { renderContextPanel } from './contextPanel';
 import type { DescribeContext } from './describe';
 import type { CrossViewId, DesignSelection, NavFilters } from './navTree';
 import { renderNavTree } from './navTree';
-import { renderRelicView } from './relicView';
 import type { TextEditingOptions } from './textEditing';
 import { DesignTextSaveCoordinator } from './textSave';
 import { DesignContentSaveCoordinator } from './contentSave';
 import type { MechanismEditingOptions, EditableContentDomain } from './mechanismEditor';
 import type { SaveCandidate } from '../editor/saveFlow';
 
-type ContentDomain = 'skills' | 'gods' | 'relics' | 'evolutionRecipes' | 'texts';
+type ContentDomain = 'skills' | 'gods' | 'evolutionRecipes' | 'texts';
 type PrintScope = 'entity' | 'god' | 'all' | 'cross';
 
 interface DesignData {
   skills: SkillsConfig;
   gods: GodsConfig;
-  relics: RelicsConfig;
   evolutionRecipes: EvolutionRecipesConfig;
   texts: Record<string, unknown>;
 }
 
-const CONTENT_DOMAINS: readonly ContentDomain[] = ['skills', 'gods', 'relics', 'evolutionRecipes', 'texts'];
+const CONTENT_DOMAINS: readonly ContentDomain[] = ['skills', 'gods', 'evolutionRecipes', 'texts'];
 
 export class DesignWorkbenchApp {
   private readonly api = new ConfigApi();
@@ -117,7 +115,7 @@ export class DesignWorkbenchApp {
   private render(): void {
     if (!this.data || !this.nav || !this.main || !this.context || !this.references) return;
     renderNavTree(this.nav, {
-      cards: this.data.skills.cards, gods: this.data.gods, relics: this.data.relics.relics, ctx: this.ctx(), filters: this.filters,
+      cards: this.data.skills.cards, gods: this.data.gods, ctx: this.ctx(), filters: this.filters,
       selection: this.selection, crossView: this.crossView,
       onSelect: selection => { this.selection = selection; this.crossView = undefined; this.editingTextPath = undefined; this.editingMechanismPath = undefined; this.render(); },
       onCrossView: view => { this.crossView = view; this.editingTextPath = undefined; this.editingMechanismPath = undefined; this.render(); },
@@ -128,7 +126,7 @@ export class DesignWorkbenchApp {
       this.context.replaceChildren(el('section', 'context-section'), el('p', 'empty-state', '横切视图的行与单元格可点击回到实体；右栏在实体阅读态显示校验、反向引用和文案槽位。'));
     } else {
       renderContextPanel(this.context, {
-        selection: this.selection, cards: this.data.skills.cards, gods: this.data.gods.gods, relics: this.data.relics.relics,
+        selection: this.selection, cards: this.data.skills.cards, gods: this.data.gods.gods,
         recipes: this.data.evolutionRecipes, texts: this.data.texts, report: this.combinedReport(), references: this.references,
         locate: (domain, path) => this.locate(domain, path),
       });
@@ -148,7 +146,7 @@ export class DesignWorkbenchApp {
       case 'copy': renderCopyCompletenessView(this.main, this.data.skills.cards, this.data.texts, (id, path) => this.openCard(id, path)); break;
       case 'power': renderPowerGridView(this.main, this.data.skills.cards, this.ctx(), this.currentGodId(), id => this.openCard(id)); break;
       case 'atoms': renderAtomUsageView(this.main, this.data.skills.cards, id => this.openCard(id)); break;
-      case 'affixes': renderAffixCoverageView(this.main, this.data.skills.cards, this.data.relics.relics); break;
+      case 'affixes': renderAffixCoverageView(this.main, this.data.skills.cards); break;
     }
   }
 
@@ -157,11 +155,6 @@ export class DesignWorkbenchApp {
     if (selection.kind === 'card') {
       const index = this.data.skills.cards.findIndex(card => card.id === selection.id); const card = this.data.skills.cards[index];
       if (card) renderCardView(container, card, this.ctx(), index, this.textEditingOptions(), this.mechanismEditingOptions()); else container.replaceChildren(el('p', 'empty-state', '卡牌不存在'));
-    } else if (selection.kind === 'relic') {
-      const index = this.data.relics.relics.findIndex(relic => relic.id === selection.id); const relic = this.data.relics.relics[index];
-      const rarityOptions = [...new Set(this.data.relics.relics.map(item => item.rarity))];
-      const axisOptions = [...new Set(this.data.relics.relics.flatMap(item => item.effects.map(effect => effect.axis)))];
-      if (relic) renderRelicView(container, relic, this.ctx(), index, this.textEditingOptions(), this.mechanismEditingOptions(), rarityOptions, axisOptions); else container.replaceChildren(el('p', 'empty-state', '遗物不存在'));
     } else {
       const god = this.data.gods.gods.find(item => item.id === selection.id);
       if (god) renderGodView(container, god, this.data.skills.cards, this.ctx(), this.textEditingOptions()); else container.replaceChildren(el('p', 'empty-state', '神祇不存在'));
@@ -264,7 +257,7 @@ export class DesignWorkbenchApp {
   private renderContextOnly(): void {
     if (!this.data || !this.context || !this.references || this.crossView) return;
     renderContextPanel(this.context, {
-      selection: this.selection, cards: this.data.skills.cards, gods: this.data.gods.gods, relics: this.data.relics.relics,
+      selection: this.selection, cards: this.data.skills.cards, gods: this.data.gods.gods,
       recipes: this.data.evolutionRecipes, texts: this.data.texts, report: this.combinedReport(), references: this.references,
       locate: (domain, path) => this.locate(domain, path),
     });
@@ -329,7 +322,7 @@ export class DesignWorkbenchApp {
     if (!this.data) return '';
     if (this.selection.kind === 'god') return this.selection.id;
     if (this.selection.kind === 'card') return this.data.skills.cards.find(card => card.id === this.selection.id)?.god ?? this.data.gods.gods[0]?.id ?? '';
-    return this.data.relics.relics.find(relic => relic.id === this.selection.id)?.god ?? this.data.gods.gods[0]?.id ?? '';
+    return this.data.gods.gods[0]?.id ?? '';
   }
 
   private locate(_domain: EditorDomain, path: string): void {
@@ -345,7 +338,6 @@ export class DesignWorkbenchApp {
     const god = this.data.gods.gods.find(item => item.id === godId); if (!god) return;
     const godContainer = el('section', 'print-chapter'); renderGodView(godContainer, god, this.data.skills.cards, this.ctx()); target.append(godContainer);
     for (const id of [...god.anchorCardIds, ...god.variableCardIds]) { const card = this.data.skills.cards.find(item => item.id === id); if (card) { const wrap = el('section', 'print-entity'); renderCardView(wrap, card, this.ctx()); target.append(wrap); } }
-    for (const relic of this.data.relics.relics.filter(item => item.god === godId)) { const wrap = el('section', 'print-entity'); renderRelicView(wrap, relic, this.ctx()); target.append(wrap); }
   }
 
   private preparePrint(): void {
@@ -361,8 +353,6 @@ export class DesignWorkbenchApp {
     for (const god of this.data.gods.gods) this.appendGodChapter(this.printRoot, god.id);
     const fusionTitle = el('h1', 'print-section-title', '融合卡'); this.printRoot.append(fusionTitle);
     for (const card of this.data.skills.cards.filter(item => item.recipeOnly)) { const wrap = el('section', 'print-entity'); renderCardView(wrap, card, this.ctx()); this.printRoot.append(wrap); }
-    const relicTitle = el('h1', 'print-section-title', '通用遗物'); this.printRoot.append(relicTitle);
-    for (const relic of this.data.relics.relics.filter(item => !item.god)) { const wrap = el('section', 'print-entity'); renderRelicView(wrap, relic, this.ctx()); this.printRoot.append(wrap); }
   }
 
   /** 后续阶段复用同一内存候选与原始快照，不允许视图自行序列化落盘。 */

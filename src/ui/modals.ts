@@ -3,11 +3,10 @@ import { cfg } from '../config';
 import type { GameState, RunDecision } from '../core/types';
 import type { DomRefs } from './domRefs';
 import { cardDisplayName, evolutionChoiceCopy } from './cardMeta';
-import { relicCopy } from './relicMeta';
 import { fmt } from './format';
 import { buildEvolutionOptionViewModel } from './cardDetailModel';
 
-/** 升级三选一 / 结算 / 中心引导文案的显隐控制。 */
+/** 局内抉择 / 结算 / 中心引导文案的显隐控制。 */
 export function createModals(refs: DomRefs, hooks: { onDecision(choice: string): void; onRestart(): void }) {
   const decisionModal = document.createElement('div');
   const decisionCard = document.createElement('div');
@@ -47,7 +46,7 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
             ? cfg.waveRewards.choice
               .map(option => option.id)
               .filter(id => decision.candidates.includes(id) || decision.capped.includes(id))
-          : decision.kind === 'evolutionBranch' || decision.kind === 'relic'
+          : decision.kind === 'evolutionBranch'
             ? decision.options
             : [];
         decisionTitle.textContent = copy.title;
@@ -118,34 +117,6 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
             fit.className = 'choice-fit';
             fit.textContent = `适合：${optionModel?.keywords.join('、') || '当前机制强化'}`;
             button.append(label, desc, effects, fit);
-          } else if (decision.kind === 'relic') {
-            const relic = cfg.relics.relics.find(item => item.id === option);
-            const copy = relic ? relicCopy(relic) : null;
-            label.textContent = copy?.name ?? option;
-            const meta = document.createElement('span');
-            meta.className = 'choice-desc';
-            const godName = relic?.god
-              ? (texts.gods as Record<string, { name: string }>)[relic.god]?.name ?? relic.god
-              : '中立';
-            meta.textContent = `${godName} · ${relic?.rarity ?? ''}`;
-            const desc = document.createElement('span');
-            desc.className = 'choice-desc';
-            desc.textContent = copy?.desc ?? '';
-            button.append(label, meta, desc);
-            if (relic && state) {
-              const heldTypes = new Set([...state.cards, ...state.equipment]
-                .filter(card => card !== null).map(card => card.type));
-              const names = cfg.skills.cards
-                .filter(card => heldTypes.has(card.id)
-                  && card.synergyTags.some(tag => relic.targetTags.includes(tag)))
-                .map(card => cardDisplayName(card.id));
-              if (names.length) {
-                const benefits = document.createElement('span');
-                benefits.className = 'choice-benefits';
-                benefits.textContent = fmt(texts.levelup.benefits, { names: [...new Set(names)].join('、') });
-                button.append(benefits);
-              }
-            }
           } else if (decision.kind === 'waveBaseReward') {
             const optionDef = cfg.waveRewards.choice.find(item => item.id === option);
             label.textContent = optionDef
@@ -221,9 +192,6 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
           highest.textContent = fmt(texts.result.highestCard, { star: summary.highestCard.star, name: cardDisplayName(summary.highestCard.type) });
           refs.resultBuildMeta.append(highest);
         }
-        const relics = document.createElement('span');
-        relics.textContent = `遗物 ${summary.relics.count} · 普通 ${summary.relics.rarity.common} / 稀有 ${summary.relics.rarity.rare} / 史诗 ${summary.relics.rarity.epic}`;
-        refs.resultBuildMeta.append(relics);
         for (const card of summary.cardEvolutions.filter(item => item.path.length > 0)) {
           const route = document.createElement('span');
           const names = card.path.map(entry => {

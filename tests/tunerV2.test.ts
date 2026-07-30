@@ -16,13 +16,13 @@ beforeEach(resetTestEnv);
 
 /** 迁移前各分组暴露的滑杆数（tunerSchema.ts 五张手写表合并后的分组统计），用于锁死面板可调项不变。 */
 const SLIDERS_PER_GROUP = {
-  waves: 37, combat: 9, enemies: 29, drops: 34, progression: 2, bounty: 42, p2: 8,
+  waves: 37, combat: 9, enemies: 29, drops: 32, progression: 1, bounty: 42, p2: 8,
 } as const;
 
 describe('调参元数据 · 单一来源', () => {
   it('每个滑杆都有合法范围、可解析标签，并指向配置中的真实数值', () => {
     const sliders = tunerSliders();
-    expect(sliders).toHaveLength(161);
+    expect(sliders).toHaveLength(158);
     for (const param of sliders) {
       expect(param.min, param.path).toBeLessThan(param.max!);
       expect(param.step, param.path).toBeGreaterThan(0);
@@ -72,11 +72,8 @@ describe('调参元数据 · 单一来源', () => {
 });
 
 describe('调参面板 v2 · 派生指标', () => {
-  it('round-trips all progression controls through numeric path accessors', () => {
-    const paths = [
-      'progression.killXpMul',
-      'progression.relicChoices',
-    ];
+  it('round-trips the reward meter control through numeric path accessors', () => {
+    const paths = ['rewardMeter.pointMul'];
     for (const [index, path] of paths.entries()) {
       const value = index + 2.25;
       setNumberAt(cfg, path, value);

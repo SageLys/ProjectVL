@@ -19,9 +19,6 @@
     "defense": "防御",
     "utility": "辅助"
   },
-  "levelup": {
-    "benefits": "生效中：{names}"
-  },
   "affixes": {
     "skillTitle": "技能效果",
     "slotTitle": "数值词条",
@@ -45,7 +42,7 @@
       "retaliationMul": "反击",
       "dropRateMul": "掉落率",
       "dropLifetimeMul": "掉落时限",
-      "xpMul": "经验"
+      "xpMul": "奖励积分"
     }
   },
   "gods": {
@@ -67,7 +64,7 @@
     },
     "plenty": {
       "name": "丰饶",
-      "theme": "收获与命运：掉落、经验、合成与标记"
+      "theme": "收获与命运：掉落、奖励积分、合成与标记"
     }
   },
   "decisions": {
@@ -83,10 +80,6 @@
       "title": "选择进化分支",
       "body": "为这张卡选择一条进化路线。"
     },
-    "relic": {
-      "title": "选择遗物",
-      "body": "选择一件遗物强化本局构筑。"
-    },
     "waveBaseReward": {
       "title": "强化炮台",
       "body": "从下列 5 项中选择 1 项强化。"
@@ -101,7 +94,7 @@
     "fireRateAdd": "基础射速",
     "rangeAdd": "基础射程",
     "maxHpAdd": "心防上限",
-    "xpGainPct": "经验取得"
+    "xpGainPct": "奖励积分取得"
   },
   "waveRewardCapped": "已达到上限",
   "evolution": {
@@ -2017,12 +2010,12 @@
     "luckyStar": {
       "luckyStarA": {
         "name": "吉星",
-        "summary": "常驻提高掉率与经验",
+        "summary": "常驻提高掉率与奖励积分",
         "intent": "吉星以dropRateMul + xpMul @ passive承担核心机制。",
         "keywords": [
           "dropRateMul + xpMul @ passive"
         ],
-        "buildFit": "常驻提高掉率与经验"
+        "buildFit": "常驻提高掉率与奖励积分"
       },
       "luckyStarB": {
         "name": "星域",
@@ -2125,7 +2118,6 @@
     "bountyCompleted": "赏金完成：{name}奖励已落地",
     "bountyFailed": "赏金失败：敌群已突破防线",
     "tunerReset": "已恢复默认参数",
-    "perkApplied": "{title} 已生效",
     "waveBaseRewardChosen": "{stat} +{add} 已生效",
     "mergeSuffix": "，自动合成 {count} 次"
   },
@@ -4643,7 +4635,7 @@
       "summon": "召唤",
       "dropRateMul": "掉率",
       "dropLifetimeMul": "掉落时限",
-      "xpMul": "经验获取",
+      "xpMul": "奖励积分获取",
       "extraDrop": "额外掉落",
       "expiryConvert": "过期转化",
       "mergeMaterialRefund": "合成素材返还",
@@ -4701,7 +4693,7 @@
     "summon": "生成拥有独立生命与行为的临时单位。",
     "dropRateMul": "乘算调整普通掉落物的生成概率。",
     "dropLifetimeMul": "乘算调整掉落物从生成到过期的时间。",
-    "xpMul": "乘算调整本局获得的经验。",
+    "xpMul": "乘算调整本局获得的奖励积分。",
     "extraDrop": "满足触发条件时额外生成掉落物。",
     "expiryConvert": "掉落物自然过期时把一部分价值转为其他收益。",
     "mergeMaterialRefund": "普通同型合并或装备喂养完成时，按概率返还同型低星素材卡。",
@@ -4734,97 +4726,39 @@
     "retaliationMul": "提高本卡破盾、反伤或突破反击的伤害。",
     "dropRateMul": "提高本卡提供的掉落概率。",
     "dropLifetimeMul": "延长本卡影响的掉落物存在时间。",
-    "xpMul": "提高本卡提供的经验获取倍率。"
+    "xpMul": "提高本卡提供的奖励积分获取倍率。"
   },
-  "relics": {
-    "proj_damage": {
-      "name": "超压弹道",
-      "desc": "弹道类技能的衍生伤害提高 15%。"
+  "rewards": {
+    "heartbreakNova": {
+      "name": "心防震爆",
+      "desc": "对全场造成一次高额伤害。"
     },
-    "proj_quantity": {
-      "name": "增殖弹药",
-      "desc": "穿透、弹跳与分裂数量 +1。"
+    "absoluteStillness": {
+      "name": "绝对静止",
+      "desc": "冻结全场并使敌人短暂易伤。"
     },
-    "storm_judgment": {
-      "name": "雷罚印记",
-      "desc": "弹道与控制技能的衍生伤害提高 18%。"
+    "clarityReflux": {
+      "name": "清醒回流",
+      "desc": "恢复心防并获得一次突破吸收。"
     },
-    "storm_overload_coil": {
-      "name": "过载线圈",
-      "desc": "弹道派生数量 +1。"
+    "wildHeart": {
+      "name": "万能心意",
+      "desc": "直接获得一张万能卡。"
     },
-    "ctrl_potency": {
-      "name": "凝滞力场",
-      "desc": "减速、冻结、眩晕与击退效果增强 20%。"
-    },
-    "ctrl_bridge": {
-      "name": "乘虚而入",
-      "desc": "受控敌人承受的伤害提高 10%。"
-    },
-    "winter_frozen_marrow": {
-      "name": "冻髓",
-      "desc": "受控敌人承受的伤害提高 15%。"
-    },
-    "winter_deep_reach": {
-      "name": "极寒延展",
-      "desc": "控制与领域范围扩大，控制强度同步提高。"
-    },
-    "domain_area": {
-      "name": "领域扩张",
-      "desc": "区域与光环的范围和持续时间提高 15%。"
-    },
-    "domain_dot": {
-      "name": "余烬灼心",
-      "desc": "持续伤害提高 20%。"
-    },
-    "inferno_wildfire": {
-      "name": "燎原",
-      "desc": "领域持续伤害提高 30%。"
-    },
-    "inferno_detonation": {
-      "name": "爆轰理论",
-      "desc": "弹道与领域技能的衍生伤害提高 25%。"
-    },
-    "def_durability": {
-      "name": "加固壁垒",
-      "desc": "护盾与召唤物耐久提高 25%。"
-    },
-    "def_bridge": {
-      "name": "荆棘反击",
-      "desc": "破盾新星、反噬与反击伤害提高 25%。"
-    },
-    "bulwark_wall_doctrine": {
-      "name": "城墙学说",
-      "desc": "防御耐久提高 35%。"
-    },
-    "bulwark_revenge_edict": {
-      "name": "复仇律令",
-      "desc": "反击伤害提高 40%。"
-    },
-    "plenty_harvest_hymn": {
-      "name": "丰收颂歌",
-      "desc": "辅助技能提供的掉落率提高 10%。"
-    },
-    "plenty_wisdom_crystal": {
-      "name": "智慧结晶",
-      "desc": "辅助技能提供的经验倍率提高 15%。"
-    },
-    "neutral_calibrator": {
-      "name": "校准仪",
-      "desc": "所有机制标签的衍生伤害提高 8%。"
-    },
-    "neutral_redundant_armor": {
-      "name": "冗余装甲",
-      "desc": "防御耐久提高 15%。"
-    },
-    "neutral_scavenger": {
-      "name": "拾荒者",
-      "desc": "辅助技能提供的掉落存留时间提高 12%。"
-    },
-    "neutral_focused_training": {
-      "name": "集中训练",
-      "desc": "所有机制标签的衍生伤害提高 12%。"
+    "buildResonance": {
+      "name": "构筑共鸣",
+      "desc": "短时强化当前的构筑方向。"
     }
+  },
+  "rewardReceipt": {
+    "title": "奖励已执行",
+    "confirm": "确认",
+    "damage": "造成 {damage} 伤害 · 消灭 {kills} 名敌人",
+    "control": "冻结并削弱 {count} 名敌人",
+    "healing": "恢复 {healing} 心防 · 获得 {hits} 次突破吸收",
+    "wildcard": "获得 {count} 张 {star}★ 万能卡",
+    "surge": "强化 {tag} 构筑方向 {duration} 秒",
+    "fallback": "奖励已结算"
   },
   "tuner": {
     "groups": {
@@ -4842,7 +4776,7 @@
         "title": "D · 掉落与拾取"
       },
       "progression": {
-        "title": "经验与升级"
+        "title": "奖励蓄力"
       },
       "bounty": {
         "title": "E · 精英 Bounty"
@@ -4887,32 +4821,31 @@
       "enemies.types.normal.speedPerWave": "普通 · 每波速度",
       "enemies.types.normal.damage": "普通 · 突破伤害",
       "enemies.types.normal.r": "普通 · 半径",
-      "enemies.types.normal.xp": "普通 · 经验",
+      "enemies.types.normal.xp": "普通 · 奖励积分",
       "enemies.types.fast.hpBase": "高速 · 基础 HP",
       "enemies.types.fast.hpPerWave": "高速 · 每波 HP",
       "enemies.types.fast.speedBase": "高速 · 基础速度",
       "enemies.types.fast.speedPerWave": "高速 · 每波速度",
       "enemies.types.fast.damage": "高速 · 突破伤害",
       "enemies.types.fast.r": "高速 · 半径",
-      "enemies.types.fast.xp": "高速 · 经验",
+      "enemies.types.fast.xp": "高速 · 奖励积分",
       "enemies.types.tank.hpBase": "重装 · 基础 HP",
       "enemies.types.tank.hpPerWave": "重装 · 每波 HP",
       "enemies.types.tank.speedBase": "重装 · 基础速度",
       "enemies.types.tank.speedPerWave": "重装 · 每波速度",
       "enemies.types.tank.damage": "重装 · 突破伤害",
       "enemies.types.tank.r": "重装 · 半径",
-      "enemies.types.tank.xp": "重装 · 经验",
+      "enemies.types.tank.xp": "重装 · 奖励积分",
       "enemies.types.boss.hpBase": "Boss · 基础 HP",
       "enemies.types.boss.hpPerWave": "Boss · 每波 HP",
       "enemies.types.boss.speedBase": "Boss · 基础速度",
       "enemies.types.boss.speedPerWave": "Boss · 每波速度",
       "enemies.types.boss.damage": "Boss · 突破伤害",
       "enemies.types.boss.r": "Boss · 半径",
-      "enemies.types.boss.xp": "Boss · 经验",
+      "enemies.types.boss.xp": "Boss · 奖励积分",
       "economy.defaults.dropChance": "基础掉落率（仅回退模式生效）",
       "economy.defaults.dropLifetime": "掉落存在时间",
-      "progression.killXpMul": "经验 · 击破倍率",
-      "progression.relicChoices": "遗物 · 候选数量",
+      "rewardMeter.pointMul": "奖励积分 · 击破倍率",
       "combat.bullet.radius": "P2 · 弹丸半径",
       "combat.bullet.muzzleOffset": "P2 · 炮口偏移",
       "combat.vfx.shootParticles": "P2 · 开火粒子数",
@@ -4997,8 +4930,6 @@
       "economy.normalDropTypePolicy.lateMix.pivot": "掉落导演 · 后期调整位",
       "economy.normalDropTypePolicy.bootstrapMinDiscovery": "掉落导演 · 启动探索保底",
       "economy.normalDropTypePolicy.bootstrapForcedDrops": "普通掉落 · 开局强制发牌次数",
-      "economy.normalDropTypePolicy.godAffinity.scorePerStack": "掉落导演 · 每层神倾向分",
-      "economy.normalDropTypePolicy.godAffinity.scoreCap": "掉落导演 · 神倾向分封顶",
       "economy.normalDropTypePolicy.maturity.fullMergeOps": "掉落导演 · 满成熟合成数",
       "economy.normalDropTypePolicy.maturity.fullHighestStar": "掉落导演 · 满成熟最高星",
       "economy.normalDropTypePolicy.maturity.fullEquippedTypes": "掉落导演 · 满成熟装备数",

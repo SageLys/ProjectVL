@@ -135,7 +135,7 @@ describe('combatSystem · 射击与命中', () => {
     updateBullets(s, config, constRng(0.99), 0.016);
     expect(s.enemies).toHaveLength(0);
     expect(s.kills).toBe(1);
-    expect(s.xp).toBe(1);
+    expect(s.rewardMeter.points).toBe(1);
     expect(s.bullets).toHaveLength(0);
   });
 

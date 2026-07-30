@@ -2,7 +2,7 @@ import { ConfigApi } from '../editor/api';
 import type { EditorDomain, ValidationReportDto } from '../editor/contracts';
 import { ConfigSaveFlow, type SaveCandidate, type SaveFlowResult } from '../editor/saveFlow';
 
-const ENTITY_DOMAINS = ['skills', 'gods', 'relics'] as const;
+const ENTITY_DOMAINS = ['skills', 'gods'] as const;
 
 export class DesignContentSaveCoordinator {
   private readonly flow: ConfigSaveFlow;

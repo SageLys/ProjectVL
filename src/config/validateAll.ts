@@ -7,7 +7,8 @@ import { AFFIX_SINKS } from './affixSinks';
 import { ATOM_CONTRACT, atomContract } from '../core/effects/atomContract';
 import { validateDifficultyConfig } from './difficultyValidator';
 import { validateGodConfig } from './godValidator';
-import { validateProgressionConfig } from './progressionValidator';
+import { validateRewardMeterConfig } from './rewardMeterValidator';
+import { validateSettlementConfig } from './settlementValidator';
 import { validateSkillsConfig } from './skillValidator';
 import { validateIntermissionConfig, validateStagePlanConfig } from './stagePlanValidator';
 import { validateTunerConfig } from './tunerMeta';
@@ -15,8 +16,8 @@ import type { CardStatKind, GameConfig } from './types';
 
 export type ValidationLayer = 'schema' | 'reference' | 'semantic';
 export type ValidationDomain =
-  | 'skills' | 'gods' | 'relics' | 'evolutionRecipes' | 'waveRewards'
-  | 'waves' | 'combat' | 'enemies' | 'difficulty' | 'progression' | 'economy'
+  | 'skills' | 'gods' | 'rewardMeter' | 'evolutionRecipes' | 'waveRewards'
+  | 'waves' | 'combat' | 'enemies' | 'difficulty' | 'settlement' | 'economy'
   | 'bounty' | 'input' | 'tuner' | 'texts';
 
 export interface ValidationIssue {
@@ -37,7 +38,7 @@ export interface ValidationReport {
 
 /** 文案表的最小形状；只取本校验用得到的部分。 */
 export interface TextsLike {
-  relics?: Record<string, { name?: string; desc?: string }>;
+  rewards?: Record<string, { name?: string; desc?: string }>;
   tuner?: { groups?: Record<string, { title?: string }>; params?: Record<string, string> };
   [key: string]: unknown;
 }
@@ -87,13 +88,14 @@ function textString(texts: TextsLike, key: string): string | undefined {
 // —— schema 层：复用既有 fail-fast 校验器，逐域独立 try/catch ——
 function schemaLayer(config: GameConfig, out: IssueCollector): void {
   out.run('schema:skills', 'skills', () => validateSkillsConfig(config.skills));
-  out.run('schema:progression', 'progression', () => validateProgressionConfig(config.progression));
+  out.run('schema:rewardMeter', 'rewardMeter', () => validateRewardMeterConfig(config.rewardMeter));
+  out.run('schema:settlement', 'settlement', () => validateSettlementConfig(config.settlement));
   out.run('schema:difficulty', 'difficulty', () => validateDifficultyConfig(config.difficulty));
   out.run('schema:intermission', 'waves', () => validateIntermissionConfig(config.waves.intermission));
   out.run('schema:stagePlan', 'waves', () => validateStagePlanConfig(
     config.waves.stagePlan, config.waves.totalWaves, config.economy.maxStar, config.waves.waveBoss.reward,
   ));
-  out.run('schema:crossDomain(gods/relics/recipes/waveRewards)', 'gods', () => validateGodConfig(config));
+  out.run('schema:crossDomain(gods/recipes/waveRewards)', 'gods', () => validateGodConfig(config));
   out.run('schema:tuner', 'tuner', () => validateTunerConfig(config));
 }
 
@@ -112,8 +114,8 @@ function referenceLayer(config: GameConfig, texts: TextsLike, out: IssueCollecto
       entries: config.gods.gods.map((god, index) => ({ id: god.id, path: `$.gods.gods[${index}].id` })),
     },
     {
-      domain: 'relics', name: 'relics.relics',
-      entries: config.relics.relics.map((relic, index) => ({ id: relic.id, path: `$.relics.relics[${index}].id` })),
+      domain: 'rewardMeter', name: 'rewardMeter.rewards',
+      entries: config.rewardMeter.rewards.map((reward, index) => ({ id: reward.id, path: `$.rewardMeter.rewards[${index}].id` })),
     },
     {
       domain: 'evolutionRecipes', name: 'evolutionRecipes.recipes',
@@ -168,15 +170,11 @@ function referenceLayer(config: GameConfig, texts: TextsLike, out: IssueCollecto
       out.error('reference', 'texts', `$.gods.gods[${index}].textKey`, `文案键未命中 texts.json: ${god.textKey}`);
     }
   });
-  config.relics.relics.forEach((relic, index) => {
-    const path = `$.relics.relics[${index}]`;
-    if (relic.textKey !== `relics.${relic.id}`) {
-      out.error('reference', 'relics', `${path}.textKey`, `必须等于 relics.${relic.id}`);
-    }
-    for (const leaf of ['name', 'desc'] as const) {
-      if (!textString(texts, `${relic.textKey}.${leaf}`)) {
-        out.error('reference', 'texts', `${path}.textKey`, `文案缺失或为空: ${relic.textKey}.${leaf}`);
-      }
+  config.rewardMeter.rewards.forEach((reward, index) => {
+    const path = `$.rewardMeter.rewards[${index}]`;
+    if (reward.textKey !== `rewards.${reward.id}`) out.error('reference', 'rewardMeter', `${path}.textKey`, `必须等于 rewards.${reward.id}`);
+    for (const leaf of ['name', 'desc'] as const) if (!textString(texts, `${reward.textKey}.${leaf}`)) {
+      out.error('reference', 'texts', `${path}.textKey`, `文案缺失或为空: ${reward.textKey}.${leaf}`);
     }
   });
   config.tuner.params.forEach((param, index) => {
@@ -191,9 +189,9 @@ function referenceLayer(config: GameConfig, texts: TextsLike, out: IssueCollecto
   }
 
   out.checks.push('reference:textOrphans');
-  const relicIds = new Set(config.relics.relics.map(relic => relic.id));
-  for (const id of Object.keys(texts.relics ?? {})) {
-    if (!relicIds.has(id)) out.warn('reference', 'texts', `texts.relics.${id}`, '孤儿文案：没有任何遗物引用它');
+  const rewardIds = new Set(config.rewardMeter.rewards.map(reward => reward.id));
+  for (const id of Object.keys(texts.rewards ?? {})) if (!rewardIds.has(id)) {
+    out.warn('reference', 'texts', `texts.rewards.${id}`, '孤儿文案：没有任何奖励引用它');
   }
   const tunerPaths = new Set(config.tuner.params.map(param => param.path));
   for (const path of Object.keys(texts.tuner?.params ?? {})) {

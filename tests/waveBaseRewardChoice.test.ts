@@ -83,7 +83,7 @@ describe('waveBaseReward choice', () => {
     const fireRate = offerAndChoose('optFireRate');
     expect(totalFireRate(fireRate.state, runtime)).toBe(runtime.fireRate + 0.15);
     expect(fireRate.state.maxHp).toBe(100);
-    expect(fireRate.state.xpGainBonus).toBe(0);
+    expect(fireRate.state.rewardMeter.pointGainBonus).toBe(0);
 
     const maxHp = offerAndChoose('optMaxHp');
     expect(maxHp.state.maxHp).toBe(110);
@@ -91,7 +91,7 @@ describe('waveBaseReward choice', () => {
     expect(maxHp.state.runBaseStats.fireRateAdd).toBe(0);
 
     const xp = offerAndChoose('optXpGain');
-    expect(xp.state.xpGainBonus).toBe(0.08);
+    expect(xp.state.rewardMeter.pointGainBonus).toBe(0.08);
     expect(xp.state.runBaseStats.damageAdd).toBe(0);
     expect(xp.events).toContainEqual({
       type: 'waveBaseRewardChosen',
@@ -103,10 +103,10 @@ describe('waveBaseReward choice', () => {
 
   it('升级决策保持当前项，波末选择排在其后且互不覆盖', () => {
     const state = freshState();
-    enqueueDecision(state, { kind: 'relic', relicIndex: 0, options: ['r1'] });
+    enqueueDecision(state, { kind: 'godFocus', wave: 1, candidates: ['storm'] });
     enqueueWaveBaseRewardDecision(state, 1);
 
-    expect(state.decisions.current?.kind).toBe('relic');
+    expect(state.decisions.current?.kind).toBe('godFocus');
     expect(state.decisions.pending.map(item => item.kind)).toEqual(['waveBaseReward']);
   });
 

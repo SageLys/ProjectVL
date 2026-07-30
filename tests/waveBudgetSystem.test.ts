@@ -6,7 +6,7 @@ import { createDefaultConfig } from '../src/core/createInitialState';
 import { createSeededRng } from '../src/debug/exposeDebugApi';
 import { updateGame } from '../src/core/updateGame';
 import { startNextWave } from '../src/core/systems/waveSystem';
-import { resolveCurrentDecision } from '../src/core/systems/decisionQueueSystem';
+import { confirmRewardReceipt } from '../src/core/systems/rewardMeterSystem';
 import { computeExperienceMetrics } from '../src/telemetry/metrics';
 import type { TelemetryEvent, TelemetrySession } from '../src/telemetry/types';
 import { resolveActiveWavePlan } from '../src/core/runStage';
@@ -65,12 +65,9 @@ describe('waveSystem · budget spawn strategy', () => {
         knownDrops.add(drop.id);
         events.push({ type: 'dropLanded', at: state.time, wave: 1, dropId: drop.id });
       }
-      if (gameEvents.some(event => event.type === 'levelUp')) {
+      if (gameEvents.some(event => event.type === 'rewardTriggered')) {
         events.push({ type: 'perkPopup', at: state.time, wave: 1 });
-        const decision = state.decisions.current;
-        if (decision?.kind === 'relic') {
-          resolveCurrentDecision(state, runtime, rng, decision.options[0]);
-        }
+        confirmRewardReceipt(state, runtime, rng);
       }
       if (gameEvents.some(event => event.type === 'waveCleared' || event.type === 'gameEnd')) {
         events.push({ type: 'waveCleared', at: state.time, wave: 1 });

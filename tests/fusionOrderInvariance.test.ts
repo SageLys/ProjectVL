@@ -128,9 +128,8 @@ describe('纯融合函数与卡内覆盖', () => {
     ]);
     const state = freshState();
     equipOrder(state, [fixedCard('scaledNova', 110), fixedCard('plainNova', 120)]);
-    state.relicStacks.def_bridge = 1;
-    state.buildState.scalingVersion = 1;
-    expect(getModifiers(state).novaOnBreak).toEqual({ damage: 43.75, knockbackDistance: 80 });
+    state.statModifiers.push({ sourceId: 'test', stat: 'retaliationMul', operation: 'mul', value: 1.25, remaining: 1 });
+    expect(getModifiers(state).novaOnBreak).toEqual({ damage: 50, knockbackDistance: 80 });
   });
 });
 
@@ -195,14 +194,14 @@ describe('槽位排列与真实消费路径', () => {
       spawnGroundDrop(state, config, constRng(0), 100, 100, 'material', 1);
       const counting = { draws: 0, rng: () => { counting.draws++; return roll; } };
       tickDrops(state, config, counting.rng, config.dropLifetime + 0.01);
-      return { mods: getModifiers(state), draws: counting.draws, xp: state.xp };
+      return { mods: getModifiers(state), draws: counting.draws, points: state.rewardMeter.points };
     };
 
-    expect(run([0], 0)).toMatchObject({ mods: { expiryConvert: { ratio: 0 } }, draws: 1, xp: 0 });
-    expect(run([1], 0.999)).toMatchObject({ mods: { expiryConvert: { ratio: 1 } }, draws: 1, xp: 4 });
-    expect(run([], 0)).toMatchObject({ mods: { expiryConvert: null }, draws: 0, xp: 0 });
-    expect(run([0.5, 0.65], 0.8249).xp).toBe(4);
-    expect(run([0.5, 0.65], 0.8251).xp).toBe(0);
+    expect(run([0], 0)).toMatchObject({ mods: { expiryConvert: { ratio: 0 } }, draws: 1, points: 0 });
+    expect(run([1], 0.999)).toMatchObject({ mods: { expiryConvert: { ratio: 1 } }, draws: 1, points: 4 });
+    expect(run([], 0)).toMatchObject({ mods: { expiryConvert: null }, draws: 0, points: 0 });
+    expect(run([0.5, 0.65], 0.8249).points).toBe(4);
+    expect(run([0.5, 0.65], 0.8251).points).toBe(0);
   });
 });
 
