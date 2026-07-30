@@ -30,6 +30,21 @@ namespace ProjectVL.Presentation
         private SpriteRenderer _secondaryDecoyView;
         private SpriteRenderer _beamView;
 
+        public int EnemyViewCount => _enemyViews.Count;
+        public int BulletViewCount => _bulletViews.Count;
+        public int DropViewCount => _dropViews.Count;
+        public int BountyOfferViewCount => _bountyOfferViews.Count;
+        public int GroundZoneViewCount => _groundZoneViews.Count;
+        public int TransientViewCount =>
+            EnemyViewCount
+            + BulletViewCount
+            + DropViewCount
+            + BountyOfferViewCount
+            + GroundZoneViewCount
+            + (_decoyView == null ? 0 : 1)
+            + (_secondaryDecoyView == null ? 0 : 1)
+            + (_beamView == null ? 0 : 1);
+
         public void Initialize(CombatConfig combat, GameState state)
         {
             _combat = combat;
@@ -419,7 +434,7 @@ namespace ProjectVL.Presentation
             {
                 if (!activeIds.Contains(pair.Key))
                 {
-                    Destroy(pair.Value.Renderer.gameObject);
+                    DestroyRuntimeObject(pair.Value.Renderer.gameObject);
                     removedIds.Add(pair.Key);
                 }
             }
@@ -492,7 +507,7 @@ namespace ProjectVL.Presentation
             {
                 if (!activeIds.Contains(pair.Key))
                 {
-                    Destroy(pair.Value.Renderer.gameObject);
+                    DestroyRuntimeObject(pair.Value.Renderer.gameObject);
                     removedIds.Add(pair.Key);
                 }
             }
@@ -537,7 +552,7 @@ namespace ProjectVL.Presentation
             while (_groundZoneViews.Count > _state.GroundZones.Count)
             {
                 int last = _groundZoneViews.Count - 1;
-                Destroy(_groundZoneViews[last].gameObject);
+                DestroyRuntimeObject(_groundZoneViews[last].gameObject);
                 _groundZoneViews.RemoveAt(last);
             }
 
@@ -567,7 +582,7 @@ namespace ProjectVL.Presentation
             {
                 if (view != null)
                 {
-                    Destroy(view.gameObject);
+                    DestroyRuntimeObject(view.gameObject);
                     view = null;
                 }
 
@@ -605,7 +620,7 @@ namespace ProjectVL.Presentation
             {
                 if (_beamView != null)
                 {
-                    Destroy(_beamView.gameObject);
+                    DestroyRuntimeObject(_beamView.gameObject);
                     _beamView = null;
                 }
 
@@ -643,7 +658,7 @@ namespace ProjectVL.Presentation
             {
                 if (!activeIds.Contains(pair.Key))
                 {
-                    Destroy(pair.Value.gameObject);
+                    DestroyRuntimeObject(pair.Value.gameObject);
                     removedIds.Add(pair.Key);
                 }
             }
@@ -661,7 +676,7 @@ namespace ProjectVL.Presentation
             {
                 if (!activeIds.Contains(pair.Key))
                 {
-                    Destroy(pair.Value.Root.gameObject);
+                    DestroyRuntimeObject(pair.Value.Root.gameObject);
                     removedIds.Add(pair.Key);
                 }
             }
@@ -678,6 +693,17 @@ namespace ProjectVL.Presentation
                 point.X - _combat.canvas.width / 2f,
                 _combat.canvas.height / 2f - point.Y,
                 0f);
+        }
+
+        private static void DestroyRuntimeObject(Object target)
+        {
+            if (target == null)
+                return;
+
+            if (Application.isPlaying)
+                Destroy(target);
+            else
+                DestroyImmediate(target);
         }
 
         private static Color EnemyColor(EnemyState enemy)

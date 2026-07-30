@@ -1211,6 +1211,13 @@ namespace ProjectVL.Presentation
             {
                 _simulation.SimulationStep -= _world.Step;
             }
+
+            if (_simulation != null && _telemetry != null)
+            {
+                _simulation.SimulationStep -= _telemetry.Step;
+            }
+
+            _telemetry?.Dispose();
         }
     }
 }

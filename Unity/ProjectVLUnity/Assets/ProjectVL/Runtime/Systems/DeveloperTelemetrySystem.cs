@@ -220,7 +220,7 @@ namespace ProjectVL.Systems
             new List<TelemetryInputRecord>();
     }
 
-    public sealed class DeveloperTelemetrySystem
+    public sealed class DeveloperTelemetrySystem : IDisposable
     {
         private const float SampleInterval = 0.25f;
         private readonly TelemetrySession _session = new TelemetrySession();
@@ -245,6 +245,7 @@ namespace ProjectVL.Systems
         private float _currentTime;
         private int _dangerEntriesThisWave;
         private bool _autoClosed;
+        private bool _disposed;
 
         public TelemetrySession Session => _session;
         public string LastExportPath { get; private set; }
@@ -326,7 +327,7 @@ namespace ProjectVL.Systems
 
         public void Step(GameState state, float deltaTime)
         {
-            if (state == null)
+            if (_disposed || state == null)
             {
                 return;
             }
@@ -465,7 +466,7 @@ namespace ProjectVL.Systems
 
         public void RecordInput(GameState state, string type, string detail = null)
         {
-            if (state == null || string.IsNullOrEmpty(type))
+            if (_disposed || state == null || string.IsNullOrEmpty(type))
             {
                 return;
             }
@@ -521,6 +522,15 @@ namespace ProjectVL.Systems
                 LastExportPath,
                 ToJson(true) + Environment.NewLine);
             return LastExportPath;
+        }
+
+        public void Dispose()
+        {
+            if (_disposed)
+                return;
+
+            _state.TelemetryEvent -= RecordCoreEvent;
+            _disposed = true;
         }
 
         private void RefreshMetadata()
@@ -627,7 +637,9 @@ namespace ProjectVL.Systems
 
         private void RecordCoreEvent(TelemetryEventRecord item)
         {
-            if (item == null || string.IsNullOrEmpty(item.type))
+            if (_disposed
+                || item == null
+                || string.IsNullOrEmpty(item.type))
                 return;
             if (!TelemetryEventContract.Contains(item.type))
                 throw new InvalidOperationException(
