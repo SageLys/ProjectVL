@@ -12,7 +12,7 @@
 //   chain.spreadStatus 在每次链伤后直接交给 statusSystem；跨卡仍按状态既有规则取最强/最长，
 //   且绝不发送完整 onHit，避免 chain → onHit → chain 的递归套娃。
 import { cfg } from '../../config';
-import type { RunBaseStatKind } from '../../config/types';
+import type { CardBaseStatMulKind } from '../../config/types';
 import type { AttackInstance, Bullet, Card, CardType, Config, Enemy, GameEvent, GameState, GroundDrop, Rng, Summon, WeaponImpactSpec } from '../types';
 import type { AtomName, BindingDef, CardDef, EffectDef, OriginSelector, Trigger } from './defs';
 import { atomBooleanDefault, atomNumberDefault, atomStringDefault, effectParams } from './atomContract';
@@ -20,7 +20,7 @@ import { ATOMS, runEffects, selectEffectOrigin, type EffectCtx } from './registr
 import { totalDamage } from '../stats';
 import { applyBuildScalingToBindings, applyBuildScalingToTier } from '../systems/buildModifierSystem';
 import { recordCardImpact, recordCardTrigger, totalEnemyHp } from '../../telemetry/combatCounters';
-import { activateConsumableAffixes, equipmentAffixAdd } from '../systems/cardAffixSystem';
+import { activateConsumableAffixes, equipmentAffixMul } from '../systems/cardAffixSystem';
 import { modifierTotal } from '../systems/runtimeStatModifierSystem';
 import { isControlled } from './statusSystem';
 
@@ -446,7 +446,7 @@ export interface Modifiers {
     follow?: 'densestCluster' | 'nearestEnemy'; followLerp: number;
     duration: number; radiusOverTime?: { from: number; to: number; easing?: 'linear' };
   }[];
-  equipmentAffixAdd: Record<RunBaseStatKind, number>;
+  equipmentAffixMul: Record<CardBaseStatMulKind, number>;
 }
 
 const num = (p: Record<string, unknown> | undefined, k: string, d: number): number =>
@@ -492,13 +492,11 @@ export function getModifiers(state: GameState): Modifiers {
     novaOnBreak: null, mergeMaterialRefunds: [], wildcardRewardBonuses: [], expiryConvert: null,
     weaponForms: [],
     auras: [],
-    equipmentAffixAdd: {
-      damageAdd: equipmentAffixAdd(state, 'damageAdd'),
-      fireRateAdd: equipmentAffixAdd(state, 'fireRateAdd'),
-      rangeAdd: equipmentAffixAdd(state, 'rangeAdd'),
-      multiAdd: equipmentAffixAdd(state, 'multiAdd'),
-      maxHpAdd: equipmentAffixAdd(state, 'maxHpAdd'),
-      heal: equipmentAffixAdd(state, 'heal'),
+    equipmentAffixMul: {
+      damageMul: equipmentAffixMul(state, 'damageMul'),
+      fireRateMul: equipmentAffixMul(state, 'fireRateMul'),
+      rangeMul: equipmentAffixMul(state, 'rangeMul'),
+      maxHpMul: equipmentAffixMul(state, 'maxHpMul'),
     },
   };
   const novaByCard = new Map<number, { damage: number; knockbackDistance: number }>();

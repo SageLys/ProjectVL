@@ -306,6 +306,8 @@ const STAT_LABELS: Record<typeof RUNTIME_STAT_KINDS[number], string> = {
   damage: '伤害', fireRate: '攻速',
   damageAdd: '伤害加值', fireRateAdd: '攻速加值', rangeAdd: '射程加值', multiAdd: '多重射击加值',
   maxHpAdd: '生命上限加值', heal: '治疗',
+  damageMul: '基础伤害倍率', fireRateMul: '基础射速倍率', rangeMul: '基础射程倍率',
+  maxHpMul: '基础生命上限倍率',
   effectDamageMul: '效果伤害倍率', quantityAdd: '数量加值', controlPotencyMul: '控制强度倍率',
   controlledDamageTakenMul: '受控增伤倍率', areaScaleMul: '范围倍率', dotDamageMul: '持续伤害倍率',
   defenseDurabilityMul: '防御耐久倍率', retaliationMul: '反击倍率',

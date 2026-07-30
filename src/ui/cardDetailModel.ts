@@ -1,6 +1,6 @@
 import { cfg } from '../config';
 import { AFFIX_SINKS } from '../config/affixSinks';
-import type { CardStatKind, EvolutionOptionDef } from '../config/types';
+import type { CardAffixStatKind, EvolutionOptionDef } from '../config/types';
 import type { BindingDef, CardDef, EffectDef } from '../core/effects/defs';
 import { nestedEffectsOf } from '../core/effects/atomContract';
 import { getSkillDef, resolveCardBindings, resolveConsumableTier } from '../core/effects/interpreter';
@@ -19,7 +19,7 @@ export interface EffectSection {
 }
 
 export interface AffixDetail {
-  stat: CardStatKind;
+  stat: CardAffixStatKind;
   value: string;
   equipment: string;
   consumable: string;
@@ -85,7 +85,7 @@ type DetailTexts = {
     buildFit?: string;
   }>>;
   glossary?: Record<string, string | { term?: string; description?: string }>;
-  affixHelp?: Partial<Record<CardStatKind, string>>;
+  affixHelp?: Partial<Record<CardAffixStatKind, string>>;
 };
 
 const detailTexts = texts as unknown as DetailTexts;

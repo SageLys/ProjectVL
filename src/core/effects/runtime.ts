@@ -278,7 +278,7 @@ function tickStatModifiers(state: GameState, dt: number): void {
     if (modifier.remaining === undefined) continue;
     modifier.remaining -= dt;
     if (modifier.remaining <= 0) {
-      if (modifier.stat === 'maxHpAdd') maxHpChanged = true;
+      if (modifier.stat === 'maxHpAdd' || modifier.stat === 'maxHpMul') maxHpChanged = true;
       state.statModifiers.splice(i, 1);
     }
   }

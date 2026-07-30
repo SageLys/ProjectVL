@@ -67,16 +67,16 @@ describe('run-scoped card affix templates', () => {
     }
   });
 
-  it('applies equipped add affixes immediately and removes them with the equipment', () => {
+  it('applies equipped base-stat multipliers immediately and removes them with the equipment', () => {
     const state = freshState();
     state.runBuild.cardAffixRolls.pierce = [
-      { stat: 'damageAdd', value: 2, consumableDuration: 5 },
-      { stat: 'fireRateAdd', value: 0.2, consumableDuration: 5 },
+      { stat: 'damageMul', value: 0.1, consumableDuration: 5 },
+      { stat: 'fireRateMul', value: 0.04, consumableDuration: 5 },
     ];
     state.equipment[0] = card('pierce', 3);
 
-    expect(totalDamage(state, config)).toBe(config.damage + 2);
-    expect(totalFireRate(state, config)).toBeCloseTo(config.fireRate + 0.2);
+    expect(totalDamage(state, config)).toBeCloseTo(config.damage * 1.1);
+    expect(totalFireRate(state, config)).toBeCloseTo(config.fireRate * 1.04);
     state.equipment[0] = null;
     expect(totalDamage(state, config)).toBe(config.damage);
     expect(totalFireRate(state, config)).toBe(config.fireRate);
@@ -85,26 +85,26 @@ describe('run-scoped card affix templates', () => {
   it('turns consumed affixes into expiring global modifiers without conflicting with equipment', () => {
     const state = freshState();
     state.runBuild.cardAffixRolls.pierce = [
-      { stat: 'damageAdd', value: 2, consumableDuration: 5 },
+      { stat: 'damageMul', value: 0.1, consumableDuration: 5 },
       { stat: 'effectDamageMul', value: 0.1, consumableDuration: 5 },
     ];
     state.runBuild.cardAffixRolls.frost = [
-      { stat: 'damageAdd', value: 1, consumableDuration: 5 },
+      { stat: 'damageMul', value: 0.05, consumableDuration: 5 },
     ];
     state.cards[0] = card('pierce', 1);
     state.equipment[0] = card('frost', 3);
 
-    expect(totalDamage(state, config)).toBe(config.damage + 1);
+    expect(totalDamage(state, config)).toBeCloseTo(config.damage * 1.05);
     consumeCard(state, config, seededRng(1), 0, 100, 100);
     expect(state.statModifiers).toEqual(expect.arrayContaining([
-      expect.objectContaining({ sourceId: 'affix:pierce', stat: 'damageAdd', operation: 'add', value: 2, remaining: 5 }),
+      expect.objectContaining({ sourceId: 'affix:pierce', stat: 'damageMul', operation: 'mul', value: 1.1, remaining: 5 }),
       expect.objectContaining({ sourceId: 'affix:pierce', stat: 'effectDamageMul', operation: 'mul', value: 1.1, remaining: 5 }),
     ]));
-    expect(totalDamage(state, config)).toBe(config.damage + 3);
+    expect(totalDamage(state, config)).toBeCloseTo(config.damage * 1.05 * 1.1);
 
     tickEffects(state, config, seededRng(1), 5);
     expect(state.statModifiers).toHaveLength(0);
-    expect(totalDamage(state, config)).toBe(config.damage + 1);
+    expect(totalDamage(state, config)).toBeCloseTo(config.damage * 1.05);
   });
 
   it('keeps the run template through automatic 2★ + 2★ merging', () => {

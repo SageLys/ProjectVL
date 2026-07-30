@@ -12,7 +12,7 @@ import { validateSettlementConfig } from './settlementValidator';
 import { validateSkillsConfig } from './skillValidator';
 import { validateIntermissionConfig, validateStagePlanConfig } from './stagePlanValidator';
 import { validateTunerConfig } from './tunerMeta';
-import type { CardStatKind, GameConfig } from './types';
+import type { CardAffixStatKind, GameConfig } from './types';
 
 export type ValidationLayer = 'schema' | 'reference' | 'semantic';
 export type ValidationDomain =
@@ -202,7 +202,7 @@ function referenceLayer(config: GameConfig, texts: TextsLike, out: IssueCollecto
 // —— 语义层：可达性与"有没有消费者" ——
 function semanticLayer(config: GameConfig, out: IssueCollector): void {
   out.checks.push('semantic:affixSinkConsumers');
-  for (const [stat, contract] of Object.entries(AFFIX_SINKS) as [CardStatKind, typeof AFFIX_SINKS[CardStatKind]][]) {
+  for (const [stat, contract] of Object.entries(AFFIX_SINKS) as [CardAffixStatKind, typeof AFFIX_SINKS[CardAffixStatKind]][]) {
     const hasConsumer = !!contract.globalConsumer || !!contract.scalingTargets?.length;
     if (!hasConsumer) {
       out.error('semantic', 'skills', `AFFIX_SINKS.${stat}`,

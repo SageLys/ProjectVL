@@ -6,7 +6,8 @@ import type { GameConfig } from './types';
 export type {
   CardAffixCandidateDef,
   CardAffixPoolDef,
-  CardStatKind,
+  CardAffixStatKind,
+  CardBaseStatMulKind,
   EvolutionRecipeDef,
   EvolutionRecipesConfig,
   EvolutionTreeDef,

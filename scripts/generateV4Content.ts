@@ -557,11 +557,11 @@ function candidateFor(stat: string, god: string): Json {
 }
 
 function affixPool(god: string, spring = false): Json {
-  const stats = god === 'storm' ? ['damageAdd', 'fireRateAdd', 'effectDamageMul']
+  const stats = god === 'storm' ? ['damageMul', 'fireRateMul', 'effectDamageMul']
     : god === 'winter' ? ['controlPotencyMul', 'controlledDamageTakenMul', 'effectDamageMul']
-      : god === 'inferno' ? ['dotDamageMul', 'areaScaleMul', 'damageAdd']
-        : god === 'bulwark' ? ['maxHpAdd', 'defenseDurabilityMul', 'retaliationMul']
-          : spring ? ['dropRateMul', 'dropLifetimeMul', 'maxHpAdd']
+      : god === 'inferno' ? ['dotDamageMul', 'areaScaleMul', 'damageMul']
+        : god === 'bulwark' ? ['maxHpMul', 'defenseDurabilityMul', 'retaliationMul']
+          : spring ? ['dropRateMul', 'dropLifetimeMul', 'maxHpMul']
             : ['dropRateMul', 'dropLifetimeMul', 'xpMul'];
   return { count: 2, candidates: stats.map(stat => candidateFor(stat, god)) };
 }
@@ -1076,7 +1076,7 @@ texts.evolution.recipeAsIngredient = '进化配方：本卡达到 {selfStar}★ 
 texts.decisions.recipePin = { title: '钉选进化配方', body: '选择一条追踪目标，或跳过并在第 4 波自动钉选。' };
 delete texts.decisions.recipeEvolution;
 
-writeFileSync(skillsPath, `${JSON.stringify({ version: '0.5.0', cards: [...cards, ...products] }, null, 2)}\n`, 'utf8');
+writeFileSync(skillsPath, `${JSON.stringify({ version: '0.6.0', cards: [...cards, ...products] }, null, 2)}\n`, 'utf8');
 writeFileSync(fingerprintsPath, `${JSON.stringify(compileDesignFingerprints(), null, 2)}\n`, 'utf8');
 writeFileSync(recipesPath, `${JSON.stringify({ version: '0.2.0', recipes }, null, 2)}\n`, 'utf8');
 writeFileSync(textsPath, `${JSON.stringify(texts, null, 2)}\n`, 'utf8');

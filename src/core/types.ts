@@ -1,7 +1,7 @@
 // 纯规则层类型定义。core/ 内禁止出现 DOM / Canvas / 浏览器 API。（P3 重构版）
 import type { BuildTag, EffectDef, RuntimeStatKind } from './effects/defs';
 import type { RunSummary } from './settlement';
-import type { CardStatKind, DifficultyId, GodId, RunBaseStatKind, WaveChoiceStatKind } from '../config/types';
+import type { CardAffixStatKind, DifficultyId, GodId, RunBaseStatKind, WaveChoiceStatKind } from '../config/types';
 import type { ValidationRewardSpec, ValidationRewardTypePolicy } from '../config/types';
 
 /** 卡牌类型 = 技能 id 字符串（schema: ^[a-z][a-zA-Z0-9]*$），由 skills.json 的 cards[].id 决定。 */
@@ -95,7 +95,7 @@ export interface OrdinaryDropBudgetState {
 export type Rng = () => number;
 
 export interface CardAffixRoll {
-  stat: CardStatKind;
+  stat: CardAffixStatKind;
   value: number;
   consumableDuration: number;
 }

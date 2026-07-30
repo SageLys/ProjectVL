@@ -1,6 +1,6 @@
 import { cfg } from '../../config';
 import type { WaveChoiceStatKind } from '../../config/types';
-import { maxAttackRange, reconcileMaxHp, totalRange } from '../stats';
+import { maxAttackRange, permanentRange, reconcileMaxHp } from '../stats';
 import type { Config, GameEvent, GameState, RunDecision, WaveRewardGrant } from '../types';
 import { enqueueDecision, registerDecisionResolver } from './decisionQueueSystem';
 
@@ -49,7 +49,7 @@ function defaultRuntimeConfig(): Config {
 }
 
 function rangeIsCapped(state: GameState): boolean {
-  return totalRange(state, defaultRuntimeConfig()) >= maxAttackRange();
+  return permanentRange(state, defaultRuntimeConfig()) >= maxAttackRange();
 }
 
 /**

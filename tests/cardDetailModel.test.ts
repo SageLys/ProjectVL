@@ -21,19 +21,20 @@ describe('card detail view model', () => {
     expect(node6?.locked).toBe(true);
   });
 
-  it('explains unsupported instant and scoped timed affixes separately', () => {
+  it('explains global base multipliers and scoped timed affixes separately', () => {
     const model = buildCardDetailViewModel({
       id: 11,
       type: 'chainLightning',
       star: 3,
       evolutionPath: ['3:chainLightningA'],
       affixes: [
-        { stat: 'heal', value: 10, consumableDuration: 0 },
+        { stat: 'damageMul', value: 0.1, consumableDuration: 5 },
         { stat: 'effectDamageMul', value: 0.1, consumableDuration: 5 },
       ],
     }, 'equipment');
-    expect(model.affixes[0].equipment).toContain('不生效');
-    expect(model.affixes[0].consumable).toContain('立即结算');
+    expect(model.affixes[0].equipment).toContain('基础伤害');
+    expect(model.affixes[0].equipment).toContain('+10%');
+    expect(model.affixes[0].consumable).toContain('持续 5 秒');
     expect(model.affixes[1].equipment).toContain('只提高这张卡');
     expect(model.affixes[1].consumable).toContain('持续 5 秒');
   });

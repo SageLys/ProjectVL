@@ -14,6 +14,7 @@ import {
 import { updateGame } from '../src/core/updateGame';
 import { createDevTelemetry } from '../src/telemetry/devTelemetry';
 import {
+  card,
   constRng,
   createDefaultConfig,
   freshState,
@@ -77,6 +78,18 @@ describe('waveBaseReward choice', () => {
     expect(decision.candidates).not.toContain('optRange');
     expect(resolveCurrentDecision(state, runtime, constRng(0), 'optRange')).toEqual([]);
     expect(state.decisions.current).toBe(decision);
+  });
+
+  it('装备倍率把有效射程顶满时 optRange 仍可选择', () => {
+    const state = freshState();
+    state.runBuild.cardAffixRolls.pierce = [
+      { stat: 'rangeMul', value: 0.4, consumableDuration: 5 },
+    ];
+    state.equipment[0] = card('pierce', 3);
+
+    const menu = buildWaveChoiceMenu(state);
+    expect(menu.capped).toEqual([]);
+    expect(menu.candidates).toContain('optRange');
   });
 
   it('选择射速、心防上限、经验取得分别只加算被选一项', () => {

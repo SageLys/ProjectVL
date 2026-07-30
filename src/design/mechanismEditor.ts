@@ -1,5 +1,5 @@
 import { AFFIX_SINKS } from '../config/affixSinks';
-import type { CardStatKind, EvolutionRecipeDef } from '../config/types';
+import type { CardAffixStatKind, EvolutionRecipeDef } from '../config/types';
 import type { BindingDef, CardDef, Category, Trigger } from '../core/effects/defs';
 import { button, el, labeled, numberControl, selectControl } from '../editor/dom';
 import { allowedTriggersForEffects, renderEffectsEditor } from '../editor/effectEditor';
@@ -234,14 +234,14 @@ export function renderAffixPoolForm(container: HTMLElement, card: CardDef, path:
   const count = numberControl(pool.count, 0, undefined, 1); count.addEventListener('input', () => { pool.count = count.valueAsNumber; onChange(); });
   container.append(labeled('每次抽取条数', count, `${path}.affixPool.count`));
   const list = el('div', 'affix-editor-list');
-  const axes = Object.keys(AFFIX_SINKS) as CardStatKind[];
+  const axes = Object.keys(AFFIX_SINKS) as CardAffixStatKind[];
   const render = (): void => {
     list.replaceChildren();
     pool.candidates.forEach((candidate, index) => {
       const candidatePath = `${path}.affixPool.candidates[${index}]`;
       const article = el('article', 'affix-editor-card');
       const stat = selectControl(axes, candidate.stat, false, value => labelWithKey('enumValue', `stat.${value}`, value));
-      stat.addEventListener('change', () => { candidate.stat = stat.value as CardStatKind; onChange(); });
+      stat.addEventListener('change', () => { candidate.stat = stat.value as CardAffixStatKind; onChange(); });
       article.append(labeled('词条轴', stat, `${candidatePath}.stat`));
       for (const key of ['weight', 'min', 'max', 'step', 'consumableDuration'] as const) {
         const input = numberControl(candidate[key]); input.addEventListener('input', () => { candidate[key] = input.valueAsNumber; onChange(); });

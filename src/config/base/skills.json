@@ -1,5 +1,5 @@
 {
-  "version": "0.5.0",
+  "version": "0.6.0",
   "cards": [
     {
       "id": "chainLightning",
@@ -230,19 +230,19 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "damageAdd",
+            "stat": "damageMul",
             "weight": 1,
-            "min": 1,
-            "max": 3,
-            "step": 1,
+            "min": 0.04,
+            "max": 0.12,
+            "step": 0.04,
             "consumableDuration": 5
           },
           {
-            "stat": "fireRateAdd",
+            "stat": "fireRateMul",
             "weight": 1,
-            "min": 0.1,
-            "max": 0.25,
-            "step": 0.05,
+            "min": 0.02,
+            "max": 0.05,
+            "step": 0.01,
             "consumableDuration": 5
           },
           {
@@ -777,19 +777,19 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "damageAdd",
+            "stat": "damageMul",
             "weight": 1,
-            "min": 1,
-            "max": 3,
-            "step": 1,
+            "min": 0.04,
+            "max": 0.12,
+            "step": 0.04,
             "consumableDuration": 5
           },
           {
-            "stat": "fireRateAdd",
+            "stat": "fireRateMul",
             "weight": 1,
-            "min": 0.1,
-            "max": 0.25,
-            "step": 0.05,
+            "min": 0.02,
+            "max": 0.05,
+            "step": 0.01,
             "consumableDuration": 5
           },
           {
@@ -1302,19 +1302,19 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "damageAdd",
+            "stat": "damageMul",
             "weight": 1,
-            "min": 1,
-            "max": 3,
-            "step": 1,
+            "min": 0.04,
+            "max": 0.12,
+            "step": 0.04,
             "consumableDuration": 5
           },
           {
-            "stat": "fireRateAdd",
+            "stat": "fireRateMul",
             "weight": 1,
-            "min": 0.1,
-            "max": 0.25,
-            "step": 0.05,
+            "min": 0.02,
+            "max": 0.05,
+            "step": 0.01,
             "consumableDuration": 5
           },
           {
@@ -1866,19 +1866,19 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "damageAdd",
+            "stat": "damageMul",
             "weight": 1,
-            "min": 1,
-            "max": 3,
-            "step": 1,
+            "min": 0.04,
+            "max": 0.12,
+            "step": 0.04,
             "consumableDuration": 5
           },
           {
-            "stat": "fireRateAdd",
+            "stat": "fireRateMul",
             "weight": 1,
-            "min": 0.1,
-            "max": 0.25,
-            "step": 0.05,
+            "min": 0.02,
+            "max": 0.05,
+            "step": 0.01,
             "consumableDuration": 5
           },
           {
@@ -2500,19 +2500,19 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "damageAdd",
+            "stat": "damageMul",
             "weight": 1,
-            "min": 1,
-            "max": 3,
-            "step": 1,
+            "min": 0.04,
+            "max": 0.12,
+            "step": 0.04,
             "consumableDuration": 5
           },
           {
-            "stat": "fireRateAdd",
+            "stat": "fireRateMul",
             "weight": 1,
-            "min": 0.1,
-            "max": 0.25,
-            "step": 0.05,
+            "min": 0.02,
+            "max": 0.05,
+            "step": 0.01,
             "consumableDuration": 5
           },
           {
@@ -3092,19 +3092,19 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "damageAdd",
+            "stat": "damageMul",
             "weight": 1,
-            "min": 1,
-            "max": 3,
-            "step": 1,
+            "min": 0.04,
+            "max": 0.12,
+            "step": 0.04,
             "consumableDuration": 5
           },
           {
-            "stat": "fireRateAdd",
+            "stat": "fireRateMul",
             "weight": 1,
-            "min": 0.1,
-            "max": 0.25,
-            "step": 0.05,
+            "min": 0.02,
+            "max": 0.05,
+            "step": 0.01,
             "consumableDuration": 5
           },
           {
@@ -3734,19 +3734,19 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "damageAdd",
+            "stat": "damageMul",
             "weight": 1,
-            "min": 1,
-            "max": 3,
-            "step": 1,
+            "min": 0.04,
+            "max": 0.12,
+            "step": 0.04,
             "consumableDuration": 5
           },
           {
-            "stat": "fireRateAdd",
+            "stat": "fireRateMul",
             "weight": 1,
-            "min": 0.1,
-            "max": 0.25,
-            "step": 0.05,
+            "min": 0.02,
+            "max": 0.05,
+            "step": 0.01,
             "consumableDuration": 5
           },
           {
@@ -8258,11 +8258,11 @@
             "consumableDuration": 5
           },
           {
-            "stat": "damageAdd",
+            "stat": "damageMul",
             "weight": 1,
-            "min": 1,
-            "max": 2,
-            "step": 1,
+            "min": 0.04,
+            "max": 0.08,
+            "step": 0.04,
             "consumableDuration": 5
           }
         ]
@@ -8779,11 +8779,11 @@
             "consumableDuration": 5
           },
           {
-            "stat": "damageAdd",
+            "stat": "damageMul",
             "weight": 1,
-            "min": 1,
-            "max": 2,
-            "step": 1,
+            "min": 0.04,
+            "max": 0.08,
+            "step": 0.04,
             "consumableDuration": 5
           }
         ]
@@ -9358,11 +9358,11 @@
             "consumableDuration": 5
           },
           {
-            "stat": "damageAdd",
+            "stat": "damageMul",
             "weight": 1,
-            "min": 1,
-            "max": 2,
-            "step": 1,
+            "min": 0.04,
+            "max": 0.08,
+            "step": 0.04,
             "consumableDuration": 5
           }
         ]
@@ -9941,11 +9941,11 @@
             "consumableDuration": 5
           },
           {
-            "stat": "damageAdd",
+            "stat": "damageMul",
             "weight": 1,
-            "min": 1,
-            "max": 2,
-            "step": 1,
+            "min": 0.04,
+            "max": 0.08,
+            "step": 0.04,
             "consumableDuration": 5
           }
         ]
@@ -10567,11 +10567,11 @@
             "consumableDuration": 5
           },
           {
-            "stat": "damageAdd",
+            "stat": "damageMul",
             "weight": 1,
-            "min": 1,
-            "max": 2,
-            "step": 1,
+            "min": 0.04,
+            "max": 0.08,
+            "step": 0.04,
             "consumableDuration": 5
           }
         ]
@@ -11266,11 +11266,11 @@
             "consumableDuration": 5
           },
           {
-            "stat": "damageAdd",
+            "stat": "damageMul",
             "weight": 1,
-            "min": 1,
-            "max": 2,
-            "step": 1,
+            "min": 0.04,
+            "max": 0.08,
+            "step": 0.04,
             "consumableDuration": 5
           }
         ]
@@ -11950,11 +11950,11 @@
             "consumableDuration": 5
           },
           {
-            "stat": "damageAdd",
+            "stat": "damageMul",
             "weight": 1,
-            "min": 1,
-            "max": 2,
-            "step": 1,
+            "min": 0.04,
+            "max": 0.08,
+            "step": 0.04,
             "consumableDuration": 5
           }
         ]
@@ -12390,11 +12390,11 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "maxHpAdd",
+            "stat": "maxHpMul",
             "weight": 1,
-            "min": 5,
-            "max": 15,
-            "step": 5,
+            "min": 0.05,
+            "max": 0.15,
+            "step": 0.05,
             "consumableDuration": 5
           },
           {
@@ -12812,11 +12812,11 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "maxHpAdd",
+            "stat": "maxHpMul",
             "weight": 1,
-            "min": 5,
-            "max": 15,
-            "step": 5,
+            "min": 0.05,
+            "max": 0.15,
+            "step": 0.05,
             "consumableDuration": 5
           },
           {
@@ -13309,11 +13309,11 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "maxHpAdd",
+            "stat": "maxHpMul",
             "weight": 1,
-            "min": 5,
-            "max": 15,
-            "step": 5,
+            "min": 0.05,
+            "max": 0.15,
+            "step": 0.05,
             "consumableDuration": 5
           },
           {
@@ -13879,11 +13879,11 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "maxHpAdd",
+            "stat": "maxHpMul",
             "weight": 1,
-            "min": 5,
-            "max": 15,
-            "step": 5,
+            "min": 0.05,
+            "max": 0.15,
+            "step": 0.05,
             "consumableDuration": 5
           },
           {
@@ -14406,11 +14406,11 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "maxHpAdd",
+            "stat": "maxHpMul",
             "weight": 1,
-            "min": 5,
-            "max": 15,
-            "step": 5,
+            "min": 0.05,
+            "max": 0.15,
+            "step": 0.05,
             "consumableDuration": 5
           },
           {
@@ -14851,11 +14851,11 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "maxHpAdd",
+            "stat": "maxHpMul",
             "weight": 1,
-            "min": 5,
-            "max": 15,
-            "step": 5,
+            "min": 0.05,
+            "max": 0.15,
+            "step": 0.05,
             "consumableDuration": 5
           },
           {
@@ -15372,11 +15372,11 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "maxHpAdd",
+            "stat": "maxHpMul",
             "weight": 1,
-            "min": 5,
-            "max": 15,
-            "step": 5,
+            "min": 0.05,
+            "max": 0.15,
+            "step": 0.05,
             "consumableDuration": 5
           },
           {
@@ -19021,11 +19021,11 @@
             "consumableDuration": 5
           },
           {
-            "stat": "maxHpAdd",
+            "stat": "maxHpMul",
             "weight": 1,
-            "min": 5,
-            "max": 15,
-            "step": 5,
+            "min": 0.05,
+            "max": 0.15,
+            "step": 0.05,
             "consumableDuration": 5
           }
         ]
@@ -20045,19 +20045,19 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "damageAdd",
+            "stat": "damageMul",
             "weight": 1,
-            "min": 1,
-            "max": 3,
-            "step": 1,
+            "min": 0.04,
+            "max": 0.12,
+            "step": 0.04,
             "consumableDuration": 5
           },
           {
-            "stat": "fireRateAdd",
+            "stat": "fireRateMul",
             "weight": 1,
-            "min": 0.1,
-            "max": 0.25,
-            "step": 0.05,
+            "min": 0.02,
+            "max": 0.05,
+            "step": 0.01,
             "consumableDuration": 5
           },
           {
@@ -20561,11 +20561,11 @@
             "consumableDuration": 5
           },
           {
-            "stat": "damageAdd",
+            "stat": "damageMul",
             "weight": 1,
-            "min": 1,
-            "max": 2,
-            "step": 1,
+            "min": 0.04,
+            "max": 0.08,
+            "step": 0.04,
             "consumableDuration": 5
           }
         ]
@@ -20739,11 +20739,11 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "maxHpAdd",
+            "stat": "maxHpMul",
             "weight": 1,
-            "min": 5,
-            "max": 15,
-            "step": 5,
+            "min": 0.05,
+            "max": 0.15,
+            "step": 0.05,
             "consumableDuration": 5
           },
           {
@@ -21131,19 +21131,19 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "damageAdd",
+            "stat": "damageMul",
             "weight": 1,
-            "min": 1,
-            "max": 3,
-            "step": 1,
+            "min": 0.04,
+            "max": 0.12,
+            "step": 0.04,
             "consumableDuration": 5
           },
           {
-            "stat": "fireRateAdd",
+            "stat": "fireRateMul",
             "weight": 1,
-            "min": 0.1,
-            "max": 0.25,
-            "step": 0.05,
+            "min": 0.02,
+            "max": 0.05,
+            "step": 0.01,
             "consumableDuration": 5
           },
           {
@@ -21594,11 +21594,11 @@
             "consumableDuration": 5
           },
           {
-            "stat": "damageAdd",
+            "stat": "damageMul",
             "weight": 1,
-            "min": 1,
-            "max": 2,
-            "step": 1,
+            "min": 0.04,
+            "max": 0.08,
+            "step": 0.04,
             "consumableDuration": 5
           }
         ]
@@ -21804,11 +21804,11 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "maxHpAdd",
+            "stat": "maxHpMul",
             "weight": 1,
-            "min": 5,
-            "max": 15,
-            "step": 5,
+            "min": 0.05,
+            "max": 0.15,
+            "step": 0.05,
             "consumableDuration": 5
           },
           {
@@ -22226,19 +22226,19 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "damageAdd",
+            "stat": "damageMul",
             "weight": 1,
-            "min": 1,
-            "max": 3,
-            "step": 1,
+            "min": 0.04,
+            "max": 0.12,
+            "step": 0.04,
             "consumableDuration": 5
           },
           {
-            "stat": "fireRateAdd",
+            "stat": "fireRateMul",
             "weight": 1,
-            "min": 0.1,
-            "max": 0.25,
-            "step": 0.05,
+            "min": 0.02,
+            "max": 0.05,
+            "step": 0.01,
             "consumableDuration": 5
           },
           {
@@ -22775,11 +22775,11 @@
             "consumableDuration": 5
           },
           {
-            "stat": "damageAdd",
+            "stat": "damageMul",
             "weight": 1,
-            "min": 1,
-            "max": 2,
-            "step": 1,
+            "min": 0.04,
+            "max": 0.08,
+            "step": 0.04,
             "consumableDuration": 5
           }
         ]
@@ -22963,11 +22963,11 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "maxHpAdd",
+            "stat": "maxHpMul",
             "weight": 1,
-            "min": 5,
-            "max": 15,
-            "step": 5,
+            "min": 0.05,
+            "max": 0.15,
+            "step": 0.05,
             "consumableDuration": 5
           },
           {
@@ -23341,19 +23341,19 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "damageAdd",
+            "stat": "damageMul",
             "weight": 1,
-            "min": 1,
-            "max": 3,
-            "step": 1,
+            "min": 0.04,
+            "max": 0.12,
+            "step": 0.04,
             "consumableDuration": 5
           },
           {
-            "stat": "fireRateAdd",
+            "stat": "fireRateMul",
             "weight": 1,
-            "min": 0.1,
-            "max": 0.25,
-            "step": 0.05,
+            "min": 0.02,
+            "max": 0.05,
+            "step": 0.01,
             "consumableDuration": 5
           },
           {
@@ -23825,11 +23825,11 @@
             "consumableDuration": 5
           },
           {
-            "stat": "damageAdd",
+            "stat": "damageMul",
             "weight": 1,
-            "min": 1,
-            "max": 2,
-            "step": 1,
+            "min": 0.04,
+            "max": 0.08,
+            "step": 0.04,
             "consumableDuration": 5
           }
         ]
@@ -24034,11 +24034,11 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "maxHpAdd",
+            "stat": "maxHpMul",
             "weight": 1,
-            "min": 5,
-            "max": 15,
-            "step": 5,
+            "min": 0.05,
+            "max": 0.15,
+            "step": 0.05,
             "consumableDuration": 5
           },
           {
@@ -24420,19 +24420,19 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "damageAdd",
+            "stat": "damageMul",
             "weight": 1,
-            "min": 1,
-            "max": 3,
-            "step": 1,
+            "min": 0.04,
+            "max": 0.12,
+            "step": 0.04,
             "consumableDuration": 5
           },
           {
-            "stat": "fireRateAdd",
+            "stat": "fireRateMul",
             "weight": 1,
-            "min": 0.1,
-            "max": 0.25,
-            "step": 0.05,
+            "min": 0.02,
+            "max": 0.05,
+            "step": 0.01,
             "consumableDuration": 5
           },
           {
@@ -24872,11 +24872,11 @@
             "consumableDuration": 5
           },
           {
-            "stat": "damageAdd",
+            "stat": "damageMul",
             "weight": 1,
-            "min": 1,
-            "max": 2,
-            "step": 1,
+            "min": 0.04,
+            "max": 0.08,
+            "step": 0.04,
             "consumableDuration": 5
           }
         ]
@@ -25049,11 +25049,11 @@
         "count": 2,
         "candidates": [
           {
-            "stat": "maxHpAdd",
+            "stat": "maxHpMul",
             "weight": 1,
-            "min": 5,
-            "max": 15,
-            "step": 5,
+            "min": 0.05,
+            "max": 0.15,
+            "step": 0.05,
             "consumableDuration": 5
           },
           {

@@ -92,6 +92,18 @@ export interface ReplaySlotSnapshot {
   evolutionPath: string[];
 }
 
+export interface ReplayEnemySpawn {
+  frame: number;
+  id: number;
+  type: GameState['enemies'][number]['type'];
+  spawnKind: GameState['enemies'][number]['spawnKind'];
+  maxHp: number;
+  speed: number;
+  damage: number;
+  x: number;
+  y: number;
+}
+
 export interface ReplaySummary {
   spec: { id: string; seed: number; variants: string[]; dt: number; frames: number; start: string };
   /** 实际推进的帧数；对局提前结束时小于 spec.frames。 */
@@ -121,6 +133,8 @@ export interface ReplaySummary {
   equipment: ReplaySlotSnapshot[];
   wildcards: Record<string, number>;
   rewards: string[];
+  /** Enemy generation fingerprint in first-observed id order. */
+  enemySequence: ReplayEnemySpawn[];
   dropSequence: ReplayDropEvent[];
   /** 事件类型的帧序列（不含载荷，便于跨引擎比对语义顺序）。 */
   eventSequence: Array<{ frame: number; type: GameEvent['type'] }>;
@@ -219,6 +233,7 @@ export function runReplay(spec: ReplaySpec): ReplaySummary {
   let cumulativeDamageTaken = 0;
   let win: boolean | null = null;
   const rewards: string[] = [];
+  const enemySequence: ReplayEnemySpawn[] = [];
 
   const record = (frame: number, events: readonly GameEvent[]): void => {
     for (const event of events) {
@@ -254,6 +269,25 @@ export function runReplay(spec: ReplaySpec): ReplaySummary {
     }
   };
 
+  const seenEnemyIds = new Set<number>();
+  const recordSpawnedEnemies = (frame: number): void => {
+    for (const enemy of state.enemies) {
+      if (seenEnemyIds.has(enemy.id)) continue;
+      seenEnemyIds.add(enemy.id);
+      enemySequence.push({
+        frame,
+        id: enemy.id,
+        type: enemy.type,
+        spawnKind: enemy.spawnKind,
+        maxHp: enemy.maxHp,
+        speed: enemy.speed,
+        damage: enemy.damage,
+        x: enemy.x,
+        y: enemy.y,
+      });
+    }
+  };
+
   const enemyHp = new Map<number, number>();
   const accumulateDamage = (): void => {
     for (const enemy of state.enemies) {
@@ -266,6 +300,7 @@ export function runReplay(spec: ReplaySpec): ReplaySummary {
   if (spec.start === 'run') record(0, beginOpeningIntermission(state));
   else record(0, startNextWave(state, config, rng));
   recordSpawnedDrops(0);
+  recordSpawnedEnemies(0);
   accumulateDamage();
 
   let framesRun = 0;
@@ -286,6 +321,7 @@ export function runReplay(spec: ReplaySpec): ReplaySummary {
     for (const input of byFrame.get(frame) ?? []) record(frame, applyInput(state, config, rng, input));
 
     recordSpawnedDrops(frame);
+    recordSpawnedEnemies(frame);
     accumulateDamage();
     if (state.mode !== 'playing') break;
   }
@@ -323,6 +359,7 @@ export function runReplay(spec: ReplaySpec): ReplaySummary {
     equipment: snapshotSlots(state.equipment),
     wildcards: Object.fromEntries(Object.entries(state.wildcards).map(([star, count]) => [star, count ?? 0])),
     rewards,
+    enemySequence,
     dropSequence,
     eventSequence,
     eventCounts,
