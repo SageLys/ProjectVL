@@ -38,6 +38,14 @@ namespace ProjectVL.Systems
         public string detail;
         public float x;
         public float y;
+        public float distance = -1f;
+        public float range;
+        public float visibleSeconds;
+        public string source;
+        public string stage;
+        public float activeRegularSeconds;
+        public int ordinaryDropsShown;
+        public int eligibleKills;
     }
 
     [Serializable]
