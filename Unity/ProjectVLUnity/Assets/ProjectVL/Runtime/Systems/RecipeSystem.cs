@@ -109,7 +109,7 @@ namespace ProjectVL.Systems
             return RecipeCraftResult.Crafted;
         }
 
-        private EvolutionRecipeConfig FindRecipe(string recipeId)
+        public EvolutionRecipeConfig FindRecipe(string recipeId)
         {
             foreach (EvolutionRecipeConfig recipe in _config.recipes)
             {

@@ -13,6 +13,7 @@ namespace ProjectVL.Presentation
         private GUIStyle _leftStyle;
         private GUIStyle _centerStyle;
         private GUIStyle _buttonStyle;
+        private GUIStyle _detailStyle;
         private int _selectedDifficulty = 1;
         private Rect _physicalViewport;
         private float _uiScale = 1f;
@@ -133,12 +134,7 @@ namespace ProjectVL.Presentation
             }
 
             EnsureStyles();
-            _physicalViewport = _controller.MobileViewportRect;
-            _uiScale = Mathf.Max(
-                0.01f,
-                Mathf.Min(
-                    _physicalViewport.width / MobileHudLayout.ReferenceWidth,
-                    _physicalViewport.height / MobileHudLayout.ReferenceHeight));
+            RefreshViewport();
             Matrix4x4 previousMatrix = GUI.matrix;
             GUI.matrix = Matrix4x4.TRS(
                 new Vector3(_physicalViewport.x, _physicalViewport.y, 0f),
@@ -148,6 +144,7 @@ namespace ProjectVL.Presentation
             DrawTopBar();
             DrawControls();
             DrawCardLoadout();
+            DrawSelectedCardDetail();
             DrawCenterPanel();
             DrawDeveloperPanel();
             GUI.matrix = previousMatrix;
@@ -157,7 +154,10 @@ namespace ProjectVL.Presentation
         {
             DeveloperToolsSystem tools = _controller.DeveloperTools;
             RuntimeTuningSystem tuning = _controller.RuntimeTuning;
-            if (tools == null || tuning == null || !tools.Visible)
+            if (tools == null
+                || tuning == null
+                || !tools.Enabled
+                || !tools.Visible)
             {
                 return;
             }
@@ -997,6 +997,60 @@ namespace ProjectVL.Presentation
                     38f));
         }
 
+        private void DrawSelectedCardDetail()
+        {
+            GameState state = _controller.State;
+            CardState card = _controller.SelectedCard;
+            if (card == null
+                || state.Mode != GameMode.Playing
+                || state.DecisionLocked
+                || state.IntermissionActive
+                || state.Paused
+                || _controller.DeveloperTools?.Visible == true)
+                return;
+
+            Rect arena = ArenaRect();
+            float width = Mathf.Min(360f, arena.width - 18f);
+            Rect panel = new Rect(
+                arena.x + 9f,
+                arena.yMax - 152f,
+                width,
+                143f);
+            Color previous = GUI.backgroundColor;
+            GUI.backgroundColor = new Color(0.055f, 0.10f, 0.16f, 0.96f);
+            GUI.Box(panel, GUIContent.none);
+            GUI.backgroundColor = previous;
+
+            const float artSize = 92f;
+            Sprite cardSprite =
+                _controller.VisualCatalog?.ResolveCardSprite(card.Type);
+            Rect artRect = new Rect(
+                panel.x + 9f,
+                panel.y + 9f,
+                artSize,
+                panel.height - 18f);
+            if (cardSprite != null)
+                DrawSprite(artRect, cardSprite);
+            else
+            {
+                Color oldColor = GUI.color;
+                GUI.color = VisualCatalog.DefaultGodAccent(
+                    CardCatalog.Default.Find(card.Type)?.god);
+                GUI.DrawTexture(artRect, Texture2D.whiteTexture);
+                GUI.color = oldColor;
+                GUI.Label(artRect, $"{card.Star}★", _centerStyle);
+            }
+
+            GUI.Label(
+                new Rect(
+                    artRect.xMax + 10f,
+                    panel.y + 7f,
+                    panel.xMax - artRect.xMax - 18f,
+                    panel.height - 14f),
+                CardDetailFormatter.Format(card),
+                _detailStyle);
+        }
+
         private void DrawCardSlot(
             CardSlotKind kind,
             int index,
@@ -1061,7 +1115,10 @@ namespace ProjectVL.Presentation
 
         private void RefreshViewport()
         {
-            _physicalViewport = _controller.MobileViewportRect;
+            _physicalViewport = HudViewportMapper.Resolve(
+                _controller.MobileViewportRect,
+                Screen.safeArea,
+                Screen.height);
             _uiScale = Mathf.Max(
                 0.01f,
                 Mathf.Min(
@@ -1253,7 +1310,8 @@ namespace ProjectVL.Presentation
             string recipe = _controller.AvailableRecipeId;
             GUI.Label(
                 new Rect(panel.x + 20f, panel.y + 160f, panel.width - 40f, 28f),
-                recipe == null ? "固定配方：材料不足" : $"可合成固定配方：{recipe}",
+                CardDetailFormatter.FormatRecipe(
+                    _controller.AvailableRecipe),
                 _hudStyle);
             GUI.enabled = recipe != null;
             if (GUI.Button(
@@ -1332,6 +1390,21 @@ namespace ProjectVL.Presentation
                 new Rect(rect.x, rect.y, rect.width * Mathf.Clamp01(ratio), rect.height),
                 Texture2D.whiteTexture);
             GUI.color = previous;
+        }
+
+        private static void DrawSprite(Rect rect, Sprite sprite)
+        {
+            Rect textureRect = sprite.textureRect;
+            Rect uv = new Rect(
+                textureRect.x / sprite.texture.width,
+                textureRect.y / sprite.texture.height,
+                textureRect.width / sprite.texture.width,
+                textureRect.height / sprite.texture.height);
+            GUI.DrawTextureWithTexCoords(
+                rect,
+                sprite.texture,
+                uv,
+                true);
         }
 
         private Rect ViewportRect()
@@ -1481,6 +1554,13 @@ namespace ProjectVL.Presentation
                 wordWrap = true,
                 normal = { textColor = Color.white }
             };
+            _detailStyle = new GUIStyle(_leftStyle)
+            {
+                fontSize = 12,
+                alignment = TextAnchor.UpperLeft,
+                wordWrap = true,
+                richText = false
+            };
         }
     }
 
@@ -1534,6 +1614,54 @@ namespace ProjectVL.Presentation
                 y,
                 safe.width - 6f * scale,
                 safe.yMax - y - 3f * scale);
+        }
+    }
+
+    public static class HudViewportMapper
+    {
+        public static Rect Resolve(
+            Rect gameViewport,
+            Rect screenSafeArea,
+            float screenHeight)
+        {
+            Rect guiSafeArea = new Rect(
+                screenSafeArea.x,
+                screenHeight - screenSafeArea.yMax,
+                screenSafeArea.width,
+                screenSafeArea.height);
+            Rect available = Intersect(gameViewport, guiSafeArea);
+            if (available.width <= 0f || available.height <= 0f)
+                available = gameViewport;
+            return FitReference(available);
+        }
+
+        public static Rect FitReference(Rect available)
+        {
+            float scale = Mathf.Max(
+                0.0001f,
+                Mathf.Min(
+                    available.width / MobileHudLayout.ReferenceWidth,
+                    available.height / MobileHudLayout.ReferenceHeight));
+            float width = MobileHudLayout.ReferenceWidth * scale;
+            float height = MobileHudLayout.ReferenceHeight * scale;
+            return new Rect(
+                available.center.x - width / 2f,
+                available.center.y - height / 2f,
+                width,
+                height);
+        }
+
+        private static Rect Intersect(Rect first, Rect second)
+        {
+            float xMin = Mathf.Max(first.xMin, second.xMin);
+            float yMin = Mathf.Max(first.yMin, second.yMin);
+            float xMax = Mathf.Min(first.xMax, second.xMax);
+            float yMax = Mathf.Min(first.yMax, second.yMax);
+            return Rect.MinMaxRect(
+                xMin,
+                yMin,
+                Mathf.Max(xMin, xMax),
+                Mathf.Max(yMin, yMax));
         }
     }
 }

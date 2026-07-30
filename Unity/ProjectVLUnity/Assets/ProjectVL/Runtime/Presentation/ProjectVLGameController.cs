@@ -150,10 +150,17 @@ namespace ProjectVL.Presentation
                 : new Rect(0f, 0f, Screen.width, Screen.height);
         public string AvailableRecipeId =>
             _recipeSystem?.FirstAvailableRecipe(State);
+        public EvolutionRecipeConfig AvailableRecipe =>
+            _recipeSystem?.FindRecipe(AvailableRecipeId);
+        public CardState SelectedCard =>
+            _selectedSlotKind == null
+                ? null
+                : CardAt(_selectedSlotKind.Value, _selectedSlotIndex);
         public bool HasCardDrag => _draggedSlotKind != null;
         public DeveloperToolsSystem DeveloperTools => _developerTools;
         public RuntimeTuningSystem RuntimeTuning => _runtimeTuning;
         public DeveloperTelemetrySystem Telemetry => _telemetry;
+        public VisualCatalog VisualCatalog => _presenter?.VisualCatalog;
         public string LastTelemetryExportPath { get; private set; }
         public System.Collections.Generic.IReadOnlyList<TuningPreset>
             TuningPresets => _tuningPresets?.Presets;
