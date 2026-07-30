@@ -52,6 +52,10 @@ export function formatToast(ev: GameEvent): string | null {
       return T.recipeAvailable;
     }
     case 'bossRewardGranted': return fmt(T.bossReward, { desc: wildcardGrantDescription(ev.grants) });
+    case 'validationRewardGranted': return ev.delivery === 'hand'
+      ? `验证奖励已直接加入手牌：${name(ev.cardType)} ${ev.star}★`
+      : `手牌已满，验证奖励已安全落地：${name(ev.cardType)} ${ev.star}★`;
+    case 'validationRewardSettleStarted': return `验证奖励结算窗口：${ev.seconds} 秒`;
     case 'breakthrough': return fmt(T.breakthrough, { damage: Math.round(ev.damage) });
     case 'bossContactStarted': return T.bossContactStarted;
     case 'bossContactDamage':
@@ -95,11 +99,17 @@ export function formatToast(ev: GameEvent): string | null {
     }
     case 'evolutionBranchSelected': return `${name(ev.cardType)}：本卡路线已确定`;
     case 'recipeCompleted': return `卡间进化完成：${name(ev.outputCardType)} ${ev.outputStar}★`;
-    case 'recipeRejected': return ev.reason === 'phase'
-      ? '卡间进化只能在波间完成'
-      : ev.reason === 'materials'
-        ? '进化材料已变化，请重新选择'
-        : '没有可放置进化产物的槽位';
+    case 'recipeRejected': {
+      if (ev.reason === 'paused') return '暂停时不能进化';
+      if (ev.reason === 'decision') return '请先完成当前决策';
+      if (ev.reason === 'intermission' || ev.reason === 'phase' || ev.reason === 'mode') return '当前阶段不能进化';
+      if (ev.reason === 'limit') return '本局进化次数已用尽';
+      if (ev.reason === 'completed') return '同一配方每局只能完成一次';
+      if (ev.reason === 'star') return '进化材料尚未达到 5★';
+      if (ev.reason === 'provisional') return '请先确定材料卡的进化分支';
+      if (ev.reason === 'slots') return '没有可放置进化产物的槽位';
+      return '进化材料已变化，操作已取消';
+    }
     case 'bountyAccepted': return fmt(T.bountyAccepted, { name: name(ev.rewardCardType) });
     case 'bountyCompleted': return fmt(T.bountyCompleted, { name: name(ev.rewardCardType) });
     case 'bountyFailed': return T.bountyFailed;

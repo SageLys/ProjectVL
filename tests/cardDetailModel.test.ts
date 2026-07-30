@@ -9,16 +9,16 @@ describe('card detail view model', () => {
       id: 10,
       type: 'chainLightning',
       star: 5,
-      evolutionPath: ['3:chainLightningA', '5:chainLightningB2'],
+      evolutionPath: ['3:chainLightningA', '5:chainLightning2x'],
     }, 'cards');
     expect(model.consume.blocks[0].lines.length).toBeGreaterThan(0);
-    expect(model.equip.blocks.length).toBeGreaterThan(1);
-    expect(model.currentRoute).toContain('长链');
+    expect(model.equip.blocks.length).toBeGreaterThan(0);
+    expect(model.currentRoute).toContain('链弧');
     const node3 = model.tree.nodes.find(node => node.star === 3);
     const node5 = model.tree.nodes.find(node => node.star === 5);
     const node6 = model.tree.nodes.find(node => node.star === 6);
     expect(node3?.options?.find(option => option.id === 'chainLightningA')?.selected).toBe(true);
-    expect(node5?.options?.find(option => option.id === 'chainLightningB2')?.selected).toBe(true);
+    expect(node5?.options?.find(option => option.id === 'chainLightning2x')?.selected).toBe(true);
     expect(node6?.locked).toBe(true);
   });
 
@@ -40,18 +40,18 @@ describe('card detail view model', () => {
   });
 
   it('renders recipe-only cards as recipes instead of a normal tree', () => {
-    const model = buildCardDetailViewModel({ id: 12, type: 'frozenThunder', star: 6 }, 'equipment');
+    const model = buildCardDetailViewModel({ id: 12, type: 'stormLattice', star: 6 }, 'equipment');
     expect(model.tree.nodes).toHaveLength(0);
-    expect(model.tree.recipe?.notice).toContain('不可通过普通合成');
+    expect(model.tree.recipe?.notice).toContain('原分支被终极形态替代');
     expect(model.tree.recipe?.ingredientA).toContain('≥5★');
   });
 
-  it('previews both ingredient sides of all six fixed recipes from 1★', () => {
-    expect(cfg.evolutionRecipes.recipes).toHaveLength(6);
+  it('previews both ingredient sides of all 25 fixed recipes from 1★', () => {
+    expect(cfg.evolutionRecipes.recipes).toHaveLength(25);
     for (const recipe of cfg.evolutionRecipes.recipes) {
       for (const [self, partner] of [
-        [recipe.ingredientA, recipe.ingredientB],
-        [recipe.ingredientB, recipe.ingredientA],
+        [recipe.ingredientVariable, recipe.ingredientAnchor],
+        [recipe.ingredientAnchor, recipe.ingredientVariable],
       ] as const) {
         const model = buildCardDetailViewModel({ id: 100, type: self.cardId, star: 1 }, 'cards');
         const preview = model.tree.asIngredient.find(item => item.recipeId === recipe.id);

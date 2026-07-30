@@ -71,6 +71,12 @@ export interface RecipeIngredientViewModel {
   output: string;
   outputStar: number;
   notice: string;
+  compatible: boolean;
+}
+
+export interface RecipeDisplayContext {
+  mode: 'run' | 'compendium';
+  compatibleRecipeIds?: string[];
 }
 
 export interface SkillTreeViewModel {
@@ -265,15 +271,20 @@ function syntheticBlock(trigger: string, lines: EffectTextLine[]): EffectTextBlo
   return { trigger, lines, keywords: [...new Set(lines.flatMap(line => line.keywords))] };
 }
 
-function ingredientRecipeViewModels(cardType: string): RecipeIngredientViewModel[] {
+export function ingredientRecipeViewModels(
+  cardType: string,
+  context: RecipeDisplayContext = { mode: 'compendium' },
+): RecipeIngredientViewModel[] {
+  const compatibleIds = new Set(context.compatibleRecipeIds ?? []);
   return cfg.evolutionRecipes.recipes.flatMap(recipe => {
-    const isIngredientA = recipe.ingredientA.cardId === cardType;
-    const isIngredientB = recipe.ingredientB.cardId === cardType;
+    const isIngredientA = recipe.ingredientVariable.cardId === cardType;
+    const isIngredientB = recipe.ingredientAnchor.cardId === cardType;
     if (!isIngredientA && !isIngredientB) return [];
-    const self = isIngredientA ? recipe.ingredientA : recipe.ingredientB;
-    const partner = isIngredientA ? recipe.ingredientB : recipe.ingredientA;
+    const self = isIngredientA ? recipe.ingredientVariable : recipe.ingredientAnchor;
+    const partner = isIngredientA ? recipe.ingredientAnchor : recipe.ingredientVariable;
     const partnerName = cardDisplayName(partner.cardId);
     const outputName = cardDisplayName(recipe.outputCardId);
+    const compatible = context.mode === 'compendium' || compatibleIds.has(recipe.id);
     return [{
       recipeId: recipe.id,
       selfMinStar: self.minStar,
@@ -283,19 +294,24 @@ function ingredientRecipeViewModels(cardType: string): RecipeIngredientViewModel
       outputCardId: recipe.outputCardId,
       output: outputName,
       outputStar: recipe.outputStar,
-      notice: fmt(texts.evolution.recipeAsIngredient, {
+      notice: compatible ? fmt(texts.evolution.recipeAsIngredient, {
         selfStar: self.minStar,
         partner: partnerName,
         partnerStar: partner.minStar,
         output: outputName,
         outputStar: recipe.outputStar,
-      }),
+      }) : '本局材料未入池',
+      compatible,
     }];
   });
 }
 
-export function buildSkillTreeViewModel(card: Card, def = getDef(card.type)): SkillTreeViewModel {
-  const asIngredient = ingredientRecipeViewModels(card.type);
+export function buildSkillTreeViewModel(
+  card: Card,
+  def = getDef(card.type),
+  recipeContext: RecipeDisplayContext = { mode: 'compendium' },
+): SkillTreeViewModel {
+  const asIngredient = ingredientRecipeViewModels(card.type, recipeContext);
   if (!def) return { nodes: [], asIngredient };
   if (def.recipeOnly && !def.evolutionTree) {
     const recipe = cfg.evolutionRecipes.recipes.find(item => item.outputCardId === card.type);
@@ -304,11 +320,11 @@ export function buildSkillTreeViewModel(card: Card, def = getDef(card.type)): Sk
       nodes: [],
       asIngredient,
       recipe: recipe ? {
-        ingredientA: `${cardDisplayName(recipe.ingredientA.cardId)} ≥${recipe.ingredientA.minStar}★`,
-        ingredientB: `${cardDisplayName(recipe.ingredientB.cardId)} ≥${recipe.ingredientB.minStar}★`,
+        ingredientA: `${cardDisplayName(recipe.ingredientVariable.cardId)} ≥${recipe.ingredientVariable.minStar}★`,
+        ingredientB: `${cardDisplayName(recipe.ingredientAnchor.cardId)} ≥${recipe.ingredientAnchor.minStar}★`,
         output: `${cardDisplayName(recipe.outputCardId)} ${recipe.outputStar}★`,
         exactEffects: bindings.map(formatBinding),
-        notice: '此卡不可通过普通合成获得，只能在波间阶段按配方进化。',
+        notice: '原分支被终极形态替代；拖动任一材料至另一张，立即进化。',
       } : undefined,
     };
   }
@@ -370,6 +386,7 @@ function glossaryFor(atoms: string[]): GlossaryEntry[] {
 export function buildCardDetailViewModel(
   card: Card,
   source: 'cards' | 'equipment',
+  recipeContext: RecipeDisplayContext = { mode: 'compendium' },
 ): CardDetailViewModel {
   const def = getDef(card.type);
   const visual = resolveCardVisual(card.type);
@@ -382,7 +399,7 @@ export function buildCardDetailViewModel(
       currentRoute: '尚未选择路线',
       consume: { title: '消耗释放效果', hint: '', blocks: [], empty: '暂无可用效果。' },
       equip: { title: '装备持续效果', hint: '', blocks: [], empty: '暂无可用效果。' },
-      affixes: [], glossary: [], tree: { nodes: [], asIngredient: ingredientRecipeViewModels(card.type) },
+      affixes: [], glossary: [], tree: { nodes: [], asIngredient: ingredientRecipeViewModels(card.type, recipeContext) },
     };
   }
   const path = card.evolutionPath ?? [];
@@ -416,6 +433,6 @@ export function buildCardDetailViewModel(
     },
     affixes: (card.affixes ?? []).map(buildAffixDetail),
     glossary: glossaryFor([...effectAtoms(tier.effects), ...bindingAtoms(bindings)]),
-    tree: buildSkillTreeViewModel(card, def),
+    tree: buildSkillTreeViewModel(card, def, recipeContext),
   };
 }

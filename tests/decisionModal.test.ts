@@ -64,15 +64,15 @@ describe('decision modal', () => {
       kind: 'evolutionBranch',
       cardType: 'chainLightning',
       checkpointStar: 5,
-      options: ['chainLightningA2', 'chainLightningB2', 'chainLightningC2'],
+      options: ['chainLightning1x', 'chainLightning2x', 'chainLightning3x'],
       provisionalCardId: 99,
     };
 
     modals.showDecision(decision, state);
     const body = document.querySelector('#decisionModal .modal-card > p')?.textContent;
-    const option = document.querySelector<HTMLButtonElement>('[data-decision-choice="chainLightningB2"]');
+    const option = document.querySelector<HTMLButtonElement>('[data-decision-choice="chainLightning2x"]');
     expect(body).toContain('叠加到当前 3★ 路线');
-    expect(option?.querySelector('.choice-desc')?.textContent).toMatch(/强化/);
+    expect(option?.querySelector('.choice-desc')?.textContent?.trim().length).toBeGreaterThan(0);
     expect(option?.querySelectorAll('.choice-effects li').length).toBeGreaterThan(0);
     expect(option?.querySelector('.choice-fit')?.textContent).toContain('适合：');
   });

@@ -41,7 +41,7 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
       // button between pointerdown and pointerup suppresses the browser click.
       if (renderedDecision !== decision) {
         const copy = texts.decisions[decision.kind];
-        const options = decision.kind === 'godDraft' || decision.kind === 'godFocus'
+        const options = decision.kind === 'godDraft' || decision.kind === 'godFocus' || decision.kind === 'recipePin'
           ? decision.candidates
           : decision.kind === 'waveBaseReward'
             ? cfg.waveRewards.choice
@@ -49,7 +49,7 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
               .filter(id => decision.candidates.includes(id) || decision.capped.includes(id))
           : decision.kind === 'evolutionBranch' || decision.kind === 'relic'
             ? decision.options
-            : [decision.recipeId];
+            : [];
         decisionTitle.textContent = copy.title;
         decisionBody.textContent = decision.kind === 'evolutionBranch'
           ? `${copy.body} ${decision.checkpointStar === 5 ? '该分支会叠加到当前 3★ 路线上，不会替换之前的选择。 ' : ''}${texts.evolution.lockNotice}`
@@ -67,13 +67,24 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
             theme.className = 'choice-desc';
             theme.textContent = godCopy?.theme ?? '';
             button.append(label, theme);
-            if (decision.kind === 'godDraft' && decision.role === 'main' && state) {
+            if (decision.kind === 'godDraft' && state) {
+              const roster = state.godPool.offerRosterPreviews[option] ?? [];
               const preview = document.createElement('span');
               preview.className = 'god-roster-preview';
-              preview.textContent = (state.godPool.offerRosterPreviews[option] ?? [])
-                .map(cardDisplayName)
-                .join(' · ');
+              preview.textContent = roster.map(cardDisplayName).join(' · ');
               button.append(preview);
+              const combined = new Set([...state.godPool.runRoster, ...roster]);
+              const candidateRecipes = cfg.evolutionRecipes.recipes.filter(recipe =>
+                combined.has(recipe.ingredientVariable.cardId)
+                && combined.has(recipe.ingredientAnchor.cardId));
+              if (candidateRecipes.length) {
+                const recipes = document.createElement('span');
+                recipes.className = 'god-recipe-preview';
+                recipes.textContent = candidateRecipes.map(recipe =>
+                  `候选·${recipe.recipeType === 'sameGod' ? '同神' : '跨神'}：${cardDisplayName(recipe.outputCardId)}`)
+                  .join(' · ');
+                button.append(recipes);
+              }
             }
           } else if (decision.kind === 'evolutionBranch') {
             const optionDef = cfg.skills.cards
@@ -151,6 +162,16 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
             button.disabled = capped;
             button.classList.toggle('choice-capped', capped);
             button.append(label, desc);
+          } else if (decision.kind === 'recipePin') {
+            if (option === '__skip__') {
+              label.textContent = '暂不钉选';
+            } else {
+              const recipe = cfg.evolutionRecipes.recipes.find(item => item.id === option);
+              label.textContent = recipe
+                ? `${cardDisplayName(recipe.ingredientVariable.cardId)} + ${cardDisplayName(recipe.ingredientAnchor.cardId)} → ${cardDisplayName(recipe.outputCardId)}`
+                : option;
+            }
+            button.append(label);
           } else {
             label.textContent = option;
             button.append(label);

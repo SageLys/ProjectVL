@@ -109,10 +109,10 @@ function appendRecipePath(svg: SVGSVGElement, d: string, className: string, pair
 function recipeHintText(pair: RecipeHintPair): string {
   const recipe = cfg.evolutionRecipes.recipes.find(item => item.id === pair.recipeId)!;
   return fmt(texts.evolution.recipeCombatHint, {
-    a: cardDisplayName(recipe.ingredientA.cardId),
-    aStar: recipe.ingredientA.minStar,
-    b: cardDisplayName(recipe.ingredientB.cardId),
-    bStar: recipe.ingredientB.minStar,
+    a: cardDisplayName(recipe.ingredientVariable.cardId),
+    aStar: recipe.ingredientVariable.minStar,
+    b: cardDisplayName(recipe.ingredientAnchor.cardId),
+    bStar: recipe.ingredientAnchor.minStar,
     output: cardDisplayName(pair.outputCardId),
     outputStar: pair.outputStar,
   });
@@ -190,7 +190,9 @@ export function renderMergeHints(dock: HTMLElement, state: GameState): void {
   dock.querySelector('.recipe-evolution-hints')?.remove();
   dock.querySelectorAll('.card.recipe-ready').forEach(card => card.classList.remove('recipe-ready'));
   const recipePairs = findRecipeHintPairs(state);
-  if (state.mode === 'playing' && state.wavePhase !== 'between') renderRecipeHints(dock, recipePairs);
+  if (state.mode === 'playing' && (!state.intermission.active || state.intermission.step === 'free')) {
+    renderRecipeHints(dock, recipePairs);
+  }
   const pairs = findMergeHintPairs(state);
   if (!pairs.length) return;
 
