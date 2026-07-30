@@ -21,6 +21,7 @@ namespace ProjectVL.Presentation
         private BountySystem _bountySystem;
         private DeveloperToolsSystem _developerTools;
         private RuntimeTuningSystem _runtimeTuning;
+        private DeveloperTelemetrySystem _telemetry;
         private CardSlotKind? _selectedSlotKind;
         private int _selectedSlotIndex = -1;
         private CardSlotKind? _pendingCastSlotKind;
@@ -150,6 +151,8 @@ namespace ProjectVL.Presentation
         public bool HasCardDrag => _draggedSlotKind != null;
         public DeveloperToolsSystem DeveloperTools => _developerTools;
         public RuntimeTuningSystem RuntimeTuning => _runtimeTuning;
+        public DeveloperTelemetrySystem Telemetry => _telemetry;
+        public string LastTelemetryExportPath { get; private set; }
 
         private void Awake()
         {
@@ -265,6 +268,19 @@ namespace ProjectVL.Presentation
                 waves,
                 economy,
                 bounty);
+            if (_developerTools.Enabled)
+            {
+                _telemetry = new DeveloperTelemetrySystem(
+                    state,
+                    seed,
+                    Application.version,
+                    combat,
+                    enemies,
+                    waves,
+                    economy,
+                    bounty);
+                _simulation.SimulationStep += _telemetry.Step;
+            }
 
             _presenter = gameObject.AddComponent<ArenaPresenter>();
             _presenter.Initialize(combat, state);
@@ -288,6 +304,7 @@ namespace ProjectVL.Presentation
             }
 
             State.StartRun();
+            _telemetry?.RecordInput(State, "startRun");
             if (!_godPoolSystem.OfferInitial(State))
             {
                 _waveSystem.StartNextWave(State);
@@ -311,6 +328,10 @@ namespace ProjectVL.Presentation
             if (_progressionSystem != null
                 && _progressionSystem.Choose(State, optionIndex))
             {
+                _telemetry?.RecordInput(
+                    State,
+                    "decision_resolved",
+                    "level:" + optionIndex);
                 LastCardAction = "遗物已加入本局构筑。";
             }
         }
@@ -323,6 +344,10 @@ namespace ProjectVL.Presentation
                 return;
             }
 
+            _telemetry?.RecordInput(
+                State,
+                "decision_resolved",
+                "god:" + optionIndex);
             LastCardAction = "神祇选择已生效。";
             if (State.Wave == 0 && State.PendingGodChoice == null)
             {
@@ -334,6 +359,10 @@ namespace ProjectVL.Presentation
         {
             if (_waveSystem.ChooseWaveReward(State, optionIndex))
             {
+                _telemetry?.RecordInput(
+                    State,
+                    "decision_resolved",
+                    "waveReward:" + optionIndex);
                 LastCardAction = "波次成长已生效。";
             }
         }
@@ -351,6 +380,21 @@ namespace ProjectVL.Presentation
             _simulation.SetTimeScale(timeScale);
         }
 
+        public string ExportTelemetry()
+        {
+            if (_telemetry == null)
+            {
+                LastTelemetryExportPath = "Telemetry is disabled.";
+                return LastTelemetryExportPath;
+            }
+
+            LastTelemetryExportPath = _telemetry.Export(
+                System.IO.Path.Combine(
+                    Application.persistentDataPath,
+                    "telemetry"));
+            return LastTelemetryExportPath;
+        }
+
         public void RestartGame()
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
@@ -359,6 +403,7 @@ namespace ProjectVL.Presentation
         public void ClaimBossReward()
         {
             _waveSystem.ClaimBossReward(State);
+            _telemetry?.RecordInput(State, "bossRewardGranted");
         }
 
         public void ConfirmNextWave()
@@ -523,6 +568,7 @@ namespace ProjectVL.Presentation
                 _draggedSlotIndex,
                 targetKind,
                 targetIndex);
+            _telemetry?.RecordInput(State, "dragDrop", result.ToString());
             ClearCardSelection(CardActionText(result));
             CancelCardDrag();
         }
@@ -559,6 +605,10 @@ namespace ProjectVL.Presentation
             if (cast)
             {
                 _cardInventory.Consume(State, kind, index);
+                _telemetry?.RecordInput(
+                    State,
+                    "consumeRelease",
+                    card.Type);
                 ClearCardSelection(
                     $"已拖拽施放 {card.Star}★ {card.Type}。");
             }
@@ -629,6 +679,10 @@ namespace ProjectVL.Presentation
             EvolutionChoice choice = State.PendingEvolution;
             if (_cardInventory.ResolveEvolutionChoice(State, optionIndex))
             {
+                _telemetry?.RecordInput(
+                    State,
+                    "decision_resolved",
+                    "evolution:" + optionIndex);
                 LastCardAction =
                     $"已选择进化路线：{choice.Options[optionIndex]}。";
             }
@@ -917,6 +971,7 @@ namespace ProjectVL.Presentation
             if (_bountySystem != null
                 && _bountySystem.AcceptAt(State, arenaPoint))
             {
+                _telemetry?.RecordInput(State, "bountyAccept");
                 LastCardAction = "已接受悬赏，消灭全部悬赏敌人可获得奖励。";
                 return;
             }
@@ -925,6 +980,7 @@ namespace ProjectVL.Presentation
                 _dropSystem.CollectNearest(State, arenaPoint);
             if (result == DropCollectResult.Collected)
             {
+                _telemetry?.RecordInput(State, "pickupClick");
                 LastCardAction = "已拾取掉落卡牌。";
             }
             else if (result == DropCollectResult.HandFull)

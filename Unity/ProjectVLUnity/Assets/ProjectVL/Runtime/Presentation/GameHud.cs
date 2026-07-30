@@ -225,6 +225,28 @@ namespace ProjectVL.Presentation
 
             string group = TuningGroups[_tuningGroup];
             y += 34f;
+            DeveloperTelemetrySystem telemetry = _controller.Telemetry;
+            if (telemetry != null)
+            {
+                telemetry.GetEnemyPercentiles(
+                    _controller.State.Wave,
+                    out float p50,
+                    out float p95);
+                GUI.Label(
+                    new Rect(panel.x + 12f, y, 360f, 22f),
+                    $"LIVE  enemies {_controller.State.Enemies.Count}"
+                    + $"  E1 P50 {p50:0.#} / P95 {p95:0.#}",
+                    _leftStyle);
+                GUI.Label(
+                    new Rect(panel.x + 12f, y + 22f, 360f, 22f),
+                    $"idle {telemetry.IdleSeconds:0.0}s"
+                    + $"  opportunity/10s {telemetry.RecentOpportunities}"
+                    + $"  danger {telemetry.DangerEntriesThisWave}"
+                    + $"  input/90s {telemetry.First90SecondInputs}",
+                    _leftStyle);
+                y += 48f;
+            }
+
             foreach (TuningParameter parameter in tuning.Parameters)
             {
                 if (parameter.Group != group)
@@ -261,13 +283,25 @@ namespace ProjectVL.Presentation
             }
 
             if (GUI.Button(
-                new Rect(panel.x + 216f, panel.yMax - 35f, 160f, 25f),
+                new Rect(panel.x + 216f, panel.yMax - 64f, 160f, 25f),
                 "Reset this group",
                 _buttonStyle))
                 tuning.ResetGroup(group);
+            if (GUI.Button(
+                new Rect(panel.x + 216f, panel.yMax - 35f, 160f, 25f),
+                "Export telemetry",
+                _buttonStyle))
+                _controller.ExportTelemetry();
             GUI.Label(
-                new Rect(panel.x + 12f, panel.yMax - 34f, 190f, 24f),
+                new Rect(panel.x + 12f, panel.yMax - 62f, 190f, 24f),
                 "* applies from next wave",
+                _leftStyle);
+            string exportPath = _controller.LastTelemetryExportPath;
+            GUI.Label(
+                new Rect(panel.x + 12f, panel.yMax - 35f, 194f, 25f),
+                string.IsNullOrEmpty(exportPath)
+                    ? $"Events {_controller.Telemetry?.Session.events.Count ?? 0}"
+                    : "Saved: " + System.IO.Path.GetFileName(exportPath),
                 _leftStyle);
         }
 
