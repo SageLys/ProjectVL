@@ -9,6 +9,7 @@ import { grantFloorRewards } from '../src/core/systems/waveRewardSystem';
 import { createDevTelemetry } from '../src/telemetry/devTelemetry';
 import { createIntermissionPanel } from '../src/ui/intermissionPanel';
 import {
+  card,
   constRng,
   createDefaultConfig,
   freshState,
@@ -58,6 +59,18 @@ describe('waveRewardSystem floor', () => {
         { id: 'floorDamage' },
       ],
     });
+  });
+
+  it('装备倍率把有效射程顶满时仍结算永久射程保底', () => {
+    const state = freshState();
+    state.runBuild.cardAffixRolls.pierce = [
+      { stat: 'rangeMul', value: 0.4, consumableDuration: 5 },
+    ];
+    state.equipment[0] = card('pierce', 3);
+
+    expect(totalRange(state, createDefaultConfig())).toBe(210);
+    grantFloorRewards(state, 1);
+    expect(state.runBaseStats.rangeAdd).toBe(4);
   });
 
   it('同一波只发一次；跳到第 5 波只结算第 5 波保底', () => {

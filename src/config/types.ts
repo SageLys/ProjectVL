@@ -321,6 +321,12 @@ export interface EvolutionRecipesConfig {
 
 export type RunBaseStatKind = 'damageAdd' | 'fireRateAdd' | 'rangeAdd' | 'multiAdd' | 'maxHpAdd' | 'heal';
 
+/** Card-affix-only multipliers for the turret's base combat stats. */
+export type CardBaseStatMulKind = 'damageMul' | 'fireRateMul' | 'rangeMul' | 'maxHpMul';
+
+/** Complete card-affix vocabulary: base-stat multipliers plus build-mechanic axes. */
+export type CardAffixStatKind = CardBaseStatMulKind | BuildScalingAxis;
+
 /** xpGainPct is the sole percentage-based exception in wave-end growth. */
 export type WaveChoiceStatKind = RunBaseStatKind | 'xpGainPct';
 
@@ -366,10 +372,8 @@ export interface EvolutionTreeDef {
   sharedNodes: EvolutionSharedNodeDef[];
 }
 
-export type CardStatKind = RunBaseStatKind | BuildScalingAxis;
-
 export interface CardAffixCandidateDef {
-  stat: CardStatKind;
+  stat: CardAffixStatKind;
   weight: number;
   min: number;
   max: number;
@@ -380,7 +384,7 @@ export interface CardAffixCandidateDef {
 /**
  * D2 预留：卡间融合（配方进化）时数值词条如何传递。**占位契约，运行时无效果**——
  * loader / 校验器只检查类型合法，解释器与词条系统一律忽略；实现见 Stage 5。
- * 缺省（不声明本字段）时行为与今日完全一致：融合产物按自身 affixPool 重新掷点。
+ * 缺省（不声明本字段）时行为与今日完全一致：沿用每局每卡型已锁定的共享词条模板。
  */
 export interface CardFusionPolicyDef {
   /** 源卡词条如何合并进产物：none=不继承（当前实际行为）。 */

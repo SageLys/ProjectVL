@@ -815,7 +815,7 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
         (modifier.remaining ?? Infinity) < (shortest.remaining ?? Infinity) ? modifier : shortest);
       refresh.value = value;
       refresh.remaining = duration;
-      if (stat === 'maxHpAdd') reconcileMaxHp(ctx.state);
+      if (stat === 'maxHpAdd' || stat === 'maxHpMul') reconcileMaxHp(ctx.state);
       return;
     }
     ctx.state.statModifiers.push({
@@ -825,7 +825,7 @@ export const ATOMS: Record<AtomName, AtomHandler> = {
       value,
       remaining: duration,
     });
-    if (stat === 'maxHpAdd') reconcileMaxHp(ctx.state);
+    if (stat === 'maxHpAdd' || stat === 'maxHpMul') reconcileMaxHp(ctx.state);
   },
   charge(ctx, p) {
     const key = `charge:${ctx.sourceCardId ?? 'consume'}:${cStr('charge', p, 'chargeKey')}`;

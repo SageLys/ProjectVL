@@ -48,6 +48,239 @@
     "5": 0
   },
   "rewards": [],
+  "enemySequence": [
+    {
+      "frame": 13,
+      "id": 1,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": -24.265719294981228,
+      "y": 180.50395941004848
+    },
+    {
+      "frame": 13,
+      "id": 2,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 313.2218490677359,
+      "y": -24.138630264428418
+    },
+    {
+      "frame": 13,
+      "id": 3,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 564.358208141649,
+      "y": 632.1277690590858
+    },
+    {
+      "frame": 13,
+      "id": 4,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": -23.679215427919143,
+      "y": 523.0934512953364
+    },
+    {
+      "frame": 13,
+      "id": 5,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 253.77476670992533,
+      "y": -24.134085717457747
+    },
+    {
+      "frame": 13,
+      "id": 6,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": -23.64458292676249,
+      "y": 225.79901014069435
+    },
+    {
+      "frame": 72,
+      "id": 7,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 154.42843055198742,
+      "y": 754.1691942489359
+    },
+    {
+      "frame": 72,
+      "id": 8,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 135,
+      "speed": 16.5,
+      "damage": 14,
+      "x": -24.539413475727187,
+      "y": 172.77032556959273
+    },
+    {
+      "frame": 72,
+      "id": 9,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": 255.9905414662379,
+      "y": -23.50097430838886
+    },
+    {
+      "frame": 72,
+      "id": 10,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 73.43477589279142,
+      "y": -24.22638789522108
+    },
+    {
+      "frame": 190,
+      "id": 11,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 564.2830115187829,
+      "y": 564.8308687080814
+    },
+    {
+      "frame": 249,
+      "id": 12,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": 563.6609102069732,
+      "y": 513.2237517742309
+    },
+    {
+      "frame": 308,
+      "id": 13,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": -24.30596064841109,
+      "y": 144.8948150791609
+    },
+    {
+      "frame": 367,
+      "id": 14,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 135,
+      "speed": 16.5,
+      "damage": 14,
+      "x": -24.4667279430867,
+      "y": 439.3322783388585
+    },
+    {
+      "frame": 426,
+      "id": 15,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 258.18829428201303,
+      "y": -24.133732311928437
+    },
+    {
+      "frame": 426,
+      "id": 16,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 564.2315752105687,
+      "y": 211.53573599362304
+    },
+    {
+      "frame": 426,
+      "id": 17,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": -24.32871422995139,
+      "y": 124.6535601202303
+    },
+    {
+      "frame": 485,
+      "id": 18,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 90.77539015928775,
+      "y": 754.212785058405
+    },
+    {
+      "frame": 544,
+      "id": 19,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 135,
+      "speed": 16.5,
+      "damage": 14,
+      "x": 564.6324640284072,
+      "y": 36.99465096032174
+    },
+    {
+      "frame": 544,
+      "id": 20,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": -23.524943296380933,
+      "y": 310.7923170051734
+    },
+    {
+      "frame": 603,
+      "id": 21,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 55.129854474921714,
+      "y": 754.2412619528341
+    }
+  ],
   "dropSequence": [
     {
       "frame": 164,

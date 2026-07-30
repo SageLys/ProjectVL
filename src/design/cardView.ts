@@ -176,7 +176,7 @@ function renderConsumable(view: CardView, card: CardDef, cardPath: string, editi
 function renderAffixes(view: CardView): HTMLElement {
   const section = el('section', 'card-block'); section.append(el('h2', '', '数值词条候选'));
   if (!view.affixPool) { section.append(el('p', 'empty-state', '无词条池')); return section; }
-  section.append(el('p', '', `每次实例随机抽 ${view.affixPool.count} 条`));
+  section.append(el('p', '', `每局每卡型随机抽 ${view.affixPool.count} 条`));
   const table = el('table', 'data-table'); const header = el('tr'); header.append(el('th', '', '词条'), el('th', '', '权重'), el('th', '', '范围'), el('th', '', '步进'), el('th', '', '消耗态时限')); const thead = el('thead'); thead.append(header); table.append(thead);
   const body = el('tbody');
   view.affixPool.candidates.forEach(candidate => {

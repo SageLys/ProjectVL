@@ -187,6 +187,29 @@ describe('原子契约 · 单一来源', () => {
     expect(TRIGGER_NAMES).toHaveLength(9);
     expect(new Set(RUNTIME_STAT_KINDS).size).toBe(RUNTIME_STAT_KINDS.length);
     expect(RUNTIME_STAT_KINDS).toContain('maxHpAdd');
+    expect(RUNTIME_STAT_KINDS).toEqual(expect.arrayContaining([
+      'damageAdd', 'damageMul', 'fireRateMul', 'rangeMul', 'maxHpMul',
+    ]));
+  });
+
+  it('CardAffixStatKind 收窄后 statBuff 仍可使用基础平加', () => {
+    const skills = structuredClone(cfg.skills) as any;
+    const stack: any[] = [skills];
+    let changed = false;
+    while (stack.length && !changed) {
+      const value = stack.pop();
+      if (!value || typeof value !== 'object') continue;
+      if (value.atom === 'statBuff') {
+        value.params.stat = 'damageAdd';
+        value.params.operation = 'add';
+        value.params.value = 2;
+        changed = true;
+        break;
+      }
+      stack.push(...Object.values(value));
+    }
+    expect(changed).toBe(true);
+    expect(() => validateSkillsConfig(skills)).not.toThrow();
   });
 
   it('契约自洽：enum 有值域、variantDefaults 指向同原子的已声明参数、嵌套仅限领域原子', () => {

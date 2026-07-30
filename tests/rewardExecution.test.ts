@@ -78,6 +78,11 @@ describe('reward execution', () => {
     expect(second.result.surgeTag).toBe('projectile');
     expect(definition).toEqual(before);
     expect(state.statModifiers.length).toBe(4);
+    expect(new Set(state.statModifiers.map(modifier => modifier.stat))).toEqual(
+      new Set(['effectDamageMul', 'quantityAdd']),
+    );
+    expect(state.statModifiers.some(modifier =>
+      ['damageMul', 'fireRateMul', 'rangeMul', 'maxHpMul'].includes(modifier.stat))).toBe(false);
     tickEffects(state, config, constRng(0), 13);
     expect(state.statModifiers).toEqual([]);
   });

@@ -1,5 +1,5 @@
 import type { AtomName, BindingDef, CardDef, EffectDef, Trigger } from '../core/effects/defs';
-import type { CardStatKind, EvolutionRecipesConfig, GodsConfig } from '../config/types';
+import type { CardAffixStatKind, EvolutionRecipesConfig, GodsConfig } from '../config/types';
 import { describeLabel, labelWithKey } from '../editor/labels';
 
 export interface ParamView { key: string; label: string; value: string }
@@ -46,7 +46,7 @@ export interface ConsumableTierView {
   effects: EffectView[];
 }
 export interface AffixView {
-  stat: CardStatKind;
+  stat: CardAffixStatKind;
   statLabel: string;
   weight: number;
   min: number;

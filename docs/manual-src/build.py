@@ -377,7 +377,7 @@ _cov = Table([[""]], colWidths=[38 * mm], rowHeights=[3])
 _cov.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#3F9D7B"))]))
 story += [_cov, Spacer(1, 10 * mm)]
 story += [Paragraph(x, ST["cover_meta"]) for x in [
-    "版本　　skills-schema v0.5.0　·　9 个触发器　·　34 个效果原子",
+    "版本　　skills-schema v0.6.0　·　9 个触发器　·　34 个效果原子",
     "生成日期　%s" % DATE,
     "唯一权威　<font color='#0B5C74'>src/core/effects/atomContract.ts</font>（参数契约）、"
     "<font color='#0B5C74'>registry.ts</font>（原子实现）、<font color='#0B5C74'>interpreter.ts</font>（触发器总线）",
@@ -424,7 +424,7 @@ story += [Paragraph("执行链路", ST["h2"]), Spacer(1, 5)]
 flow_rows = [
     ["①", "装备解析", rt("<b>resolveCardBindings()</b> 按星级与进化路径，把这张卡当前生效的绑定列表算出来"
                      "（3★ 分支 → 4★ 共享强化 → 5★ 分支 → 6★ 共享，逐级累加）")],
-    ["②", "词条缩放", rt("<b>applyBuildScalingToBindings()</b> 按遗物/词条的轴，"
+    ["②", "词条缩放", rt("<b>applyBuildScalingToBindings()</b> 按卡牌机制词条与限时 modifier 的轴，"
                      "就地改写绑定里的具体数值（如 quantityAdd 给 pierce.count +1）")],
     ["③", "触发", rt("各系统在自己的结算点调 <b>fireTrigger(trigger, payload)</b>；"
                    "interval 走 tickIntervalBindings，passive 走 getModifiers")],
@@ -628,11 +628,11 @@ for cat in ORDER:
                     code(axis), code(tgt["param"]), mode_cn,
                     ("，" + "、".join(extra)) if extra else ""))
             fus += [Spacer(1, 4),
-                    Paragraph("<b>会被这些词条 / 遗物轴放大：</b>", ST["body"])] + \
+                    Paragraph("<b>会被这些机制词条轴放大：</b>", ST["body"])] + \
                    [Paragraph("• " + x, ST["bullet"]) for x in lines]
         else:
             fus += [Spacer(1, 4),
-                    Paragraph(rt("<b>不被任何词条 / 遗物轴放大</b>——AFFIX_SINKS 里没有指向本原子的靶点，"
+                    Paragraph(rt("<b>不被任何机制词条轴放大</b>——AFFIX_SINKS 里没有指向本原子的靶点，"
                                  "数值完全由配置决定。"), ST["body"])]
         story += [callout("plain", "叠加、融合与缩放", fus), Spacer(1, 6)]
 
@@ -806,7 +806,7 @@ story += [data_table(["#", "规则"], rows, [10 * mm, CW - 10 * mm], colors.HexC
           Spacer(1, 12)]
 
 story += [CondPageBreak(70 * mm),
-          Head("附录 B　词条 / 遗物缩放靶点总表（AFFIX_SINKS）", ST["h2"], 1, "appB"),
+          Head("附录 B　卡牌词条缩放靶点总表（AFFIX_SINKS）", ST["h2"], 1, "appB"),
           Spacer(1, 4),
           Paragraph(rt("这是一张<b>白名单</b>：只有下表列出的 (原子, 参数) 会被对应的轴改写，"
                        "同名参数在别的原子上不受影响。缩放在 "
@@ -874,7 +874,7 @@ class Doc(BaseDocTemplate):
 
 doc = Doc(OUT, pagesize=A4, leftMargin=ML, rightMargin=MR, topMargin=MT, bottomMargin=MB,
           title="ProjectVL 触发器与效果原子说明手册", author="ProjectVL",
-          subject="skills-schema v0.5.0 · 9 触发器 · 34 效果原子")
+          subject="skills-schema v0.6.0 · 9 触发器 · 34 效果原子")
 frame = Frame(ML, MB, CW, PAGE_H - MT - MB, id="f", leftPadding=0, rightPadding=0,
               topPadding=0, bottomPadding=0)
 doc.addPageTemplates([

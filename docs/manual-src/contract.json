@@ -83,6 +83,36 @@
      "min": 0,
      "note": "无 attack/bullet 载荷时的伤害基准倍率"
     },
+    "spreadStatus": {
+     "type": "enum",
+     "enum": [
+      "vulnerable",
+      "slow",
+      "dot",
+      "brand"
+     ],
+     "note": "每次链伤后施加的状态；不发送 onHit"
+    },
+    "spreadParams": {
+     "type": "record",
+     "default": {},
+     "note": "状态强度 ratio 与持续时间 duration"
+    },
+    "preferRelay": {
+     "type": "boolean",
+     "default": false,
+     "note": "链路优先经过本卡生成的中继召唤物"
+    },
+    "relayDamageBonus": {
+     "type": "number",
+     "default": 0,
+     "min": 0
+    },
+    "relayBonusCap": {
+     "type": "number",
+     "default": 0.45,
+     "min": 0
+    },
     "chance": {
      "type": "number",
      "min": 0,
@@ -196,6 +226,7 @@
     "onFire",
     "onHit",
     "onKill",
+    "onBreach",
     "interval"
    ],
    "supports": {
@@ -532,6 +563,23 @@
      "min": 0,
      "note": "shape=ring 的内径；未声明 = radius × 0.5"
     },
+    "follow": {
+     "type": "enum",
+     "enum": [
+      "densestCluster",
+      "nearestEnemy"
+     ]
+    },
+    "followLerp": {
+     "type": "number",
+     "default": 0.5,
+     "min": 0,
+     "max": 1
+    },
+    "radiusOverTime": {
+     "type": "record",
+     "note": "duration 内从 from 到 to 线性插值"
+    },
     "color": {
      "type": "string",
      "note": "未声明 = 继承来源卡的主题色"
@@ -548,9 +596,7 @@
      "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
     }
    },
-   "allowedTriggers": [
-    "passive"
-   ],
+   "allowedTriggers": "any",
    "supports": {
     "equip": true,
     "consume": true
@@ -592,6 +638,17 @@
      "type": "number",
      "min": 0,
      "note": "shape=ring 的内径；未声明 = radius × 0.5"
+    },
+    "radiusOverTime": {
+     "type": "record",
+     "note": "duration 内从 from 到 to 线性插值"
+    },
+    "lineFrom": {
+     "type": "enum",
+     "enum": [
+      "turretToPoint",
+      "bulletPath"
+     ]
     },
     "color": {
      "type": "string",
@@ -671,7 +728,14 @@
      "enum": [
       "decoy",
       "mirrorTurret",
-      "orbital"
+      "orbital",
+      "wall",
+      "goldenTree",
+      "rootSegment",
+      "crystal",
+      "pylon",
+      "iceSpire",
+      "iceDecoy"
      ]
     },
     "count": {
@@ -694,9 +758,10 @@
     "placement": {
      "type": "enum",
      "enum": [
-      "threatDirection"
+      "threatDirection",
+      "ring"
      ],
-     "note": "仅装备态：按威胁方向放置于炮台外围"
+     "note": "装备态按威胁方向或环形放置"
     },
     "distanceFromTurret": {
      "type": "number",
@@ -763,6 +828,35 @@
      },
      "note": "召唤物开火冷却；decoy 不开火。0.05s 防御性下限避免每帧开火"
     },
+    "maxCount": {
+     "type": "integer",
+     "default": 1,
+     "min": 1,
+     "max": 8
+    },
+    "chainRelay": {
+     "type": "boolean",
+     "default": false
+    },
+    "onDeathEffects": {
+     "type": "effects"
+    },
+    "intervalSeconds": {
+     "type": "number",
+     "default": 0,
+     "min": 0
+    },
+    "intervalEffects": {
+     "type": "effects"
+    },
+    "auraRadius": {
+     "type": "number",
+     "default": 0,
+     "min": 0
+    },
+    "auraEffects": {
+     "type": "effects"
+    },
     "chance": {
      "type": "number",
      "min": 0,
@@ -775,7 +869,8 @@
     "equip": true,
     "consume": true
    },
-   "emitsEvents": false
+   "emitsEvents": true,
+   "allowsNestedEffects": true
   },
   "dropRateMul": {
    "category": "economy",
@@ -873,6 +968,10 @@
       "killPoint"
      ],
      "note": "'turret' 落在炮台；其余落在 ctx.origin（命中点/击杀点/消耗落点）"
+    },
+    "secure": {
+     "type": "boolean",
+     "default": false
     },
     "chance": {
      "type": "number",
@@ -1276,6 +1375,10 @@
       "multiAdd",
       "maxHpAdd",
       "heal",
+      "damageMul",
+      "fireRateMul",
+      "rangeMul",
+      "maxHpMul",
       "effectDamageMul",
       "quantityAdd",
       "controlPotencyMul",
@@ -1338,6 +1441,107 @@
     "consume": true
    },
    "emitsEvents": false
+  },
+  "charge": {
+   "category": "shared",
+   "params": {
+    "by": {
+     "type": "enum",
+     "default": "breach",
+     "enum": [
+      "breach",
+      "shieldAbsorb",
+      "thornsDamage",
+      "killWithSource:dot"
+     ]
+    },
+    "perEvent": {
+     "type": "number",
+     "default": 1,
+     "min": 0
+    },
+    "max": {
+     "type": "number",
+     "default": 3,
+     "min": 1
+    },
+    "releaseAt": {
+     "type": "enum",
+     "default": "full",
+     "enum": [
+      "full",
+      "interval",
+      "onShieldBreak"
+     ]
+    },
+    "chargeKey": {
+     "type": "string",
+     "default": "main"
+    },
+    "effects": {
+     "type": "effects"
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": true,
+   "allowsNestedEffects": true
+  },
+  "summonBuff": {
+   "category": "shared",
+   "params": {
+    "target": {
+     "type": "enum",
+     "default": "nearestToPoint",
+     "enum": [
+      "nearestToPoint",
+      "all"
+     ]
+    },
+    "kind": {
+     "type": "string",
+     "required": true
+    },
+    "damageMul": {
+     "type": "number",
+     "default": 1,
+     "min": 0
+    },
+    "radiusAdd": {
+     "type": "number",
+     "default": 0
+    },
+    "dropChanceAdd": {
+     "type": "number",
+     "default": 0
+    },
+    "capLevels": {
+     "type": "integer",
+     "default": 5,
+     "min": 1
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": false
   }
  },
  "triggers": [
@@ -1352,41 +1556,29 @@
   "passive"
  ],
  "affixSinks": {
-  "damageAdd": {
-   "operation": "add",
+  "damageMul": {
+   "operation": "mul",
    "settlement": "timed",
    "equipment": "global",
    "globalConsumer": "totalDamage"
   },
-  "fireRateAdd": {
-   "operation": "add",
+  "fireRateMul": {
+   "operation": "mul",
    "settlement": "timed",
    "equipment": "global",
    "globalConsumer": "totalFireRate"
   },
-  "rangeAdd": {
-   "operation": "add",
+  "rangeMul": {
+   "operation": "mul",
    "settlement": "timed",
    "equipment": "global",
    "globalConsumer": "totalRange"
   },
-  "multiAdd": {
-   "operation": "add",
-   "settlement": "timed",
-   "equipment": "global",
-   "globalConsumer": "totalMulti"
-  },
-  "maxHpAdd": {
-   "operation": "add",
+  "maxHpMul": {
+   "operation": "mul",
    "settlement": "timed",
    "equipment": "global",
    "globalConsumer": "totalMaxHp"
-  },
-  "heal": {
-   "operation": "add",
-   "settlement": "instant",
-   "equipment": "unsupported",
-   "globalConsumer": "instantHeal"
   },
   "effectDamageMul": {
    "operation": "mul",
@@ -1670,6 +1862,24 @@
     "damageMul": {
      "label": "伤害基准倍率",
      "help": "无 attack/bullet 载荷时的伤害基准倍率"
+    },
+    "spreadStatus": {
+     "label": "每跳扩散状态",
+     "help": "每次链伤后施加的状态；不发送 onHit"
+    },
+    "spreadParams": {
+     "label": "扩散状态参数",
+     "help": "状态强度 ratio 与持续时间 duration"
+    },
+    "preferRelay": {
+     "label": "优先中继",
+     "help": "链路优先经过本卡生成的中继召唤物"
+    },
+    "relayDamageBonus": {
+     "label": "中继增伤"
+    },
+    "relayBonusCap": {
+     "label": "中继增伤上限"
     },
     "chance": {
      "label": "触发概率",
@@ -1974,6 +2184,16 @@
      "label": "内径",
      "help": "shape=ring 的内径；未声明 = radius × 0.5"
     },
+    "follow": {
+     "label": "跟随目标"
+    },
+    "followLerp": {
+     "label": "跟随趋近比例"
+    },
+    "radiusOverTime": {
+     "label": "半径随时间变化",
+     "help": "duration 内从 from 到 to 线性插值"
+    },
     "color": {
      "label": "颜色",
      "help": "未声明 = 继承来源卡的主题色"
@@ -2013,6 +2233,13 @@
     "innerRadius": {
      "label": "内径",
      "help": "shape=ring 的内径；未声明 = radius × 0.5"
+    },
+    "radiusOverTime": {
+     "label": "半径随时间变化",
+     "help": "duration 内从 from 到 to 线性插值"
+    },
+    "lineFrom": {
+     "label": "线段方向来源"
     },
     "color": {
      "label": "颜色",
@@ -2083,7 +2310,7 @@
     },
     "placement": {
      "label": "放置方式",
-     "help": "仅装备态：按威胁方向放置于炮台外围"
+     "help": "装备态按威胁方向或环形放置"
     },
     "distanceFromTurret": {
      "label": "距炮台距离"
@@ -2121,6 +2348,27 @@
     "fireInterval": {
      "label": "开火间隔",
      "help": "召唤物开火冷却；decoy 不开火。0.05s 防御性下限避免每帧开火"
+    },
+    "maxCount": {
+     "label": "场上上限"
+    },
+    "chainRelay": {
+     "label": "链路中继"
+    },
+    "onDeathEffects": {
+     "label": "死亡效果"
+    },
+    "intervalSeconds": {
+     "label": "周期秒数"
+    },
+    "intervalEffects": {
+     "label": "周期效果"
+    },
+    "auraRadius": {
+     "label": "自带光环半径"
+    },
+    "auraEffects": {
+     "label": "自带光环效果"
     },
     "chance": {
      "label": "触发概率",
@@ -2162,12 +2410,12 @@
   },
   "xpMul": {
    "atom": {
-    "label": "经验获取",
-    "help": "乘算调整本局获得的经验。"
+    "label": "奖励积分获取",
+    "help": "乘算调整本局获得的奖励积分。"
    },
    "params": {
     "mul": {
-     "label": "经验乘数",
+     "label": "奖励积分乘数",
      "help": "乘法叠加"
     },
     "chance": {
@@ -2192,6 +2440,9 @@
     "at": {
      "label": "落点",
      "help": "'turret' 落在炮台；其余落在 ctx.origin（命中点/击杀点/消耗落点）"
+    },
+    "secure": {
+     "label": "安全掉落"
     },
     "chance": {
      "label": "触发概率",
@@ -2459,6 +2710,66 @@
     "maxStacks": {
      "label": "叠加层数上限",
      "help": "同来源同属性的层数上限，超出时刷新最短的一层"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "charge": {
+   "atom": {
+    "label": "计量释放",
+    "help": "按指定战斗事件积累计量，并在满档或配置时机释放内嵌效果。"
+   },
+   "params": {
+    "by": {
+     "label": "计量来源"
+    },
+    "perEvent": {
+     "label": "每事件计量"
+    },
+    "max": {
+     "label": "计量上限"
+    },
+    "releaseAt": {
+     "label": "释放条件"
+    },
+    "chargeKey": {
+     "label": "计量键"
+    },
+    "effects": {
+     "label": "嵌套效果"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "summonBuff": {
+   "atom": {
+    "label": "召唤强化",
+    "help": "强化符合类型与来源条件的召唤物，并受等级上限约束。"
+   },
+   "params": {
+    "target": {
+     "label": "目标选择"
+    },
+    "kind": {
+     "label": "类型"
+    },
+    "damageMul": {
+     "label": "伤害倍率"
+    },
+    "radiusAdd": {
+     "label": "半径增量"
+    },
+    "dropChanceAdd": {
+     "label": "掉落概率增量"
+    },
+    "capLevels": {
+     "label": "强化等级上限"
     },
     "chance": {
      "label": "触发概率",

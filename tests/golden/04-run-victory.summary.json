@@ -9,7 +9,7 @@
     "frames": 12000,
     "start": "run"
   },
-  "framesRun": 5626,
+  "framesRun": 5506,
   "mode": "ended",
   "win": true,
   "hp": 1000000,
@@ -26,17 +26,17 @@
     }
   },
   "enemiesRemaining": 0,
-  "cumulativeDamageDealt": 6917.5725026666605,
+  "cumulativeDamageDealt": 6697.839097628883,
   "cumulativeDamageTaken": 0,
   "counters": {
     "kills": 249,
-    "collected": 66,
+    "collected": 79,
     "expired": 0,
-    "merges": 8,
-    "consumes": 49,
+    "merges": 12,
+    "consumes": 58,
     "equipOps": 0,
-    "rewardPoints": 64,
-    "rewardActivations": 7
+    "rewardPoints": 7,
+    "rewardActivations": 8
   },
   "cards": [
     {
@@ -45,7 +45,7 @@
       "star": 2,
       "affixes": [
         "dotDamageMul:0.1",
-        "damageAdd:2"
+        "damageMul:0.08"
       ],
       "evolutionPath": []
     },
@@ -54,7 +54,7 @@
       "cardType": "ashHarvest",
       "star": 2,
       "affixes": [
-        "damageAdd:2",
+        "damageMul:0.08",
         "dotDamageMul:0.2"
       ],
       "evolutionPath": []
@@ -65,7 +65,7 @@
       "star": 3,
       "affixes": [
         "dotDamageMul:0.1",
-        "damageAdd:1"
+        "damageMul:0.04"
       ],
       "evolutionPath": [
         "3:flashfireA"
@@ -77,19 +77,21 @@
       "star": 2,
       "affixes": [
         "dotDamageMul:0.15",
-        "damageAdd:1"
+        "damageMul:0.04"
       ],
       "evolutionPath": []
     },
     {
       "slot": 4,
       "cardType": "splitBlast",
-      "star": 2,
+      "star": 3,
       "affixes": [
-        "damageAdd:1",
+        "damageMul:0.04",
         "areaScaleMul:0.15"
       ],
-      "evolutionPath": []
+      "evolutionPath": [
+        "3:splitBlastA"
+      ]
     },
     {
       "slot": 5,
@@ -97,7 +99,7 @@
       "star": 2,
       "affixes": [
         "dotDamageMul:0.1",
-        "damageAdd:1"
+        "damageMul:0.04"
       ],
       "evolutionPath": []
     }
@@ -106,18 +108,2760 @@
   "wildcards": {
     "1": 1,
     "2": 2,
-    "3": 0,
-    "4": 1,
-    "5": 1
+    "3": 1,
+    "4": 0,
+    "5": 2
   },
   "rewards": [
     "absoluteStillness",
     "clarityReflux",
     "wildHeart",
-    "heartbreakNova",
+    "buildResonance",
+    "wildHeart",
     "buildResonance",
     "heartbreakNova",
     "wildHeart"
+  ],
+  "enemySequence": [
+    {
+      "frame": 15,
+      "id": 1,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": 170.14448544083345,
+      "y": 753.5472095482985
+    },
+    {
+      "frame": 15,
+      "id": 2,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 425.59318810330336,
+      "y": 754.1952596704311
+    },
+    {
+      "frame": 15,
+      "id": 3,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 446.9977824973687,
+      "y": -24.211079610121427
+    },
+    {
+      "frame": 15,
+      "id": 4,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": -23.71526879195993,
+      "y": 542.0094398668948
+    },
+    {
+      "frame": 15,
+      "id": 5,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": 108.11283563888026,
+      "y": 753.6153392144761
+    },
+    {
+      "frame": 15,
+      "id": 6,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": 36.44960579365097,
+      "y": 753.7142305343966
+    },
+    {
+      "frame": 74,
+      "id": 7,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 135,
+      "speed": 16.5,
+      "damage": 14,
+      "x": 564.5730964897177,
+      "y": 604.2830983193949
+    },
+    {
+      "frame": 74,
+      "id": 8,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 404.28428041060033,
+      "y": 754.1807312785928
+    },
+    {
+      "frame": 74,
+      "id": 9,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 68.72998805293427,
+      "y": 754.230166235351
+    },
+    {
+      "frame": 74,
+      "id": 10,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": 428.53805669622784,
+      "y": 753.6111301076896
+    },
+    {
+      "frame": 192,
+      "id": 11,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 564.3255627995565,
+      "y": 602.5266815170444
+    },
+    {
+      "frame": 192,
+      "id": 12,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": 563.5628189967056,
+      "y": 452.74056661645477
+    },
+    {
+      "frame": 251,
+      "id": 13,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 461.37417860871886,
+      "y": -24.22225982026031
+    },
+    {
+      "frame": 251,
+      "id": 14,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": -24.15707739780072,
+      "y": 294.6903354898021
+    },
+    {
+      "frame": 251,
+      "id": 15,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": 470.68929531785363,
+      "y": 753.6671904504523
+    },
+    {
+      "frame": 310,
+      "id": 16,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": -24.162363350263366,
+      "y": 286.8860635474844
+    },
+    {
+      "frame": 310,
+      "id": 17,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": 343.31833278127044,
+      "y": 753.5260154946602
+    },
+    {
+      "frame": 310,
+      "id": 18,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": -24.17130752677362,
+      "y": 274.92960823979297
+    },
+    {
+      "frame": 369,
+      "id": 19,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 193.65404603324814,
+      "y": 754.1495454696113
+    },
+    {
+      "frame": 369,
+      "id": 20,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 135,
+      "speed": 16.5,
+      "damage": 14,
+      "x": 564.4937619679253,
+      "y": 239.93071905803228
+    },
+    {
+      "frame": 487,
+      "id": 21,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 214.53114702293726,
+      "y": 754.142005888516
+    },
+    {
+      "frame": 487,
+      "id": 22,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": -24.368137763864574,
+      "y": 88.6534125689078
+    },
+    {
+      "frame": 487,
+      "id": 23,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": -24.220175408930565,
+      "y": 507.6659510668605
+    },
+    {
+      "frame": 546,
+      "id": 24,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 135,
+      "speed": 16.5,
+      "damage": 14,
+      "x": -24.463718119707018,
+      "y": 297.9718504585393
+    },
+    {
+      "frame": 546,
+      "id": 25,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 564.4099856769351,
+      "y": 48.23339893943628
+    },
+    {
+      "frame": 546,
+      "id": 26,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": 277.5932078973073,
+      "y": 753.5002864209318
+    },
+    {
+      "frame": 546,
+      "id": 27,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": -24.231332493249923,
+      "y": 211.76258109814572
+    },
+    {
+      "frame": 546,
+      "id": 28,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": -24.264239293776832,
+      "y": 181.82348793555641
+    },
+    {
+      "frame": 664,
+      "id": 29,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 136.11533083632472,
+      "y": 754.1804722201769
+    },
+    {
+      "frame": 723,
+      "id": 30,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 474.5060764802378,
+      "y": -24.2327840662097
+    },
+    {
+      "frame": 723,
+      "id": 31,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": 458.3174899611844,
+      "y": -23.65011672149742
+    },
+    {
+      "frame": 723,
+      "id": 32,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": -24.136467477012253,
+      "y": 339.91710405345464
+    },
+    {
+      "frame": 723,
+      "id": 33,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": -23.920865015536936,
+      "y": 648.7677877213662
+    },
+    {
+      "frame": 782,
+      "id": 34,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": -24.174217622055004,
+      "y": 271.29235566388815
+    },
+    {
+      "frame": 782,
+      "id": 35,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 224.09249958838157,
+      "y": -24.13930196372214
+    },
+    {
+      "frame": 841,
+      "id": 36,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 135,
+      "speed": 16.5,
+      "damage": 14,
+      "x": -24.631806339562043,
+      "y": 38.05479057266727
+    },
+    {
+      "frame": 841,
+      "id": 37,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": -24.268493601875566,
+      "y": 551.9657532042565
+    },
+    {
+      "frame": 900,
+      "id": 38,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 564.1735928650504,
+      "y": 272.06443769992467
+    },
+    {
+      "frame": 900,
+      "id": 39,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 564.1428856263893,
+      "y": 320.9633331979793
+    },
+    {
+      "frame": 959,
+      "id": 40,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": -24.1570352959629,
+      "y": 294.7553516267203
+    },
+    {
+      "frame": 959,
+      "id": 41,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 490.9943074098049,
+      "y": 754.2463309905647
+    },
+    {
+      "frame": 959,
+      "id": 42,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 564.3230477727742,
+      "y": 600.2807993150608
+    },
+    {
+      "frame": 959,
+      "id": 43,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": 120.44662357018525,
+      "y": 753.6000924260674
+    },
+    {
+      "frame": 959,
+      "id": 44,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": -23.501339759017718,
+      "y": 352.58679643618893
+    },
+    {
+      "frame": 1018,
+      "id": 45,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": 563.9064125312706,
+      "y": 640.9240344440499
+    },
+    {
+      "frame": 1018,
+      "id": 46,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 135,
+      "speed": 16.5,
+      "damage": 14,
+      "x": 52.47438197808326,
+      "y": 754.5198038217716
+    },
+    {
+      "frame": 1077,
+      "id": 47,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 135,
+      "speed": 16.5,
+      "damage": 14,
+      "x": 63.17026624871079,
+      "y": -24.514234847324424
+    },
+    {
+      "frame": 1077,
+      "id": 48,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 564.2913258710464,
+      "y": 157.8254375065257
+    },
+    {
+      "frame": 1136,
+      "id": 49,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": 170.7418527036294,
+      "y": -23.546672525641164
+    },
+    {
+      "frame": 1195,
+      "id": 50,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 135,
+      "speed": 16.5,
+      "damage": 14,
+      "x": -24.586586256136066,
+      "y": 623.486565712651
+    },
+    {
+      "frame": 1195,
+      "id": 51,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 204.62421299895414,
+      "y": -24.14531055839266
+    },
+    {
+      "frame": 1195,
+      "id": 52,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 135,
+      "speed": 16.5,
+      "damage": 14,
+      "x": 564.5682071498005,
+      "y": 132.59673233701986
+    },
+    {
+      "frame": 1195,
+      "id": 53,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 564.1335642992408,
+      "y": 371.7919470935598
+    },
+    {
+      "frame": 1254,
+      "id": 54,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 135,
+      "speed": 16.5,
+      "damage": 14,
+      "x": 223.1703544283152,
+      "y": -24.453933540880058
+    },
+    {
+      "frame": 1254,
+      "id": 55,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 258.933430555564,
+      "y": -24.13368359058599
+    },
+    {
+      "frame": 1313,
+      "id": 56,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": 563.7873749621912,
+      "y": 151.0925334066899
+    },
+    {
+      "frame": 1372,
+      "id": 57,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 135,
+      "speed": 16.5,
+      "damage": 14,
+      "x": -24.45869578206365,
+      "y": 312.0080118982837
+    },
+    {
+      "frame": 1372,
+      "id": 58,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": -23.827349422637603,
+      "y": 599.36916714595
+    },
+    {
+      "frame": 1372,
+      "id": 59,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": 563.9379689366475,
+      "y": 71.82136446599561
+    },
+    {
+      "frame": 1431,
+      "id": 60,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 564.2417480058863,
+      "y": 202.1264452257112
+    },
+    {
+      "frame": 1491,
+      "id": 61,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 564.3885521737569,
+      "y": 69.28597979797593
+    },
+    {
+      "frame": 1550,
+      "id": 62,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 564.3063115022711,
+      "y": 144.58433253991757
+    },
+    {
+      "frame": 1550,
+      "id": 63,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 166.20339300783976,
+      "y": 754.1626070536379
+    },
+    {
+      "frame": 1550,
+      "id": 64,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 135,
+      "speed": 16.5,
+      "damage": 14,
+      "x": 564.585697755086,
+      "y": 107.79033029483588
+    },
+    {
+      "frame": 1550,
+      "id": 65,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 135,
+      "speed": 16.5,
+      "damage": 14,
+      "x": 564.4646749305942,
+      "y": 434.4198332274871
+    },
+    {
+      "frame": 1609,
+      "id": 66,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 135,
+      "speed": 16.5,
+      "damage": 14,
+      "x": 280.8898055562651,
+      "y": 754.4502148891398
+    },
+    {
+      "frame": 1609,
+      "id": 67,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": -24.269814519788895,
+      "y": 176.85994325822477
+    },
+    {
+      "frame": 1609,
+      "id": 68,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": 313.05523826078496,
+      "y": -23.50912710034083
+    },
+    {
+      "frame": 1609,
+      "id": 69,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": -24.22474471106556,
+      "y": 217.96834715310658
+    },
+    {
+      "frame": 1668,
+      "id": 70,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": -24.153644243931684,
+      "y": 429.8287282569737
+    },
+    {
+      "frame": 1668,
+      "id": 71,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 221.9167617434286,
+      "y": 754.1398745641736
+    },
+    {
+      "frame": 1668,
+      "id": 72,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 564.1534988942215,
+      "y": 300.4120366961864
+    },
+    {
+      "frame": 1668,
+      "id": 73,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 344.7158007196089,
+      "y": -24.148878899796145
+    },
+    {
+      "frame": 1727,
+      "id": 74,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": -24.354338145652097,
+      "y": 101.43408337344779
+    },
+    {
+      "frame": 1786,
+      "id": 75,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": 450.5651896194338,
+      "y": 753.6396541814554
+    },
+    {
+      "frame": 2052,
+      "id": 76,
+      "type": "boss",
+      "spawnKind": "waveBoss",
+      "maxHp": 620,
+      "speed": 29.5,
+      "damage": 28,
+      "x": 224.2712423275225,
+      "y": -25
+    },
+    {
+      "frame": 2364,
+      "id": 77,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": -24.417664798262795,
+      "y": 438.0660233100619
+    },
+    {
+      "frame": 2364,
+      "id": 78,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": -23.816822513095545,
+      "y": 97.53140553717739
+    },
+    {
+      "frame": 2364,
+      "id": 79,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": -24.36879472880393,
+      "y": 685.6341875736174
+    },
+    {
+      "frame": 2364,
+      "id": 80,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 563.8848481910575,
+      "y": 667.3730988161441
+    },
+    {
+      "frame": 2364,
+      "id": 81,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 564.1107376793692,
+      "y": 458.735191228739
+    },
+    {
+      "frame": 2364,
+      "id": 82,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 447.0275420267551,
+      "y": 754.1504406005133
+    },
+    {
+      "frame": 2364,
+      "id": 83,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 448.9269807083808,
+      "y": 754.1520069709421
+    },
+    {
+      "frame": 2364,
+      "id": 84,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": -24.11129666400533,
+      "y": 459.3728091034893
+    },
+    {
+      "frame": 2364,
+      "id": 85,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 564.5756056143075,
+      "y": 70.6053303370353
+    },
+    {
+      "frame": 2364,
+      "id": 86,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": -24.23342592379611,
+      "y": 160.64019031615013
+    },
+    {
+      "frame": 2423,
+      "id": 87,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 110.84400745682201,
+      "y": -24.44459077179292
+    },
+    {
+      "frame": 2423,
+      "id": 88,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 460.0057365982792,
+      "y": -23.56264600514385
+    },
+    {
+      "frame": 2423,
+      "id": 89,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 469.5165448381557,
+      "y": -24.46599287718363
+    },
+    {
+      "frame": 2423,
+      "id": 90,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 563.4116242333345,
+      "y": 329.4376073907631
+    },
+    {
+      "frame": 2423,
+      "id": 91,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 322.57149787517733,
+      "y": -24.07507177111901
+    },
+    {
+      "frame": 2423,
+      "id": 92,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 344.4360858968583,
+      "y": 754.0832917072422
+    },
+    {
+      "frame": 2423,
+      "id": 93,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 564.3505199077254,
+      "y": 668.7811031707228
+    },
+    {
+      "frame": 2423,
+      "id": 94,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 564.4006543189508,
+      "y": 378.7603134835034
+    },
+    {
+      "frame": 2423,
+      "id": 95,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": -23.835683439208484,
+      "y": 88.04266307576985
+    },
+    {
+      "frame": 2423,
+      "id": 96,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": -24.150059410254475,
+      "y": 231.5392592208333
+    },
+    {
+      "frame": 2482,
+      "id": 97,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 564.2574533618816,
+      "y": 140.92199259645977
+    },
+    {
+      "frame": 2482,
+      "id": 98,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 564.1044404521515,
+      "y": 278.6829672022987
+    },
+    {
+      "frame": 2482,
+      "id": 99,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": -24.25767191780031,
+      "y": 140.7421300783447
+    },
+    {
+      "frame": 2482,
+      "id": 100,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 489.3348521702281,
+      "y": 754.1869022301294
+    },
+    {
+      "frame": 2482,
+      "id": 101,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 80.53710498493727,
+      "y": 753.5618546009873
+    },
+    {
+      "frame": 2482,
+      "id": 102,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 564.0892231834321,
+      "y": 430.85618819297247
+    },
+    {
+      "frame": 2482,
+      "id": 103,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 564.5351642020614,
+      "y": 605.3863202495336
+    },
+    {
+      "frame": 2482,
+      "id": 104,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 564.5443263604867,
+      "y": 617.3099773631345
+    },
+    {
+      "frame": 2541,
+      "id": 105,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": -24.58938504064739,
+      "y": 678.8687107261444
+    },
+    {
+      "frame": 2541,
+      "id": 106,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 564.5524509888896,
+      "y": 628.011257387839
+    },
+    {
+      "frame": 2541,
+      "id": 107,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 49.66018800938642,
+      "y": 754.4777773237464
+    },
+    {
+      "frame": 2541,
+      "id": 108,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 487.39284794284714,
+      "y": 754.1851698628669
+    },
+    {
+      "frame": 2541,
+      "id": 109,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 70.41257120778592,
+      "y": -24.46603230762237
+    },
+    {
+      "frame": 2541,
+      "id": 110,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 465.9850323131593,
+      "y": -24.16640583162825
+    },
+    {
+      "frame": 2600,
+      "id": 111,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 563.4227388877715,
+      "y": 314.99640447662006
+    },
+    {
+      "frame": 2600,
+      "id": 112,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 417.5941959510441,
+      "y": 754.1273313094259
+    },
+    {
+      "frame": 2600,
+      "id": 113,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 478.90085543746454,
+      "y": 753.5907313863048
+    },
+    {
+      "frame": 2600,
+      "id": 114,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 564.1163452961331,
+      "y": 464.9994022825865
+    },
+    {
+      "frame": 2600,
+      "id": 115,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": -24.54167070676152,
+      "y": 116.16035709658317
+    },
+    {
+      "frame": 2659,
+      "id": 116,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 246.49930017184224,
+      "y": -23.402920761828256
+    },
+    {
+      "frame": 2659,
+      "id": 117,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 563.7250749752944,
+      "y": 142.27887668961148
+    },
+    {
+      "frame": 2659,
+      "id": 118,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 564.2119621785884,
+      "y": 178.2861108940157
+    },
+    {
+      "frame": 2659,
+      "id": 119,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 234.16414102761308,
+      "y": -24.070600654367002
+    },
+    {
+      "frame": 2718,
+      "id": 120,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": -24.09193999415513,
+      "y": 295.13284318465963
+    },
+    {
+      "frame": 2718,
+      "id": 121,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 428.6954386460945,
+      "y": -24.444360997561127
+    },
+    {
+      "frame": 2718,
+      "id": 122,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 354.73825831720035,
+      "y": 754.0880436702931
+    },
+    {
+      "frame": 2718,
+      "id": 123,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": -24.07510098529737,
+      "y": 404.80512095038245
+    },
+    {
+      "frame": 2718,
+      "id": 124,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": -24.348775355533228,
+      "y": 62.80052580345645
+    },
+    {
+      "frame": 2718,
+      "id": 125,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 90.07553407331224,
+      "y": 754.1528327321437
+    },
+    {
+      "frame": 2718,
+      "id": 126,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": -24.353612233809454,
+      "y": 671.5958068443766
+    },
+    {
+      "frame": 2718,
+      "id": 127,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 483.4087261551472,
+      "y": -23.59756726442486
+    },
+    {
+      "frame": 2718,
+      "id": 128,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 563.7616187228127,
+      "y": 124.67359169018499
+    },
+    {
+      "frame": 2718,
+      "id": 129,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 149.11325678119857,
+      "y": -24.10869041273385
+    },
+    {
+      "frame": 2777,
+      "id": 130,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 117.16827647337767,
+      "y": -24.441469512694066
+    },
+    {
+      "frame": 2777,
+      "id": 131,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 564.3303537747967,
+      "y": 79.24221679762229
+    },
+    {
+      "frame": 2777,
+      "id": 132,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 564.2935889397226,
+      "y": 619.1264975126729
+    },
+    {
+      "frame": 2777,
+      "id": 133,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": -24.35277920234491,
+      "y": 670.8361419773829
+    },
+    {
+      "frame": 2777,
+      "id": 134,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": -24.175089650174847,
+      "y": 209.29614984724512
+    },
+    {
+      "frame": 2836,
+      "id": 135,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 564.1878317640577,
+      "y": 531.581817026911
+    },
+    {
+      "frame": 2836,
+      "id": 136,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 564.1820890499116,
+      "y": 526.7069140011206
+    },
+    {
+      "frame": 2836,
+      "id": 137,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 564.0724144988341,
+      "y": 332.21191210090933
+    },
+    {
+      "frame": 2836,
+      "id": 138,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 484.09691425500745,
+      "y": -24.182239908707935
+    },
+    {
+      "frame": 2895,
+      "id": 139,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 478.270896548772,
+      "y": 753.5897798133566
+    },
+    {
+      "frame": 2895,
+      "id": 140,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 564.4856436648042,
+      "y": 188.12775063433978
+    },
+    {
+      "frame": 2895,
+      "id": 141,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": -24.376888309218913,
+      "y": 36.72277773374721
+    },
+    {
+      "frame": 2895,
+      "id": 142,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 434.1730699705531,
+      "y": -24.14006376142098
+    },
+    {
+      "frame": 2895,
+      "id": 143,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 298.8385273382721,
+      "y": 754.0692200390389
+    },
+    {
+      "frame": 2895,
+      "id": 144,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 563.4056636374062,
+      "y": 389.7529283577055
+    },
+    {
+      "frame": 2895,
+      "id": 145,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": -24.273832603531616,
+      "y": 602.6089512967408
+    },
+    {
+      "frame": 2954,
+      "id": 146,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": -23.40311207649702,
+      "y": 383.3264825151236
+    },
+    {
+      "frame": 2954,
+      "id": 147,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": -24.354705649346673,
+      "y": 672.5945324069359
+    },
+    {
+      "frame": 2954,
+      "id": 148,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": -24.2902930149931,
+      "y": 113.64793696394383
+    },
+    {
+      "frame": 2954,
+      "id": 149,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": -24.52382653154133,
+      "y": 139.2107633728625
+    },
+    {
+      "frame": 3013,
+      "id": 150,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 564.4001436173259,
+      "y": 358.557435364646
+    },
+    {
+      "frame": 3013,
+      "id": 151,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 97.8548313982881,
+      "y": 753.5371507258895
+    },
+    {
+      "frame": 3013,
+      "id": 152,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 390.79408475010297,
+      "y": -23.47215786566288
+    },
+    {
+      "frame": 3013,
+      "id": 153,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": -24.160848464833087,
+      "y": 508.22513268454225
+    },
+    {
+      "frame": 3013,
+      "id": 154,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 564.2548528553998,
+      "y": 586.9389939100862
+    },
+    {
+      "frame": 3072,
+      "id": 155,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 404.4798778418228,
+      "y": 754.4328627451622
+    },
+    {
+      "frame": 3072,
+      "id": 156,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 128.29661292771618,
+      "y": -24.123007309235106
+    },
+    {
+      "frame": 3072,
+      "id": 157,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 273.9242618651131,
+      "y": -24.06671413909541
+    },
+    {
+      "frame": 3072,
+      "id": 158,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 180.77878809222943,
+      "y": -24.090277685360533
+    },
+    {
+      "frame": 3072,
+      "id": 159,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 123.01895410489549,
+      "y": -24.126876067394694
+    },
+    {
+      "frame": 3072,
+      "id": 160,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 563.6900860654819,
+      "y": 570.9918463841981
+    },
+    {
+      "frame": 3072,
+      "id": 161,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": -24.299140077627996,
+      "y": 106.18102213406095
+    },
+    {
+      "frame": 3072,
+      "id": 162,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 428.801826976703,
+      "y": -24.444414041808134
+    },
+    {
+      "frame": 3072,
+      "id": 163,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": -24.12884299608052,
+      "y": 251.90822973037177
+    },
+    {
+      "frame": 3072,
+      "id": 164,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 564.1583233593898,
+      "y": 224.03270787309836
+    },
+    {
+      "frame": 3131,
+      "id": 165,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 480.61094780967954,
+      "y": -23.593319211563035
+    },
+    {
+      "frame": 3131,
+      "id": 166,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": -23.557827253249858,
+      "y": 506.0455261427806
+    },
+    {
+      "frame": 3131,
+      "id": 167,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 52.75200062579071,
+      "y": 754.185040825026
+    },
+    {
+      "frame": 3131,
+      "id": 168,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 564.1892669255315,
+      "y": 197.20611268597656
+    },
+    {
+      "frame": 3131,
+      "id": 169,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": -24.40439733294094,
+      "y": 329.1593587902089
+    },
+    {
+      "frame": 3131,
+      "id": 170,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 564.3569231881504,
+      "y": 55.37429501739995
+    },
+    {
+      "frame": 3131,
+      "id": 171,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 564.0672827765858,
+      "y": 354.3097585202169
+    },
+    {
+      "frame": 3131,
+      "id": 172,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": -24.21163291440263,
+      "y": 551.4419333488154
+    },
+    {
+      "frame": 3131,
+      "id": 173,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 56.17016960114818,
+      "y": 754.1820030647272
+    },
+    {
+      "frame": 3190,
+      "id": 174,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 386.83546758606866,
+      "y": 754.1060943575415
+    },
+    {
+      "frame": 3190,
+      "id": 175,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 387.3494128440488,
+      "y": 754.1064200371413
+    },
+    {
+      "frame": 3190,
+      "id": 176,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 441.26924820805357,
+      "y": -23.535931670010083
+    },
+    {
+      "frame": 3190,
+      "id": 177,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 564.570305330206,
+      "y": 652.076307237641
+    },
+    {
+      "frame": 3190,
+      "id": 178,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 564.4556714604439,
+      "y": 501.53704210654195
+    },
+    {
+      "frame": 3190,
+      "id": 179,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": -23.9127967555928,
+      "y": 47.655739828432665
+    },
+    {
+      "frame": 3190,
+      "id": 180,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 375.89413523149153,
+      "y": -23.456328972172088
+    },
+    {
+      "frame": 3249,
+      "id": 181,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": -24.582710731073128,
+      "y": 60.64930554957748
+    },
+    {
+      "frame": 3249,
+      "id": 182,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 73.94247818940237,
+      "y": -23.57153131630582
+    },
+    {
+      "frame": 3249,
+      "id": 183,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 283.8020560186767,
+      "y": -24.067253392654692
+    },
+    {
+      "frame": 3249,
+      "id": 184,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 450.94620255979993,
+      "y": -24.4558626313283
+    },
+    {
+      "frame": 3249,
+      "id": 185,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 64.7154169936689,
+      "y": -24.174475256433666
+    },
+    {
+      "frame": 3249,
+      "id": 186,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 286.7653104282356,
+      "y": -23.40148848700054
+    },
+    {
+      "frame": 3249,
+      "id": 187,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": -24.092609750124975,
+      "y": 435.82638690780027
+    },
+    {
+      "frame": 3308,
+      "id": 188,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 212.21805490959525,
+      "y": 754.0767919731198
+    },
+    {
+      "frame": 3367,
+      "id": 189,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": -24.173797538934014,
+      "y": 519.5873228718613
+    },
+    {
+      "frame": 3367,
+      "id": 190,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 564.2454526737182,
+      "y": 579.2204396847634
+    },
+    {
+      "frame": 3367,
+      "id": 191,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 143.66427966328467,
+      "y": 754.1122838956417
+    },
+    {
+      "frame": 3367,
+      "id": 192,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": -23.82677266149268,
+      "y": 637.4584130118487
+    },
+    {
+      "frame": 3367,
+      "id": 193,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 336.4205230049989,
+      "y": 754.0799762900637
+    },
+    {
+      "frame": 3367,
+      "id": 194,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 97.73217788406195,
+      "y": 754.1465516176759
+    },
+    {
+      "frame": 3367,
+      "id": 195,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 287.47626344055743,
+      "y": -24.067606816803682
+    },
+    {
+      "frame": 3367,
+      "id": 196,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 115.2207982503693,
+      "y": -24.132751784528995
+    },
+    {
+      "frame": 3367,
+      "id": 197,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 564.2682718716248,
+      "y": 131.99797608115077
+    },
+    {
+      "frame": 3367,
+      "id": 198,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 563.6315410577974,
+      "y": 187.11043942440946
+    },
+    {
+      "frame": 3426,
+      "id": 199,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 564.3455527668659,
+      "y": 65.71047409480315
+    },
+    {
+      "frame": 3426,
+      "id": 200,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 564.1669638107485,
+      "y": 513.6329488156518
+    },
+    {
+      "frame": 3426,
+      "id": 201,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 352.4500622452547,
+      "y": -23.434870224339747
+    },
+    {
+      "frame": 3426,
+      "id": 202,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 274.95511884753233,
+      "y": 754.4000485718522
+    },
+    {
+      "frame": 3426,
+      "id": 203,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 317.34922801352036,
+      "y": 753.4117577238752
+    },
+    {
+      "frame": 3426,
+      "id": 204,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 209.52573611715002,
+      "y": -24.077740350148265
+    },
+    {
+      "frame": 3426,
+      "id": 205,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": -24.06666717449282,
+      "y": 364.6932390190825
+    },
+    {
+      "frame": 3426,
+      "id": 206,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 174.97764334000726,
+      "y": 754.0933129271244
+    },
+    {
+      "frame": 3426,
+      "id": 207,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 222.3737419865323,
+      "y": 754.4044378553493
+    },
+    {
+      "frame": 3426,
+      "id": 208,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 264.7472008171359,
+      "y": -24.066751717930554
+    },
+    {
+      "frame": 3485,
+      "id": 209,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 450.17328124780806,
+      "y": 754.4554504871645
+    },
+    {
+      "frame": 3485,
+      "id": 210,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 221.4448997301692,
+      "y": 753.412357186082
+    },
+    {
+      "frame": 3485,
+      "id": 211,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 462.1937505403035,
+      "y": 754.1631575148699
+    },
+    {
+      "frame": 3485,
+      "id": 212,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 564.4057182593854,
+      "y": 324.0608165417765
+    },
+    {
+      "frame": 3485,
+      "id": 213,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": -24.541715473018396,
+      "y": 613.8980396285707
+    },
+    {
+      "frame": 3485,
+      "id": 214,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 196.78557558989917,
+      "y": -24.410331613102407
+    },
+    {
+      "frame": 3485,
+      "id": 215,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 563.4468220269174,
+      "y": 292.40486204008255
+    },
+    {
+      "frame": 3485,
+      "id": 216,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 475.61930023556664,
+      "y": 754.4694062707862
+    },
+    {
+      "frame": 3544,
+      "id": 217,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": -24.172667385213654,
+      "y": 518.608433505993
+    },
+    {
+      "frame": 3544,
+      "id": 218,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 39.71641965266651,
+      "y": -24.196743221467475
+    },
+    {
+      "frame": 3544,
+      "id": 219,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 564.316669459796,
+      "y": 91.179268499574
+    },
+    {
+      "frame": 3544,
+      "id": 220,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 79.81758354945724,
+      "y": 753.5629037900744
+    },
+    {
+      "frame": 3544,
+      "id": 221,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": -24.587163222237017,
+      "y": 675.6815239940199
+    },
+    {
+      "frame": 3603,
+      "id": 222,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 123.98243176386136,
+      "y": -23.50229097692104
+    },
+    {
+      "frame": 3603,
+      "id": 223,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 286.92608718752746,
+      "y": 753.4015171316037
+    },
+    {
+      "frame": 3603,
+      "id": 224,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": -23.412118502374817,
+      "y": 401.31913692553456
+    },
+    {
+      "frame": 3603,
+      "id": 225,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 564.2826452987887,
+      "y": 120.05498960283595
+    },
+    {
+      "frame": 3603,
+      "id": 226,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 409.82668183708023,
+      "y": -23.49454142427213
+    },
+    {
+      "frame": 3603,
+      "id": 227,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 564.0667359571527,
+      "y": 368.58346772122707
+    },
+    {
+      "frame": 3603,
+      "id": 228,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 564.5744794081843,
+      "y": 657.832192950051
+    },
+    {
+      "frame": 3662,
+      "id": 229,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": -24.430901271343277,
+      "y": 463.3353212389407
+    },
+    {
+      "frame": 3662,
+      "id": 230,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": -24.4951442743296,
+      "y": 175.87237593383693
+    },
+    {
+      "frame": 3662,
+      "id": 231,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 192.91958008325992,
+      "y": -24.08445962372357
+    },
+    {
+      "frame": 3662,
+      "id": 232,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 218.4468082658897,
+      "y": -24.405189975954862
+    },
+    {
+      "frame": 3662,
+      "id": 233,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 469.57350001865103,
+      "y": 754.1695031778603
+    },
+    {
+      "frame": 3662,
+      "id": 234,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 563.5029269558744,
+      "y": 475.69034328070273
+    },
+    {
+      "frame": 3662,
+      "id": 235,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 444.06859363383586,
+      "y": -24.148016761463253
+    },
+    {
+      "frame": 3662,
+      "id": 236,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 401.644898464829,
+      "y": 753.4846414563724
+    },
+    {
+      "frame": 3662,
+      "id": 237,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 564.1792781619758,
+      "y": 205.6951214277008
+    },
+    {
+      "frame": 3662,
+      "id": 238,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 222.02323724103724,
+      "y": 754.4045026787246
+    },
+    {
+      "frame": 3721,
+      "id": 239,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 85.32256062776608,
+      "y": 754.457863651162
+    },
+    {
+      "frame": 3721,
+      "id": 240,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": -23.597303558917325,
+      "y": 203.89406428520456
+    },
+    {
+      "frame": 3721,
+      "id": 241,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": 564.4047628104618,
+      "y": 327.6824200049057
+    },
+    {
+      "frame": 3721,
+      "id": 242,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 185.31986853665873,
+      "y": 754.0880153541324
+    },
+    {
+      "frame": 3721,
+      "id": 243,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 62,
+      "speed": 28,
+      "damage": 8,
+      "x": 100.87263413756776,
+      "y": 754.1440151245196
+    },
+    {
+      "frame": 3721,
+      "id": 244,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 43,
+      "speed": 48,
+      "damage": 6,
+      "x": 563.8846313179195,
+      "y": 667.2585325389265
+    },
+    {
+      "frame": 3721,
+      "id": 245,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": -24.585086027755093,
+      "y": 57.28112982016859
+    },
+    {
+      "frame": 3721,
+      "id": 246,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 180,
+      "speed": 18,
+      "damage": 14,
+      "x": -24.587095867575123,
+      "y": 675.585201319382
+    },
+    {
+      "frame": 4182,
+      "id": 247,
+      "type": "boss",
+      "spawnKind": "waveBoss",
+      "maxHp": 940,
+      "speed": 31,
+      "damage": 28,
+      "x": 264.73181469365954,
+      "y": 755
+    },
+    {
+      "frame": 4481,
+      "id": 248,
+      "type": "tank",
+      "spawnKind": "validationElite",
+      "maxHp": 3150,
+      "speed": 14.625,
+      "damage": 28,
+      "x": -25,
+      "y": 180.7749184500426
+    },
+    {
+      "frame": 5328,
+      "id": 249,
+      "type": "boss",
+      "spawnKind": "waveBoss",
+      "maxHp": 1260,
+      "speed": 32.5,
+      "damage": 28,
+      "x": 565,
+      "y": 299.2028516763821
+    }
   ],
   "dropSequence": [
     {
@@ -401,7 +3145,7 @@
       "star": 1
     },
     {
-      "frame": 1254,
+      "frame": 1250,
       "action": "spawned",
       "dropId": 19,
       "kind": "card",
@@ -421,7 +3165,7 @@
       "action": "spawned",
       "dropId": 20,
       "kind": "card",
-      "cardType": "flashfire",
+      "cardType": "meteor",
       "star": 1
     },
     {
@@ -429,63 +3173,55 @@
       "action": "collected",
       "dropId": 20,
       "kind": "card",
-      "cardType": "flashfire",
+      "cardType": "meteor",
       "star": 1
     },
     {
-      "frame": 1377,
+      "frame": 1349,
       "action": "spawned",
       "dropId": 21,
-      "kind": "card",
-      "cardType": "flashfire",
-      "star": 1
-    },
-    {
-      "frame": 1380,
-      "action": "collected",
-      "dropId": 21,
-      "kind": "card",
-      "cardType": "flashfire",
-      "star": 1
-    },
-    {
-      "frame": 1464,
-      "action": "spawned",
-      "dropId": 22,
-      "kind": "card",
-      "cardType": "splitBlast",
-      "star": 1
-    },
-    {
-      "frame": 1470,
-      "action": "collected",
-      "dropId": 22,
-      "kind": "card",
-      "cardType": "splitBlast",
-      "star": 1
-    },
-    {
-      "frame": 1492,
-      "action": "spawned",
-      "dropId": 23,
       "kind": "card",
       "cardType": "scorch",
       "star": 1
     },
     {
-      "frame": 1500,
+      "frame": 1350,
       "action": "collected",
-      "dropId": 23,
+      "dropId": 21,
       "kind": "card",
       "cardType": "scorch",
       "star": 1
     },
     {
-      "frame": 1565,
+      "frame": 1485,
+      "action": "collected",
+      "dropId": 22,
+      "kind": "card",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 1531,
+      "action": "spawned",
+      "dropId": 23,
+      "kind": "card",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 1545,
+      "action": "collected",
+      "dropId": 23,
+      "kind": "card",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 1569,
       "action": "spawned",
       "dropId": 24,
       "kind": "card",
-      "cardType": "flashfire",
+      "cardType": "meteor",
       "star": 1
     },
     {
@@ -493,7 +3229,7 @@
       "action": "collected",
       "dropId": 24,
       "kind": "card",
-      "cardType": "flashfire",
+      "cardType": "meteor",
       "star": 1
     },
     {
@@ -501,7 +3237,7 @@
       "action": "spawned",
       "dropId": 25,
       "kind": "card",
-      "cardType": "meteor",
+      "cardType": "ashHarvest",
       "star": 1
     },
     {
@@ -509,245 +3245,269 @@
       "action": "collected",
       "dropId": 25,
       "kind": "card",
+      "cardType": "ashHarvest",
+      "star": 1
+    },
+    {
+      "frame": 1706,
+      "action": "spawned",
+      "dropId": 26,
+      "kind": "card",
       "cardType": "meteor",
       "star": 1
     },
     {
-      "frame": 1776,
-      "action": "spawned",
+      "frame": 1710,
+      "action": "collected",
       "dropId": 26,
       "kind": "card",
-      "cardType": "scorch",
+      "cardType": "meteor",
+      "star": 1
+    },
+    {
+      "frame": 1777,
+      "action": "spawned",
+      "dropId": 27,
+      "kind": "card",
+      "cardType": "flashfire",
       "star": 1
     },
     {
       "frame": 1785,
       "action": "collected",
-      "dropId": 26,
+      "dropId": 27,
+      "kind": "card",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 1823,
+      "action": "spawned",
+      "dropId": 28,
       "kind": "card",
       "cardType": "scorch",
       "star": 1
     },
     {
-      "frame": 1815,
-      "action": "collected",
-      "dropId": 27,
-      "kind": "card",
-      "cardType": "splitBlast",
-      "star": 1
-    },
-    {
-      "frame": 1884,
-      "action": "spawned",
-      "dropId": 28,
-      "kind": "card",
-      "cardType": "meteor",
-      "star": 1
-    },
-    {
-      "frame": 1890,
+      "frame": 1830,
       "action": "collected",
       "dropId": 28,
       "kind": "card",
-      "cardType": "meteor",
+      "cardType": "scorch",
       "star": 1
     },
     {
-      "frame": 1971,
-      "action": "spawned",
-      "dropId": 29,
-      "kind": "card",
-      "cardType": "flashfire",
-      "star": 1
-    },
-    {
-      "frame": 1980,
+      "frame": 1860,
       "action": "collected",
       "dropId": 29,
       "kind": "card",
-      "cardType": "flashfire",
+      "cardType": "scorch",
       "star": 1
     },
     {
-      "frame": 2023,
+      "frame": 1955,
       "action": "spawned",
       "dropId": 30,
       "kind": "card",
       "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 1965,
+      "action": "collected",
+      "dropId": 30,
+      "kind": "card",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 2017,
+      "action": "spawned",
+      "dropId": 31,
+      "kind": "card",
+      "cardType": "scorch",
       "star": 1
     },
     {
       "frame": 2025,
       "action": "collected",
-      "dropId": 30,
-      "kind": "card",
-      "cardType": "flashfire",
-      "star": 1
-    },
-    {
-      "frame": 2170,
-      "action": "spawned",
       "dropId": 31,
       "kind": "card",
-      "cardType": "splitBlast",
+      "cardType": "scorch",
       "star": 1
     },
     {
-      "frame": 2175,
-      "action": "collected",
-      "dropId": 31,
-      "kind": "card",
-      "cardType": "splitBlast",
-      "star": 1
-    },
-    {
-      "frame": 2357,
+      "frame": 2052,
       "action": "spawned",
       "dropId": 32,
+      "kind": "card",
+      "cardType": "splitBlast",
+      "star": 1
+    },
+    {
+      "frame": 2055,
+      "action": "collected",
+      "dropId": 32,
+      "kind": "card",
+      "cardType": "splitBlast",
+      "star": 1
+    },
+    {
+      "frame": 2322,
+      "action": "spawned",
+      "dropId": 33,
       "kind": "wildcard",
       "cardType": null,
       "star": 1
     },
     {
-      "frame": 2597,
+      "frame": 2519,
       "action": "spawned",
-      "dropId": 33,
+      "dropId": 34,
       "kind": "card",
-      "cardType": "aegis",
+      "cardType": "chainLightning",
+      "star": 1
+    },
+    {
+      "frame": 2520,
+      "action": "collected",
+      "dropId": 34,
+      "kind": "card",
+      "cardType": "chainLightning",
+      "star": 1
+    },
+    {
+      "frame": 2549,
+      "action": "spawned",
+      "dropId": 35,
+      "kind": "card",
+      "cardType": "pierce",
+      "star": 1
+    },
+    {
+      "frame": 2550,
+      "action": "collected",
+      "dropId": 35,
+      "kind": "card",
+      "cardType": "pierce",
+      "star": 1
+    },
+    {
+      "frame": 2604,
+      "action": "spawned",
+      "dropId": 36,
+      "kind": "card",
+      "cardType": "staticSurge",
       "star": 1
     },
     {
       "frame": 2610,
       "action": "collected",
-      "dropId": 33,
-      "kind": "card",
-      "cardType": "aegis",
-      "star": 1
-    },
-    {
-      "frame": 2624,
-      "action": "spawned",
-      "dropId": 34,
-      "kind": "card",
-      "cardType": "thorns",
-      "star": 1
-    },
-    {
-      "frame": 2640,
-      "action": "collected",
-      "dropId": 34,
-      "kind": "card",
-      "cardType": "thorns",
-      "star": 1
-    },
-    {
-      "frame": 2684,
-      "action": "spawned",
-      "dropId": 35,
-      "kind": "card",
-      "cardType": "retribution",
-      "star": 1
-    },
-    {
-      "frame": 2685,
-      "action": "collected",
-      "dropId": 35,
-      "kind": "card",
-      "cardType": "retribution",
-      "star": 1
-    },
-    {
-      "frame": 2724,
-      "action": "spawned",
       "dropId": 36,
       "kind": "card",
-      "cardType": "flashfire",
+      "cardType": "staticSurge",
       "star": 1
     },
     {
-      "frame": 2730,
-      "action": "collected",
-      "dropId": 36,
-      "kind": "card",
-      "cardType": "flashfire",
-      "star": 1
-    },
-    {
-      "frame": 2772,
+      "frame": 2663,
       "action": "spawned",
       "dropId": 37,
       "kind": "card",
-      "cardType": "aegis",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 2670,
+      "action": "collected",
+      "dropId": 37,
+      "kind": "card",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 2690,
+      "action": "spawned",
+      "dropId": 38,
+      "kind": "card",
+      "cardType": "chainLightning",
+      "star": 1
+    },
+    {
+      "frame": 2700,
+      "action": "collected",
+      "dropId": 38,
+      "kind": "card",
+      "cardType": "chainLightning",
       "star": 1
     },
     {
       "frame": 2775,
       "action": "collected",
-      "dropId": 37,
-      "kind": "card",
-      "cardType": "aegis",
-      "star": 1
-    },
-    {
-      "frame": 2839,
-      "action": "spawned",
-      "dropId": 38,
-      "kind": "card",
-      "cardType": "thorns",
-      "star": 1
-    },
-    {
-      "frame": 2850,
-      "action": "collected",
-      "dropId": 38,
-      "kind": "card",
-      "cardType": "thorns",
-      "star": 1
-    },
-    {
-      "frame": 2863,
-      "action": "spawned",
       "dropId": 39,
-      "kind": "card",
-      "cardType": "retribution",
-      "star": 1
-    },
-    {
-      "frame": 2880,
-      "action": "collected",
-      "dropId": 39,
-      "kind": "card",
-      "cardType": "retribution",
-      "star": 1
-    },
-    {
-      "frame": 2919,
-      "action": "spawned",
-      "dropId": 40,
-      "kind": "card",
-      "cardType": "meteor",
-      "star": 1
-    },
-    {
-      "frame": 2925,
-      "action": "collected",
-      "dropId": 40,
-      "kind": "card",
-      "cardType": "meteor",
-      "star": 1
-    },
-    {
-      "frame": 2965,
-      "action": "spawned",
-      "dropId": 41,
       "kind": "card",
       "cardType": "flashfire",
       "star": 1
     },
     {
-      "frame": 2970,
+      "frame": 2813,
+      "action": "spawned",
+      "dropId": 40,
+      "kind": "card",
+      "cardType": "pierce",
+      "star": 1
+    },
+    {
+      "frame": 2820,
+      "action": "collected",
+      "dropId": 40,
+      "kind": "card",
+      "cardType": "pierce",
+      "star": 1
+    },
+    {
+      "frame": 2850,
       "action": "collected",
       "dropId": 41,
+      "kind": "card",
+      "cardType": "meteor",
+      "star": 1
+    },
+    {
+      "frame": 2897,
+      "action": "spawned",
+      "dropId": 42,
+      "kind": "card",
+      "cardType": "staticSurge",
+      "star": 1
+    },
+    {
+      "frame": 2910,
+      "action": "collected",
+      "dropId": 42,
+      "kind": "card",
+      "cardType": "staticSurge",
+      "star": 1
+    },
+    {
+      "frame": 2950,
+      "action": "spawned",
+      "dropId": 43,
+      "kind": "card",
+      "cardType": "pierce",
+      "star": 1
+    },
+    {
+      "frame": 2955,
+      "action": "collected",
+      "dropId": 43,
+      "kind": "card",
+      "cardType": "pierce",
+      "star": 1
+    },
+    {
+      "frame": 2988,
+      "action": "spawned",
+      "dropId": 44,
       "kind": "card",
       "cardType": "flashfire",
       "star": 1
@@ -755,157 +3515,133 @@
     {
       "frame": 3000,
       "action": "collected",
-      "dropId": 42,
+      "dropId": 44,
       "kind": "card",
-      "cardType": "aegis",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 3035,
+      "action": "spawned",
+      "dropId": 45,
+      "kind": "card",
+      "cardType": "chainLightning",
+      "star": 1
+    },
+    {
+      "frame": 3045,
+      "action": "collected",
+      "dropId": 45,
+      "kind": "card",
+      "cardType": "chainLightning",
+      "star": 1
+    },
+    {
+      "frame": 3074,
+      "action": "spawned",
+      "dropId": 46,
+      "kind": "card",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 3075,
+      "action": "collected",
+      "dropId": 46,
+      "kind": "card",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 3143,
+      "action": "spawned",
+      "dropId": 47,
+      "kind": "card",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 3150,
+      "action": "collected",
+      "dropId": 47,
+      "kind": "card",
+      "cardType": "flashfire",
       "star": 1
     },
     {
       "frame": 3170,
       "action": "spawned",
-      "dropId": 43,
+      "dropId": 48,
       "kind": "card",
-      "cardType": "flashfire",
+      "cardType": "ashHarvest",
       "star": 1
     },
     {
       "frame": 3180,
       "action": "collected",
-      "dropId": 43,
+      "dropId": 48,
       "kind": "card",
-      "cardType": "flashfire",
+      "cardType": "ashHarvest",
       "star": 1
     },
     {
-      "frame": 3200,
+      "frame": 3212,
       "action": "spawned",
-      "dropId": 44,
+      "dropId": 49,
       "kind": "card",
-      "cardType": "flashfire",
+      "cardType": "staticSurge",
       "star": 1
     },
     {
-      "frame": 3210,
+      "frame": 3225,
       "action": "collected",
-      "dropId": 44,
+      "dropId": 49,
       "kind": "card",
-      "cardType": "flashfire",
+      "cardType": "staticSurge",
       "star": 1
     },
     {
-      "frame": 3239,
+      "frame": 3258,
       "action": "spawned",
-      "dropId": 45,
+      "dropId": 50,
       "kind": "card",
-      "cardType": "thorns",
+      "cardType": "pierce",
       "star": 1
     },
     {
-      "frame": 3240,
+      "frame": 3270,
       "action": "collected",
-      "dropId": 45,
+      "dropId": 50,
       "kind": "card",
-      "cardType": "thorns",
+      "cardType": "pierce",
       "star": 1
     },
     {
-      "frame": 3296,
+      "frame": 3318,
       "action": "spawned",
-      "dropId": 46,
+      "dropId": 51,
       "kind": "card",
-      "cardType": "retribution",
-      "star": 1
-    },
-    {
-      "frame": 3300,
-      "action": "collected",
-      "dropId": 46,
-      "kind": "card",
-      "cardType": "retribution",
-      "star": 1
-    },
-    {
-      "frame": 3329,
-      "action": "spawned",
-      "dropId": 47,
-      "kind": "card",
-      "cardType": "thorns",
+      "cardType": "ashHarvest",
       "star": 1
     },
     {
       "frame": 3330,
       "action": "collected",
-      "dropId": 47,
+      "dropId": 51,
       "kind": "card",
-      "cardType": "thorns",
+      "cardType": "ashHarvest",
       "star": 1
     },
     {
-      "frame": 3381,
+      "frame": 3493,
       "action": "spawned",
-      "dropId": 48,
-      "kind": "card",
-      "cardType": "meteor",
-      "star": 1
-    },
-    {
-      "frame": 3390,
-      "action": "collected",
-      "dropId": 48,
-      "kind": "card",
-      "cardType": "meteor",
-      "star": 1
-    },
-    {
-      "frame": 3419,
-      "action": "spawned",
-      "dropId": 49,
+      "dropId": 52,
       "kind": "card",
       "cardType": "flashfire",
       "star": 1
     },
     {
-      "frame": 3420,
-      "action": "collected",
-      "dropId": 49,
-      "kind": "card",
-      "cardType": "flashfire",
-      "star": 1
-    },
-    {
-      "frame": 3463,
-      "action": "spawned",
-      "dropId": 50,
-      "kind": "card",
-      "cardType": "meteor",
-      "star": 1
-    },
-    {
-      "frame": 3465,
-      "action": "collected",
-      "dropId": 50,
-      "kind": "card",
-      "cardType": "meteor",
-      "star": 1
-    },
-    {
-      "frame": 3509,
-      "action": "spawned",
-      "dropId": 51,
-      "kind": "card",
-      "cardType": "retribution",
-      "star": 1
-    },
-    {
-      "frame": 3510,
-      "action": "collected",
-      "dropId": 51,
-      "kind": "card",
-      "cardType": "retribution",
-      "star": 1
-    },
-    {
-      "frame": 3555,
+      "frame": 3495,
       "action": "collected",
       "dropId": 52,
       "kind": "card",
@@ -913,121 +3649,169 @@
       "star": 1
     },
     {
-      "frame": 3608,
+      "frame": 3529,
       "action": "spawned",
       "dropId": 53,
       "kind": "card",
-      "cardType": "aegis",
+      "cardType": "meteor",
+      "star": 1
+    },
+    {
+      "frame": 3540,
+      "action": "collected",
+      "dropId": 53,
+      "kind": "card",
+      "cardType": "meteor",
+      "star": 1
+    },
+    {
+      "frame": 3566,
+      "action": "spawned",
+      "dropId": 54,
+      "kind": "card",
+      "cardType": "chainLightning",
+      "star": 1
+    },
+    {
+      "frame": 3570,
+      "action": "collected",
+      "dropId": 54,
+      "kind": "card",
+      "cardType": "chainLightning",
+      "star": 1
+    },
+    {
+      "frame": 3606,
+      "action": "spawned",
+      "dropId": 55,
+      "kind": "card",
+      "cardType": "staticSurge",
       "star": 1
     },
     {
       "frame": 3615,
       "action": "collected",
-      "dropId": 53,
+      "dropId": 55,
       "kind": "card",
-      "cardType": "aegis",
+      "cardType": "staticSurge",
       "star": 1
     },
     {
-      "frame": 3645,
+      "frame": 3658,
+      "action": "spawned",
+      "dropId": 56,
+      "kind": "card",
+      "cardType": "pierce",
+      "star": 1
+    },
+    {
+      "frame": 3660,
       "action": "collected",
-      "dropId": 54,
+      "dropId": 56,
+      "kind": "card",
+      "cardType": "pierce",
+      "star": 1
+    },
+    {
+      "frame": 3702,
+      "action": "spawned",
+      "dropId": 57,
       "kind": "card",
       "cardType": "ashHarvest",
       "star": 1
     },
     {
-      "frame": 3693,
-      "action": "spawned",
-      "dropId": 55,
-      "kind": "card",
-      "cardType": "flashfire",
-      "star": 1
-    },
-    {
       "frame": 3705,
       "action": "collected",
-      "dropId": 55,
+      "dropId": 57,
+      "kind": "card",
+      "cardType": "ashHarvest",
+      "star": 1
+    },
+    {
+      "frame": 3755,
+      "action": "spawned",
+      "dropId": 58,
       "kind": "card",
       "cardType": "flashfire",
       "star": 1
     },
     {
-      "frame": 3735,
+      "frame": 3765,
       "action": "collected",
-      "dropId": 56,
+      "dropId": 58,
       "kind": "card",
       "cardType": "flashfire",
       "star": 1
     },
     {
-      "frame": 3805,
-      "action": "spawned",
-      "dropId": 57,
-      "kind": "card",
-      "cardType": "meteor",
-      "star": 1
-    },
-    {
-      "frame": 3810,
-      "action": "collected",
-      "dropId": 57,
-      "kind": "card",
-      "cardType": "meteor",
-      "star": 1
-    },
-    {
-      "frame": 3830,
-      "action": "spawned",
-      "dropId": 58,
-      "kind": "card",
-      "cardType": "aegis",
-      "star": 1
-    },
-    {
-      "frame": 3840,
-      "action": "collected",
-      "dropId": 58,
-      "kind": "card",
-      "cardType": "aegis",
-      "star": 1
-    },
-    {
-      "frame": 3879,
+      "frame": 3793,
       "action": "spawned",
       "dropId": 59,
       "kind": "card",
-      "cardType": "retribution",
+      "cardType": "chainLightning",
       "star": 1
     },
     {
-      "frame": 3885,
+      "frame": 3795,
       "action": "collected",
       "dropId": 59,
       "kind": "card",
-      "cardType": "retribution",
+      "cardType": "chainLightning",
       "star": 1
     },
     {
-      "frame": 3920,
+      "frame": 3842,
       "action": "spawned",
       "dropId": 60,
       "kind": "card",
-      "cardType": "thorns",
+      "cardType": "staticSurge",
+      "star": 1
+    },
+    {
+      "frame": 3855,
+      "action": "collected",
+      "dropId": 60,
+      "kind": "card",
+      "cardType": "staticSurge",
+      "star": 1
+    },
+    {
+      "frame": 3896,
+      "action": "spawned",
+      "dropId": 61,
+      "kind": "card",
+      "cardType": "pierce",
+      "star": 1
+    },
+    {
+      "frame": 3900,
+      "action": "collected",
+      "dropId": 61,
+      "kind": "card",
+      "cardType": "pierce",
+      "star": 1
+    },
+    {
+      "frame": 3929,
+      "action": "spawned",
+      "dropId": 62,
+      "kind": "card",
+      "cardType": "chainLightning",
       "star": 1
     },
     {
       "frame": 3930,
       "action": "collected",
-      "dropId": 60,
+      "dropId": 62,
       "kind": "card",
-      "cardType": "thorns",
+      "cardType": "chainLightning",
       "star": 1
     },
     {
-      "frame": 3964,
+      "frame": 3973,
       "action": "spawned",
-      "dropId": 61,
+      "dropId": 63,
       "kind": "card",
       "cardType": "flashfire",
       "star": 1
@@ -1035,55 +3819,215 @@
     {
       "frame": 3975,
       "action": "collected",
-      "dropId": 61,
+      "dropId": 63,
       "kind": "card",
       "cardType": "flashfire",
-      "star": 1
-    },
-    {
-      "frame": 4011,
-      "action": "spawned",
-      "dropId": 62,
-      "kind": "card",
-      "cardType": "thorns",
       "star": 1
     },
     {
       "frame": 4020,
       "action": "collected",
-      "dropId": 62,
-      "kind": "card",
-      "cardType": "thorns",
-      "star": 1
-    },
-    {
-      "frame": 4064,
-      "action": "spawned",
-      "dropId": 63,
-      "kind": "card",
-      "cardType": "flashfire",
-      "star": 1
-    },
-    {
-      "frame": 4065,
-      "action": "collected",
-      "dropId": 63,
-      "kind": "card",
-      "cardType": "flashfire",
-      "star": 1
-    },
-    {
-      "frame": 4246,
-      "action": "spawned",
       "dropId": 64,
-      "kind": "wildcard",
-      "cardType": null,
-      "star": 2
+      "kind": "card",
+      "cardType": "staticSurge",
+      "star": 1
     },
     {
-      "frame": 5621,
+      "frame": 4182,
       "action": "spawned",
       "dropId": 65,
+      "kind": "card",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 4185,
+      "action": "collected",
+      "dropId": 65,
+      "kind": "card",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 4970,
+      "action": "spawned",
+      "dropId": 67,
+      "kind": "card",
+      "cardType": "goldenVolley",
+      "star": 1
+    },
+    {
+      "frame": 4970,
+      "action": "spawned",
+      "dropId": 68,
+      "kind": "card",
+      "cardType": "harvest",
+      "star": 1
+    },
+    {
+      "frame": 4970,
+      "action": "spawned",
+      "dropId": 69,
+      "kind": "card",
+      "cardType": "harvest",
+      "star": 1
+    },
+    {
+      "frame": 4980,
+      "action": "collected",
+      "dropId": 67,
+      "kind": "card",
+      "cardType": "goldenVolley",
+      "star": 1
+    },
+    {
+      "frame": 5000,
+      "action": "spawned",
+      "dropId": 70,
+      "kind": "card",
+      "cardType": "fateLoom",
+      "star": 1
+    },
+    {
+      "frame": 5010,
+      "action": "collected",
+      "dropId": 68,
+      "kind": "card",
+      "cardType": "harvest",
+      "star": 1
+    },
+    {
+      "frame": 5025,
+      "action": "collected",
+      "dropId": 69,
+      "kind": "card",
+      "cardType": "harvest",
+      "star": 1
+    },
+    {
+      "frame": 5030,
+      "action": "spawned",
+      "dropId": 71,
+      "kind": "card",
+      "cardType": "goldenVolley",
+      "star": 1
+    },
+    {
+      "frame": 5030,
+      "action": "spawned",
+      "dropId": 72,
+      "kind": "card",
+      "cardType": "splitBlast",
+      "star": 1
+    },
+    {
+      "frame": 5040,
+      "action": "collected",
+      "dropId": 70,
+      "kind": "card",
+      "cardType": "fateLoom",
+      "star": 1
+    },
+    {
+      "frame": 5060,
+      "action": "spawned",
+      "dropId": 73,
+      "kind": "card",
+      "cardType": "harvest",
+      "star": 1
+    },
+    {
+      "frame": 5070,
+      "action": "collected",
+      "dropId": 71,
+      "kind": "card",
+      "cardType": "goldenVolley",
+      "star": 1
+    },
+    {
+      "frame": 5090,
+      "action": "spawned",
+      "dropId": 74,
+      "kind": "card",
+      "cardType": "harvest",
+      "star": 1
+    },
+    {
+      "frame": 5100,
+      "action": "collected",
+      "dropId": 72,
+      "kind": "card",
+      "cardType": "splitBlast",
+      "star": 1
+    },
+    {
+      "frame": 5130,
+      "action": "collected",
+      "dropId": 73,
+      "kind": "card",
+      "cardType": "harvest",
+      "star": 1
+    },
+    {
+      "frame": 5145,
+      "action": "collected",
+      "dropId": 74,
+      "kind": "card",
+      "cardType": "harvest",
+      "star": 1
+    },
+    {
+      "frame": 5150,
+      "action": "spawned",
+      "dropId": 75,
+      "kind": "card",
+      "cardType": "harvest",
+      "star": 1
+    },
+    {
+      "frame": 5150,
+      "action": "spawned",
+      "dropId": 76,
+      "kind": "card",
+      "cardType": "splitBlast",
+      "star": 1
+    },
+    {
+      "frame": 5160,
+      "action": "collected",
+      "dropId": 75,
+      "kind": "card",
+      "cardType": "harvest",
+      "star": 1
+    },
+    {
+      "frame": 5180,
+      "action": "spawned",
+      "dropId": 77,
+      "kind": "card",
+      "cardType": "splitBlast",
+      "star": 1
+    },
+    {
+      "frame": 5190,
+      "action": "collected",
+      "dropId": 76,
+      "kind": "card",
+      "cardType": "splitBlast",
+      "star": 1
+    },
+    {
+      "frame": 5205,
+      "action": "collected",
+      "dropId": 77,
+      "kind": "card",
+      "cardType": "splitBlast",
+      "star": 1
+    },
+    {
+      "frame": 5502,
+      "action": "spawned",
+      "dropId": 78,
       "kind": "wildcard",
       "cardType": null,
       "star": 5
@@ -1475,7 +4419,7 @@
       "type": "skillConsumed"
     },
     {
-      "frame": 1254,
+      "frame": 1250,
       "type": "rewardPointsGained"
     },
     {
@@ -1499,100 +4443,120 @@
       "type": "collected"
     },
     {
-      "frame": 1320,
+      "frame": 1340,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 1349,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 1350,
+      "type": "collected"
+    },
+    {
+      "frame": 1358,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 1370,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 1376,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 1485,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 1485,
+      "type": "collected"
+    },
+    {
+      "frame": 1485,
       "type": "merged"
     },
     {
-      "frame": 1320,
+      "frame": 1485,
       "type": "merged"
     },
     {
-      "frame": 1320,
+      "frame": 1485,
       "type": "evolutionBranchOffered"
     },
     {
-      "frame": 1320,
+      "frame": 1485,
       "type": "decisionOffered"
     },
     {
-      "frame": 1321,
+      "frame": 1486,
       "type": "evolutionBranchSelected"
     },
     {
-      "frame": 1321,
+      "frame": 1486,
       "type": "decisionResolved"
     },
     {
-      "frame": 1377,
+      "frame": 1499,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 1380,
-      "type": "collected"
-    },
-    {
-      "frame": 1394,
+      "frame": 1531,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 1464,
+      "frame": 1540,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 1470,
-      "type": "collected"
-    },
-    {
-      "frame": 1475,
+      "frame": 1543,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 1486,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 1490,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 1492,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 1500,
-      "type": "collected"
-    },
-    {
-      "frame": 1520,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 1524,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 1565,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 1575,
-      "type": "collected"
-    },
-    {
-      "frame": 1575,
-      "type": "merged"
-    },
-    {
-      "frame": 1615,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 1615,
+      "frame": 1543,
       "type": "rewardTriggered"
     },
     {
-      "frame": 1615,
+      "frame": 1543,
       "type": "rewardConfirmed"
+    },
+    {
+      "frame": 1545,
+      "type": "collected"
+    },
+    {
+      "frame": 1557,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 1569,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 1575,
+      "type": "collected"
+    },
+    {
+      "frame": 1576,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 1580,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 1580,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 1612,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 1615,
+      "type": "rewardPointsGained"
     },
     {
       "frame": 1620,
@@ -1603,7 +4567,31 @@
       "type": "skillConsumed"
     },
     {
-      "frame": 1776,
+      "frame": 1651,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 1652,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 1706,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 1710,
+      "type": "collected"
+    },
+    {
+      "frame": 1730,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 1730,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 1777,
       "type": "rewardPointsGained"
     },
     {
@@ -1611,63 +4599,63 @@
       "type": "collected"
     },
     {
-      "frame": 1789,
+      "frame": 1785,
+      "type": "merged"
+    },
+    {
+      "frame": 1823,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 1790,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 1815,
+      "frame": 1830,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 1815,
+      "frame": 1830,
       "type": "collected"
     },
     {
-      "frame": 1820,
+      "frame": 1849,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 1850,
       "type": "skillConsumed"
     },
     {
-      "frame": 1824,
+      "frame": 1860,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 1837,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 1884,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 1890,
+      "frame": 1860,
       "type": "collected"
     },
     {
-      "frame": 1910,
+      "frame": 1880,
       "type": "skillConsumed"
     },
     {
-      "frame": 1971,
+      "frame": 1955,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 1980,
+      "frame": 1965,
       "type": "collected"
     },
     {
-      "frame": 1984,
+      "frame": 1967,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 2000,
+      "frame": 1970,
       "type": "skillConsumed"
     },
     {
-      "frame": 2023,
+      "frame": 1979,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 2017,
       "type": "rewardPointsGained"
     },
     {
@@ -1679,91 +4667,175 @@
       "type": "skillConsumed"
     },
     {
-      "frame": 2170,
+      "frame": 2052,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 2170,
+      "frame": 2052,
       "type": "waveBossSpawned"
     },
     {
-      "frame": 2175,
+      "frame": 2055,
       "type": "collected"
     },
     {
-      "frame": 2180,
+      "frame": 2060,
       "type": "skillConsumed"
     },
     {
-      "frame": 2357,
+      "frame": 2322,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 2370,
+      "frame": 2325,
       "type": "wildcardsGranted"
     },
     {
-      "frame": 2370,
+      "frame": 2325,
       "type": "bossRewardGranted"
     },
     {
-      "frame": 2371,
+      "frame": 2326,
       "type": "waveCleared"
     },
     {
-      "frame": 2372,
+      "frame": 2327,
       "type": "waveRewardsGranted"
     },
     {
-      "frame": 2388,
+      "frame": 2343,
       "type": "godOffer"
     },
     {
-      "frame": 2388,
+      "frame": 2343,
       "type": "decisionOffered"
     },
     {
-      "frame": 2388,
+      "frame": 2343,
       "type": "godSelected"
     },
     {
-      "frame": 2388,
+      "frame": 2343,
       "type": "decisionResolved"
     },
     {
-      "frame": 2389,
+      "frame": 2344,
       "type": "waveBaseRewardOffered"
     },
     {
-      "frame": 2389,
+      "frame": 2344,
       "type": "decisionOffered"
     },
     {
-      "frame": 2389,
+      "frame": 2344,
       "type": "waveBaseRewardChosen"
     },
     {
-      "frame": 2389,
+      "frame": 2344,
       "type": "decisionResolved"
     },
     {
-      "frame": 2410,
+      "frame": 2350,
       "type": "intermissionReady"
     },
     {
-      "frame": 2411,
+      "frame": 2351,
       "type": "waveStart"
     },
     {
-      "frame": 2411,
+      "frame": 2351,
       "type": "activePoolCreated"
     },
     {
-      "frame": 2597,
+      "frame": 2519,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 2609,
+      "frame": 2520,
+      "type": "collected"
+    },
+    {
+      "frame": 2520,
+      "type": "affixRolled"
+    },
+    {
+      "frame": 2531,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 2531,
+      "type": "wildcardsGranted"
+    },
+    {
+      "frame": 2531,
+      "type": "rewardTriggered"
+    },
+    {
+      "frame": 2531,
+      "type": "rewardConfirmed"
+    },
+    {
+      "frame": 2540,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 2540,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 2540,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 2540,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 2540,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 2542,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 2549,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 2550,
+      "type": "collected"
+    },
+    {
+      "frame": 2550,
+      "type": "affixRolled"
+    },
+    {
+      "frame": 2553,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 2558,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 2570,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 2590,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 2592,
+      "type": "bountyOfferSpawned"
+    },
+    {
+      "frame": 2604,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 2605,
       "type": "rewardPointsGained"
     },
     {
@@ -1775,68 +4847,40 @@
       "type": "affixRolled"
     },
     {
-      "frame": 2614,
+      "frame": 2617,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 2624,
+      "frame": 2622,
       "type": "rewardPointsGained"
-    },
-    {
-      "frame": 2625,
-      "type": "cardsFull"
     },
     {
       "frame": 2630,
       "type": "skillConsumed"
     },
     {
-      "frame": 2640,
+      "frame": 2663,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 2670,
       "type": "collected"
     },
     {
-      "frame": 2640,
-      "type": "affixRolled"
-    },
-    {
-      "frame": 2641,
+      "frame": 2675,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 2647,
+      "frame": 2680,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 2652,
-      "type": "bountyOfferSpawned"
-    },
-    {
-      "frame": 2656,
+      "frame": 2683,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 2659,
+      "frame": 2686,
       "type": "rewardPointsGained"
-    },
-    {
-      "frame": 2660,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 2669,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 2684,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 2685,
-      "type": "collected"
-    },
-    {
-      "frame": 2685,
-      "type": "affixRolled"
     },
     {
       "frame": 2690,
@@ -1851,87 +4895,43 @@
       "type": "rewardPointsGained"
     },
     {
-      "frame": 2696,
+      "frame": 2690,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 2701,
+      "frame": 2690,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 2712,
+      "frame": 2690,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 2724,
+      "frame": 2698,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 2724,
-      "type": "rewardTriggered"
-    },
-    {
-      "frame": 2724,
-      "type": "rewardConfirmed"
-    },
-    {
-      "frame": 2729,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 2730,
+      "frame": 2700,
       "type": "collected"
     },
     {
-      "frame": 2735,
+      "frame": 2704,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 2738,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 2742,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 2750,
+      "frame": 2720,
       "type": "skillConsumed"
     },
     {
-      "frame": 2750,
+      "frame": 2720,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 2750,
+      "frame": 2720,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 2750,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 2750,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 2753,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 2759,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 2762,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 2765,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 2772,
+      "frame": 2775,
       "type": "rewardPointsGained"
     },
     {
@@ -1943,23 +4943,35 @@
       "type": "skillConsumed"
     },
     {
-      "frame": 2784,
+      "frame": 2787,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 2791,
+      "frame": 2794,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 2796,
+      "frame": 2813,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 2810,
+      "frame": 2820,
+      "type": "collected"
+    },
+    {
+      "frame": 2825,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 2839,
+      "frame": 2833,
+      "type": "bountyOfferExpired"
+    },
+    {
+      "frame": 2840,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 2850,
       "type": "rewardPointsGained"
     },
     {
@@ -1967,71 +4979,75 @@
       "type": "collected"
     },
     {
-      "frame": 2863,
+      "frame": 2861,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 2865,
-      "type": "cardsFull"
+      "frame": 2862,
+      "type": "rewardPointsGained"
     },
     {
       "frame": 2870,
       "type": "skillConsumed"
     },
     {
+      "frame": 2870,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 2874,
+      "type": "rewardPointsGained"
+    },
+    {
       "frame": 2880,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 2880,
+      "type": "rewardTriggered"
+    },
+    {
+      "frame": 2880,
+      "type": "rewardConfirmed"
+    },
+    {
+      "frame": 2886,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 2897,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 2903,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 2909,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 2910,
       "type": "collected"
-    },
-    {
-      "frame": 2882,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 2893,
-      "type": "bountyOfferExpired"
-    },
-    {
-      "frame": 2900,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 2919,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 2925,
-      "type": "collected"
-    },
-    {
-      "frame": 2926,
-      "type": "rewardPointsGained"
     },
     {
       "frame": 2930,
       "type": "skillConsumed"
     },
     {
-      "frame": 2953,
+      "frame": 2950,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 2965,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 2970,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 2970,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 2970,
+      "frame": 2955,
       "type": "collected"
     },
     {
-      "frame": 2972,
+      "frame": 2960,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 2961,
       "type": "rewardPointsGained"
     },
     {
@@ -2039,19 +5055,11 @@
       "type": "rewardPointsGained"
     },
     {
-      "frame": 2982,
+      "frame": 2988,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 2990,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 2994,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3000,
+      "frame": 2999,
       "type": "rewardPointsGained"
     },
     {
@@ -2059,15 +5067,7 @@
       "type": "collected"
     },
     {
-      "frame": 3003,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3005,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3011,
+      "frame": 3006,
       "type": "rewardPointsGained"
     },
     {
@@ -2076,26 +5076,126 @@
     },
     {
       "frame": 3020,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3020,
       "type": "skillConsumed"
+    },
+    {
+      "frame": 3020,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3020,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3020,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3020,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3020,
+      "type": "rewardPointsGained"
     },
     {
       "frame": 3024,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3024,
-      "type": "rewardTriggered"
+      "frame": 3035,
+      "type": "rewardPointsGained"
     },
     {
-      "frame": 3024,
-      "type": "rewardConfirmed"
+      "frame": 3041,
+      "type": "rewardPointsGained"
     },
     {
-      "frame": 3132,
-      "type": "bountyOfferSpawned"
+      "frame": 3041,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3045,
+      "type": "collected"
+    },
+    {
+      "frame": 3047,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3050,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 3053,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3059,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3074,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3075,
+      "type": "collected"
+    },
+    {
+      "frame": 3080,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 3080,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3080,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3086,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3090,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3143,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3150,
+      "type": "collected"
+    },
+    {
+      "frame": 3156,
+      "type": "rewardPointsGained"
     },
     {
       "frame": 3170,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3170,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 3170,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3170,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3177,
       "type": "rewardPointsGained"
     },
     {
@@ -2103,83 +5203,71 @@
       "type": "collected"
     },
     {
+      "frame": 3182,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3192,
+      "type": "bountyOfferSpawned"
+    },
+    {
+      "frame": 3194,
+      "type": "rewardPointsGained"
+    },
+    {
       "frame": 3200,
       "type": "skillConsumed"
     },
     {
-      "frame": 3200,
+      "frame": 3204,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3200,
+      "frame": 3206,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3210,
+      "frame": 3212,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3220,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3223,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3225,
       "type": "collected"
-    },
-    {
-      "frame": 3215,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3228,
-      "type": "rewardPointsGained"
     },
     {
       "frame": 3230,
       "type": "skillConsumed"
     },
     {
-      "frame": 3230,
+      "frame": 3246,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3239,
+      "frame": 3258,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3239,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3240,
+      "frame": 3270,
       "type": "collected"
     },
     {
-      "frame": 3260,
+      "frame": 3290,
       "type": "skillConsumed"
-    },
-    {
-      "frame": 3282,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3296,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3300,
-      "type": "collected"
-    },
-    {
-      "frame": 3306,
-      "type": "rewardPointsGained"
     },
     {
       "frame": 3318,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3319,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3320,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 3329,
+      "frame": 3330,
       "type": "rewardPointsGained"
     },
     {
@@ -2187,155 +5275,67 @@
       "type": "collected"
     },
     {
-      "frame": 3338,
+      "frame": 3336,
       "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3339,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3342,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3342,
+      "type": "rewardTriggered"
+    },
+    {
+      "frame": 3342,
+      "type": "rewardConfirmed"
     },
     {
       "frame": 3350,
       "type": "skillConsumed"
     },
     {
-      "frame": 3354,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3359,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3371,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3373,
+      "frame": 3433,
       "type": "bountyOfferExpired"
     },
     {
-      "frame": 3381,
+      "frame": 3493,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3382,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3389,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3390,
+      "frame": 3495,
       "type": "collected"
     },
     {
-      "frame": 3401,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3407,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3410,
+      "frame": 3500,
       "type": "skillConsumed"
     },
     {
-      "frame": 3419,
+      "frame": 3500,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3420,
+      "frame": 3500,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3500,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3529,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3540,
       "type": "collected"
     },
     {
-      "frame": 3430,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3436,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3440,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 3440,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3449,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3456,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3463,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3465,
-      "type": "collected"
-    },
-    {
-      "frame": 3470,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 3472,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3490,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3509,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3510,
-      "type": "collected"
-    },
-    {
-      "frame": 3511,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3523,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3528,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3530,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 3530,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3532,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3535,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3555,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3555,
-      "type": "collected"
-    },
-    {
-      "frame": 3558,
+      "frame": 3548,
       "type": "rewardPointsGained"
     },
     {
@@ -2343,15 +5343,15 @@
       "type": "skillConsumed"
     },
     {
-      "frame": 3560,
+      "frame": 3566,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3560,
-      "type": "rewardPointsGained"
+      "frame": 3570,
+      "type": "collected"
     },
     {
-      "frame": 3571,
+      "frame": 3582,
       "type": "rewardPointsGained"
     },
     {
@@ -2359,28 +5359,28 @@
       "type": "rewardPointsGained"
     },
     {
+      "frame": 3590,
+      "type": "skillConsumed"
+    },
+    {
       "frame": 3591,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3594,
+      "frame": 3593,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3608,
+      "frame": 3599,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3610,
+      "frame": 3606,
       "type": "rewardPointsGained"
     },
     {
       "frame": 3615,
       "type": "collected"
-    },
-    {
-      "frame": 3618,
-      "type": "rewardPointsGained"
     },
     {
       "frame": 3620,
@@ -2391,59 +5391,55 @@
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3622,
-      "type": "wildcardsGranted"
-    },
-    {
-      "frame": 3622,
-      "type": "rewardTriggered"
-    },
-    {
-      "frame": 3622,
-      "type": "rewardConfirmed"
-    },
-    {
-      "frame": 3633,
+      "frame": 3634,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3645,
+      "frame": 3643,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3645,
-      "type": "collected"
-    },
-    {
-      "frame": 3650,
-      "type": "skillConsumed"
+      "frame": 3646,
+      "type": "rewardPointsGained"
     },
     {
       "frame": 3658,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3666,
+      "frame": 3659,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3675,
+      "frame": 3660,
+      "type": "collected"
+    },
+    {
+      "frame": 3665,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3682,
+      "frame": 3670,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3693,
+      "frame": 3680,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 3685,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3693,
+      "frame": 3690,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3694,
+      "frame": 3702,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3704,
       "type": "rewardPointsGained"
     },
     {
@@ -2451,84 +5447,88 @@
       "type": "collected"
     },
     {
-      "frame": 3706,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3707,
-      "type": "rewardPointsGained"
-    },
-    {
       "frame": 3710,
       "type": "skillConsumed"
     },
     {
-      "frame": 3710,
+      "frame": 3713,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3710,
+      "frame": 3720,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3717,
+      "frame": 3732,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3721,
+      "frame": 3732,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3724,
+      "frame": 3738,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3735,
+      "frame": 3738,
       "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3735,
-      "type": "collected"
     },
     {
       "frame": 3740,
-      "type": "skillConsumed"
+      "type": "rewardPointsGained"
     },
     {
-      "frame": 3758,
+      "frame": 3755,
       "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3757,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3765,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3765,
+      "type": "collected"
     },
     {
       "frame": 3769,
       "type": "rewardPointsGained"
     },
     {
+      "frame": 3770,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 3770,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3780,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3793,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3795,
+      "type": "collected"
+    },
+    {
+      "frame": 3800,
+      "type": "skillConsumed"
+    },
+    {
       "frame": 3805,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3810,
-      "type": "collected"
-    },
-    {
-      "frame": 3818,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3825,
-      "type": "rewardPointsGained"
-    },
-    {
       "frame": 3830,
       "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3830,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 3840,
-      "type": "collected"
     },
     {
       "frame": 3842,
@@ -2539,39 +5539,35 @@
       "type": "rewardPointsGained"
     },
     {
+      "frame": 3855,
+      "type": "collected"
+    },
+    {
       "frame": 3860,
       "type": "skillConsumed"
     },
     {
-      "frame": 3867,
+      "frame": 3871,
       "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3879,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 3885,
-      "type": "collected"
-    },
-    {
-      "frame": 3890,
-      "type": "skillConsumed"
     },
     {
       "frame": 3896,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3908,
+      "frame": 3900,
+      "type": "collected"
+    },
+    {
+      "frame": 3907,
       "type": "rewardPointsGained"
     },
     {
       "frame": 3920,
-      "type": "rewardPointsGained"
+      "type": "skillConsumed"
     },
     {
-      "frame": 3928,
+      "frame": 3929,
       "type": "rewardPointsGained"
     },
     {
@@ -2579,7 +5575,11 @@
       "type": "collected"
     },
     {
-      "frame": 3942,
+      "frame": 3940,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 3941,
       "type": "rewardPointsGained"
     },
     {
@@ -2587,11 +5587,11 @@
       "type": "skillConsumed"
     },
     {
-      "frame": 3953,
+      "frame": 3961,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3964,
+      "frame": 3973,
       "type": "rewardPointsGained"
     },
     {
@@ -2599,23 +5599,31 @@
       "type": "collected"
     },
     {
+      "frame": 3979,
+      "type": "rewardPointsGained"
+    },
+    {
       "frame": 3980,
       "type": "skillConsumed"
     },
     {
-      "frame": 3987,
+      "frame": 3991,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 3999,
+      "frame": 4000,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 4011,
+      "frame": 4008,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 4018,
+      "frame": 4020,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 4020,
       "type": "rewardPointsGained"
     },
     {
@@ -2623,135 +5631,135 @@
       "type": "collected"
     },
     {
-      "frame": 4022,
-      "type": "rewardPointsGained"
-    },
-    {
       "frame": 4040,
       "type": "skillConsumed"
     },
     {
-      "frame": 4049,
+      "frame": 4182,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 4064,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 4065,
-      "type": "collected"
-    },
-    {
-      "frame": 4070,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 4072,
-      "type": "rewardPointsGained"
-    },
-    {
-      "frame": 4072,
+      "frame": 4182,
       "type": "waveBossSpawned"
     },
     {
-      "frame": 4246,
+      "frame": 4185,
+      "type": "collected"
+    },
+    {
+      "frame": 4190,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 4440,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 4260,
+      "frame": 4440,
       "type": "wildcardsGranted"
     },
     {
-      "frame": 4260,
+      "frame": 4440,
+      "type": "rewardTriggered"
+    },
+    {
+      "frame": 4440,
+      "type": "rewardConfirmed"
+    },
+    {
+      "frame": 4440,
+      "type": "wildcardsGranted"
+    },
+    {
+      "frame": 4440,
       "type": "bossRewardGranted"
     },
     {
-      "frame": 4261,
+      "frame": 4441,
       "type": "waveCleared"
     },
     {
-      "frame": 4262,
+      "frame": 4442,
       "type": "waveRewardsGranted"
     },
     {
-      "frame": 4278,
+      "frame": 4458,
       "type": "godOffer"
     },
     {
-      "frame": 4278,
+      "frame": 4458,
       "type": "decisionOffered"
     },
     {
-      "frame": 4278,
+      "frame": 4458,
       "type": "godSelected"
     },
     {
-      "frame": 4278,
+      "frame": 4458,
       "type": "runRosterCreated"
     },
     {
-      "frame": 4278,
+      "frame": 4458,
       "type": "decisionResolved"
     },
     {
-      "frame": 4279,
+      "frame": 4459,
       "type": "waveBaseRewardOffered"
     },
     {
-      "frame": 4279,
+      "frame": 4459,
       "type": "decisionOffered"
     },
     {
-      "frame": 4279,
+      "frame": 4459,
       "type": "waveBaseRewardChosen"
     },
     {
-      "frame": 4279,
+      "frame": 4459,
       "type": "decisionResolved"
     },
     {
-      "frame": 4300,
+      "frame": 4480,
       "type": "intermissionReady"
     },
     {
-      "frame": 4301,
+      "frame": 4481,
       "type": "waveStart"
     },
     {
-      "frame": 4301,
+      "frame": 4481,
       "type": "activePoolCreated"
     },
     {
-      "frame": 4968,
+      "frame": 4966,
       "type": "validationRewardGranted"
     },
     {
-      "frame": 4968,
+      "frame": 4966,
       "type": "affixRolled"
     },
     {
-      "frame": 4968,
+      "frame": 4966,
       "type": "evolutionBranchOffered"
     },
     {
-      "frame": 4968,
+      "frame": 4966,
       "type": "decisionOffered"
     },
     {
-      "frame": 4968,
+      "frame": 4966,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 4968,
+      "frame": 4966,
       "type": "validationRewardSettleStarted"
     },
     {
-      "frame": 4968,
+      "frame": 4966,
       "type": "evolutionBranchSelected"
     },
     {
-      "frame": 4968,
+      "frame": 4966,
       "type": "decisionResolved"
     },
     {
@@ -2759,45 +5767,177 @@
       "type": "skillConsumed"
     },
     {
-      "frame": 5329,
+      "frame": 4980,
+      "type": "collected"
+    },
+    {
+      "frame": 4995,
+      "type": "cardsFull"
+    },
+    {
+      "frame": 5000,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 5010,
+      "type": "collected"
+    },
+    {
+      "frame": 5010,
+      "type": "affixRolled"
+    },
+    {
+      "frame": 5025,
+      "type": "collected"
+    },
+    {
+      "frame": 5025,
+      "type": "merged"
+    },
+    {
+      "frame": 5030,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 5040,
+      "type": "collected"
+    },
+    {
+      "frame": 5040,
+      "type": "affixRolled"
+    },
+    {
+      "frame": 5055,
+      "type": "cardsFull"
+    },
+    {
+      "frame": 5060,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 5070,
+      "type": "collected"
+    },
+    {
+      "frame": 5085,
+      "type": "cardsFull"
+    },
+    {
+      "frame": 5090,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 5100,
+      "type": "collected"
+    },
+    {
+      "frame": 5115,
+      "type": "cardsFull"
+    },
+    {
+      "frame": 5120,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 5130,
+      "type": "collected"
+    },
+    {
+      "frame": 5145,
+      "type": "collected"
+    },
+    {
+      "frame": 5145,
+      "type": "merged"
+    },
+    {
+      "frame": 5150,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 5160,
+      "type": "collected"
+    },
+    {
+      "frame": 5175,
+      "type": "cardsFull"
+    },
+    {
+      "frame": 5180,
+      "type": "skillConsumed"
+    },
+    {
+      "frame": 5190,
+      "type": "collected"
+    },
+    {
+      "frame": 5205,
+      "type": "collected"
+    },
+    {
+      "frame": 5205,
+      "type": "merged"
+    },
+    {
+      "frame": 5205,
+      "type": "merged"
+    },
+    {
+      "frame": 5205,
+      "type": "evolutionBranchOffered"
+    },
+    {
+      "frame": 5205,
+      "type": "decisionOffered"
+    },
+    {
+      "frame": 5206,
+      "type": "evolutionBranchSelected"
+    },
+    {
+      "frame": 5206,
+      "type": "decisionResolved"
+    },
+    {
+      "frame": 5328,
       "type": "waveBossSpawned"
     },
     {
-      "frame": 5621,
+      "frame": 5502,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 5625,
+      "frame": 5505,
       "type": "wildcardsGranted"
     },
     {
-      "frame": 5625,
+      "frame": 5505,
       "type": "bossRewardGranted"
     },
     {
-      "frame": 5626,
+      "frame": 5506,
       "type": "gameEnd"
     }
   ],
   "eventCounts": {
     "godOffer": 3,
-    "decisionOffered": 7,
+    "decisionOffered": 8,
     "godSelected": 3,
-    "decisionResolved": 7,
+    "decisionResolved": 8,
     "waveStart": 3,
     "activePoolCreated": 3,
-    "rewardPointsGained": 215,
-    "collected": 62,
-    "affixRolled": 9,
+    "rewardPointsGained": 226,
+    "collected": 75,
+    "affixRolled": 11,
     "bountyOfferSpawned": 4,
-    "merged": 8,
-    "rewardTriggered": 7,
-    "rewardConfirmed": 7,
+    "merged": 12,
+    "rewardTriggered": 8,
+    "rewardConfirmed": 8,
     "bountyOfferExpired": 4,
-    "skillConsumed": 49,
-    "wildcardsGranted": 5,
-    "evolutionBranchOffered": 2,
-    "evolutionBranchSelected": 2,
+    "skillConsumed": 58,
+    "wildcardsGranted": 6,
+    "evolutionBranchOffered": 3,
+    "evolutionBranchSelected": 3,
     "waveBossSpawned": 3,
     "bossRewardGranted": 3,
     "waveCleared": 2,
@@ -2805,14 +5945,14 @@
     "waveBaseRewardOffered": 2,
     "waveBaseRewardChosen": 2,
     "intermissionReady": 2,
-    "cardsFull": 2,
     "runRosterCreated": 1,
     "validationRewardGranted": 1,
     "validationRewardSettleStarted": 1,
+    "cardsFull": 5,
     "gameEnd": 1
   },
   "rng": {
-    "draws": 19762,
-    "last": 0.5664255197625607
+    "draws": 19493,
+    "last": 0.9256664626300335
   }
 }

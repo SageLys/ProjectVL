@@ -605,8 +605,8 @@ ATOMS = {
         "fusion": "各来源独立结算，即时生效，无叠加概念。",
         "pitfalls": [
             f"<b>不吃任何词条缩放轴</b>——AFFIX_SINKS 里没有指向 restore 的靶点。"
-            "回血量是纯配置值，遗物和词条完全放大不了。",
-            f"{c('maxHpAdd')} 类 statBuff 到期时会 {c('reconcileMaxHp')}，"
+            "回血量是纯配置值，卡牌词条完全放大不了。",
+            f"{c('maxHpAdd')} / {c('maxHpMul')} 类 statBuff 到期时会 {c('reconcileMaxHp')}，"
             "配合 restore 使用时要注意「先回血再掉上限」的顺序问题。",
         ],
     },
@@ -619,11 +619,12 @@ ATOMS = {
             f"叠层：同 sourceId 的条数 &lt; {c('maxStacks')} 时新增；"
             f"达到上限时<b>刷新剩余时间最短的那一条</b>（而不是拒绝或新增）。",
             f"{c('stat')} 的合法值域是 {c('RUNTIME_STAT_KINDS')}（19 项），"
-            f"包含 damage / fireRate 与全部 CardStatKind。",
+            f"显式包含 RunBaseStatKind、CardBaseStatMulKind、BuildScalingAxis 与 damage / fireRate，"
+            f"不再从卡牌词条值域自动推导。",
             f"{c('value')} 有 variantDefault：{c('operation = mul')} 时默认 1（乘法恒等元），"
             f"{c('add')} 时默认 0（加法恒等元）。",
             f"校验器额外约束：duration 必须 &gt; 0；mul 时 value 必须 &gt; 0。",
-            f"{c('stat = maxHpAdd')} 时会立即 {c('reconcileMaxHp(state)')}。",
+            f"{c('stat = maxHpAdd / maxHpMul')} 时会立即 {c('reconcileMaxHp(state)')}。",
             f"消耗态 duration <b>封顶 5 秒</b>（cappedDuration，设计约束 R4）。",
         ],
         "fusion": "按 sourceId 分组，同卡同属性同运算共享层数上限；不同卡各自独立成组。",

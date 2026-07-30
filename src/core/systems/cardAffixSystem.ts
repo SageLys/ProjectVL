@@ -1,14 +1,21 @@
 import { cfg } from '../../config';
 import { AFFIX_SINKS } from '../../config/affixSinks';
-import type { BuildScalingAxis, CardAffixCandidateDef, CardStatKind, RunBaseStatKind } from '../../config/types';
+import type {
+  BuildScalingAxis,
+  CardAffixCandidateDef,
+  CardAffixStatKind,
+  CardBaseStatMulKind,
+} from '../../config/types';
 import { createCardInstance } from '../createInitialState';
 import type { Card, CardAffixRoll, CardType, GameEvent, GameState, Rng, RuntimeStatModifier } from '../types';
 import { reconcileMaxHp } from '../stats';
 
 export type { CardAffixRoll } from '../types';
 
-const RUN_BASE_STATS = new Set<CardStatKind>([
-  'damageAdd', 'fireRateAdd', 'rangeAdd', 'multiAdd', 'maxHpAdd', 'heal',
+const BUILD_SCALING_AXES = new Set<CardAffixStatKind>([
+  'effectDamageMul', 'quantityAdd', 'controlPotencyMul', 'controlledDamageTakenMul',
+  'areaScaleMul', 'dotDamageMul', 'defenseDurabilityMul', 'retaliationMul',
+  'dropRateMul', 'dropLifetimeMul', 'xpMul',
 ]);
 
 function rollIndex(length: number, rng: Rng): number {
@@ -98,12 +105,12 @@ export function createCardWithAffixes(
   };
 }
 
-export function isRunBaseAffix(stat: CardStatKind): stat is RunBaseStatKind {
-  return RUN_BASE_STATS.has(stat);
+function isBuildScalingAxis(stat: CardAffixStatKind): stat is BuildScalingAxis {
+  return BUILD_SCALING_AXES.has(stat);
 }
 
-export function equipmentAffixAdd(state: GameState, stat: RunBaseStatKind): number {
-  let total = 0;
+export function equipmentAffixMul(state: GameState, stat: CardBaseStatMulKind): number {
+  let total = 1;
   for (const card of state.equipment) {
     if (!card || card.provisional) continue;
     for (const roll of state.runBuild.cardAffixRolls[card.type] ?? []) {
@@ -120,13 +127,13 @@ export function cardAffixScaling(
 ): Partial<Record<BuildScalingAxis, number>> {
   const result: Partial<Record<BuildScalingAxis, number>> = {};
   for (const roll of state.runBuild.cardAffixRolls[type] ?? []) {
-    if (isRunBaseAffix(roll.stat)) continue;
+    if (!isBuildScalingAxis(roll.stat)) continue;
     result[roll.stat] = (result[roll.stat] ?? 0) + roll.value;
   }
   return result;
 }
 
-export function affixOperation(stat: CardStatKind): RuntimeStatModifier['operation'] {
+export function affixOperation(stat: CardAffixStatKind): RuntimeStatModifier['operation'] {
   return AFFIX_SINKS[stat].operation;
 }
 
@@ -145,15 +152,9 @@ export function activateConsumableAffixes(state: GameState, type: CardType): Run
       value: contract.operation === 'mul' ? 1 + roll.value : roll.value,
       remaining: roll.consumableDuration,
     });
-    if (roll.stat === 'maxHpAdd') maxHpChanged = true;
+    if (roll.stat === 'maxHpMul') maxHpChanged = true;
   }
   state.statModifiers.push(...activated);
   if (maxHpChanged) reconcileMaxHp(state);
-
-  // Instant affixes settle after timed maximum-HP modifiers so their cap is current.
-  for (const roll of template) {
-    if (AFFIX_SINKS[roll.stat].settlement !== 'instant') continue;
-    if (roll.stat === 'heal') state.hp = Math.min(state.maxHp, state.hp + roll.value);
-  }
   return activated;
 }

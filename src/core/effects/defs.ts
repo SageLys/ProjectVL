@@ -1,14 +1,20 @@
-// 技能数据模型（对应 docs/skills-schema.json v0.5.0）。
+// 技能数据模型（对应 docs/skills-schema.json v0.6.0）。
 // 技能 = 数据（JSON 实例）+ 通用解释器（触发器 → 效果原子）。禁止每张卡硬编码 if。
 // v0.3.0（P3）：新增 'passive' 触发器承载常驻修饰类原子（掉率/反伤/突破减免等，
 // 设计表中"掉率+25%"这类无事件语义的装备态此前在 schema 中无处安放）。
 // v0.4.1（固化2）：新增可选 fusionPolicy 结构位（D2 预留，运行时无效果）。
 import type {
-  CardAffixPoolDef, CardFusionPolicyDef, CardStatKind, EvolutionTreeDef, GodId,
+  BuildScalingAxis, CardAffixPoolDef, CardBaseStatMulKind, CardFusionPolicyDef,
+  EvolutionTreeDef, GodId, RunBaseStatKind,
 } from '../../config/types';
 
 /** RuntimeStatModifier 可承载的属性全集，也是 statBuff.stat 的合法值域。 */
-export type RuntimeStatKind = CardStatKind | 'damage' | 'fireRate';
+export type RuntimeStatKind =
+  | RunBaseStatKind
+  | CardBaseStatMulKind
+  | BuildScalingAxis
+  | 'damage'
+  | 'fireRate';
 
 /** 效果原子五大类别。 */
 export type Category = 'projectile' | 'control' | 'domain' | 'economy' | 'defense';

@@ -1,7 +1,7 @@
 /** Rewards are synchronous one-shot settlements. Future DOT/summon/zone rewards need persistent source tagging. */
 import { AFFIX_SINKS } from '../../config/affixSinks';
 import { cfg } from '../../config';
-import type { RewardDef } from '../../config/types';
+import type { BuildScalingAxis, RewardDef } from '../../config/types';
 import { applyFreeze, applyVulnerable, controlBudgetDenies } from '../effects/statusSystem';
 import { totalDamage } from '../stats';
 import type { BuildTag } from '../effects/defs';
@@ -11,7 +11,7 @@ import { dominantBuildTag } from './buildProfileSystem';
 import { grantWildcards } from './wildcardSystem';
 import { withRewardPointsSuppressed } from './rewardMeterSystem';
 
-const SURGE_AXES: Record<BuildTag, Array<keyof typeof AFFIX_SINKS>> = {
+const SURGE_AXES: Record<BuildTag, BuildScalingAxis[]> = {
   projectile: ['effectDamageMul', 'quantityAdd'],
   control: ['controlPotencyMul', 'controlledDamageTakenMul'],
   domain: ['areaScaleMul', 'dotDamageMul'],

@@ -16,7 +16,7 @@ const SCALE_SOURCES = new Set([
   'pickupsThisWave', 'summonsAlive',
 ]);
 const STATUS_IDS = new Set(['controlled', 'frozen', 'slow', 'stun', 'stunned', 'vulnerable', 'dot', 'brand']);
-/** 词条属性同理派生自 AFFIX_SINKS（`Record<CardStatKind, …>`），不再手抄第二份。 */
+/** 词条属性同理派生自 AFFIX_SINKS（`Record<CardAffixStatKind, …>`），不再手抄第二份。 */
 const CARD_STATS = new Set<string>(Object.keys(AFFIX_SINKS));
 const TIERS: Record<string, string> = { '3': 'core', '5': 'dual', '6': 'transform' };
 const CARD_KEYS = new Set([
@@ -27,7 +27,10 @@ const CARD_KEYS = new Set([
 const FUSION_TRANSFER = new Set(['none', 'strongest', 'sum', 'average']);
 const FUSION_CONFLICT = new Set(['keepHigher', 'keepNewer', 'reject']);
 
-const SKILLS_SCHEMA_VERSION = '0.5.0';
+const SKILLS_SCHEMA_VERSION = '0.6.0';
+const RUN_BASE_STATS = new Set([
+  'damageAdd', 'fireRateAdd', 'rangeAdd', 'multiAdd', 'maxHpAdd', 'heal',
+]);
 
 function fail(path: string, message: string): never {
   throw new Error(`[skills-schema v${SKILLS_SCHEMA_VERSION}] ${path}: ${message}`);
@@ -286,6 +289,12 @@ function affixPool(value: unknown, path: string, card: Record<string, unknown>):
   pool.candidates.forEach((rawCandidate, index) => {
     const candidatePath = `${path}.candidates[${index}]`;
     const candidate = object(rawCandidate, candidatePath);
+    if (RUN_BASE_STATS.has(String(candidate.stat))) {
+      fail(
+        `${candidatePath}.stat`,
+        '基础属性平加由 waveRewards 独占，卡牌词条请使用 damageMul/fireRateMul/rangeMul/maxHpMul',
+      );
+    }
     if (!CARD_STATS.has(String(candidate.stat))) fail(`${candidatePath}.stat`, '非法词条属性');
     for (const key of ['weight', 'min', 'max', 'step', 'consumableDuration']) {
       if (typeof candidate[key] !== 'number' || !Number.isFinite(candidate[key])) fail(`${candidatePath}.${key}`, '必须是有限数值');

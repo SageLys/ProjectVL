@@ -50,6 +50,7 @@ export interface AtomContract {
 export const RUNTIME_STAT_KINDS = [
   'damage', 'fireRate',
   'damageAdd', 'fireRateAdd', 'rangeAdd', 'multiAdd', 'maxHpAdd', 'heal',
+  'damageMul', 'fireRateMul', 'rangeMul', 'maxHpMul',
   'effectDamageMul', 'quantityAdd', 'controlPotencyMul', 'controlledDamageTakenMul',
   'areaScaleMul', 'dotDamageMul', 'defenseDurabilityMul', 'retaliationMul',
   'dropRateMul', 'dropLifetimeMul', 'xpMul',
