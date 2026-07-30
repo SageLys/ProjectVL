@@ -20,6 +20,7 @@ namespace ProjectVL.Presentation
         private GodPoolSystem _godPoolSystem;
         private BountySystem _bountySystem;
         private DeveloperToolsSystem _developerTools;
+        private RuntimeTuningSystem _runtimeTuning;
         private CardSlotKind? _selectedSlotKind;
         private int _selectedSlotIndex = -1;
         private CardSlotKind? _pendingCastSlotKind;
@@ -148,6 +149,7 @@ namespace ProjectVL.Presentation
             _recipeSystem?.FirstAvailableRecipe(State);
         public bool HasCardDrag => _draggedSlotKind != null;
         public DeveloperToolsSystem DeveloperTools => _developerTools;
+        public RuntimeTuningSystem RuntimeTuning => _runtimeTuning;
 
         private void Awake()
         {
@@ -257,6 +259,12 @@ namespace ProjectVL.Presentation
                 _waveSystem,
                 seed,
                 Application.isEditor || Debug.isDebugBuild);
+            _runtimeTuning = new RuntimeTuningSystem(
+                combat,
+                enemies,
+                waves,
+                economy,
+                bounty);
 
             _presenter = gameObject.AddComponent<ArenaPresenter>();
             _presenter.Initialize(combat, state);

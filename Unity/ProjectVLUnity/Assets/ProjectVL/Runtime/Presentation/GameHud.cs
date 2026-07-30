@@ -1,5 +1,6 @@
 using ProjectVL.Config;
 using ProjectVL.Core;
+using ProjectVL.Systems;
 using UnityEngine;
 
 namespace ProjectVL.Presentation
@@ -18,6 +19,9 @@ namespace ProjectVL.Presentation
         private CardSlotKind? _pressedSlotKind;
         private int _pressedSlotIndex = -1;
         private Vector2 _pressPoint;
+        private int _tuningGroup;
+        private static readonly string[] TuningGroups =
+            { "Combat", "Enemies", "Waves", "Economy", "Bounty" };
 
         public void Initialize(ProjectVLGameController controller)
         {
@@ -32,6 +36,13 @@ namespace ProjectVL.Presentation
             }
 
             RefreshViewport();
+            if (_controller.DeveloperTools != null
+                && _controller.DeveloperTools.Visible)
+            {
+                ClearPressedSlot();
+                return;
+            }
+
             if (!TryReadPointer(
                 out Vector2 guiPosition,
                 out bool pressed,
@@ -132,7 +143,132 @@ namespace ProjectVL.Presentation
             DrawControls();
             DrawCardLoadout();
             DrawCenterPanel();
+            DrawDeveloperPanel();
             GUI.matrix = previousMatrix;
+        }
+
+        private void DrawDeveloperPanel()
+        {
+            DeveloperToolsSystem tools = _controller.DeveloperTools;
+            RuntimeTuningSystem tuning = _controller.RuntimeTuning;
+            if (tools == null || tuning == null || !tools.Visible)
+            {
+                return;
+            }
+
+            Rect panel = new Rect(8f, 48f, 386f, 684f);
+            Color previous = GUI.backgroundColor;
+            GUI.backgroundColor = new Color(0.035f, 0.075f, 0.12f, 0.98f);
+            GUI.Box(panel, GUIContent.none);
+            GUI.backgroundColor = previous;
+
+            GUI.Label(
+                new Rect(panel.x + 10f, panel.y + 6f, 220f, 24f),
+                $"DEV TOOLS  seed {tools.Seed}",
+                _leftStyle);
+            if (GUI.Button(
+                new Rect(panel.xMax - 56f, panel.y + 5f, 46f, 24f),
+                "Close",
+                _buttonStyle))
+            {
+                tools.SetVisible(false);
+                return;
+            }
+
+            float y = panel.y + 36f;
+            float buttonWidth = 69f;
+            if (GUI.Button(new Rect(panel.x + 10f, y, buttonWidth, 26f),
+                tools.TimeScale == 0.5f ? "[0.5x]" : "0.5x", _buttonStyle))
+                tools.SetTimeScale(0.5f);
+            if (GUI.Button(new Rect(panel.x + 83f, y, buttonWidth, 26f),
+                tools.TimeScale == 1f ? "[1x]" : "1x", _buttonStyle))
+                tools.SetTimeScale(1f);
+            if (GUI.Button(new Rect(panel.x + 156f, y, buttonWidth, 26f),
+                tools.TimeScale == 2f ? "[2x]" : "2x", _buttonStyle))
+                tools.SetTimeScale(2f);
+            if (GUI.Button(new Rect(panel.x + 229f, y, buttonWidth, 26f),
+                _controller.State.Invincible ? "Invincible ON" : "Invincible",
+                _buttonStyle))
+                tools.ToggleInvincible();
+            if (GUI.Button(new Rect(panel.x + 302f, y, 74f, 26f),
+                "Restart", _buttonStyle))
+                tools.RestartWave();
+
+            y += 32f;
+            if (GUI.Button(new Rect(panel.x + 10f, y, 55f, 24f),
+                "Wave -", _buttonStyle))
+                tools.JumpToWave(_controller.State.Wave - 1);
+            GUI.Label(new Rect(panel.x + 70f, y, 80f, 24f),
+                $"Wave {_controller.State.Wave}", _leftStyle);
+            if (GUI.Button(new Rect(panel.x + 145f, y, 55f, 24f),
+                "Wave +", _buttonStyle))
+                tools.JumpToWave(_controller.State.Wave + 1);
+            if (GUI.Button(new Rect(panel.x + 273f, y, 103f, 24f),
+                "Reset all", _buttonStyle))
+                tuning.ResetAll();
+
+            y += 34f;
+            float tabWidth = 72f;
+            for (int i = 0; i < TuningGroups.Length; i++)
+            {
+                Color tabColor = GUI.backgroundColor;
+                if (i == _tuningGroup)
+                    GUI.backgroundColor = new Color(0.2f, 0.7f, 0.9f);
+                if (GUI.Button(
+                    new Rect(panel.x + 10f + i * (tabWidth + 2f), y,
+                        tabWidth, 25f),
+                    TuningGroups[i],
+                    _buttonStyle))
+                    _tuningGroup = i;
+                GUI.backgroundColor = tabColor;
+            }
+
+            string group = TuningGroups[_tuningGroup];
+            y += 34f;
+            foreach (TuningParameter parameter in tuning.Parameters)
+            {
+                if (parameter.Group != group)
+                    continue;
+
+                string suffix = parameter.AppliesNextWave ? " *" : string.Empty;
+                GUI.Label(
+                    new Rect(panel.x + 12f, y, 190f, 22f),
+                    parameter.Label + suffix,
+                    _leftStyle);
+                float value = GUI.HorizontalSlider(
+                    new Rect(panel.x + 180f, y + 5f, 130f, 18f),
+                    parameter.Value,
+                    parameter.Min,
+                    parameter.Max);
+                parameter.Set(value);
+                GUI.Label(
+                    new Rect(panel.x + 316f, y, 58f, 22f),
+                    parameter.Integer
+                        ? parameter.Value.ToString("0")
+                        : parameter.Value.ToString("0.##"),
+                    _leftStyle);
+                y += 29f;
+            }
+
+            if (group == "Bounty")
+            {
+                if (GUI.Button(
+                    new Rect(panel.x + 12f, y, 160f, 25f),
+                    tuning.BountyEnabled ? "Bounty enabled" : "Bounty disabled",
+                    _buttonStyle))
+                    tuning.SetBountyEnabled(!tuning.BountyEnabled);
+                y += 31f;
+            }
+
+            if (GUI.Button(
+                new Rect(panel.x + 216f, panel.yMax - 35f, 160f, 25f),
+                "Reset this group",
+                _buttonStyle))
+                tuning.ResetGroup(group);
+            GUI.Label(
+                new Rect(panel.x + 12f, panel.yMax - 34f, 190f, 24f),
+                "* applies from next wave",
+                _leftStyle);
         }
 
         private void DrawArenaFrame()

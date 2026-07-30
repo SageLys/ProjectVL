@@ -12,6 +12,7 @@ namespace ProjectVL.Systems
         public bool Enabled { get; }
         public bool Visible { get; private set; }
         public int Seed { get; }
+        public float TimeScale => _simulation.TimeScale;
 
         public DeveloperToolsSystem(
             GameState state,
