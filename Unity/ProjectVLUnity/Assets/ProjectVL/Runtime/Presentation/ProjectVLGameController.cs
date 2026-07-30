@@ -19,6 +19,7 @@ namespace ProjectVL.Presentation
         private ProgressionSystem _progressionSystem;
         private GodPoolSystem _godPoolSystem;
         private BountySystem _bountySystem;
+        private DeveloperToolsSystem _developerTools;
         private CardSlotKind? _selectedSlotKind;
         private int _selectedSlotIndex = -1;
         private CardSlotKind? _pendingCastSlotKind;
@@ -146,6 +147,7 @@ namespace ProjectVL.Presentation
         public string AvailableRecipeId =>
             _recipeSystem?.FirstAvailableRecipe(State);
         public bool HasCardDrag => _draggedSlotKind != null;
+        public DeveloperToolsSystem DeveloperTools => _developerTools;
 
         private void Awake()
         {
@@ -181,7 +183,8 @@ namespace ProjectVL.Presentation
                     progression,
                     relics,
                     waves.totalWaves));
-            var random = new SystemRandomSource(System.Environment.TickCount);
+            int seed = System.Environment.TickCount;
+            var random = new SystemRandomSource(seed);
             var cardAffixSystem = new CardAffixSystem(
                 cardAffixCatalog,
                 random);
@@ -248,6 +251,12 @@ namespace ProjectVL.Presentation
                 _bountySystem);
             _simulation = new GameSimulation(state, combat);
             _simulation.SimulationStep += _world.Step;
+            _developerTools = new DeveloperToolsSystem(
+                state,
+                _simulation,
+                _waveSystem,
+                seed,
+                Application.isEditor || Debug.isDebugBuild);
 
             _presenter = gameObject.AddComponent<ArenaPresenter>();
             _presenter.Initialize(combat, state);
@@ -722,6 +731,16 @@ namespace ProjectVL.Presentation
 
         private void HandleKeyboard()
         {
+            if (Input.GetKeyDown(KeyCode.F1))
+            {
+                _developerTools.ToggleVisible();
+            }
+
+            if (_developerTools.Enabled)
+            {
+                HandleDeveloperKeyboard();
+            }
+
             if (Input.GetKeyDown(KeyCode.Space) && State.PendingBossReward != null)
             {
                 ClaimBossReward();
@@ -746,14 +765,58 @@ namespace ProjectVL.Presentation
                 RestartGame();
             }
 
-            if (Input.GetKeyDown(KeyCode.G))
-            {
-                GrantTestCards();
-            }
-
             if (Input.GetKeyDown(KeyCode.C))
             {
                 ConsumeSelectedCard();
+            }
+
+            for (int i = 0; i < State.Hand.Length && i < 7; i++)
+            {
+                if (Input.GetKeyDown((KeyCode)((int)KeyCode.Alpha1 + i)))
+                {
+                    SelectCardSlot(CardSlotKind.Hand, i);
+                }
+            }
+
+            if (State.Equipment.Length > 0 && Input.GetKeyDown(KeyCode.Q))
+            {
+                SelectCardSlot(CardSlotKind.Equipment, 0);
+            }
+            else if (State.Equipment.Length > 1 && Input.GetKeyDown(KeyCode.W))
+            {
+                SelectCardSlot(CardSlotKind.Equipment, 1);
+            }
+            else if (State.Equipment.Length > 2 && Input.GetKeyDown(KeyCode.E))
+            {
+                SelectCardSlot(CardSlotKind.Equipment, 2);
+            }
+        }
+
+        private void HandleDeveloperKeyboard()
+        {
+            if (Input.GetKeyDown(KeyCode.F2))
+            {
+                _developerTools.ToggleInvincible();
+            }
+
+            if (Input.GetKeyDown(KeyCode.F3))
+            {
+                _developerTools.RestartWave();
+            }
+
+            if (Input.GetKeyDown(KeyCode.LeftBracket))
+            {
+                _developerTools.JumpToWave(State.Wave - 1);
+            }
+
+            if (Input.GetKeyDown(KeyCode.RightBracket))
+            {
+                _developerTools.JumpToWave(State.Wave + 1);
+            }
+
+            if (Input.GetKeyDown(KeyCode.G))
+            {
+                GrantTestCards();
             }
 
             if (Input.GetKeyDown(KeyCode.M))
@@ -794,27 +857,6 @@ namespace ProjectVL.Presentation
             if (Input.GetKeyDown(KeyCode.U))
             {
                 GrantTransformEffectDemo();
-            }
-
-            for (int i = 0; i < State.Hand.Length && i < 7; i++)
-            {
-                if (Input.GetKeyDown((KeyCode)((int)KeyCode.Alpha1 + i)))
-                {
-                    SelectCardSlot(CardSlotKind.Hand, i);
-                }
-            }
-
-            if (State.Equipment.Length > 0 && Input.GetKeyDown(KeyCode.Q))
-            {
-                SelectCardSlot(CardSlotKind.Equipment, 0);
-            }
-            else if (State.Equipment.Length > 1 && Input.GetKeyDown(KeyCode.W))
-            {
-                SelectCardSlot(CardSlotKind.Equipment, 1);
-            }
-            else if (State.Equipment.Length > 2 && Input.GetKeyDown(KeyCode.E))
-            {
-                SelectCardSlot(CardSlotKind.Equipment, 2);
             }
         }
 

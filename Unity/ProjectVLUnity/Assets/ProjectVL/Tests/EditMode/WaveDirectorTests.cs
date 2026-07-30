@@ -258,6 +258,53 @@ namespace ProjectVL.Tests
             Assert.That(_state.SpawnTimer, Is.EqualTo(_waves.firstSpawnDelay));
         }
 
+        [Test]
+        public void DeveloperToolsControlInvincibilityAndWaveNavigation()
+        {
+            var waveSystem = new WaveSystem(_waves, _factory);
+            var simulation = new GameSimulation(_state, _combat);
+            var tools = new DeveloperToolsSystem(
+                _state,
+                simulation,
+                waveSystem,
+                42,
+                true);
+
+            tools.ToggleVisible();
+            tools.SetInvincible(true);
+            tools.SetTimeScale(2f);
+            tools.JumpToWave(9);
+
+            Assert.That(tools.Visible, Is.True);
+            Assert.That(tools.Seed, Is.EqualTo(42));
+            Assert.That(_state.Invincible, Is.True);
+            Assert.That(simulation.TimeScale, Is.EqualTo(2f));
+            Assert.That(_state.Wave, Is.EqualTo(9));
+        }
+
+        [Test]
+        public void DisabledDeveloperToolsIgnoreMutatingCommands()
+        {
+            var waveSystem = new WaveSystem(_waves, _factory);
+            var simulation = new GameSimulation(_state, _combat);
+            var tools = new DeveloperToolsSystem(
+                _state,
+                simulation,
+                waveSystem,
+                7,
+                false);
+
+            tools.ToggleVisible();
+            tools.SetInvincible(true);
+            tools.SetTimeScale(2f);
+            tools.JumpToWave(9);
+
+            Assert.That(tools.Visible, Is.False);
+            Assert.That(_state.Invincible, Is.False);
+            Assert.That(simulation.TimeScale, Is.EqualTo(1f));
+            Assert.That(_state.Wave, Is.Zero);
+        }
+
         private sealed class ConstantRandomSource : IRandomSource
         {
             private readonly float _value;

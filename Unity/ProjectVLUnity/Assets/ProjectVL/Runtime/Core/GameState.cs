@@ -9,6 +9,7 @@ namespace ProjectVL.Core
     {
         public GameMode Mode { get; private set; }
         public bool Paused { get; private set; }
+        public bool Invincible { get; private set; }
         public bool DecisionLocked { get; private set; }
         public bool IntermissionActive { get; internal set; }
         public float Time { get; private set; }
@@ -288,6 +289,11 @@ namespace ProjectVL.Core
             Paused = Mode == GameMode.Playing && paused;
         }
 
+        public void SetInvincible(bool invincible)
+        {
+            Invincible = invincible;
+        }
+
         public void SetDecisionLocked(bool locked)
         {
             DecisionLocked = locked;
@@ -404,6 +410,11 @@ namespace ProjectVL.Core
 
         internal void ApplyDamage(float damage)
         {
+            if (Invincible)
+            {
+                return;
+            }
+
             float applied = Math.Max(0f, damage);
             if (applied > 0f)
             {
