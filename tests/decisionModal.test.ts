@@ -87,7 +87,7 @@ describe('decision modal', () => {
     };
 
     modals.showDecision(decision, state);
-    const body = document.querySelector('#decisionModal .modal-card > p')?.textContent;
+    const body = document.querySelector('#decisionModal .modal-shell-header > p')?.textContent;
     const option = document.querySelector<HTMLButtonElement>('[data-decision-choice="chainLightning2x"]');
     expect(body).toContain('叠加到当前 3★ 路线');
     expect(option?.querySelector('.choice-desc')?.textContent?.trim().length).toBeGreaterThan(0);

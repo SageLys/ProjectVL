@@ -60,7 +60,7 @@ describe('Budget derived event estimate', () => {
     }
   });
 
-  it('projects stage targets and suppresses regular validation projections', () => {
+  it('projects validation swarms together with milestone elites', () => {
     const derived = deriveMetrics(buildConfig([]), createDefaultConfig());
     const metrics = derived.budget!;
     expect(metrics.projections[0]).toMatchObject({ normalTarget: 7, sprintTriggered: false });
@@ -69,8 +69,8 @@ describe('Budget derived event estimate', () => {
     expect(metrics.projections[3].normalTarget).toBe(14);
     expect(metrics.projections[7].normalTarget).toBe(28);
     expect(metrics.projections[8]).toMatchObject({
-      normalTarget: 0,
-      peakOnScreen: 1,
+      normalTarget: 36,
+      peakOnScreen: 54,
       validationEncounter: { enemyCount: 1, estimatedTtk: expect.any(Number) },
     });
     expect(derived.waves.map(wave => wave.stage)).toEqual([
@@ -79,7 +79,11 @@ describe('Budget derived event estimate', () => {
       'validation', 'validation',
     ]);
     expect(derived.waves.map(wave => wave.ordinaryDropsTargetPerMinute)).toEqual([35, 35, 35, 40, 40, 40, 40, 40, 0, 0]);
-    expect(derived.waves[8]).toMatchObject({ projectedOnScreenP50: 1, projectedOnScreenP95: 1 });
+    expect(derived.waves[8]).toMatchObject({
+      projectedOnScreenP50: expect.any(Number),
+      projectedOnScreenP95: 54,
+      validationEncounter: { enemyCount: 1 },
+    });
   });
 
   it('projects active time-based drop rates independently of legacy chance', () => {
@@ -100,6 +104,7 @@ describe('Budget derived event estimate', () => {
 
     const longerValidation = structuredClone(game);
     longerValidation.waves.stagePlan.validationWaves += 1;
+    longerValidation.waves.stagePlan.validation.unshift(structuredClone(longerValidation.waves.stagePlan.validation[0]));
     expect(deriveMetrics(longerValidation, runtime).expectedDrops).toBeLessThan(baseline);
   });
 });

@@ -59,11 +59,12 @@ export function beginIntermission(state: GameState): GameEvent[] {
   state.intermission = {
     active: true,
     afterWave: state.wave,
-    step: 'settle',
+    step: 'rewardChoice',
     settleRemaining: Math.max(0, cfg.waves.intermission.settleSeconds),
     freeRemaining: 0,
     readyConfirmed: false,
     rewardsGranted: [],
+    selectedReward: null,
   };
   return [{ type: 'waveCleared', wave: state.wave }];
 }
@@ -74,11 +75,12 @@ export function beginOpeningIntermission(state: GameState): GameEvent[] {
   state.intermission = {
     active: true,
     afterWave: 0,
-    step: 'decide',
+    step: 'godDecision',
     settleRemaining: 0,
     freeRemaining: 0,
     readyConfirmed: false,
     rewardsGranted: [],
+    selectedReward: null,
   };
   return [];
 }
@@ -98,6 +100,16 @@ export function tickIntermission(
   const intermission = state.intermission;
   if (!intermission.active) return { events: [], complete: false };
 
+  if (intermission.step === 'rewardChoice') {
+    const events = enqueueWaveBaseRewardDecision(state, intermission.afterWave);
+    if (events.length) return { events, complete: false };
+    if (state.decisions.current || state.decisions.pending.length) {
+      return { events: [], complete: false };
+    }
+    intermission.step = 'settle';
+    return { events: [], complete: false };
+  }
+
   if (intermission.step === 'settle') {
     const events = grantFloorRewards(state, intermission.afterWave);
     const granted = events.find(event => event.type === 'waveRewardsGranted');
@@ -105,18 +117,13 @@ export function tickIntermission(
       intermission.rewardsGranted = granted.granted.map(reward => ({ ...reward }));
     }
     intermission.settleRemaining = Math.max(0, intermission.settleRemaining - dt);
-    if (intermission.settleRemaining <= 0) intermission.step = 'decide';
+    if (intermission.settleRemaining <= 0) intermission.step = 'godDecision';
     return { events, complete: false };
   }
 
-  if (intermission.step === 'decide') {
+  if (intermission.step === 'godDecision') {
     const godEvents = enqueueGodPoolDecisionForIntermission(state, rng);
     if (godEvents.length) return { events: godEvents, complete: false };
-    if (state.decisions.current || state.decisions.pending.length) {
-      return { events: [], complete: false };
-    }
-    const waveRewardEvents = enqueueWaveBaseRewardDecision(state, intermission.afterWave);
-    if (waveRewardEvents.length) return { events: waveRewardEvents, complete: false };
     if (state.decisions.current || state.decisions.pending.length) {
       return { events: [], complete: false };
     }
@@ -147,10 +154,11 @@ export function endIntermission(state: GameState): void {
   state.intermission = {
     active: false,
     afterWave: 0,
-    step: 'decide',
+    step: 'godDecision',
     settleRemaining: 0,
     freeRemaining: 0,
     readyConfirmed: false,
     rewardsGranted: [],
+    selectedReward: null,
   };
 }

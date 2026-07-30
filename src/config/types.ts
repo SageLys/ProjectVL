@@ -23,6 +23,27 @@ export type ValidationRewardSpec =
   | { kind: 'wildcard'; star: number; count: number }
   | { kind: 'card'; star: number; count: number; typePolicy: ValidationRewardTypePolicy };
 
+/** 验证波杂兵构成权重。按 normal → fast → tank 固定顺序做累积抽取。 */
+export interface ValidationCompositionConfig {
+  normal: number;
+  fast: number;
+  tank: number;
+}
+
+/** 验证波敌潮：投射成 ResolvedRegularStageConfig 后复用 Budget 准入。 */
+export interface ValidationSwarmConfig {
+  quota: number;
+  targetOnScreen: number;
+  checkInterval: number;
+  batchMax: number;
+  maxAlive: number;
+  waveEndSprint: { window: number; multiplier: number };
+  hpMul: number;
+  damageMul: number;
+  speedMul: number;
+  composition: ValidationCompositionConfig;
+}
+
 export interface ValidationEnemySpec {
   type: 'normal' | 'fast' | 'tank';
   hpMul: number;
@@ -30,11 +51,29 @@ export interface ValidationEnemySpec {
   speedMul: number;
   ccResistOverride?: number;
   knockbackResistOverride?: number;
-  reward: ValidationRewardSpec;
+  reward?: ValidationRewardSpec;
+}
+
+/** 里程碑精英：敌潮进度越过 spawnAtProgress 时生成一次。 */
+export interface ValidationEliteSpawnSpec extends ValidationEnemySpec {
+  spawnAtProgress: number;
+}
+
+/** Boss 阶段持续召唤的护卫；不掉验证奖励，也不计入敌潮配额。 */
+export interface ValidationBossEscortConfig {
+  intervalSeconds: number;
+  count: number;
+  maxAlive: number;
+  hpMul: number;
+  damageMul: number;
+  speedMul: number;
+  composition: ValidationCompositionConfig;
 }
 
 export interface ValidationWaveConfig {
-  enemies: ValidationEnemySpec[];
+  swarm: ValidationSwarmConfig;
+  elites: ValidationEliteSpawnSpec[];
+  bossEscort?: ValidationBossEscortConfig;
   bossReward: ValidationRewardSpec;
 }
 

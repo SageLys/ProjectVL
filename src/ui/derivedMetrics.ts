@@ -104,22 +104,19 @@ function cell(game: GameConfig, runtime: Config, type: EnemyType, wave: number, 
   return { hitRate, ttk, entryWalk, insideWalk: Math.min(ttk, breachWalk), killDepth: runtime.range - speed * ttk, onScreen: 0 };
 }
 
-/** Deterministic, side-effect-free event estimate.  Enemies leave after entry walk + expected DPS TTK; this intentionally excludes skills, drops and player input. */
+/** Deterministic, side-effect-free estimate. Boss escorts are intentionally omitted because their lifetime depends on dynamic Boss combat. */
 export function simulateBudgetWave(game: GameConfig, runtime: Config, wave: number, plan: ResolvedWavePlan, distance: number, difficultyId: DifficultyId = 'hell'): { duration: number; projection: BudgetProjection } {
-  if (!plan.regular) {
-    const enemies = plan.validation?.enemies ?? [];
-    const estimatedTtk = enemies.reduce((sum, enemy) => sum + cell(game, runtime, enemy.type, wave, distance, difficultyId).ttk * enemy.hpMul, 0);
-    return {
-      duration: estimatedTtk,
-      projection: {
-        normalTarget: 0, sprintTarget: 0, averageOnScreen: enemies.length, peakOnScreen: enemies.length,
-        sprintTriggered: false, validationEncounter: { enemyCount: enemies.length, estimatedTtk },
-      },
-    };
-  }
+  if (!plan.regular) return {
+    duration: 0,
+    projection: { normalTarget: 0, sprintTarget: 0, averageOnScreen: 0, peakOnScreen: 0, sprintTriggered: false },
+  };
   let now = game.waves.firstSpawnDelay; let left = budgetWaveQuotaFor(plan);
   const leaveAt: number[] = []; let area = 0; let peak = 0; let sprintTriggered = false;
-  const lifetime = (type: EnemyType) => { const c = cell(game, runtime, type, wave, distance, difficultyId); return c.entryWalk + c.ttk; };
+  const lifetime = (type: EnemyType) => {
+    const c = cell(game, runtime, type, wave, distance, difficultyId);
+    const swarm = plan.validation?.swarm;
+    return swarm ? c.entryWalk / swarm.speedMul + c.ttk * swarm.hpMul : c.entryWalk + c.ttk;
+  };
   const checkInterval = Math.max(.0001, plan.regular.checkInterval);
   // Checks are discrete, exactly like runtime; deaths between checks only create a deficit at the next check.
   while (left > 0) {
@@ -134,10 +131,30 @@ export function simulateBudgetWave(game: GameConfig, runtime: Config, wave: numb
     area += leaveAt.length * checkInterval;
     now += checkInterval;
   }
-  const duration = Math.max(now - checkInterval, ...leaveAt);
+  let duration = Math.max(now - checkInterval, ...leaveAt);
+  let validationEncounter: BudgetProjection['validationEncounter'];
+  if (plan.validation) {
+    const elites = plan.validation.elites;
+    const estimatedTtk = elites.reduce(
+      (sum, elite) => sum + cell(game, runtime, elite.type, wave, distance, difficultyId).ttk * elite.hpMul,
+      0,
+    );
+    duration += estimatedTtk;
+    validationEncounter = { enemyCount: elites.length, estimatedTtk };
+  }
   const normal = budgetAdmission(plan, budgetWaveQuotaFor(plan), 0).normalTarget;
   const sprint = Math.ceil(normal * plan.regular.waveEndSprint.multiplier);
-  return { duration, projection: { normalTarget: Math.min(plan.regular.maxAlive, normal), sprintTarget: Math.min(plan.regular.maxAlive, sprint), averageOnScreen: duration ? area / duration : 0, peakOnScreen: peak, sprintTriggered } };
+  return {
+    duration,
+    projection: {
+      normalTarget: Math.min(plan.regular.maxAlive, normal),
+      sprintTarget: Math.min(plan.regular.maxAlive, sprint),
+      averageOnScreen: duration ? area / duration : 0,
+      peakOnScreen: peak,
+      sprintTriggered,
+      ...(validationEncounter ? { validationEncounter } : {}),
+    },
+  };
 }
 
 export function deriveMetrics(game: GameConfig, runtime: Config, difficultyId: DifficultyId = 'hell'): DerivedMetrics {

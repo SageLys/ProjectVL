@@ -2061,14 +2061,16 @@
   "intermission": {
     "title": "第 {wave} 波结束",
     "steps": {
+      "rewardChoice": "选择本波强化",
       "settle": "正在结算本波成果",
-      "decide": "等待构筑决策完成",
+      "godDecision": "等待神池决策完成",
       "free": "自由整备：可整理手牌与装备"
     },
     "countdown": "{seconds} 秒后自动准备完成",
     "waiting": "完成选择后进入自由整备",
     "ready": "准备完成",
     "rewardsTitle": "本波基础奖励",
+    "selectedRewardTitle": "本波强化选择",
     "rewardStats": {
       "damageAdd": "基础伤害",
       "fireRateAdd": "基础射速",

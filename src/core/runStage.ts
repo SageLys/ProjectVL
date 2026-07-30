@@ -31,6 +31,7 @@ export interface ResolvedRegularStageConfig {
 export interface ResolvedWavePlan {
   stage: RunStage;
   quota: number;
+  /** Validation waves carry both regular Budget rules and validation encounter data. */
   regular?: ResolvedRegularStageConfig;
   validation?: ValidationWaveConfig;
 }
@@ -39,7 +40,19 @@ export function resolveWavePlan(wave: number, totalWaves: number, plan: StagePla
   const stage = stageForWave(wave, totalWaves, plan);
   if (stage === 'validation') {
     const validationIndex = wave - (totalWaves - plan.validationWaves + 1);
-    return { stage, quota: 0, validation: plan.validation[validationIndex] };
+    const validation = plan.validation[validationIndex];
+    return {
+      stage,
+      quota: Math.max(0, Math.trunc(validation.swarm.quota)),
+      regular: {
+        targetOnScreen: validation.swarm.targetOnScreen,
+        checkInterval: validation.swarm.checkInterval,
+        batchMax: validation.swarm.batchMax,
+        maxAlive: validation.swarm.maxAlive,
+        waveEndSprint: { ...validation.swarm.waveEndSprint },
+      },
+      validation,
+    };
   }
   const config = stage === 'selection' ? plan.selection : plan.build;
   const progress = stageProgress(wave, totalWaves, plan);

@@ -9,7 +9,7 @@
     "frames": 12000,
     "start": "run"
   },
-  "framesRun": 5506,
+  "framesRun": 6031,
   "mode": "ended",
   "win": true,
   "hp": 1000000,
@@ -18,24 +18,24 @@
     "wave": 3,
     "phase": "boss",
     "spawnLeft": 0,
-    "waveSpawnQuota": 0,
+    "waveSpawnQuota": 24,
     "intermission": {
       "active": false,
-      "step": "decide",
+      "step": "godDecision",
       "afterWave": 0
     }
   },
   "enemiesRemaining": 0,
-  "cumulativeDamageDealt": 6697.839097628883,
+  "cumulativeDamageDealt": 5049.839097628883,
   "cumulativeDamageTaken": 0,
   "counters": {
-    "kills": 249,
-    "collected": 79,
+    "kills": 273,
+    "collected": 72,
     "expired": 0,
-    "merges": 12,
-    "consumes": 58,
+    "merges": 11,
+    "consumes": 52,
     "equipOps": 0,
-    "rewardPoints": 7,
+    "rewardPoints": 35.2,
     "rewardActivations": 8
   },
   "cards": [
@@ -62,7 +62,7 @@
     {
       "slot": 2,
       "cardType": "flashfire",
-      "star": 3,
+      "star": 4,
       "affixes": [
         "dotDamageMul:0.1",
         "damageMul:0.04"
@@ -84,22 +84,20 @@
     {
       "slot": 4,
       "cardType": "splitBlast",
-      "star": 3,
+      "star": 2,
       "affixes": [
         "damageMul:0.04",
         "areaScaleMul:0.15"
       ],
-      "evolutionPath": [
-        "3:splitBlastA"
-      ]
+      "evolutionPath": []
     },
     {
       "slot": 5,
-      "cardType": "flashfire",
-      "star": 2,
+      "cardType": "fateLoom",
+      "star": 1,
       "affixes": [
-        "dotDamageMul:0.1",
-        "damageMul:0.04"
+        "dropLifetimeMul:0.2",
+        "dropRateMul:0.1"
       ],
       "evolutionPath": []
     }
@@ -2841,26 +2839,290 @@
       "y": 755
     },
     {
-      "frame": 4481,
+      "frame": 4494,
       "id": 248,
       "type": "tank",
-      "spawnKind": "validationElite",
-      "maxHp": 3150,
-      "speed": 14.625,
-      "damage": 28,
-      "x": -25,
-      "y": 180.7749184500426
+      "spawnKind": "validationMinion",
+      "maxHp": 225,
+      "speed": 19.5,
+      "damage": 14,
+      "x": 199.55982148161303,
+      "y": -24.360382854559536
     },
     {
-      "frame": 5328,
+      "frame": 4494,
       "id": 249,
+      "type": "normal",
+      "spawnKind": "validationMinion",
+      "maxHp": 74,
+      "speed": 30,
+      "damage": 8,
+      "x": 336.7903010461703,
+      "y": -24.01442086141663
+    },
+    {
+      "frame": 4494,
+      "id": 250,
+      "type": "fast",
+      "spawnKind": "validationMinion",
+      "maxHp": 53,
+      "speed": 51,
+      "damage": 6,
+      "x": 334.87556497683795,
+      "y": 753.3232390058731
+    },
+    {
+      "frame": 4494,
+      "id": 251,
+      "type": "normal",
+      "spawnKind": "validationMinion",
+      "maxHp": 74,
+      "speed": 30,
+      "damage": 8,
+      "x": 564.0730141956095,
+      "y": 483.9939824670269
+    },
+    {
+      "frame": 4530,
+      "id": 252,
+      "type": "fast",
+      "spawnKind": "validationMinion",
+      "maxHp": 53,
+      "speed": 51,
+      "damage": 6,
+      "x": 563.3269300777607,
+      "y": 417.84079231929564
+    },
+    {
+      "frame": 4530,
+      "id": 253,
+      "type": "normal",
+      "spawnKind": "validationMinion",
+      "maxHp": 74,
+      "speed": 30,
+      "damage": 8,
+      "x": 217.1274430915531,
+      "y": -24.009110544813904
+    },
+    {
+      "frame": 4530,
+      "id": 254,
+      "type": "normal",
+      "spawnKind": "validationMinion",
+      "maxHp": 74,
+      "speed": 30,
+      "damage": 8,
+      "x": 564.0149330845433,
+      "y": 416.388506183614
+    },
+    {
+      "frame": 4530,
+      "id": 255,
+      "type": "normal",
+      "spawnKind": "validationMinion",
+      "maxHp": 74,
+      "speed": 30,
+      "damage": 8,
+      "x": -24.0247062808136,
+      "y": 298.4009666780891
+    },
+    {
+      "frame": 4638,
+      "id": 256,
+      "type": "tank",
+      "spawnKind": "validationMinion",
+      "maxHp": 225,
+      "speed": 19.5,
+      "damage": 14,
+      "x": -24.56248805847365,
+      "y": 688.6471668780125
+    },
+    {
+      "frame": 4638,
+      "id": 257,
+      "type": "normal",
+      "spawnKind": "validationMinion",
+      "maxHp": 74,
+      "speed": 30,
+      "damage": 8,
+      "x": 400.70201586848594,
+      "y": -24.05206344043485
+    },
+    {
+      "frame": 4674,
+      "id": 258,
+      "type": "normal",
+      "spawnKind": "validationMinion",
+      "maxHp": 74,
+      "speed": 30,
+      "damage": 8,
+      "x": 564.0544712826852,
+      "y": 263.7591721459798
+    },
+    {
+      "frame": 4674,
+      "id": 259,
+      "type": "normal",
+      "spawnKind": "validationMinion",
+      "maxHp": 74,
+      "speed": 30,
+      "damage": 8,
+      "x": 564.0664608631989,
+      "y": 252.07959229702072
+    },
+    {
+      "frame": 4674,
+      "id": 260,
+      "type": "tank",
+      "spawnKind": "validationElite",
+      "maxHp": 675,
+      "speed": 16.575,
+      "damage": 21,
+      "x": -24.57148432999804,
+      "y": 125.25731369493559
+    },
+    {
+      "frame": 4746,
+      "id": 261,
+      "type": "normal",
+      "spawnKind": "validationMinion",
+      "maxHp": 74,
+      "speed": 30,
+      "damage": 8,
+      "x": -24.211082461257096,
+      "y": 135.83480835522863
+    },
+    {
+      "frame": 4782,
+      "id": 262,
+      "type": "fast",
+      "spawnKind": "validationMinion",
+      "maxHp": 53,
+      "speed": 51,
+      "damage": 6,
+      "x": 313.277365178955,
+      "y": 753.3104606670549
+    },
+    {
+      "frame": 4854,
+      "id": 263,
+      "type": "fast",
+      "spawnKind": "validationMinion",
+      "maxHp": 53,
+      "speed": 51,
+      "damage": 6,
+      "x": 430.46995026822134,
+      "y": -23.42880120451627
+    },
+    {
+      "frame": 4854,
+      "id": 264,
+      "type": "normal",
+      "spawnKind": "validationMinion",
+      "maxHp": 74,
+      "speed": 30,
+      "damage": 8,
+      "x": 271.4814813629536,
+      "y": 754.0000072520108
+    },
+    {
+      "frame": 4890,
+      "id": 265,
+      "type": "fast",
+      "spawnKind": "validationMinion",
+      "maxHp": 53,
+      "speed": 51,
+      "damage": 6,
+      "x": 400.19003516871334,
+      "y": -23.388146218557683
+    },
+    {
+      "frame": 4926,
+      "id": 266,
+      "type": "fast",
+      "spawnKind": "validationMinion",
+      "maxHp": 53,
+      "speed": 51,
+      "damage": 6,
+      "x": 112.62499699401526,
+      "y": 753.4244100199863
+    },
+    {
+      "frame": 4926,
+      "id": 267,
+      "type": "normal",
+      "spawnKind": "validationMinion",
+      "maxHp": 74,
+      "speed": 30,
+      "damage": 8,
+      "x": 408.86372664562083,
+      "y": 754.0581924512942
+    },
+    {
+      "frame": 4962,
+      "id": 268,
+      "type": "fast",
+      "spawnKind": "validationMinion",
+      "maxHp": 53,
+      "speed": 51,
+      "damage": 6,
+      "x": -23.370933331215284,
+      "y": 452.5114034421403
+    },
+    {
+      "frame": 4998,
+      "id": 269,
+      "type": "tank",
+      "spawnKind": "validationMinion",
+      "maxHp": 225,
+      "speed": 19.5,
+      "damage": 14,
+      "x": 294.36500927417836,
+      "y": 754.3512689954749
+    },
+    {
+      "frame": 5034,
+      "id": 270,
+      "type": "normal",
+      "spawnKind": "validationMinion",
+      "maxHp": 74,
+      "speed": 30,
+      "damage": 8,
+      "x": -24.002534232239704,
+      "y": 385.970846065035
+    },
+    {
+      "frame": 5070,
+      "id": 271,
+      "type": "normal",
+      "spawnKind": "validationMinion",
+      "maxHp": 74,
+      "speed": 30,
+      "damage": 8,
+      "x": 165.28661398173026,
+      "y": -24.03436764655057
+    },
+    {
+      "frame": 5106,
+      "id": 272,
+      "type": "tank",
+      "spawnKind": "validationMinion",
+      "maxHp": 225,
+      "speed": 19.5,
+      "damage": 14,
+      "x": 564.4771322253305,
+      "y": 582.4763574175167
+    },
+    {
+      "frame": 5802,
+      "id": 273,
       "type": "boss",
       "spawnKind": "waveBoss",
       "maxHp": 1260,
       "speed": 32.5,
       "damage": 28,
       "x": 565,
-      "y": 299.2028516763821
+      "y": 558.7198628298938
     }
   ],
   "dropSequence": [
@@ -3849,161 +4111,41 @@
       "star": 1
     },
     {
-      "frame": 4970,
+      "frame": 5150,
       "action": "spawned",
       "dropId": 67,
       "kind": "card",
-      "cardType": "goldenVolley",
-      "star": 1
-    },
-    {
-      "frame": 4970,
-      "action": "spawned",
-      "dropId": 68,
-      "kind": "card",
-      "cardType": "harvest",
-      "star": 1
-    },
-    {
-      "frame": 4970,
-      "action": "spawned",
-      "dropId": 69,
-      "kind": "card",
-      "cardType": "harvest",
-      "star": 1
-    },
-    {
-      "frame": 4980,
-      "action": "collected",
-      "dropId": 67,
-      "kind": "card",
-      "cardType": "goldenVolley",
-      "star": 1
-    },
-    {
-      "frame": 5000,
-      "action": "spawned",
-      "dropId": 70,
-      "kind": "card",
-      "cardType": "fateLoom",
-      "star": 1
-    },
-    {
-      "frame": 5010,
-      "action": "collected",
-      "dropId": 68,
-      "kind": "card",
-      "cardType": "harvest",
-      "star": 1
-    },
-    {
-      "frame": 5025,
-      "action": "collected",
-      "dropId": 69,
-      "kind": "card",
-      "cardType": "harvest",
-      "star": 1
-    },
-    {
-      "frame": 5030,
-      "action": "spawned",
-      "dropId": 71,
-      "kind": "card",
-      "cardType": "goldenVolley",
-      "star": 1
-    },
-    {
-      "frame": 5030,
-      "action": "spawned",
-      "dropId": 72,
-      "kind": "card",
       "cardType": "splitBlast",
-      "star": 1
-    },
-    {
-      "frame": 5040,
-      "action": "collected",
-      "dropId": 70,
-      "kind": "card",
-      "cardType": "fateLoom",
-      "star": 1
-    },
-    {
-      "frame": 5060,
-      "action": "spawned",
-      "dropId": 73,
-      "kind": "card",
-      "cardType": "harvest",
-      "star": 1
-    },
-    {
-      "frame": 5070,
-      "action": "collected",
-      "dropId": 71,
-      "kind": "card",
-      "cardType": "goldenVolley",
-      "star": 1
-    },
-    {
-      "frame": 5090,
-      "action": "spawned",
-      "dropId": 74,
-      "kind": "card",
-      "cardType": "harvest",
-      "star": 1
-    },
-    {
-      "frame": 5100,
-      "action": "collected",
-      "dropId": 72,
-      "kind": "card",
-      "cardType": "splitBlast",
-      "star": 1
-    },
-    {
-      "frame": 5130,
-      "action": "collected",
-      "dropId": 73,
-      "kind": "card",
-      "cardType": "harvest",
-      "star": 1
-    },
-    {
-      "frame": 5145,
-      "action": "collected",
-      "dropId": 74,
-      "kind": "card",
-      "cardType": "harvest",
       "star": 1
     },
     {
       "frame": 5150,
       "action": "spawned",
-      "dropId": 75,
+      "dropId": 68,
       "kind": "card",
-      "cardType": "harvest",
+      "cardType": "flashfire",
       "star": 1
     },
     {
       "frame": 5150,
       "action": "spawned",
-      "dropId": 76,
+      "dropId": 69,
       "kind": "card",
-      "cardType": "splitBlast",
+      "cardType": "flashfire",
+      "star": 1
+    },
+    {
+      "frame": 5150,
+      "action": "spawned",
+      "dropId": 70,
+      "kind": "card",
+      "cardType": "fateLoom",
       "star": 1
     },
     {
       "frame": 5160,
       "action": "collected",
-      "dropId": 75,
-      "kind": "card",
-      "cardType": "harvest",
-      "star": 1
-    },
-    {
-      "frame": 5180,
-      "action": "spawned",
-      "dropId": 77,
+      "dropId": 67,
       "kind": "card",
       "cardType": "splitBlast",
       "star": 1
@@ -4011,23 +4153,31 @@
     {
       "frame": 5190,
       "action": "collected",
-      "dropId": 76,
+      "dropId": 68,
       "kind": "card",
-      "cardType": "splitBlast",
+      "cardType": "flashfire",
       "star": 1
     },
     {
       "frame": 5205,
       "action": "collected",
-      "dropId": 77,
+      "dropId": 69,
       "kind": "card",
-      "cardType": "splitBlast",
+      "cardType": "flashfire",
       "star": 1
     },
     {
-      "frame": 5502,
+      "frame": 5220,
+      "action": "collected",
+      "dropId": 70,
+      "kind": "card",
+      "cardType": "fateLoom",
+      "star": 1
+    },
+    {
+      "frame": 6022,
       "action": "spawned",
-      "dropId": 78,
+      "dropId": 71,
       "kind": "wildcard",
       "cardType": null,
       "star": 5
@@ -4700,38 +4850,38 @@
     },
     {
       "frame": 2327,
-      "type": "waveRewardsGranted"
-    },
-    {
-      "frame": 2343,
-      "type": "godOffer"
-    },
-    {
-      "frame": 2343,
-      "type": "decisionOffered"
-    },
-    {
-      "frame": 2343,
-      "type": "godSelected"
-    },
-    {
-      "frame": 2343,
-      "type": "decisionResolved"
-    },
-    {
-      "frame": 2344,
       "type": "waveBaseRewardOffered"
     },
     {
-      "frame": 2344,
+      "frame": 2327,
       "type": "decisionOffered"
     },
     {
-      "frame": 2344,
+      "frame": 2327,
       "type": "waveBaseRewardChosen"
     },
     {
-      "frame": 2344,
+      "frame": 2327,
+      "type": "decisionResolved"
+    },
+    {
+      "frame": 2329,
+      "type": "waveRewardsGranted"
+    },
+    {
+      "frame": 2345,
+      "type": "godOffer"
+    },
+    {
+      "frame": 2345,
+      "type": "decisionOffered"
+    },
+    {
+      "frame": 2345,
+      "type": "godSelected"
+    },
+    {
+      "frame": 2345,
       "type": "decisionResolved"
     },
     {
@@ -5680,42 +5830,42 @@
     },
     {
       "frame": 4442,
-      "type": "waveRewardsGranted"
-    },
-    {
-      "frame": 4458,
-      "type": "godOffer"
-    },
-    {
-      "frame": 4458,
-      "type": "decisionOffered"
-    },
-    {
-      "frame": 4458,
-      "type": "godSelected"
-    },
-    {
-      "frame": 4458,
-      "type": "runRosterCreated"
-    },
-    {
-      "frame": 4458,
-      "type": "decisionResolved"
-    },
-    {
-      "frame": 4459,
       "type": "waveBaseRewardOffered"
     },
     {
-      "frame": 4459,
+      "frame": 4442,
       "type": "decisionOffered"
     },
     {
-      "frame": 4459,
+      "frame": 4442,
       "type": "waveBaseRewardChosen"
     },
     {
-      "frame": 4459,
+      "frame": 4442,
+      "type": "decisionResolved"
+    },
+    {
+      "frame": 4444,
+      "type": "waveRewardsGranted"
+    },
+    {
+      "frame": 4460,
+      "type": "godOffer"
+    },
+    {
+      "frame": 4460,
+      "type": "decisionOffered"
+    },
+    {
+      "frame": 4460,
+      "type": "godSelected"
+    },
+    {
+      "frame": 4460,
+      "type": "runRosterCreated"
+    },
+    {
+      "frame": 4460,
       "type": "decisionResolved"
     },
     {
@@ -5731,124 +5881,112 @@
       "type": "activePoolCreated"
     },
     {
-      "frame": 4966,
-      "type": "validationRewardGranted"
-    },
-    {
-      "frame": 4966,
-      "type": "affixRolled"
-    },
-    {
-      "frame": 4966,
-      "type": "evolutionBranchOffered"
-    },
-    {
-      "frame": 4966,
-      "type": "decisionOffered"
-    },
-    {
-      "frame": 4966,
+      "frame": 4620,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 4966,
-      "type": "validationRewardSettleStarted"
+      "frame": 4630,
+      "type": "rewardPointsGained"
     },
     {
-      "frame": 4966,
+      "frame": 4640,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 4661,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 4674,
+      "type": "validationEliteSpawned"
+    },
+    {
+      "frame": 4681,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 4738,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 4772,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 4834,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 4840,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 4867,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 4898,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 4918,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 4926,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 4968,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 5016,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 5057,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 5082,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 5094,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 5106,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 5129,
+      "type": "validationRewardGranted"
+    },
+    {
+      "frame": 5129,
+      "type": "affixRolled"
+    },
+    {
+      "frame": 5129,
+      "type": "evolutionBranchOffered"
+    },
+    {
+      "frame": 5129,
+      "type": "decisionOffered"
+    },
+    {
+      "frame": 5129,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 5129,
       "type": "evolutionBranchSelected"
     },
     {
-      "frame": 4966,
+      "frame": 5129,
       "type": "decisionResolved"
-    },
-    {
-      "frame": 4970,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 4980,
-      "type": "collected"
-    },
-    {
-      "frame": 4995,
-      "type": "cardsFull"
-    },
-    {
-      "frame": 5000,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 5010,
-      "type": "collected"
-    },
-    {
-      "frame": 5010,
-      "type": "affixRolled"
-    },
-    {
-      "frame": 5025,
-      "type": "collected"
-    },
-    {
-      "frame": 5025,
-      "type": "merged"
-    },
-    {
-      "frame": 5030,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 5040,
-      "type": "collected"
-    },
-    {
-      "frame": 5040,
-      "type": "affixRolled"
-    },
-    {
-      "frame": 5055,
-      "type": "cardsFull"
-    },
-    {
-      "frame": 5060,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 5070,
-      "type": "collected"
-    },
-    {
-      "frame": 5085,
-      "type": "cardsFull"
-    },
-    {
-      "frame": 5090,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 5100,
-      "type": "collected"
-    },
-    {
-      "frame": 5115,
-      "type": "cardsFull"
-    },
-    {
-      "frame": 5120,
-      "type": "skillConsumed"
-    },
-    {
-      "frame": 5130,
-      "type": "collected"
-    },
-    {
-      "frame": 5145,
-      "type": "collected"
-    },
-    {
-      "frame": 5145,
-      "type": "merged"
     },
     {
       "frame": 5150,
@@ -5863,8 +6001,16 @@
       "type": "cardsFull"
     },
     {
+      "frame": 5178,
+      "type": "rewardPointsGained"
+    },
+    {
       "frame": 5180,
       "type": "skillConsumed"
+    },
+    {
+      "frame": 5190,
+      "type": "rewardPointsGained"
     },
     {
       "frame": 5190,
@@ -5896,26 +6042,58 @@
     },
     {
       "frame": 5206,
+      "type": "merged"
+    },
+    {
+      "frame": 5206,
       "type": "decisionResolved"
     },
     {
-      "frame": 5328,
-      "type": "waveBossSpawned"
+      "frame": 5220,
+      "type": "collected"
     },
     {
-      "frame": 5502,
+      "frame": 5220,
+      "type": "affixRolled"
+    },
+    {
+      "frame": 5323,
       "type": "rewardPointsGained"
     },
     {
-      "frame": 5505,
+      "frame": 5364,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 5441,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 5441,
+      "type": "validationRewardSettleStarted"
+    },
+    {
+      "frame": 5802,
+      "type": "waveBossSpawned"
+    },
+    {
+      "frame": 6022,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 6023,
+      "type": "validationEscortsCleared"
+    },
+    {
+      "frame": 6030,
       "type": "wildcardsGranted"
     },
     {
-      "frame": 5505,
+      "frame": 6030,
       "type": "bossRewardGranted"
     },
     {
-      "frame": 5506,
+      "frame": 6031,
       "type": "gameEnd"
     }
   ],
@@ -5926,33 +6104,35 @@
     "decisionResolved": 8,
     "waveStart": 3,
     "activePoolCreated": 3,
-    "rewardPointsGained": 226,
-    "collected": 75,
-    "affixRolled": 11,
+    "rewardPointsGained": 250,
+    "collected": 68,
+    "affixRolled": 10,
     "bountyOfferSpawned": 4,
-    "merged": 12,
+    "merged": 11,
     "rewardTriggered": 8,
     "rewardConfirmed": 8,
     "bountyOfferExpired": 4,
-    "skillConsumed": 58,
+    "skillConsumed": 52,
     "wildcardsGranted": 6,
     "evolutionBranchOffered": 3,
     "evolutionBranchSelected": 3,
     "waveBossSpawned": 3,
     "bossRewardGranted": 3,
     "waveCleared": 2,
-    "waveRewardsGranted": 2,
     "waveBaseRewardOffered": 2,
     "waveBaseRewardChosen": 2,
+    "waveRewardsGranted": 2,
     "intermissionReady": 2,
     "runRosterCreated": 1,
+    "validationEliteSpawned": 1,
     "validationRewardGranted": 1,
+    "cardsFull": 1,
     "validationRewardSettleStarted": 1,
-    "cardsFull": 5,
+    "validationEscortsCleared": 1,
     "gameEnd": 1
   },
   "rng": {
-    "draws": 19493,
-    "last": 0.9256664626300335
+    "draws": 21245,
+    "last": 0.06169937434606254
   }
 }

@@ -39,11 +39,35 @@ const gods = optionalBaseConfig('gods.json', { version: '0.1.0', gods: [] });
 const evolutionRecipes = optionalBaseConfig('evolutionRecipes.json', { version: '0.1.0', recipes: [] });
 const waveRewards = optionalBaseConfig('waveRewards.json', { version: '0.2.0', floor: [], choice: [] });
 
-function normalizeValidationRewards(config: GameConfig): void {
-  for (const wave of config.waves.stagePlan.validation) {
-    for (const enemy of wave.enemies) {
-      const reward = enemy.reward as unknown as Record<string, unknown>;
-      if (!reward.kind) reward.kind = 'wildcard';
+/** Migrate validation stages saved before swarm/elites were introduced. */
+export function normalizeValidationStage(config: GameConfig): void {
+  const waves = config.waves.stagePlan.validation as unknown as Array<Record<string, unknown>>;
+  for (const wave of waves) {
+    if (!Array.isArray(wave.elites) && Array.isArray(wave.enemies)) {
+      const enemies = wave.enemies as Array<Record<string, unknown>>;
+      wave.elites = enemies.map((enemy, index) => ({
+        ...enemy,
+        spawnAtProgress: index / (enemies.length + 1),
+      }));
+      delete wave.enemies;
+    }
+    if (!wave.swarm) {
+      wave.swarm = {
+        quota: 0,
+        targetOnScreen: 0,
+        checkInterval: 1,
+        batchMax: 1,
+        maxAlive: 1,
+        waveEndSprint: { window: 0, multiplier: 1 },
+        hpMul: 1,
+        damageMul: 1,
+        speedMul: 1,
+        composition: { normal: 1, fast: 0, tank: 0 },
+      };
+    }
+    for (const elite of (wave.elites as Array<Record<string, unknown>> ?? [])) {
+      const reward = elite.reward as Record<string, unknown> | undefined;
+      if (reward && !reward.kind) reward.kind = 'wildcard';
     }
     const bossReward = wave.bossReward as unknown as Record<string, unknown>;
     if (!bossReward.kind) bossReward.kind = 'wildcard';
@@ -131,7 +155,7 @@ function assembleBase(): GameConfig {
     tuner,
   }) as unknown as GameConfig;
   normalizeLegacyDirectorConfig(config);
-  normalizeValidationRewards(config);
+  normalizeValidationStage(config);
   validateGodConfig(config);
   validateTunerConfig(config);
   validateIntermissionConfig(config.waves.intermission);
@@ -152,7 +176,7 @@ export function buildConfig(variantNames: string[] = []): GameConfig {
   }
   cfg.waves.bossWaves = normalizeBossWaves(cfg.waves.bossWaves, cfg.waves.totalWaves);
   normalizeLegacyDirectorConfig(cfg);
-  normalizeValidationRewards(cfg);
+  normalizeValidationStage(cfg);
   validateSkillsConfig(cfg.skills);
   validateGodConfig(cfg);
   validateTunerConfig(cfg);

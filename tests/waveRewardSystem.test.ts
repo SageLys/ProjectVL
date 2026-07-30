@@ -93,6 +93,7 @@ describe('waveRewardSystem floor', () => {
     jumped.spawnLeft = 0;
     jumped.enemies.length = 0;
     advanceWavePhase(jumped, runtime, constRng(0));
+    jumped.intermission.step = 'settle';
     const settled = tickIntermission(jumped, 0).events;
 
     expect(settled).toContainEqual(expect.objectContaining({
@@ -112,6 +113,7 @@ describe('waveRewardSystem floor', () => {
     const state = freshState();
     state.wave = 3;
     beginIntermission(state);
+    state.intermission.step = 'settle';
     tickIntermission(state, 0);
     const restored = structuredClone(state);
     const before = structuredClone({
@@ -178,6 +180,7 @@ describe('waveRewardSystem floor', () => {
     const state = freshState();
     state.wave = 2;
     beginIntermission(state);
+    state.intermission.step = 'settle';
     tickIntermission(state, 0);
 
     panel.render(state);

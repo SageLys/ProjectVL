@@ -60,7 +60,6 @@ function hudRefs(): DomRefs {
     rewardThresholdText: textNode(),
     rewardBar: textNode(),
     waveText: textNode(),
-    godPoolText: textNode(),
     statModifierText: null,
     damageStat: null,
     rateStat: null,

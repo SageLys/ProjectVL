@@ -62,6 +62,8 @@ function normalDropStar(rng: Rng): number {
 
 /** 击杀掉落判定：概率命中或 boss 必掉，则在敌人位置生成掉落。 */
 export function rollDropOnKill(state: GameState, config: Config, rng: Rng, enemy: Enemy): void {
+  // Validation swarms and Boss escorts are isolated from both ordinary-drop branches.
+  if (enemy.spawnKind === 'validationMinion') return;
   const rate = cfg.economy.ordinaryDropRate;
   if (!rate.enabled) {
     if (rng() < totalDropChance(state, config)) {

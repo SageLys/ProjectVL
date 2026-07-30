@@ -1,6 +1,6 @@
 import { cfg } from '../../config';
 import type { CardType, Config, Enemy, EnemyType, GameEvent, GameState, Rng, Summon } from '../types';
-import type { ValidationRewardSpec } from '../../config/types';
+import type { ValidationCompositionConfig, ValidationRewardSpec } from '../../config/types';
 import { endGame } from '../endGame';
 import { spawnParticle } from './particleSystem';
 import { killEnemy } from './damageSystem';
@@ -10,6 +10,7 @@ import { fireTrigger, getModifiers } from '../effects/interpreter';
 import { notifyBountyMemberBreached, notifyBountyMemberKilled } from './bountySystem';
 import { difficultyMultipliersFor } from '../difficulty';
 import { totalRange } from '../stats';
+import { resolveActiveWavePlan } from '../runStage';
 
 /**
  * 敌人类型判定：roll < tankBase + wave*tankPerWave → 重装；
@@ -18,6 +19,16 @@ import { totalRange } from '../stats';
 export function determineType(wave: number, roll: number, _spawnLeft: number): EnemyType {
   const tr = cfg.waves.typeRoll;
   return roll < tr.tankBase + wave * tr.tankPerWave ? 'tank' : roll < tr.fastThreshold ? 'fast' : 'normal';
+}
+
+/** Validation-wave composition is independent from the global typeRoll curve. */
+export function determineValidationType(composition: ValidationCompositionConfig, roll: number): EnemyType {
+  const total = composition.normal + composition.fast + composition.tank;
+  if (!(total > 0)) return 'normal';
+  const scaled = roll * total;
+  if (scaled < composition.normal) return 'normal';
+  if (scaled < composition.normal + composition.fast) return 'fast';
+  return 'tank';
 }
 
 export interface EnemyModifiers {
@@ -112,9 +123,17 @@ export function randomEdgeSpawnPosition(rng: Rng): { x: number; y: number } {
 
 export function spawnEnemy(state: GameState, rng: Rng): void {
   const roll = rng();
-  const type = determineType(state.wave, roll, state.spawnLeft);
+  const swarm = resolveActiveWavePlan(cfg, state.wave).validation?.swarm;
+  const type = swarm
+    ? determineValidationType(swarm.composition, roll)
+    : determineType(state.wave, roll, state.spawnLeft);
   const spawn = randomEdgeSpawnPosition(rng);
-  state.enemies.push(createEnemy(state, type, state.wave, spawn));
+  state.enemies.push(createEnemy(state, type, state.wave, spawn, swarm ? {
+    spawnKind: 'validationMinion',
+    hpMul: swarm.hpMul,
+    damageMul: swarm.damageMul,
+    speedMul: swarm.speedMul,
+  } : undefined));
 }
 
 /** Spawn the explicit end-of-wave Boss without consuming the regular quota. */

@@ -19,7 +19,7 @@
     "waveSpawnQuota": 60,
     "intermission": {
       "active": false,
-      "step": "decide",
+      "step": "godDecision",
       "afterWave": 0
     }
   },

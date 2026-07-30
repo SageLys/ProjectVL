@@ -47,6 +47,10 @@ export function formatToast(ev: GameEvent): string | null {
       ? `验证奖励已直接加入手牌：${name(ev.cardType)} ${ev.star}★`
       : `手牌已满，验证奖励已安全落地：${name(ev.cardType)} ${ev.star}★`;
     case 'validationRewardSettleStarted': return `验证奖励结算窗口：${ev.seconds} 秒`;
+    case 'validationEliteSpawned': return '验证精英已入场';
+    case 'validationEscortSpawned':
+    case 'validationEscortsCleared':
+      return null;
     case 'breakthrough': return fmt(T.breakthrough, { damage: Math.round(ev.damage) });
     case 'bossContactStarted': return T.bossContactStarted;
     case 'bossContactDamage':

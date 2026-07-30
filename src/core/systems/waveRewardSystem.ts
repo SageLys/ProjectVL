@@ -107,7 +107,12 @@ function waveBaseRewardResolver(
   choice: string,
 ): GameEvent[] {
   if (decision.kind !== 'waveBaseReward') return [];
-  return applyWaveChoice(state, config, choice, decision.wave);
+  const events = applyWaveChoice(state, config, choice, decision.wave);
+  const option = cfg.waveRewards.choice.find(def => def.id === choice);
+  if (option && state.intermission.active && state.intermission.afterWave === decision.wave) {
+    state.intermission.selectedReward = { id: option.id, stat: option.stat, add: option.add };
+  }
+  return events;
 }
 
 export function registerWaveBaseRewardDecisionResolver(): void {

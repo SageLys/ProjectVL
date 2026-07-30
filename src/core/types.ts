@@ -9,7 +9,7 @@ export type CardType = string;
 export type EnemyType = 'normal' | 'fast' | 'tank' | 'boss';
 export type GameMode = 'ready' | 'playing' | 'ended';
 export type WavePhase = 'regular' | 'validationRewardSettle' | 'boss' | 'between';
-export type EnemySpawnKind = 'regular' | 'waveBoss' | 'bounty' | 'validationElite';
+export type EnemySpawnKind = 'regular' | 'waveBoss' | 'bounty' | 'validationElite' | 'validationMinion';
 export type BountySide = 'top' | 'right' | 'bottom' | 'left';
 
 export interface BountyOffer {
@@ -185,7 +185,7 @@ export interface WaveRewardGrant {
   add: number;
 }
 
-export type IntermissionStep = 'settle' | 'decide' | 'free';
+export type IntermissionStep = 'rewardChoice' | 'settle' | 'godDecision' | 'free';
 
 export interface IntermissionState {
   active: boolean;
@@ -195,6 +195,8 @@ export interface IntermissionState {
   freeRemaining: number;
   readyConfirmed: boolean;
   rewardsGranted: WaveRewardGrant[];
+  /** 本波玩家在「强化炮台」中选中的项；开局波与无可选项时为 null。 */
+  selectedReward: { id: string; stat: WaveChoiceStatKind; add: number } | null;
 }
 
 export type WildcardInventory = Record<number, number>;
@@ -622,6 +624,11 @@ export interface GameState {
   wavePhase: WavePhase;
   validationRewardSettleRemaining: number;
   validationRewardSettleConfirmed: boolean;
+  validationRuntime: {
+    spawnedEliteIndexes: number[];
+    bossEscortTimer: number;
+    bossEscortsCleared: boolean;
+  };
   waveBossId: number | null;
   waveBossSpawnedAt: number | null;
   bossRewardClaimedWave: number;
@@ -686,6 +693,9 @@ export type GameEvent =
   | { type: 'bossRewardGranted'; wave: number; grants: Array<{ star: number; count: number }> }
   | { type: 'validationRewardGranted'; wave: number; cardType: CardType; star: number; delivery: 'hand' | 'drop' }
   | { type: 'validationRewardSettleStarted'; wave: number; seconds: number }
+  | { type: 'validationEliteSpawned'; wave: number; eliteIndex: number; enemyId: number }
+  | { type: 'validationEscortSpawned'; wave: number; count: number }
+  | { type: 'validationEscortsCleared'; wave: number; removed: number }
   // 只带 id：显示名属表现层，由 UI 文案映射解析（core 不得依赖 texts）。
   | { type: 'rewardPointsGained'; amount: number; total: number }
   | { type: 'rewardTriggered'; rewardId: string; activationIndex: number; result: RewardExecutionResult }

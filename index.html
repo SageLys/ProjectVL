@@ -8,22 +8,24 @@
 <body>
   <main class="game-shell">
     <header class="game-hud" aria-label="战斗状态">
-      <div class="hud-vital">
-        <div class="bar"><i id="hpBar"></i></div>
-        <span>HP <b id="hpText">100</b> / <b id="maxHpText">100</b></span>
-      </div>
-      <div class="hud-progress">
-        <strong>波次 <span id="waveText">0</span>/<span id="totalWavesText">5</span></strong>
-        <strong id="evolutionHudText">进化 0/2</strong>
-        <span id="rewardMeterLabel">心防共鸣 <span id="rewardPointsText">0</span>/<span id="rewardThresholdText">10</span></span>
-        <small id="godPoolText" class="god-pool-hud"></small>
+      <div class="hud-status-row">
+        <strong class="hud-wave">波次 <span id="waveText">0</span>/<span id="totalWavesText">5</span></strong>
         <small id="statModifierText" class="stat-modifier-hud" hidden></small>
-        <div class="bar reward"><i id="rewardBar" style="width:0%"></i></div>
       </div>
+      <div class="hud-meter-row">
+        <div class="hud-meter hud-meter-hp">
+          <span class="hud-meter-label">HP <b id="hpText">100</b>/<b id="maxHpText">100</b></span>
+          <div class="bar"><i id="hpBar"></i></div>
+        </div>
+        <div class="hud-meter hud-meter-reward">
+          <span class="hud-meter-label" id="rewardMeterLabel">心防共鸣 <b id="rewardPointsText">0</b>/<b id="rewardThresholdText">10</b></span>
+          <div class="bar reward"><i id="rewardBar" style="width:0%"></i></div>
+        </div>
       <div class="hud-controls">
         <button class="validation-settle" id="validationSettleBtn" type="button" hidden>奖励结算 12s · 继续</button>
         <button class="hud-speed" id="speedBtn" type="button" aria-label="游戏速度：1倍" title="切换游戏速度">1×</button>
         <button class="hud-pause" id="pauseBtn" type="button" aria-label="暂停">Ⅱ</button>
+      </div>
       </div>
     </header>
 
@@ -66,7 +68,7 @@
     </section>
   </main>
 
-  <div class="modal" id="resultModal"><div class="modal-card"><h2 id="resultTitle">防守完成</h2><p id="resultDesc"></p><div class="result-grid">
+  <div class="modal" id="resultModal" role="dialog" aria-modal="true" aria-labelledby="resultTitle"><div class="modal-card"><h2 id="resultTitle">防守完成</h2><p id="resultDesc"></p><div class="result-grid">
     <div><span>击杀</span><b id="resultKills">0</b></div><div><span>合成</span><b id="resultMerges">0</b></div><div><span>消耗</span><b id="resultUses">0</b></div>
   </div><section class="result-score" id="resultScore" hidden><div class="result-total"><span id="resultScoreLabel"></span><b id="resultScoreTotal">0</b></div><div class="result-breakdown" id="resultBreakdown"></div><div class="result-build-meta" id="resultBuildMeta"></div></section><button class="btn primary" id="restartBtn">再来一局</button></div></div>
   <script type="module" src="/src/main.ts"></script>

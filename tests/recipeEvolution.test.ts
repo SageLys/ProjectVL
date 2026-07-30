@@ -127,7 +127,7 @@ describe('instant fixed-recipe evolution', () => {
     ['paused', (state: GameState) => { state.paused = true; }, 'paused'],
     ['decision', (state: GameState) => { state.decisions.current = { kind: 'godFocus', wave: 2, candidates: ['storm'] }; }, 'decision'],
     ['settle', (state: GameState) => { state.wavePhase = 'between'; state.intermission.active = true; state.intermission.step = 'settle'; }, 'intermission'],
-    ['decide', (state: GameState) => { state.wavePhase = 'between'; state.intermission.active = true; state.intermission.step = 'decide'; }, 'intermission'],
+    ['godDecision', (state: GameState) => { state.wavePhase = 'between'; state.intermission.active = true; state.intermission.step = 'godDecision'; }, 'intermission'],
   ])('rejects %s with an exact reason and consumes no RNG', (_label, mutate, reason) => {
     const { state, item, source, target } = readyPair();
     mutate(state);

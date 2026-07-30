@@ -1,5 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { buildConfig, deepMerge, variantsFromSearch, cfg, applyVariants, VARIANTS } from '../src/config';
+import { normalizeValidationStage } from '../src/config/loader';
 import { resetTestEnv } from './helpers';
 import { validateRewardMeterConfig } from '../src/config/rewardMeterValidator';
 import { computeWaveBossReward } from '../src/core/systems/waveBossSystem';
@@ -37,6 +38,22 @@ describe('击退配置', () => {
 
 describe('config · 深合并', () => {
   it('对象递归合并，标量与数组整体替换，不改入参', () => { const base={a:{b:1,c:[1,2]},d:'x'}; const out=deepMerge(base,{a:{c:[9]}} as never); expect(out).toEqual({a:{b:1,c:[9]},d:'x'}); expect(base.a.c).toEqual([1,2]); });
+});
+describe('config · 验证波兼容层', () => {
+  it('把旧 enemies 格式迁移为互不重复的里程碑精英和零配额敌潮', () => {
+    const legacy = buildConfig();
+    const oldEnemies = legacy.waves.stagePlan.validation[0].elites
+      .map(({ spawnAtProgress: _progress, ...enemy }) => enemy);
+    (legacy.waves.stagePlan.validation[0] as unknown as Record<string, unknown>).enemies = oldEnemies;
+    delete (legacy.waves.stagePlan.validation[0] as unknown as { elites?: unknown }).elites;
+    delete (legacy.waves.stagePlan.validation[0] as unknown as { swarm?: unknown }).swarm;
+    normalizeValidationStage(legacy);
+    const migrated = legacy.waves.stagePlan.validation[0];
+    expect(migrated.swarm.quota).toBe(0);
+    expect(migrated.elites).toHaveLength(oldEnemies.length);
+    expect(new Set(migrated.elites.map(elite => elite.spawnAtProgress)).size).toBe(oldEnemies.length);
+    expect(migrated.elites.every(elite => elite.spawnAtProgress >= 0 && elite.spawnAtProgress < 1)).toBe(true);
+  });
 });
 describe('config · 方案A base', () => {
   it('可消耗释放的独立装备格，手牌7+装备3', () => { const c=buildConfig([]); expect(c.economy).toMatchObject({maxStar:6,mergeCopies:2,equipThreshold:3,handSlots:7,equipSlots:3,equipIrreversible:false,unequipPolicy:'consume',equipSwappable:true}); });

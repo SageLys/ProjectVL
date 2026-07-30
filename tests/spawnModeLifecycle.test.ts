@@ -19,7 +19,7 @@ describe('spawn-mode wave boundary lifecycle', () => {
     cfg.waves.intermission.settleSeconds = 0;
     cfg.waves.intermission.freeSeconds = { selection: 0, buildEarly: 0, buildLate: 0, validation: 0 };
     state.spawnLeft = 0; state.enemies.length = 0;
-    for (let step = 0; step < 5; step++) {
+    for (let step = 0; step < 7; step++) {
       updateGame(state, runtime, constRng(.5), 0, () => { if (pending) { cfg.waves.spawnMode = pending; pending = null; } });
       const decision = state.decisions.current;
       if (decision?.kind === 'waveBaseReward') {

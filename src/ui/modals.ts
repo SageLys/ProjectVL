@@ -5,22 +5,28 @@ import type { DomRefs } from './domRefs';
 import { cardDisplayName, evolutionChoiceCopy } from './cardMeta';
 import { fmt } from './format';
 import { buildEvolutionOptionViewModel } from './cardDetailModel';
+import { modalShell } from './modalShell';
 
 /** 局内抉择 / 结算 / 中心引导文案的显隐控制。 */
 export function createModals(refs: DomRefs, hooks: { onDecision(choice: string): void; onRestart(): void }) {
-  const decisionModal = document.createElement('div');
-  const decisionCard = document.createElement('div');
+  const decisionShell = modalShell({
+    mode: 'centered',
+    dismissible: false,
+    className: 'modal',
+    labelledBy: 'decisionModalTitle',
+  });
+  const decisionModal = decisionShell.overlay;
+  const decisionCard = decisionShell.dialog;
   const decisionTitle = document.createElement('h2');
   const decisionBody = document.createElement('p');
   const decisionChoices = document.createElement('div');
   let renderedDecision: RunDecision | null = null;
-  decisionModal.className = 'modal';
   decisionModal.id = 'decisionModal';
-  decisionCard.className = 'modal-card';
-  decisionChoices.className = 'choices';
-  decisionCard.append(decisionTitle, decisionBody, decisionChoices);
-  decisionModal.append(decisionCard);
-  document.body.append(decisionModal);
+  decisionCard.classList.add('modal-card');
+  decisionTitle.id = 'decisionModalTitle';
+  decisionChoices.className = 'choices modal-shell-body';
+  decisionShell.header.append(decisionTitle, decisionBody);
+  decisionShell.body.replaceWith(decisionChoices);
 
   decisionChoices.addEventListener('click', event => {
     const button = (event.target as Element).closest<HTMLButtonElement>('[data-decision-choice]');
@@ -28,6 +34,11 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
     if (choice) hooks.onDecision(choice);
   });
   refs.restartBtn.addEventListener('click', () => hooks.onRestart());
+  refs.resultModal?.addEventListener('keydown', event => {
+    if (event.key !== 'Tab' || !refs.resultModal.classList.contains('show')) return;
+    event.preventDefault();
+    refs.restartBtn.focus();
+  });
 
   return {
     /** 中心引导文案。show=false 时隐藏。 */
@@ -50,6 +61,7 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
             ? decision.options
             : [];
         decisionTitle.textContent = copy.title;
+        decisionCard.dataset.kind = decision.kind;
         decisionBody.textContent = decision.kind === 'evolutionBranch'
           ? `${copy.body} ${decision.checkpointStar === 5 ? '该分支会叠加到当前 3★ 路线上，不会替换之前的选择。 ' : ''}${texts.evolution.lockNotice}`
           : copy.body;
@@ -119,6 +131,7 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
                 ? `+${optionDef.add * 100}%`
                 : `+${optionDef?.add ?? 0}`;
             button.disabled = capped;
+            button.setAttribute('aria-disabled', String(capped));
             button.classList.toggle('choice-capped', capped);
             button.append(label, desc);
           } else {
@@ -129,9 +142,9 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
         }));
         renderedDecision = decision;
       }
-      decisionModal.classList.add('show');
+      decisionShell.open();
     },
-    hideDecision(): void { decisionModal.classList.remove('show'); },
+    hideDecision(): void { decisionShell.close(); },
     hideResult(): void { refs.resultModal.classList.remove('show'); },
     showResult(win: boolean, state: GameState): void {
       refs.resultTitle.textContent = win ? texts.result.winTitle : texts.result.loseTitle;
@@ -181,6 +194,7 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
         }
       }
       refs.resultModal.classList.add('show');
+      refs.restartBtn.focus();
     },
   };
 }

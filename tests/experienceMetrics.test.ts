@@ -30,7 +30,28 @@ describe('stage and drop telemetry metrics', () => {
       stage: 'validation', activeRegularSeconds: 30, ordinaryDropsShownPerMinute: 40,
       eligibleKillsPerMinute: 80, ordinaryPickupRate: .5, ordinaryExpiryRate: .5,
       dropRejectedFullHand: 1, validationRewardDrops: 2, validationOrdinaryDrops: 1,
+      killsPerSecond: 0, manualPickups: 1, decisionPopups: 0, rewardActivations: 0,
       buildAtStart: { maturity: .72, highestStar: 4, equippedCount: 3 },
+    });
+  });
+
+  it('computes validation calibration counters from existing events', () => {
+    const result = computeExperienceMetrics(session([
+      event('waveStart', 0, { stage: 'validation' }),
+      event('kill', 2),
+      event('kill', 4),
+      event('pickup', 5),
+      event('validationRewardPickup', 6),
+      event('decision_offered', 7),
+      event('perkPopup', 8),
+      event('reward_triggered', 9),
+      event('waveCleared', 10, { stage: 'validation' }),
+    ])).waves[0];
+    expect(result).toMatchObject({
+      killsPerSecond: 0.2,
+      manualPickups: 2,
+      decisionPopups: 2,
+      rewardActivations: 1,
     });
   });
 });

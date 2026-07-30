@@ -1,6 +1,7 @@
 import type { Card } from '../core/types';
 import { buildCardDetailViewModel, type CardDetailViewModel, type EffectSection } from './cardDetailModel';
 import type { EffectTextBlock } from './effectText';
+import { modalShell } from './modalShell';
 
 export interface CardDetailModalHooks {
   onOpen(): void;
@@ -16,23 +17,20 @@ export interface CardDetailModal {
 
 /** 卡牌详情的可访问弹窗外壳；内容模型由后续展示层注入。 */
 export function createCardDetailModal(hooks: CardDetailModalHooks): CardDetailModal {
-  const overlay = document.createElement('div');
-  const dialog = document.createElement('section');
-  const header = document.createElement('header');
+  const shell = modalShell({
+    mode: 'fullscreen',
+    dismissible: true,
+    className: 'card-detail-modal',
+    labelledBy: 'cardDetailTitle',
+  });
+  const { overlay, dialog } = shell;
+  const header = shell.header;
   const title = document.createElement('h2');
   const closeButton = document.createElement('button');
-  const scroll = document.createElement('div');
-  let open = false;
-  let focusTarget: HTMLElement | null = null;
+  const scroll = shell.body;
 
-  overlay.className = 'card-detail-modal';
-  overlay.hidden = true;
-  overlay.setAttribute('aria-hidden', 'true');
-  dialog.className = 'card-detail-card';
-  dialog.setAttribute('role', 'dialog');
-  dialog.setAttribute('aria-modal', 'true');
-  dialog.setAttribute('aria-labelledby', 'cardDetailTitle');
-  header.className = 'card-detail-header';
+  dialog.classList.add('card-detail-card');
+  header.classList.add('card-detail-header');
   title.id = 'cardDetailTitle';
   closeButton.type = 'button';
   closeButton.className = 'card-detail-close';
@@ -40,32 +38,13 @@ export function createCardDetailModal(hooks: CardDetailModalHooks): CardDetailMo
   closeButton.textContent = '×';
   scroll.className = 'card-detail-scroll';
   header.append(title, closeButton);
-  dialog.append(header, scroll);
-  overlay.append(dialog);
-  document.body.append(overlay);
 
   function close(): void {
-    if (!open) return;
-    open = false;
-    overlay.hidden = true;
-    overlay.setAttribute('aria-hidden', 'true');
-    hooks.onClose();
-    const target = focusTarget;
-    focusTarget = null;
-    if (target?.isConnected) target.focus();
+    shell.close();
   }
 
   closeButton.addEventListener('click', close);
-  overlay.addEventListener('click', event => {
-    if (event.target === overlay) close();
-  });
-  const onKeyDown = (event: KeyboardEvent) => {
-    if (open && event.key === 'Escape') {
-      event.preventDefault();
-      close();
-    }
-  };
-  document.addEventListener('keydown', onKeyDown);
+  overlay.addEventListener('modal-shell-close', hooks.onClose);
 
   function renderBlocks(blocks: EffectTextBlock[], empty = '暂无效果。'): HTMLElement {
     const container = document.createElement('div');
@@ -159,9 +138,10 @@ export function createCardDetailModal(hooks: CardDetailModalHooks): CardDetailMo
       affixes.append(item);
     }
 
-    const glossary = document.createElement('section');
+    const glossary = document.createElement('details');
     glossary.className = 'card-detail-group';
-    const glossaryTitle = document.createElement('h3');
+    glossary.dataset.section = 'glossary';
+    const glossaryTitle = document.createElement('summary');
     glossaryTitle.textContent = '关键词解释';
     const terms = document.createElement('dl');
     for (const entry of model.glossary) {
@@ -179,9 +159,10 @@ export function createCardDetailModal(hooks: CardDetailModalHooks): CardDetailMo
       glossary.append(empty);
     }
 
-    const tree = document.createElement('section');
+    const tree = document.createElement('details');
     tree.className = 'card-detail-group';
-    const treeTitle = document.createElement('h3');
+    tree.dataset.section = 'skill-tree';
+    const treeTitle = document.createElement('summary');
     treeTitle.textContent = model.currentRoute === '终极形态' ? '终极形态效果' : '完整技能树';
     tree.append(treeTitle);
     {
@@ -202,19 +183,22 @@ export function createCardDetailModal(hooks: CardDetailModalHooks): CardDetailMo
           const options = document.createElement('div');
           options.className = 'skill-tree-options';
           for (const option of node.options) {
-            const optionElement = document.createElement('article');
+            const optionElement = document.createElement('details');
             optionElement.className = [
               'skill-tree-option',
               option.selected ? 'is-selected' : '',
               option.available ? 'is-available' : 'is-unselected',
             ].filter(Boolean).join(' ');
+            optionElement.open = option.selected;
+            const optionSummary = document.createElement('summary');
             const name = document.createElement('strong');
             name.textContent = option.name;
             const intent = document.createElement('p');
             intent.textContent = option.intent;
             const keywords = document.createElement('small');
             keywords.textContent = `适合：${option.keywords.join('、') || '当前机制强化'}`;
-            optionElement.append(name, intent, renderBlocks(option.exactEffects), keywords);
+            optionSummary.append(name, keywords);
+            optionElement.append(optionSummary, intent, renderBlocks(option.exactEffects));
             options.append(optionElement);
           }
           nodeElement.append(options);
@@ -223,27 +207,21 @@ export function createCardDetailModal(hooks: CardDetailModalHooks): CardDetailMo
       }
       tree.append(track);
     }
-    scroll.replaceChildren(intro, effects, affixes, glossary, tree);
+    scroll.replaceChildren(intro, effects, affixes, tree, glossary);
   }
 
   return {
     open(card, source, returnFocus) {
-      focusTarget = returnFocus ?? document.activeElement as HTMLElement | null;
       renderModel(buildCardDetailViewModel(card, source));
-      if (!open) {
-        open = true;
-        overlay.hidden = false;
-        overlay.setAttribute('aria-hidden', 'false');
+      if (!shell.isOpen()) {
         hooks.onOpen();
       }
-      closeButton.focus();
+      shell.open(returnFocus);
     },
     close,
-    isOpen: () => open,
+    isOpen: shell.isOpen,
     destroy() {
-      if (open) close();
-      document.removeEventListener('keydown', onKeyDown);
-      overlay.remove();
+      shell.destroy();
     },
   };
 }

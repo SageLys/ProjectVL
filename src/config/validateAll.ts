@@ -253,7 +253,9 @@ function semanticLayer(config: GameConfig, out: IssueCollector): void {
   };
   config.waves.stagePlan.validation.forEach((wave, waveIndex) => {
     const path = `$.waves.stagePlan.validation[${waveIndex}]`;
-    wave.enemies.forEach((enemy, index) => checkReward(enemy.reward, `${path}.enemies[${index}].reward`));
+    wave.elites.forEach((elite, index) => {
+      if (elite.reward !== undefined) checkReward(elite.reward, `${path}.elites[${index}].reward`);
+    });
     checkReward(wave.bossReward, `${path}.bossReward`);
   });
 
