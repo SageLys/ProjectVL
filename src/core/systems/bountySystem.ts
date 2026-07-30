@@ -60,6 +60,15 @@ const COMBAT_LANES: BuildTag[] = ['projectile', 'control', 'domain', 'defense'];
 
 function weightedRewardChoice(state: GameState, candidates: CardType[], rng: Rng): CardType {
   const bias = cfg.bounty.rewardBias;
+  const directorActive = state.wave >= cfg.economy.evolution.assistWindowWaves[0]
+    && state.wave <= cfg.economy.evolution.assistWindowWaves[1]
+    && !state.recipes.assistClosed;
+  const pinned = directorActive
+    ? cfg.evolutionRecipes.recipes.find(recipe => recipe.id === state.recipes.pinnedRecipeId)
+    : undefined;
+  const recipeMaterials = new Set(pinned
+    ? [pinned.ingredientVariable.cardId, pinned.ingredientAnchor.cardId]
+    : []);
   const weights = candidates.map(type => {
     let weight = 1;
     const oneStarCount = [...state.cards, ...state.equipment]
@@ -69,6 +78,12 @@ function weightedRewardChoice(state: GameState, candidates: CardType[], rng: Rng
     weight *= 1 + calculateAffinityScore(state, type);
     if (cardGodInRun(state, type) === state.godPool.focusGod) weight *= 1.75;
     if (getOrCreateCardTypeRunStats(state, type).totalShown === 0) weight *= bias.droughtBonus;
+    if (recipeMaterials.has(type)) {
+      weight *= cfg.economy.evolution.bountyRecipeMaterialBonus;
+      if (calculateCommitmentScore(state, type) >= 16) {
+        weight *= cfg.economy.evolution.bountyReadySideMultiplier;
+      }
+    }
     if (type === state.bountyDirector.lastRewardType
       && cfg.bounty.reward.repeatProtection > 0
       && candidates.length > 1) weight = 0;

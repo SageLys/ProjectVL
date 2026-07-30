@@ -400,6 +400,25 @@ export function createDevTelemetry(options: Options): DevTelemetry {
         recipeId: event.recipeId,
         cardType: event.outputCardType,
         outputStar: event.outputStar,
+        outputCardId: event.outputCardId,
+        targetSlotKind: event.target.slotKind,
+        targetSlotIndex: event.target.index,
+        materialCardIds: [...event.materialCardIds],
+        assistBudgetUsed: state().recipes.assistBudgetUsed,
+      });
+      if (event.type === 'validationRewardGranted') add({
+        type: 'validation_reward_granted',
+        wave: event.wave,
+        cardType: event.cardType,
+        star: event.star,
+        delivery: event.delivery,
+        assistBudgetUsed: state().recipes.assistBudgetUsed,
+      });
+      if (event.type === 'validationRewardSettleStarted') add({
+        type: 'validation_reward_settle_started',
+        wave: event.wave,
+        settleSeconds: event.seconds,
+        assistBudgetUsed: state().recipes.assistBudgetUsed,
       });
       if (event.type === 'affixRolled') {
         for (const affix of event.affixes) add({

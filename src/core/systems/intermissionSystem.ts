@@ -3,11 +3,36 @@ import type { GameEvent, GameState, Rng } from '../types';
 import { stageForWave } from '../runStage';
 import { enqueueWaveBaseRewardDecision, grantFloorRewards } from './waveRewardSystem';
 import { enqueueGodPoolDecisionForIntermission } from './godPoolSystem';
-import { availableRecipes } from './recipeEvolutionSystem';
+import { recomputeRecipeReadiness } from './recipeEvolutionSystem';
 
 export interface IntermissionTickResult {
   events: GameEvent[];
   complete: boolean;
+}
+
+export const VALIDATION_REWARD_SETTLE_SECONDS = 12;
+
+export function beginValidationRewardSettle(state: GameState): GameEvent[] {
+  clearCombatTransients(state);
+  state.wavePhase = 'validationRewardSettle';
+  state.validationRewardSettleRemaining = VALIDATION_REWARD_SETTLE_SECONDS;
+  state.validationRewardSettleConfirmed = false;
+  return [{
+    type: 'validationRewardSettleStarted',
+    wave: state.wave,
+    seconds: VALIDATION_REWARD_SETTLE_SECONDS,
+  }];
+}
+
+export function tickValidationRewardSettle(state: GameState, dt: number): void {
+  if (state.wavePhase !== 'validationRewardSettle') return;
+  state.validationRewardSettleRemaining = Math.max(0, state.validationRewardSettleRemaining - dt);
+}
+
+export function confirmValidationRewardSettle(state: GameState): GameEvent[] {
+  if (state.wavePhase !== 'validationRewardSettle' || state.validationRewardSettleConfirmed) return [];
+  state.validationRewardSettleConfirmed = true;
+  return [];
 }
 
 function freeSecondsFor(afterWave: number): number {
@@ -99,9 +124,8 @@ export function tickIntermission(
     if (intermission.afterWave === 0) return { events: [], complete: true };
     intermission.step = 'free';
     intermission.freeRemaining = Math.max(0, freeSecondsFor(intermission.afterWave));
-    const recipeIds = availableRecipes(state).map(recipe => recipe.recipeId);
     return {
-      events: recipeIds.length ? [{ type: 'recipeAvailable', recipeIds }] : [],
+      events: recomputeRecipeReadiness(state),
       complete: false,
     };
   }
