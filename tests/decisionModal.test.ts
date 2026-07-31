@@ -62,7 +62,7 @@ describe('decision modal', () => {
     }
   });
 
-  it('shows intent, exact effects, build fit and the 5★ stacking notice', () => {
+  it('shows player summary, exact effects and the 5★ stacking notice; no choice-fit element', () => {
     document.body.innerHTML = '<button id="restartBtn"></button>';
     const modals = createModals({
       restartBtn: document.querySelector('#restartBtn'),
@@ -90,8 +90,10 @@ describe('decision modal', () => {
     const body = document.querySelector('#decisionModal .modal-shell-header > p')?.textContent;
     const option = document.querySelector<HTMLButtonElement>('[data-decision-choice="chainLightning2x"]');
     expect(body).toContain('叠加到当前 3★ 路线');
+    // .choice-desc 展示玩家向 summary（长度大于 0）
     expect(option?.querySelector('.choice-desc')?.textContent?.trim().length).toBeGreaterThan(0);
     expect(option?.querySelectorAll('.choice-effects li').length).toBeGreaterThan(0);
-    expect(option?.querySelector('.choice-fit')?.textContent).toContain('适合：');
+    // 「适合：」行已删除
+    expect(option?.querySelector('.choice-fit')).toBeNull();
   });
 });

@@ -20,10 +20,10 @@ export interface BindingView {
 export interface BranchView {
   id: string;
   name: string;
+  /** 玩家向一句话效果说明 */
   summary: string;
+  /** 设计向定位，仅设计工作台显示 */
   intent: string;
-  keywords: string[];
-  buildFit: string;
   bindings: BindingView[];
 }
 export interface TierView {
@@ -98,10 +98,6 @@ function text(root: unknown, path: readonly (string | number)[]): string {
   return typeof value === 'string' ? value : '';
 }
 
-function stringArray(root: unknown, path: readonly (string | number)[]): string[] {
-  const value = at(root, path);
-  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
-}
 
 function formatNumber(value: number): string {
   if (!Number.isFinite(value)) return String(value);
@@ -169,8 +165,6 @@ function describeBranch(card: CardDef, option: NonNullable<CardDef['evolutionTre
     name: text(texts, [...nodePath, 'name']),
     summary: text(texts, [...nodePath, 'summary']),
     intent: text(texts, [...nodePath, 'intent']),
-    keywords: stringArray(texts, [...nodePath, 'keywords']),
-    buildFit: text(texts, [...nodePath, 'buildFit']),
     bindings: option.equip.map(describeBinding),
   };
 }

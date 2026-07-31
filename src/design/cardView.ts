@@ -90,9 +90,8 @@ function renderTier(
       item.append(el('h3', '', `${branch.name || '缺失名称'} `));
       item.querySelector('h3')?.append(el('code', '', branch.id));
       const copy = el('div', 'branch-copy');
-      copy.append(el('p', branch.summary ? '' : 'missing-copy', branch.summary || '缺失：summary'));
+      copy.append(el('p', branch.summary ? '' : 'missing-copy', branch.summary || '缺失：玩家摘要'));
       copy.append(el('p', branch.intent ? '' : 'missing-copy', `设计意图：${branch.intent || '缺失'}`));
-      copy.append(el('small', '', `关键词：${branch.keywords.join('、') || '缺失'} · 构筑适配：${branch.buildFit || '缺失'}`));
       const mechanismBlock = el('div', 'mechanism');
       mechanismBlock.append(el('span', 'eyebrow', '设计层机制'));
       const checkpointIndex = card.evolutionTree?.checkpoints.findIndex(checkpoint => checkpoint.star === tier.star) ?? -1;
@@ -108,8 +107,6 @@ function renderTier(
         { path: `${branchBase}.name`, label: '分支名称' },
         { path: `${branchBase}.summary`, label: '玩家摘要', multiline: true },
         { path: `${branchBase}.intent`, label: '设计意图', multiline: true },
-        { path: `${branchBase}.keywords`, label: '关键词', kind: 'stringArray' },
-        { path: `${branchBase}.buildFit`, label: '构筑适配', multiline: true },
       ];
       item.append(editableTextBlock(copy, fields, editing, 'branch-copy-editor'), mechanismBlock);
       grid.append(item);

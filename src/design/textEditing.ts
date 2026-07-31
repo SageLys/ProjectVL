@@ -67,7 +67,7 @@ function renderControl(field: TextFieldSpec, options: TextEditingOptions): HTMLE
   const textValue = kind === 'stringArray' ? arrayValue(raw).join('\n') : typeof raw === 'string' ? raw : '';
   const fieldParts = parts(field.path);
   const tail = fieldParts[fieldParts.length - 1] ?? '';
-  const multiline = field.multiline ?? (kind === 'stringArray' || ['overview', 'theme', 'desc', 'detail', 'summary', 'intent', 'buildFit'].includes(tail));
+  const multiline = field.multiline ?? (kind === 'stringArray' || ['overview', 'theme', 'desc', 'detail', 'summary', 'intent'].includes(tail));
   const control = multiline ? el('textarea') : el('input');
   if (control instanceof HTMLTextAreaElement) control.rows = kind === 'stringArray' ? 3 : 4;
   else control.type = 'text';

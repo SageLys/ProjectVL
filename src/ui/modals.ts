@@ -105,7 +105,7 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
             label.textContent = optionModel?.name ?? optionDef?.textKey ?? option;
             const desc = document.createElement('span');
             desc.className = 'choice-desc';
-            desc.textContent = optionModel?.intent ?? '';
+            desc.textContent = optionModel?.summary ?? '';
             const effects = document.createElement('ul');
             effects.className = 'choice-effects';
             for (const line of optionModel?.exactEffects.flatMap(block => block.lines) ?? []) {
@@ -113,10 +113,7 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
               item.textContent = line.text;
               effects.append(item);
             }
-            const fit = document.createElement('span');
-            fit.className = 'choice-fit';
-            fit.textContent = `适合：${optionModel?.keywords.join('、') || '当前机制强化'}`;
-            button.append(label, desc, effects, fit);
+            button.append(label, desc, effects);
           } else if (decision.kind === 'waveBaseReward') {
             const optionDef = cfg.waveRewards.choice.find(item => item.id === option);
             label.textContent = optionDef
