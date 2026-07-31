@@ -15,7 +15,7 @@ namespace ProjectVL.Config
         private static readonly HashSet<string> SupportedAtoms =
             new HashSet<string>(StringComparer.Ordinal)
             {
-                "aura", "breachReduction", "burstDamage", "chain",
+                "aura", "beamMorph", "breachReduction", "burstDamage", "chain",
                 "charge", "dot", "dropRateMul", "extraDrop", "focusPriority",
                 "freeze", "groundZone", "knockback", "mergePulse",
                 "mortarMorph", "novaOnBreak", "pierce", "restore", "shield",
@@ -43,6 +43,11 @@ namespace ProjectVL.Config
                 if (definition?.recipeOnly != true
                     || compiled.bindings == null
                     || compiled.bindings.Length == 0
+                    || compiled.consumable?.effects == null
+                    || compiled.consumable.effects.Length == 0
+                    || compiled.consumable.duration <= 0f
+                    || compiled.consumable.duration > 5f
+                    || compiled.consumable.radius <= 0f
                     || !_byCard.TryAdd(compiled.cardId, compiled))
                 {
                     throw new InvalidOperationException(
@@ -62,6 +67,12 @@ namespace ProjectVL.Config
 
                     foreach (CompiledEffectAtomConfig atom in binding.effects)
                         ValidateAtom(compiled.cardId, atom);
+                }
+
+                foreach (CompiledEffectAtomConfig atom
+                    in compiled.consumable.effects)
+                {
+                    ValidateAtom(compiled.cardId, atom);
                 }
             }
 

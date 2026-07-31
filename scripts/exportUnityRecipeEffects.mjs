@@ -76,13 +76,19 @@ function compileBinding(binding) {
 
 const products = skills.cards.filter(card => card.recipeOnly === true);
 const output = {
-  version: '1.0.0',
+  version: '1.1.0',
   sourceVersion: skills.version,
   cards: products.map(card => ({
     cardId: card.id,
     category: card.category,
     synergyTags: card.synergyTags,
     bindings: (card.stars?.['6']?.equip ?? []).map(compileBinding),
+    consumable: {
+      radius: card.consumable?.anchors?.['6']?.radius ?? 0,
+      duration: card.consumable?.anchors?.['6']?.duration ?? 0,
+      effects: (card.consumable?.anchors?.['6']?.effects ?? [])
+        .map(effect => compileAtom(effect)),
+    },
   })),
 };
 
@@ -95,4 +101,8 @@ const atomCount = output.cards.reduce((sum, card) => {
     0,
   );
 }, 0);
-console.log(`Exported ${output.cards.length} recipe products, ${bindingCount} bindings and ${atomCount} atoms.`);
+const consumableAtomCount = output.cards.reduce((sum, card) => {
+  const count = atom => 1 + atom.children.reduce((childSum, child) => childSum + count(child), 0);
+  return sum + card.consumable.effects.reduce((effectSum, atom) => effectSum + count(atom), 0);
+}, 0);
+console.log(`Exported ${output.cards.length} recipe products, ${bindingCount} bindings, ${atomCount} equipment atoms and ${consumableAtomCount} consumable atoms.`);

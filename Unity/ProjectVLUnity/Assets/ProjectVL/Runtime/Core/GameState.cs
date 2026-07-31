@@ -676,7 +676,10 @@ namespace ProjectVL.Core
     public sealed class GroundZoneState
     {
         public Float2 Position { get; }
-        public float Radius { get; }
+        public float Radius { get; set; }
+        public float InitialRadius { get; }
+        public float TargetRadius { get; }
+        public float TotalDuration { get; }
         public float LifeRemaining { get; set; }
         public float TickInterval { get; }
         public float TickRemaining { get; set; }
@@ -687,6 +690,12 @@ namespace ProjectVL.Core
         public float SlowDuration { get; }
         public float ExecuteThresholdRatio { get; }
         public float FocusPriorityWeight { get; }
+        public string Shape { get; }
+        public float InnerRadius { get; }
+        public Float2 Direction { get; }
+        public float FreezeDuration { get; }
+        public int FreezeStacksToTrigger { get; }
+        public float KnockbackDistance { get; }
 
         public GroundZoneState(
             Float2 position,
@@ -699,10 +708,20 @@ namespace ProjectVL.Core
             float slowRatio = 0f,
             float slowDuration = 0f,
             float executeThresholdRatio = 0f,
-            float focusPriorityWeight = 1f)
+            float focusPriorityWeight = 1f,
+            string shape = "circle",
+            float innerRadius = 0f,
+            Float2 direction = default,
+            float targetRadius = 0f,
+            float freezeDuration = 0f,
+            int freezeStacksToTrigger = 0,
+            float knockbackDistance = 0f)
         {
             Position = position;
             Radius = radius;
+            InitialRadius = radius;
+            TargetRadius = targetRadius > 0f ? targetRadius : radius;
+            TotalDuration = duration;
             LifeRemaining = duration;
             TickInterval = tickInterval;
             TickRemaining = tickInterval;
@@ -713,6 +732,14 @@ namespace ProjectVL.Core
             SlowDuration = slowDuration;
             ExecuteThresholdRatio = executeThresholdRatio;
             FocusPriorityWeight = focusPriorityWeight;
+            Shape = string.IsNullOrEmpty(shape) ? "circle" : shape;
+            InnerRadius = Math.Max(0f, innerRadius);
+            Direction = direction.Length > 0.000001f
+                ? direction.Normalized()
+                : new Float2(1f, 0f);
+            FreezeDuration = freezeDuration;
+            FreezeStacksToTrigger = freezeStacksToTrigger;
+            KnockbackDistance = knockbackDistance;
         }
     }
 }

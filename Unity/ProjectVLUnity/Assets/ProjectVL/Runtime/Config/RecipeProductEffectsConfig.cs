@@ -19,6 +19,17 @@ namespace ProjectVL.Config
         public string[] synergyTags = Array.Empty<string>();
         public CompiledEffectBindingConfig[] bindings =
             Array.Empty<CompiledEffectBindingConfig>();
+        public CompiledConsumableTierConfig consumable =
+            new CompiledConsumableTierConfig();
+    }
+
+    [Serializable]
+    public sealed class CompiledConsumableTierConfig
+    {
+        public float radius;
+        public float duration;
+        public CompiledEffectAtomConfig[] effects =
+            Array.Empty<CompiledEffectAtomConfig>();
     }
 
     [Serializable]

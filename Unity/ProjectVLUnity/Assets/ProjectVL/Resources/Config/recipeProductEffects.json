@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "sourceVersion": "0.6.0",
   "cards": [
     {
@@ -161,7 +161,90 @@
             }
           ]
         }
-      ]
+      ],
+      "consumable": {
+        "radius": 160,
+        "duration": 5,
+        "effects": [
+          {
+            "atom": "pierce",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "count",
+                "kind": "number",
+                "number": 999
+              },
+              {
+                "key": "damageRetention",
+                "kind": "number",
+                "number": 1
+              },
+              {
+                "key": "width",
+                "kind": "number",
+                "number": 26
+              },
+              {
+                "key": "damageMul",
+                "kind": "number",
+                "number": 3
+              }
+            ],
+            "children": []
+          },
+          {
+            "atom": "groundZone",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "radius",
+                "kind": "number",
+                "number": 130
+              },
+              {
+                "key": "duration",
+                "kind": "number",
+                "number": 4
+              },
+              {
+                "key": "tickInterval",
+                "kind": "number",
+                "number": 0.5
+              },
+              {
+                "key": "shape",
+                "kind": "string",
+                "text": "line"
+              },
+              {
+                "key": "lineFrom",
+                "kind": "string",
+                "text": "turretToPoint"
+              }
+            ],
+            "children": [
+              {
+                "atom": "vulnerable",
+                "relation": "paramEffect",
+                "params": [
+                  {
+                    "key": "ratio",
+                    "kind": "number",
+                    "number": 0.25
+                  },
+                  {
+                    "key": "duration",
+                    "kind": "number",
+                    "number": 3
+                  }
+                ],
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "cardId": "thunderRime",
@@ -378,7 +461,82 @@
             }
           ]
         }
-      ]
+      ],
+      "consumable": {
+        "radius": 160,
+        "duration": 5,
+        "effects": [
+          {
+            "atom": "groundZone",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "radius",
+                "kind": "number",
+                "number": 110
+              },
+              {
+                "key": "duration",
+                "kind": "number",
+                "number": 5
+              },
+              {
+                "key": "tickInterval",
+                "kind": "number",
+                "number": 0.5
+              }
+            ],
+            "children": [
+              {
+                "atom": "slow",
+                "relation": "paramEffect",
+                "params": [
+                  {
+                    "key": "ratio",
+                    "kind": "number",
+                    "number": 0.3
+                  },
+                  {
+                    "key": "duration",
+                    "kind": "number",
+                    "number": 2
+                  }
+                ],
+                "children": []
+              },
+              {
+                "atom": "vulnerable",
+                "relation": "paramEffect",
+                "params": [
+                  {
+                    "key": "ratio",
+                    "kind": "number",
+                    "number": 0.2
+                  },
+                  {
+                    "key": "duration",
+                    "kind": "number",
+                    "number": 2
+                  }
+                ],
+                "children": []
+              },
+              {
+                "atom": "burstDamage",
+                "relation": "paramEffect",
+                "params": [
+                  {
+                    "key": "damageMul",
+                    "kind": "number",
+                    "number": 1
+                  }
+                ],
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "cardId": "emberSpark",
@@ -545,7 +703,68 @@
             }
           ]
         }
-      ]
+      ],
+      "consumable": {
+        "radius": 160,
+        "duration": 5,
+        "effects": [
+          {
+            "atom": "chain",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "forEach.set.kind",
+                "kind": "string",
+                "text": "enemiesWithStatus"
+              },
+              {
+                "key": "forEach.set.status",
+                "kind": "string",
+                "text": "dot"
+              },
+              {
+                "key": "forEach.maxTargets",
+                "kind": "number",
+                "number": 8
+              },
+              {
+                "key": "forEach.order",
+                "kind": "string",
+                "text": "nearest"
+              }
+            ],
+            "children": [
+              {
+                "atom": "chain",
+                "relation": "forEachEffect",
+                "params": [
+                  {
+                    "key": "targets",
+                    "kind": "number",
+                    "number": 1
+                  },
+                  {
+                    "key": "bounces",
+                    "kind": "number",
+                    "number": 2
+                  },
+                  {
+                    "key": "damageMul",
+                    "kind": "number",
+                    "number": 0.7
+                  },
+                  {
+                    "key": "spreadStatus",
+                    "kind": "string",
+                    "text": "vulnerable"
+                  }
+                ],
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "cardId": "voltBastion",
@@ -695,7 +914,52 @@
             }
           ]
         }
-      ]
+      ],
+      "consumable": {
+        "radius": 160,
+        "duration": 5,
+        "effects": [
+          {
+            "atom": "chain",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "targets",
+                "kind": "number",
+                "number": 4
+              },
+              {
+                "key": "bounces",
+                "kind": "number",
+                "number": 5
+              },
+              {
+                "key": "spreadStatus",
+                "kind": "string",
+                "text": "vulnerable"
+              }
+            ],
+            "children": []
+          },
+          {
+            "atom": "stun",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "radius",
+                "kind": "number",
+                "number": 160
+              },
+              {
+                "key": "duration",
+                "kind": "number",
+                "number": 0.3
+              }
+            ],
+            "children": []
+          }
+        ]
+      }
     },
     {
       "cardId": "ampereFlow",
@@ -809,7 +1073,47 @@
             }
           ]
         }
-      ]
+      ],
+      "consumable": {
+        "radius": 160,
+        "duration": 5,
+        "effects": [
+          {
+            "atom": "vulnerable",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "radius",
+                "kind": "number",
+                "number": 999
+              },
+              {
+                "key": "ratio",
+                "kind": "number",
+                "number": 0.2
+              },
+              {
+                "key": "duration",
+                "kind": "number",
+                "number": 3
+              }
+            ],
+            "children": []
+          },
+          {
+            "atom": "extraDrop",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "count",
+                "kind": "number",
+                "number": 2
+              }
+            ],
+            "children": []
+          }
+        ]
+      }
     },
     {
       "cardId": "crystalRelay",
@@ -935,7 +1239,90 @@
             }
           ]
         }
-      ]
+      ],
+      "consumable": {
+        "radius": 160,
+        "duration": 5,
+        "effects": [
+          {
+            "atom": "summon",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "kind",
+                "kind": "string",
+                "text": "crystal"
+              },
+              {
+                "key": "count",
+                "kind": "number",
+                "number": 3
+              },
+              {
+                "key": "maxCount",
+                "kind": "number",
+                "number": 5
+              },
+              {
+                "key": "hp",
+                "kind": "number",
+                "number": 65
+              },
+              {
+                "key": "duration",
+                "kind": "number",
+                "number": 5
+              },
+              {
+                "key": "chainRelay",
+                "kind": "boolean",
+                "flag": true
+              }
+            ],
+            "children": [
+              {
+                "atom": "slow",
+                "relation": "onDeathEffects",
+                "params": [
+                  {
+                    "key": "radius",
+                    "kind": "number",
+                    "number": 80
+                  },
+                  {
+                    "key": "ratio",
+                    "kind": "number",
+                    "number": 0.3
+                  },
+                  {
+                    "key": "duration",
+                    "kind": "number",
+                    "number": 2
+                  }
+                ],
+                "children": []
+              },
+              {
+                "atom": "burstDamage",
+                "relation": "onDeathEffects",
+                "params": [
+                  {
+                    "key": "radius",
+                    "kind": "number",
+                    "number": 80
+                  },
+                  {
+                    "key": "damageMul",
+                    "kind": "number",
+                    "number": 0.4
+                  }
+                ],
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "cardId": "glacialEpoch",
@@ -1082,7 +1469,102 @@
             }
           ]
         }
-      ]
+      ],
+      "consumable": {
+        "radius": 160,
+        "duration": 5,
+        "effects": [
+          {
+            "atom": "groundZone",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "radius",
+                "kind": "number",
+                "number": 260
+              },
+              {
+                "key": "duration",
+                "kind": "number",
+                "number": 3
+              },
+              {
+                "key": "tickInterval",
+                "kind": "number",
+                "number": 0.2
+              },
+              {
+                "key": "shape",
+                "kind": "string",
+                "text": "ring"
+              },
+              {
+                "key": "innerRadius",
+                "kind": "number",
+                "number": 45
+              },
+              {
+                "key": "radiusOverTime.from",
+                "kind": "number",
+                "number": 60
+              },
+              {
+                "key": "radiusOverTime.to",
+                "kind": "number",
+                "number": 260
+              }
+            ],
+            "children": [
+              {
+                "atom": "slow",
+                "relation": "paramEffect",
+                "params": [
+                  {
+                    "key": "ratio",
+                    "kind": "number",
+                    "number": 0.35
+                  },
+                  {
+                    "key": "duration",
+                    "kind": "number",
+                    "number": 2
+                  }
+                ],
+                "children": []
+              },
+              {
+                "atom": "freeze",
+                "relation": "paramEffect",
+                "params": [
+                  {
+                    "key": "duration",
+                    "kind": "number",
+                    "number": 1
+                  },
+                  {
+                    "key": "stacksToTrigger",
+                    "kind": "number",
+                    "number": 3
+                  }
+                ],
+                "children": []
+              },
+              {
+                "atom": "knockback",
+                "relation": "paramEffect",
+                "params": [
+                  {
+                    "key": "distance",
+                    "kind": "number",
+                    "number": 40
+                  }
+                ],
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "cardId": "rimeShell",
@@ -1200,7 +1682,64 @@
             }
           ]
         }
-      ]
+      ],
+      "consumable": {
+        "radius": 160,
+        "duration": 5,
+        "effects": [
+          {
+            "atom": "mortarMorph",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "radius",
+                "kind": "number",
+                "number": 110
+              },
+              {
+                "key": "damageRatio",
+                "kind": "number",
+                "number": 2
+              }
+            ],
+            "children": []
+          },
+          {
+            "atom": "freeze",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "radius",
+                "kind": "number",
+                "number": 110
+              },
+              {
+                "key": "duration",
+                "kind": "number",
+                "number": 1
+              }
+            ],
+            "children": []
+          },
+          {
+            "atom": "dot",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "radius",
+                "kind": "number",
+                "number": 110
+              },
+              {
+                "key": "damageRatio",
+                "kind": "number",
+                "number": 0.2
+              }
+            ],
+            "children": []
+          }
+        ]
+      }
     },
     {
       "cardId": "tombSpire",
@@ -1342,7 +1881,85 @@
             }
           ]
         }
-      ]
+      ],
+      "consumable": {
+        "radius": 160,
+        "duration": 5,
+        "effects": [
+          {
+            "atom": "summon",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "kind",
+                "kind": "string",
+                "text": "iceSpire"
+              },
+              {
+                "key": "count",
+                "kind": "number",
+                "number": 1
+              },
+              {
+                "key": "maxCount",
+                "kind": "number",
+                "number": 3
+              },
+              {
+                "key": "hp",
+                "kind": "number",
+                "number": 160
+              },
+              {
+                "key": "duration",
+                "kind": "number",
+                "number": 5
+              },
+              {
+                "key": "tauntRadius",
+                "kind": "number",
+                "number": 110
+              }
+            ],
+            "children": [
+              {
+                "atom": "freeze",
+                "relation": "onDeathEffects",
+                "params": [
+                  {
+                    "key": "radius",
+                    "kind": "number",
+                    "number": 100
+                  },
+                  {
+                    "key": "duration",
+                    "kind": "number",
+                    "number": 1.5
+                  }
+                ],
+                "children": []
+              },
+              {
+                "atom": "burstDamage",
+                "relation": "onDeathEffects",
+                "params": [
+                  {
+                    "key": "radius",
+                    "kind": "number",
+                    "number": 100
+                  },
+                  {
+                    "key": "damageMul",
+                    "kind": "number",
+                    "number": 0.8
+                  }
+                ],
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "cardId": "stasisLedger",
@@ -1463,7 +2080,69 @@
             }
           ]
         }
-      ]
+      ],
+      "consumable": {
+        "radius": 160,
+        "duration": 5,
+        "effects": [
+          {
+            "atom": "burstDamage",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "damageMul",
+                "kind": "number",
+                "number": 1.8
+              },
+              {
+                "key": "radius",
+                "kind": "number",
+                "number": 999
+              }
+            ],
+            "children": []
+          },
+          {
+            "atom": "slow",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "radius",
+                "kind": "number",
+                "number": 999
+              },
+              {
+                "key": "ratio",
+                "kind": "number",
+                "number": 0.3
+              },
+              {
+                "key": "duration",
+                "kind": "number",
+                "number": 2.5
+              }
+            ],
+            "children": []
+          },
+          {
+            "atom": "freeze",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "radius",
+                "kind": "number",
+                "number": 220
+              },
+              {
+                "key": "duration",
+                "kind": "number",
+                "number": 1.5
+              }
+            ],
+            "children": []
+          }
+        ]
+      }
     },
     {
       "cardId": "solarPiercer",
@@ -1596,7 +2275,75 @@
             }
           ]
         }
-      ]
+      ],
+      "consumable": {
+        "radius": 160,
+        "duration": 5,
+        "effects": [
+          {
+            "atom": "beamMorph",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "width",
+                "kind": "number",
+                "number": 30
+              },
+              {
+                "key": "damageRatio",
+                "kind": "number",
+                "number": 2
+              }
+            ],
+            "children": []
+          },
+          {
+            "atom": "groundZone",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "radius",
+                "kind": "number",
+                "number": 130
+              },
+              {
+                "key": "duration",
+                "kind": "number",
+                "number": 3.5
+              },
+              {
+                "key": "tickInterval",
+                "kind": "number",
+                "number": 0.5
+              },
+              {
+                "key": "shape",
+                "kind": "string",
+                "text": "line"
+              },
+              {
+                "key": "lineFrom",
+                "kind": "string",
+                "text": "turretToPoint"
+              }
+            ],
+            "children": [
+              {
+                "atom": "dot",
+                "relation": "paramEffect",
+                "params": [
+                  {
+                    "key": "damageRatio",
+                    "kind": "number",
+                    "number": 0.2
+                  }
+                ],
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "cardId": "steamBurst",
@@ -1774,7 +2521,75 @@
             }
           ]
         }
-      ]
+      ],
+      "consumable": {
+        "radius": 160,
+        "duration": 5,
+        "effects": [
+          {
+            "atom": "burstDamage",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "forEach.set.kind",
+                "kind": "string",
+                "text": "enemiesWithStatus"
+              },
+              {
+                "key": "forEach.set.status",
+                "kind": "array",
+                "text": "slow|dot"
+              },
+              {
+                "key": "forEach.maxTargets",
+                "kind": "number",
+                "number": 8
+              },
+              {
+                "key": "forEach.order",
+                "kind": "string",
+                "text": "nearest"
+              }
+            ],
+            "children": [
+              {
+                "atom": "burstDamage",
+                "relation": "forEachEffect",
+                "params": [
+                  {
+                    "key": "radius",
+                    "kind": "number",
+                    "number": 70
+                  },
+                  {
+                    "key": "damageMul",
+                    "kind": "number",
+                    "number": 1.3
+                  }
+                ],
+                "children": []
+              },
+              {
+                "atom": "knockback",
+                "relation": "forEachEffect",
+                "params": [
+                  {
+                    "key": "radius",
+                    "kind": "number",
+                    "number": 70
+                  },
+                  {
+                    "key": "distance",
+                    "kind": "number",
+                    "number": 30
+                  }
+                ],
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "cardId": "volcanoCore",
@@ -2052,7 +2867,65 @@
             }
           ]
         }
-      ]
+      ],
+      "consumable": {
+        "radius": 160,
+        "duration": 5,
+        "effects": [
+          {
+            "atom": "groundZone",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "radius",
+                "kind": "number",
+                "number": 100
+              },
+              {
+                "key": "duration",
+                "kind": "number",
+                "number": 5
+              },
+              {
+                "key": "tickInterval",
+                "kind": "number",
+                "number": 0.5
+              }
+            ],
+            "children": [
+              {
+                "atom": "dot",
+                "relation": "paramEffect",
+                "params": [
+                  {
+                    "key": "damageRatio",
+                    "kind": "number",
+                    "number": 0.2
+                  }
+                ],
+                "children": []
+              },
+              {
+                "atom": "mortarMorph",
+                "relation": "paramEffect",
+                "params": [
+                  {
+                    "key": "radius",
+                    "kind": "number",
+                    "number": 80
+                  },
+                  {
+                    "key": "damageRatio",
+                    "kind": "number",
+                    "number": 1.4
+                  }
+                ],
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "cardId": "emberMoat",
@@ -2206,7 +3079,58 @@
             }
           ]
         }
-      ]
+      ],
+      "consumable": {
+        "radius": 160,
+        "duration": 5,
+        "effects": [
+          {
+            "atom": "groundZone",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "radius",
+                "kind": "number",
+                "number": 150
+              },
+              {
+                "key": "shape",
+                "kind": "string",
+                "text": "ring"
+              },
+              {
+                "key": "innerRadius",
+                "kind": "number",
+                "number": 110
+              },
+              {
+                "key": "duration",
+                "kind": "number",
+                "number": 5
+              },
+              {
+                "key": "tickInterval",
+                "kind": "number",
+                "number": 0.4
+              }
+            ],
+            "children": [
+              {
+                "atom": "dot",
+                "relation": "paramEffect",
+                "params": [
+                  {
+                    "key": "damageRatio",
+                    "kind": "number",
+                    "number": 0.3
+                  }
+                ],
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "cardId": "emberYield",
@@ -2333,7 +3257,52 @@
             }
           ]
         }
-      ]
+      ],
+      "consumable": {
+        "radius": 160,
+        "duration": 5,
+        "effects": [
+          {
+            "atom": "dot",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "radius",
+                "kind": "number",
+                "number": 999
+              },
+              {
+                "key": "damageRatio",
+                "kind": "number",
+                "number": 0.16
+              },
+              {
+                "key": "duration",
+                "kind": "number",
+                "number": 4
+              }
+            ],
+            "children": []
+          },
+          {
+            "atom": "extraDrop",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "count",
+                "kind": "number",
+                "number": 2
+              },
+              {
+                "key": "secure",
+                "kind": "boolean",
+                "flag": true
+              }
+            ],
+            "children": []
+          }
+        ]
+      }
     },
     {
       "cardId": "pylonCircuit",
@@ -2454,7 +3423,73 @@
             }
           ]
         }
-      ]
+      ],
+      "consumable": {
+        "radius": 160,
+        "duration": 5,
+        "effects": [
+          {
+            "atom": "summon",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "kind",
+                "kind": "string",
+                "text": "pylon"
+              },
+              {
+                "key": "count",
+                "kind": "number",
+                "number": 1
+              },
+              {
+                "key": "maxCount",
+                "kind": "number",
+                "number": 3
+              },
+              {
+                "key": "hp",
+                "kind": "number",
+                "number": 100
+              },
+              {
+                "key": "duration",
+                "kind": "number",
+                "number": 5
+              },
+              {
+                "key": "chainRelay",
+                "kind": "boolean",
+                "flag": true
+              },
+              {
+                "key": "auraRadius",
+                "kind": "number",
+                "number": 70
+              }
+            ],
+            "children": [
+              {
+                "atom": "vulnerable",
+                "relation": "auraEffects",
+                "params": [
+                  {
+                    "key": "ratio",
+                    "kind": "number",
+                    "number": 0.2
+                  },
+                  {
+                    "key": "duration",
+                    "kind": "number",
+                    "number": 1.2
+                  }
+                ],
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "cardId": "glacialEffigy",
@@ -2584,7 +3619,85 @@
             }
           ]
         }
-      ]
+      ],
+      "consumable": {
+        "radius": 160,
+        "duration": 5,
+        "effects": [
+          {
+            "atom": "mortarMorph",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "radius",
+                "kind": "number",
+                "number": 80
+              },
+              {
+                "key": "damageRatio",
+                "kind": "number",
+                "number": 1.4
+              }
+            ],
+            "children": []
+          },
+          {
+            "atom": "summon",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "kind",
+                "kind": "string",
+                "text": "iceDecoy"
+              },
+              {
+                "key": "count",
+                "kind": "number",
+                "number": 1
+              },
+              {
+                "key": "maxCount",
+                "kind": "number",
+                "number": 2
+              },
+              {
+                "key": "hp",
+                "kind": "number",
+                "number": 110
+              },
+              {
+                "key": "duration",
+                "kind": "number",
+                "number": 5
+              },
+              {
+                "key": "tauntRadius",
+                "kind": "number",
+                "number": 140
+              }
+            ],
+            "children": [
+              {
+                "atom": "freeze",
+                "relation": "onDeathEffects",
+                "params": [
+                  {
+                    "key": "radius",
+                    "kind": "number",
+                    "number": 90
+                  },
+                  {
+                    "key": "duration",
+                    "kind": "number",
+                    "number": 1.5
+                  }
+                ],
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "cardId": "wrathMortar",
@@ -2808,7 +3921,65 @@
             }
           ]
         }
-      ]
+      ],
+      "consumable": {
+        "radius": 160,
+        "duration": 5,
+        "effects": [
+          {
+            "atom": "mortarMorph",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "radius",
+                "kind": "number",
+                "number": 90
+              },
+              {
+                "key": "damageRatio",
+                "kind": "number",
+                "number": 2
+              }
+            ],
+            "children": []
+          },
+          {
+            "atom": "groundZone",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "radius",
+                "kind": "number",
+                "number": 70
+              },
+              {
+                "key": "duration",
+                "kind": "number",
+                "number": 4
+              },
+              {
+                "key": "tickInterval",
+                "kind": "number",
+                "number": 0.5
+              }
+            ],
+            "children": [
+              {
+                "atom": "dot",
+                "relation": "paramEffect",
+                "params": [
+                  {
+                    "key": "damageRatio",
+                    "kind": "number",
+                    "number": 0.2
+                  }
+                ],
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "cardId": "aegisCitadel",
@@ -3001,7 +4172,73 @@
             }
           ]
         }
-      ]
+      ],
+      "consumable": {
+        "radius": 160,
+        "duration": 5,
+        "effects": [
+          {
+            "atom": "summon",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "kind",
+                "kind": "string",
+                "text": "wall"
+              },
+              {
+                "key": "count",
+                "kind": "number",
+                "number": 4
+              },
+              {
+                "key": "maxCount",
+                "kind": "number",
+                "number": 4
+              },
+              {
+                "key": "hp",
+                "kind": "number",
+                "number": 220
+              },
+              {
+                "key": "duration",
+                "kind": "number",
+                "number": 5
+              },
+              {
+                "key": "placement",
+                "kind": "string",
+                "text": "ring"
+              },
+              {
+                "key": "distanceFromTurret",
+                "kind": "number",
+                "number": 125
+              }
+            ],
+            "children": [
+              {
+                "atom": "burstDamage",
+                "relation": "onDeathEffects",
+                "params": [
+                  {
+                    "key": "radius",
+                    "kind": "number",
+                    "number": 90
+                  },
+                  {
+                    "key": "damageMul",
+                    "kind": "number",
+                    "number": 1.2
+                  }
+                ],
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "cardId": "rootLoom",
@@ -3131,7 +4368,75 @@
             }
           ]
         }
-      ]
+      ],
+      "consumable": {
+        "radius": 160,
+        "duration": 5,
+        "effects": [
+          {
+            "atom": "summon",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "kind",
+                "kind": "string",
+                "text": "rootSegment"
+              },
+              {
+                "key": "count",
+                "kind": "number",
+                "number": 2
+              },
+              {
+                "key": "maxCount",
+                "kind": "number",
+                "number": 6
+              },
+              {
+                "key": "hp",
+                "kind": "number",
+                "number": 120
+              },
+              {
+                "key": "duration",
+                "kind": "number",
+                "number": 5
+              },
+              {
+                "key": "auraRadius",
+                "kind": "number",
+                "number": 75
+              }
+            ],
+            "children": [
+              {
+                "atom": "dot",
+                "relation": "auraEffects",
+                "params": [
+                  {
+                    "key": "damageRatio",
+                    "kind": "number",
+                    "number": 0.1
+                  }
+                ],
+                "children": []
+              },
+              {
+                "atom": "knockback",
+                "relation": "auraEffects",
+                "params": [
+                  {
+                    "key": "distance",
+                    "kind": "number",
+                    "number": 10
+                  }
+                ],
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "cardId": "midasChain",
@@ -3245,7 +4550,50 @@
             }
           ]
         }
-      ]
+      ],
+      "consumable": {
+        "radius": 160,
+        "duration": 5,
+        "effects": [
+          {
+            "atom": "chain",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "targets",
+                "kind": "number",
+                "number": 1
+              },
+              {
+                "key": "bounces",
+                "kind": "number",
+                "number": 6
+              },
+              {
+                "key": "damageMul",
+                "kind": "number",
+                "number": 1.2
+              },
+              {
+                "key": "spreadStatus",
+                "kind": "string",
+                "text": "brand"
+              },
+              {
+                "key": "spreadParams.ratio",
+                "kind": "number",
+                "number": 2
+              },
+              {
+                "key": "spreadParams.duration",
+                "kind": "number",
+                "number": 5
+              }
+            ],
+            "children": []
+          }
+        ]
+      }
     },
     {
       "cardId": "frostDew",
@@ -3389,7 +4737,45 @@
             }
           ]
         }
-      ]
+      ],
+      "consumable": {
+        "radius": 160,
+        "duration": 5,
+        "effects": [
+          {
+            "atom": "restore",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "amount",
+                "kind": "number",
+                "number": 2
+              },
+              {
+                "key": "scaleBy.source",
+                "kind": "string",
+                "text": "controlledInAura"
+              },
+              {
+                "key": "scaleBy.param",
+                "kind": "string",
+                "text": "amount"
+              },
+              {
+                "key": "scaleBy.perUnit",
+                "kind": "number",
+                "number": 2
+              },
+              {
+                "key": "scaleBy.cap",
+                "kind": "number",
+                "number": 6
+              }
+            ],
+            "children": []
+          }
+        ]
+      }
     },
     {
       "cardId": "pyreBrand",
@@ -3648,7 +5034,57 @@
             }
           ]
         }
-      ]
+      ],
+      "consumable": {
+        "radius": 160,
+        "duration": 5,
+        "effects": [
+          {
+            "atom": "dot",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "radius",
+                "kind": "number",
+                "number": 260
+              },
+              {
+                "key": "damageRatio",
+                "kind": "number",
+                "number": 0.16
+              },
+              {
+                "key": "duration",
+                "kind": "number",
+                "number": 6
+              }
+            ],
+            "children": []
+          },
+          {
+            "atom": "focusPriority",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "radius",
+                "kind": "number",
+                "number": 260
+              },
+              {
+                "key": "priorityWeight",
+                "kind": "number",
+                "number": 4
+              },
+              {
+                "key": "duration",
+                "kind": "number",
+                "number": 6
+              }
+            ],
+            "children": []
+          }
+        ]
+      }
     },
     {
       "cardId": "fortuneThorns",
@@ -3797,7 +5233,52 @@
             }
           ]
         }
-      ]
+      ],
+      "consumable": {
+        "radius": 160,
+        "duration": 5,
+        "effects": [
+          {
+            "atom": "extraDrop",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "count",
+                "kind": "number",
+                "number": 2
+              },
+              {
+                "key": "at",
+                "kind": "string",
+                "text": "turret"
+              },
+              {
+                "key": "secure",
+                "kind": "boolean",
+                "flag": true
+              }
+            ],
+            "children": []
+          },
+          {
+            "atom": "burstDamage",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "radius",
+                "kind": "number",
+                "number": 100
+              },
+              {
+                "key": "damageMul",
+                "kind": "number",
+                "number": 1
+              }
+            ],
+            "children": []
+          }
+        ]
+      }
     },
     {
       "cardId": "goldenGrove",
@@ -3936,7 +5417,95 @@
             }
           ]
         }
-      ]
+      ],
+      "consumable": {
+        "radius": 160,
+        "duration": 5,
+        "effects": [
+          {
+            "atom": "summon",
+            "relation": "direct",
+            "params": [
+              {
+                "key": "kind",
+                "kind": "string",
+                "text": "goldenTree"
+              },
+              {
+                "key": "count",
+                "kind": "number",
+                "number": 1
+              },
+              {
+                "key": "maxCount",
+                "kind": "number",
+                "number": 3
+              },
+              {
+                "key": "hp",
+                "kind": "number",
+                "number": 140
+              },
+              {
+                "key": "duration",
+                "kind": "number",
+                "number": 5
+              },
+              {
+                "key": "intervalSeconds",
+                "kind": "number",
+                "number": 1
+              },
+              {
+                "key": "fireInterval",
+                "kind": "number",
+                "number": 1
+              }
+            ],
+            "children": [
+              {
+                "atom": "focusPriority",
+                "relation": "intervalEffects",
+                "params": [
+                  {
+                    "key": "priorityWeight",
+                    "kind": "number",
+                    "number": 2
+                  },
+                  {
+                    "key": "duration",
+                    "kind": "number",
+                    "number": 4
+                  },
+                  {
+                    "key": "radius",
+                    "kind": "number",
+                    "number": 170
+                  }
+                ],
+                "children": []
+              },
+              {
+                "atom": "extraDrop",
+                "relation": "intervalEffects",
+                "params": [
+                  {
+                    "key": "count",
+                    "kind": "number",
+                    "number": 1
+                  },
+                  {
+                    "key": "chance",
+                    "kind": "number",
+                    "number": 0.5
+                  }
+                ],
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
     }
   ]
 }

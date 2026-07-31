@@ -16,6 +16,7 @@ namespace ProjectVL.Tests
                 GameConfigLoader.LoadRecipeProductEffects();
             int bindings = 0;
             int atoms = 0;
+            int consumableAtoms = 0;
             foreach (RecipeProductCardEffectsConfig card in config.cards)
             {
                 bindings += card.bindings.Length;
@@ -24,12 +25,19 @@ namespace ProjectVL.Tests
                     foreach (CompiledEffectAtomConfig atom in binding.effects)
                         atoms += CountAtoms(atom);
                 }
+                foreach (CompiledEffectAtomConfig atom
+                    in card.consumable.effects)
+                {
+                    consumableAtoms += CountAtoms(atom);
+                }
             }
 
+            Assert.That(config.version, Is.EqualTo("1.1.0"));
             Assert.That(config.sourceVersion, Is.EqualTo("0.6.0"));
             Assert.That(config.cards, Has.Length.EqualTo(25));
             Assert.That(bindings, Is.EqualTo(70));
             Assert.That(atoms, Is.EqualTo(142));
+            Assert.That(consumableAtoms, Is.EqualTo(64));
             Assert.DoesNotThrow(() => new RecipeProductEffectCatalog(
                 config,
                 new CardCatalog(GameConfigLoader.LoadCards())));

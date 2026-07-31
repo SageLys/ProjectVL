@@ -189,14 +189,14 @@ namespace ProjectVL.Systems
                     CastLuckyStar(state, card.Star);
                     return true;
                 default:
-                    return CastRecipeProductFallback(
+                    return CastCompiledRecipeProduct(
                         state,
                         card,
                         point);
             }
         }
 
-        private bool CastRecipeProductFallback(
+        private bool CastCompiledRecipeProduct(
             GameState state,
             CardState card,
             Float2 point)
@@ -206,28 +206,823 @@ namespace ProjectVL.Systems
             if (definition?.recipeOnly != true || card.Star < 6)
                 return false;
 
-            switch (definition.category)
+            RecipeProductCardEffectsConfig compiled =
+                RecipeProductEffectCatalog.Default.Find(card.Type);
+            CompiledConsumableTierConfig tier = compiled?.consumable;
+            if (tier?.effects == null || tier.effects.Length == 0)
+                return false;
+
+            foreach (CompiledEffectAtomConfig atom in tier.effects)
             {
-                case "projectile":
-                    CastPierce(state, 6, point);
-                    break;
-                case "control":
-                    CastFrost(state, 6, point);
-                    break;
-                case "domain":
-                    CastScorch(state, 6, point);
-                    break;
-                case "defense":
-                    CastAegis(state, 6, point);
-                    break;
-                case "economy":
-                    CastHarvest(state, 6, point);
-                    break;
-                default:
-                    return false;
+                ExecuteCompiledConsumableAtom(
+                    state,
+                    card.Type,
+                    tier,
+                    atom,
+                    point,
+                    null);
             }
 
             return true;
+        }
+
+        private void ExecuteCompiledConsumableAtom(
+            GameState state,
+            string cardType,
+            CompiledConsumableTierConfig tier,
+            CompiledEffectAtomConfig atom,
+            Float2 point,
+            EnemyState target)
+        {
+            if (atom == null)
+                return;
+
+            string setKind = EffectText(atom, "forEach.set.kind");
+            if (!string.IsNullOrEmpty(setKind))
+            {
+                ExecuteCompiledForEach(
+                    state,
+                    cardType,
+                    tier,
+                    atom,
+                    point,
+                    setKind);
+                return;
+            }
+
+            switch (atom.atom)
+            {
+                case "pierce":
+                    CastCompiledPierce(state, tier, atom, point);
+                    break;
+                case "chain":
+                    CastCompiledChain(state, tier, atom, point, target);
+                    break;
+                case "beamMorph":
+                    CastCompiledBeam(state, atom, point);
+                    break;
+                case "mortarMorph":
+                    DamageCompiledArea(
+                        state,
+                        point,
+                        EffectNumber(atom, "radius", tier.radius),
+                        EffectNumber(atom, "damageRatio", 1.2f),
+                        EffectNumber(atom, "falloff", 0.5f));
+                    break;
+                case "slow":
+                    foreach (EnemyState enemy in CompiledTargets(
+                        state,
+                        point,
+                        tier.radius,
+                        target))
+                    {
+                        enemy.SlowRatio = Math.Max(
+                            enemy.SlowRatio,
+                            EffectNumber(atom, "ratio", 0.3f));
+                        enemy.SlowRemaining = Math.Max(
+                            enemy.SlowRemaining,
+                            EffectNumber(atom, "duration", 1.5f));
+                    }
+                    break;
+                case "freeze":
+                    foreach (EnemyState enemy in CompiledTargets(
+                        state,
+                        point,
+                        tier.radius,
+                        target))
+                    {
+                        ApplyCompiledFreeze(enemy, atom);
+                    }
+                    break;
+                case "stun":
+                    foreach (EnemyState enemy in CompiledTargets(
+                        state,
+                        point,
+                        tier.radius,
+                        target))
+                    {
+                        enemy.StunnedRemaining = Math.Max(
+                            enemy.StunnedRemaining,
+                            EffectNumber(atom, "duration", 0.5f));
+                    }
+                    break;
+                case "knockback":
+                    foreach (EnemyState enemy in CompiledTargets(
+                        state,
+                        point,
+                        tier.radius,
+                        target))
+                    {
+                        ApplyKnockback(
+                            enemy,
+                            enemy.Position - point,
+                            EffectNumber(atom, "distance", 60f));
+                    }
+                    break;
+                case "vulnerable":
+                    foreach (EnemyState enemy in CompiledTargets(
+                        state,
+                        point,
+                        tier.radius,
+                        target))
+                    {
+                        ApplyCompiledVulnerable(enemy, atom);
+                    }
+                    break;
+                case "groundZone":
+                    CastCompiledGroundZone(
+                        state,
+                        tier,
+                        atom,
+                        point);
+                    break;
+                case "dot":
+                    foreach (EnemyState enemy in CompiledTargets(
+                        state,
+                        point,
+                        tier.radius,
+                        target))
+                    {
+                        ApplyCompiledDot(state, enemy, tier, atom);
+                    }
+                    break;
+                case "summon":
+                    CastCompiledSummon(state, tier, atom, point);
+                    break;
+                case "extraDrop":
+                    CastCompiledExtraDrops(state, atom, point);
+                    break;
+                case "burstDamage":
+                    if (target != null)
+                    {
+                        DamageEnemy(
+                            state,
+                            target,
+                            BaseDamage(state)
+                                * EffectNumber(atom, "damageMul", 3f));
+                    }
+                    else
+                    {
+                        DamageCompiledArea(
+                            state,
+                            point,
+                            tier.radius,
+                            EffectNumber(atom, "damageMul", 3f),
+                            0f);
+                    }
+                    break;
+                case "focusPriority":
+                    foreach (EnemyState enemy in CompiledTargets(
+                        state,
+                        point,
+                        tier.radius,
+                        target))
+                    {
+                        enemy.FocusPriorityWeight = Math.Max(
+                            enemy.FocusPriorityWeight,
+                            EffectNumber(atom, "priorityWeight", 1f));
+                        enemy.FocusPriorityRemaining = Math.Max(
+                            enemy.FocusPriorityRemaining,
+                            Math.Min(
+                                5f,
+                                EffectNumber(atom, "duration", tier.duration)));
+                    }
+                    break;
+                case "restore":
+                    float amount = ScaledConsumableNumber(
+                        state,
+                        tier,
+                        atom,
+                        point,
+                        "amount",
+                        0f);
+                    state.RestoreHp(
+                        amount
+                        + state.MaxHp
+                            * EffectNumber(atom, "amountRatio", 0f));
+                    break;
+            }
+        }
+
+        private void ExecuteCompiledForEach(
+            GameState state,
+            string cardType,
+            CompiledConsumableTierConfig tier,
+            CompiledEffectAtomConfig atom,
+            Float2 point,
+            string setKind)
+        {
+            string[] statuses = EffectText(atom, "forEach.set.status")
+                .Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+            int maximum = Math.Max(
+                0,
+                EffectInteger(atom, "forEach.maxTargets", 0));
+            var matches = new System.Collections.Generic.List<EnemyState>();
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                bool hasEvery = true;
+                foreach (string status in statuses)
+                {
+                    if (!HasCompiledStatus(enemy, status))
+                    {
+                        hasEvery = false;
+                        break;
+                    }
+                }
+
+                if ((setKind == "enemiesWithStatus" && hasEvery)
+                    || (setKind == "enemiesWithoutStatus" && !hasEvery))
+                {
+                    matches.Add(enemy);
+                }
+            }
+
+            matches.Sort((left, right) => Float2.Distance(
+                left.Position,
+                point).CompareTo(Float2.Distance(right.Position, point)));
+            if (EffectText(atom, "forEach.order") == "farthest")
+                matches.Reverse();
+
+            int count = maximum > 0
+                ? Math.Min(maximum, matches.Count)
+                : matches.Count;
+            for (int index = 0; index < count; index++)
+            {
+                EnemyState member = matches[index];
+                foreach (CompiledEffectAtomConfig child
+                    in atom.children ?? Array.Empty<CompiledEffectAtomConfig>())
+                {
+                    if (child.relation != "forEachEffect")
+                        continue;
+                    ExecuteCompiledConsumableAtom(
+                        state,
+                        cardType,
+                        tier,
+                        child,
+                        member.Position,
+                        member);
+                }
+            }
+        }
+
+        private void CastCompiledPierce(
+            GameState state,
+            CompiledConsumableTierConfig tier,
+            CompiledEffectAtomConfig atom,
+            Float2 point)
+        {
+            Float2 direction = (point - TurretPosition).Normalized();
+            if (direction.Length <= 0.000001f)
+                direction = new Float2(1f, 0f);
+            var profile = new CardCombatProfile
+            {
+                PierceCount = EffectInteger(atom, "count", 1),
+                PierceDamageRetention =
+                    EffectNumber(atom, "damageRetention", 1f)
+            };
+            state.Bullets.Add(new BulletState(
+                state.TakeNextBulletId(),
+                TurretPosition,
+                direction * _combat.bullet.speed,
+                EffectNumber(atom, "width", 10f),
+                _combat.bullet.life * 1.6f,
+                BaseDamage(state)
+                    * EffectNumber(atom, "damageMul", 3f),
+                profile));
+        }
+
+        private void CastCompiledChain(
+            GameState state,
+            CompiledConsumableTierConfig tier,
+            CompiledEffectAtomConfig atom,
+            Float2 point,
+            EnemyState suppliedTarget)
+        {
+            int starts = suppliedTarget == null
+                ? Math.Max(0, EffectInteger(atom, "targets", 1))
+                : 1;
+            var usedStarts = new System.Collections.Generic.HashSet<int>();
+            for (int startIndex = 0; startIndex < starts; startIndex++)
+            {
+                EnemyState target = suppliedTarget ?? FindClosestChainTarget(
+                    state,
+                    point,
+                    tier.radius,
+                    usedStarts);
+                if (target == null)
+                    break;
+                usedStarts.Add(target.Id);
+
+                var visited = new System.Collections.Generic.HashSet<int>
+                {
+                    target.Id
+                };
+                float damage = BaseDamage(state)
+                    * EffectNumber(atom, "damageMul", 1f);
+                int bounces = Math.Max(
+                    0,
+                    EffectInteger(atom, "bounces", 2));
+                float retention = EffectNumber(
+                    atom,
+                    "damageRetention",
+                    0.7f);
+                float searchRange = EffectNumber(
+                    atom,
+                    "searchRange",
+                    130f);
+                EnemyState current = target;
+                for (int hit = 0;
+                    hit <= bounces && current != null;
+                    hit++)
+                {
+                    Float2 origin = current.Position;
+                    DamageEnemy(state, current, damage);
+                    ApplyCompiledChainStatus(state, current, atom);
+                    damage *= retention;
+                    current = FindClosestChainTarget(
+                        state,
+                        origin,
+                        searchRange,
+                        visited);
+                    if (current != null)
+                        visited.Add(current.Id);
+                }
+
+                if (suppliedTarget != null)
+                    break;
+            }
+        }
+
+        private void ApplyCompiledChainStatus(
+            GameState state,
+            EnemyState enemy,
+            CompiledEffectAtomConfig atom)
+        {
+            if (enemy == null)
+                return;
+            string status = EffectText(atom, "spreadStatus");
+            float ratio = EffectNumber(
+                atom,
+                "spreadParams.ratio",
+                status == "dot" ? 0.12f : 0.15f);
+            float duration = EffectNumber(
+                atom,
+                "spreadParams.duration",
+                2f);
+            if (status == "vulnerable")
+            {
+                enemy.VulnerableRatio = Math.Max(
+                    enemy.VulnerableRatio,
+                    ratio);
+                enemy.VulnerableRemaining = Math.Max(
+                    enemy.VulnerableRemaining,
+                    duration);
+            }
+            else if (status == "slow")
+            {
+                enemy.SlowRatio = Math.Max(enemy.SlowRatio, ratio);
+                enemy.SlowRemaining = Math.Max(
+                    enemy.SlowRemaining,
+                    duration);
+            }
+            else if (status == "dot")
+            {
+                enemy.DotDamagePerTick = Math.Max(
+                    enemy.DotDamagePerTick,
+                    BaseDamage(state) * ratio);
+                enemy.DotTickInterval = 0.5f;
+                enemy.DotTickRemaining = 0.5f;
+                enemy.DotRemaining = Math.Max(enemy.DotRemaining, duration);
+            }
+            else if (status == "brand")
+            {
+                enemy.FocusPriorityWeight = Math.Max(
+                    enemy.FocusPriorityWeight,
+                    ratio);
+                enemy.FocusPriorityRemaining = Math.Max(
+                    enemy.FocusPriorityRemaining,
+                    duration);
+            }
+        }
+
+        private void CastCompiledBeam(
+            GameState state,
+            CompiledEffectAtomConfig atom,
+            Float2 point)
+        {
+            Float2 direction = (point - TurretPosition).Normalized();
+            if (direction.Length <= 0.000001f)
+                direction = new Float2(1f, 0f);
+            float width = EffectNumber(atom, "width", 26f);
+            float damage = BaseDamage(state)
+                * EffectNumber(atom, "damageRatio", 1f);
+            var targets = new System.Collections.Generic.List<EnemyState>();
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                Float2 relative = enemy.Position - TurretPosition;
+                float along = relative.X * direction.X
+                    + relative.Y * direction.Y;
+                float perpendicular = Math.Abs(
+                    relative.X * direction.Y
+                    - relative.Y * direction.X);
+                if (along >= 0f
+                    && along <= AttackRange(state)
+                    && perpendicular <= width / 2f + enemy.Radius)
+                {
+                    targets.Add(enemy);
+                }
+            }
+
+            foreach (EnemyState enemy in targets)
+                DamageEnemy(state, enemy, damage);
+            state.BeamVisualStart = TurretPosition;
+            state.BeamVisualEnd = TurretPosition
+                + direction * AttackRange(state);
+            state.BeamVisualWidth = width;
+            state.BeamVisualRemaining = 0.25f;
+        }
+
+        private void DamageCompiledArea(
+            GameState state,
+            Float2 point,
+            float radius,
+            float damageRatio,
+            float falloff)
+        {
+            DamageArea(
+                state,
+                point,
+                radius,
+                BaseDamage(state) * damageRatio,
+                -1,
+                0f,
+                0f,
+                0f,
+                falloff);
+        }
+
+        private void CastCompiledGroundZone(
+            GameState state,
+            CompiledConsumableTierConfig tier,
+            CompiledEffectAtomConfig atom,
+            Float2 point)
+        {
+            float damageRatio = 0f;
+            float fixedDamage = 0f;
+            float vulnerableRatio = 0f;
+            float vulnerableDuration = 0f;
+            float slowRatio = 0f;
+            float slowDuration = 0f;
+            float freezeDuration = 0f;
+            int freezeStacks = 0;
+            float knockback = 0f;
+            float focusWeight = 1f;
+            foreach (CompiledEffectAtomConfig child
+                in atom.children ?? Array.Empty<CompiledEffectAtomConfig>())
+            {
+                switch (child.atom)
+                {
+                    case "dot":
+                        if (HasEffectParam(child, "damageRatio"))
+                        {
+                            damageRatio += EffectNumber(
+                                child,
+                                "damageRatio",
+                                0f);
+                        }
+                        else
+                        {
+                            fixedDamage += EffectNumber(
+                                child,
+                                "damagePerTick",
+                                5f);
+                        }
+                        break;
+                    case "burstDamage":
+                        damageRatio += EffectNumber(
+                            child,
+                            "damageMul",
+                            3f);
+                        break;
+                    case "mortarMorph":
+                        damageRatio += EffectNumber(
+                            child,
+                            "damageRatio",
+                            1.2f);
+                        break;
+                    case "vulnerable":
+                        vulnerableRatio = Math.Max(
+                            vulnerableRatio,
+                            EffectNumber(child, "ratio", 0.2f));
+                        vulnerableDuration = Math.Max(
+                            vulnerableDuration,
+                            EffectNumber(child, "duration", 2f));
+                        break;
+                    case "slow":
+                        slowRatio = Math.Max(
+                            slowRatio,
+                            EffectNumber(child, "ratio", 0.3f));
+                        slowDuration = Math.Max(
+                            slowDuration,
+                            EffectNumber(child, "duration", 1.5f));
+                        break;
+                    case "freeze":
+                        freezeDuration = Math.Max(
+                            freezeDuration,
+                            EffectNumber(child, "duration", 1f));
+                        freezeStacks = Math.Max(
+                            freezeStacks,
+                            EffectInteger(child, "stacksToTrigger", 0));
+                        break;
+                    case "knockback":
+                        knockback = Math.Max(
+                            knockback,
+                            EffectNumber(child, "distance", 60f));
+                        break;
+                    case "focusPriority":
+                        focusWeight = Math.Max(
+                            focusWeight,
+                            EffectNumber(child, "priorityWeight", 1f));
+                        break;
+                }
+            }
+
+            float duration = Math.Min(
+                5f,
+                EffectNumber(atom, "duration", tier.duration));
+            float radius = EffectNumber(atom, "radius", tier.radius);
+            float initialRadius = EffectNumber(
+                atom,
+                "radiusOverTime.from",
+                radius);
+            float targetRadius = EffectNumber(
+                atom,
+                "radiusOverTime.to",
+                radius);
+            string shape = EffectText(atom, "shape");
+            if (string.IsNullOrEmpty(shape))
+                shape = "circle";
+            Float2 direction = (point - TurretPosition).Normalized();
+            state.GroundZones.Add(new GroundZoneState(
+                point,
+                initialRadius,
+                duration,
+                EffectNumber(atom, "tickInterval", 0.5f),
+                BaseDamage(state) * damageRatio + fixedDamage,
+                vulnerableRatio,
+                vulnerableDuration,
+                slowRatio,
+                slowDuration,
+                0f,
+                focusWeight,
+                shape,
+                EffectNumber(atom, "innerRadius", 0f),
+                direction,
+                targetRadius,
+                freezeDuration,
+                freezeStacks,
+                knockback));
+        }
+
+        private void CastCompiledSummon(
+            GameState state,
+            CompiledConsumableTierConfig tier,
+            CompiledEffectAtomConfig atom,
+            Float2 point)
+        {
+            string kind = EffectText(atom, "kind");
+            if (string.IsNullOrEmpty(kind))
+                kind = "decoy";
+            int count = Math.Max(1, EffectInteger(atom, "count", 1));
+            float hp = EffectNumber(atom, "hp", 40f);
+            float duration = Math.Min(
+                5f,
+                EffectNumber(atom, "duration", tier.duration));
+            state.DecoyActive = true;
+            state.DecoyPosition = point;
+            state.DecoyHp = hp;
+            state.DecoyMaxHp = hp;
+            state.DecoyLifeRemaining = duration;
+            state.DecoyTauntRadius = EffectNumber(
+                atom,
+                "tauntRadius",
+                kind == "orbital" ? 0f : 140f);
+            state.DecoyIsMirrorTurret = kind != "decoy"
+                && kind != "wall"
+                && kind != "rootSegment";
+            state.DecoyDamageRatio = EffectNumber(
+                atom,
+                "damageRatio",
+                0.3f);
+            state.DecoyFireInterval = EffectNumber(
+                atom,
+                "fireInterval",
+                kind == "decoy" ? 0f : 0.7f);
+            state.DecoyFireCooldown = 0f;
+            if (count > 1)
+            {
+                state.SecondaryDecoyActive = true;
+                state.SecondaryDecoyPosition = point + new Float2(24f, 0f);
+                state.SecondaryDecoyHp = hp;
+            }
+        }
+
+        private void CastCompiledExtraDrops(
+            GameState state,
+            CompiledEffectAtomConfig atom,
+            Float2 point)
+        {
+            if (_drops == null)
+                return;
+            int count = Math.Max(0, EffectInteger(atom, "count", 1));
+            Float2 basePoint = EffectText(atom, "at") == "turret"
+                ? TurretPosition
+                : point;
+            for (int index = 0; index < count; index++)
+            {
+                float offset = (index - (count - 1) / 2f) * 24f;
+                _drops.SpawnBonusDrop(
+                    state,
+                    basePoint + new Float2(offset, 0f),
+                    1);
+            }
+        }
+
+        private void ApplyCompiledFreeze(
+            EnemyState enemy,
+            CompiledEffectAtomConfig atom)
+        {
+            int threshold = EffectInteger(atom, "stacksToTrigger", 0);
+            if (threshold > 1)
+            {
+                enemy.FreezeStacks++;
+                if (enemy.FreezeStacks < threshold)
+                    return;
+                enemy.FreezeStacks = 0;
+            }
+
+            enemy.FrozenRemaining = Math.Max(
+                enemy.FrozenRemaining,
+                EffectNumber(atom, "duration", 1f));
+        }
+
+        private static void ApplyCompiledVulnerable(
+            EnemyState enemy,
+            CompiledEffectAtomConfig atom)
+        {
+            enemy.VulnerableRatio = Math.Max(
+                enemy.VulnerableRatio,
+                EffectNumber(atom, "ratio", 0.2f));
+            enemy.VulnerableRemaining = Math.Max(
+                enemy.VulnerableRemaining,
+                EffectNumber(atom, "duration", 2f));
+        }
+
+        private void ApplyCompiledDot(
+            GameState state,
+            EnemyState enemy,
+            CompiledConsumableTierConfig tier,
+            CompiledEffectAtomConfig atom)
+        {
+            float tickInterval = EffectNumber(atom, "tickInterval", 0.5f);
+            float damage = HasEffectParam(atom, "damageRatio")
+                ? BaseDamage(state) * EffectNumber(atom, "damageRatio", 0f)
+                : EffectNumber(atom, "damagePerTick", 5f);
+            enemy.DotDamagePerTick = Math.Max(
+                enemy.DotDamagePerTick,
+                damage);
+            enemy.DotTickInterval = tickInterval;
+            enemy.DotTickRemaining = Math.Min(
+                enemy.DotTickRemaining > 0f
+                    ? enemy.DotTickRemaining
+                    : tickInterval,
+                tickInterval);
+            enemy.DotRemaining = Math.Max(
+                enemy.DotRemaining,
+                Math.Min(
+                    5f,
+                    EffectNumber(atom, "duration", tier.duration)));
+        }
+
+        private static System.Collections.Generic.List<EnemyState>
+            CompiledTargets(
+                GameState state,
+                Float2 point,
+                float radius,
+                EnemyState supplied)
+        {
+            var targets = new System.Collections.Generic.List<EnemyState>();
+            if (supplied != null)
+            {
+                if (state.Enemies.Contains(supplied))
+                    targets.Add(supplied);
+                return targets;
+            }
+
+            foreach (EnemyState enemy in state.Enemies)
+            {
+                if (Float2.Distance(point, enemy.Position) <= radius)
+                    targets.Add(enemy);
+            }
+            return targets;
+        }
+
+        private static bool HasCompiledStatus(
+            EnemyState enemy,
+            string status)
+        {
+            switch (status)
+            {
+                case "slow": return enemy.SlowRemaining > 0f;
+                case "dot": return enemy.DotRemaining > 0f
+                    || enemy.SecondaryDotRemaining > 0f;
+                case "frozen": return enemy.FrozenRemaining > 0f;
+                case "stun":
+                case "stunned": return enemy.StunnedRemaining > 0f;
+                case "vulnerable": return enemy.VulnerableRemaining > 0f;
+                case "brand": return enemy.FocusPriorityRemaining > 0f;
+                case "controlled": return enemy.SlowRemaining > 0f
+                    || enemy.FrozenRemaining > 0f
+                    || enemy.StunnedRemaining > 0f;
+                default: return false;
+            }
+        }
+
+        private static float ScaledConsumableNumber(
+            GameState state,
+            CompiledConsumableTierConfig tier,
+            CompiledEffectAtomConfig atom,
+            Float2 point,
+            string key,
+            float fallback)
+        {
+            float value = EffectNumber(atom, key, fallback);
+            if (EffectText(atom, "scaleBy.param") != key)
+                return value;
+            float units = 0f;
+            if (EffectText(atom, "scaleBy.source") == "controlledInAura")
+            {
+                foreach (EnemyState enemy in state.Enemies)
+                {
+                    if (Float2.Distance(point, enemy.Position) <= tier.radius
+                        && HasCompiledStatus(enemy, "controlled"))
+                    {
+                        units++;
+                    }
+                }
+            }
+            units = Math.Min(
+                units,
+                EffectNumber(atom, "scaleBy.cap", units));
+            return value + units
+                * EffectNumber(atom, "scaleBy.perUnit", 0f);
+        }
+
+        private static bool HasEffectParam(
+            CompiledEffectAtomConfig atom,
+            string key)
+        {
+            return FindEffectParam(atom, key) != null;
+        }
+
+        private static float EffectNumber(
+            CompiledEffectAtomConfig atom,
+            string key,
+            float fallback)
+        {
+            CompiledEffectParamConfig item = FindEffectParam(atom, key);
+            return item != null && item.kind == "number"
+                ? item.number
+                : fallback;
+        }
+
+        private static int EffectInteger(
+            CompiledEffectAtomConfig atom,
+            string key,
+            int fallback)
+        {
+            return (int)Math.Round(EffectNumber(atom, key, fallback));
+        }
+
+        private static string EffectText(
+            CompiledEffectAtomConfig atom,
+            string key)
+        {
+            CompiledEffectParamConfig item = FindEffectParam(atom, key);
+            return item?.text ?? string.Empty;
+        }
+
+        private static CompiledEffectParamConfig FindEffectParam(
+            CompiledEffectAtomConfig atom,
+            string key)
+        {
+            foreach (CompiledEffectParamConfig item
+                in atom?.Params ?? Array.Empty<CompiledEffectParamConfig>())
+            {
+                if (item != null && item.key == key)
+                    return item;
+            }
+            return null;
         }
 
         public static bool SupportsConsumable(CardState card)
@@ -4406,6 +5201,16 @@ namespace ProjectVL.Systems
             {
                 GroundZoneState zone = state.GroundZones[index];
                 zone.LifeRemaining -= deltaTime;
+                float zoneProgress = zone.TotalDuration > 0f
+                    ? Math.Max(
+                        0f,
+                        Math.Min(
+                            1f,
+                            1f - zone.LifeRemaining / zone.TotalDuration))
+                    : 1f;
+                zone.Radius = zone.InitialRadius
+                    + (zone.TargetRadius - zone.InitialRadius)
+                        * zoneProgress;
                 zone.TickRemaining -= deltaTime;
                 while (zone.TickRemaining <= 0f
                     && zone.LifeRemaining > 0f)
@@ -4415,9 +5220,7 @@ namespace ProjectVL.Systems
                         new System.Collections.Generic.List<EnemyState>();
                     foreach (EnemyState enemy in state.Enemies)
                     {
-                        if (Float2.Distance(
-                            zone.Position,
-                            enemy.Position) <= zone.Radius)
+                        if (ZoneContains(zone, enemy.Position))
                         {
                             targets.Add(enemy);
                         }
@@ -4452,6 +5255,34 @@ namespace ProjectVL.Systems
                         enemy.FocusPriorityRemaining = Math.Max(
                             enemy.FocusPriorityRemaining,
                             zone.LifeRemaining);
+                        if (zone.FreezeDuration > 0f)
+                        {
+                            if (zone.FreezeStacksToTrigger > 1)
+                            {
+                                enemy.FreezeStacks++;
+                                if (enemy.FreezeStacks
+                                    >= zone.FreezeStacksToTrigger)
+                                {
+                                    enemy.FreezeStacks = 0;
+                                    enemy.FrozenRemaining = Math.Max(
+                                        enemy.FrozenRemaining,
+                                        zone.FreezeDuration);
+                                }
+                            }
+                            else
+                            {
+                                enemy.FrozenRemaining = Math.Max(
+                                    enemy.FrozenRemaining,
+                                    zone.FreezeDuration);
+                            }
+                        }
+                        if (zone.KnockbackDistance > 0f)
+                        {
+                            ApplyKnockback(
+                                enemy,
+                                enemy.Position - zone.Position,
+                                zone.KnockbackDistance);
+                        }
                         if (zone.ExecuteThresholdRatio > 0f
                             && enemy.Hp / enemy.MaxHp
                                 <= zone.ExecuteThresholdRatio)
@@ -4507,6 +5338,35 @@ namespace ProjectVL.Systems
                 profile.PyrestormZoneVulnerableDuration));
             state.PyrestormPulseRemaining +=
                 profile.PyrestormInterval;
+        }
+
+        private static bool ZoneContains(
+            GroundZoneState zone,
+            Float2 point)
+        {
+            Float2 offset = point - zone.Position;
+            float distance = offset.Length;
+            if (zone.Shape == "ring")
+            {
+                float inner = zone.InnerRadius > 0f
+                    ? zone.InnerRadius
+                    : zone.Radius * 0.5f;
+                return distance >= inner && distance <= zone.Radius;
+            }
+
+            if (zone.Shape == "line")
+            {
+                float along = offset.X * zone.Direction.X
+                    + offset.Y * zone.Direction.Y;
+                float perpendicular = Math.Abs(
+                    offset.X * zone.Direction.Y
+                    - offset.Y * zone.Direction.X);
+                return along >= 0f
+                    && along <= zone.Radius * 2f
+                    && perpendicular <= zone.Radius * 0.5f;
+            }
+
+            return distance <= zone.Radius;
         }
 
         private void HandleBreach(
