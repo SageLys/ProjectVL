@@ -143,7 +143,9 @@ namespace ProjectVL.Tests
                     rewardMeter: GameConfigLoader.LoadRewardMeter(),
                     settlement: GameConfigLoader.LoadSettlement(),
                     recipeProductEffects:
-                        GameConfigLoader.LoadRecipeProductEffects());
+                        GameConfigLoader.LoadRecipeProductEffects(),
+                    evolutionBranchEffects:
+                        GameConfigLoader.LoadEvolutionBranchEffects());
 
                 state.EndRun();
                 telemetry.Step(state, 0.016f);
@@ -162,6 +164,7 @@ namespace ProjectVL.Tests
                 StringAssert.Contains("\"rewardMeter\":", json);
                 StringAssert.Contains("\"settlement\":", json);
                 StringAssert.Contains("\"recipeProductEffects\":", json);
+                StringAssert.Contains("\"evolutionBranchEffects\":", json);
             }
             finally
             {

@@ -202,6 +202,8 @@ namespace ProjectVL.Presentation
             SettlementConfig settlement = GameConfigLoader.LoadSettlement();
             RecipeProductEffectsConfig recipeProductEffects =
                 GameConfigLoader.LoadRecipeProductEffects();
+            EvolutionBranchEffectsConfig evolutionBranchEffects =
+                GameConfigLoader.LoadEvolutionBranchEffects();
             GodsConfig gods = GameConfigLoader.LoadGods();
             CardsConfig cards = GameConfigLoader.LoadCards();
             CardAffixesConfig affixes =
@@ -223,6 +225,9 @@ namespace ProjectVL.Presentation
             _ = new RecipeProductEffectCatalog(
                 recipeProductEffects,
                 cardCatalog);
+            _ = new EvolutionBranchEffectCatalog(
+                evolutionBranchEffects,
+                cards);
 
             GameState state = GameStateFactory.Create(combat, economy);
             state.AttachSettlement(
@@ -348,7 +353,8 @@ namespace ProjectVL.Presentation
                         "telemetry"),
                     rewardMeter: rewardMeter,
                     settlement: settlement,
-                    recipeProductEffects: recipeProductEffects);
+                    recipeProductEffects: recipeProductEffects,
+                    evolutionBranchEffects: evolutionBranchEffects);
                 _simulation.SimulationStep += _telemetry.Step;
             }
 

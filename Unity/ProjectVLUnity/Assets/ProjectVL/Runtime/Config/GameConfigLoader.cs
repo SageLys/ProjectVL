@@ -71,6 +71,12 @@ namespace ProjectVL.Config
                 "Config/recipeProductEffects");
         }
 
+        public static EvolutionBranchEffectsConfig LoadEvolutionBranchEffects()
+        {
+            return Load<EvolutionBranchEffectsConfig>(
+                "Config/evolutionBranchEffects");
+        }
+
         public static RelicsConfig LoadRelics()
         {
             return Load<RelicsConfig>("Config/relics");
