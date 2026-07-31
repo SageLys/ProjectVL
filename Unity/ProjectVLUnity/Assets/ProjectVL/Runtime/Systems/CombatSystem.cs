@@ -9,20 +9,20 @@ namespace ProjectVL.Systems
         private readonly CombatConfig _combat;
         private readonly EnemiesConfig _enemies;
         private readonly DropSystem _drops;
-        private readonly ProgressionSystem _progression;
+        private readonly RewardMeterSystem _rewardMeter;
         private readonly BountySystem _bounties;
 
         public CombatSystem(
             CombatConfig combat,
             EnemiesConfig enemies,
             DropSystem drops = null,
-            ProgressionSystem progression = null,
+            RewardMeterSystem rewardMeter = null,
             BountySystem bounties = null)
         {
             _combat = combat;
             _enemies = enemies;
             _drops = drops;
-            _progression = progression;
+            _rewardMeter = rewardMeter;
             _bounties = bounties;
         }
 
@@ -256,7 +256,9 @@ namespace ProjectVL.Systems
                     profile));
             }
             state.ShotCooldown = 1f
-                / (BaseFireRate(state) * state.FireRateMultiplier);
+                / (BaseFireRate(state)
+                    * state.FireRateMultiplier
+                    * state.RewardFireRateMultiplier);
         }
 
         private void CastPierce(
@@ -1786,7 +1788,8 @@ namespace ProjectVL.Systems
                     + CardAffixSystem.RuntimeAdd(
                         state,
                         "damageAdd"))
-                    * state.DamageMultiplier);
+                    * state.DamageMultiplier
+                    * state.RewardDamageMultiplier);
         }
 
         private float BaseFireRate(GameState state)
@@ -1864,6 +1867,7 @@ namespace ProjectVL.Systems
 
         public void StepPassives(GameState state, float deltaTime)
         {
+            _rewardMeter?.Step(state, deltaTime);
             CardAffixSystem.StepRuntime(state, deltaTime);
             CardCombatProfile profile = CardEffectResolver.Resolve(state);
             if (state.EconomyBuffRemaining > 0f)
@@ -1903,9 +1907,11 @@ namespace ProjectVL.Systems
             }
 
             state.DropRateMultiplier = profile.DropRateMultiplier
-                * state.EconomyDropRateMultiplier;
+                * state.EconomyDropRateMultiplier
+                * state.RewardDropMultiplier;
             state.DropLifetimeMultiplier = profile.DropLifetimeMultiplier
-                * state.EconomyDropLifetimeMultiplier;
+                * state.EconomyDropLifetimeMultiplier
+                * state.RewardDropMultiplier;
             state.ExpiryConvertRatio = profile.ExpiryConvertRatio;
             state.XpMultiplier = profile.XpMultiplier
                 * state.EconomyXpMultiplier;
@@ -2236,6 +2242,33 @@ namespace ProjectVL.Systems
             }
         }
 
+        public float ApplyRewardDamage(
+            GameState state,
+            EnemyState enemy,
+            float damageMultiplier,
+            float bossMaxHpRatioCap)
+        {
+            if (state == null
+                || enemy == null
+                || !state.Enemies.Contains(enemy))
+            {
+                return 0f;
+            }
+
+            float before = enemy.Hp;
+            float damage = BaseDamage(state) * Math.Max(0f, damageMultiplier);
+            if (enemy.Kind == EnemyKind.Boss
+                || enemy.SpawnKind == EnemySpawnKind.WaveBoss)
+            {
+                damage = Math.Min(
+                    damage,
+                    enemy.MaxHp * Math.Max(0f, bossMaxHpRatioCap));
+            }
+
+            DamageEnemy(state, enemy, damage);
+            return Math.Max(0f, before - Math.Max(0f, enemy.Hp));
+        }
+
         private void DamageEnemy(
             GameState state,
             EnemyState enemy,
@@ -2335,9 +2368,9 @@ namespace ProjectVL.Systems
                 {
                     experience *= profile.DotKillXpMultiplier;
                 }
-                if (_progression != null)
+                if (_rewardMeter != null)
                 {
-                    _progression.AddExperience(state, experience);
+                    _rewardMeter.AddPoints(state, experience);
                 }
                 else
                 {
@@ -4480,7 +4513,10 @@ namespace ProjectVL.Systems
             state.ApplyDamage(
                 incomingDamage
                 * (1f - profile.BreachReductionRatio)
-                / Math.Max(1f, state.DefenseDurabilityMultiplier));
+                / Math.Max(
+                    1f,
+                    state.DefenseDurabilityMultiplier
+                    * state.RewardDefenseMultiplier));
         }
 
         private void ApplyBreachEffects(

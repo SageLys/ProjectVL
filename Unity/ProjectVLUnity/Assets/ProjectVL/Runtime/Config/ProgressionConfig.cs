@@ -24,6 +24,8 @@ namespace ProjectVL.Config
     [Serializable]
     public sealed class SettlementConfig
     {
+        public string version;
+        public string sourceVersion;
         public int winBonus = 500;
         public int perWaveCleared = 40;
         public int perKill = 2;

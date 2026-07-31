@@ -471,21 +471,17 @@ namespace ProjectVL.Presentation
                 $"波次 {state.Wave}/{_controller.TotalWaves}",
                 _hudStyle);
 
-            float levelSpan = Mathf.Max(
-                1f,
-                state.ExperienceNeeded - state.ExperienceFloor);
-            float levelXp = Mathf.Max(
-                0f,
-                state.Experience - state.ExperienceFloor);
+            float rewardSpan = Mathf.Max(1f, state.RewardThreshold);
+            float rewardPoints = Mathf.Max(0f, state.RewardPoints);
             float levelX = waveX + waveWidth;
             float levelWidth = bar.width * 0.22f;
             GUI.Label(
                 new Rect(levelX, bar.y, levelWidth, 19f),
-                $"等级 {state.Level} · {levelXp:0.#}/{levelSpan:0.#}",
+                $"欢愉蓄力 · {rewardPoints:0.#}/{rewardSpan:0.#}",
                 _leftStyle);
             DrawProgressBar(
                 new Rect(levelX, bar.y + 25f, levelWidth, 6f),
-                levelXp / levelSpan,
+                rewardPoints / rewardSpan,
                 new Color(0.18f, 0.55f, 0.9f));
         }
 
@@ -543,6 +539,12 @@ namespace ProjectVL.Presentation
         private void DrawCenterPanel()
         {
             GameState state = _controller.State;
+            if (state.PendingRewardReceipt != null)
+            {
+                DrawRewardReceiptPanel(state.PendingRewardReceipt);
+                return;
+            }
+
             if (state.PendingLevelUpgrade != null)
             {
                 DrawLevelUpgradePanel(state.PendingLevelUpgrade);
@@ -689,7 +691,7 @@ namespace ProjectVL.Presentation
                     new Rect(panel.x + 20f, panel.y + 91f, panel.width - 40f, 25f),
                     $"{DifficultyName(summary.Difficulty)}  ·  "
                     + $"通过 {summary.ClearedWaves} 波  ·  "
-                    + $"到达等级 {summary.Level}",
+                    + $"触发奖励 {summary.RewardActivations} 次",
                     _hudStyle);
 
                 Rect scoreBox = new Rect(
@@ -732,7 +734,7 @@ namespace ProjectVL.Presentation
                     _leftStyle);
                 GUI.Label(
                     new Rect(panel.x + 24f, panel.y + 301f, panel.width - 48f, 26f),
-                    $"遗物：{summary.RelicKinds} 种 / {summary.RelicStacks} 层"
+                    $"欢愉奖励：触发 {summary.RewardActivations} 次"
                     + $"  ·  配方 {summary.CompletedRecipes.Count}",
                     _leftStyle);
                 GUI.Label(
@@ -745,7 +747,7 @@ namespace ProjectVL.Presentation
                     new Rect(panel.x + 24f, panel.y + 361f, panel.width - 48f, 26f),
                     $"成长属性：生命 +{summary.RunMaxHpAdd:0.##}  ·  "
                     + $"射程 +{summary.RunRangeAdd:0.##}  ·  "
-                    + $"经验 +{summary.XpGainBonus * 100f:0}%",
+                    + $"奖励进度 +{summary.XpGainBonus * 100f:0}%",
                     _leftStyle);
                 GUI.Label(
                     new Rect(panel.x + 24f, panel.y + 391f, panel.width - 48f, 26f),
@@ -879,6 +881,87 @@ namespace ProjectVL.Presentation
                 _hudStyle);
         }
 
+        private void DrawRewardReceiptPanel(RewardReceipt receipt)
+        {
+            Rect panel = CenterPanelRect(382f, 260f);
+            GUI.Box(panel, GUIContent.none);
+            GUI.Label(
+                new Rect(panel.x + 18f, panel.y + 14f, panel.width - 36f, 38f),
+                RewardTitle(receipt.RewardId),
+                _centerStyle);
+            GUI.Label(
+                new Rect(panel.x + 24f, panel.y + 58f, panel.width - 48f, 105f),
+                RewardResultText(receipt.Result),
+                _leftStyle);
+            GUI.Label(
+                new Rect(panel.x + 24f, panel.y + 166f, panel.width - 48f, 24f),
+                $"第 {receipt.ActivationIndex + 1} 次欢愉奖励已结算",
+                _hudStyle);
+            if (GUI.Button(
+                new Rect(panel.x + 82f, panel.yMax - 58f, panel.width - 164f, 42f),
+                "收下并继续",
+                _buttonStyle))
+            {
+                _controller.ConfirmRewardReceipt();
+            }
+        }
+
+        private static string RewardTitle(string rewardId)
+        {
+            switch (rewardId)
+            {
+                case "heartbreakNova":
+                    return "心碎新星";
+                case "absoluteStillness":
+                    return "绝对静止";
+                case "clarityReflux":
+                    return "清明回流";
+                case "wildHeart":
+                    return "狂野之心";
+                case "buildResonance":
+                    return "构筑共振";
+                default:
+                    return "欢愉奖励";
+            }
+        }
+
+        private static string RewardResultText(RewardExecutionResult result)
+        {
+            if (result == null)
+                return "奖励已经生效。";
+            if (result.DamageDealt > 0f)
+                return $"向全场释放新星，造成 {result.DamageDealt:0} 点伤害，"
+                    + $"击败 {result.EnemiesKilled} 名敌人。";
+            if (result.FrozenCount > 0)
+                return $"冻结并易伤全场 {result.FrozenCount} 名敌人。";
+            if (result.HealingGranted > 0f || result.ShieldHitsGranted > 0)
+                return $"恢复 {result.HealingGranted:0} 点生命，并获得 "
+                    + $"{result.ShieldHitsGranted} 次护盾。";
+            if (result.WildcardGrants != null
+                && result.WildcardGrants.Length > 0)
+            {
+                WildcardGrant grant = result.WildcardGrants[0];
+                return $"获得 {grant.Count} 张 {grant.Star}★ 万能牌。";
+            }
+            if (!string.IsNullOrEmpty(result.SurgeTag))
+                return $"{BuildTagName(result.SurgeTag)}流派共振 "
+                    + $"{result.SurgeDuration:0.#} 秒。";
+            return "奖励已经生效。";
+        }
+
+        private static string BuildTagName(string tag)
+        {
+            switch (tag)
+            {
+                case "projectile": return "弹道";
+                case "control": return "控制";
+                case "domain": return "领域";
+                case "defense": return "防御";
+                case "utility": return "资源";
+                default: return "当前";
+            }
+        }
+
         private void DrawGodChoicePanel(GodChoice choice)
         {
             Rect panel = CenterPanelRect(382f, 270f);
@@ -889,8 +972,8 @@ namespace ProjectVL.Presentation
                     ? "选择副神"
                     : "选择本波重点";
             string body = choice.Role == GodChoiceRole.Focus
-                ? "重点神会影响后续遗物候选倾向。"
-                : "主神和副神共同决定本局遗物候选范围。";
+                ? "重点神会影响后续卡池和掉落倾向。"
+                : "主神和副神共同决定本局卡池范围。";
             GUI.Label(
                 new Rect(panel.x + 18f, panel.y + 14f, panel.width - 36f, 38f),
                 title,
@@ -1374,7 +1457,7 @@ namespace ProjectVL.Presentation
                 case "rangeAdd":
                     return $"攻击射程 +{reward.add:0.##}";
                 case "xpGainPct":
-                    return $"经验获取 +{reward.add * 100f:0}%";
+                    return $"奖励进度 +{reward.add * 100f:0}%";
                 default:
                     return reward.id;
             }
@@ -1487,7 +1570,7 @@ namespace ProjectVL.Presentation
                 case "bulwark":
                     return "壁垒与反击\n护盾、反伤与召唤";
                 case "plenty":
-                    return "收获与命运\n掉落、经验与合成";
+                    return "收获与命运\n掉落、奖励与合成";
                 default:
                     return "中立构筑";
             }

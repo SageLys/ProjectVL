@@ -33,6 +33,7 @@ namespace ProjectVL.Core
         public float XpGainBonus { get; }
         public CardSummary HighestCard { get; }
         public RunScore Score { get; }
+        public int RewardActivations { get; }
 
         public RunSummary(
             bool won,
@@ -63,7 +64,8 @@ namespace ProjectVL.Core
             float runRangeAdd,
             float xpGainBonus,
             CardSummary highestCard,
-            RunScore score)
+            RunScore score,
+            int rewardActivations = 0)
         {
             Won = won;
             Difficulty = difficulty;
@@ -94,6 +96,7 @@ namespace ProjectVL.Core
             XpGainBonus = xpGainBonus;
             HighestCard = highestCard;
             Score = score;
+            RewardActivations = rewardActivations;
         }
     }
 

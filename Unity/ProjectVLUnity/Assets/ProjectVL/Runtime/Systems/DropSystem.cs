@@ -30,20 +30,20 @@ namespace ProjectVL.Systems
 
         private readonly EconomyConfig _economy;
         private readonly IRandomSource _random;
-        private readonly ProgressionSystem _progression;
+        private readonly RewardMeterSystem _rewardMeter;
         private readonly CardPoolSystem _cardPool;
         private readonly WavesConfig _waves;
 
         public DropSystem(
             EconomyConfig economy,
             IRandomSource random,
-            ProgressionSystem progression = null,
+            RewardMeterSystem rewardMeter = null,
             CardPoolSystem cardPool = null,
             WavesConfig waves = null)
         {
             _economy = economy ?? throw new ArgumentNullException(nameof(economy));
             _random = random ?? throw new ArgumentNullException(nameof(random));
-            _progression = progression;
+            _rewardMeter = rewardMeter;
             _cardPool = cardPool;
             _waves = waves;
         }
@@ -219,14 +219,16 @@ namespace ProjectVL.Systems
                         && _random.NextFloat()
                             < state.ExpiryConvertRatio)
                     {
-                        float experience = drop.Star * 4f;
-                        if (_progression != null)
+                        float rewardPoints = drop.Star
+                            * (_rewardMeter?.Config
+                                .expiryConvertPointsPerStar ?? 4f);
+                        if (_rewardMeter != null)
                         {
-                            _progression.AddExperience(state, experience);
+                            _rewardMeter.AddPoints(state, rewardPoints);
                         }
                         else
                         {
-                            state.AddExperience(experience);
+                            state.AddExperience(rewardPoints);
                         }
 
                         state.ExpiredDropsConverted++;

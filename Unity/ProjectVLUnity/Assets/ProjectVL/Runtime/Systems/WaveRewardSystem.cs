@@ -179,7 +179,8 @@ namespace ProjectVL.Systems
                     state.RestoreHp(reward.add);
                     break;
                 case "xpGainPct":
-                    state.XpGainBonus += reward.add;
+                    state.RewardPointGainBonus += reward.add;
+                    state.XpGainBonus = state.RewardPointGainBonus;
                     break;
             }
         }

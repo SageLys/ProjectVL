@@ -1,0 +1,16 @@
+{
+  "version": "0.1.0",
+  "sourceVersion": "0.1.0",
+  "winBonus": 500,
+  "perWaveCleared": 40,
+  "perKill": 2,
+  "hpRatioBonusMax": 200,
+  "perEquippedStarSquared": 10,
+  "wildcardStarValue": {
+    "star1": 15,
+    "star2": 40,
+    "star3": 100,
+    "star4": 250,
+    "star5": 600
+  }
+}

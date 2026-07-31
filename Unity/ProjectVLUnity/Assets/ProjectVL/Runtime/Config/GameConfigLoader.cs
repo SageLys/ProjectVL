@@ -35,6 +35,16 @@ namespace ProjectVL.Config
             return Load<ProgressionConfig>("Config/progression");
         }
 
+        public static RewardMeterConfig LoadRewardMeter()
+        {
+            return Load<RewardMeterConfig>("Config/rewardMeter");
+        }
+
+        public static SettlementConfig LoadSettlement()
+        {
+            return Load<SettlementConfig>("Config/settlement");
+        }
+
         public static GodsConfig LoadGods()
         {
             return Load<GodsConfig>("Config/gods");

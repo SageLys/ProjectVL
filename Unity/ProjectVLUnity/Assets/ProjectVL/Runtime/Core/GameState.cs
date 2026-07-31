@@ -99,6 +99,36 @@ namespace ProjectVL.Core
         public float ExperienceNeeded { get; private set; } = 10f;
         public int Level { get; private set; } = 1;
         public float XpGainBonus { get; internal set; }
+        public float RewardPoints { get; internal set; }
+        public int RewardThresholdIndex { get; internal set; }
+        public float RewardThreshold { get; internal set; } =
+            float.PositiveInfinity;
+        public RewardReceipt PendingRewardReceipt { get; internal set; }
+        public string LastRewardId { get; internal set; }
+        public int RewardActivationCount { get; internal set; }
+        public float RewardPointGainBonus { get; internal set; }
+        public int RewardPointSuppressionDepth { get; internal set; }
+        public string RewardSurgeTag { get; internal set; }
+        public float RewardSurgeRemaining { get; internal set; }
+        public float RewardSurgeValue { get; internal set; }
+        public float RewardDamageMultiplier =>
+            RewardSurgeRemaining > 0f
+            && (RewardSurgeTag == "projectile"
+                || RewardSurgeTag == "domain")
+                ? 1f + RewardSurgeValue
+                : 1f;
+        public float RewardFireRateMultiplier =>
+            RewardSurgeRemaining > 0f && RewardSurgeTag == "projectile"
+                ? 1f + RewardSurgeValue
+                : 1f;
+        public float RewardDefenseMultiplier =>
+            RewardSurgeRemaining > 0f && RewardSurgeTag == "defense"
+                ? 1f + RewardSurgeValue
+                : 1f;
+        public float RewardDropMultiplier =>
+            RewardSurgeRemaining > 0f && RewardSurgeTag == "utility"
+                ? 1f + RewardSurgeValue
+                : 1f;
         public string MainGod { get; internal set; }
         public List<string> SubGods { get; } = new List<string>();
         public string FocusGod { get; internal set; }
@@ -599,7 +629,8 @@ namespace ProjectVL.Core
                 || PendingGodChoice != null
                 || PendingEvolution != null
                 || PendingBossReward != null
-                || PendingWaveReward != null;
+                || PendingWaveReward != null
+                || PendingRewardReceipt != null;
         }
 
         internal void GrantReward(RunReward reward)

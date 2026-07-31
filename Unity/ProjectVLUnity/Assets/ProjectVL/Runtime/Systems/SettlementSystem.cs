@@ -21,6 +21,15 @@ namespace ProjectVL.Systems
             _totalWaves = Math.Max(1, totalWaves);
         }
 
+        public SettlementSystem(
+            SettlementConfig config,
+            int totalWaves)
+        {
+            _config = config ?? new SettlementConfig();
+            _relics = new RelicsConfig();
+            _totalWaves = Math.Max(1, totalWaves);
+        }
+
         public RunSummary Build(GameState state, bool won)
         {
             if (state == null)
@@ -114,7 +123,8 @@ namespace ProjectVL.Systems
                 state.RunRangeAdd,
                 state.XpGainBonus,
                 highestCard,
-                score);
+                score,
+                state.RewardActivationCount);
         }
 
         private void ScoreCards(

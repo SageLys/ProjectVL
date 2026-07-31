@@ -53,7 +53,10 @@ namespace ProjectVL.Systems
             "evolution_branch_selected",
             "recipe_available",
             "recipe_completed",
-            "affix_rolled"
+            "affix_rolled",
+            "rewardPointsGained",
+            "rewardTriggered",
+            "rewardConfirmed"
         };
 
         private static readonly HashSet<string> TypeSet =
@@ -82,6 +85,8 @@ namespace ProjectVL.Systems
         public EvolutionRecipesConfig evolutionRecipes;
         public EvolutionTextConfig evolutionText;
         public WaveRewardsConfig waveRewards;
+        public RewardMeterConfig rewardMeter;
+        public SettlementConfig settlement;
     }
 
     [Serializable]
@@ -185,6 +190,9 @@ namespace ProjectVL.Systems
         public string affixStat;
         public float affixValue;
         public float consumableDuration;
+        public string rewardId;
+        public int activationIndex;
+        public float rewardPoints;
     }
 
     [Serializable]
@@ -282,7 +290,9 @@ namespace ProjectVL.Systems
             WaveRewardsConfig waveRewards = null,
             Func<string> presetName = null,
             string gitCommit = null,
-            string autoExportDirectory = null)
+            string autoExportDirectory = null,
+            RewardMeterConfig rewardMeter = null,
+            SettlementConfig settlement = null)
         {
             if (state == null) throw new ArgumentNullException(nameof(state));
             _state = state;
@@ -319,7 +329,9 @@ namespace ProjectVL.Systems
                 relics = relics,
                 evolutionRecipes = evolutionRecipes,
                 evolutionText = evolutionText,
-                waveRewards = waveRewards
+                waveRewards = waveRewards,
+                rewardMeter = rewardMeter,
+                settlement = settlement
             };
             _state.TelemetryEvent += RecordCoreEvent;
             RefreshMetadata();

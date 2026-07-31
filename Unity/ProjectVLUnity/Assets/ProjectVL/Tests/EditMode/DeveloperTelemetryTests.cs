@@ -139,7 +139,9 @@ namespace ProjectVL.Tests
                     waveRewards,
                     () => "stress-preset",
                     "abc123",
-                    directory);
+                    directory,
+                    rewardMeter: GameConfigLoader.LoadRewardMeter(),
+                    settlement: GameConfigLoader.LoadSettlement());
 
                 state.EndRun();
                 telemetry.Step(state, 0.016f);
@@ -155,6 +157,8 @@ namespace ProjectVL.Tests
                 StringAssert.Contains("\"progression\":", json);
                 StringAssert.Contains("\"cards\":", json);
                 StringAssert.Contains("\"waveRewards\":", json);
+                StringAssert.Contains("\"rewardMeter\":", json);
+                StringAssert.Contains("\"settlement\":", json);
             }
             finally
             {
@@ -166,13 +170,16 @@ namespace ProjectVL.Tests
         [Test]
         public void EventContractMatchesWebAndCoreSystemsPublishIntoSession()
         {
-            Assert.That(TelemetryEventContract.Types.Length, Is.EqualTo(43));
+            Assert.That(TelemetryEventContract.Types.Length, Is.EqualTo(46));
             Assert.That(
                 new HashSet<string>(TelemetryEventContract.Types).Count,
-                Is.EqualTo(43));
+                Is.EqualTo(46));
             Assert.That(TelemetryEventContract.Contains("spawn"), Is.True);
             Assert.That(
                 TelemetryEventContract.Contains("affix_rolled"),
+                Is.True);
+            Assert.That(
+                TelemetryEventContract.Contains("rewardTriggered"),
                 Is.True);
             Assert.That(
                 TelemetryEventContract.Contains("wavePhase"),

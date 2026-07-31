@@ -16,7 +16,7 @@ namespace ProjectVL.Presentation
         private RecipeSystem _recipeSystem;
         private DropSystem _dropSystem;
         private CombatSystem _combatSystem;
-        private ProgressionSystem _progressionSystem;
+        private RewardMeterSystem _rewardMeterSystem;
         private GodPoolSystem _godPoolSystem;
         private BountySystem _bountySystem;
         private DeveloperToolsSystem _developerTools;
@@ -179,6 +179,8 @@ namespace ProjectVL.Presentation
                 GameConfigLoader.LoadEvolutionRecipes();
             DifficultyConfig difficulty = GameConfigLoader.LoadDifficulty();
             ProgressionConfig progression = GameConfigLoader.LoadProgression();
+            RewardMeterConfig rewardMeter = GameConfigLoader.LoadRewardMeter();
+            SettlementConfig settlement = GameConfigLoader.LoadSettlement();
             GodsConfig gods = GameConfigLoader.LoadGods();
             CardsConfig cards = GameConfigLoader.LoadCards();
             CardAffixesConfig affixes =
@@ -201,8 +203,7 @@ namespace ProjectVL.Presentation
             GameState state = GameStateFactory.Create(combat, economy);
             state.AttachSettlement(
                 new SettlementSystem(
-                    progression,
-                    relics,
+                    settlement,
                     waves.totalWaves));
             int seed = _requestedSeed ?? System.Environment.TickCount;
             _requestedSeed = null;
@@ -210,6 +211,11 @@ namespace ProjectVL.Presentation
             var cardAffixSystem = new CardAffixSystem(
                 cardAffixCatalog,
                 random);
+            _rewardMeterSystem = new RewardMeterSystem(
+                rewardMeter,
+                random,
+                cardCatalog);
+            _rewardMeterSystem.Initialize(state);
             _recipeSystem = new RecipeSystem(
                 recipes,
                 cardAffixSystem);
@@ -232,14 +238,10 @@ namespace ProjectVL.Presentation
                 waves,
                 random,
                 difficultySystem);
-            _progressionSystem = new ProgressionSystem(
-                progression,
-                relics,
-                random);
             _dropSystem = new DropSystem(
                 economy,
                 random,
-                _progressionSystem,
+                _rewardMeterSystem,
                 cardPoolSystem,
                 waves);
             _bountySystem = new BountySystem(
@@ -264,8 +266,10 @@ namespace ProjectVL.Presentation
                 combat,
                 enemies,
                 _dropSystem,
-                _progressionSystem,
+                _rewardMeterSystem,
                 _bountySystem);
+            _rewardMeterSystem.AttachDamageHandler(
+                _combatSystem.ApplyRewardDamage);
 
             _world = new CombatWorld(
                 _combatSystem,
@@ -314,7 +318,9 @@ namespace ProjectVL.Presentation
                     () => _runtimeTuning.AppliedPresetName,
                     autoExportDirectory: System.IO.Path.Combine(
                         Application.persistentDataPath,
-                        "telemetry"));
+                        "telemetry"),
+                    rewardMeter: rewardMeter,
+                    settlement: settlement);
                 _simulation.SimulationStep += _telemetry.Step;
             }
 
@@ -364,15 +370,22 @@ namespace ProjectVL.Presentation
 
         public void ChooseLevelUpgrade(int optionIndex)
         {
-            if (_progressionSystem != null
-                && _progressionSystem.Choose(State, optionIndex))
+            if (State?.PendingLevelUpgrade != null)
+            {
+                LastCardAction = "旧版遗物选择已停用。";
+            }
+        }
+
+        public void ConfirmRewardReceipt()
+        {
+            if (_rewardMeterSystem != null
+                && _rewardMeterSystem.ConfirmReceipt(State))
             {
                 _audio?.Play("sfx.level");
                 _telemetry?.RecordInput(
                     State,
-                    "decision_resolved",
-                    "level:" + optionIndex);
-                LastCardAction = "遗物已加入本局构筑。";
+                    "rewardConfirmed");
+                LastCardAction = "奖励结算完成，战斗继续。";
             }
         }
 
