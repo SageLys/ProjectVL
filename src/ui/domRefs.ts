@@ -12,6 +12,9 @@ function maybeEl<T extends Element>(sel: string): T | null {
 
 export function getDomRefs() {
   return {
+    viewportHost: el<HTMLElement>('#viewportHost'),
+    gameStage: el<HTMLElement>('#gameStage'),
+    globalOverlayRoot: el<HTMLElement>('#globalOverlayRoot'),
     canvas: el<HTMLCanvasElement>('#game'),
     arena: el<HTMLElement>('#arena'),
     dock: el<HTMLElement>('#dock'),
@@ -35,6 +38,9 @@ export function getDomRefs() {
     equipmentSlots: el<HTMLElement>('#equipmentSlots'),
     cardsHint: el<HTMLElement>('#cardsHint'),
     centerMsg: el<HTMLElement>('#centerMsg'),
+    readyOverlay: el<HTMLElement>('#readyOverlay'),
+    readyTitle: el<HTMLElement>('#readyTitle'),
+    readyDescription: el<HTMLElement>('#readyDescription'),
     toast: el<HTMLElement>('#toast'),
     upgradeBanner: el<HTMLElement>('#upgradeBanner'),
     celebrationFx: el<HTMLElement>('#celebrationFx'),

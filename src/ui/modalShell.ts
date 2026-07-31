@@ -57,7 +57,7 @@ export function modalShell(options: ModalShellOptions): ModalShell {
   footer.hidden = true;
   dialog.append(header, body, footer);
   overlay.append(dialog);
-  document.body.append(overlay);
+  (document.querySelector('#globalOverlayRoot') ?? document.body).append(overlay);
 
   const close = (): void => {
     if (!open) return;

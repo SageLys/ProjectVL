@@ -1,6 +1,7 @@
 import type { SlotKind } from '../core/types';
 import type { InputConfig } from '../config/types';
 import type { SlotSource } from '../ui/slotFactory';
+import { ARENA_HEIGHT, ARENA_WIDTH } from '../platform/stageMetrics';
 
 export type PointerSample = { x: number; y: number; at: number };
 export type DropTarget =
@@ -14,7 +15,8 @@ export function isTap(start: PointerSample, end: PointerSample, maxDistance: num
 }
 
 export function canvasPoint(canvas: Pick<HTMLCanvasElement, 'width' | 'height'>, rect: Pick<DOMRect, 'left' | 'top' | 'width' | 'height'>, clientX: number, clientY: number) {
-  return { x: ((clientX - rect.left) / rect.width) * canvas.width, y: ((clientY - rect.top) / rect.height) * canvas.height };
+  void canvas;
+  return { x: ((clientX - rect.left) / rect.width) * ARENA_WIDTH, y: ((clientY - rect.top) / rect.height) * ARENA_HEIGHT };
 }
 
 export function distanceFrom(start: PointerSample, x: number, y: number): number {
@@ -123,10 +125,10 @@ export function createPointerRouter(options: RouterOptions) {
     if (target.kind !== 'arena') return;
     if (preview.placement === 'screen') { options.screenPreview.classList.add('show'); return; }
     const rect = options.canvas.getBoundingClientRect();
-    const scale = Math.min(rect.width / options.canvas.width, rect.height / options.canvas.height);
-    options.aimPreview.style.setProperty('--radius', `${preview.radius * scale}px`);
-    options.aimPreview.style.left = `${clientX}px`;
-    options.aimPreview.style.top = `${clientY - options.input.reticleOffsetY}px`;
+    const arenaScale = rect.width / ARENA_WIDTH;
+    options.aimPreview.style.setProperty('--radius', `${preview.radius}px`);
+    options.aimPreview.style.left = `${target.x}px`;
+    options.aimPreview.style.top = `${target.y - options.input.reticleOffsetY / Math.max(0.01, arenaScale)}px`;
     options.aimPreview.classList.add('show');
   }
 

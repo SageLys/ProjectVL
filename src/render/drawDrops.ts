@@ -1,10 +1,12 @@
 import type { GameState } from '../core/types';
 import { resolveCardVisual } from '../presentation/cardVisual';
 import { glyphGeometry, shapeGeometry, traceGeometryToCanvas } from '../presentation/skillGeometry';
+import { currentArenaCssScale, logicalFontPx } from './renderMetrics';
 
 const TAU = Math.PI * 2;
 
 function drawWildcardDrop(ctx: CanvasRenderingContext2D, drop: Extract<GameState['groundDrops'][number], { kind: 'wildcard' }>): void {
+  const fontPx = logicalFontPx(11, currentArenaCssScale(ctx));
   const ratio = Math.max(0, drop.life / drop.maxLife);
   const bob = Math.sin(drop.pulse) * 3;
   ctx.save();
@@ -24,7 +26,7 @@ function drawWildcardDrop(ctx: CanvasRenderingContext2D, drop: Extract<GameState
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText('W', 0, 0);
-  ctx.font = 'bold 9px Microsoft YaHei';
+  ctx.font = `bold ${fontPx}px Microsoft YaHei`;
   ctx.fillText(`${drop.star}★×${drop.count}`, 0, 17);
   ctx.strokeStyle = ratio > 0.35 ? '#c084fc' : '#ff6b6b';
   ctx.lineWidth = 4;
@@ -36,6 +38,7 @@ function drawWildcardDrop(ctx: CanvasRenderingContext2D, drop: Extract<GameState
 
 /** 地面掉落：发光圆牌 + 图标 + 倒计时圆环 + 剩余秒数。 */
 export function drawDrops(ctx: CanvasRenderingContext2D, state: GameState): void {
+  const fontPx = logicalFontPx(11, currentArenaCssScale(ctx));
   for (const drop of state.groundDrops) {
     if (drop.kind === 'wildcard') {
       drawWildcardDrop(ctx, drop);
@@ -73,7 +76,7 @@ export function drawDrops(ctx: CanvasRenderingContext2D, state: GameState): void
     ctx.arc(0, 0, 27, -Math.PI / 2, -Math.PI / 2 + TAU * ratio);
     ctx.stroke();
     ctx.fillStyle = '#e8f2ff';
-    ctx.font = 'bold 10px Microsoft YaHei';
+    ctx.font = `bold ${fontPx}px Microsoft YaHei`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(`${drop.life.toFixed(1)}s`, 0, 36);

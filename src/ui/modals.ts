@@ -43,8 +43,9 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
   return {
     /** 中心引导文案。show=false 时隐藏。 */
     message(title: string, body: string, show: boolean): void {
-      refs.centerMsg.innerHTML = `<h2>${title}</h2><p>${body}</p>`;
-      refs.centerMsg.style.display = show ? 'block' : 'none';
+      refs.centerMsg.querySelector('h2')!.textContent = title;
+      refs.centerMsg.querySelector('p')!.textContent = body;
+      refs.centerMsg.hidden = !show;
     },
     showDecision(decision: RunDecision, state?: GameState): void {
       // dispatch() synchronizes this modal every animation frame. Replacing a

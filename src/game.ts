@@ -46,6 +46,9 @@ import type { DifficultyId } from './config/types';
 import { resyncEnemyStats, type EnemyStatConfigKey } from './core/systems/enemySystem';
 import { DEV_TOOLS_ENABLED } from './debug/devToolsMode';
 import { cardDisplayName } from './ui/cardMeta';
+import { createViewportManager } from './platform/viewportManager';
+import { createLayoutDebug } from './debug/layoutDebug';
+import { simulationSteps } from './core/simulationClock';
 
 // 技能 = 数据 + 解释器：把配置里的卡定义注入解释器（P5 实装 12 张正式卡后自动生效）。
 registerSkillDefs(cfg.skills.cards);
@@ -62,13 +65,31 @@ const uiPauseReasons = new Set<'cardDetail'>();
 const evidenceMode = DEV_TOOLS_ENABLED ? new URLSearchParams(location.search).get('evidence') : null;
 const refs = getDomRefs();
 let selectedDifficulty: DifficultyId = cfg.difficulty.defaultDifficulty;
-const difficultyInputs = Array.from(document.querySelectorAll<HTMLInputElement>('input[name="difficulty"]'));
-for (const input of difficultyInputs) {
-  const id = input.value as DifficultyId;
-  input.nextElementSibling!.textContent = cfg.difficulty.profiles[id].label;
-  input.checked = id === selectedDifficulty;
-  input.addEventListener('change', () => { if (input.checked) selectedDifficulty = id; });
+const difficultyButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[role="radio"][data-difficulty]'));
+function selectDifficulty(id: DifficultyId, focus = false): void {
+  selectedDifficulty = id;
+  for (const button of difficultyButtons) {
+    const selected = button.dataset.difficulty === id;
+    button.setAttribute('aria-checked', String(selected));
+    button.tabIndex = selected ? 0 : -1;
+    if (selected && focus) button.focus();
+  }
 }
+for (const button of difficultyButtons) {
+  const id = button.dataset.difficulty as DifficultyId;
+  button.textContent = cfg.difficulty.profiles[id].label;
+  button.addEventListener('click', () => selectDifficulty(id));
+  button.addEventListener('keydown', event => {
+    if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    const current = difficultyButtons.indexOf(button);
+    const next = event.key === 'Home' ? 0
+      : event.key === 'End' ? difficultyButtons.length - 1
+      : (current + (event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? -1 : 1) + difficultyButtons.length) % difficultyButtons.length;
+    selectDifficulty(difficultyButtons[next].dataset.difficulty as DifficultyId, true);
+  });
+}
+selectDifficulty(selectedDifficulty);
 if (DEV_TOOLS_ENABLED) {
   refs.testCardBtn.removeAttribute('hidden');
   refs.testWildcardBtn.removeAttribute('hidden');
@@ -77,7 +98,18 @@ if (DEV_TOOLS_ENABLED) {
 }
 const ctx = refs.canvas.getContext('2d');
 if (!ctx) throw new Error('无法获取 canvas 2D 上下文');
-const render = createRenderer(ctx);
+let layoutDebug: ReturnType<typeof createLayoutDebug>;
+const viewportManager = createViewportManager({
+  host: refs.viewportHost,
+  stage: refs.gameStage,
+  canvas: refs.canvas,
+  onChange: () => {
+    renderMergeHints(refs.dock, state);
+    layoutDebug?.update();
+  },
+});
+layoutDebug = createLayoutDebug(viewportManager.getSnapshot);
+const render = createRenderer(ctx, refs.canvas);
 const toast = createToast(refs);
 const upgradeFeedback = createUpgradeFeedback(refs);
 
@@ -269,19 +301,42 @@ function reset(): void {
     state.equipment[0] = createEvidenceCard('pierce', sourceStar);
     state.cards[0] = createEvidenceCard('pierce', sourceStar);
     state.cards[1] = createEvidenceCard('frost', 1);
+  } else if (evidenceMode === 'mobileLayout') {
+    const cardTypes = ['emberMoat', 'chainLightning', 'pierce', 'frozenBulwark', 'springOfLife', 'stormLattice', 'bountyCall'];
+    state.cards = cardTypes.map((type, index) => createEvidenceCard(type, index === 0 ? 6 : 1 + index % 5));
+    state.equipment = ['pierce', 'frozenBulwark', 'bountyCall'].map((type, index) => createEvidenceCard(type, 3 + index));
+    state.wildcards[1] = 2;
+    state.wildcards[3] = 1;
+    spawnGroundDrop(state, config, rng, 150, 250, 'emberMoat', 3);
+    state.bountyOffers.push({
+      id: 1,
+      rewardCardType: 'chainLightning',
+      rewardCardStar: 5,
+      rewardCardCount: 1,
+      wildcardStar: 3,
+      wildcardCount: 2,
+      side: 'right',
+      x: 508,
+      y: 180,
+      remaining: 8,
+      guaranteed: true,
+      createdAt: 0,
+    });
   }
   modals.hideResult();
   modals.hideDecision();
   rewardCelebration.hide();
   refs.startBtn.textContent = texts.buttons.start;
-  refs.startBtn.parentElement?.removeAttribute('hidden');
+  refs.readyOverlay.hidden = false;
+  refs.readyTitle.textContent = texts.center.readyTitle;
+  refs.readyDescription.textContent = texts.center.readyBody;
   refs.pauseBtn.textContent = texts.buttons.pause;
   refs.pauseBtn.setAttribute('aria-pressed', 'false');
   refs.pauseBtn.title = texts.buttons.pause;
   refs.pauseBtn.disabled = true;
   refs.speedBtn.disabled = true;
   syncSpeedButton();
-  modals.message(texts.center.readyTitle, texts.center.readyBody, true);
+  modals.message('', '', false);
   refreshSlots();
   renderHud(refs, state, config);
   intermissionPanel.render(state);
@@ -299,7 +354,7 @@ function start(): void {
   refs.speedBtn.disabled = false;
   dispatch(beginOpeningIntermission(state));
   refs.startBtn.textContent = texts.buttons.restart;
-  refs.startBtn.parentElement?.setAttribute('hidden', '');
+  refs.readyOverlay.hidden = true;
   modals.message('', '', false);
 }
 
@@ -333,11 +388,14 @@ function syncSpeedButton(): void {
 
 let last = performance.now();
 function loop(now: number): void {
-  const dt = Math.min(cfg.combat.dtCap, ((now - last) / 1000) * timeScale);
+  const elapsed = Math.max(0, ((now - last) / 1000) * timeScale);
   last = now;
   const lockedHp = state.hp;
   if (DEV_TOOLS_ENABLED) telemetry?.beforeUpdate();
-  let events = updateGame(state, config, rng, dt, () => tuner?.applyPendingWaveChanges());
+  let events: GameEvent[] = [];
+  for (const dt of simulationSteps(elapsed, cfg.combat.dtCap)) {
+    events.push(...updateGame(state, config, rng, dt, () => tuner?.applyPendingWaveChanges()));
+  }
   if (DEV_TOOLS_ENABLED) telemetry?.afterUpdate();
   if (DEV_TOOLS_ENABLED && devInvincible && state.hp < lockedHp) {
     state.hp = Math.max(1, lockedHp);
@@ -420,7 +478,7 @@ if (DEV_TOOLS_ENABLED) void Promise.all([import('./debug/exposeDebugApi'), impor
       getDifficultyId: () => state.difficultyId,
     },
   });
-  if (evidenceMode?.startsWith('upgrade')) devTools.hidden = true;
+  if (evidenceMode?.startsWith('upgrade') || evidenceMode === 'mobileLayout') devTools.hidden = true;
 
   telemetry = telemetryModule.createDevTelemetry({
     getState: () => state,
@@ -437,7 +495,7 @@ if (DEV_TOOLS_ENABLED) void Promise.all([import('./debug/exposeDebugApi'), impor
     testActions.append(refs.testCardBtn, refs.testWildcardBtn);
     telemetryActions.prepend(testActions);
   }
-  if (evidenceMode?.startsWith('upgrade')) {
+  if (evidenceMode?.startsWith('upgrade') || evidenceMode === 'mobileLayout') {
     document.querySelector<HTMLElement>('.telemetry-hud')?.setAttribute('hidden', '');
     if (telemetryActions) telemetryActions.style.display = 'none';
   }
@@ -446,8 +504,7 @@ if (DEV_TOOLS_ENABLED) void Promise.all([import('./debug/exposeDebugApi'), impor
       getState: () => ({ ...state, enemyTypes: state.enemies.map(enemy => enemy.type), enemies: state.enemies.length, bullets: state.bullets.length, config: { ...config }, waves: { spawnMode: cfg.waves.spawnMode, pendingSpawnMode: tuner?.getPendingSpawnMode() ?? null, budget: cfg.waves.budget } }), start, reset,
     setDifficulty: id => {
       if (!cfg.difficulty.profiles[id]) throw new Error(`未知难度: ${id}`);
-      selectedDifficulty = id;
-      for (const input of difficultyInputs) input.checked = input.value === id;
+      selectDifficulty(id);
       reset();
     },
     spawnGroundDrop: (x, y, type = null, star) => {

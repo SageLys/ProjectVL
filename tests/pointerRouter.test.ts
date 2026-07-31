@@ -20,7 +20,7 @@ describe('pointerRouter · 坐标与取消', () => {
     expect(resolveTarget({ width: 540, height: 960 }, { left: 0, top: 0, right: 270, bottom: 480, width: 270, height: 480 }, -1, 100)).toEqual({ kind: 'cancel' });
   });
   it('画布抬指返回换算后的释放落点', () => {
-    expect(resolveTarget({ width: 540, height: 960 }, { left: 0, top: 0, right: 270, bottom: 480, width: 270, height: 480 }, 135, 240)).toEqual({ kind: 'arena', x: 270, y: 480 });
+    expect(resolveTarget({ width: 1080, height: 1460 }, { left: 0, top: 0, right: 270, bottom: 365, width: 270, height: 365 }, 135, 182.5)).toEqual({ kind: 'arena', x: 270, y: 365 });
   });
   it('卡格优先于下方画布并保留目标索引', () => expect(resolveTarget({ width: 540, height: 960 }, { left: 0, top: 0, right: 270, bottom: 480, width: 270, height: 480 }, 100, 100, { slotKind: 'cards', index: 3 })).toEqual({ kind: 'slot', slotKind: 'cards', index: 3 }));
 });
