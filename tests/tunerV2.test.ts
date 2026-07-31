@@ -7,54 +7,73 @@ import { resolveActiveWavePlan } from '../src/core/runStage';
 import { createSeededRng } from '../src/debug/exposeDebugApi';
 import { deriveMetrics } from '../src/ui/derivedMetrics';
 import {
-  BOUNTY_TUNER_PARAMS, BUDGET_TUNER_PARAMS, DROP_DIRECTOR_TUNER_PARAMS, STAGE_DIRECTOR_TUNER_PARAMS, TUNER_PARAMS,
-  getNumberAt, setNumberAt,
+  getNumberAt, setNumberAt, tunerLabel, tunerParam, tunerSliders, tunerSlidersInGroup,
 } from '../src/ui/tunerSchema';
+import { validateTunerConfig } from '../src/config/tunerMeta';
 import { freshState, resetTestEnv } from './helpers';
 
 beforeEach(resetTestEnv);
 
-describe('stage director tuner controls', () => {
-  it('exposes valid numeric ranges', () => {
-    expect(STAGE_DIRECTOR_TUNER_PARAMS).toHaveLength(16);
-    for (const param of STAGE_DIRECTOR_TUNER_PARAMS) {
-      const range = cfg.tuner[param.path];
-      expect(range, param.path).toBeDefined();
-      expect(range.min).toBeLessThan(range.max);
-      expect(range.step).toBeGreaterThan(0);
+/** 迁移前各分组暴露的滑杆数（tunerSchema.ts 五张手写表合并后的分组统计），用于锁死面板可调项不变。 */
+const SLIDERS_PER_GROUP = {
+  waves: 37, combat: 9, enemies: 29, drops: 32, progression: 1, bounty: 42, p2: 8,
+} as const;
+
+describe('调参元数据 · 单一来源', () => {
+  it('每个滑杆都有合法范围、可解析标签，并指向配置中的真实数值', () => {
+    const sliders = tunerSliders();
+    expect(sliders).toHaveLength(158);
+    for (const param of sliders) {
+      expect(param.min, param.path).toBeLessThan(param.max!);
+      expect(param.step, param.path).toBeGreaterThan(0);
+      expect(tunerLabel(param), param.path).not.toBe(param.path);
       expect(() => getNumberAt(cfg, param.path)).not.toThrow();
     }
+  });
+
+  it('面板每组的可调项数量与迁移前逐组相等', () => {
+    for (const [group, count] of Object.entries(SLIDERS_PER_GROUP)) {
+      expect(tunerSlidersInGroup(group as keyof typeof SLIDERS_PER_GROUP), group).toHaveLength(count);
+    }
+  });
+
+  it('专用控件由 type/options 表达，不再靠面板内硬编码', () => {
+    expect(tunerParam('waves.spawnMode')).toMatchObject({ type: 'enum', options: ['interval', 'budget'] });
+    expect(tunerParam('bounty.enabled')).toMatchObject({ type: 'boolean', applyPolicy: 'immediate' });
+    expect(tunerParam('waves.bossWaves')).toMatchObject({ type: 'text' });
+  });
+
+  it('保留项已声明范围但不进面板', () => {
+    const reserved = cfg.tuner.params.filter(param => param.exposed === false);
+    expect(reserved).toHaveLength(13);
+    expect(reserved.map(param => param.path)).toContain('enemies.types.boss.ccResist');
+    expect(tunerSliders().some(param => param.exposed === false)).toBe(false);
+  });
+
+  it('非法元数据在配置加载阶段即报错', () => {
+    const broken = structuredClone(cfg);
+    broken.tuner.params[3].max = broken.tuner.params[3].min;
+    expect(() => validateTunerConfig(broken)).toThrow(/min 必须小于 max/);
+    const missingPath = structuredClone(cfg);
+    missingPath.tuner.params[3].path = 'waves.notARealField';
+    expect(() => validateTunerConfig(missingPath)).toThrow(/未指向配置中的数值/);
+  });
+
+  it('Bounty 的全部数值参数都即时生效', () => {
+    const bounty = tunerSlidersInGroup('bounty');
+    expect(bounty.every(param => param.applyPolicy === 'immediate')).toBe(true);
+  });
+
+  it('开局强制发牌次数在下一波延迟生效', () => {
+    expect(tunerParam('economy.normalDropTypePolicy.bootstrapForcedDrops')).toMatchObject({
+      type: 'number', group: 'drops', min: 0, max: 20, step: 1, applyPolicy: 'waveDeferred',
+    });
   });
 });
 
-describe('调参面板 v2 · 参数与派生指标', () => {
-  it('§2 A/B/C/D 每个暴露参数都在 tuner.json 有 min/max/step', () => {
-    expect(TUNER_PARAMS.length).toBe(66);
-    for (const param of TUNER_PARAMS) {
-      const range = cfg.tuner[param.path];
-      expect(range, param.path).toBeDefined();
-      expect(range.min).toBeLessThan(range.max);
-      expect(range.step).toBeGreaterThan(0);
-    }
-  });
-
-  it('exposes every numeric drop-director control with a valid tuner range', () => {
-    expect(DROP_DIRECTOR_TUNER_PARAMS).toHaveLength(27);
-    expect(DROP_DIRECTOR_TUNER_PARAMS.every(param => param.group === 'drops')).toBe(true);
-    for (const param of DROP_DIRECTOR_TUNER_PARAMS) {
-      const range = cfg.tuner[param.path];
-      expect(range, param.path).toBeDefined();
-      expect(range.min).toBeLessThan(range.max);
-      expect(range.step).toBeGreaterThan(0);
-      expect(() => getNumberAt(cfg, param.path)).not.toThrow();
-    }
-  });
-
-  it('round-trips all progression controls through numeric path accessors', () => {
-    const paths = [
-      'progression.killXpMul',
-      'progression.relicChoices',
-    ];
+describe('调参面板 v2 · 派生指标', () => {
+  it('round-trips the reward meter control through numeric path accessors', () => {
+    const paths = ['rewardMeter.pointMul'];
     for (const [index, path] of paths.entries()) {
       const value = index + 2.25;
       setNumberAt(cfg, path, value);
@@ -62,28 +81,8 @@ describe('调参面板 v2 · 参数与派生指标', () => {
     }
   });
 
-  it('Bounty 的全部数值参数都有合法范围且即时生效', () => {
-    expect(BOUNTY_TUNER_PARAMS).toHaveLength(42);
-    expect(BOUNTY_TUNER_PARAMS.every(param => param.group === 'bounty' && !param.waveDeferred)).toBe(true);
-    for (const param of BOUNTY_TUNER_PARAMS) {
-      const range = cfg.tuner[param.path];
-      expect(range, param.path).toBeDefined();
-      expect(range.min).toBeLessThan(range.max);
-      expect(range.step).toBeGreaterThan(0);
-      expect(() => getNumberAt(cfg, param.path)).not.toThrow();
-    }
-  });
-
   it('TTK、击杀深度与同屏数和手算一致，damage 联动方向正确', () => {
-    cfg.economy.ordinaryDropRate.enabled = false;
-    expect(BUDGET_TUNER_PARAMS).toHaveLength(9);
-    for (const param of BUDGET_TUNER_PARAMS) {
-      const range = cfg.tuner[param.path];
-      expect(range, param.path).toBeDefined();
-      expect(range.min).toBeLessThan(range.max);
-      expect(range.step).toBeGreaterThan(0);
-    }
-
+    cfg.waves.stagePlan.enabled = false;
     const runtime = createDefaultConfig();
     const metrics = deriveMetrics(cfg, runtime);
     const hp = cfg.enemies.types.normal.hpBase + cfg.enemies.types.normal.hpPerWave;
@@ -115,7 +114,7 @@ describe('调参面板 v2 · 参数与派生指标', () => {
   });
 
   it('projects every Budget control into a visible derived value', () => {
-    cfg.economy.ordinaryDropRate.enabled = false;
+    cfg.waves.stagePlan.enabled = false;
     const runtime = createDefaultConfig();
     cfg.waves.spawnMode = 'budget';
     cfg.waves.enemyCountBase = 20;

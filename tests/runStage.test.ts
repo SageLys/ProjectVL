@@ -12,7 +12,17 @@ describe('run stage plan', () => {
     expect(resolveWavePlan(3, 10, plan)).toMatchObject({ stage: 'selection', quota: 75, regular: { targetOnScreen: 10 } });
     expect(resolveWavePlan(4, 10, plan)).toMatchObject({ stage: 'build', quota: 95, regular: { targetOnScreen: 14 } });
     expect(resolveWavePlan(8, 10, plan)).toMatchObject({ stage: 'build', quota: 170, regular: { targetOnScreen: 28 } });
-    expect(resolveWavePlan(9, 10, plan)).toMatchObject({ stage: 'validation', quota: 0, validation: plan.validation[0] });
+    expect(resolveWavePlan(9, 10, plan)).toMatchObject({
+      stage: 'validation',
+      quota: plan.validation[0].swarm.quota,
+      regular: {
+        targetOnScreen: plan.validation[0].swarm.targetOnScreen,
+        checkInterval: plan.validation[0].swarm.checkInterval,
+        batchMax: plan.validation[0].swarm.batchMax,
+        maxAlive: plan.validation[0].swarm.maxAlive,
+      },
+      validation: plan.validation[0],
+    });
   });
 
   it('uses 3 recruitment, 5 convergence, and 2 validation waves', () => {
@@ -42,11 +52,34 @@ describe('run stage plan', () => {
     expect(() => validateStagePlanConfig(invalidWildcard, 10, 6, config.waves.waveBoss.reward)).toThrow(/between 1 and 5/);
 
     const invalidCard = structuredClone(config.waves.stagePlan);
-    invalidCard.validation[0].enemies[0].reward = { kind: 'card', star: 7, count: 1, typePolicy: 'build' };
+    invalidCard.validation[0].elites[0].reward = { kind: 'card', star: 7, count: 1, typePolicy: 'build' };
     expect(() => validateStagePlanConfig(invalidCard, 10, 6, config.waves.waveBoss.reward)).toThrow(/between 1 and 6/);
 
     const invalidSchedule = structuredClone(config.waves.waveBoss.reward);
     invalidSchedule.schedule.build = [];
     expect(() => validateStagePlanConfig(config.waves.stagePlan, 10, 6, invalidSchedule)).toThrow(/non-empty array/);
+  });
+
+  it('rejects invalid validation swarm and elite contracts', () => {
+    const config = buildConfig();
+    const invalidTarget = structuredClone(config.waves.stagePlan);
+    invalidTarget.validation[0].swarm.targetOnScreen = invalidTarget.validation[0].swarm.maxAlive + 1;
+    expect(() => validateStagePlanConfig(invalidTarget, 10)).toThrow(/targetOnScreen.*maxAlive/);
+
+    const invalidComposition = structuredClone(config.waves.stagePlan);
+    invalidComposition.validation[0].swarm.composition = { normal: 0, fast: 0, tank: 0 };
+    expect(() => validateStagePlanConfig(invalidComposition, 10)).toThrow(/total weight/);
+
+    const duplicateProgress = structuredClone(config.waves.stagePlan);
+    duplicateProgress.validation[0].elites.push(structuredClone(duplicateProgress.validation[0].elites[0]));
+    expect(() => validateStagePlanConfig(duplicateProgress, 10)).toThrow(/unique/);
+
+    const invalidProgress = structuredClone(config.waves.stagePlan);
+    invalidProgress.validation[0].elites[0].spawnAtProgress = 1;
+    expect(() => validateStagePlanConfig(invalidProgress, 10)).toThrow(/\[0, 1\)/);
+
+    const weakenedSwarm = structuredClone(config.waves.stagePlan);
+    weakenedSwarm.validation[0].swarm.hpMul = 0.99;
+    expect(() => validateStagePlanConfig(weakenedSwarm, 10)).toThrow(/不得低于 1/);
   });
 });

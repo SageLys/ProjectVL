@@ -1,0 +1,43 @@
+@page { size: A4; margin: 13mm 12mm 15mm; }
+
+@media print {
+  :root { color: #241a1f; background: #fff; }
+  body { min-width: 0; background: #fff; }
+  .workbench-header, .workbench-layout { display: none !important; }
+  .copy-edit-button, .copy-editor, .mechanism-edit-button, .mechanism-editor { display: none !important; }
+  .editable-copy.is-editing { padding: 0; border: 0; background: transparent; }
+  .editable-copy.is-editing > .editable-copy__read { display: block; }
+  .editable-mechanism.is-editing { margin: 0; padding: 0; border: 0; background: transparent; box-shadow: none; }
+  .editable-mechanism.is-editing > .editable-mechanism__read { display: block; }
+  .print-batch { display: block; }
+  .print-batch > * { display: block; }
+  .entity-sheet, .audit-card { max-width: none; margin: 0 0 7mm; padding: 4mm; border-color: #c7aeb9; border-radius: 2mm; box-shadow: none; }
+  .print-chapter { break-before: page; }
+  .print-chapter:first-child { break-before: auto; }
+  .print-section-title { break-before: page; }
+  h1 { font-size: 18pt; }
+  h2 { font-size: 11pt; }
+  h3 { font-size: 9.5pt; }
+  h2, h3 { break-after: avoid; }
+  tr { break-inside: avoid; }
+  .card-block, .branch-card, .binding, .slot, .audit-card { break-inside: avoid; }
+  .branch-grid, .branch-grid--compact { display: block; }
+  .branch-card { margin-bottom: 3mm; }
+  .branch-copy { min-height: 0; }
+  .tier-block { padding: 3mm; }
+  .tier-block > h2 { color: #fff !important; background: #8f3f62 !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .badge, .player-copy, .recipe-banner, .silent-note, .callout, .design-notes { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .data-table, .matrix-table { font-size: 7.5pt; }
+  .data-table th, .data-table td, .matrix-table th, .matrix-table td { padding: 1.6mm; overflow-wrap: anywhere; word-break: break-word; }
+  .data-table thead th, .matrix-table thead th { color: #fff !important; background: #522137 !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .matrix-scroll { max-height: none; overflow: visible; border: 0; }
+  .matrix-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .matrix-table th, .matrix-table td { min-width: 0; }
+  .matrix-table thead th { position: static; height: auto; writing-mode: horizontal-tb; font-size: 5pt; }
+  .matrix-table .matrix-sticky { position: static; min-width: 0; }
+  button { color: inherit; text-decoration: none !important; }
+  details { display: block; }
+  details > summary { list-style: none; }
+  details > * { display: block; }
+  .location-link { display: block; }
+}

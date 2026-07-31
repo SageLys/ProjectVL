@@ -1,268 +1,238 @@
 // @vitest-environment happy-dom
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { cfg } from '../src/config';
-import type { BindingDef, CardDef } from '../src/core/effects/defs';
-import { registerSkillDefs } from '../src/core/effects/interpreter';
 import { buildRunSummary } from '../src/core/settlement';
-import { autoMergeCards } from '../src/core/systems/cardSystem';
-import { getActivePool, getRunRoster, selectFocusGodCard } from '../src/core/systems/activePoolSystem';
-import { selectBountyRewardType } from '../src/core/systems/bountySystem';
-import { getCardPool, selectUniformCardType } from '../src/core/systems/dropTypePolicy';
-import { consumeCard, moveOrSwap } from '../src/core/systems/equipmentSystem';
-import { beginIntermission, tickIntermission } from '../src/core/systems/intermissionSystem';
-import { availableRecipes, confirmRecipe } from '../src/core/systems/recipeEvolutionSystem';
+import { makeCountingRng } from '../src/core/rng';
+import {
+  evolveRecipePair,
+  getActionableRecipes,
+  initializeRecipesAfterRosterLock,
+  matchRecipeDrop,
+  recomputeRecipeReadiness,
+  updateRecipeDirector,
+} from '../src/core/systems/recipeEvolutionSystem';
+import type { CardRef, GameState, SlotKind } from '../src/core/types';
 import { createDevTelemetry } from '../src/telemetry/devTelemetry';
 import { createIntermissionPanel } from '../src/ui/intermissionPanel';
-import { renderMergeHints } from '../src/ui/renderMergeHints';
-import { formatToast, resetToastDedupe } from '../src/ui/eventText';
-import { card, constRng, createDefaultConfig, enemy, freshState, resetTestEnv } from './helpers';
+import { card, createDefaultConfig, freshState, resetTestEnv } from './helpers';
 
 const config = createDefaultConfig();
-const rng = constRng(0);
 
-function enterFreeIntermission(state = freshState()) {
-  state.wave = 1;
-  beginIntermission(state);
-  state.intermission.step = 'free';
-  state.intermission.freeRemaining = 30;
-  return state;
+function recipe(index = 0) {
+  return cfg.evolutionRecipes.recipes[index];
 }
 
-function mergePulseDef(): CardDef {
-  const equip: BindingDef[] = [{
-    trigger: 'onMerge',
-    effects: [{ atom: 'mergePulse', params: { damagePerMergeCount: 10, radius: 'all' } }],
-  }];
-  const consumable = { radius: 100, effects: [{ atom: 'burstDamage' as const, params: { damageMul: 1 } }] };
-  return {
-    id: 'aegis',
-    category: 'defense',
-    synergyTags: ['defense'],
-    textKey: 'test.aegis',
-    teaching: false,
-    stars: {
-      '3': { tier: 'core', equip },
-      '5': { tier: 'dual', equip },
-      '6': { tier: 'transform', equip },
-    },
-    amplifyAxis: { params: { damageMul: '+1' } },
-    consumable: {
-      placement: 'point',
-      anchors: { '1': consumable, '3': consumable, '6': consumable },
-    },
-    evolutionTree: {
-      checkpoints: [
-        {
-          star: 3,
-          options: ['testA', 'testB', 'testC'].map(id => ({ id, textKey: id, equip })),
-        },
-        {
-          star: 5,
-          options: ['testA2', 'testB2', 'testC2'].map(id => ({ id, textKey: id, equip })),
-        },
-      ],
-      sharedNodes: [{ star: 4, amplify: { damageMul: '+1' } }, { star: 6, equip }],
-    },
-  };
+function ref(state: GameState, kind: SlotKind, index: number): CardRef {
+  const item = (kind === 'cards' ? state.cards : state.equipment)[index]!;
+  return { slotKind: kind, index, cardId: item.id };
+}
+
+function readyPair(
+  sourceKind: SlotKind = 'cards',
+  targetKind: SlotKind = 'cards',
+  sourceIndex = 0,
+  targetIndex = sourceKind === targetKind ? 1 : 0,
+  recipeIndex = 0,
+) {
+  const state = freshState();
+  const item = recipe(recipeIndex);
+  state.recipes.compatibleRecipeIds = [item.id];
+  (sourceKind === 'cards' ? state.cards : state.equipment)[sourceIndex] = card(item.ingredientVariable.cardId, 5);
+  (targetKind === 'cards' ? state.cards : state.equipment)[targetIndex] = card(item.ingredientAnchor.cardId, 5);
+  recomputeRecipeReadiness(state);
+  return { state, item, source: ref(state, sourceKind, sourceIndex), target: ref(state, targetKind, targetIndex) };
 }
 
 beforeEach(() => {
   resetTestEnv();
-  resetToastDedupe();
   document.body.innerHTML = '';
 });
-afterEach(() => {
-  vi.restoreAllMocks();
-  resetTestEnv();
-});
 
-describe('fixed recipe card evolution', () => {
-  it('rejects missing, under-star and combat-phase materials with precise reasons', () => {
-    const state = enterFreeIntermission();
-    state.cards[0] = card('chainLightning', 4);
-    state.cards[1] = card('frost', 5);
-
-    expect(availableRecipes(state)).toEqual([]);
-    expect(confirmRecipe(state, config, rng, 'frozenThunder', state.cards[0].id, state.cards[1].id))
-      .toEqual([{ type: 'recipeRejected', recipeId: 'frozenThunder', reason: 'materials' }]);
-
-    state.cards[0]!.star = 5;
-    state.intermission.active = false;
-    state.wavePhase = 'regular';
-    expect(confirmRecipe(state, config, rng, 'frozenThunder', state.cards[0]!.id, state.cards[1]!.id))
-      .toEqual([{ type: 'recipeRejected', recipeId: 'frozenThunder', reason: 'phase' }]);
-  });
-
-  it('consumes exactly two cards and uses material A position when the hand was full', () => {
-    const state = enterFreeIntermission();
-    state.cards = Array.from({ length: cfg.economy.handSlots }, (_, index) => card(`filler${index}`, 1));
-    const a = card('chainLightning', 5);
-    const b = card('frost', 5);
-    state.cards[2] = a;
-    state.cards[5] = b;
-    const idsBefore = state.cards.map(item => item!.id);
-
-    const events = confirmRecipe(state, config, rng, 'frozenThunder', a.id, b.id);
-
-    expect(events).toContainEqual({
-      type: 'recipeCompleted',
-      recipeId: 'frozenThunder',
-      outputCardType: 'frozenThunder',
-      outputStar: 6,
-    });
-    expect(state.cards[2]).toMatchObject({ type: 'frozenThunder', star: 6, evolutionPath: [] });
-    expect(state.cards[5]).toBeNull();
-    expect([...state.cards, ...state.equipment].filter(Boolean)).toHaveLength(idsBefore.length - 1);
-    expect([...state.cards, ...state.equipment].some(item => item?.id === a.id || item?.id === b.id)).toBe(false);
-  });
-
-  it('selects exact-minimum hand copies first and requires explicit UI opt-in for equipment', () => {
-    const state = enterFreeIntermission();
-    const high = card('chainLightning', 6);
-    const exact = card('chainLightning', 5);
-    const frost = card('frost', 5);
-    state.cards[0] = high;
-    state.cards[1] = exact;
-    state.equipment[0] = frost;
-
-    expect(availableRecipes(state)[0]).toMatchObject({
-      a: { slotKind: 'cards', cardId: exact.id },
-      b: { slotKind: 'equipment', cardId: frost.id },
-    });
-
-    const onRecipe = vi.fn();
-    const arena = document.createElement('div');
-    document.body.append(arena);
-    const panel = createIntermissionPanel(arena, { onReady() {}, onRecipe });
-    panel.render(state);
-    const confirm = arena.querySelector<HTMLButtonElement>('.recipe-confirm')!;
-    const equipmentConsent = arena.querySelector<HTMLInputElement>('[data-equipment-card-id]')!;
-    expect(confirm.disabled).toBe(true);
-    confirm.click();
-    expect(onRecipe).not.toHaveBeenCalled();
-
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
-    equipmentConsent.click();
-    expect(confirm.disabled).toBe(false);
-    confirm.click();
-    expect(onRecipe).toHaveBeenCalledWith('frozenThunder', exact.id, frost.id);
-  });
-
-  it('produces a normal equipable and consumable Card, while generic recipe outputs can upgrade later', () => {
-    const state = enterFreeIntermission();
-    state.cards[0] = card('chainLightning', 5);
-    state.cards[1] = card('frost', 5);
-    confirmRecipe(state, config, rng, 'frozenThunder', state.cards[0].id, state.cards[1].id);
-    const outputIndex = state.cards.findIndex(item => item?.type === 'frozenThunder');
-
-    expect(moveOrSwap(state, config, rng, 'cards', outputIndex, 'equipment', 0))
-      .toContainEqual(expect.objectContaining({ type: 'equipped', cardType: 'frozenThunder' }));
-    expect(consumeCard(state, config, rng, 0, 100, 100, 'equipment'))
-      .toContainEqual(expect.objectContaining({ type: 'skillConsumed', cardType: 'frozenThunder', star: 6 }));
-    expect(state.consumes).toBe(1);
-
-    const evolving = enterFreeIntermission();
-    const recipe = cfg.evolutionRecipes.recipes[0];
-    recipe.outputCardId = 'pierce';
-    recipe.outputStar = 2;
-    evolving.cards[0] = card('chainLightning', 5);
-    evolving.cards[1] = card('frost', 5);
-    confirmRecipe(evolving, config, rng, recipe.id, evolving.cards[0].id, evolving.cards[1].id);
-    evolving.cards[1] = card('pierce', 2);
-    const upgradeEvents = autoMergeCards(evolving, config, rng).events;
-    expect(evolving.cards.find(item => item?.type === 'pierce')).toMatchObject({ star: 3, provisional: true });
-    expect(upgradeEvents).toContainEqual(expect.objectContaining({ type: 'evolutionBranchOffered', cardType: 'pierce' }));
-  });
-
-  it('keeps recipe-only cards out of every random pool and bounty/validation selector', () => {
+describe('instant fixed-recipe evolution', () => {
+  it('initializes compatibility after the third god without enqueueing a recipe choice', () => {
     const state = freshState();
-    state.godPool.runRoster = ['frozenThunder', 'pierce', 'chainLightning'];
-    state.godPool.activePool = ['frozenThunder', 'frost'];
-    state.godPool.focusGod = 'storm';
-    state.godPool.rosterByGod.storm = ['frozenThunder', 'pierce'];
-
-    expect(getCardPool()).not.toContain('frozenThunder');
-    expect(getRunRoster(state)).toEqual(['pierce', 'chainLightning']);
-    expect(getActivePool(state)).toEqual(['frost']);
-    expect(selectBountyRewardType(state, rng)).not.toBe('frozenThunder');
-    expect(state.bountyDirector.rewardBag).not.toContain('frozenThunder');
-    expect(selectFocusGodCard(state, rng)).toBe('pierce');
-    expect(selectUniformCardType(rng)).not.toBe('frozenThunder');
+    const item = recipe();
+    state.godPool.runRoster = [item.ingredientVariable.cardId, item.ingredientAnchor.cardId];
+    const events = initializeRecipesAfterRosterLock(state);
+    expect(state.recipes.compatibleRecipeIds).toContain(item.id);
+    expect(state.decisions).toEqual({ current: null, pending: [] });
+    expect(events.some(event => event.type === 'decisionOffered')).toBe(false);
   });
 
-  it('counts one merge, fires onMerge, records completion in summary, and emits telemetry', () => {
-    registerSkillDefs([mergePulseDef()]);
-    const state = enterFreeIntermission();
-    state.cards[0] = card('chainLightning', 5);
-    state.cards[1] = card('frost', 5);
-    state.equipment[0] = { ...card('aegis', 3), evolutionPath: ['3:testA'] };
-    state.enemies.push(enemy({ hp: 100, maxHp: 100 }));
+  it('selects one hidden director target deterministically at the assist window and clears stale bags', () => {
+    const state = freshState();
+    const [first, second] = cfg.evolutionRecipes.recipes.slice(0, 2);
+    state.wave = cfg.economy.evolution.assistWindowWaves[0];
+    state.recipes.compatibleRecipeIds = [first.id, second.id];
+    state.cards[0] = card(second.ingredientVariable.cardId, 4);
+    state.cards[1] = card(second.ingredientAnchor.cardId, 3);
+    state.normalDropDirector.roleBag.push('discovery');
+    state.bountyDirector.rewardBag.push(first.ingredientVariable.cardId);
+    updateRecipeDirector(state);
+    expect(state.recipes.directedRecipeId).toBe(second.id);
+    expect(state.normalDropDirector.roleBag).toEqual([]);
+    expect(state.bountyDirector.rewardBag).toEqual([]);
+    const selected = state.recipes.directedRecipeId;
+    state.cards = state.cards.map(() => null);
+    updateRecipeDirector(state);
+    expect(state.recipes.directedRecipeId).toBe(selected);
+  });
+
+  it.each([
+    ['cards', 'cards'],
+    ['cards', 'equipment'],
+    ['equipment', 'cards'],
+    ['equipment', 'equipment'],
+  ] as const)('supports %s → %s and always places output in the target slot', (sourceKind, targetKind) => {
+    const { state, item, source, target } = readyPair(sourceKind, targetKind);
+    const events = evolveRecipePair(state, config, () => 0, item.id, source, target);
+    expect((targetKind === 'cards' ? state.cards : state.equipment)[target.index]).toMatchObject({
+      type: item.outputCardId,
+      star: 6,
+      primaryGod: item.anchorGod,
+      sourceGods: expect.arrayContaining([item.variableGod, item.anchorGod]),
+      recipeLineage: { recipeId: item.id },
+    });
+    expect((sourceKind === 'cards' ? state.cards : state.equipment)[source.index]).toBeNull();
+    expect(events).toContainEqual(expect.objectContaining({
+      type: 'recipeCompleted', recipeId: item.id,
+      target: { slotKind: targetKind, index: target.index },
+    }));
+    expect(state.merges).toBe(1);
+    expect(state.recipes.completedRecipeIds).toEqual([item.id]);
+  });
+
+  it('recognizes the material pair in either drag direction', () => {
+    const { state, item, source, target } = readyPair();
+    expect(matchRecipeDrop(state, source, target)?.recipeId).toBe(item.id);
+    expect(matchRecipeDrop(state, target, source)?.recipeId).toBe(item.id);
+  });
+
+  it('allows combat, boss, free intermission, and validation settle', () => {
+    for (const phase of ['regular', 'boss', 'validationRewardSettle'] as const) {
+      const { state, item, source, target } = readyPair();
+      state.wavePhase = phase;
+      expect(evolveRecipePair(state, config, () => 0, item.id, source, target))
+        .toContainEqual(expect.objectContaining({ type: 'recipeCompleted' }));
+    }
+    const { state, item, source, target } = readyPair();
+    state.wavePhase = 'between';
+    state.intermission.active = true;
+    state.intermission.step = 'free';
+    expect(evolveRecipePair(state, config, () => 0, item.id, source, target))
+      .toContainEqual(expect.objectContaining({ type: 'recipeCompleted' }));
+  });
+
+  it.each([
+    ['paused', (state: GameState) => { state.paused = true; }, 'paused'],
+    ['decision', (state: GameState) => { state.decisions.current = { kind: 'godFocus', wave: 2, candidates: ['storm'] }; }, 'decision'],
+    ['settle', (state: GameState) => { state.wavePhase = 'between'; state.intermission.active = true; state.intermission.step = 'settle'; }, 'intermission'],
+    ['godDecision', (state: GameState) => { state.wavePhase = 'between'; state.intermission.active = true; state.intermission.step = 'godDecision'; }, 'intermission'],
+  ])('rejects %s with an exact reason and consumes no RNG', (_label, mutate, reason) => {
+    const { state, item, source, target } = readyPair();
+    mutate(state);
+    const rng = makeCountingRng(123);
+    const before = structuredClone(state);
+    expect(evolveRecipePair(state, config, rng.rng, item.id, source, target)).toEqual([
+      { type: 'recipeRejected', recipeId: item.id, reason },
+    ]);
+    expect(rng.draws()).toBe(0);
+    expect(state).toEqual(before);
+  });
+
+  it('rejects stale, under-star, and provisional instances atomically', () => {
+    const stale = readyPair();
+    stale.state.cards[0] = null;
+    expect(evolveRecipePair(stale.state, config, () => 0, stale.item.id, stale.source, stale.target))
+      .toEqual([{ type: 'recipeRejected', recipeId: stale.item.id, reason: 'stale' }]);
+
+    const under = readyPair();
+    under.state.cards[0]!.star = 4;
+    expect(evolveRecipePair(under.state, config, () => 0, under.item.id, under.source, under.target))
+      .toEqual([{ type: 'recipeRejected', recipeId: under.item.id, reason: 'star' }]);
+
+    const provisional = readyPair();
+    provisional.state.cards[0]!.provisional = true;
+    expect(evolveRecipePair(provisional.state, config, () => 0, provisional.item.id, provisional.source, provisional.target))
+      .toEqual([{ type: 'recipeRejected', recipeId: provisional.item.id, reason: 'provisional' }]);
+  });
+
+  it('enforces once per recipe and the strict run cap of two', () => {
+    const first = readyPair();
+    evolveRecipePair(first.state, config, () => 0, first.item.id, first.source, first.target);
+    expect(evolveRecipePair(first.state, config, () => 0, first.item.id, first.source, first.target))
+      .toEqual([{ type: 'recipeRejected', recipeId: first.item.id, reason: 'completed' }]);
+
+    const capped = readyPair();
+    capped.state.recipes.completedRecipeIds = cfg.evolutionRecipes.recipes.slice(1, 3).map(item => item.id);
+    expect(evolveRecipePair(capped.state, config, () => 0, capped.item.id, capped.source, capped.target))
+      .toEqual([{ type: 'recipeRejected', recipeId: capped.item.id, reason: 'limit' }]);
+    expect(getActionableRecipes(capped.state)).toEqual([]);
+  });
+
+  it('records recipe lineage, validation delivery, settle timing, and assist usage in telemetry', () => {
+    const { state, item, source, target } = readyPair();
+    state.recipes.assistBudgetUsed = 2;
     const telemetry = createDevTelemetry({
       getState: () => state,
       getConfig: () => cfg,
-      getSeed: () => 1,
-      getPresetName: () => 'test',
+      getSeed: () => 19,
+      getPresetName: () => 'recipe-v2',
       getRange: () => 100,
       getDifficultyId: () => state.difficultyId,
     });
-
-    const availability = { type: 'recipeAvailable' as const, recipeIds: ['frozenThunder'] };
-    const events = confirmRecipe(state, config, rng, 'frozenThunder', state.cards[0].id, state.cards[1].id);
-    telemetry.recordGameEvents([availability, ...events]);
-
-    expect(state.merges).toBe(1);
-    expect(state.normalDropDirector.typeStats.frozenThunder.mergeOps).toBe(1);
-    expect(state.enemies[0].hp).toBeLessThan(100);
-    expect(buildRunSummary(state, false).completedRecipes).toEqual(['frozenThunder']);
+    telemetry.recordGameEvents([
+      ...evolveRecipePair(state, config, () => 0, item.id, source, target),
+      { type: 'validationRewardGranted', wave: 9, cardType: item.ingredientVariable.cardId, star: 4, delivery: 'hand' },
+      { type: 'validationRewardSettleStarted', wave: 9, seconds: 12 },
+    ]);
     expect(telemetry.getSession().events).toEqual(expect.arrayContaining([
-      expect.objectContaining({ type: 'recipe_available', recipeIds: ['frozenThunder'] }),
-      expect.objectContaining({ type: 'recipe_completed', recipeId: 'frozenThunder', cardType: 'frozenThunder', outputStar: 6 }),
+      expect.objectContaining({
+        type: 'recipe_completed', recipeId: item.id, targetSlotKind: target.slotKind,
+        targetSlotIndex: target.index, assistBudgetUsed: 2,
+      }),
+      expect.objectContaining({ type: 'validation_reward_granted', delivery: 'hand', assistBudgetUsed: 2 }),
+      expect.objectContaining({ type: 'validation_reward_settle_started', settleSeconds: 12, assistBudgetUsed: 2 }),
     ]));
   });
 
-  it('emits recipe availability at decide-to-free and shows a dedicated combat recipe link with full copy', () => {
-    const state = freshState();
-    state.cards[0] = card('chainLightning', 5);
-    state.cards[1] = card('frost', 5);
-    state.wave = 1;
-    beginIntermission(state);
-    state.intermission.step = 'decide';
-    state.godPool.lastDecisionAfterWave = 1;
-    state.waveChoiceOfferedWave = 1;
-    const transition = tickIntermission(state, 0, rng);
-    expect(transition.events).toContainEqual({ type: 'recipeAvailable', recipeIds: ['frozenThunder'] });
-
-    state.intermission.active = false;
-    state.wavePhase = 'regular';
-    const dock = document.createElement('div');
-    dock.innerHTML = `<button class="card" data-id="${state.cards[0]!.id}"></button><button class="card" data-id="${state.cards[1]!.id}"></button>`;
-    document.body.append(dock);
-    const rect = (left: number, top: number, width: number, height: number): DOMRect => ({
-      left, top, width, height, right: left + width, bottom: top + height, x: left, y: top, toJSON: () => ({}),
+  it('records completion and assistance in the run summary', () => {
+    const { state, item, source, target } = readyPair();
+    evolveRecipePair(state, config, () => 0, item.id, source, target);
+    state.recipes.assistBudgetUsed = 1;
+    expect(buildRunSummary(state, false)).toMatchObject({
+      completedRecipes: [item.id],
+      assistBudgetUsed: 1,
     });
-    vi.spyOn(dock, 'getBoundingClientRect').mockReturnValue(rect(0, 0, 400, 180));
-    dock.querySelectorAll<HTMLElement>('.card').forEach((element, index) => {
-      vi.spyOn(element, 'getBoundingClientRect').mockReturnValue(rect(20 + index * 220, 50, 100, 70));
-    });
-    renderMergeHints(dock, state);
-    expect(dock.querySelectorAll('.recipe-hints .recipe-hint-line')).toHaveLength(1);
-    expect(dock.querySelector('.recipe-evolution-hint')?.textContent).toContain('连环闪电');
-    expect(dock.querySelector('.recipe-evolution-hint')?.textContent).toContain('霜寒');
-    expect(dock.querySelector('.recipe-evolution-hint')?.textContent).toContain('霜雷');
-    expect(dock.querySelector('.recipe-evolution-hint button')).toBeNull();
   });
 
-  it('formats recipe availability once per recipe signature without changing the event', () => {
-    const event = { type: 'recipeAvailable' as const, recipeIds: ['frozenThunder'] };
-    expect(formatToast(event)).toBe('已凑齐卡间进化材料，本波结束后可在波间完成进化。');
-    expect(formatToast(event)).toBeNull();
-    expect(event).toEqual({ type: 'recipeAvailable', recipeIds: ['frozenThunder'] });
+  it('does not render any recipe area during intermission', () => {
+    const { state } = readyPair();
+    state.wave = 4;
+    state.wavePhase = 'between';
+    state.intermission.active = true;
+    state.intermission.afterWave = 4;
+    state.intermission.step = 'free';
+    const arena = document.createElement('div');
+    const confirmSpy = vi.spyOn(window, 'confirm');
+    createIntermissionPanel(arena, { onReady() {} }).render(state);
+    expect(arena.querySelector('.recipe-progress-row')).toBeNull();
+    expect(arena.querySelector('.intermission-recipes')).toBeNull();
+    expect(arena.querySelector('.recipe-confirm')).toBeNull();
+    expect(arena.querySelector('[data-equipment-card-id]')).toBeNull();
+    expect(confirmSpy).not.toHaveBeenCalled();
   });
 
-  it('exports only fixed-recipe APIs, never an arbitrary fusion entrypoint', async () => {
+  it('exports the complete v2 system surface without arbitrary fusion', async () => {
     const module = await import('../src/core/systems/recipeEvolutionSystem');
-    expect(Object.keys(module).sort()).toEqual(['availableRecipes', 'confirmRecipe']);
-    expect(confirmRecipe(enterFreeIntermission(), config, rng, 'notARecipe', 1, 2))
-      .toEqual([{ type: 'recipeRejected', recipeId: 'notARecipe', reason: 'materials' }]);
+    expect(module).toEqual(expect.objectContaining({
+      getRosterCompatibleRecipes: expect.any(Function),
+      getActionableRecipes: expect.any(Function),
+      recomputeRecipeReadiness: expect.any(Function),
+      matchRecipeDrop: expect.any(Function),
+      evolveRecipePair: expect.any(Function),
+      updateRecipeDirector: expect.any(Function),
+    }));
+    expect(module).not.toHaveProperty('fuseCards');
   });
 });

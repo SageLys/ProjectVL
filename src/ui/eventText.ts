@@ -5,24 +5,22 @@ import { fmt } from './format';
 import { cardDisplayName as name } from './cardMeta';
 
 const T = texts.toast;
-const shownRecipeAvailability = new Set<string>();
 
 /** Clears run-scoped presentation dedupe without changing recipe events or telemetry. */
 export function resetToastDedupe(): void {
-  shownRecipeAvailability.clear();
 }
 
 /** 事件类型中会改变卡槽/装备内容、需要重绘槽位的集合。 */
 export const SLOT_CHANGING = new Set<GameEvent['type']>([
   'collected', 'moved', 'swapped', 'merged', 'fed', 'skillConsumed', 'equipped',
-  'wildcardsGranted', 'wildcardMerged',
+  'mergeRefunded', 'wildcardsGranted', 'wildcardMerged',
   'evolutionBranchSelected',
   'bossRewardGranted',
   'recipeCompleted',
 ]);
 
 function wildcardGrantDescription(grants: Array<{ star: number; count: number }>): string {
-  return grants.map(grant => `${grant.star}★万能卡×${grant.count}`).join('、');
+  return grants.map(grant => `${grant.count} 张 ${grant.star}★ 万能卡`).join('、');
 }
 
 /** 把语义事件翻译成 toast 文案；无需 toast 的事件返回 null。 */
@@ -40,17 +38,19 @@ export function formatToast(ev: GameEvent): string | null {
     case 'intermissionReady':
     case 'waveRewardsGranted':
     case 'waveBaseRewardOffered':
-    case 'relicOffered':
     case 'evolutionBranchOffered':
     case 'affixRolled':
       return null;
-    case 'recipeAvailable': {
-      const signature = [...new Set(ev.recipeIds)].sort().join('|');
-      if (!signature || shownRecipeAvailability.has(signature)) return null;
-      shownRecipeAvailability.add(signature);
-      return T.recipeAvailable;
-    }
+    case 'recipeAvailable': return null;
     case 'bossRewardGranted': return fmt(T.bossReward, { desc: wildcardGrantDescription(ev.grants) });
+    case 'validationRewardGranted': return ev.delivery === 'hand'
+      ? `验证奖励已直接加入手牌：${name(ev.cardType)} ${ev.star}★`
+      : `手牌已满，验证奖励已安全落地：${name(ev.cardType)} ${ev.star}★`;
+    case 'validationRewardSettleStarted': return `验证奖励结算窗口：${ev.seconds} 秒`;
+    case 'validationEliteSpawned': return '验证精英已入场';
+    case 'validationEscortSpawned':
+    case 'validationEscortsCleared':
+      return null;
     case 'breakthrough': return fmt(T.breakthrough, { damage: Math.round(ev.damage) });
     case 'bossContactStarted': return T.bossContactStarted;
     case 'bossContactDamage':
@@ -69,7 +69,15 @@ export function formatToast(ev: GameEvent): string | null {
     case 'swapped': return fmt(T.swapped, { a: name(ev.a), b: name(ev.b) });
     case 'merged': return null; // 合成提示已并入 collected/moved 的 mergeSuffix
     case 'fed': return fmt(T.fed, { name: name(ev.cardType), star: ev.resultStar });
-    case 'wildcardsGranted': return T.testWildcards;
+    case 'mergeRefunded':
+      if (ev.granted > 0 && ev.lost > 0) return fmt(T.mergeRefundPartial, {
+        name: name(ev.cardType), star: ev.star, granted: ev.granted, lost: ev.lost,
+      });
+      if (ev.granted > 0) return fmt(T.mergeRefunded, {
+        name: name(ev.cardType), star: ev.star, granted: ev.granted,
+      });
+      return fmt(T.mergeRefundLost, { name: name(ev.cardType), star: ev.star, lost: ev.lost });
+    case 'wildcardsGranted': return fmt(T.wildcardsGranted, { desc: wildcardGrantDescription(ev.grants) });
     case 'wildcardMerged': return fmt(T.wildcardMerged, { name: name(ev.cardType), star: ev.resultStar });
     case 'wildcardMergeRejected':
       return ev.reason === 'missingWildcard' ? fmt(T.wildcardMissing, { star: ev.requiredStar ?? '' }) : ev.reason === 'maxStar' ? T.wildcardMaxStar : null;
@@ -78,7 +86,13 @@ export function formatToast(ev: GameEvent): string | null {
     case 'shieldBroken': return T.shieldBroken;
     case 'shieldRestored': return T.shieldRestored;
     case 'testDrops': return fmt(T.testDrops, { name: name(ev.cardType) });
-    case 'relicSelected': return fmt(T.perkApplied, { title: ev.title });
+    case 'rewardTriggered': {
+      const reward = (texts.rewards as Record<string, { name?: string }>)[ev.rewardId];
+      return `${reward?.name ?? ev.rewardId} 已执行`;
+    }
+    case 'rewardPointsGained':
+    case 'rewardConfirmed':
+      return null;
     case 'waveBaseRewardChosen': {
       const add = ev.stat === 'xpGainPct' ? `${ev.add * 100}%` : String(ev.add);
       const stat = (texts.waveRewardStats as Record<string, string>)[ev.stat] ?? ev.stat;
@@ -86,11 +100,17 @@ export function formatToast(ev: GameEvent): string | null {
     }
     case 'evolutionBranchSelected': return `${name(ev.cardType)}：本卡路线已确定`;
     case 'recipeCompleted': return `卡间进化完成：${name(ev.outputCardType)} ${ev.outputStar}★`;
-    case 'recipeRejected': return ev.reason === 'phase'
-      ? '卡间进化只能在波间完成'
-      : ev.reason === 'materials'
-        ? '进化材料已变化，请重新选择'
-        : '没有可放置进化产物的槽位';
+    case 'recipeRejected': {
+      if (ev.reason === 'paused') return '暂停时不能进化';
+      if (ev.reason === 'decision') return '请先完成当前决策';
+      if (ev.reason === 'intermission' || ev.reason === 'phase' || ev.reason === 'mode') return '当前阶段不能进化';
+      if (ev.reason === 'limit') return '本局进化次数已用尽';
+      if (ev.reason === 'completed') return '同一配方每局只能完成一次';
+      if (ev.reason === 'star') return '进化材料尚未达到 5★';
+      if (ev.reason === 'provisional') return '请先确定材料卡的进化分支';
+      if (ev.reason === 'slots') return '没有可放置进化产物的槽位';
+      return '进化材料已变化，操作已取消';
+    }
     case 'bountyAccepted': return fmt(T.bountyAccepted, { name: name(ev.rewardCardType) });
     case 'bountyCompleted': return fmt(T.bountyCompleted, { name: name(ev.rewardCardType) });
     case 'bountyFailed': return T.bountyFailed;
@@ -99,7 +119,6 @@ export function formatToast(ev: GameEvent): string | null {
     case 'bountyMemberSpawned':
     case 'bountyRewardDropped':
     case 'dropExpired':
-    case 'levelUp':
     case 'gameEnd':
       return null;
   }

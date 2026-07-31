@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { RunDecision } from '../src/core/types';
+import { cfg } from '../src/config';
 import { createModals } from '../src/ui/modals';
 import { freshState, resetTestEnv } from './helpers';
 
@@ -44,7 +45,24 @@ describe('decision modal', () => {
     expect(onDecision).toHaveBeenCalledWith('storm');
   });
 
-  it('shows intent, exact effects, build fit and the 5★ stacking notice', () => {
+  it('shows only god theme and sampled base roster, never candidate recipes or outputs', () => {
+    document.body.innerHTML = '<button id="restartBtn"></button>';
+    const modals = createModals({ restartBtn: document.querySelector('#restartBtn') } as never, {
+      onDecision: vi.fn(), onRestart: vi.fn(),
+    });
+    const state = freshState();
+    state.godPool.offerRosterPreviews.storm = ['chainLightning', 'pierce'];
+    modals.showDecision({ kind: 'godDraft', wave: 1, candidates: ['storm'], role: 'main' }, state);
+    const choice = document.querySelector('[data-decision-choice="storm"]')!;
+    expect(choice.querySelector('.god-roster-preview')).not.toBeNull();
+    expect(choice.querySelector('.god-recipe-preview')).toBeNull();
+    expect(choice.textContent).not.toContain('候选·');
+    for (const recipe of cfg.evolutionRecipes.recipes) {
+      expect(choice.textContent).not.toContain(recipe.outputCardId);
+    }
+  });
+
+  it('shows player summary, exact effects and the 5★ stacking notice; no choice-fit element', () => {
     document.body.innerHTML = '<button id="restartBtn"></button>';
     const modals = createModals({
       restartBtn: document.querySelector('#restartBtn'),
@@ -64,16 +82,18 @@ describe('decision modal', () => {
       kind: 'evolutionBranch',
       cardType: 'chainLightning',
       checkpointStar: 5,
-      options: ['chainLightningA2', 'chainLightningB2', 'chainLightningC2'],
+      options: ['chainLightning1x', 'chainLightning2x', 'chainLightning3x'],
       provisionalCardId: 99,
     };
 
     modals.showDecision(decision, state);
-    const body = document.querySelector('#decisionModal .modal-card > p')?.textContent;
-    const option = document.querySelector<HTMLButtonElement>('[data-decision-choice="chainLightningB2"]');
+    const body = document.querySelector('#decisionModal .modal-shell-header > p')?.textContent;
+    const option = document.querySelector<HTMLButtonElement>('[data-decision-choice="chainLightning2x"]');
     expect(body).toContain('叠加到当前 3★ 路线');
-    expect(option?.querySelector('.choice-desc')?.textContent).toMatch(/强化/);
+    // .choice-desc 展示玩家向 summary（长度大于 0）
+    expect(option?.querySelector('.choice-desc')?.textContent?.trim().length).toBeGreaterThan(0);
     expect(option?.querySelectorAll('.choice-effects li').length).toBeGreaterThan(0);
-    expect(option?.querySelector('.choice-fit')?.textContent).toContain('适合：');
+    // 「适合：」行已删除
+    expect(option?.querySelector('.choice-fit')).toBeNull();
   });
 });

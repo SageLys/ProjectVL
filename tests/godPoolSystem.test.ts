@@ -8,6 +8,7 @@ import {
   registerGodPoolDecisionResolvers,
 } from '../src/core/systems/godPoolSystem';
 import { createSeededRng } from '../src/debug/exposeDebugApi';
+import { selectNormalEnemyDropType } from '../src/core/systems/dropTypePolicy';
 import type { GameState, Rng } from '../src/core/types';
 import { createDefaultConfig, freshState, resetTestEnv } from './helpers';
 
@@ -89,5 +90,34 @@ describe('godPoolSystem', () => {
     const offer = createGodFocusDecision(state, 6, 2, createSeededRng(99))!;
 
     expect(offer.candidates).toContain(droughtGod);
+  });
+
+  it('bootstrapForcedDrops=0 makes the first post-sub-god drop use the role bag', () => {
+    cfg.economy.normalDropTypePolicy.bootstrapForcedDrops = 0;
+    const state = freshState();
+    const rng = createSeededRng(904);
+    chooseDraft(state, 'main', 1, rng);
+    chooseDraft(state, 'sub', 2, rng);
+
+    expect(state.godPool.bootstrapDropsRemaining).toBe(0);
+    expect(state.normalDropDirector.roleBag).toEqual([]);
+    selectNormalEnemyDropType(state, rng);
+    expect(state.normalDropDirector.roleBag).toHaveLength(cfg.economy.normalDropTypePolicy.roleBagSize - 1);
+    expect(state.normalDropDirector.ordinaryDropCount).toBe(1);
+  });
+
+  it('keeps the default nine forced post-sub-god drops', () => {
+    const state = freshState();
+    const rng = createSeededRng(905);
+    chooseDraft(state, 'main', 1, rng);
+    chooseDraft(state, 'sub', 2, rng);
+    const queuedFirst = state.godPool.bootstrapQueue[0];
+
+    expect(cfg.economy.normalDropTypePolicy.bootstrapForcedDrops).toBe(9);
+    expect(state.godPool.bootstrapDropsRemaining).toBe(9);
+    expect(selectNormalEnemyDropType(state, rng)).toBe(queuedFirst);
+    expect(state.godPool.bootstrapDropsRemaining).toBe(8);
+    expect(state.normalDropDirector.roleBag).toEqual([]);
+    expect(state.normalDropDirector.ordinaryDropCount).toBe(1);
   });
 });

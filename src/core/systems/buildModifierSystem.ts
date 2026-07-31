@@ -1,13 +1,13 @@
-import { cfg } from '../../config';
 import type { BuildScalingAxis } from '../../config/types';
 import { AFFIX_SINKS, type AffixScalingTarget } from '../../config/affixSinks';
 import type { BindingDef, BuildTag, CardDef, ConsumableTierDef, EffectDef, Trigger } from '../effects/defs';
+import { effectParams } from '../effects/atomContract';
 import type { GameState } from '../types';
 import { cardAffixScaling } from './cardAffixSystem';
 import { modifierTotal } from './runtimeStatModifierSystem';
 
 export interface BuildScalingTotals {
-  /** axis -> target tag -> additive relic total. Multiplicative axes consume this as (1 + total). */
+  /** axis -> target tag -> additive scaling total. Multiplicative axes consume this as (1 + total). */
   byAxis: Partial<Record<BuildScalingAxis, Partial<Record<BuildTag, number>>>>;
 }
 
@@ -25,31 +25,9 @@ export const BUILD_SCALING_RULES: Partial<Record<BuildScalingAxis, readonly Scal
   ) as Partial<Record<BuildScalingAxis, readonly ScalingRule[]>>;
 
 const EMPTY_TOTALS: BuildScalingTotals = { byAxis: {} };
-const cache = new WeakMap<GameState, { version: number; totals: BuildScalingTotals }>();
+export function aggregateBuildScaling(_state: GameState): BuildScalingTotals { return EMPTY_TOTALS; }
 
-export function aggregateBuildScaling(state: GameState): BuildScalingTotals {
-  const totals: BuildScalingTotals = { byAxis: {} };
-  for (const relic of cfg.relics.relics) {
-    const stacks = state.relicStacks[relic.id] ?? 0;
-    if (!(stacks > 0)) continue;
-    for (const effect of relic.effects) {
-      const axisTotals = totals.byAxis[effect.axis] ?? (totals.byAxis[effect.axis] = {});
-      for (const tag of effect.targetTags) {
-        axisTotals[tag] = (axisTotals[tag] ?? 0) + effect.value * stacks;
-      }
-    }
-  }
-  return totals;
-}
-
-function currentTotals(state: GameState): BuildScalingTotals {
-  if (state.buildState.scalingVersion === 0) return EMPTY_TOTALS;
-  const cached = cache.get(state);
-  if (cached?.version === state.buildState.scalingVersion) return cached.totals;
-  const totals = aggregateBuildScaling(state);
-  cache.set(state, { version: state.buildState.scalingVersion, totals });
-  return totals;
-}
+function currentTotals(_state: GameState): BuildScalingTotals { return EMPTY_TOTALS; }
 
 function hasScaling(totals: BuildScalingTotals): boolean {
   return Object.keys(totals.byAxis).length > 0;
@@ -83,8 +61,10 @@ function scaleEffects(
   affixScaling: Partial<Record<BuildScalingAxis, number>>,
 ): void {
   for (const effect of effects) {
-    const params = effect.params;
-    if (!params) continue;
+    // 词条缩放按 (atom, param) 规则原地改写数值，天然是跨原子的泛型遍历——
+    // 这里取契约参数的松散视图，改写的仍是同一个对象引用。
+    if (!effect.params) continue;
+    const params = effectParams(effect);
     for (const [axis, rules] of Object.entries(BUILD_SCALING_RULES) as [BuildScalingAxis, readonly ScalingRule[]][]) {
       const value = scalingFor(totals, def, axis)
         + runtimeScalingFor(state, axis)
@@ -143,12 +123,10 @@ export function applyBuildScalingToTier(state: GameState, def: CardDef, tier: Co
 
 /** Global bridge multiplier: the strongest tagged total applies once to every damage source. */
 export function controlledDamageTakenBonus(state: GameState): number {
-  const byTag = currentTotals(state).byAxis.controlledDamageTakenMul;
-  const relic = byTag ? Math.max(0, ...Object.values(byTag).map(value => value ?? 0)) : 0;
   const equippedAffix = state.equipment.reduce((sum, card) => (
     card && !card.provisional
       ? sum + (cardAffixScaling(state, card.type).controlledDamageTakenMul ?? 0)
       : sum
   ), 0);
-  return relic + equippedAffix + runtimeScalingFor(state, 'controlledDamageTakenMul');
+  return equippedAffix + runtimeScalingFor(state, 'controlledDamageTakenMul');
 }

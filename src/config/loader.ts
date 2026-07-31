@@ -5,7 +5,8 @@ import waves from './base/waves.json';
 import enemies from './base/enemies.json';
 import difficulty from './base/difficulty.json';
 import skills from './base/skills.json';
-import progression from './base/progression.json';
+import rewardMeter from './base/rewardMeter.json';
+import settlement from './base/settlement.json';
 import economy from './base/economy.json';
 import bounty from './base/bounty.json';
 import tuner from './base/tuner.json';
@@ -13,17 +14,19 @@ import input from './base/input.json';
 import devShort from '../config/variants/dev-short.json';
 import type { DeepPartial, GameConfig } from './types';
 import { validateSkillsConfig } from './skillValidator';
-import { validateProgressionConfig } from './progressionValidator';
+import { validateRewardMeterConfig } from './rewardMeterValidator';
+import { validateSettlementConfig } from './settlementValidator';
 import { validateDifficultyConfig } from './difficultyValidator';
 import { validateIntermissionConfig, validateStagePlanConfig } from './stagePlanValidator';
 import { validateGodConfig } from './godValidator';
+import { validateTunerConfig } from './tunerMeta';
 
 const optionalBaseModules = import.meta.glob<{ default: unknown }>(
-  './base/{gods,relics,evolutionRecipes,waveRewards}.json',
+  './base/{gods,evolutionRecipes,waveRewards}.json',
   { eager: true },
 );
 
-function optionalBaseConfig<K extends 'gods' | 'relics' | 'evolutionRecipes' | 'waveRewards'>(
+function optionalBaseConfig<K extends 'gods' | 'evolutionRecipes' | 'waveRewards'>(
   fileName: string,
   fallback: GameConfig[K],
 ): GameConfig[K] {
@@ -33,18 +36,49 @@ function optionalBaseConfig<K extends 'gods' | 'relics' | 'evolutionRecipes' | '
 
 // C0 兼容层：新文件尚未部署时回落为空域，旧战斗路径仍可启动。
 const gods = optionalBaseConfig('gods.json', { version: '0.1.0', gods: [] });
-const relics = optionalBaseConfig('relics.json', { version: '0.1.0', relics: [] });
 const evolutionRecipes = optionalBaseConfig('evolutionRecipes.json', { version: '0.1.0', recipes: [] });
 const waveRewards = optionalBaseConfig('waveRewards.json', { version: '0.2.0', floor: [], choice: [] });
 
-function normalizeValidationRewards(config: GameConfig): void {
-  for (const wave of config.waves.stagePlan.validation) {
-    for (const enemy of wave.enemies) {
-      const reward = enemy.reward as unknown as Record<string, unknown>;
-      if (!reward.kind) reward.kind = 'wildcard';
+/** Migrate validation stages saved before swarm/elites were introduced. */
+export function normalizeValidationStage(config: GameConfig): void {
+  const waves = config.waves.stagePlan.validation as unknown as Array<Record<string, unknown>>;
+  for (const wave of waves) {
+    if (!Array.isArray(wave.elites) && Array.isArray(wave.enemies)) {
+      const enemies = wave.enemies as Array<Record<string, unknown>>;
+      wave.elites = enemies.map((enemy, index) => ({
+        ...enemy,
+        spawnAtProgress: index / (enemies.length + 1),
+      }));
+      delete wave.enemies;
+    }
+    if (!wave.swarm) {
+      wave.swarm = {
+        quota: 0,
+        targetOnScreen: 0,
+        checkInterval: 1,
+        batchMax: 1,
+        maxAlive: 1,
+        waveEndSprint: { window: 0, multiplier: 1 },
+        hpMul: 1,
+        damageMul: 1,
+        speedMul: 1,
+        composition: { normal: 1, fast: 0, tank: 0 },
+      };
+    }
+    for (const elite of (wave.elites as Array<Record<string, unknown>> ?? [])) {
+      const reward = elite.reward as Record<string, unknown> | undefined;
+      if (reward && !reward.kind) reward.kind = 'wildcard';
     }
     const bossReward = wave.bossReward as unknown as Record<string, unknown>;
     if (!bossReward.kind) bossReward.kind = 'wildcard';
+  }
+}
+
+function normalizeLegacyDirectorConfig(config: GameConfig): void {
+  // Compatibility for variants and presets saved before these director fields were introduced.
+  if (config.waves.stagePlan.enabled === undefined) config.waves.stagePlan.enabled = true;
+  if (config.economy.normalDropTypePolicy.bootstrapForcedDrops === undefined) {
+    config.economy.normalDropTypePolicy.bootstrapForcedDrops = 9;
   }
 }
 
@@ -100,7 +134,8 @@ export function deepMerge<T>(base: T, patch: DeepPartial<T>): T {
 
 function assembleBase(): GameConfig {
   validateSkillsConfig(skills);
-  validateProgressionConfig(progression);
+  validateRewardMeterConfig(rewardMeter);
+  validateSettlementConfig(settlement);
   validateDifficultyConfig(difficulty as GameConfig['difficulty']);
   const config = structuredClone({
     combat,
@@ -109,18 +144,20 @@ function assembleBase(): GameConfig {
     difficulty,
     skills,
     gods,
-    relics,
     evolutionRecipes,
     waveRewards,
-    progression,
+    rewardMeter,
+    settlement,
     economy,
     bounty,
     input,
     // 可玩原型的构建预览也保留调参面板；可在运行时用 ?devtools=0 隐藏。
     tuner,
   }) as unknown as GameConfig;
-  normalizeValidationRewards(config);
+  normalizeLegacyDirectorConfig(config);
+  normalizeValidationStage(config);
   validateGodConfig(config);
+  validateTunerConfig(config);
   validateIntermissionConfig(config.waves.intermission);
   validateStagePlanConfig(config.waves.stagePlan, config.waves.totalWaves, config.economy.maxStar, config.waves.waveBoss.reward);
   return config;
@@ -138,11 +175,14 @@ export function buildConfig(variantNames: string[] = []): GameConfig {
     cfg = deepMerge<GameConfig>(cfg, patch);
   }
   cfg.waves.bossWaves = normalizeBossWaves(cfg.waves.bossWaves, cfg.waves.totalWaves);
-  normalizeValidationRewards(cfg);
+  normalizeLegacyDirectorConfig(cfg);
+  normalizeValidationStage(cfg);
   validateSkillsConfig(cfg.skills);
   validateGodConfig(cfg);
+  validateTunerConfig(cfg);
   validateIntermissionConfig(cfg.waves.intermission);
-  validateProgressionConfig(cfg.progression);
+  validateRewardMeterConfig(cfg.rewardMeter);
+  validateSettlementConfig(cfg.settlement);
   validateDifficultyConfig(cfg.difficulty);
   validateStagePlanConfig(cfg.waves.stagePlan, cfg.waves.totalWaves, cfg.economy.maxStar, cfg.waves.waveBoss.reward);
   return cfg;

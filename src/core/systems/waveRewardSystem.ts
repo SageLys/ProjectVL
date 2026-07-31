@@ -1,6 +1,6 @@
 import { cfg } from '../../config';
 import type { WaveChoiceStatKind } from '../../config/types';
-import { maxAttackRange, reconcileMaxHp, totalRange } from '../stats';
+import { maxAttackRange, permanentRange, reconcileMaxHp } from '../stats';
 import type { Config, GameEvent, GameState, RunDecision, WaveRewardGrant } from '../types';
 import { enqueueDecision, registerDecisionResolver } from './decisionQueueSystem';
 
@@ -33,9 +33,9 @@ export function applyRunBaseReward(
     case 'heal':
       state.hp = Math.min(state.maxHp, state.hp + effect.add);
       break;
-    // Sole percentage-based exception: XP gain has no additive base-stat form.
+    // Sole percentage-based exception: reward-point gain has no additive base-stat form.
     case 'xpGainPct':
-      state.xpGainBonus += effect.add;
+      state.rewardMeter.pointGainBonus += effect.add;
       break;
   }
 }
@@ -49,7 +49,7 @@ function defaultRuntimeConfig(): Config {
 }
 
 function rangeIsCapped(state: GameState): boolean {
-  return totalRange(state, defaultRuntimeConfig()) >= maxAttackRange();
+  return permanentRange(state, defaultRuntimeConfig()) >= maxAttackRange();
 }
 
 /**
@@ -107,7 +107,12 @@ function waveBaseRewardResolver(
   choice: string,
 ): GameEvent[] {
   if (decision.kind !== 'waveBaseReward') return [];
-  return applyWaveChoice(state, config, choice, decision.wave);
+  const events = applyWaveChoice(state, config, choice, decision.wave);
+  const option = cfg.waveRewards.choice.find(def => def.id === choice);
+  if (option && state.intermission.active && state.intermission.afterWave === decision.wave) {
+    state.intermission.selectedReward = { id: option.id, stat: option.stat, add: option.add };
+  }
+  return events;
 }
 
 export function registerWaveBaseRewardDecisionResolver(): void {

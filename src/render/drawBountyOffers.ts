@@ -3,6 +3,7 @@ import type { BountySide, GameState } from '../core/types';
 import { resolveCardVisual } from '../presentation/cardVisual';
 import { glyphGeometry, shapeGeometry, traceGeometryToCanvas } from '../presentation/skillGeometry';
 import { cardDisplayName } from '../ui/cardMeta';
+import { currentArenaCssScale, logicalFontPx } from './renderMetrics';
 
 const TAU = Math.PI * 2;
 
@@ -15,6 +16,7 @@ function inwardAngle(side: BountySide): number {
 
 /** Edge Offer marker: promised reward identity, threat direction, and acceptance countdown. */
 export function drawBountyOffers(ctx: CanvasRenderingContext2D, state: GameState): void {
+  const fontPx = logicalFontPx(11, currentArenaCssScale(ctx));
   for (const offer of state.bountyOffers) {
     const visual = resolveCardVisual(offer.rewardCardType);
     const radius = cfg.bounty.visual.offerRadius;
@@ -70,15 +72,17 @@ export function drawBountyOffers(ctx: CanvasRenderingContext2D, state: GameState
     if (cfg.bounty.visual.showRewardName) {
       ctx.save();
       ctx.fillStyle = '#e8f2ff';
-      ctx.font = 'bold 10px Microsoft YaHei';
+      ctx.font = `bold ${fontPx}px Microsoft YaHei`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
       const labelY = Math.min(cfg.combat.canvas.height - 13, offer.y + radius + 6);
-      ctx.fillText(
-        `${cardDisplayName(offer.rewardCardType)} ${offer.rewardCardStar}★×${offer.rewardCardCount} + 万能${offer.wildcardStar}★×${offer.wildcardCount}`,
-        offer.x,
-        labelY,
-      );
+      const lines = [
+        `${cardDisplayName(offer.rewardCardType)} ${offer.rewardCardStar}★×${offer.rewardCardCount}`,
+        `万能${offer.wildcardStar}★×${offer.wildcardCount}`,
+      ];
+      const maxWidth = Math.min(220, cfg.combat.canvas.width - 20);
+      const x = Math.max(maxWidth / 2 + 10, Math.min(cfg.combat.canvas.width - maxWidth / 2 - 10, offer.x));
+      lines.forEach((line, index) => ctx.fillText(line, x, labelY + index * fontPx * 1.15, maxWidth));
       ctx.restore();
     }
   }

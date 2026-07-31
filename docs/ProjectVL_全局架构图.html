@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>ProjectVL 全局架构：15 个配置域怎么拼成一局游戏</title>
+<style>
+  :root{
+    --ink:#1c2126; --sub:#5a6272; --line:#c7ccd6;
+    --numeric-bg:#eaf0fb; --numeric-bd:#7e9bd6;
+    --content-bg:#fdece1; --content-bd:#d9975f;
+    --economy-bg:#e6f3ea; --economy-bd:#6fb98a;
+    --support-bg:#f1eaf8; --support-bd:#a983cf;
+    --accent:#22314f;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC","Segoe UI",sans-serif;
+    background:#f5f6f9; color:var(--ink); line-height:1.6;
+  }
+  header{
+    background:linear-gradient(135deg,#12161c,#1c2536 60%,#2a2f45);
+    color:#f2f0ec; padding:28px 36px 24px;
+  }
+  header .kicker{font-size:12px; letter-spacing:3px; color:#9fb4d8; text-transform:uppercase; margin-bottom:8px;}
+  header h1{margin:0 0 8px; font-size:24px;}
+  header p{margin:0; color:#cfd6e6; font-size:14px; max-width:900px;}
+
+  .wrap{ max-width:1280px; margin:0 auto; padding:24px 24px 60px; }
+
+  .toolbar{
+    display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+    margin-bottom:14px;
+  }
+  .toolbar .group-label{font-size:12.5px; color:var(--sub); margin-right:4px;}
+  button.scenario, button.reset, button.toggle{
+    font-family:inherit; font-size:12.5px; padding:7px 12px; border-radius:16px;
+    border:1px solid var(--line); background:#fff; color:var(--ink); cursor:pointer;
+    transition:all .15s ease;
+  }
+  button.scenario:hover, button.toggle:hover{border-color:var(--accent); color:var(--accent);}
+  button.scenario.active{background:var(--accent); color:#fff; border-color:var(--accent);}
+  button.reset{background:#fff3e0; border-color:#e8c98a; color:#8a5a00;}
+  button.toggle.active{background:#22314f; color:#fff;}
+
+  .board-area{
+    display:grid; grid-template-columns: 1fr 320px; gap:18px; align-items:start;
+  }
+  .board-card{
+    background:#fff; border:1px solid var(--line); border-radius:10px;
+    padding:18px 18px 8px; position:relative; overflow:hidden;
+  }
+  #board{ position:relative; width:100%; height:660px; }
+  svg#edges{ position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; overflow:visible;}
+  .node{
+    position:absolute; width:196px; border-radius:9px; border:1.6px solid var(--line);
+    background:#f7f8fa; padding:9px 11px; cursor:pointer; user-select:none;
+    box-shadow:0 1px 2px rgba(0,0,0,.04);
+    transition: box-shadow .15s ease, transform .15s ease, opacity .2s ease;
+  }
+  .node:hover{ box-shadow:0 3px 10px rgba(0,0,0,.12); transform:translateY(-1px); }
+  .node.cat-numeric{ background:var(--numeric-bg); border-color:var(--numeric-bd); }
+  .node.cat-content{ background:var(--content-bg); border-color:var(--content-bd); }
+  .node.cat-economy{ background:var(--economy-bg); border-color:var(--economy-bd); }
+  .node.cat-support{ background:var(--support-bg); border-color:var(--support-bd); }
+  .node .en{ font-weight:700; font-size:14px; color:var(--accent); font-family:Consolas,"SF Mono",monospace;}
+  .node .cn{ font-size:11.5px; color:var(--sub); margin-top:1px;}
+  .node.dim{ opacity:.22; }
+  .node.selected{ outline:2.5px solid var(--accent); box-shadow:0 4px 14px rgba(34,49,79,.35); }
+
+  .legend{ display:flex; flex-wrap:wrap; gap:14px; font-size:12px; color:var(--sub); padding:10px 4px 14px; border-top:1px dashed var(--line); margin-top:6px;}
+  .legend .sw{ display:inline-flex; align-items:center; gap:6px; }
+  .legend .dot{ width:12px; height:12px; border-radius:3px; display:inline-block; border-width:1.6px; border-style:solid;}
+  .legend .ln{ width:26px; height:0; border-top:2px solid var(--accent); display:inline-block; }
+  .legend .ln.dash{ border-top:2px dashed #a9b2c4; }
+
+  .panel{
+    background:#fff; border:1px solid var(--line); border-radius:10px; padding:18px;
+    position:sticky; top:16px; min-height:420px;
+  }
+  .panel h2{ margin:0 0 4px; font-size:16px; color:var(--accent); }
+  .panel .file{ font-family:Consolas,"SF Mono",monospace; font-size:12px; color:#6a7284; background:#eef0f4; display:inline-block; padding:2px 6px; border-radius:4px; margin-bottom:10px;}
+  .panel .desc{ font-size:13px; color:#333; margin-bottom:12px; }
+  .panel h3{ font-size:12.5px; color:var(--sub); text-transform:uppercase; letter-spacing:.5px; margin:14px 0 6px; }
+  .panel ul{ margin:0; padding-left:18px; font-size:12.8px; }
+  .panel li{ margin-bottom:7px; }
+  .panel li b{ color:var(--accent); }
+  .panel .empty{ color:var(--sub); font-size:13px; }
+  .panel .scenario-note{ background:#fff7e6; border:1px solid #e8c98a; border-radius:6px; padding:10px 12px; font-size:12.8px; margin-bottom:12px; }
+
+  .refgrid{ margin-top:28px; }
+  .refgrid h2{ font-size:18px; margin-bottom:6px; color:var(--accent); }
+  .refgrid p.hint{ font-size:13px; color:var(--sub); margin-top:0; }
+  #search{ width:100%; max-width:360px; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:13px; margin-bottom:12px; font-family:inherit;}
+  table{ width:100%; border-collapse:collapse; font-size:13px; background:#fff; }
+  th,td{ border:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top;}
+  th{ background:var(--accent); color:#fff; font-weight:600; }
+  tr:nth-child(even) td{ background:#f7f8fb; }
+  td.file{ font-family:Consolas,"SF Mono",monospace; font-size:12px; color:#556; white-space:nowrap;}
+  tr.hide{ display:none; }
+
+  footer{ text-align:center; font-size:12px; color:#9aa2b0; padding:24px 0 40px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="kicker">ProjectVL &nbsp;/&nbsp; 配置架构说明</div>
+  <h1>15 个配置域怎么拼成一局游戏</h1>
+  <p>点击任意方块查看它的作用、依赖谁、被谁依赖；或者直接点下面的"常见场景"按钮，看清楚做某件事到底要碰哪几个文件。虚线 = 语义/运行时层面的隐性关联（不强校验，但改动需要同步理解）；实线 = 配置里的显式字段引用（改错会被三层校验拦下）。</p>
+</header>
+
+<div class="wrap">
+
+  <div class="toolbar" id="scenarioBar">
+    <span class="group-label">常见场景：</span>
+    <button class="scenario" data-scn="newcard">新增一张卡</button>
+    <button class="scenario" data-scn="newrelic">新增一件遗物</button>
+    <button class="scenario" data-scn="newrecipe">新增一条融合配方</button>
+    <button class="scenario" data-scn="tuneWave">调波次/难度手感</button>
+    <button class="scenario" data-scn="focusGod">看懂兑现波奖励定向</button>
+    <button class="scenario" data-scn="tuneEconomy">改经济数值</button>
+    <button class="reset" id="resetBtn">重置视图</button>
+  </div>
+
+  <div class="board-area">
+    <div class="board-card">
+      <div id="board">
+        <svg id="edges"></svg>
+      </div>
+      <div class="legend">
+        <span class="sw"><span class="dot" style="background:var(--numeric-bg);border-color:var(--numeric-bd)"></span>数值骨架（combat/waves/enemies/difficulty/input）</span>
+        <span class="sw"><span class="dot" style="background:var(--content-bg);border-color:var(--content-bd)"></span>内容实体（gods/skills/relics/evolutionRecipes）</span>
+        <span class="sw"><span class="dot" style="background:var(--economy-bg);border-color:var(--economy-bd)"></span>经济结算（economy/progression/waveRewards/bounty）</span>
+        <span class="sw"><span class="dot" style="background:var(--support-bg);border-color:var(--support-bd)"></span>支撑层（tuner/texts）</span>
+        <span class="sw"><span class="ln"></span>显式字段引用（强，会被校验）</span>
+        <span class="sw"><span class="ln dash"></span>语义/运行时关联（弱，不强校验）</span>
+      </div>
+    </div>
+
+    <div class="panel" id="panel">
+      <div class="empty">点击左边任意一个方块，这里会显示它的说明、依赖关系与关键字段。</div>
+    </div>
+  </div>
+
+  <div class="refgrid">
+    <h2>15 个域快速查表</h2>
+    <p class="hint">按域名 / 文件名 / 描述关键字过滤，例如输入"星级"或"tuner"。</p>
+    <input id="search" type="text" placeholder="搜索域名、文件名或说明关键字…">
+    <table id="refTable">
+      <thead><tr><th>域</th><th>文件</th><th>分类</th><th>一句话作用</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <footer>数据来自 2026-07-27 工作树快照（src/config/base/*.json + src/data/texts.json）；随配置迭代会过期，改动权威永远是仓库源文件与 npm run validate。</footer>
+</div>
+
+<script>
+const CAT_LABEL = { numeric:'数值骨架', content:'内容实体', economy:'经济结算', support:'支撑层' };
+
+const DOMAINS = [
+  { id:'combat', cn:'战斗', file:'combat.json', cat:'numeric', x:20, y:20,
+    desc:'炮台/子弹/控制上限/击退疲劳等物理常量，几乎不与内容域产生显式引用。',
+    fields:['turret.x/y 炮台坐标','defaults.damage/fireRate/range 基础三围','controlBudget 控制类效果硬顶'] },
+  { id:'waves', cn:'波次', file:'waves.json', cat:'numeric', x:20, y:112,
+    desc:'10 波结构（3招募+5构筑+2兑现）、出怪预算、阶段导演、Boss 波次。',
+    fields:['stagePlan.selectionWaves/validationWaves 阶段划分','bossWaves 波末精英波次表','stagePlan.validation[] 第9/10波定向奖励'] },
+  { id:'enemies', cn:'敌人', file:'enemies.json', cat:'numeric', x:20, y:204,
+    desc:'normal/fast/tank/boss 四类型的基础属性与 Boss 行为参数。',
+    fields:['types.<kind>.hpBase/speedBase','bossBehavior 绕轨/贴身逻辑'] },
+  { id:'difficulty', cn:'难度', file:'difficulty.json', cat:'numeric', x:20, y:296,
+    desc:'四档难度曲线（relaxed/standard/hard/hell），运行时整体相乘在 enemies 基础值上，不改配置文件本身。',
+    fields:['profiles.<id>.enemy.hp/damage/speed 曲线','hell 档恒为1，用作数值回归基准'] },
+  { id:'input', cn:'输入', file:'input.json', cat:'numeric', x:20, y:388,
+    desc:'触屏点击判定阈值（T1 真机校准值），孤立域，不与其它域产生引用。',
+    fields:['tapMaxPx/tapMaxMs 点击判定','confirmStyle 二次确认样式'] },
+
+  { id:'gods', cn:'神祇', file:'gods.json', cat:'content', x:330, y:20,
+    desc:'5 神，每神 2 锚点+5可变=7张卡；本局=1主神(5张)+2副神(各3张)=11张名册。',
+    fields:['anchorCardIds 必进本局的锚点卡','variableCardIds 可变卡候选池'] },
+  { id:'skills', cn:'卡牌', file:'skills.json', cat:'content', x:330, y:130, h:96,
+    desc:'41 张卡的完整结构：星级质变锚点(3/5/6)、消耗态(1/3/6)、进化树、词条池——全书篇幅最大的域。',
+    fields:['stars.{3,5,6} 装备态绑定','consumable.anchors 消耗态三档','affixPool 随机数值词条候选'] },
+  { id:'relics', cn:'遗物', file:'relics.json', cat:'content', x:330, y:258,
+    desc:'22 件局外持续增幅，升级时三选一（progression.relicChoices），把一个数值轴按机制标签过滤后加到全局。',
+    fields:['effects[].axis 缩放轴（17种之一）','targetTags 生效范围过滤'] },
+  { id:'evolutionRecipes', cn:'融合配方', file:'evolutionRecipes.json', cat:'content', x:330, y:350,
+    desc:'6 条波间卡间融合配方，两张5★卡合成一张全新6★卡，产物卡通常标 recipeOnly。',
+    fields:['ingredientA/B.cardId + minStar','outputCardId 产物卡'] },
+
+  { id:'economy', cn:'经济', file:'economy.json', cat:'economy', x:660, y:20,
+    desc:'星级/卡槽/合成/掉落的经济骨架；maxStar 和 equipThreshold 是全局护栏，多处被引用做上限校验。',
+    fields:['maxStar=6 全局星级上限','handSlots=7 / equipSlots=3'] },
+  { id:'progression', cn:'成长', file:'progression.json', cat:'economy', x:660, y:112,
+    desc:'遗物驱动的经验成长：升级阈值表、遗物稀有度曲线、结算得分公式。',
+    fields:['xpThresholds 8级经验阈值','rarityByRelicIndex 稀有度曲线'] },
+  { id:'waveRewards', cn:'波末奖励', file:'waveRewards.json', cat:'economy', x:660, y:204,
+    desc:'与卡/神/遗物体系完全独立的第三条成长线：每波无条件保底三项 + 三选一属性奖励。',
+    fields:['floor[] 保底三项','choice[] 三选一五项'] },
+  { id:'bounty', cn:'精英委托', file:'bounty.json', cat:'economy', x:660, y:296,
+    desc:'唯一的主动风险选择机制：点击接单=集火精英换高星奖励，不接单无惩罚。',
+    fields:['offer.* 触发概率参数','reward.cardStarMax/wildcardStarMax'] },
+
+  { id:'texts', cn:'文案', file:'texts.json', cat:'support', x:180, y:492,
+    desc:'全部玩家可见文案的唯一来源；卡/神/遗物的名称与描述已内联进各自编辑器，不再单独编辑。',
+    fields:['cards/gods/relics 实体文案','effectText/glossary 原子说明'] },
+  { id:'tuner', cn:'调参', file:'tuner.json', cat:'support', x:560, y:492,
+    desc:'176 项调参面板元数据（范围/分组/生效策略），每条 path 都指向其它域里的一个真实数值字段。',
+    fields:['path 指向任意数值字段','applyPolicy 立即/下一波生效'] },
+];
+
+const EDGES = [
+  { from:'gods', to:'skills', label:'anchorCardIds / variableCardIds → 卡 id', kind:'strong' },
+  { from:'skills', to:'gods', label:'card.god 字段（反向标注，非强引用）', kind:'weak' },
+  { from:'skills', to:'relics', label:'synergyTags ≈ relics.targetTags（机制标签匹配）', kind:'weak' },
+  { from:'relics', to:'gods', label:'relic.god（抽取权重偏置）', kind:'weak' },
+  { from:'evolutionRecipes', to:'skills', label:'ingredientA/B.cardId、outputCardId → 卡 id', kind:'strong' },
+  { from:'skills', to:'texts', label:'textKey → texts.cards.<id>', kind:'strong' },
+  { from:'gods', to:'texts', label:'textKey → texts.gods.<id>', kind:'strong' },
+  { from:'relics', to:'texts', label:'textKey → texts.relics.<id>', kind:'strong' },
+  { from:'tuner', to:'texts', label:'labelKey → texts.tuner.params', kind:'strong' },
+  { from:'tuner', to:'combat', label:'path 指向数值字段', kind:'weak' },
+  { from:'tuner', to:'waves', label:'path 指向数值字段', kind:'weak' },
+  { from:'tuner', to:'enemies', label:'path 指向数值字段', kind:'weak' },
+  { from:'tuner', to:'economy', label:'path 指向数值字段', kind:'weak' },
+  { from:'tuner', to:'progression', label:'path 指向数值字段', kind:'weak' },
+  { from:'tuner', to:'bounty', label:'path 指向数值字段', kind:'weak' },
+  { from:'waves', to:'gods', label:'stagePlan.validation reward.typePolicy=focusGod（兑现波定向）', kind:'strong' },
+  { from:'waves', to:'economy', label:'验证波星级 ≤ economy.maxStar（语义校验）', kind:'weak' },
+  { from:'bounty', to:'economy', label:'cardStarMax/wildcardStarMax ≤ maxStar（人工核对，未强校验）', kind:'weak' },
+  { from:'difficulty', to:'enemies', label:'运行时相乘，不改配置文件本身', kind:'weak' },
+  { from:'progression', to:'relics', label:'rarityByRelicIndex 决定遗物稀有度权重', kind:'weak' },
+];
+
+const SCENARIOS = {
+  newcard: { nodes:['skills','gods','texts'],
+    note:'新增一张卡：在 skills.json 里加卡，把它塞进某神的 anchorCardIds/variableCardIds（否则 activePoolFeasibility 会警告本局永远抽不到），再补 texts.json 的 cards.&lt;id&gt; 文案。' },
+  newrelic: { nodes:['relics','texts','progression'],
+    note:'新增一件遗物：relics.json 加条目 + texts.json 补 relics.&lt;id&gt;.name/.desc（textKey 必须严格等于 relics.&lt;id&gt;）；它的稀有度出现频率由 progression.rarityByRelicIndex 决定，不用单独配置。' },
+  newrecipe: { nodes:['evolutionRecipes','skills'],
+    note:'新增融合配方：evolutionRecipes.json 加条目，两个 minStar 通常填 5；产物卡在 skills.json 里应标 recipeOnly:true，这样即使不在任何神的 roster 里也不会被误报成孤儿卡。' },
+  tuneWave: { nodes:['waves','difficulty','enemies','tuner'],
+    note:'调波次/难度手感：waves.json 管结构和节奏，difficulty.json 只做运行时乘法（不改 enemies 基础值），enemies.json 是基础属性；三者都可以通过 tuner.json 挂滑杆现场试。' },
+  focusGod: { nodes:['waves','gods'],
+    note:'兑现波（第9/10波）的奖励通过 stagePlan.validation[].enemies[].reward.typePolicy="focusGod" 定向发给玩家在兑现波选中的神，这是 waves 与 gods 之间唯一的强引用连接点。' },
+  tuneEconomy: { nodes:['economy','tuner','bounty','waves'],
+    note:'改经济数值：economy.json 是星级/槽位/掉落骨架，maxStar 被 waves 的验证波星级、bounty 的卡/万用牌星级上限交叉引用；tuner.json 可以挂滑杆现场调，但 bounty 侧的上限没有强校验，改完要人工核对。' },
+};
+
+const board = document.getElementById('board');
+const svg = document.getElementById('edges');
+let selected = null;
+let scenarioActive = null;
+
+function nodeEl(d){ return document.getElementById('node-'+d.id); }
+
+function buildNodes(){
+  DOMAINS.forEach(d=>{
+    const el = document.createElement('div');
+    el.className = 'node cat-'+d.cat;
+    el.id = 'node-'+d.id;
+    el.style.left = d.x+'px';
+    el.style.top = d.y+'px';
+    if (d.h) el.style.minHeight = d.h+'px';
+    el.innerHTML = '<div class="en">'+d.id+'</div><div class="cn">'+d.cn+' · '+d.file+'</div>';
+    el.addEventListener('click', ()=> selectNode(d.id));
+    board.appendChild(el);
+  });
+}
+
+function edgePath(x1,y1,x2,y2){
+  const dx = (x2-x1)*0.5;
+  return `M ${x1} ${y1} C ${x1+dx} ${y1}, ${x2-dx} ${y2}, ${x2} ${y2}`;
+}
+
+function drawEdges(){
+  svg.innerHTML = `<defs>
+    <marker id="arrowStrong" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#22314f"/>
+    </marker>
+    <marker id="arrowWeak" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#a9b2c4"/>
+    </marker>
+  </defs>`;
+  const boardRect = board.getBoundingClientRect();
+  EDGES.forEach((e,idx)=>{
+    const fromEl = nodeEl({id:e.from}), toEl = nodeEl({id:e.to});
+    if(!fromEl || !toEl) return;
+    const fr = fromEl.getBoundingClientRect(), tr = toEl.getBoundingClientRect();
+    const x1 = fr.left - boardRect.left + fr.width/2;
+    const y1 = fr.top - boardRect.top + fr.height/2;
+    const x2 = tr.left - boardRect.left + tr.width/2;
+    const y2 = tr.top - boardRect.top + tr.height/2;
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d', edgePath(x1,y1,x2,y2));
+    path.setAttribute('fill','none');
+    path.setAttribute('stroke', e.kind==='strong' ? '#22314f' : '#a9b2c4');
+    path.setAttribute('stroke-width', e.kind==='strong' ? '1.6' : '1.3');
+    if(e.kind==='weak') path.setAttribute('stroke-dasharray','5,4');
+    path.setAttribute('marker-end', e.kind==='strong' ? 'url(#arrowStrong)' : 'url(#arrowWeak)');
+    path.dataset.from = e.from; path.dataset.to = e.to; path.dataset.idx = idx;
+    path.style.opacity = '0.55';
+    path.style.transition = 'opacity .15s ease';
+    svg.appendChild(path);
+  });
+}
+
+function clearHighlight(){
+  document.querySelectorAll('.node').forEach(n=>n.classList.remove('dim','selected'));
+  document.querySelectorAll('#edges path').forEach(p=>p.style.opacity='0.55');
+}
+
+function highlightSet(nodeIds){
+  const set = new Set(nodeIds);
+  document.querySelectorAll('.node').forEach(n=>{
+    const id = n.id.replace('node-','');
+    n.classList.toggle('dim', !set.has(id));
+  });
+  document.querySelectorAll('#edges path').forEach(p=>{
+    const rel = set.has(p.dataset.from) && set.has(p.dataset.to);
+    p.style.opacity = rel ? '0.95' : '0.06';
+  });
+}
+
+function connectedNodes(id){
+  const out = EDGES.filter(e=>e.from===id);
+  const inc = EDGES.filter(e=>e.to===id);
+  return {out, inc};
+}
+
+function selectNode(id){
+  scenarioActive = null;
+  document.querySelectorAll('button.scenario').forEach(b=>b.classList.remove('active'));
+  selected = id;
+  const d = DOMAINS.find(x=>x.id===id);
+  const {out, inc} = connectedNodes(id);
+  const involved = new Set([id, ...out.map(e=>e.to), ...inc.map(e=>e.from)]);
+  clearHighlight();
+  highlightSet([...involved]);
+  nodeEl(d).classList.add('selected');
+
+  const panel = document.getElementById('panel');
+  let html = `<h2>${d.id}　${d.cn}</h2><div class="file">${d.file}</div><div class="desc">${d.desc}</div>`;
+  html += `<h3>关键字段</h3><ul>` + d.fields.map(f=>`<li>${f}</li>`).join('') + `</ul>`;
+  if(out.length){
+    html += `<h3>它引用了谁</h3><ul>` + out.map(e=>`<li><b>${e.to}</b> — ${e.label}</li>`).join('') + `</ul>`;
+  }
+  if(inc.length){
+    html += `<h3>谁引用了它</h3><ul>` + inc.map(e=>`<li><b>${e.from}</b> — ${e.label}</li>`).join('') + `</ul>`;
+  }
+  if(!out.length && !inc.length){
+    html += `<p class="empty">这个域相对独立，不与其它域产生显式/语义引用。</p>`;
+  }
+  panel.innerHTML = html;
+}
+
+function applyScenario(key, btn){
+  const already = scenarioActive === key;
+  document.querySelectorAll('button.scenario').forEach(b=>b.classList.remove('active'));
+  clearHighlight();
+  selected = null;
+  if(already){
+    scenarioActive = null;
+    document.getElementById('panel').innerHTML = '<div class="empty">点击左边任意一个方块，这里会显示它的说明、依赖关系与关键字段。</div>';
+    return;
+  }
+  scenarioActive = key;
+  btn.classList.add('active');
+  const s = SCENARIOS[key];
+  highlightSet(s.nodes);
+  s.nodes.forEach(id=>{
+    const el = nodeEl({id});
+    if(el) el.classList.add('selected');
+  });
+  const panel = document.getElementById('panel');
+  panel.innerHTML = `<h2>场景说明</h2><div class="scenario-note">${s.note}</div>
+    <h3>涉及的域</h3><ul>${s.nodes.map(id=>{
+      const d = DOMAINS.find(x=>x.id===id);
+      return `<li><b>${id}</b>（${d.cn}） — ${d.file}</li>`;
+    }).join('')}</ul>`;
+}
+
+document.querySelectorAll('button.scenario').forEach(btn=>{
+  btn.addEventListener('click', ()=> applyScenario(btn.dataset.scn, btn));
+});
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  selected = null; scenarioActive = null;
+  document.querySelectorAll('button.scenario').forEach(b=>b.classList.remove('active'));
+  clearHighlight();
+  document.getElementById('panel').innerHTML = '<div class="empty">点击左边任意一个方块，这里会显示它的说明、依赖关系与关键字段。</div>';
+});
+
+function buildRefTable(){
+  const tbody = document.querySelector('#refTable tbody');
+  DOMAINS.forEach(d=>{
+    const tr = document.createElement('tr');
+    tr.dataset.key = (d.id+' '+d.cn+' '+d.file+' '+d.desc).toLowerCase();
+    tr.innerHTML = `<td><b>${d.id}</b><br>${d.cn}</td><td class="file">${d.file}</td><td>${CAT_LABEL[d.cat]}</td><td>${d.desc}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+document.getElementById('search').addEventListener('input', (e)=>{
+  const q = e.target.value.trim().toLowerCase();
+  document.querySelectorAll('#refTable tbody tr').forEach(tr=>{
+    tr.classList.toggle('hide', q && !tr.dataset.key.includes(q));
+  });
+});
+
+buildNodes();
+buildRefTable();
+requestAnimationFrame(drawEdges);
+window.addEventListener('resize', drawEdges);
+</script>
+
+</body>
+</html>

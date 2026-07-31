@@ -75,11 +75,22 @@ function compareRank(left: readonly number[], right: readonly number[]): number 
 
 function protectedCards(state: GameState): CardType[] {
   const roster = getRunRoster(state);
+  const directorActive = state.wave >= cfg.economy.evolution.assistWindowWaves[0]
+    && state.wave <= cfg.economy.evolution.assistWindowWaves[1]
+    && !state.recipes.assistClosed;
+  const directed = directorActive
+    ? cfg.evolutionRecipes.recipes.find(recipe => recipe.id === state.recipes.directedRecipeId)
+    : undefined;
+  const recipeMaterials = directed
+    ? [directed.ingredientVariable.cardId, directed.ingredientAnchor.cardId]
+      .filter(type => roster.includes(type))
+      .slice(0, cfg.economy.evolution.recipeProtectionSlots)
+    : [];
   const candidates = roster.filter(type => {
     const rank = protectionRank(state, type);
     return rank[0] > 0 || rank[1] > 0 || rank[2] > 0 || rank[3] > 0;
   });
-  return candidates.sort((left, right) => {
+  const normalProtections = candidates.filter(type => !recipeMaterials.includes(type)).sort((left, right) => {
     const leftSlept = state.godPool.activePool.length > 0
       && !state.godPool.activePool.includes(left) ? 1 : 0;
     const rightSlept = state.godPool.activePool.length > 0
@@ -88,6 +99,10 @@ function protectedCards(state: GameState): CardType[] {
       || compareRank(protectionRank(state, left), protectionRank(state, right))
       || left.localeCompare(right);
   }).slice(0, 3);
+  return unique([...recipeMaterials, ...normalProtections]).slice(
+    0,
+    3 + cfg.economy.evolution.recipeProtectionSlots,
+  );
 }
 
 function focusPriority(state: GameState, type: CardType): [number, number, number] {

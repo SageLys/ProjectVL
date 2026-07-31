@@ -9,7 +9,6 @@ import { moveOrSwap } from '../src/core/systems/equipmentSystem';
 import { grantWildcards, useWildcardOnSlot } from '../src/core/systems/wildcardSystem';
 import {
   calculateBuildMaturity,
-  calculateAffinityScore,
   calculateCommitmentScore,
   getCardPool,
   refillNormalDropRoleBag,
@@ -66,41 +65,6 @@ describe('NormalDropDirector · card pool and discovery', () => {
 });
 
 describe('NormalDropDirector · build and pivot choices', () => {
-  it('biases only build choices toward affinity and caps the added score', () => {
-    const baseline = freshState();
-    const focused = freshState();
-    focused.buildState.godAffinity.storm = 3;
-    const sample = (state: typeof focused, seed: number) => {
-      const rng = createSeededRng(seed);
-      return Array.from({ length: 300 }, () => selectBuildType(state, rng));
-    };
-    const storm = new Set(['pierce', 'chainLightning']);
-    const baselineHits = sample(baseline, 91).filter(type => storm.has(type)).length;
-    const focusedHits = sample(focused, 91).filter(type => storm.has(type)).length;
-    expect(focusedHits).toBeGreaterThan(baselineHits + 100);
-
-    const capped = freshState();
-    capped.buildState.godAffinity.storm = cfg.economy.normalDropTypePolicy.godAffinity.scoreCap
-      / cfg.economy.normalDropTypePolicy.godAffinity.scorePerStack;
-    const excessive = freshState();
-    excessive.buildState.godAffinity.storm = 99;
-    expect(calculateAffinityScore(capped, 'pierce')).toBe(cfg.economy.normalDropTypePolicy.godAffinity.scoreCap);
-    expect(sample(capped, 17)).toEqual(sample(excessive, 17));
-  });
-
-  it('does not let affinity affect discovery or pivot selection', () => {
-    const baseline = freshState();
-    baseline.equipment[0] = card('pierce', 6);
-    baseline.equipment[1] = card('frost', 5);
-    const focused = structuredClone(baseline);
-    focused.buildState.godAffinity.bulwark = 99;
-    const rolls = [0, 0.17, 0.41, 0.76, 0.99];
-    expect(rolls.map(roll => selectDiscoveryType(focused, constRng(roll))))
-      .toEqual(rolls.map(roll => selectDiscoveryType(baseline, constRng(roll))));
-    expect(rolls.map(roll => selectPivotType(focused, constRng(roll))))
-      .toEqual(rolls.map(roll => selectPivotType(baseline, constRng(roll))));
-  });
-
   it('uses opening build slots to match held one-star cards, then falls back to discovery when empty', () => {
     const withCard = freshState();
     withCard.cards[0] = card('pierce', 1);
@@ -170,28 +134,6 @@ describe('NormalDropDirector · build and pivot choices', () => {
     expect(selectNormalEnemyDropType(state, constRng(0))).not.toBe('pierce');
   });
 
-  it('god pity forces the second missed normal drop and clears immediately on a hit', () => {
-    cfg.economy.normalDropTypePolicy.godAffinity.scorePerStack = 0;
-    const state = freshState();
-    state.buildState.godAffinity.storm = 1;
-    state.buildState.dropPity = { god: 'storm', remaining: 2 };
-    state.normalDropDirector.roleBag = ['discovery', 'discovery'];
-    const first = selectNormalEnemyDropType(state, constRng(0.99));
-    expect(cfg.skills.cards.find(card => card.id === first)!.god).not.toBe('storm');
-    expect(state.buildState.dropPity?.remaining).toBe(1);
-    const second = selectNormalEnemyDropType(state, constRng(0.99));
-    expect(cfg.skills.cards.find(card => card.id === second)!.god).toBe('storm');
-    expect(state.buildState.dropPity).toBeUndefined();
-
-    const hit = freshState();
-    cfg.economy.normalDropTypePolicy.godAffinity.scorePerStack = 2.5;
-    hit.buildState.godAffinity.storm = 1;
-    hit.buildState.dropPity = { god: 'storm', remaining: 2 };
-    hit.normalDropDirector.roleBag = ['discovery'];
-    const hitType = selectNormalEnemyDropType(hit, constRng(0));
-    expect(cfg.skills.cards.find(card => card.id === hitType)!.god).toBe('storm');
-    expect(hit.buildState.dropPity).toBeUndefined();
-  });
 });
 
 describe('NormalDropDirector · source isolation and reproducibility', () => {

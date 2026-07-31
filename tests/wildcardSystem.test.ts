@@ -15,7 +15,7 @@ afterEach(resetTestEnv);
 function def(id: CardType, equip: BindingDef[]): CardDef {
   const tier = { radius: 100, effects: [{ atom: 'burstDamage' as const, params: { damageMul: 1, radius: 100 } }] };
   return {
-    id, category: 'projectile', synergyTags: ['projectile'], textKey: `t.${id}`, teaching: false,
+    id, identityContract: 'test fixture', category: 'projectile', synergyTags: ['projectile'], textKey: `t.${id}`, teaching: false,
     stars: { '3': { tier: 'core', equip }, '5': { tier: 'dual', equip }, '6': { tier: 'transform', equip } },
     amplifyAxis: { params: {} },
     evolutionTree: fixtureEvolutionTree(id, equip),
@@ -119,7 +119,7 @@ describe('wildcardSystem', () => {
     grant(state, 1);
     const events = useWildcardOnSlot(state, config, rng, 'cards', 0);
     expect(state.enemies).toHaveLength(0);
-    expect(events.some(event => event.type === 'levelUp')).toBe(true);
+    expect(events.some(event => event.type === 'rewardTriggered')).toBe(true);
   });
 
   it('ordinary auto merge never reads wildcard inventory', () => {

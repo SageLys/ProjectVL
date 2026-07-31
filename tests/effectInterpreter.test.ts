@@ -30,7 +30,7 @@ afterEach(resetTestEnv);
 function def(id: CardType, equip: BindingDef[], consumeEffects: BindingDef['effects'] = [{ atom: 'burstDamage', params: { damageMul: 2, radius: 100 } }]): CardDef {
   const tier = { radius: 100, effects: consumeEffects };
   return {
-    id, category: 'projectile', synergyTags: ['projectile'], textKey: `t.${id}`, teaching: false,
+    id, identityContract: 'test fixture', category: 'projectile', synergyTags: ['projectile'], textKey: `t.${id}`, teaching: false,
     stars: { '3': { tier: 'core', equip }, '5': { tier: 'dual', equip }, '6': { tier: 'transform', equip } },
     amplifyAxis: { params: { damageMul: '+1' } },
     evolutionTree: fixtureEvolutionTree(id, equip),
@@ -120,7 +120,7 @@ describe('解释器 · 装备态触发绑定', () => {
 
   it('星级分层：同一卡 2★/3★ 取不同绑定（入装门槛 2★）', () => {
     registerSkillDefs([{
-      id: 'pierce', category: 'projectile', synergyTags: ['projectile'], textKey: 't', teaching: false,
+      id: 'pierce', identityContract: 'test fixture', category: 'projectile', synergyTags: ['projectile'], textKey: 't', teaching: false,
       stars: {
         '3': { tier: 'core', equip: [{ trigger: 'onFire', effects: [{ atom: 'pierce', params: { count: 1 } }] }] },
         '5': { tier: 'dual', equip: [{ trigger: 'onFire', effects: [{ atom: 'pierce', params: { count: 2 } }] }] },
@@ -157,15 +157,15 @@ describe('解释器 · passive 修饰聚合', () => {
       { atom: 'xpMul', params: { mul: 2 } },
     ]))]);
     const s = freshState();
-    cfg.progression.killXpMul = 1.5;
-    s.xpGainBonus = 0.25;
+    cfg.rewardMeter.pointMul = 1.5;
+    s.rewardMeter.pointGainBonus = 0.25;
     equipCard(s, 'sanctum', 3);
     expect(totalDropChance(s, config)).toBeCloseTo(Math.min(0.95, config.dropChance * 1.5));
     expect(totalDropLifetime(s, config)).toBeCloseTo(config.dropLifetime * 1.25);
     const e = enemy({ x: 300, y: 300, hp: 1, maxHp: 1, xp: 2 });
     s.enemies = [e];
     dealDamage(s, config, rng, e, 10);
-    expect(s.xp).toBe(7.5); // 2 × killXpMul 1.5 × personal 1.25 × effect xpMul 2
+    expect(s.rewardMeter.points).toBe(7.5);
   });
 
   it('防御修饰：breachReduction 减伤 / thorns 反噬击杀 / novaOnBreak', () => {
@@ -183,18 +183,6 @@ describe('解释器 · passive 修饰聚合', () => {
     moveEnemies(s2, config, rng, 0.016);
     expect(s2.hp).toBe(100);  // 反噬致死 → 无突破伤害
     expect(s2.kills).toBe(1); // 按击杀结算
-  });
-
-  it('mergeRule 暴露给上层（P5 万能卡建模前置）；execute 取最高阈值', () => {
-    registerSkillDefs([def('harvest', passive([
-      { atom: 'mergeRule', params: { rule: 'wildcardDrop', value: 1 } },
-      { atom: 'execute', params: { hpThresholdRatio: 0.2 } },
-    ]))]);
-    const s = freshState();
-    equipCard(s, 'harvest', 3);
-    const mods = getModifiers(s);
-    expect(mods.mergeRules).toEqual([{ rule: 'wildcardDrop', value: 1 }]);
-    expect(mods.executeThreshold).toBe(0.2);
   });
 
   it('mortarMorph passive：主炮改射榴弹并在落点爆炸', () => {
@@ -393,11 +381,11 @@ describe('解释器 · expiryConvert 落地（丰收 5★ 落穗，批次1修复
     const s = freshState();
     equipCard(s, 'harvest', 3);
     spawnGroundDrop(s, config, constRng(0), 100, 100, 'pierce', 2);
-    expect(s.xp).toBe(0);
+    expect(s.rewardMeter.points).toBe(0);
     tickDrops(s, config, constRng(0), config.dropLifetime + 0.01);
     expect(s.groundDrops).toHaveLength(0);
     expect(s.expired).toBe(1);
-    expect(s.xp).toBeCloseTo(2 * 4); // drop.star(2) × EXPIRY_CONVERT_XP_PER_STAR(4)
+    expect(s.rewardMeter.points).toBeCloseTo(2 * 4);
   });
 
   it('无 expiryConvert 装备时过期纯损失，经验不变', () => {
@@ -405,7 +393,7 @@ describe('解释器 · expiryConvert 落地（丰收 5★ 落穗，批次1修复
     spawnGroundDrop(s, config, constRng(0), 100, 100, 'pierce', 2);
     tickDrops(s, config, constRng(0), config.dropLifetime + 0.01);
     expect(s.expired).toBe(1);
-    expect(s.xp).toBe(0);
+    expect(s.rewardMeter.points).toBe(0);
   });
 });
 

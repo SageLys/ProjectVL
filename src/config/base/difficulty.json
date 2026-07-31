@@ -5,48 +5,120 @@
       "label": "轻松",
       "description": "前期敌人明显较弱，后期仍有压力",
       "enemy": {
-        "hp": { "start": 0.45, "end": 0.85, "power": 1.65 },
-        "damage": { "start": 0.35, "end": 0.75, "power": 1.5 },
-        "speed": { "start": 0.95, "end": 1.0, "power": 1.2 }
+        "hp": {
+          "start": 0.45,
+          "end": 0.85,
+          "power": 1.65
+        },
+        "damage": {
+          "start": 0.35,
+          "end": 0.75,
+          "power": 1.5
+        },
+        "speed": {
+          "start": 0.95,
+          "end": 1,
+          "power": 1.2
+        }
       },
       "boss": {
-        "hp": { "start": 0.6, "end": 0.9, "power": 1.5 },
-        "damage": { "start": 0.45, "end": 0.8, "power": 1.4 }
+        "hp": {
+          "start": 0.6,
+          "end": 0.9,
+          "power": 1.5
+        },
+        "damage": {
+          "start": 0.45,
+          "end": 0.8,
+          "power": 1.4
+        }
       }
     },
     "standard": {
       "label": "标准",
       "description": "前期宽松，后期接近完整压力",
       "enemy": {
-        "hp": { "start": 0.65, "end": 0.95, "power": 1.55 },
-        "damage": { "start": 0.55, "end": 0.9, "power": 1.45 },
-        "speed": { "start": 0.98, "end": 1.0, "power": 1.2 }
+        "hp": {
+          "start": 0.65,
+          "end": 0.95,
+          "power": 1.55
+        },
+        "damage": {
+          "start": 0.55,
+          "end": 0.9,
+          "power": 1.45
+        },
+        "speed": {
+          "start": 0.98,
+          "end": 1,
+          "power": 1.2
+        }
       },
       "boss": {
-        "hp": { "start": 0.75, "end": 1.0, "power": 1.45 },
-        "damage": { "start": 0.65, "end": 0.95, "power": 1.4 }
+        "hp": {
+          "start": 0.75,
+          "end": 1,
+          "power": 1.45
+        },
+        "damage": {
+          "start": 0.65,
+          "end": 0.95,
+          "power": 1.4
+        }
       }
     },
     "hard": {
       "label": "困难",
       "description": "仅缓和开局，后期接近当前版本",
       "enemy": {
-        "hp": { "start": 0.82, "end": 1.0, "power": 1.35 },
-        "damage": { "start": 0.75, "end": 1.0, "power": 1.3 },
-        "speed": { "start": 1.0, "end": 1.0, "power": 1.0 }
+        "hp": {
+          "start": 0.82,
+          "end": 1,
+          "power": 1.35
+        },
+        "damage": {
+          "start": 0.75,
+          "end": 1,
+          "power": 1.3
+        },
+        "speed": {
+          "start": 1,
+          "end": 1,
+          "power": 1
+        }
       },
       "boss": {
-        "hp": { "start": 0.9, "end": 1.0, "power": 1.3 },
-        "damage": { "start": 0.85, "end": 1.0, "power": 1.3 }
+        "hp": {
+          "start": 0.9,
+          "end": 1,
+          "power": 1.3
+        },
+        "damage": {
+          "start": 0.85,
+          "end": 1,
+          "power": 1.3
+        }
       }
     },
     "hell": {
       "label": "地狱",
       "description": "当前版本原始难度",
       "enemy": {
-        "hp": { "start": 1.0, "end": 1.0, "power": 1.0 },
-        "damage": { "start": 1.0, "end": 1.0, "power": 1.0 },
-        "speed": { "start": 1.0, "end": 1.0, "power": 1.0 }
+        "hp": {
+          "start": 1,
+          "end": 1,
+          "power": 1
+        },
+        "damage": {
+          "start": 1,
+          "end": 1,
+          "power": 1
+        },
+        "speed": {
+          "start": 1,
+          "end": 1,
+          "power": 1
+        }
       }
     }
   }

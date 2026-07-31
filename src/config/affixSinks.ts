@@ -1,4 +1,4 @@
-import type { CardStatKind } from './types';
+import type { CardAffixStatKind } from './types';
 import type { AtomName, Trigger } from '../core/effects/defs';
 
 export interface AffixScalingTarget {
@@ -21,26 +21,20 @@ export interface AffixSinkContract {
 
 /**
  * One authoritative contract for rolling, settlement, equipment support and
- * observable scaling sinks. Keep this exhaustive when CardStatKind changes.
+ * observable scaling sinks. Keep this exhaustive when CardAffixStatKind changes.
  */
-export const AFFIX_SINKS: Record<CardStatKind, AffixSinkContract> = {
-  damageAdd: {
-    operation: 'add', settlement: 'timed', equipment: 'global', globalConsumer: 'totalDamage',
+export const AFFIX_SINKS: Record<CardAffixStatKind, AffixSinkContract> = {
+  damageMul: {
+    operation: 'mul', settlement: 'timed', equipment: 'global', globalConsumer: 'totalDamage',
   },
-  fireRateAdd: {
-    operation: 'add', settlement: 'timed', equipment: 'global', globalConsumer: 'totalFireRate',
+  fireRateMul: {
+    operation: 'mul', settlement: 'timed', equipment: 'global', globalConsumer: 'totalFireRate',
   },
-  rangeAdd: {
-    operation: 'add', settlement: 'timed', equipment: 'global', globalConsumer: 'totalRange',
+  rangeMul: {
+    operation: 'mul', settlement: 'timed', equipment: 'global', globalConsumer: 'totalRange',
   },
-  multiAdd: {
-    operation: 'add', settlement: 'timed', equipment: 'global', globalConsumer: 'totalMulti',
-  },
-  maxHpAdd: {
-    operation: 'add', settlement: 'timed', equipment: 'global', globalConsumer: 'totalMaxHp',
-  },
-  heal: {
-    operation: 'add', settlement: 'instant', equipment: 'unsupported', globalConsumer: 'instantHeal',
+  maxHpMul: {
+    operation: 'mul', settlement: 'timed', equipment: 'global', globalConsumer: 'totalMaxHp',
   },
   effectDamageMul: {
     operation: 'mul',
@@ -152,4 +146,3 @@ export const AFFIX_SINKS: Record<CardStatKind, AffixSinkContract> = {
     scalingTargets: [{ atom: 'xpMul', param: 'mul' }],
   },
 };
-

@@ -16,9 +16,9 @@ import { collectNearest, spawnTestDrops, spawnGroundDrop } from './core/systems/
 import { recordCardDropShown, selectUniformCardType } from './core/systems/dropTypePolicy';
 import { acceptBountyOfferAt, calculateOfferChance } from './core/systems/bountySystem';
 import { resolveCurrentDecision } from './core/systems/decisionQueueSystem';
-import { beginOpeningIntermission, confirmIntermissionReady } from './core/systems/intermissionSystem';
+import { beginOpeningIntermission, confirmIntermissionReady, confirmValidationRewardSettle } from './core/systems/intermissionSystem';
 import { checkWildcardTarget, grantWildcards, useWildcardOnSlot, type WildcardGrant } from './core/systems/wildcardSystem';
-import { confirmRecipe } from './core/systems/recipeEvolutionSystem';
+import { evolveRecipePair, matchRecipeDrop } from './core/systems/recipeEvolutionSystem';
 import { createCardWithAffixes } from './core/systems/cardAffixSystem';
 import { totalRange } from './core/stats';
 import { createRenderer } from './render/canvasRenderer';
@@ -31,6 +31,8 @@ import { renderEquipment } from './ui/renderEquipment';
 import { renderMergeHints } from './ui/renderMergeHints';
 import type { TunerPanel } from './ui/tunerPanel';
 import { createModals } from './ui/modals';
+import { createRewardCelebration } from './ui/rewardCelebration';
+import { confirmRewardReceipt } from './core/systems/rewardMeterSystem';
 import { createCardDetailModal } from './ui/cardDetailModal';
 import { resolvePauseState } from './ui/pauseState';
 import { formatToast, resetToastDedupe, SLOT_CHANGING } from './ui/eventText';
@@ -43,6 +45,9 @@ import type { DevTelemetry } from './telemetry/devTelemetry';
 import type { DifficultyId } from './config/types';
 import { resyncEnemyStats, type EnemyStatConfigKey } from './core/systems/enemySystem';
 import { DEV_TOOLS_ENABLED } from './debug/devToolsMode';
+import { cardDisplayName } from './ui/cardMeta';
+import { simulationSteps } from './core/simulationClock';
+import { resizeCanvasBackingStore } from './render/renderMetrics';
 
 // 技能 = 数据 + 解释器：把配置里的卡定义注入解释器（P5 实装 12 张正式卡后自动生效）。
 registerSkillDefs(cfg.skills.cards);
@@ -59,13 +64,31 @@ const uiPauseReasons = new Set<'cardDetail'>();
 const evidenceMode = DEV_TOOLS_ENABLED ? new URLSearchParams(location.search).get('evidence') : null;
 const refs = getDomRefs();
 let selectedDifficulty: DifficultyId = cfg.difficulty.defaultDifficulty;
-const difficultyInputs = Array.from(document.querySelectorAll<HTMLInputElement>('input[name="difficulty"]'));
-for (const input of difficultyInputs) {
-  const id = input.value as DifficultyId;
-  input.nextElementSibling!.textContent = cfg.difficulty.profiles[id].label;
-  input.checked = id === selectedDifficulty;
-  input.addEventListener('change', () => { if (input.checked) selectedDifficulty = id; });
+const difficultyButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[role="radio"][data-difficulty]'));
+function selectDifficulty(id: DifficultyId, focus = false): void {
+  selectedDifficulty = id;
+  for (const button of difficultyButtons) {
+    const selected = button.dataset.difficulty === id;
+    button.setAttribute('aria-checked', String(selected));
+    button.tabIndex = selected ? 0 : -1;
+    if (selected && focus) button.focus();
+  }
 }
+for (const button of difficultyButtons) {
+  const id = button.dataset.difficulty as DifficultyId;
+  button.textContent = cfg.difficulty.profiles[id].label;
+  button.addEventListener('click', () => selectDifficulty(id));
+  button.addEventListener('keydown', event => {
+    if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    const current = difficultyButtons.indexOf(button);
+    const next = event.key === 'Home' ? 0
+      : event.key === 'End' ? difficultyButtons.length - 1
+      : (current + (event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? -1 : 1) + difficultyButtons.length) % difficultyButtons.length;
+    selectDifficulty(difficultyButtons[next].dataset.difficulty as DifficultyId, true);
+  });
+}
+selectDifficulty(selectedDifficulty);
 if (DEV_TOOLS_ENABLED) {
   refs.testCardBtn.removeAttribute('hidden');
   refs.testWildcardBtn.removeAttribute('hidden');
@@ -74,12 +97,20 @@ if (DEV_TOOLS_ENABLED) {
 }
 const ctx = refs.canvas.getContext('2d');
 if (!ctx) throw new Error('无法获取 canvas 2D 上下文');
-const render = createRenderer(ctx);
+const render = createRenderer(ctx, refs.canvas);
 const toast = createToast(refs);
 const upgradeFeedback = createUpgradeFeedback(refs);
 
 const config = createDefaultConfig();
 let state: GameState = createInitialState();
+const syncCanvasLayout = (): void => {
+  resizeCanvasBackingStore(refs.canvas);
+  renderMergeHints(refs.dock, state);
+};
+syncCanvasLayout();
+window.addEventListener('resize', syncCanvasLayout);
+window.visualViewport?.addEventListener('resize', syncCanvasLayout);
+if (typeof ResizeObserver !== 'undefined') new ResizeObserver(syncCanvasLayout).observe(refs.canvas);
 
 refs.totalWavesText.textContent = String(cfg.waves.totalWaves);
 refs.equipmentHint.textContent = `拖入 ${cfg.economy.equipThreshold}★+ 卡装备`;
@@ -112,6 +143,8 @@ function refreshSlots(): void {
 }
 
 function syncDecisionUi(): void {
+  if (state.rewardMeter.currentReceipt) rewardCelebration.show(state.rewardMeter.currentReceipt);
+  else rewardCelebration.hide();
   if (state.decisions.current) modals.showDecision(state.decisions.current, state);
   else modals.hideDecision();
 }
@@ -138,6 +171,7 @@ const modals = createModals(refs, {
     start();
   },
 });
+const rewardCelebration = createRewardCelebration(refs.arena, () => dispatch(confirmRewardReceipt(state, config, rng)));
 
 const cardDetail = createCardDetailModal({
   onOpen() {
@@ -153,9 +187,6 @@ const cardDetail = createCardDetailModal({
 const intermissionPanel = createIntermissionPanel(refs.arena, {
   onReady() {
     dispatch(confirmIntermissionReady(state));
-  },
-  onRecipe(recipeId, aCardId, bCardId) {
-    dispatch(confirmRecipe(state, config, rng, recipeId, aCardId, bCardId));
   },
 });
 
@@ -184,26 +215,61 @@ const pointerRouter = createPointerRouter({
     dispatch(events);
     if (DEV_TOOLS_ENABLED && events.some(event => event.type === 'collected')) telemetry?.recordInput('pickupClick');
   },
-  onDrop: (source, index, target) => {
+  onDrop: (source, index, target, context) => {
     let events: GameEvent[] = [];
     if (source === 'wildcard') {
       if (target.kind === 'slot') events = useWildcardOnSlot(state, config, rng, target.slotKind, target.index);
     } else if (target.kind === 'arena') events = consumeCard(state, config, rng, index, target.x, target.y, source);
-    else if (target.kind === 'slot' && target.slotKind === 'equipment' && source === 'cards') {
-      events = moveOrSwap(state, config, rng, source, index, 'equipment', target.index);
-      if (events.some(event => event.type === 'equipRejected' || event.type === 'equipFull')) state.equipTelemetry.rejects++;
-    } else if (target.kind === 'slot') events = moveOrSwap(state, config, rng, source, index, target.slotKind, target.index);
+    else if (target.kind === 'slot') {
+      const sourceCard = (source === 'cards' ? state.cards : state.equipment)[index];
+      const targetCard = (target.slotKind === 'cards' ? state.cards : state.equipment)[target.index];
+      const sourceRef = sourceCard ? { slotKind: source, index, cardId: sourceCard.id } : null;
+      const targetRef = targetCard ? { slotKind: target.slotKind, index: target.index, cardId: targetCard.id } : null;
+      const recipe = sourceRef && targetRef ? matchRecipeDrop(state, sourceRef, targetRef) : null;
+      if (recipe) events = evolveRecipePair(state, config, rng, recipe.recipeId, recipe.source, recipe.target);
+      else if (context?.recipeIntent) {
+        events = [{ type: 'recipeRejected', recipeId: context.recipeId ?? '', reason: 'stale' }];
+      }
+      else if (target.slotKind === 'equipment' && source === 'cards') {
+        events = moveOrSwap(state, config, rng, source, index, 'equipment', target.index);
+        if (events.some(event => event.type === 'equipRejected' || event.type === 'equipFull')) state.equipTelemetry.rejects++;
+      } else events = moveOrSwap(state, config, rng, source, index, target.slotKind, target.index);
+    }
     dispatch(events);
     if (DEV_TOOLS_ENABLED && events.some(event => event.type === 'skillConsumed')) telemetry?.recordInput('consumeRelease');
     else if (DEV_TOOLS_ENABLED && events.some(event => SLOT_CHANGING.has(event.type))) telemetry?.recordInput('dragDrop');
   },
   previewFor,
   getDropValidity: (source, _index, target) => source !== 'wildcard' || checkWildcardTarget(state, target.slotKind, target.index).ok,
+  getWildcardDropWarning: target => {
+    const card = (target.slotKind === 'cards' ? state.cards : state.equipment)[target.index];
+    if (!card || card.star !== 5) return null;
+    const materialOfReadyRecipe = state.recipes.readyRecipeIds.some(recipeId => {
+      const recipe = cfg.evolutionRecipes.recipes.find(item => item.id === recipeId);
+      return recipe?.ingredientVariable.cardId === card.type || recipe?.ingredientAnchor.cardId === card.type;
+    });
+    return materialOfReadyRecipe ? '升到 6★ 不会提升进化产物' : null;
+  },
+  getRecipeDropPreview: (source, index, target) => {
+    if (source === 'wildcard') return null;
+    const sourceCard = (source === 'cards' ? state.cards : state.equipment)[index];
+    const targetCard = (target.slotKind === 'cards' ? state.cards : state.equipment)[target.index];
+    if (!sourceCard || !targetCard) return null;
+    const match = matchRecipeDrop(
+      state,
+      { slotKind: source, index, cardId: sourceCard.id },
+      { slotKind: target.slotKind, index: target.index, cardId: targetCard.id },
+    );
+    if (!match) return null;
+    const recipe = cfg.evolutionRecipes.recipes.find(item => item.id === match.recipeId);
+    return recipe ? { recipeId: recipe.id, label: `立即进化：${cardDisplayName(recipe.outputCardId)}` } : null;
+  },
 });
 createKeyboard(togglePause);
 
 refs.startBtn.addEventListener('click', start);
 refs.pauseBtn.addEventListener('click', togglePause);
+refs.validationSettleBtn.addEventListener('click', () => dispatch(confirmValidationRewardSettle(state)));
 refs.speedBtn.addEventListener('click', () => setTimeScale(nextPlaySpeed(timeScale)));
 refs.testCardBtn.addEventListener('click', () => dispatch(spawnTestDrops(state, config, rng)));
 refs.testWildcardBtn.addEventListener('click', () => {
@@ -231,11 +297,33 @@ function reset(): void {
     state.equipment[0] = createEvidenceCard('pierce', sourceStar);
     state.cards[0] = createEvidenceCard('pierce', sourceStar);
     state.cards[1] = createEvidenceCard('frost', 1);
+  } else if (evidenceMode === 'mobileLayout') {
+    const cardTypes = ['emberMoat', 'chainLightning', 'pierce', 'frozenBulwark', 'springOfLife', 'stormLattice', 'bountyCall'];
+    state.cards = cardTypes.map((type, index) => createEvidenceCard(type, index === 0 ? 6 : 1 + index % 5));
+    state.equipment = ['pierce', 'frozenBulwark', 'bountyCall'].map((type, index) => createEvidenceCard(type, 3 + index));
+    state.wildcards[1] = 2;
+    state.wildcards[3] = 1;
+    spawnGroundDrop(state, config, rng, 150, 250, 'emberMoat', 3);
+    state.bountyOffers.push({
+      id: 1,
+      rewardCardType: 'chainLightning',
+      rewardCardStar: 5,
+      rewardCardCount: 1,
+      wildcardStar: 3,
+      wildcardCount: 2,
+      side: 'right',
+      x: 508,
+      y: 180,
+      remaining: 8,
+      guaranteed: true,
+      createdAt: 0,
+    });
   }
   modals.hideResult();
   modals.hideDecision();
+  rewardCelebration.hide();
   refs.startBtn.textContent = texts.buttons.start;
-  refs.startBtn.parentElement?.removeAttribute('hidden');
+  refs.readyOverlay.hidden = false;
   refs.pauseBtn.textContent = texts.buttons.pause;
   refs.pauseBtn.setAttribute('aria-pressed', 'false');
   refs.pauseBtn.title = texts.buttons.pause;
@@ -260,7 +348,7 @@ function start(): void {
   refs.speedBtn.disabled = false;
   dispatch(beginOpeningIntermission(state));
   refs.startBtn.textContent = texts.buttons.restart;
-  refs.startBtn.parentElement?.setAttribute('hidden', '');
+  refs.readyOverlay.hidden = true;
   modals.message('', '', false);
 }
 
@@ -294,11 +382,14 @@ function syncSpeedButton(): void {
 
 let last = performance.now();
 function loop(now: number): void {
-  const dt = Math.min(cfg.combat.dtCap, ((now - last) / 1000) * timeScale);
+  const elapsed = Math.max(0, ((now - last) / 1000) * timeScale);
   last = now;
   const lockedHp = state.hp;
   if (DEV_TOOLS_ENABLED) telemetry?.beforeUpdate();
-  let events = updateGame(state, config, rng, dt, () => tuner?.applyPendingWaveChanges());
+  let events: GameEvent[] = [];
+  for (const dt of simulationSteps(elapsed, cfg.combat.dtCap)) {
+    events.push(...updateGame(state, config, rng, dt, () => tuner?.applyPendingWaveChanges()));
+  }
   if (DEV_TOOLS_ENABLED) telemetry?.afterUpdate();
   if (DEV_TOOLS_ENABLED && devInvincible && state.hp < lockedHp) {
     state.hp = Math.max(1, lockedHp);
@@ -381,7 +472,7 @@ if (DEV_TOOLS_ENABLED) void Promise.all([import('./debug/exposeDebugApi'), impor
       getDifficultyId: () => state.difficultyId,
     },
   });
-  if (evidenceMode?.startsWith('upgrade')) devTools.hidden = true;
+  if (evidenceMode?.startsWith('upgrade') || evidenceMode === 'mobileLayout') devTools.hidden = true;
 
   telemetry = telemetryModule.createDevTelemetry({
     getState: () => state,
@@ -398,7 +489,7 @@ if (DEV_TOOLS_ENABLED) void Promise.all([import('./debug/exposeDebugApi'), impor
     testActions.append(refs.testCardBtn, refs.testWildcardBtn);
     telemetryActions.prepend(testActions);
   }
-  if (evidenceMode?.startsWith('upgrade')) {
+  if (evidenceMode?.startsWith('upgrade') || evidenceMode === 'mobileLayout') {
     document.querySelector<HTMLElement>('.telemetry-hud')?.setAttribute('hidden', '');
     if (telemetryActions) telemetryActions.style.display = 'none';
   }
@@ -407,8 +498,7 @@ if (DEV_TOOLS_ENABLED) void Promise.all([import('./debug/exposeDebugApi'), impor
       getState: () => ({ ...state, enemyTypes: state.enemies.map(enemy => enemy.type), enemies: state.enemies.length, bullets: state.bullets.length, config: { ...config }, waves: { spawnMode: cfg.waves.spawnMode, pendingSpawnMode: tuner?.getPendingSpawnMode() ?? null, budget: cfg.waves.budget } }), start, reset,
     setDifficulty: id => {
       if (!cfg.difficulty.profiles[id]) throw new Error(`未知难度: ${id}`);
-      selectedDifficulty = id;
-      for (const input of difficultyInputs) input.checked = input.value === id;
+      selectDifficulty(id);
       reset();
     },
     spawnGroundDrop: (x, y, type = null, star) => {

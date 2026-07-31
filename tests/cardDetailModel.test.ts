@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { cfg } from '../src/config';
 import { buildCardDetailViewModel } from '../src/ui/cardDetailModel';
-import { cardDisplayName } from '../src/ui/cardMeta';
 
 describe('card detail view model', () => {
   it('uses resolved current effects and marks the selected 3★/5★ routes', () => {
@@ -9,63 +8,51 @@ describe('card detail view model', () => {
       id: 10,
       type: 'chainLightning',
       star: 5,
-      evolutionPath: ['3:chainLightningA', '5:chainLightningB2'],
+      evolutionPath: ['3:chainLightningA', '5:chainLightning2x'],
     }, 'cards');
     expect(model.consume.blocks[0].lines.length).toBeGreaterThan(0);
-    expect(model.equip.blocks.length).toBeGreaterThan(1);
-    expect(model.currentRoute).toContain('长链');
+    expect(model.equip.blocks.length).toBeGreaterThan(0);
+    expect(model.currentRoute).toContain('一个传一个');
     const node3 = model.tree.nodes.find(node => node.star === 3);
     const node5 = model.tree.nodes.find(node => node.star === 5);
     const node6 = model.tree.nodes.find(node => node.star === 6);
     expect(node3?.options?.find(option => option.id === 'chainLightningA')?.selected).toBe(true);
-    expect(node5?.options?.find(option => option.id === 'chainLightningB2')?.selected).toBe(true);
+    expect(node5?.options?.find(option => option.id === 'chainLightning2x')?.selected).toBe(true);
     expect(node6?.locked).toBe(true);
   });
 
-  it('explains unsupported instant and scoped timed affixes separately', () => {
+  it('explains global base multipliers and scoped timed affixes separately', () => {
     const model = buildCardDetailViewModel({
       id: 11,
       type: 'chainLightning',
       star: 3,
       evolutionPath: ['3:chainLightningA'],
       affixes: [
-        { stat: 'heal', value: 10, consumableDuration: 0 },
+        { stat: 'damageMul', value: 0.1, consumableDuration: 5 },
         { stat: 'effectDamageMul', value: 0.1, consumableDuration: 5 },
       ],
     }, 'equipment');
-    expect(model.affixes[0].equipment).toContain('不生效');
-    expect(model.affixes[0].consumable).toContain('立即结算');
+    expect(model.affixes[0].equipment).toContain('基础伤害');
+    expect(model.affixes[0].equipment).toContain('+10%');
+    expect(model.affixes[0].consumable).toContain('持续 5 秒');
     expect(model.affixes[1].equipment).toContain('只提高这张卡');
     expect(model.affixes[1].consumable).toContain('持续 5 秒');
   });
 
-  it('renders recipe-only cards as recipes instead of a normal tree', () => {
-    const model = buildCardDetailViewModel({ id: 12, type: 'frozenThunder', star: 6 }, 'equipment');
-    expect(model.tree.nodes).toHaveLength(0);
-    expect(model.tree.recipe?.notice).toContain('不可通过普通合成');
-    expect(model.tree.recipe?.ingredientA).toContain('≥5★');
+  it('renders recipe-only cards as an accurate terminal form without a material formula', () => {
+    const model = buildCardDetailViewModel({ id: 12, type: 'stormLattice', star: 6 }, 'equipment');
+    expect(model.currentRoute).toBe('终极形态');
+    expect(model.tree.nodes).toHaveLength(1);
+    expect(model.tree.nodes[0].label).toBe('终极形态效果');
+    expect(model.tree.nodes[0].exactEffects?.length).toBeGreaterThan(0);
   });
 
-  it('previews both ingredient sides of all six fixed recipes from 1★', () => {
-    expect(cfg.evolutionRecipes.recipes).toHaveLength(6);
+  it('does not expose partner or output recipes from ordinary card details', () => {
+    expect(cfg.evolutionRecipes.recipes).toHaveLength(25);
     for (const recipe of cfg.evolutionRecipes.recipes) {
-      for (const [self, partner] of [
-        [recipe.ingredientA, recipe.ingredientB],
-        [recipe.ingredientB, recipe.ingredientA],
-      ] as const) {
-        const model = buildCardDetailViewModel({ id: 100, type: self.cardId, star: 1 }, 'cards');
-        const preview = model.tree.asIngredient.find(item => item.recipeId === recipe.id);
-        expect(preview).toMatchObject({
-          selfMinStar: self.minStar,
-          partnerCardId: partner.cardId,
-          partnerMinStar: partner.minStar,
-          outputCardId: recipe.outputCardId,
-          outputStar: recipe.outputStar,
-        });
-        expect(preview?.notice).toContain(`本卡达到 ${self.minStar}★ 后`);
-        expect(preview?.notice).toContain(cardDisplayName(partner.cardId));
-        expect(preview?.notice).toContain(cardDisplayName(recipe.outputCardId));
-      }
+      const model = buildCardDetailViewModel({ id: 100, type: recipe.ingredientVariable.cardId, star: 1 }, 'cards');
+      expect(JSON.stringify(model.tree)).not.toContain(recipe.ingredientAnchor.cardId);
+      expect(JSON.stringify(model.tree)).not.toContain(recipe.outputCardId);
     }
   });
 });

@@ -21,6 +21,7 @@ function defenseDef(id: CardType, equip: BindingDef[]): CardDef {
   const tier = { radius: 100, effects: [] };
   return {
     id,
+    identityContract: 'test fixture',
     category: 'defense',
     synergyTags: ['defense'],
     textKey: `test.${id}`,

@@ -10,10 +10,12 @@ import { drawBeams } from './drawBeams';
 import { drawVfx } from './drawVfx';
 import { drawBountyOffers } from './drawBountyOffers';
 import { drawBountyEffects } from './drawBountyEffects';
+import { applyLogicalCanvasTransform } from './renderMetrics';
 
 /** 建立渲染器：返回逐帧调用的 render(state, config)。区域画在实体下，召唤物/护盾画在实体上。 */
-export function createRenderer(ctx: CanvasRenderingContext2D) {
+export function createRenderer(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement = ctx.canvas) {
   return function render(state: GameState, config: Config): void {
+    applyLogicalCanvasTransform(ctx, canvas);
     drawArena(ctx, state, config);
     drawBountyOffers(ctx, state);
     drawZones(ctx, state);

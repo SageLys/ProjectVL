@@ -9,6 +9,7 @@ import { grantFloorRewards } from '../src/core/systems/waveRewardSystem';
 import { createDevTelemetry } from '../src/telemetry/devTelemetry';
 import { createIntermissionPanel } from '../src/ui/intermissionPanel';
 import {
+  card,
   constRng,
   createDefaultConfig,
   freshState,
@@ -60,6 +61,18 @@ describe('waveRewardSystem floor', () => {
     });
   });
 
+  it('装备倍率把有效射程顶满时仍结算永久射程保底', () => {
+    const state = freshState();
+    state.runBuild.cardAffixRolls.pierce = [
+      { stat: 'rangeMul', value: 0.4, consumableDuration: 5 },
+    ];
+    state.equipment[0] = card('pierce', 3);
+
+    expect(totalRange(state, createDefaultConfig())).toBe(210);
+    grantFloorRewards(state, 1);
+    expect(state.runBaseStats.rangeAdd).toBe(4);
+  });
+
   it('同一波只发一次；跳到第 5 波只结算第 5 波保底', () => {
     const runtime = createDefaultConfig();
     const state = freshState();
@@ -80,6 +93,7 @@ describe('waveRewardSystem floor', () => {
     jumped.spawnLeft = 0;
     jumped.enemies.length = 0;
     advanceWavePhase(jumped, runtime, constRng(0));
+    jumped.intermission.step = 'settle';
     const settled = tickIntermission(jumped, 0).events;
 
     expect(settled).toContainEqual(expect.objectContaining({
@@ -99,6 +113,7 @@ describe('waveRewardSystem floor', () => {
     const state = freshState();
     state.wave = 3;
     beginIntermission(state);
+    state.intermission.step = 'settle';
     tickIntermission(state, 0);
     const restored = structuredClone(state);
     const before = structuredClone({
@@ -165,6 +180,7 @@ describe('waveRewardSystem floor', () => {
     const state = freshState();
     state.wave = 2;
     beginIntermission(state);
+    state.intermission.step = 'settle';
     tickIntermission(state, 0);
 
     panel.render(state);

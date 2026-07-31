@@ -379,7 +379,7 @@ grantWildcard: (star, count = 1) => dispatch(grantWildcards(state, [{ star, coun
 - `docs/P2_技能体系框架与首批卡牌设计表.md` 卡 10 · 同调条目及批次数量表（批次 2 由 5 张改述为 4 张）。
 - `docs/P5_批次2_验收证据表.md`、`docs/可玩原型_重启开发总计划.md`、`docs/S4a_经济拍板_provisional.md` 等处「同调搁置/待 S4b」表述按「已删除」更新。
 
-**保留**通用基建：`onMerge` 触发器、`mergePulse` 效果原子、通用 `mergeRule` 数据类型——它们不是 resonance 卡本体，且万能合成依赖 `onMerge`。
+**保留**通用基建：`onMerge` 触发器与 `mergePulse` 效果原子——它们不是 resonance 卡本体，且万能合成依赖 `onMerge`。历史上的含糊合成规则断路桩已在后续任务中退役，合并返还与万能卡奖励分别由专用原子承接。
 
 ---
 

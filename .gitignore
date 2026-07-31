@@ -7,7 +7,6 @@ presets/
 
 scripts/_s4a_calc.ts
 vitest.config.ts.timestamp-*.mjs
-
 # Tuanjie / Unity generated files
 Unity/ProjectVLUnity/[Ll]ibrary/
 Unity/ProjectVLUnity/[Tt]emp/
@@ -20,3 +19,7 @@ Unity/ProjectVLUnity/.vs/
 Unity/ProjectVLUnity/*.csproj
 Unity/ProjectVLUnity/*.sln
 Unity/ProjectVLUnity/*.user
+vite.config.ts.timestamp-*.mjs
+
+# 配置 Excel 是本地审查/编辑产物，避免二进制文件污染配置 diff。
+/交付/配置总表.xlsx

@@ -1,9 +1,9 @@
 import { cfg } from '../../config';
-import { getSkillDef } from '../effects/interpreter';
+import { getModifiers, getSkillDef } from '../effects/interpreter';
 import type { BuildTag } from '../effects/defs';
 import type { BountyEncounter, BountyOffer, BountySide, CardType, Config, Enemy, EnemyType, GameEvent, GameState, Rng } from '../types';
 import { spawnGroundDrop, spawnWildcardDrop } from './dropSystem';
-import { calculateAffinityScore, calculateCommitmentScore, getOrCreateCardTypeRunStats, recordCardDropShown } from './dropTypePolicy';
+import { calculateCommitmentScore, getOrCreateCardTypeRunStats, recordCardDropShown } from './dropTypePolicy';
 import { cardGodInRun, getRunRoster } from './activePoolSystem';
 import { getSelectedGods } from './godPoolSystem';
 import { createEnemy } from './enemySystem';
@@ -60,15 +60,29 @@ const COMBAT_LANES: BuildTag[] = ['projectile', 'control', 'domain', 'defense'];
 
 function weightedRewardChoice(state: GameState, candidates: CardType[], rng: Rng): CardType {
   const bias = cfg.bounty.rewardBias;
+  const directorActive = state.wave >= cfg.economy.evolution.assistWindowWaves[0]
+    && state.wave <= cfg.economy.evolution.assistWindowWaves[1]
+    && !state.recipes.assistClosed;
+  const directed = directorActive
+    ? cfg.evolutionRecipes.recipes.find(recipe => recipe.id === state.recipes.directedRecipeId)
+    : undefined;
+  const recipeMaterials = new Set(directed
+    ? [directed.ingredientVariable.cardId, directed.ingredientAnchor.cardId]
+    : []);
   const weights = candidates.map(type => {
     let weight = 1;
     const oneStarCount = [...state.cards, ...state.equipment]
       .filter(card => card?.type === type && card.star === 1).length;
     if (oneStarCount === cfg.economy.mergeCopies - 1) weight *= bias.nearMergeBonus;
     if (calculateCommitmentScore(state, type) > 0) weight *= bias.investedBonus;
-    weight *= 1 + calculateAffinityScore(state, type);
     if (cardGodInRun(state, type) === state.godPool.focusGod) weight *= 1.75;
     if (getOrCreateCardTypeRunStats(state, type).totalShown === 0) weight *= bias.droughtBonus;
+    if (recipeMaterials.has(type)) {
+      weight *= cfg.economy.evolution.bountyRecipeMaterialBonus;
+      if (calculateCommitmentScore(state, type) >= 16) {
+        weight *= cfg.economy.evolution.bountyReadySideMultiplier;
+      }
+    }
     if (type === state.bountyDirector.lastRewardType
       && cfg.bounty.reward.repeatProtection > 0
       && candidates.length > 1) weight = 0;
@@ -92,6 +106,7 @@ export function selectBountyRewardType(state: GameState, rng: Rng): CardType {
     state.bountyDirector.lastRewardType = type;
     return type;
   }
+  // TODO: derive and persist buildState.affinity in a separate behavior-changing fix.
   const maxAffinity = Math.max(...COMBAT_LANES.map(lane => state.buildState.affinity[lane]));
   if (!cfg.bounty.rewardBias.enabled || maxAffinity <= 0) return drawUniformRewardType(state, rng);
 
@@ -157,6 +172,15 @@ function createOffer(state: GameState, rng: Rng, guaranteed: boolean): GameEvent
   const side = SIDES[Math.min(SIDES.length - 1, Math.floor(rng() * SIDES.length))];
   const anchor = offerAnchor(side, rng);
   const reward = cfg.bounty.reward;
+  let wildcardCount = reward.wildcardCount;
+  const wildcardBonuses = getModifiers(state).wildcardRewardBonuses.filter(
+    rule => rule.scope === 'both' || rule.scope === 'bounty',
+  );
+  if (wildcardBonuses.length > 0) {
+    for (const rule of wildcardBonuses) {
+      if (rng() < rule.bonusChance) wildcardCount += rule.count;
+    }
+  }
   const offer: BountyOffer = {
     id: state.nextBountyOfferId++,
     rewardCardType: selectBountyRewardType(state, rng),
@@ -169,7 +193,7 @@ function createOffer(state: GameState, rng: Rng, guaranteed: boolean): GameEvent
       reward.wildcardStarByWave, reward.wildcardStarMax, state.wave,
       reward.wildcardStarBase, reward.wildcardStarUpgradeEveryWaves,
     ),
-    wildcardCount: reward.wildcardCount,
+    wildcardCount,
     side,
     ...anchor,
     remaining: cfg.bounty.offer.markWindowSeconds,

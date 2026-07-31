@@ -27,10 +27,7 @@ function validChoices(decision: RunDecision): string[] {
     case 'waveBaseReward':
       return decision.candidates;
     case 'evolutionBranch':
-    case 'relic':
       return decision.options;
-    case 'recipeEvolution':
-      return [decision.recipeId];
   }
 }
 

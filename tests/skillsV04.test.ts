@@ -16,9 +16,6 @@ const pathFor = (def: CardDef, star: number) => def.evolutionTree?.checkpoints
   .map(checkpoint => `${checkpoint.star}:${checkpoint.options[0].id}`) ?? [];
 const bindingsFor = (def: CardDef, star: number): BindingDef[] =>
   resolveCardBindings(def, pathFor(def, star), star);
-const param = (bindings: BindingDef[], key: string) =>
-  bindings.flatMap(b => b.effects).map(e => e.params?.[key]).find(v => typeof v === 'number') as number;
-
 beforeEach(() => { resetTestEnv(); registerSkillDefs(cfg.skills.cards); });
 afterEach(resetTestEnv);
 
@@ -43,26 +40,32 @@ describe('schema v0.4.0 · 进化树解释规则', () => {
   });
 
   it('4★ amplify 持续放大 3★ 分支', () => {
-    const pierce = get('pierce');
-    expect(param(bindingsFor(pierce, 4), 'count')).toBe(param(bindingsFor(pierce, 3), 'count') + 1);
-    expect(bindingsFor(pierce, 4).map(b => b.trigger)).toEqual(bindingsFor(pierce, 3).map(b => b.trigger));
-    const harvest = get('harvest');
-    expect(param(bindingsFor(harvest, 4), 'mul')).toBeCloseTo(param(bindingsFor(harvest, 3), 'mul') * 1.1);
+    for (const def of cfg.skills.cards.filter(card => !card.recipeOnly)) {
+      const amplifyKeys = Object.keys(def.evolutionTree!.sharedNodes.find(node => node.star === 4)!.amplify ?? {});
+      const optionPayload = JSON.stringify(def.evolutionTree!.checkpoints.find(point => point.star === 3)!.options);
+      expect(amplifyKeys.every(key => optionPayload.includes(`\"${key}\"`)), def.id).toBe(true);
+    }
   });
 
   it('消耗态内插：2★ 位于 1/3 中点，5★ 位于 3/6 的加权中点且不提前引入 6★-only 新原子', () => {
-    const pierce = get('pierce');
-    expect(resolveConsumableTier(pierce, 2).radius).toBeCloseTo((40 + 70) / 2);
-    expect((resolveConsumableTier(pierce, 2).effects[0].params!.damageMul as number)).toBeCloseTo((3 + 5) / 2);
-    const aegis = get('aegis');
-    expect(resolveConsumableTier(aegis, 5).radius).toBeCloseTo(120 + (150 - 120) * 2 / 3);
-    // 6★ anchor 比 3★ 多一个 burstDamage（第 3 个效果）；interpolate 按 3★（更短）的效果数展开，该原子不会提前出现在 5★。
-    expect(resolveConsumableTier(aegis, 5).effects.map(e => e.atom)).not.toContain('burstDamage');
+    for (const def of cfg.skills.cards.filter(card => !card.recipeOnly)) {
+      const one = def.consumable.anchors['1'];
+      const three = def.consumable.anchors['3'];
+      const six = def.consumable.anchors['6'];
+      expect(resolveConsumableTier(def, 2).radius, def.id).toBeCloseTo(((one.radius ?? 0) + (three.radius ?? 0)) / 2);
+      expect(resolveConsumableTier(def, 5).radius, def.id).toBeCloseTo((three.radius ?? 0) + ((six.radius ?? 0) - (three.radius ?? 0)) * 2 / 3);
+      const threeAtoms = new Set(three.effects.map(effect => effect.atom));
+      const sixOnly = six.effects.map(effect => effect.atom).filter(atom => !threeAtoms.has(atom));
+      if (sixOnly.length) {
+        expect(resolveConsumableTier(def, 5).effects.map(effect => effect.atom), def.id)
+          .not.toEqual(expect.arrayContaining(sixOnly));
+      }
+    }
   });
 
-  it('6 张 recipeOnly 产物无树且只声明 6★ 终态', () => {
+  it('25 张 recipeOnly 产物无树且只声明 6★ 终态', () => {
     const recipes = cfg.skills.cards.filter(card => card.recipeOnly);
-    expect(recipes).toHaveLength(6);
+    expect(recipes).toHaveLength(25);
     for (const recipe of recipes) {
       expect(recipe.evolutionTree).toBeUndefined();
       expect(Object.keys(recipe.stars)).toEqual(['6']);
@@ -125,10 +128,33 @@ describe('四项占位假设 · 开关可翻转', () => {
   });
 });
 
-describe('v0.4.0 加载校验', () => {
+describe('v0.4.1 加载校验', () => {
   it('故意缺少 5★ 锚点的坏 JSON 立即报错', () => {
     const bad = structuredClone(cfg.skills) as unknown as Record<string, unknown>;
     delete ((bad.cards as Record<string, unknown>[])[0].stars as Record<string, unknown>)['5'];
     expect(() => validateSkillsConfig(bad)).toThrow(/正式卡必须且只能定义 3\/5\/6 迁移锚点/);
+  });
+
+  it('fusionPolicy 是 D2 预留结构位：缺省合法、声明后校验、运行时零效果', () => {
+    // 现有内容一张卡都没声明——缺省即今日行为。
+    expect(cfg.skills.cards.some(card => card.fusionPolicy !== undefined)).toBe(false);
+
+    const withPolicy = structuredClone(cfg.skills) as unknown as Record<string, unknown>;
+    const cards = withPolicy.cards as Record<string, unknown>[];
+    cards[0].fusionPolicy = { affixTransferPolicy: 'strongest', conflictResolution: 'keepHigher', sourceCardIds: ['pierce'] };
+    expect(() => validateSkillsConfig(withPolicy)).not.toThrow();
+
+    // 声明后的绑定解析与缺省完全一致（没有任何消费者）。
+    const before = resolveCardBindings(get('pierce'), pathFor(get('pierce'), 6), 6);
+    const patched = { ...get('pierce'), fusionPolicy: { affixTransferPolicy: 'sum' as const } };
+    expect(resolveCardBindings(patched, pathFor(patched, 6), 6)).toEqual(before);
+
+    const badValue = structuredClone(cfg.skills) as unknown as Record<string, unknown>;
+    (badValue.cards as Record<string, unknown>[])[0].fusionPolicy = { affixTransferPolicy: 'magic' };
+    expect(() => validateSkillsConfig(badValue)).toThrow(/affixTransferPolicy/);
+
+    const badKey = structuredClone(cfg.skills) as unknown as Record<string, unknown>;
+    (badKey.cards as Record<string, unknown>[])[0].fusionPolicy = { nope: 1 };
+    expect(() => validateSkillsConfig(badKey)).toThrow(/不允许的字段/);
   });
 });

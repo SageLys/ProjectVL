@@ -31,6 +31,7 @@ export interface ResolvedRegularStageConfig {
 export interface ResolvedWavePlan {
   stage: RunStage;
   quota: number;
+  /** Validation waves carry both regular Budget rules and validation encounter data. */
   regular?: ResolvedRegularStageConfig;
   validation?: ValidationWaveConfig;
 }
@@ -39,7 +40,19 @@ export function resolveWavePlan(wave: number, totalWaves: number, plan: StagePla
   const stage = stageForWave(wave, totalWaves, plan);
   if (stage === 'validation') {
     const validationIndex = wave - (totalWaves - plan.validationWaves + 1);
-    return { stage, quota: 0, validation: plan.validation[validationIndex] };
+    const validation = plan.validation[validationIndex];
+    return {
+      stage,
+      quota: Math.max(0, Math.trunc(validation.swarm.quota)),
+      regular: {
+        targetOnScreen: validation.swarm.targetOnScreen,
+        checkInterval: validation.swarm.checkInterval,
+        batchMax: validation.swarm.batchMax,
+        maxAlive: validation.swarm.maxAlive,
+        waveEndSprint: { ...validation.swarm.waveEndSprint },
+      },
+      validation,
+    };
   }
   const config = stage === 'selection' ? plan.selection : plan.build;
   const progress = stageProgress(wave, totalWaves, plan);
@@ -58,7 +71,7 @@ export function resolveWavePlan(wave: number, totalWaves: number, plan: StagePla
 
 /** Resolves the stage director, or the untouched legacy linear Budget when the rollback switch is off. */
 export function resolveActiveWavePlan(game: GameConfig, wave: number): ResolvedWavePlan {
-  if (game.economy.ordinaryDropRate.enabled) return resolveWavePlan(wave, game.waves.totalWaves, game.waves.stagePlan);
+  if (game.waves.stagePlan.enabled) return resolveWavePlan(wave, game.waves.totalWaves, game.waves.stagePlan);
   const legacy = game.waves.budget;
   return {
     stage: stageForWave(wave, game.waves.totalWaves, game.waves.stagePlan),

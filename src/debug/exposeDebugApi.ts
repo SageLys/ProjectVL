@@ -48,14 +48,5 @@ export function exposeDebugApi(api: DebugApi): void {
   window.__game = api;
 }
 
-/** mulberry32：32 位整数 seed 对应稳定的 [0,1) 序列。 */
-export function createSeededRng(seed: number): () => number {
-  let value = Math.trunc(seed) >>> 0;
-  return () => {
-    value = (value + 0x6d2b79f5) >>> 0;
-    let t = value;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
+/** 调试面板/自动化沿用的播种入口；实现见 core/rng.ts（黄金回放与调试共用同一序列）。 */
+export { makeRng as createSeededRng } from '../core/rng';

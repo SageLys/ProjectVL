@@ -3,7 +3,37 @@
   "waves": {
     "totalWaves": 3,
     "bossWaves": [1, 2, 3],
-    "stagePlan": { "selectionWaves": 1, "validationWaves": 1 },
+    "stagePlan": {
+      "selectionWaves": 1,
+      "validationWaves": 1,
+      "validation": [
+        {
+          "swarm": {
+            "quota": 24,
+            "targetOnScreen": 8,
+            "checkInterval": 1.2,
+            "batchMax": 4,
+            "maxAlive": 16,
+            "waveEndSprint": { "window": 0, "multiplier": 1 },
+            "hpMul": 1,
+            "damageMul": 1,
+            "speedMul": 1,
+            "composition": { "normal": 0.6, "fast": 0.3, "tank": 0.1 }
+          },
+          "elites": [
+            {
+              "spawnAtProgress": 0.5,
+              "type": "tank",
+              "hpMul": 3,
+              "damageMul": 1.5,
+              "speedMul": 0.85,
+              "reward": { "kind": "card", "star": 4, "count": 1, "typePolicy": "focusGod" }
+            }
+          ],
+          "bossReward": { "kind": "wildcard", "star": 5, "count": 1 }
+        }
+      ]
+    },
     "intermission": {
       "freeSeconds": {
         "selection": 5,

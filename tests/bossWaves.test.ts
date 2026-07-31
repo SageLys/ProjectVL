@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { applyVariants, buildConfig, cfg, normalizeBossWaves, parseBossWavesInput } from '../src/config';
 import { determineType } from '../src/core/systems/enemySystem';
 import { advanceWavePhase, tickSpawns } from '../src/core/systems/waveSystem';
-import { BUDGET_TUNER_PARAMS, formatBossWaves, migratePresetValues } from '../src/ui/tunerSchema';
+import { formatBossWaves, migratePresetValues, tunerParam } from '../src/ui/tunerSchema';
 import { constRng, createDefaultConfig, freshState, resetTestEnv } from './helpers';
 
 beforeEach(resetTestEnv);
@@ -41,7 +41,7 @@ describe('explicit end-of-wave Boss configuration', () => {
     const config = buildConfig(['dev-short']);
     expect(config.waves.totalWaves).toBe(3);
     expect(config.waves.bossWaves).toEqual([1, 2, 3]);
-    expect(BUDGET_TUNER_PARAMS).toHaveLength(9);
+    expect(tunerParam('waves.bossWaves')).toMatchObject({ type: 'text', applyPolicy: 'waveDeferred' });
     applyVariants([]);
   });
 });

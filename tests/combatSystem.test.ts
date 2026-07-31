@@ -8,12 +8,12 @@ import { card, enemy, freshState, createDefaultConfig, constRng, resetTestEnv } 
 beforeEach(resetTestEnv);
 
 describe('affix combat stats', () => {
-  it('applies equipped adds and runtime modifiers immediately', () => {
+  it('applies equipped multipliers and runtime modifiers immediately', () => {
     const state = freshState();
     const config = createDefaultConfig();
     state.runBuild.cardAffixRolls.pierce = [
-      { stat: 'damageAdd', value: 2, consumableDuration: 5 },
-      { stat: 'fireRateAdd', value: 0.2, consumableDuration: 5 },
+      { stat: 'damageMul', value: 0.1, consumableDuration: 5 },
+      { stat: 'fireRateMul', value: 0.04, consumableDuration: 5 },
     ];
     state.equipment[0] = card('pierce', 1);
     state.statModifiers.push({
@@ -24,8 +24,8 @@ describe('affix combat stats', () => {
       remaining: 1,
     });
 
-    expect(totalDamage(state, config)).toBeCloseTo((config.damage + 2) * 1.5);
-    expect(totalFireRate(state, config)).toBeCloseTo(config.fireRate + 0.2);
+    expect(totalDamage(state, config)).toBeCloseTo(config.damage * 1.1 * 1.5);
+    expect(totalFireRate(state, config)).toBeCloseTo(config.fireRate * 1.04);
 
     state.equipment[0] = null;
     expect(totalDamage(state, config)).toBeCloseTo(config.damage * 1.5);
@@ -135,7 +135,7 @@ describe('combatSystem · 射击与命中', () => {
     updateBullets(s, config, constRng(0.99), 0.016);
     expect(s.enemies).toHaveLength(0);
     expect(s.kills).toBe(1);
-    expect(s.xp).toBe(1);
+    expect(s.rewardMeter.points).toBe(1);
     expect(s.bullets).toHaveLength(0);
   });
 

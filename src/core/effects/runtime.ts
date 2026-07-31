@@ -2,7 +2,8 @@
 // updateGame 在各系统推进后统一调用 tickEffects。
 import { cfg } from '../../config';
 import type { Config, GameEvent, GameState, Rng, Summon, Zone } from '../types';
-import { runEffects, threatDirectionSummonPosition, type EffectCtx } from './registry';
+import { atomNumberDefault } from './atomContract';
+import { runEffects, selectEffectOrigin, threatDirectionSummonPosition, type EffectCtx } from './registry';
 import { fireTrigger, getModifiers, tickIntervalBindings } from './interpreter';
 import { tickStatusTimers, applyKnockback } from './statusSystem';
 import { dealDamage } from '../systems/damageSystem';
@@ -11,15 +12,42 @@ import { reconcileMaxHp, totalDamage, totalRange } from '../stats';
 import { recordCardImpact } from '../../telemetry/combatCounters';
 
 function insideZone(zone: Zone, x: number, y: number, r: number): boolean {
+  if (zone.shape === 'line') {
+    const startX = zone.lineStartX ?? zone.x;
+    const startY = zone.lineStartY ?? zone.y;
+    const dirX = zone.lineDirX ?? 1;
+    const dirY = zone.lineDirY ?? 0;
+    const length = zone.lineLength ?? zone.radius * 2;
+    const endX = startX + dirX * length;
+    const endY = startY + dirY * length;
+    const segmentX = endX - startX;
+    const segmentY = endY - startY;
+    const segmentLengthSq = segmentX * segmentX + segmentY * segmentY;
+    const projection = segmentLengthSq > 0
+      ? Math.max(0, Math.min(1, ((x - startX) * segmentX + (y - startY) * segmentY) / segmentLengthSq))
+      : 0;
+    const nearestX = startX + segmentX * projection;
+    const nearestY = startY + segmentY * projection;
+    return Math.hypot(x - nearestX, y - nearestY) <= (zone.lineWidth ?? zone.radius) / 2;
+  }
   const d = Math.hypot(x - zone.x, y - zone.y);
   if (zone.shape === 'ring') return d + r >= (zone.innerRadius ?? zone.radius * 0.5) && d - r <= zone.radius;
   return d <= zone.radius + r;
 }
 
 function tickZones(state: GameState, config: Config, rng: Rng, dt: number, events: GameEvent[]): void {
+  const mods = getModifiers(state);
   for (let i = state.zones.length - 1; i >= 0; i--) {
     const zone = state.zones[i];
     zone.remaining -= dt;
+    if (zone.radiusOverTime && zone.totalDuration && zone.totalDuration > 0) {
+      const progress = Math.max(0, Math.min(1, 1 - zone.remaining / zone.totalDuration));
+      zone.radius = zone.radiusOverTime.from + (zone.radiusOverTime.to - zone.radiusOverTime.from) * progress;
+      if (zone.shape === 'line') {
+        zone.lineLength = zone.radius * 2;
+        zone.lineWidth = zone.radius;
+      }
+    }
     zone.tickTimer -= dt;
     if (zone.tickTimer <= 0) {
       zone.tickTimer = zone.tickInterval;
@@ -32,7 +60,12 @@ function tickZones(state: GameState, config: Config, rng: Rng, dt: number, event
           star: 0,
           baseDamage: zone.baseDamage,
           zoneTick: true,
+          sourceCardId: zone.sourceCardId,
+          sourceCardType: zone.sourceCardType,
+          sourceBindingIndex: zone.sourceBindingIndex,
           enemy,
+          scaleEnemy: enemy,
+          dynamic: { thornsRatio: mods.thornsRatio, auraReduction: mods.breachReduction },
         };
         runEffects(ctx, zone.effects);
       }
@@ -47,22 +80,49 @@ function tickAuras(state: GameState, config: Config, rng: Rng, dt: number, event
   const liveKeys = new Set<string>();
   for (const aura of mods.auras) {
     liveKeys.add(aura.key);
+    const existing = state.effectRuntime.auraOrigins[aura.key] ?? {
+      x: cfg.combat.turret.x,
+      y: cfg.combat.turret.y,
+      startedAt: state.time,
+    };
+    state.effectRuntime.auraOrigins[aura.key] = existing;
+    if (aura.follow) {
+      const probe: EffectCtx = {
+        state, config, rng, events, origin: { x: existing.x, y: existing.y },
+        star: aura.star, baseDamage: totalDamage(state, config),
+      };
+      const target = selectEffectOrigin(probe, aura.follow);
+      const alpha = 1 - Math.pow(1 - Math.max(0, Math.min(1, aura.followLerp)), dt);
+      existing.x += (target.x - existing.x) * alpha;
+      existing.y += (target.y - existing.y) * alpha;
+    }
     const clock = (state.intervalClocks[aura.key] ?? aura.tickInterval) - dt;
     if (clock <= 0) {
       state.intervalClocks[aura.key] = aura.tickInterval;
-      const radius = aura.radius ?? (aura.radiusRatioOfRange ?? 0.5) * totalRange(state, config);
-      const t = cfg.combat.turret;
+      const ratioOfRange = aura.radiusRatioOfRange ?? atomNumberDefault('aura', 'radiusRatioOfRange');
+      let radius = aura.radius ?? ratioOfRange * totalRange(state, config);
+      if (aura.radiusOverTime) {
+        const progress = Math.max(0, Math.min(1, (state.time - existing.startedAt) / Math.max(Number.EPSILON, aura.duration)));
+        radius = aura.radiusOverTime.from + (aura.radiusOverTime.to - aura.radiusOverTime.from) * progress;
+      }
       for (const enemy of [...state.enemies]) {
-        if (Math.hypot(enemy.x - t.x, enemy.y - t.y) > radius + enemy.r) continue;
+        const distance = Math.hypot(enemy.x - existing.x, enemy.y - existing.y);
+        if (aura.shape === 'ring') {
+          if (distance + enemy.r < (aura.innerRadius ?? radius * 0.5) || distance - enemy.r > radius) continue;
+        } else if (distance > radius + enemy.r) continue;
         const ctx: EffectCtx = {
           state, config, rng, events,
-          origin: { x: t.x, y: t.y },
+          origin: { x: existing.x, y: existing.y },
           radius,
           star: aura.star,
           baseDamage: totalDamage(state, config),
           zoneTick: true,
+          sourceCardId: aura.sourceCardId,
           sourceCardType: aura.sourceCardType,
+          sourceBindingIndex: aura.sourceBindingIndex,
           enemy,
+          scaleEnemy: enemy,
+          dynamic: { thornsRatio: mods.thornsRatio, auraReduction: mods.breachReduction },
         };
         runEffects(ctx, aura.effects);
       }
@@ -73,9 +133,19 @@ function tickAuras(state: GameState, config: Config, rng: Rng, dt: number, event
   for (const key of Object.keys(state.intervalClocks)) {
     if (key.startsWith('aura:') && !liveKeys.has(key)) delete state.intervalClocks[key];
   }
+  for (const key of Object.keys(state.effectRuntime.auraOrigins)) {
+    if (!liveKeys.has(key)) delete state.effectRuntime.auraOrigins[key];
+  }
 }
 
 function explodeSummon(state: GameState, config: Config, rng: Rng, summon: Summon, events: GameEvent[]): void {
+  if (summon.onDeathEffects?.length) {
+    runEffects({
+      state, config, rng, events, origin: { x: summon.x, y: summon.y }, star: 6,
+      baseDamage: summon.baseDamage ?? totalDamage(state, config), sourceCardId: summon.sourceCardId,
+      sourceCardType: summon.sourceCardType, sourceBindingIndex: summon.sourceBindingIndex,
+    }, summon.onDeathEffects);
+  }
   if (!summon.explodeOnDeath) return;
   const { damage, knockbackDistance } = summon.explodeOnDeath;
   const maxRange = totalRange(state, config);
@@ -93,6 +163,29 @@ function tickSummons(state: GameState, config: Config, rng: Rng, dt: number, eve
   for (let i = state.summons.length - 1; i >= 0; i--) {
     const s = state.summons[i];
     if (s.remaining != null) s.remaining -= dt;
+    if (s.intervalEffects?.length && s.intervalTimer != null) {
+      s.intervalTimer -= dt;
+      if (s.intervalTimer <= 0) {
+        const interval = Math.max(0.05, s.intervalSeconds || 1);
+        s.intervalTimer += interval;
+        runEffects({
+          state, config, rng, events, origin: { x: s.x, y: s.y }, star: 6,
+          baseDamage: (s.baseDamage ?? totalDamage(state, config)) * (s.damageRatio ?? 1),
+          sourceCardId: s.sourceCardId, sourceCardType: s.sourceCardType, sourceBindingIndex: s.sourceBindingIndex,
+        }, s.intervalEffects);
+      }
+    }
+    if (s.auraEffects?.length && (s.auraRadius ?? 0) > 0) {
+      for (const enemy of state.enemies) {
+        if (Math.hypot(enemy.x - s.x, enemy.y - s.y) > (s.auraRadius ?? 0) + enemy.r) continue;
+        runEffects({
+          state, config, rng, events, origin: { x: s.x, y: s.y }, star: 6,
+          baseDamage: (s.baseDamage ?? totalDamage(state, config)) * (s.damageRatio ?? 1),
+          sourceCardId: s.sourceCardId, sourceCardType: s.sourceCardType, sourceBindingIndex: s.sourceBindingIndex,
+          enemy, scaleEnemy: enemy, zoneTick: true,
+        }, s.auraEffects);
+      }
+    }
     // 镜像炮台：按冷却向最近敌人开火（本体伤害 × damageRatio）。
     if (s.kind === 'mirrorTurret') {
       s.fireCd = (s.fireCd ?? 0) - dt;
@@ -113,7 +206,7 @@ function tickSummons(state: GameState, config: Config, rng: Rng, dt: number, eve
             damage: totalDamage(state, config) * (s.damageRatio ?? 0.3),
             sourceCardId: s.sourceCardId,
           });
-          s.fireCd = 0.7;
+          s.fireCd = s.fireInterval;
         }
       }
     }
@@ -130,7 +223,7 @@ function tickSummons(state: GameState, config: Config, rng: Rng, dt: number, eve
             const hpBefore = Math.max(0, e.hp);
             events.push(...dealDamage(state, config, rng, e, totalDamage(state, config) * (s.damageRatio ?? 0.5)));
             recordCardImpact(state, s.sourceCardId, hpBefore - Math.max(0, e.hp));
-            s.fireCd = 0.25;
+            s.fireCd = s.fireInterval;
             break;
           }
         }
@@ -144,7 +237,8 @@ function tickSummons(state: GameState, config: Config, rng: Rng, dt: number, eve
       // 重生一次（decoy 5★）：只对"被摧毁"（非到期）生效，每个召唤物实例限一次。
       if (dead && s.respawnOnce && !s.respawned) {
         if (s.placement === 'threatDirection' && s.sourceCardId != null) {
-          const position = threatDirectionSummonPosition(state, s.sourceCardId, s.distanceFromTurret ?? 150);
+          const sourceKey = `${s.sourceCardType ?? 'unknown'}/${s.sourceCardId}/${s.sourceBindingIndex ?? 0}/${s.sourceEffectIndex ?? 0}`;
+          const position = threatDirectionSummonPosition(state, sourceKey, s.distanceFromTurret ?? 150);
           s.x = position.x;
           s.y = position.y;
         } else {
@@ -184,7 +278,7 @@ function tickStatModifiers(state: GameState, dt: number): void {
     if (modifier.remaining === undefined) continue;
     modifier.remaining -= dt;
     if (modifier.remaining <= 0) {
-      if (modifier.stat === 'maxHpAdd') maxHpChanged = true;
+      if (modifier.stat === 'maxHpAdd' || modifier.stat === 'maxHpMul') maxHpChanged = true;
       state.statModifiers.splice(i, 1);
     }
   }

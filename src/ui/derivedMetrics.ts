@@ -40,9 +40,7 @@ export interface DerivedMetrics {
   cells: Record<EnemyType, DerivedCell[]>;
   waveDurations: number[];
   totalDuration: number;
-  /** @deprecated Legacy fixed-probability/interval-model estimate. */
   dropsPerMinute: number;
-  /** @deprecated Legacy fixed-probability/interval-model estimate. */
   expectedDrops: number;
   waves: DerivedWaveProjection[];
   budget?: {
@@ -53,6 +51,39 @@ export interface DerivedMetrics {
     sprintQuotaThreshold: number[];
     projections: BudgetProjection[];
   };
+}
+
+/**
+ * Static projection intentionally ignores carryCap (short-term burst smoothing) and
+ * dropRateMul (a dynamic in-run modifier that cannot be known by the tuner).
+ */
+function expectedTimeBasedDrops(game: GameConfig, waveDurations: readonly number[]): number {
+  const rate = game.economy.ordinaryDropRate;
+  let buildStageSeconds = 0;
+  let expected = 0;
+  for (let index = 0; index < waveDurations.length; index++) {
+    const duration = waveDurations[index];
+    const stage = stageForWave(index + 1, game.waves.totalWaves, game.waves.stagePlan);
+    if (stage === 'validation') continue;
+    if (stage === 'selection') {
+      expected += rate.selectionPerMinute / 60 * duration;
+      continue;
+    }
+    if (rate.buildTransitionSeconds <= 0) {
+      expected += rate.buildPerMinute / 60 * duration;
+    } else {
+      const transitionStart = Math.min(rate.buildTransitionSeconds, buildStageSeconds);
+      const transitionEnd = Math.min(rate.buildTransitionSeconds, buildStageSeconds + duration);
+      const transitionDuration = Math.max(0, transitionEnd - transitionStart);
+      const transitionArea = rate.selectionPerMinute * transitionDuration
+        + (rate.buildPerMinute - rate.selectionPerMinute)
+          * (transitionEnd ** 2 - transitionStart ** 2)
+          / (2 * rate.buildTransitionSeconds);
+      expected += (transitionArea + rate.buildPerMinute * (duration - transitionDuration)) / 60;
+    }
+    buildStageSeconds += duration;
+  }
+  return expected;
 }
 
 function spawnDistance(game: GameConfig): number {
@@ -73,22 +104,19 @@ function cell(game: GameConfig, runtime: Config, type: EnemyType, wave: number, 
   return { hitRate, ttk, entryWalk, insideWalk: Math.min(ttk, breachWalk), killDepth: runtime.range - speed * ttk, onScreen: 0 };
 }
 
-/** Deterministic, side-effect-free event estimate.  Enemies leave after entry walk + expected DPS TTK; this intentionally excludes skills, drops and player input. */
+/** Deterministic, side-effect-free estimate. Boss escorts are intentionally omitted because their lifetime depends on dynamic Boss combat. */
 export function simulateBudgetWave(game: GameConfig, runtime: Config, wave: number, plan: ResolvedWavePlan, distance: number, difficultyId: DifficultyId = 'hell'): { duration: number; projection: BudgetProjection } {
-  if (!plan.regular) {
-    const enemies = plan.validation?.enemies ?? [];
-    const estimatedTtk = enemies.reduce((sum, enemy) => sum + cell(game, runtime, enemy.type, wave, distance, difficultyId).ttk * enemy.hpMul, 0);
-    return {
-      duration: estimatedTtk,
-      projection: {
-        normalTarget: 0, sprintTarget: 0, averageOnScreen: enemies.length, peakOnScreen: enemies.length,
-        sprintTriggered: false, validationEncounter: { enemyCount: enemies.length, estimatedTtk },
-      },
-    };
-  }
+  if (!plan.regular) return {
+    duration: 0,
+    projection: { normalTarget: 0, sprintTarget: 0, averageOnScreen: 0, peakOnScreen: 0, sprintTriggered: false },
+  };
   let now = game.waves.firstSpawnDelay; let left = budgetWaveQuotaFor(plan);
   const leaveAt: number[] = []; let area = 0; let peak = 0; let sprintTriggered = false;
-  const lifetime = (type: EnemyType) => { const c = cell(game, runtime, type, wave, distance, difficultyId); return c.entryWalk + c.ttk; };
+  const lifetime = (type: EnemyType) => {
+    const c = cell(game, runtime, type, wave, distance, difficultyId);
+    const swarm = plan.validation?.swarm;
+    return swarm ? c.entryWalk / swarm.speedMul + c.ttk * swarm.hpMul : c.entryWalk + c.ttk;
+  };
   const checkInterval = Math.max(.0001, plan.regular.checkInterval);
   // Checks are discrete, exactly like runtime; deaths between checks only create a deficit at the next check.
   while (left > 0) {
@@ -103,10 +131,30 @@ export function simulateBudgetWave(game: GameConfig, runtime: Config, wave: numb
     area += leaveAt.length * checkInterval;
     now += checkInterval;
   }
-  const duration = Math.max(now - checkInterval, ...leaveAt);
+  let duration = Math.max(now - checkInterval, ...leaveAt);
+  let validationEncounter: BudgetProjection['validationEncounter'];
+  if (plan.validation) {
+    const elites = plan.validation.elites;
+    const estimatedTtk = elites.reduce(
+      (sum, elite) => sum + cell(game, runtime, elite.type, wave, distance, difficultyId).ttk * elite.hpMul,
+      0,
+    );
+    duration += estimatedTtk;
+    validationEncounter = { enemyCount: elites.length, estimatedTtk };
+  }
   const normal = budgetAdmission(plan, budgetWaveQuotaFor(plan), 0).normalTarget;
   const sprint = Math.ceil(normal * plan.regular.waveEndSprint.multiplier);
-  return { duration, projection: { normalTarget: Math.min(plan.regular.maxAlive, normal), sprintTarget: Math.min(plan.regular.maxAlive, sprint), averageOnScreen: duration ? area / duration : 0, peakOnScreen: peak, sprintTriggered } };
+  return {
+    duration,
+    projection: {
+      normalTarget: Math.min(plan.regular.maxAlive, normal),
+      sprintTarget: Math.min(plan.regular.maxAlive, sprint),
+      averageOnScreen: duration ? area / duration : 0,
+      peakOnScreen: peak,
+      sprintTriggered,
+      ...(validationEncounter ? { validationEncounter } : {}),
+    },
+  };
 }
 
 export function deriveMetrics(game: GameConfig, runtime: Config, difficultyId: DifficultyId = 'hell'): DerivedMetrics {
@@ -146,7 +194,9 @@ export function deriveMetrics(game: GameConfig, runtime: Config, difficultyId: D
   const totalEnemies = waveDurations.reduce((sum, _, i) => sum + (game.waves.spawnMode === 'budget'
     ? budgetWaveQuotaFor(plans[i])
     : game.waves.enemyCountBase + (i + 1) * game.waves.enemyCountPerWave), 0);
-  const expectedDrops = totalEnemies * runtime.dropChance;
+  const expectedDrops = game.economy.ordinaryDropRate.enabled
+    ? expectedTimeBasedDrops(game, waveDurations)
+    : totalEnemies * runtime.dropChance;
   const budget = projections.map(item => item.projection);
   const waveProjections: DerivedWaveProjection[] = plans.map((plan, index) => ({
     wave: index + 1,

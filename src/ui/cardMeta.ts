@@ -1,12 +1,12 @@
 import { texts } from '../data';
 import type { CardAffixRoll, CardType, RuntimeStatModifier } from '../core/types';
-import { getSkillDef } from '../core/effects/interpreter';
 import { resolveCardVisual } from '../presentation/cardVisual';
 import type { SkillGlyph, SkillShape } from '../presentation/skillGeometry';
 
 export interface CardMeta {
   name: string;
   desc: string;
+  overview: string;
   accent: string;
   shape: SkillShape;
   glyph: SkillGlyph;
@@ -14,7 +14,12 @@ export interface CardMeta {
 
 export type CardCopyContext = 'hand' | 'equipment';
 
-type CardCopyEntry = { name: string; hand: { shortByTier: Record<string, string> }; equip: { shortByTier: Record<string, string> } };
+type CardCopyEntry = {
+  name: string;
+  overview?: string;
+  hand: { shortByTier: Record<string, string> };
+  equip: { shortByTier: Record<string, string> };
+};
 
 /** Returns the nearest defined tier at or below star, falling back to the lowest available tier. */
 export function resolveTierCopy(shortByTier: Record<string, string>, star: number): string {
@@ -36,6 +41,14 @@ function statLabel(stat: string): string {
   return labels?.[stat] ?? stat;
 }
 
+/** 卡面用 2 字缩写标签；全称留给详情弹窗。 */
+export function affixShortLabel(stat: string): string {
+  const affixes = (texts as unknown as {
+    affixes?: { shortStats?: Record<string, string>; stats?: Record<string, string> };
+  }).affixes;
+  return affixes?.shortStats?.[stat] ?? affixes?.stats?.[stat] ?? stat;
+}
+
 function compactNumber(value: number): string {
   return Number(value.toFixed(4)).toString();
 }
@@ -44,6 +57,13 @@ export function formatAffixRoll(roll: CardAffixRoll): string {
   const percentage = roll.stat.endsWith('Mul');
   const value = percentage ? `${compactNumber(roll.value * 100)}%` : compactNumber(roll.value);
   return `${statLabel(roll.stat)} +${value}`;
+}
+
+/** 卡面词条串：使用缩写标签并去掉数值前空格。 */
+export function formatAffixRollShort(roll: CardAffixRoll): string {
+  const percentage = roll.stat.endsWith('Mul');
+  const value = percentage ? `${compactNumber(roll.value * 100)}%` : compactNumber(roll.value);
+  return `${affixShortLabel(roll.stat)}+${value}`;
 }
 
 export function formatRuntimeModifier(modifier: RuntimeStatModifier): string {
@@ -63,13 +83,13 @@ export function evolutionChoiceCopy(
 }
 
 export function resolveCardMeta(cardType: CardType, star: number, context: CardCopyContext): CardMeta {
-  const def = getSkillDef(cardType);
   const cardTexts = (texts as { cards?: Record<string, CardCopyEntry> }).cards;
   const entry = cardTexts?.[cardType];
   const visual = resolveCardVisual(cardType);
-  if (def && entry) {
+  if (entry) {
     const shortByTier = context === 'hand' ? entry.hand.shortByTier : entry.equip.shortByTier;
-    return { name: entry.name, desc: resolveTierCopy(shortByTier, star), ...visual };
+    const desc = resolveTierCopy(shortByTier, star);
+    return { name: entry.name, desc, overview: entry.overview || desc || '', ...visual };
   }
-  return { name: cardType, desc: '暂无机制说明', ...visual };
+  return { name: cardType, desc: '暂无机制说明', overview: '', ...visual };
 }

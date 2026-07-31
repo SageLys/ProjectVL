@@ -1,0 +1,2810 @@
+{
+ "atoms": {
+  "pierce": {
+   "category": "projectile",
+   "params": {
+    "count": {
+     "type": "integer",
+     "default": 1,
+     "min": 0,
+     "note": "子弹可穿透的敌人数（quantityAdd 词条按整数放大）"
+    },
+    "damageRetention": {
+     "type": "number",
+     "default": 0.8,
+     "consumeDefault": 1,
+     "min": 0,
+     "max": 1,
+     "note": "每次穿透后的伤害保留比；消耗态巨型贯穿弹不衰减"
+    },
+    "rampPerPierce": {
+     "type": "number",
+     "default": 0,
+     "min": 0,
+     "note": "每次穿透后的伤害增益比"
+    },
+    "width": {
+     "type": "number",
+     "default": 10,
+     "min": 0,
+     "note": "仅消耗态：贯穿弹半径"
+    },
+    "damageMul": {
+     "type": "number",
+     "default": 3,
+     "min": 0,
+     "note": "仅消耗态：贯穿弹伤害 = 炮台总伤 × 本值"
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": [
+    "onFire"
+   ],
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": false
+  },
+  "chain": {
+   "category": "projectile",
+   "params": {
+    "bounces": {
+     "type": "integer",
+     "default": 2,
+     "min": 0,
+     "note": "起点之后的弹跳次数"
+    },
+    "damageRetention": {
+     "type": "number",
+     "default": 0.7,
+     "min": 0,
+     "max": 1
+    },
+    "searchRange": {
+     "type": "number",
+     "default": 130,
+     "min": 0
+    },
+    "targets": {
+     "type": "integer",
+     "default": 1,
+     "min": 0,
+     "note": "无敌人载荷时取 origin 附近的起点数"
+    },
+    "damageMul": {
+     "type": "number",
+     "default": 1,
+     "min": 0,
+     "note": "无 attack/bullet 载荷时的伤害基准倍率"
+    },
+    "spreadStatus": {
+     "type": "enum",
+     "enum": [
+      "vulnerable",
+      "slow",
+      "dot",
+      "brand"
+     ],
+     "note": "每次链伤后施加的状态；不发送 onHit"
+    },
+    "spreadParams": {
+     "type": "record",
+     "default": {},
+     "note": "状态强度 ratio 与持续时间 duration"
+    },
+    "preferRelay": {
+     "type": "boolean",
+     "default": false,
+     "note": "链路优先经过本卡生成的中继召唤物"
+    },
+    "relayDamageBonus": {
+     "type": "number",
+     "default": 0,
+     "min": 0
+    },
+    "relayBonusCap": {
+     "type": "number",
+     "default": 0.45,
+     "min": 0
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": [
+    "onFire",
+    "onHit",
+    "onKill",
+    "interval"
+   ],
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": true
+  },
+  "split": {
+   "category": "projectile",
+   "params": {
+    "count": {
+     "type": "integer",
+     "default": 2,
+     "min": 0
+    },
+    "damageRatio": {
+     "type": "number",
+     "default": 0.5,
+     "min": 0
+    },
+    "maxDepth": {
+     "type": "integer",
+     "default": 1,
+     "min": 0,
+     "note": "弹片再分裂的层数上限，防指数级增殖"
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": [
+    "onFire",
+    "onHit",
+    "onKill",
+    "interval"
+   ],
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": false
+  },
+  "ricochet": {
+   "category": "projectile",
+   "params": {
+    "bounces": {
+     "type": "integer",
+     "default": 1,
+     "min": 0
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": [
+    "onFire"
+   ],
+   "supports": {
+    "equip": true,
+    "consume": false
+   },
+   "emitsEvents": false
+  },
+  "aoeOnHit": {
+   "category": "projectile",
+   "params": {
+    "radius": {
+     "type": "number",
+     "default": 70,
+     "min": 0,
+     "note": "ctx.radius（消耗态档位）优先于本默认值"
+    },
+    "damageRatio": {
+     "type": "number",
+     "default": 0.6,
+     "min": 0
+    },
+    "falloff": {
+     "type": "number",
+     "default": 0.5,
+     "min": 0,
+     "max": 1,
+     "note": "边缘衰减比例"
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": [
+    "onFire",
+    "onHit",
+    "onKill",
+    "onBreach",
+    "interval"
+   ],
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": true
+  },
+  "beamMorph": {
+   "category": "projectile",
+   "params": {
+    "width": {
+     "type": "number",
+     "default": 26,
+     "min": 0
+    },
+    "damageRatio": {
+     "type": "number",
+     "default": 1,
+     "min": 0
+    },
+    "interval": {
+     "type": "number",
+     "default": 0.9,
+     "min": 0,
+     "note": "仅 passive 换形：主炮开火周期"
+    },
+    "duration": {
+     "type": "number",
+     "default": 0.6,
+     "min": 0,
+     "note": "仅 passive 换形：单次光束持续"
+    },
+    "tickInterval": {
+     "type": "number",
+     "default": 0.1,
+     "min": 0,
+     "note": "仅 passive 换形：光束伤害结算间隔"
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": true
+  },
+  "mortarMorph": {
+   "category": "projectile",
+   "params": {
+    "radius": {
+     "type": "number",
+     "default": 90,
+     "min": 0,
+     "note": "ctx.radius（消耗态档位）优先于本默认值"
+    },
+    "damageRatio": {
+     "type": "number",
+     "default": 1.2,
+     "min": 0
+    },
+    "falloff": {
+     "type": "number",
+     "default": 0.5,
+     "min": 0,
+     "max": 1
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": true
+  },
+  "slow": {
+   "category": "control",
+   "params": {
+    "ratio": {
+     "type": "number",
+     "default": 0.3,
+     "min": 0,
+     "max": 1
+    },
+    "duration": {
+     "type": "number",
+     "default": 1.5,
+     "min": 0
+    },
+    "radius": {
+     "type": "number",
+     "default": 120,
+     "min": 0,
+     "note": "无敌人载荷时的目标圈半径；ctx.radius（消耗态档位）优先于本参数"
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": false
+  },
+  "freeze": {
+   "category": "control",
+   "params": {
+    "duration": {
+     "type": "number",
+     "default": 1,
+     "min": 0
+    },
+    "stacksToTrigger": {
+     "type": "integer",
+     "min": 1,
+     "note": "未声明 = 立即冻结；声明后按层数累计触发"
+    },
+    "radius": {
+     "type": "number",
+     "default": 120,
+     "min": 0,
+     "note": "无敌人载荷时的目标圈半径；ctx.radius（消耗态档位）优先于本参数"
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": false
+  },
+  "stun": {
+   "category": "control",
+   "params": {
+    "duration": {
+     "type": "number",
+     "default": 0.5,
+     "min": 0
+    },
+    "chance": {
+     "type": "number",
+     "default": 1,
+     "min": 0,
+     "max": 1,
+     "note": "stun 自行逐目标判定（不走 runEffects 的统一闸门）"
+    },
+    "radius": {
+     "type": "number",
+     "default": 120,
+     "min": 0,
+     "note": "无敌人载荷时的目标圈半径；ctx.radius（消耗态档位）优先于本参数"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": false
+  },
+  "knockback": {
+   "category": "control",
+   "params": {
+    "distance": {
+     "type": "number",
+     "default": 60,
+     "min": 0
+    },
+    "collisionDamage": {
+     "type": "number",
+     "default": 0,
+     "min": 0,
+     "note": ">0 时撞击相邻敌人，双方各受 炮台总伤 × 本值"
+    },
+    "radius": {
+     "type": "number",
+     "default": 120,
+     "min": 0,
+     "note": "无敌人载荷时的目标圈半径；ctx.radius（消耗态档位）优先于本参数"
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": true
+  },
+  "taunt": {
+   "category": "control",
+   "params": {
+    "duration": {
+     "type": "number",
+     "default": 3,
+     "min": 0,
+     "note": "ctx.duration（消耗态档位）优先于本默认值"
+    },
+    "radius": {
+     "type": "number",
+     "default": 120,
+     "min": 0,
+     "note": "无敌人载荷时的目标圈半径；ctx.radius（消耗态档位）优先于本参数"
+    },
+    "summonId": {
+     "type": "integer",
+     "min": 0,
+     "note": "未声明 = 嘲讽到 origin；声明后嘲讽到指定召唤物"
+    },
+    "priorityWeight": {
+     "type": "number",
+     "default": 1,
+     "min": 0,
+     "note": "同来源 upsert；跨来源按 priorityWeight、remaining、sourceKey 依次仲裁，赢家失效后回退"
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": false
+  },
+  "vulnerable": {
+   "category": "control",
+   "params": {
+    "ratio": {
+     "type": "number",
+     "default": 0.2,
+     "min": 0
+    },
+    "duration": {
+     "type": "number",
+     "default": 2,
+     "min": 0
+    },
+    "maxStacks": {
+     "type": "integer",
+     "default": 1,
+     "min": 1
+    },
+    "radius": {
+     "type": "number",
+     "default": 120,
+     "min": 0,
+     "note": "无敌人载荷时的目标圈半径；ctx.radius（消耗态档位）优先于本参数"
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": false
+  },
+  "aura": {
+   "category": "domain",
+   "params": {
+    "radius": {
+     "type": "number",
+     "default": 120,
+     "min": 0,
+     "note": "声明 radius 时优先于 radiusRatioOfRange"
+    },
+    "radiusRatioOfRange": {
+     "type": "number",
+     "default": 0.5,
+     "min": 0,
+     "note": "仅 passive 常驻光环：半径 = 射程 × 本值（radius 未声明时生效）"
+    },
+    "tickInterval": {
+     "type": "number",
+     "default": 0.8,
+     "passiveDefault": 1,
+     "min": 0,
+     "note": "消耗态落点区域 0.8s；passive 常驻光环 1s"
+    },
+    "duration": {
+     "type": "number",
+     "default": 3,
+     "min": 0,
+     "note": "仅消耗态落点区域；passive 光环常驻无时限"
+    },
+    "shape": {
+     "type": "enum",
+     "default": "circle",
+     "enum": [
+      "circle",
+      "ring"
+     ]
+    },
+    "innerRadius": {
+     "type": "number",
+     "min": 0,
+     "note": "shape=ring 的内径；未声明 = radius × 0.5"
+    },
+    "follow": {
+     "type": "enum",
+     "enum": [
+      "densestCluster",
+      "nearestEnemy"
+     ]
+    },
+    "followLerp": {
+     "type": "number",
+     "default": 0.5,
+     "min": 0,
+     "max": 1
+    },
+    "radiusOverTime": {
+     "type": "record",
+     "note": "duration 内从 from 到 to 线性插值"
+    },
+    "color": {
+     "type": "string",
+     "note": "未声明 = 继承来源卡的主题色"
+    },
+    "effects": {
+     "type": "effects",
+     "required": true,
+     "note": "光环周期内对圈内敌人施加的嵌套原子"
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": false,
+   "allowsNestedEffects": true
+  },
+  "groundZone": {
+   "category": "domain",
+   "params": {
+    "radius": {
+     "type": "number",
+     "default": 100,
+     "min": 0,
+     "note": "shape='line' 时线长 = radius × 2、线宽 = radius"
+    },
+    "duration": {
+     "type": "number",
+     "default": 3,
+     "min": 0,
+     "note": "消耗态强制 ≤5s（R4）"
+    },
+    "tickInterval": {
+     "type": "number",
+     "default": 0.5,
+     "min": 0
+    },
+    "shape": {
+     "type": "enum",
+     "default": "circle",
+     "enum": [
+      "circle",
+      "ring",
+      "line"
+     ],
+     "note": "'line' 使用确定性朝向与点到线段距离判定"
+    },
+    "innerRadius": {
+     "type": "number",
+     "min": 0,
+     "note": "shape=ring 的内径；未声明 = radius × 0.5"
+    },
+    "radiusOverTime": {
+     "type": "record",
+     "note": "duration 内从 from 到 to 线性插值"
+    },
+    "lineFrom": {
+     "type": "enum",
+     "enum": [
+      "turretToPoint",
+      "bulletPath"
+     ]
+    },
+    "color": {
+     "type": "string",
+     "note": "未声明 = 继承来源卡的主题色"
+    },
+    "effects": {
+     "type": "effects",
+     "required": true,
+     "note": "区域周期内对圈内敌人施加的嵌套原子"
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": false,
+   "allowsNestedEffects": true
+  },
+  "dot": {
+   "category": "domain",
+   "params": {
+    "damageRatio": {
+     "type": "number",
+     "min": 0,
+     "note": "每 tick 伤害 = 炮台总伤 × 本值；未声明时改用 damagePerTick"
+    },
+    "damagePerTick": {
+     "type": "number",
+     "default": 5,
+     "min": 0,
+     "note": "damageRatio 未声明时的固定每 tick 伤害"
+    },
+    "tickInterval": {
+     "type": "number",
+     "default": 0.5,
+     "min": 0
+    },
+    "duration": {
+     "type": "number",
+     "default": 2,
+     "min": 0,
+     "note": "ctx.duration（消耗态档位）优先于本默认值"
+    },
+    "radius": {
+     "type": "number",
+     "default": 120,
+     "min": 0,
+     "note": "无敌人载荷时的目标圈半径；ctx.radius（消耗态档位）优先于本参数"
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": true
+  },
+  "summon": {
+   "category": "domain",
+   "params": {
+    "kind": {
+     "type": "enum",
+     "default": "decoy",
+     "enum": [
+      "decoy",
+      "mirrorTurret",
+      "orbital",
+      "wall",
+      "goldenTree",
+      "rootSegment",
+      "crystal",
+      "pylon",
+      "iceSpire",
+      "iceDecoy"
+     ]
+    },
+    "count": {
+     "type": "integer",
+     "default": 1,
+     "min": 0,
+     "note": "仅非装备态；装备态每(卡,绑定)严格单实例"
+    },
+    "hp": {
+     "type": "number",
+     "default": 40,
+     "min": 0
+    },
+    "duration": {
+     "type": "number",
+     "default": 4,
+     "min": 0,
+     "note": "仅非装备态；装备态召唤物常驻至来源消失"
+    },
+    "placement": {
+     "type": "enum",
+     "enum": [
+      "threatDirection",
+      "ring"
+     ],
+     "note": "装备态按威胁方向或环形放置"
+    },
+    "distanceFromTurret": {
+     "type": "number",
+     "default": 150,
+     "min": 0
+    },
+    "tauntRadius": {
+     "type": "number",
+     "default": 140,
+     "min": 0,
+     "variantDefaults": {
+      "on": "kind",
+      "cases": {
+       "orbital": 0
+      }
+     },
+     "note": "orbital 默认不嘲讽"
+    },
+    "priorityWeight": {
+     "type": "number",
+     "default": 1,
+     "min": 0
+    },
+    "damageRatio": {
+     "type": "number",
+     "default": 0.3,
+     "min": 0
+    },
+    "explode": {
+     "type": "boolean",
+     "default": false,
+     "note": "真值时死亡爆炸"
+    },
+    "explodeDamageMul": {
+     "type": "number",
+     "default": 1.5,
+     "min": 0
+    },
+    "knockbackDistance": {
+     "type": "number",
+     "default": 80,
+     "min": 0
+    },
+    "respawnOnce": {
+     "type": "boolean",
+     "default": false,
+     "note": "被摧毁（非到期）时重生一次"
+    },
+    "replacesEarlier": {
+     "type": "boolean",
+     "default": false,
+     "note": "装备态：替换同卡更早绑定的召唤物"
+    },
+    "fireInterval": {
+     "type": "number",
+     "default": 0.7,
+     "min": 0.05,
+     "variantDefaults": {
+      "on": "kind",
+      "cases": {
+       "orbital": 0.25,
+       "decoy": 0
+      }
+     },
+     "note": "召唤物开火冷却；decoy 不开火。0.05s 防御性下限避免每帧开火"
+    },
+    "maxCount": {
+     "type": "integer",
+     "default": 1,
+     "min": 1,
+     "max": 8
+    },
+    "chainRelay": {
+     "type": "boolean",
+     "default": false
+    },
+    "onDeathEffects": {
+     "type": "effects"
+    },
+    "intervalSeconds": {
+     "type": "number",
+     "default": 0,
+     "min": 0
+    },
+    "intervalEffects": {
+     "type": "effects"
+    },
+    "auraRadius": {
+     "type": "number",
+     "default": 0,
+     "min": 0
+    },
+    "auraEffects": {
+     "type": "effects"
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": true,
+   "allowsNestedEffects": true
+  },
+  "dropRateMul": {
+   "category": "economy",
+   "params": {
+    "mul": {
+     "type": "number",
+     "default": 1,
+     "min": 0,
+     "note": "乘法叠加"
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": false
+   },
+   "emitsEvents": false,
+   "modifierOnly": true
+  },
+  "dropLifetimeMul": {
+   "category": "economy",
+   "params": {
+    "mul": {
+     "type": "number",
+     "default": 1,
+     "min": 0,
+     "note": "乘法叠加"
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": false
+   },
+   "emitsEvents": false,
+   "modifierOnly": true
+  },
+  "xpMul": {
+   "category": "economy",
+   "params": {
+    "mul": {
+     "type": "number",
+     "default": 1,
+     "min": 0,
+     "note": "乘法叠加"
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": false
+   },
+   "emitsEvents": false,
+   "modifierOnly": true
+  },
+  "extraDrop": {
+   "category": "economy",
+   "params": {
+    "count": {
+     "type": "integer",
+     "default": 1,
+     "min": 0
+    },
+    "starWeights": {
+     "type": "record",
+     "default": {
+      "1": 1
+     },
+     "note": "星级抽取权重；结果受 economy.dropStarPolicy 上限约束"
+    },
+    "at": {
+     "type": "enum",
+     "default": "point",
+     "enum": [
+      "point",
+      "turret",
+      "killPoint"
+     ],
+     "note": "'turret' 落在炮台；其余落在 ctx.origin（命中点/击杀点/消耗落点）"
+    },
+    "secure": {
+     "type": "boolean",
+     "default": false
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": false
+  },
+  "expiryConvert": {
+   "category": "economy",
+   "params": {
+    "ratio": {
+     "type": "number",
+     "default": 0.5,
+     "min": 0,
+     "max": 1
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": false
+   },
+   "emitsEvents": false,
+   "modifierOnly": true
+  },
+  "mergeMaterialRefund": {
+   "category": "economy",
+   "params": {
+    "refundChance": {
+     "type": "number",
+     "default": 0.25,
+     "min": 0,
+     "max": 1,
+     "note": "由 commitMerge 消费端掷骰；不是 runEffects 的 chance 闸门"
+    },
+    "count": {
+     "type": "integer",
+     "default": 1,
+     "min": 1,
+     "max": 4,
+     "note": "单次返还张数"
+    },
+    "star": {
+     "type": "integer",
+     "default": 1,
+     "min": 1,
+     "note": "返还素材星级；运行时再按 maxStar 夹紧"
+    },
+    "scope": {
+     "type": "enum",
+     "default": "merge",
+     "enum": [
+      "merge",
+      "feed",
+      "both"
+     ],
+     "note": "生效的合成来源；万能升星与配方进化恒不返还"
+    }
+   },
+   "allowedTriggers": [
+    "passive"
+   ],
+   "supports": {
+    "equip": true,
+    "consume": false
+   },
+   "emitsEvents": false,
+   "modifierOnly": true
+  },
+  "wildcardRewardBonus": {
+   "category": "economy",
+   "params": {
+    "bonusChance": {
+     "type": "number",
+     "default": 1,
+     "min": 0,
+     "max": 1,
+     "note": "由奖励组装消费端掷骰；不是 runEffects 的 chance 闸门"
+    },
+    "count": {
+     "type": "integer",
+     "default": 1,
+     "min": 1,
+     "max": 3,
+     "note": "在基线奖励上额外增加的张数"
+    },
+    "scope": {
+     "type": "enum",
+     "default": "both",
+     "enum": [
+      "bounty",
+      "boss",
+      "both"
+     ]
+    }
+   },
+   "allowedTriggers": [
+    "passive"
+   ],
+   "supports": {
+    "equip": true,
+    "consume": false
+   },
+   "emitsEvents": false,
+   "modifierOnly": true
+  },
+  "mergePulse": {
+   "category": "economy",
+   "params": {
+    "damagePerMergeCount": {
+     "type": "number",
+     "default": 4,
+     "min": 0,
+     "note": "伤害 = 本值 × 合成结果星级"
+    },
+    "radius": {
+     "type": [
+      "number",
+      "enum"
+     ],
+     "default": 200,
+     "min": 0,
+     "enum": [
+      "all"
+     ],
+     "note": "'all' = 全场"
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": false
+   },
+   "emitsEvents": true
+  },
+  "shield": {
+   "category": "defense",
+   "params": {
+    "absorbHits": {
+     "type": "integer",
+     "default": 2,
+     "min": 0,
+     "note": "融合取最大"
+    },
+    "regenSeconds": {
+     "type": "number",
+     "min": 0,
+     "note": "未声明 = 破碎后不再生；融合取最小"
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": false
+  },
+  "thorns": {
+   "category": "defense",
+   "params": {
+    "ratio": {
+     "type": "number",
+     "default": 0,
+     "min": 0,
+     "note": "加法叠加"
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": false
+   },
+   "emitsEvents": false,
+   "modifierOnly": true
+  },
+  "breachReduction": {
+   "category": "defense",
+   "params": {
+    "ratio": {
+     "type": "number",
+     "default": 0,
+     "min": 0,
+     "max": 1,
+     "note": "加法叠加，聚合后封顶 0.9"
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": false
+   },
+   "emitsEvents": false,
+   "modifierOnly": true
+  },
+  "novaOnBreak": {
+   "category": "defense",
+   "params": {
+    "damage": {
+     "type": "number",
+     "default": 20,
+     "min": 0
+    },
+    "knockbackDistance": {
+     "type": "number",
+     "default": 80,
+     "min": 0
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": false
+   },
+   "emitsEvents": false,
+   "modifierOnly": true
+  },
+  "execute": {
+   "category": "defense",
+   "params": {
+    "hpThresholdRatio": {
+     "type": "number",
+     "default": 0.15,
+     "passiveDefault": 0,
+     "min": 0,
+     "max": 1,
+     "note": "passive 聚合取最高阈值，缺省贡献 0（不处决）"
+    },
+    "radius": {
+     "type": "number",
+     "default": 120,
+     "min": 0,
+     "note": "无敌人载荷时的目标圈半径；ctx.radius（消耗态档位）优先于本参数"
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": true
+  },
+  "burstDamage": {
+   "category": "shared",
+   "params": {
+    "damageMul": {
+     "type": "number",
+     "default": 3,
+     "min": 0
+    },
+    "radius": {
+     "type": "number",
+     "default": 100,
+     "min": 0,
+     "note": "ctx.radius（消耗态档位）优先于本默认值"
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": true
+  },
+  "focusPriority": {
+   "category": "shared",
+   "params": {
+    "priorityWeight": {
+     "type": "number",
+     "default": 1,
+     "min": 0
+    },
+    "duration": {
+     "type": "number",
+     "default": 4,
+     "min": 0,
+     "note": "ctx.duration（消耗态档位）优先于本默认值"
+    },
+    "hpThresholdRatio": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "未声明 = 不筛血量；声明后只标记低于该比例的目标"
+    },
+    "radius": {
+     "type": "number",
+     "default": 120,
+     "min": 0,
+     "note": "无敌人载荷时的目标圈半径；ctx.radius（消耗态档位）优先于本参数"
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": false
+  },
+  "restore": {
+   "category": "shared",
+   "params": {
+    "amount": {
+     "type": "number",
+     "default": 0,
+     "min": 0,
+     "note": "amount 与 maxHp × amountRatio 相加，封顶 maxHp"
+    },
+    "amountRatio": {
+     "type": "number",
+     "default": 0,
+     "min": 0
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": false
+  },
+  "statBuff": {
+   "category": "shared",
+   "params": {
+    "stat": {
+     "type": "enum",
+     "required": true,
+     "default": "damage",
+     "enum": [
+      "damage",
+      "fireRate",
+      "damageAdd",
+      "fireRateAdd",
+      "rangeAdd",
+      "multiAdd",
+      "maxHpAdd",
+      "heal",
+      "damageMul",
+      "fireRateMul",
+      "rangeMul",
+      "maxHpMul",
+      "effectDamageMul",
+      "quantityAdd",
+      "controlPotencyMul",
+      "controlledDamageTakenMul",
+      "areaScaleMul",
+      "dotDamageMul",
+      "defenseDurabilityMul",
+      "retaliationMul",
+      "dropRateMul",
+      "dropLifetimeMul",
+      "xpMul"
+     ],
+     "note": "校验器强制必填；registry 保留 damage 兜底以防手工注入的残缺数据"
+    },
+    "operation": {
+     "type": "enum",
+     "required": true,
+     "default": "mul",
+     "enum": [
+      "add",
+      "mul"
+     ]
+    },
+    "value": {
+     "type": "number",
+     "required": true,
+     "default": 1,
+     "min": 0,
+     "variantDefaults": {
+      "on": "operation",
+      "cases": {
+       "add": 0
+      }
+     },
+     "note": "mul 恒等元 1、add 恒等元 0；mul 时校验器要求 > 0"
+    },
+    "duration": {
+     "type": "number",
+     "required": true,
+     "default": 3,
+     "min": 0,
+     "note": "消耗态强制 ≤5s（R4）"
+    },
+    "maxStacks": {
+     "type": "integer",
+     "default": 1,
+     "min": 1,
+     "note": "同来源同属性的层数上限，超出时刷新最短的一层"
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": false
+  },
+  "charge": {
+   "category": "shared",
+   "params": {
+    "by": {
+     "type": "enum",
+     "default": "breach",
+     "enum": [
+      "breach",
+      "shieldAbsorb",
+      "thornsDamage",
+      "killWithSource:dot"
+     ]
+    },
+    "perEvent": {
+     "type": "number",
+     "default": 1,
+     "min": 0
+    },
+    "max": {
+     "type": "number",
+     "default": 3,
+     "min": 1
+    },
+    "releaseAt": {
+     "type": "enum",
+     "default": "full",
+     "enum": [
+      "full",
+      "interval",
+      "onShieldBreak"
+     ]
+    },
+    "chargeKey": {
+     "type": "string",
+     "default": "main"
+    },
+    "effects": {
+     "type": "effects"
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": true,
+   "allowsNestedEffects": true
+  },
+  "summonBuff": {
+   "category": "shared",
+   "params": {
+    "target": {
+     "type": "enum",
+     "default": "nearestToPoint",
+     "enum": [
+      "nearestToPoint",
+      "all"
+     ]
+    },
+    "kind": {
+     "type": "string",
+     "required": true
+    },
+    "damageMul": {
+     "type": "number",
+     "default": 1,
+     "min": 0
+    },
+    "radiusAdd": {
+     "type": "number",
+     "default": 0
+    },
+    "dropChanceAdd": {
+     "type": "number",
+     "default": 0
+    },
+    "capLevels": {
+     "type": "integer",
+     "default": 5,
+     "min": 1
+    },
+    "chance": {
+     "type": "number",
+     "min": 0,
+     "max": 1,
+     "note": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   },
+   "allowedTriggers": "any",
+   "supports": {
+    "equip": true,
+    "consume": true
+   },
+   "emitsEvents": false
+  }
+ },
+ "triggers": [
+  "onFire",
+  "onHit",
+  "onKill",
+  "onWaveStart",
+  "onBreach",
+  "onPickup",
+  "interval",
+  "onMerge",
+  "passive"
+ ],
+ "affixSinks": {
+  "damageMul": {
+   "operation": "mul",
+   "settlement": "timed",
+   "equipment": "global",
+   "globalConsumer": "totalDamage"
+  },
+  "fireRateMul": {
+   "operation": "mul",
+   "settlement": "timed",
+   "equipment": "global",
+   "globalConsumer": "totalFireRate"
+  },
+  "rangeMul": {
+   "operation": "mul",
+   "settlement": "timed",
+   "equipment": "global",
+   "globalConsumer": "totalRange"
+  },
+  "maxHpMul": {
+   "operation": "mul",
+   "settlement": "timed",
+   "equipment": "global",
+   "globalConsumer": "totalMaxHp"
+  },
+  "effectDamageMul": {
+   "operation": "mul",
+   "settlement": "timed",
+   "equipment": "scoped",
+   "globalConsumer": "runtimeScalingFor",
+   "scalingTargets": [
+    {
+     "atom": "aoeOnHit",
+     "param": "damageRatio"
+    },
+    {
+     "atom": "burstDamage",
+     "param": "damageMul"
+    },
+    {
+     "atom": "split",
+     "param": "damageRatio"
+    },
+    {
+     "atom": "beamMorph",
+     "param": "damageRatio"
+    },
+    {
+     "atom": "mortarMorph",
+     "param": "damageRatio"
+    },
+    {
+     "atom": "summon",
+     "param": "explodeDamageMul"
+    },
+    {
+     "atom": "summon",
+     "param": "damageRatio"
+    },
+    {
+     "atom": "pierce",
+     "param": "damageRetention",
+     "cap": 1
+    },
+    {
+     "atom": "chain",
+     "param": "damageRetention",
+     "cap": 1
+    }
+   ]
+  },
+  "quantityAdd": {
+   "operation": "mul",
+   "settlement": "timed",
+   "equipment": "scoped",
+   "globalConsumer": "runtimeScalingFor",
+   "scalingTargets": [
+    {
+     "atom": "pierce",
+     "param": "count",
+     "mode": "add",
+     "integer": true
+    },
+    {
+     "atom": "chain",
+     "param": "bounces",
+     "mode": "add",
+     "integer": true
+    },
+    {
+     "atom": "split",
+     "param": "count",
+     "mode": "add",
+     "integer": true
+    },
+    {
+     "atom": "ricochet",
+     "param": "bounces",
+     "mode": "add",
+     "integer": true
+    }
+   ]
+  },
+  "controlPotencyMul": {
+   "operation": "mul",
+   "settlement": "timed",
+   "equipment": "scoped",
+   "globalConsumer": "runtimeScalingFor",
+   "scalingTargets": [
+    {
+     "atom": "slow",
+     "param": "ratio",
+     "cap": 0.8
+    },
+    {
+     "atom": "freeze",
+     "param": "duration"
+    },
+    {
+     "atom": "stun",
+     "param": "duration"
+    },
+    {
+     "atom": "knockback",
+     "param": "distance"
+    },
+    {
+     "atom": "vulnerable",
+     "param": "ratio"
+    }
+   ]
+  },
+  "controlledDamageTakenMul": {
+   "operation": "mul",
+   "settlement": "timed",
+   "equipment": "global",
+   "globalConsumer": "controlledDamageTakenBonus"
+  },
+  "areaScaleMul": {
+   "operation": "mul",
+   "settlement": "timed",
+   "equipment": "scoped",
+   "globalConsumer": "runtimeScalingFor",
+   "scalingTargets": [
+    {
+     "atom": "aura",
+     "param": "radius"
+    },
+    {
+     "atom": "aura",
+     "param": "radiusRatioOfRange"
+    },
+    {
+     "atom": "groundZone",
+     "param": "radius"
+    },
+    {
+     "atom": "groundZone",
+     "param": "duration"
+    }
+   ]
+  },
+  "dotDamageMul": {
+   "operation": "mul",
+   "settlement": "timed",
+   "equipment": "scoped",
+   "globalConsumer": "runtimeScalingFor",
+   "scalingTargets": [
+    {
+     "atom": "dot",
+     "param": "damageRatio"
+    }
+   ]
+  },
+  "defenseDurabilityMul": {
+   "operation": "mul",
+   "settlement": "timed",
+   "equipment": "scoped",
+   "globalConsumer": "runtimeScalingFor",
+   "scalingTargets": [
+    {
+     "atom": "shield",
+     "param": "absorbHits",
+     "integer": true
+    },
+    {
+     "atom": "summon",
+     "param": "hp"
+    }
+   ]
+  },
+  "retaliationMul": {
+   "operation": "mul",
+   "settlement": "timed",
+   "equipment": "scoped",
+   "globalConsumer": "runtimeScalingFor",
+   "scalingTargets": [
+    {
+     "atom": "novaOnBreak",
+     "param": "damage"
+    },
+    {
+     "atom": "thorns",
+     "param": "ratio"
+    },
+    {
+     "atom": "burstDamage",
+     "param": "damageMul",
+     "trigger": "onBreach"
+    }
+   ]
+  },
+  "dropRateMul": {
+   "operation": "mul",
+   "settlement": "timed",
+   "equipment": "scoped",
+   "globalConsumer": "getModifiers.dropRateMul",
+   "scalingTargets": [
+    {
+     "atom": "dropRateMul",
+     "param": "mul"
+    }
+   ]
+  },
+  "dropLifetimeMul": {
+   "operation": "mul",
+   "settlement": "timed",
+   "equipment": "scoped",
+   "globalConsumer": "getModifiers.dropLifetimeMul",
+   "scalingTargets": [
+    {
+     "atom": "dropLifetimeMul",
+     "param": "mul"
+    }
+   ]
+  },
+  "xpMul": {
+   "operation": "mul",
+   "settlement": "timed",
+   "equipment": "scoped",
+   "globalConsumer": "getModifiers.xpMul",
+   "scalingTargets": [
+    {
+     "atom": "xpMul",
+     "param": "mul"
+    }
+   ]
+  }
+ },
+ "labels": {
+  "pierce": {
+   "atom": {
+    "label": "穿透",
+    "help": "弹道命中后继续前进，并可命中后续目标。"
+   },
+   "params": {
+    "count": {
+     "label": "穿透数",
+     "help": "子弹可穿透的敌人数（quantityAdd 词条按整数放大）"
+    },
+    "damageRetention": {
+     "label": "伤害保留比",
+     "help": "每次穿透后的伤害保留比；消耗态巨型贯穿弹不衰减"
+    },
+    "rampPerPierce": {
+     "label": "每次穿透增伤",
+     "help": "每次穿透后的伤害增益比"
+    },
+    "width": {
+     "label": "贯穿弹半径",
+     "help": "仅消耗态：贯穿弹半径"
+    },
+    "damageMul": {
+     "label": "贯穿弹伤害倍率",
+     "help": "仅消耗态：贯穿弹伤害 = 炮台总伤 × 本值"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "chain": {
+   "atom": {
+    "label": "连锁",
+    "help": "命中后在搜索范围内寻找新目标并继续传递伤害。"
+   },
+   "params": {
+    "bounces": {
+     "label": "弹跳次数",
+     "help": "起点之后的弹跳次数"
+    },
+    "damageRetention": {
+     "label": "伤害保留比",
+     "help": "每次传递后保留的伤害比例"
+    },
+    "searchRange": {
+     "label": "搜索范围",
+     "help": "寻找下一个目标的搜索半径"
+    },
+    "targets": {
+     "label": "起点数",
+     "help": "无敌人载荷时取 origin 附近的起点数"
+    },
+    "damageMul": {
+     "label": "伤害基准倍率",
+     "help": "无 attack/bullet 载荷时的伤害基准倍率"
+    },
+    "spreadStatus": {
+     "label": "每跳扩散状态",
+     "help": "每次链伤后施加的状态；不发送 onHit"
+    },
+    "spreadParams": {
+     "label": "扩散状态参数",
+     "help": "状态强度 ratio 与持续时间 duration"
+    },
+    "preferRelay": {
+     "label": "优先中继",
+     "help": "链路优先经过本卡生成的中继召唤物"
+    },
+    "relayDamageBonus": {
+     "label": "中继增伤"
+    },
+    "relayBonusCap": {
+     "label": "中继增伤上限"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "split": {
+   "atom": {
+    "label": "分裂",
+    "help": "一枚弹道生成多枚子弹道，子弹道按独立倍率结算。"
+   },
+   "params": {
+    "count": {
+     "label": "分裂数"
+    },
+    "damageRatio": {
+     "label": "伤害比例",
+     "help": "本次结算伤害 = 炮台总伤 × 本值"
+    },
+    "maxDepth": {
+     "label": "递归层数上限",
+     "help": "弹片再分裂的层数上限，防指数级增殖"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "ricochet": {
+   "atom": {
+    "label": "弹射",
+    "help": "弹道命中后改变方向并继续寻找目标。"
+   },
+   "params": {
+    "bounces": {
+     "label": "弹跳次数",
+     "help": "起点之后继续传递/反弹的次数"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "aoeOnHit": {
+   "atom": {
+    "label": "范围爆发",
+    "help": "在命中点对一定半径内的敌人结算范围伤害。"
+   },
+   "params": {
+    "radius": {
+     "label": "半径",
+     "help": "ctx.radius（消耗态档位）优先于本默认值"
+    },
+    "damageRatio": {
+     "label": "伤害比例",
+     "help": "本次结算伤害 = 炮台总伤 × 本值"
+    },
+    "falloff": {
+     "label": "边缘衰减",
+     "help": "边缘衰减比例"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "beamMorph": {
+   "atom": {
+    "label": "光束",
+    "help": "把主炮投射方式改为持续或周期结算的直线光束。"
+   },
+   "params": {
+    "width": {
+     "label": "光束宽度",
+     "help": "判定宽度"
+    },
+    "damageRatio": {
+     "label": "伤害比例",
+     "help": "本次结算伤害 = 炮台总伤 × 本值"
+    },
+    "interval": {
+     "label": "主炮开火周期",
+     "help": "仅 passive 换形：主炮开火周期"
+    },
+    "duration": {
+     "label": "单次光束持续",
+     "help": "仅 passive 换形：单次光束持续"
+    },
+    "tickInterval": {
+     "label": "结算间隔",
+     "help": "仅 passive 换形：光束伤害结算间隔"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "mortarMorph": {
+   "atom": {
+    "label": "迫击炮",
+    "help": "把主炮投射方式改为落点爆炸的抛射攻击。"
+   },
+   "params": {
+    "radius": {
+     "label": "半径",
+     "help": "ctx.radius（消耗态档位）优先于本默认值"
+    },
+    "damageRatio": {
+     "label": "伤害比例",
+     "help": "本次结算伤害 = 炮台总伤 × 本值"
+    },
+    "falloff": {
+     "label": "边缘衰减",
+     "help": "越靠近边缘伤害衰减越多的比例"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "slow": {
+   "atom": {
+    "label": "减速",
+    "help": "按比例降低目标移动速度，持续时间结束后恢复。"
+   },
+   "params": {
+    "ratio": {
+     "label": "减速比例",
+     "help": "按比例结算的强度"
+    },
+    "duration": {
+     "label": "持续时间",
+     "help": "效果持续秒数"
+    },
+    "radius": {
+     "label": "半径",
+     "help": "无敌人载荷时的目标圈半径；ctx.radius（消耗态档位）优先于本参数"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "freeze": {
+   "atom": {
+    "label": "冻结",
+    "help": "目标暂时无法移动；重复控制仍受抗性与免疫窗限制。"
+   },
+   "params": {
+    "duration": {
+     "label": "持续时间",
+     "help": "效果持续秒数"
+    },
+    "stacksToTrigger": {
+     "label": "触发所需层数",
+     "help": "未声明 = 立即冻结；声明后按层数累计触发"
+    },
+    "radius": {
+     "label": "半径",
+     "help": "无敌人载荷时的目标圈半径；ctx.radius（消耗态档位）优先于本参数"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "stun": {
+   "atom": {
+    "label": "眩晕",
+    "help": "目标暂时无法行动；重复控制仍受抗性与免疫窗限制。"
+   },
+   "params": {
+    "duration": {
+     "label": "持续时间",
+     "help": "效果持续秒数"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "stun 自行逐目标判定（不走 runEffects 的统一闸门）"
+    },
+    "radius": {
+     "label": "半径",
+     "help": "无敌人载荷时的目标圈半径；ctx.radius（消耗态档位）优先于本参数"
+    }
+   }
+  },
+  "knockback": {
+   "atom": {
+    "label": "击退",
+    "help": "把目标沿远离作用点的方向推开。"
+   },
+   "params": {
+    "distance": {
+     "label": "推开距离",
+     "help": "沿远离作用点方向推开的距离"
+    },
+    "collisionDamage": {
+     "label": "撞击伤害",
+     "help": ">0 时撞击相邻敌人，双方各受 炮台总伤 × 本值"
+    },
+    "radius": {
+     "label": "半径",
+     "help": "无敌人载荷时的目标圈半径；ctx.radius（消耗态档位）优先于本参数"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "taunt": {
+   "atom": {
+    "label": "嘲讽",
+    "help": "提高指定单位的索敌优先级，使敌人更倾向攻击它。"
+   },
+   "params": {
+    "duration": {
+     "label": "持续时间",
+     "help": "ctx.duration（消耗态档位）优先于本默认值"
+    },
+    "radius": {
+     "label": "半径",
+     "help": "无敌人载荷时的目标圈半径；ctx.radius（消耗态档位）优先于本参数"
+    },
+    "summonId": {
+     "label": "召唤物 id",
+     "help": "未声明 = 嘲讽到 origin；声明后嘲讽到指定召唤物"
+    },
+    "priorityWeight": {
+     "label": "索敌权重",
+     "help": "同来源 upsert；跨来源按 priorityWeight、remaining、sourceKey 依次仲裁，赢家失效后回退"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "vulnerable": {
+   "atom": {
+    "label": "易伤",
+    "help": "提高目标受到的伤害，可按配置叠层。"
+   },
+   "params": {
+    "ratio": {
+     "label": "易伤比例",
+     "help": "按比例结算的强度"
+    },
+    "duration": {
+     "label": "持续时间",
+     "help": "效果持续秒数"
+    },
+    "maxStacks": {
+     "label": "叠加层数上限",
+     "help": "同来源同目标可叠加的层数上限"
+    },
+    "radius": {
+     "label": "半径",
+     "help": "无敌人载荷时的目标圈半径；ctx.radius（消耗态档位）优先于本参数"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "aura": {
+   "atom": {
+    "label": "光环",
+    "help": "以持续存在的来源为中心，周期影响范围内目标。"
+   },
+   "params": {
+    "radius": {
+     "label": "半径",
+     "help": "声明 radius 时优先于 radiusRatioOfRange"
+    },
+    "radiusRatioOfRange": {
+     "label": "半径占射程比",
+     "help": "仅 passive 常驻光环：半径 = 射程 × 本值（radius 未声明时生效）"
+    },
+    "tickInterval": {
+     "label": "结算间隔",
+     "help": "消耗态落点区域 0.8s；passive 常驻光环 1s"
+    },
+    "duration": {
+     "label": "持续时间",
+     "help": "仅消耗态落点区域；passive 光环常驻无时限"
+    },
+    "shape": {
+     "label": "形状",
+     "help": "区域几何形状"
+    },
+    "innerRadius": {
+     "label": "内径",
+     "help": "shape=ring 的内径；未声明 = radius × 0.5"
+    },
+    "follow": {
+     "label": "跟随目标"
+    },
+    "followLerp": {
+     "label": "跟随趋近比例"
+    },
+    "radiusOverTime": {
+     "label": "半径随时间变化",
+     "help": "duration 内从 from 到 to 线性插值"
+    },
+    "color": {
+     "label": "颜色",
+     "help": "未声明 = 继承来源卡的主题色"
+    },
+    "effects": {
+     "label": "嵌套效果",
+     "help": "光环周期内对圈内敌人施加的嵌套原子"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "groundZone": {
+   "atom": {
+    "label": "领域",
+    "help": "在固定位置生成持续区域，并按间隔结算内部效果。"
+   },
+   "params": {
+    "radius": {
+     "label": "半径",
+     "help": "shape='line' 时线长 = radius × 2、线宽 = radius"
+    },
+    "duration": {
+     "label": "持续时间",
+     "help": "消耗态强制 ≤5s（R4）"
+    },
+    "tickInterval": {
+     "label": "结算间隔",
+     "help": "两次周期结算之间的秒数"
+    },
+    "shape": {
+     "label": "形状",
+     "help": "'line' 使用确定性朝向与点到线段距离判定"
+    },
+    "innerRadius": {
+     "label": "内径",
+     "help": "shape=ring 的内径；未声明 = radius × 0.5"
+    },
+    "radiusOverTime": {
+     "label": "半径随时间变化",
+     "help": "duration 内从 from 到 to 线性插值"
+    },
+    "lineFrom": {
+     "label": "线段方向来源"
+    },
+    "color": {
+     "label": "颜色",
+     "help": "未声明 = 继承来源卡的主题色"
+    },
+    "effects": {
+     "label": "嵌套效果",
+     "help": "区域周期内对圈内敌人施加的嵌套原子"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "dot": {
+   "atom": {
+    "label": "持续伤害",
+    "help": "在一段时间内按固定间隔重复造成伤害。"
+   },
+   "params": {
+    "damageRatio": {
+     "label": "伤害比例",
+     "help": "每 tick 伤害 = 炮台总伤 × 本值；未声明时改用 damagePerTick"
+    },
+    "damagePerTick": {
+     "label": "每跳固定伤害",
+     "help": "damageRatio 未声明时的固定每 tick 伤害"
+    },
+    "tickInterval": {
+     "label": "结算间隔",
+     "help": "两次周期结算之间的秒数"
+    },
+    "duration": {
+     "label": "持续时间",
+     "help": "ctx.duration（消耗态档位）优先于本默认值"
+    },
+    "radius": {
+     "label": "半径",
+     "help": "无敌人载荷时的目标圈半径；ctx.radius（消耗态档位）优先于本参数"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "summon": {
+   "atom": {
+    "label": "召唤",
+    "help": "生成拥有独立生命与行为的临时单位。"
+   },
+   "params": {
+    "kind": {
+     "label": "召唤物类型"
+    },
+    "count": {
+     "label": "召唤数量",
+     "help": "仅非装备态；装备态每(卡,绑定)严格单实例"
+    },
+    "hp": {
+     "label": "召唤物生命",
+     "help": "召唤物的初始生命"
+    },
+    "duration": {
+     "label": "存在时间",
+     "help": "仅非装备态；装备态召唤物常驻至来源消失"
+    },
+    "placement": {
+     "label": "放置方式",
+     "help": "装备态按威胁方向或环形放置"
+    },
+    "distanceFromTurret": {
+     "label": "距炮台距离"
+    },
+    "tauntRadius": {
+     "label": "嘲讽半径",
+     "help": "orbital 默认不嘲讽"
+    },
+    "priorityWeight": {
+     "label": "索敌权重",
+     "help": "召唤物被敌人选中的权重"
+    },
+    "damageRatio": {
+     "label": "召唤物伤害比例",
+     "help": "本次结算伤害 = 炮台总伤 × 本值"
+    },
+    "explode": {
+     "label": "死亡爆炸",
+     "help": "真值时死亡爆炸"
+    },
+    "explodeDamageMul": {
+     "label": "爆炸伤害倍率"
+    },
+    "knockbackDistance": {
+     "label": "击退距离"
+    },
+    "respawnOnce": {
+     "label": "重生一次",
+     "help": "被摧毁（非到期）时重生一次"
+    },
+    "replacesEarlier": {
+     "label": "替换更早实例",
+     "help": "装备态：替换同卡更早绑定的召唤物"
+    },
+    "fireInterval": {
+     "label": "开火间隔",
+     "help": "召唤物开火冷却；decoy 不开火。0.05s 防御性下限避免每帧开火"
+    },
+    "maxCount": {
+     "label": "场上上限"
+    },
+    "chainRelay": {
+     "label": "链路中继"
+    },
+    "onDeathEffects": {
+     "label": "死亡效果"
+    },
+    "intervalSeconds": {
+     "label": "周期秒数"
+    },
+    "intervalEffects": {
+     "label": "周期效果"
+    },
+    "auraRadius": {
+     "label": "自带光环半径"
+    },
+    "auraEffects": {
+     "label": "自带光环效果"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "dropRateMul": {
+   "atom": {
+    "label": "掉率",
+    "help": "乘算调整普通掉落物的生成概率。"
+   },
+   "params": {
+    "mul": {
+     "label": "掉率乘数",
+     "help": "乘法叠加"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "dropLifetimeMul": {
+   "atom": {
+    "label": "掉落时限",
+    "help": "乘算调整掉落物从生成到过期的时间。"
+   },
+   "params": {
+    "mul": {
+     "label": "掉落时限乘数",
+     "help": "乘法叠加"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "xpMul": {
+   "atom": {
+    "label": "奖励积分获取",
+    "help": "乘算调整本局获得的奖励积分。"
+   },
+   "params": {
+    "mul": {
+     "label": "奖励积分乘数",
+     "help": "乘法叠加"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "extraDrop": {
+   "atom": {
+    "label": "额外掉落",
+    "help": "满足触发条件时额外生成掉落物。"
+   },
+   "params": {
+    "count": {
+     "label": "掉落数量"
+    },
+    "starWeights": {
+     "label": "星级权重",
+     "help": "星级抽取权重；结果受 economy.dropStarPolicy 上限约束"
+    },
+    "at": {
+     "label": "落点",
+     "help": "'turret' 落在炮台；其余落在 ctx.origin（命中点/击杀点/消耗落点）"
+    },
+    "secure": {
+     "label": "安全掉落"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "expiryConvert": {
+   "atom": {
+    "label": "过期转化",
+    "help": "掉落物自然过期时把一部分价值转为其他收益。"
+   },
+   "params": {
+    "ratio": {
+     "label": "转化比例",
+     "help": "按比例结算的强度"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "mergeMaterialRefund": {
+   "atom": {
+    "label": "合成素材返还",
+    "help": "普通同型合并或装备喂养完成时，按概率返还同型低星素材卡。"
+   },
+   "params": {
+    "refundChance": {
+     "label": "返还概率",
+     "help": "由 commitMerge 消费端掷骰；不是 runEffects 的 chance 闸门"
+    },
+    "count": {
+     "label": "返还张数",
+     "help": "单次返还张数"
+    },
+    "star": {
+     "label": "返还素材星级",
+     "help": "返还素材星级；运行时再按 maxStar 夹紧"
+    },
+    "scope": {
+     "label": "返还来源",
+     "help": "生效的合成来源；万能升星与配方进化恒不返还"
+    }
+   }
+  },
+  "wildcardRewardBonus": {
+   "atom": {
+    "label": "万能卡奖励加成",
+    "help": "在 Bounty 或波末 Boss 的基线万能卡奖励上额外增加数量。"
+   },
+   "params": {
+    "bonusChance": {
+     "label": "加成概率",
+     "help": "由奖励组装消费端掷骰；不是 runEffects 的 chance 闸门"
+    },
+    "count": {
+     "label": "额外万能卡张数",
+     "help": "在基线奖励上额外增加的张数"
+    },
+    "scope": {
+     "label": "奖励来源"
+    }
+   }
+  },
+  "mergePulse": {
+   "atom": {
+    "label": "合成脉冲",
+    "help": "完成卡牌合成时，以炮台为中心释放一次范围效果。"
+   },
+   "params": {
+    "damagePerMergeCount": {
+     "label": "每星伤害",
+     "help": "伤害 = 本值 × 合成结果星级"
+    },
+    "radius": {
+     "label": "波及半径",
+     "help": "'all' = 全场"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "shield": {
+   "atom": {
+    "label": "护盾",
+    "help": "抵挡指定次数的伤害，耗尽后按规则恢复。"
+   },
+   "params": {
+    "absorbHits": {
+     "label": "抵挡次数",
+     "help": "融合取最大"
+    },
+    "regenSeconds": {
+     "label": "再生秒数",
+     "help": "未声明 = 破碎后不再生；融合取最小"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "thorns": {
+   "atom": {
+    "label": "反伤",
+    "help": "受到伤害后，按比例向攻击来源返还伤害。"
+   },
+   "params": {
+    "ratio": {
+     "label": "反伤比例",
+     "help": "加法叠加"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "breachReduction": {
+   "atom": {
+    "label": "突破减免",
+    "help": "降低敌人突破防线时造成的生命损失。"
+   },
+   "params": {
+    "ratio": {
+     "label": "突破减免比例",
+     "help": "加法叠加，聚合后封顶 0.9"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "novaOnBreak": {
+   "atom": {
+    "label": "破盾冲击",
+    "help": "护盾耗尽时自动释放一次范围反击。"
+   },
+   "params": {
+    "damage": {
+     "label": "冲击伤害"
+    },
+    "knockbackDistance": {
+     "label": "击退距离"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "execute": {
+   "atom": {
+    "label": "处决",
+    "help": "目标生命比例低于阈值时直接完成击杀。"
+   },
+   "params": {
+    "hpThresholdRatio": {
+     "label": "处决血量阈值",
+     "help": "passive 聚合取最高阈值，缺省贡献 0（不处决）"
+    },
+    "radius": {
+     "label": "半径",
+     "help": "无敌人载荷时的目标圈半径；ctx.radius（消耗态档位）优先于本参数"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "burstDamage": {
+   "atom": {
+    "label": "爆发伤害",
+    "help": "按倍率立即结算一次独立伤害。"
+   },
+   "params": {
+    "damageMul": {
+     "label": "伤害倍率"
+    },
+    "radius": {
+     "label": "半径",
+     "help": "ctx.radius（消耗态档位）优先于本默认值"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "focusPriority": {
+   "atom": {
+    "label": "索敌优先",
+    "help": "临时改变索敌评分，让符合条件的目标更早被选中。"
+   },
+   "params": {
+    "priorityWeight": {
+     "label": "索敌权重"
+    },
+    "duration": {
+     "label": "持续时间",
+     "help": "ctx.duration（消耗态档位）优先于本默认值"
+    },
+    "hpThresholdRatio": {
+     "label": "筛选血量阈值",
+     "help": "未声明 = 不筛血量；声明后只标记低于该比例的目标"
+    },
+    "radius": {
+     "label": "半径",
+     "help": "无敌人载荷时的目标圈半径；ctx.radius（消耗态档位）优先于本参数"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "restore": {
+   "atom": {
+    "label": "恢复",
+    "help": "立即恢复固定数值或最大生命比例的生命。"
+   },
+   "params": {
+    "amount": {
+     "label": "固定回复量",
+     "help": "amount 与 maxHp × amountRatio 相加，封顶 maxHp"
+    },
+    "amountRatio": {
+     "label": "生命上限回复比",
+     "help": "按最大生命的比例回复，与固定值相加后封顶"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "statBuff": {
+   "atom": {
+    "label": "属性强化",
+    "help": "在指定时间内提高一项基础属性，可按配置叠层。"
+   },
+   "params": {
+    "stat": {
+     "label": "目标属性",
+     "help": "校验器强制必填；registry 保留 damage 兜底以防手工注入的残缺数据"
+    },
+    "operation": {
+     "label": "叠加方式",
+     "help": "add = 加法叠加，mul = 乘法叠加"
+    },
+    "value": {
+     "label": "强化数值",
+     "help": "mul 恒等元 1、add 恒等元 0；mul 时校验器要求 > 0"
+    },
+    "duration": {
+     "label": "持续时间",
+     "help": "消耗态强制 ≤5s（R4）"
+    },
+    "maxStacks": {
+     "label": "叠加层数上限",
+     "help": "同来源同属性的层数上限，超出时刷新最短的一层"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "charge": {
+   "atom": {
+    "label": "计量释放",
+    "help": "按指定战斗事件积累计量，并在满档或配置时机释放内嵌效果。"
+   },
+   "params": {
+    "by": {
+     "label": "计量来源"
+    },
+    "perEvent": {
+     "label": "每事件计量"
+    },
+    "max": {
+     "label": "计量上限"
+    },
+    "releaseAt": {
+     "label": "释放条件"
+    },
+    "chargeKey": {
+     "label": "计量键"
+    },
+    "effects": {
+     "label": "嵌套效果"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  },
+  "summonBuff": {
+   "atom": {
+    "label": "召唤强化",
+    "help": "强化符合类型与来源条件的召唤物，并受等级上限约束。"
+   },
+   "params": {
+    "target": {
+     "label": "目标选择"
+    },
+    "kind": {
+     "label": "类型"
+    },
+    "damageMul": {
+     "label": "伤害倍率"
+    },
+    "radiusAdd": {
+     "label": "半径增量"
+    },
+    "dropChanceAdd": {
+     "label": "掉落概率增量"
+    },
+    "capLevels": {
+     "label": "强化等级上限"
+    },
+    "chance": {
+     "label": "触发概率",
+     "help": "runEffects 统一概率闸门；未声明 = 必定执行（不走 rng）"
+    }
+   }
+  }
+ },
+ "triggerLabels": {
+  "onFire": {
+   "label": "每次开火时"
+  },
+  "onHit": {
+   "label": "命中敌人时"
+  },
+  "onKill": {
+   "label": "击杀敌人时"
+  },
+  "onWaveStart": {
+   "label": "每波开始时"
+  },
+  "onBreach": {
+   "label": "敌人突破防线时"
+  },
+  "onPickup": {
+   "label": "拾取掉落时"
+  },
+  "interval": {
+   "label": "周期触发"
+  },
+  "onMerge": {
+   "label": "完成合成时"
+  },
+  "passive": {
+   "label": "持续生效"
+  }
+ }
+}

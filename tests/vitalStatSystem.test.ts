@@ -2,11 +2,12 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { cfg } from '../src/config';
 import { AFFIX_SINKS } from '../src/config/affixSinks';
-import type { CardStatKind } from '../src/config/types';
+import type { CardAffixStatKind } from '../src/config/types';
 import { validateSkillsConfig } from '../src/config/skillValidator';
 import { registerSkillDefs, resolveCardBindings } from '../src/core/effects/interpreter';
 import { tickEffects } from '../src/core/effects/runtime';
-import { reconcileMaxHp, totalMaxHp } from '../src/core/stats';
+import { reconcileMaxHp, totalDamage, totalMaxHp } from '../src/core/stats';
+import { equipmentAffixMul } from '../src/core/systems/cardAffixSystem';
 import { applyBuildScalingToBindings } from '../src/core/systems/buildModifierSystem';
 import { consumeCard, moveOrSwap } from '../src/core/systems/equipmentSystem';
 import { applyRunBaseReward } from '../src/core/systems/waveRewardSystem';
@@ -31,11 +32,11 @@ beforeEach(() => {
 });
 afterEach(resetTestEnv);
 
-function maxHpState(hp: number, value = 10): GameState {
+function maxHpState(hp: number, value = 0.1): GameState {
   const state = freshState();
   state.hp = hp;
   state.runBuild.cardAffixRolls.aegis = [
-    { stat: 'maxHpAdd', value, consumableDuration: 5 },
+    { stat: 'maxHpMul', value, consumableDuration: 5 },
   ];
   state.cards[0] = card('aegis', 3);
   return state;
@@ -55,12 +56,10 @@ function hudRefs(): DomRefs {
     hpText: textNode(),
     maxHpText: textNode(),
     hpBar: textNode(),
-    xpText: textNode(),
-    xpNeed: textNode(),
-    xpBar: textNode(),
-    levelText: textNode(),
+    rewardPointsText: textNode(),
+    rewardThresholdText: textNode(),
+    rewardBar: textNode(),
     waveText: textNode(),
-    godPoolText: textNode(),
     statModifierText: null,
     damageStat: null,
     rateStat: null,
@@ -72,8 +71,8 @@ function hudRefs(): DomRefs {
 }
 
 describe('derived maximum HP reconciliation', () => {
-  it('equips and removes maxHpAdd with totalMaxHp kept in sync', () => {
-    const state = maxHpState(100, 15);
+  it('equips and removes maxHpMul with totalMaxHp kept in sync', () => {
+    const state = maxHpState(100, 0.15);
 
     moveOrSwap(state, config, rng, 'cards', 0, 'equipment', 0);
     expect(state.maxHp).toBe(115);
@@ -104,27 +103,17 @@ describe('derived maximum HP reconciliation', () => {
     expect(state).toMatchObject({ hp: 37, maxHp: 100 });
   });
 
-  it('settles instant heal without a timer and expires timed maxHpAdd exactly', () => {
-    const healed = freshState();
-    healed.hp = 40;
-    healed.runBuild.cardAffixRolls.pierce = [
-      { stat: 'heal', value: 12, consumableDuration: 5 },
-    ];
-    healed.cards[0] = card('pierce', 1);
-    consumeCard(healed, config, rng, 0, 100, 100);
-    expect(healed.hp).toBe(52);
-    expect(healed.statModifiers).toHaveLength(0);
-
+  it('activates and expires timed maxHpMul exactly', () => {
     const timed = freshState();
     timed.hp = 70;
     timed.runBuild.cardAffixRolls.pierce = [
-      { stat: 'maxHpAdd', value: 10, consumableDuration: 5 },
+      { stat: 'maxHpMul', value: 0.1, consumableDuration: 5 },
     ];
     timed.cards[0] = card('pierce', 1);
     consumeCard(timed, config, rng, 0, 100, 100);
     expect(timed).toMatchObject({ hp: 80, maxHp: 110 });
     expect(timed.statModifiers).toContainEqual(expect.objectContaining({
-      stat: 'maxHpAdd', operation: 'add', value: 10, remaining: 5,
+      stat: 'maxHpMul', operation: 'mul', value: 1.1, remaining: 5,
     }));
 
     tickEffects(timed, config, rng, 5);
@@ -138,15 +127,15 @@ describe('derived maximum HP reconciliation', () => {
     applyRunBaseReward(state, { stat: 'maxHpAdd', add: 20 });
 
     expect(state.baseMaxHp).toBe(120);
-    expect(totalMaxHp(state)).toBe(130);
-    expect(state).toMatchObject({ hp: 100, maxHp: 130 });
+    expect(totalMaxHp(state)).toBe(132);
+    expect(state).toMatchObject({ hp: 102, maxHp: 132 });
 
     moveOrSwap(state, config, rng, 'equipment', 0, 'cards', 0);
     expect(state).toMatchObject({ baseMaxHp: 120, hp: 90, maxHp: 120 });
   });
 
   it('uses the playing floor when a maximum reduction exceeds current HP', () => {
-    const state = maxHpState(1, 50);
+    const state = maxHpState(1, 0.5);
     state.equipment[0] = state.cards[0];
     state.cards[0] = null;
     reconcileMaxHp(state);
@@ -158,9 +147,9 @@ describe('derived maximum HP reconciliation', () => {
 });
 
 describe('affix contracts, discrete scaling and HUD', () => {
-  it('declares settlement for every CardStatKind and validates all formal pools', () => {
-    const allStats: CardStatKind[] = [
-      'damageAdd', 'fireRateAdd', 'rangeAdd', 'multiAdd', 'maxHpAdd', 'heal',
+  it('declares settlement for every CardAffixStatKind and validates all formal pools', () => {
+    const allStats: CardAffixStatKind[] = [
+      'damageMul', 'fireRateMul', 'rangeMul', 'maxHpMul',
       'effectDamageMul', 'quantityAdd', 'controlPotencyMul', 'controlledDamageTakenMul',
       'areaScaleMul', 'dotDamageMul', 'defenseDurabilityMul', 'retaliationMul',
       'dropRateMul', 'dropLifetimeMul', 'xpMul',
@@ -169,10 +158,12 @@ describe('affix contracts, discrete scaling and HUD', () => {
     expect(() => validateSkillsConfig(structuredClone(cfg.skills))).not.toThrow();
   });
 
-  it('rejects unsupported equipment heal and card-scoped affixes without a sink', () => {
-    const heal = structuredClone(cfg.skills) as any;
-    heal.cards[0].affixPool.candidates[0].stat = 'heal';
-    expect(() => validateSkillsConfig(heal)).toThrow(/heal.*does not support persistent equipment/);
+  it('rejects wave-exclusive flat stats with an actionable error and scoped affixes without a sink', () => {
+    const flat = structuredClone(cfg.skills) as any;
+    flat.cards[0].affixPool.candidates[0].stat = 'damageAdd';
+    expect(() => validateSkillsConfig(flat)).toThrow(
+      /基础属性平加由 waveRewards 独占，卡牌词条请使用 damageMul\/fireRateMul\/rangeMul\/maxHpMul/,
+    );
 
     const missing = structuredClone(cfg.skills) as any;
     const overcharge = missing.cards.find((item: any) => item.id === 'overcharge');
@@ -180,7 +171,59 @@ describe('affix contracts, discrete scaling and HUD', () => {
     expect(() => validateSkillsConfig(missing)).toThrow(/xpMul.*no reachable equipment/);
   });
 
-  it('makes the minimum defenseDurabilityMul roll add one shield hit', () => {
+  it('adds equipped multipliers in one zone after permanent flat growth', () => {
+    const state = freshState();
+    state.runBaseStats.damageAdd = 4;
+    state.runBuild.cardAffixRolls.pierce = [
+      { stat: 'damageMul', value: 0.1, consumableDuration: 5 },
+    ];
+    state.runBuild.cardAffixRolls.frost = [
+      { stat: 'damageMul', value: 0.05, consumableDuration: 5 },
+    ];
+    state.equipment[0] = card('pierce', 3);
+    state.equipment[1] = card('frost', 3);
+
+    expect(totalDamage(state, config)).toBeCloseTo(25.3);
+    expect(totalDamage(state, config)).not.toBeCloseTo(18 * 1.1 * 1.05 + 4);
+    expect(totalDamage(state, config)).not.toBeCloseTo((18 + 4) * 1.1 * 1.05);
+  });
+
+  it('sums three equipped multipliers and recomputes exactly after removal', () => {
+    const state = freshState();
+    const affixes: Array<[string, number]> = [
+      ['pierce', 0.1],
+      ['frost', 0.15],
+      ['scorch', 0.2],
+    ];
+    for (const [index, [type, value]] of affixes.entries()) {
+      state.runBuild.cardAffixRolls[type] = [
+        { stat: 'damageMul', value, consumableDuration: 5 },
+      ];
+      state.equipment[index] = card(type, 3);
+    }
+
+    expect(equipmentAffixMul(state, 'damageMul')).toBeCloseTo(1.45);
+    expect(equipmentAffixMul(state, 'damageMul')).not.toBeCloseTo(1.518);
+    state.equipment.fill(null);
+    expect(equipmentAffixMul(state, 'damageMul')).toBe(1);
+  });
+
+  it('keeps equipment additive-zone and consumed runtime product independent', () => {
+    const state = freshState();
+    state.runBuild.cardAffixRolls.pierce = [
+      { stat: 'damageMul', value: 0.1, consumableDuration: 5 },
+    ];
+    state.runBuild.cardAffixRolls.frost = [
+      { stat: 'damageMul', value: 0.05, consumableDuration: 5 },
+    ];
+    state.equipment[0] = card('pierce', 3);
+    state.cards[0] = card('frost', 1);
+    consumeCard(state, config, rng, 0, 100, 100);
+
+    expect(totalDamage(state, config)).toBeCloseTo(18 * 1.1 * 1.05);
+  });
+
+  it('makes the minimum defenseDurabilityMul roll the source-table two-hit shield up to three', () => {
     const state = freshState();
     state.runBuild.cardAffixRolls.aegis = [
       { stat: 'defenseDurabilityMul', value: 0.1, consumableDuration: 5 },

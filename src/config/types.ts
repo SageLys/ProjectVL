@@ -1,6 +1,6 @@
 // 配置层类型：游戏域 + input（T1 输入校准值）+ tuner（调参面板元数据）。
 // P3 配置重组：所有可调数值经此处；variant = 对 base 的深覆盖（见 loader.ts）。
-import type { BuildTag, CardDef } from '../core/effects/defs';
+import type { CardDef } from '../core/effects/defs';
 import type { BindingDef } from '../core/effects/defs';
 
 export type RunStage = 'selection' | 'build' | 'validation';
@@ -23,6 +23,27 @@ export type ValidationRewardSpec =
   | { kind: 'wildcard'; star: number; count: number }
   | { kind: 'card'; star: number; count: number; typePolicy: ValidationRewardTypePolicy };
 
+/** 验证波杂兵构成权重。按 normal → fast → tank 固定顺序做累积抽取。 */
+export interface ValidationCompositionConfig {
+  normal: number;
+  fast: number;
+  tank: number;
+}
+
+/** 验证波敌潮：投射成 ResolvedRegularStageConfig 后复用 Budget 准入。 */
+export interface ValidationSwarmConfig {
+  quota: number;
+  targetOnScreen: number;
+  checkInterval: number;
+  batchMax: number;
+  maxAlive: number;
+  waveEndSprint: { window: number; multiplier: number };
+  hpMul: number;
+  damageMul: number;
+  speedMul: number;
+  composition: ValidationCompositionConfig;
+}
+
 export interface ValidationEnemySpec {
   type: 'normal' | 'fast' | 'tank';
   hpMul: number;
@@ -30,15 +51,34 @@ export interface ValidationEnemySpec {
   speedMul: number;
   ccResistOverride?: number;
   knockbackResistOverride?: number;
-  reward: ValidationRewardSpec;
+  reward?: ValidationRewardSpec;
+}
+
+/** 里程碑精英：敌潮进度越过 spawnAtProgress 时生成一次。 */
+export interface ValidationEliteSpawnSpec extends ValidationEnemySpec {
+  spawnAtProgress: number;
+}
+
+/** Boss 阶段持续召唤的护卫；不掉验证奖励，也不计入敌潮配额。 */
+export interface ValidationBossEscortConfig {
+  intervalSeconds: number;
+  count: number;
+  maxAlive: number;
+  hpMul: number;
+  damageMul: number;
+  speedMul: number;
+  composition: ValidationCompositionConfig;
 }
 
 export interface ValidationWaveConfig {
-  enemies: ValidationEnemySpec[];
+  swarm: ValidationSwarmConfig;
+  elites: ValidationEliteSpawnSpec[];
+  bossEscort?: ValidationBossEscortConfig;
   bossReward: ValidationRewardSpec;
 }
 
 export interface StagePlanConfig {
+  enabled: boolean;
   selectionWaves: number;
   validationWaves: number;
   selection: RegularStageConfig;
@@ -47,6 +87,7 @@ export interface StagePlanConfig {
 }
 
 export interface OrdinaryDropRateConfig {
+  /** Controls only the time-based ordinary-drop cadence; it does not control the wave stage director. */
   enabled: boolean;
   selectionPerMinute: number;
   buildPerMinute: number;
@@ -128,8 +169,8 @@ export interface CombatConfig {
   /** Minimum visible space between the attack circle and every canvas edge. */
   attackPreviewMargin: number;
   bullet: { speed: number; life: number; radius: number; spread: number; muzzleOffset: number };
-  /** 多个主炮形态同时装备时的确定性融合衰减。 */
-  weaponFusion: { damping: number; radiusMul: number };
+  /** 主炮融合的爆炸预算，以及多张范围形态叠加时的固定衰减。 */
+  weaponFusion: { impactShare: number; damping: number; areaMul: number };
   breakthroughDist: number;
   /** 遥测危险区在突破线外额外延伸的宽度（像素）；不参与战斗判定。 */
   dangerZoneWidth: number;
@@ -263,29 +304,35 @@ export type BuildScalingAxis =
   | 'dropLifetimeMul'
   | 'xpMul';
 
-export interface RelicBuildEffect {
-  kind: 'buildScaling';
-  targetTags: BuildTag[];
-  axis: BuildScalingAxis;
-  value: number;
-}
+/** Reward copy resolves through `${textKey}.name` and `${textKey}.desc` in texts.json. */
+export type RewardAction =
+  | { kind: 'globalDamage'; damageMul: number; bossMaxHpRatioCap: number }
+  | { kind: 'globalControl'; freezeSeconds: number; vulnerableRatio: number; vulnerableSeconds: number }
+  | { kind: 'restoreAndShield'; healRatio: number; shieldHits: number }
+  | { kind: 'grantWildcards'; count: number; starSchedule: number[] }
+  | { kind: 'buildSurge'; duration: number; value: number };
 
-export interface RelicDef {
-  id: string;
-  god?: GodId;
-  rarity: 'common' | 'rare' | 'epic';
-  textKey: string;
-  title: string;
-  desc: string;
-  targetTags: BuildTag[];
-  effects: RelicBuildEffect[];
-  poolInfluence?: { godWeightAdd: number; pityDrops?: number };
-  maxStacks: number;
-}
-
-export interface RelicsConfig {
+export interface RewardDef { id: string; textKey: string; weight: number; action: RewardAction; }
+export interface RewardMeterConfig {
   version: string;
-  relics: RelicDef[];
+  pointMul: number;
+  expiryConvertPointsPerStar: number;
+  thresholds: number[];
+  afterSchedule: 'repeatLast' | 'stop';
+  rewardKillsGrantPoints: boolean;
+  preventImmediateRepeat: boolean;
+  lowHpWeightBoost: { hpRatioBelow: number; rewardId: string; weightMul: number };
+  rewards: RewardDef[];
+}
+
+export interface SettlementConfig {
+  version: string;
+  winBonus: number;
+  perWaveCleared: number;
+  perKill: number;
+  hpRatioBonusMax: number;
+  perEquippedStarSquared: number;
+  wildcardStarValue: Record<string, number>;
 }
 
 export interface CardRequirement {
@@ -295,11 +342,15 @@ export interface CardRequirement {
 
 export interface EvolutionRecipeDef {
   id: string;
-  ingredientA: CardRequirement;
-  ingredientB: CardRequirement;
+  recipeType: 'sameGod' | 'crossGod';
+  /** 有向矩阵的行：提供可变卡的神。 */
+  variableGod: GodId;
+  /** 有向矩阵的列：提供锚点卡的神，也是产物 primaryGod。 */
+  anchorGod: GodId;
+  ingredientVariable: CardRequirement;
+  ingredientAnchor: CardRequirement;
   outputCardId: string;
-  outputStar: number;
-  allowedPhase: 'intermission';
+  outputStar: 6;
 }
 
 export interface EvolutionRecipesConfig {
@@ -308,6 +359,12 @@ export interface EvolutionRecipesConfig {
 }
 
 export type RunBaseStatKind = 'damageAdd' | 'fireRateAdd' | 'rangeAdd' | 'multiAdd' | 'maxHpAdd' | 'heal';
+
+/** Card-affix-only multipliers for the turret's base combat stats. */
+export type CardBaseStatMulKind = 'damageMul' | 'fireRateMul' | 'rangeMul' | 'maxHpMul';
+
+/** Complete card-affix vocabulary: base-stat multipliers plus build-mechanic axes. */
+export type CardAffixStatKind = CardBaseStatMulKind | BuildScalingAxis;
 
 /** xpGainPct is the sole percentage-based exception in wave-end growth. */
 export type WaveChoiceStatKind = RunBaseStatKind | 'xpGainPct';
@@ -333,6 +390,8 @@ export interface WaveRewardsConfig {
 export interface EvolutionOptionDef {
   id: string;
   textKey: string;
+  /** 5★ 分支接口；3★ 选项不声明。 */
+  interfaceRole?: 'payoff' | 'spread' | 'convert';
   equip: BindingDef[];
 }
 
@@ -352,10 +411,8 @@ export interface EvolutionTreeDef {
   sharedNodes: EvolutionSharedNodeDef[];
 }
 
-export type CardStatKind = RunBaseStatKind | BuildScalingAxis;
-
 export interface CardAffixCandidateDef {
-  stat: CardStatKind;
+  stat: CardAffixStatKind;
   weight: number;
   min: number;
   max: number;
@@ -363,25 +420,23 @@ export interface CardAffixCandidateDef {
   consumableDuration: number;
 }
 
+/**
+ * D2 预留：卡间融合（配方进化）时数值词条如何传递。**占位契约，运行时无效果**——
+ * loader / 校验器只检查类型合法，解释器与词条系统一律忽略；实现见 Stage 5。
+ * 缺省（不声明本字段）时行为与今日完全一致：沿用每局每卡型已锁定的共享词条模板。
+ */
+export interface CardFusionPolicyDef {
+  /** 源卡词条如何合并进产物：none=不继承（当前实际行为）。 */
+  affixTransferPolicy?: 'none' | 'strongest' | 'sum' | 'average';
+  /** 同属性词条冲突时的取舍。 */
+  conflictResolution?: 'keepHigher' | 'keepNewer' | 'reject';
+  /** 允许作为融合来源的卡 id；缺省 = 由 evolutionRecipes 决定。 */
+  sourceCardIds?: string[];
+}
+
 export interface CardAffixPoolDef {
   count: number;
   candidates: CardAffixCandidateDef[];
-}
-
-export interface ProgressionConfig {
-  killXpMul: number;
-  relicChoices: number;
-  targetRelics: { min: number; max: number };
-  xpThresholds: number[];
-  rarityByRelicIndex: Array<Partial<Record<RelicDef['rarity'], number>>>;
-  settlement: {
-    winBonus: number;
-    perWaveCleared: number;
-    perKill: number;
-    hpRatioBonusMax: number;
-    perEquippedStarSquared: number;
-    wildcardStarValue: Record<string, number>;
-  };
 }
 
 export interface NormalDropTypePolicyConfig {
@@ -390,7 +445,7 @@ export interface NormalDropTypePolicyConfig {
   earlyMix: { discovery: number; build: number; pivot: number };
   lateMix: { discovery: number; build: number; pivot: number };
   bootstrapMinDiscovery: number;
-  godAffinity: { scorePerStack: number; scoreCap: number };
+  bootstrapForcedDrops: number;
   maturity: {
     fullMergeOps: number;
     fullHighestStar: number;
@@ -411,6 +466,20 @@ export interface NormalDropTypePolicyConfig {
   };
   pivot: { excludeTopK: number; candidateFraction: number };
   maxSameTypeStreak: number;
+}
+
+export interface EvolutionEconomyConfig {
+  maxRecipeCompletions: number;
+  completionLimitPerRecipe: number;
+  assistWindowWaves: [number, number];
+  assistCheckpoints: [number, number];
+  assistMaxCorrections: number;
+  assistMaxCorrectionsPerMaterial: number;
+  assistRewardPolicy: 'minimumMergeCompletion';
+  allowDirectFiveStarAssist: false;
+  recipeProtectionSlots: number;
+  bountyRecipeMaterialBonus: number;
+  bountyReadySideMultiplier: number;
 }
 
 export interface EconomyConfig {
@@ -437,16 +506,43 @@ export interface EconomyConfig {
   defaults: { dropChance: number; dropLifetime: number };
   normalDropTypePolicy: NormalDropTypePolicyConfig;
   ordinaryDropRate: OrdinaryDropRateConfig;
+  evolution: EvolutionEconomyConfig;
 }
 
-export interface TunerRange {
-  min: number;
-  max: number;
-  step: number;
+export type TunerGroup = 'waves' | 'combat' | 'enemies' | 'drops' | 'progression' | 'bounty' | 'p2';
+
+/** 控件形态：number=滑杆、boolean=复选、enum=下拉、text=自由文本（当前仅 Boss 波次列表）。 */
+export type TunerParamType = 'number' | 'boolean' | 'enum' | 'text';
+
+/**
+ * 调参元数据的**唯一来源**（范围 + 标签键 + 分组 + 生效策略 + 控件形态合一）。
+ * 迁移前分散在 tuner.json（min/max/step）、ui/tunerSchema.ts（label/group/waveDeferred）
+ * 与 ui/tunerPanel.ts（专用控件的内联 HTML）三处。
+ */
+export interface TunerParamMeta {
+  /** 完整配置路径，例如 `combat.defaults.damage`；同时是本表的主键。 */
+  path: string;
+  type: TunerParamType;
+  /** texts.json 中的文案键（`tuner.params.<path>`）。 */
+  labelKey: string;
+  group: TunerGroup;
+  min?: number;
+  max?: number;
+  step?: number;
+  /** waveDeferred = 战斗中改动排队到下一波生效。 */
+  applyPolicy: 'immediate' | 'waveDeferred';
+  /** 预留：单位标注（数值标定阶段填写，当前一律缺省）。 */
+  unit?: string;
+  /** type='enum' 的候选值。 */
+  options?: readonly string[];
+  /** false = 已声明范围但当前不在面板暴露；缺省视为 true。 */
+  exposed?: boolean;
 }
 
-/** key 为面板参数的完整配置路径（例如 `combat.defaults.damage`）。 */
-export type TunerConfig = Record<string, TunerRange>;
+export interface TunerConfig {
+  version: string;
+  params: TunerParamMeta[];
+}
 
 export type ConfirmStyle = 'bubble' | 'hold-ring';
 export type HoldOrDbl = 'double-tap' | 'long-press';
@@ -466,10 +562,10 @@ export interface GameConfig {
   difficulty: DifficultyConfig;
   skills: SkillsConfig;
   gods: GodsConfig;
-  relics: RelicsConfig;
   evolutionRecipes: EvolutionRecipesConfig;
   waveRewards: WaveRewardsConfig;
-  progression: ProgressionConfig;
+  rewardMeter: RewardMeterConfig;
+  settlement: SettlementConfig;
   economy: EconomyConfig;
   bounty: BountyConfig;
   input: InputConfig;

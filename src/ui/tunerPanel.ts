@@ -2,7 +2,10 @@ import { activeVariants, cfg, normalizeBossWaves, parseBossWavesInput, VARIANTS 
 import './tunerPanel.css';
 import type { Config } from '../core/types';
 import { deriveMetrics } from './derivedMetrics';
-import { ALL_TUNER_PARAMS, formatBossWaves, getNumberAt, migratePresetValues, setNumberAt, type TunerGroup } from './tunerSchema';
+import {
+  TUNER_GROUP_ORDER, formatBossWaves, getNumberAt, migratePresetValues, setNumberAt,
+  tunerGroupCopy, tunerLabel, tunerParam, tunerSliders, tunerSlidersInGroup, type TunerParamMeta,
+} from './tunerSchema';
 import type { DifficultyId } from '../config/types';
 import { difficultyMultipliersFor } from '../core/difficulty';
 
@@ -62,15 +65,6 @@ const RUNTIME_KEYS: Record<string, keyof Config> = {
   'enemies.defaults.enemySpeed': 'enemySpeed',
 };
 
-const GROUPS: { key: TunerGroup; title: string; note?: string }[] = [
-  { key: 'waves', title: 'A · 出怪节奏与波结构', note: '下波生效' },
-  { key: 'combat', title: 'B · 炮台与弹道' },
-  { key: 'enemies', title: 'C · 敌人数值' },
-  { key: 'drops', title: 'D · 掉落与拾取' },
-  { key: 'progression', title: '经验与升级' },
-  { key: 'bounty', title: 'E · 精英 Bounty' },
-];
-
 function readPresets(): Preset[] {
   try {
     const parsed = JSON.parse(localStorage.getItem(PRESET_KEY) ?? '[]') as unknown;
@@ -86,15 +80,29 @@ function format(value: number): string {
   return String(Number(value.toFixed(3)));
 }
 
-function controlHtml(path: string, label: string, index: number): string {
-  const range = cfg.tuner[path];
-  if (!range) throw new Error(`tuner.json 缺少范围: ${path}`);
-  return `<label class="tuner-control" data-path="${path}"><span>${label}</span><output></output><input data-tuner-index="${index}" type="range" min="${range.min}" max="${range.max}" step="${range.step}"></label>`;
+/** 滑杆：范围与标签全部来自元数据（tuner.json 的合法性已在配置加载时校验）。 */
+function sliderHtml(param: TunerParamMeta, index: number): string {
+  return `<label class="tuner-control" data-path="${param.path}"><span>${tunerLabel(param)}</span><output></output><input data-tuner-index="${index}" type="range" min="${param.min}" max="${param.max}" step="${param.step}"></label>`;
+}
+
+/** 专用控件：形态由元数据的 type/options 决定，副作用仍由下方各自的事件处理器承担。 */
+function specialControlHtml(path: string): string {
+  const param = tunerParam(path);
+  const label = tunerLabel(param);
+  if (param.type === 'enum') {
+    const options = (param.options ?? []).map(value => `<option value="${value}">${value}</option>`).join('');
+    return `<label class="tuner-control" data-path="${path}"><span>${label}</span><select id="spawnModeInput">${options}</select></label>`;
+  }
+  if (param.type === 'boolean') {
+    return `<label class="tuner-control debug-check" data-path="${path}"><span>${label}</span><input id="bountyEnabledInput" type="checkbox"></label>`;
+  }
+  return `<label class="tuner-control boss-waves-control" data-path="${path}"><span>${label}</span><output id="bossWavesError"></output><input id="bossWavesInput" type="text" placeholder="1, 2, 3"><small>这些波的普通敌人清空后追加 Boss；留空表示无 Boss</small></label>`;
 }
 
 export function createTunerPanel(root: HTMLElement, config: Config, hooks: TunerHooks): TunerPanel {
   root.hidden = false;
-  const baseline = Object.fromEntries(ALL_TUNER_PARAMS.map(param => [param.path, getNumberAt(cfg, param.path)]));
+  const sliders = tunerSliders();
+  const baseline = Object.fromEntries(sliders.map(param => [param.path, getNumberAt(cfg, param.path)]));
   const baselineSpawnMode = cfg.waves.spawnMode;
   const baselineBountyEnabled = cfg.bounty.enabled;
   const baselineEquipSwappable = cfg.economy.equipSwappable;
@@ -108,22 +116,22 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
   let presets = readPresets();
   let activePresetName = '';
 
-  const groupsHtml = GROUPS.map(group => {
-    const controls = ALL_TUNER_PARAMS.filter(param => param.group === group.key)
-      .map(param => controlHtml(param.path, param.label, ALL_TUNER_PARAMS.indexOf(param))).join('');
-    const mode = group.key === 'waves' ? '<label class="tuner-control" data-path="waves.spawnMode"><span>出怪模式</span><select id="spawnModeInput"><option value="interval">interval</option><option value="budget">budget</option></select></label>' : '';
-    const bossControl = group.key === 'waves' ? '<label class="tuner-control boss-waves-control" data-path="waves.bossWaves"><span>波末 Boss 波次</span><output id="bossWavesError"></output><input id="bossWavesInput" type="text" placeholder="1, 2, 3"><small>这些波的普通敌人清空后追加 Boss；留空表示无 Boss</small></label>' : '';
-    const bountyEnabled = group.key === 'bounty' ? '<label class="tuner-control debug-check" data-path="bounty.enabled"><span>机制启用</span><input id="bountyEnabledInput" type="checkbox"></label>' : '';
-    const bountyStatus = group.key === 'bounty' ? '<p class="tuner-note" id="bountyStatus"></p>' : '';
-    return `<section class="tuner-group"><h3>${group.title}${group.note ? `<small>${group.note}</small>` : ''}</h3>${bountyStatus}<div class="tuner-grid">${mode}${bossControl}${bountyEnabled}${controls}</div></section>`;
+  const groupsHtml = TUNER_GROUP_ORDER.map(group => {
+    const copy = tunerGroupCopy(group);
+    const controls = tunerSlidersInGroup(group)
+      .map(param => sliderHtml(param, sliders.indexOf(param))).join('');
+    const mode = group === 'waves' ? specialControlHtml('waves.spawnMode') : '';
+    const bossControl = group === 'waves' ? specialControlHtml('waves.bossWaves') : '';
+    const bountyEnabled = group === 'bounty' ? specialControlHtml('bounty.enabled') : '';
+    const bountyStatus = group === 'bounty' ? '<p class="tuner-note" id="bountyStatus"></p>' : '';
+    return `<section class="tuner-group"><h3>${copy.title}${copy.note ? `<small>${copy.note}</small>` : ''}</h3>${bountyStatus}<div class="tuner-grid">${mode}${bossControl}${bountyEnabled}${controls}</div></section>`;
   }).join('');
-  const p2 = ALL_TUNER_PARAMS.filter(param => param.group === 'p2')
-    .map(param => controlHtml(param.path, param.label, ALL_TUNER_PARAMS.indexOf(param))).join('');
+  const p2 = tunerSlidersInGroup('p2').map(param => sliderHtml(param, sliders.indexOf(param))).join('');
 
   root.innerHTML = `<summary>开发调参 v2</summary><div class="dev-tools-body">
     <div class="tuner-toolbar"><label>配置 Variant <select id="variantSel"></select></label><button class="btn" id="resetTunerBtn">恢复默认参数</button></div>
     ${groupsHtml}
-    <details class="tuner-group tuner-p2"><summary>P2 · 默认冻结</summary><div class="tuner-grid">${p2}</div></details>
+    <details class="tuner-group tuner-p2"><summary>${tunerGroupCopy('p2').title}</summary><div class="tuner-grid">${p2}</div></details>
     <section class="tuner-group derived"><h3>H · 派生指标 <small>即时联动</small></h3><p class="tuner-note" id="difficultyStatus"></p><div id="derivedMetrics"></div></section>
     <section class="tuner-group"><h3>Preset</h3><div class="preset-row"><input id="presetName" placeholder="命名 preset"><button class="btn" id="savePresetBtn">保存并导出 JSON</button></div><div class="preset-row"><select id="presetSel"></select><button class="btn" id="loadPresetBtn">加载</button><button class="btn danger" id="deletePresetBtn">删除</button></div><p class="tuner-note" id="presetSaveStatus">保存时同时写入项目 presets/；加载后高亮与加载前当前配置不同的字段。</p></section>
     <section class="tuner-group"><h3>调试模式</h3><div class="debug-grid">
@@ -180,7 +188,8 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
         <span><b>${n.onScreen.toFixed(2)}</b>理论同屏数（普通·波1）</span>
         <span><b>${metrics.waveDurations.slice(0, 3).map(value => `${value.toFixed(1)}s`).join(' / ')}</b>每波理论时长（前 3 波）</span>
         <span><b>${(metrics.totalDuration / 60).toFixed(2)}min</b>全局理论局长</span>
-        <span><b>${metrics.dropsPerMinute.toFixed(2)}/min</b>每分钟掉落期望（普通·波1）</span>
+        <span><b>${metrics.dropsPerMinute.toFixed(2)}/min</b>每分钟普通掉落期望（全局均值）</span>
+        <span><b>${metrics.waves.slice(0, 3).map(wave => `${wave.ordinaryDropsTargetPerMinute.toFixed(1)}/min`).join(' / ')}</b>阶段目标速率（前 3 波）</span>
       </div><p class="tuner-note">命中率模型：min(1, 敌半径 ÷ [射程 × tan(散布)])；走行距离取四边中点出生距离均值。</p>`;
   }
 
@@ -192,8 +201,7 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
   }
 
   function setParam(path: string, value: number): void {
-    const param = ALL_TUNER_PARAMS.find(item => item.path === path)!;
-    if (param.waveDeferred && hooks.isWaveActive()) pendingWaves.set(path, value);
+    if (tunerParam(path).applyPolicy === 'waveDeferred' && hooks.isWaveActive()) pendingWaves.set(path, value);
     else {
       pendingWaves.delete(path);
       setImmediate(path, value);
@@ -206,7 +214,7 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
     return Object.fromEntries([
       ['waves.spawnMode', pendingSpawnMode ?? cfg.waves.spawnMode],
       ['bounty.enabled', cfg.bounty.enabled],
-      ...ALL_TUNER_PARAMS.map(param => [param.path, displayedValue(param.path)] as const),
+      ...sliders.map(param => [param.path, displayedValue(param.path)] as const),
       ['waves.bossWaves', formatBossWaves(displayedBossWaves())],
     ]);
   }
@@ -229,7 +237,7 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
 
   function syncInputs(): void {
     for (const input of inputs) {
-      const param = ALL_TUNER_PARAMS[Number(input.dataset.tunerIndex)];
+      const param = sliders[Number(input.dataset.tunerIndex)];
       const value = displayedValue(param.path);
       input.value = String(value);
       input.closest<HTMLElement>('.tuner-control')!.querySelector('output')!.textContent = format(value);
@@ -296,7 +304,7 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
   }
 
   for (const input of inputs) input.addEventListener('input', () => {
-    const param = ALL_TUNER_PARAMS[Number(input.dataset.tunerIndex)];
+    const param = sliders[Number(input.dataset.tunerIndex)];
     setParam(param.path, Number(input.value));
     diffPaths.delete(param.path);
     syncInputs();
@@ -362,7 +370,7 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
     bossWavesError = '';
     if (hooks.isWaveActive()) pendingBossWaves = [...baselineBossWaves];
     else cfg.waves.bossWaves = [...baselineBossWaves];
-    for (const param of ALL_TUNER_PARAMS) setParam(param.path, baseline[param.path]);
+    for (const param of sliders) setParam(param.path, baseline[param.path]);
     syncInputs(); hooks.onReset();
   });
   root.querySelector('#savePresetBtn')!.addEventListener('click', () => {
@@ -406,7 +414,7 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
       cfg.bounty.enabled = bountyEnabled;
       hooks.onImmediateChange('bounty.enabled');
     }
-    for (const param of ALL_TUNER_PARAMS) {
+    for (const param of sliders) {
       const value = values[param.path];
       if (typeof value === 'number') setParam(param.path, value);
     }

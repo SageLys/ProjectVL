@@ -1,7 +1,14 @@
 import type { Card } from '../core/types';
 import { texts } from '../data';
 import { glyphToSvg } from '../presentation/skillGeometry';
-import { evolutionChoiceCopy, formatAffixRoll, resolveCardMeta, type CardCopyContext } from './cardMeta';
+import {
+  affixShortLabel,
+  evolutionChoiceCopy,
+  formatAffixRoll,
+  formatAffixRollShort,
+  resolveCardMeta,
+  type CardCopyContext,
+} from './cardMeta';
 
 export type SlotSource = 'cards' | 'equipment' | 'wildcard';
 
@@ -33,11 +40,18 @@ export function createCardElement(card: Card, source: SlotSource, index: number,
   const affixLabels = (card.affixes ?? []).map(formatAffixRoll);
   el.setAttribute(
     'aria-label',
-    `${source === 'equipment' ? '已装备' : ''}${card.star}星${meta.name}。${pendingCopy} ${routeBadges.join(' / ')} ${meta.desc}。${affixLabels.join('，')}`,
+    `${source === 'equipment' ? '已装备' : ''}${card.star}星${meta.name}。${pendingCopy} ${routeBadges.join(' / ')} ${meta.overview} ${meta.desc}。${affixLabels.join('，')}`,
   );
   el.style.setProperty('--card', meta.accent);
-  const compactAffixes = affixLabels.length
-    ? affixLabels.slice(0, 2).map(label => `<span class="card-affix"><i aria-hidden="true">◆</i>${label}</span>`).join('')
+  const compactAffixes = (card.affixes ?? []).length
+    ? (card.affixes ?? []).slice(0, 2).map(roll => {
+      const full = formatAffixRoll(roll);
+      const short = affixShortLabel(roll.stat);
+      const compact = formatAffixRollShort(roll);
+      const value = compact.slice(short.length);
+      const fullLabel = full.slice(0, full.lastIndexOf(' +'));
+      return `<span class="card-affix" title="${full}"><i aria-hidden="true">◆</i><b class="affix-short">${short}</b><b class="affix-full">${fullLabel}</b>${value}</span>`;
+    }).join('')
     : '<span class="card-affix empty">—</span>';
   el.innerHTML =
     `<span class="card-head">` +
@@ -45,6 +59,7 @@ export function createCardElement(card: Card, source: SlotSource, index: number,
       `<strong class="card-name">${meta.name}</strong>` +
     `</span>` +
     `<span class="card-stars" aria-hidden="true">${'★'.repeat(card.star)}</span>` +
+    `<span class="card-overview">${meta.overview}</span>` +
     `<span class="card-affix-compact">${compactAffixes}</span>` +
     (card.provisional ? '<span class="card-status-badge" aria-hidden="true">!</span>' : '');
   el.addEventListener('pointerdown', e => handlers.dragStart(e, source, index, el));

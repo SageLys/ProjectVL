@@ -38,12 +38,14 @@ export type TelemetryEventType =
   | 'active_pool_created'
   | 'card_shown_by_god'
   | 'card_collected_by_god'
-  | 'relic_offered'
-  | 'relic_selected'
+  | 'reward_triggered'
+  | 'reward_confirmed'
   | 'evolution_branch_offered'
   | 'evolution_branch_selected'
   | 'recipe_available'
   | 'recipe_completed'
+  | 'validation_reward_granted'
+  | 'validation_reward_settle_started'
   | 'affix_rolled';
 
 export interface TelemetryEvent {
@@ -101,15 +103,22 @@ export interface TelemetryEvent {
   godRole?: 'main' | 'sub' | 'focus';
   candidates?: string[];
   cardTypes?: string[];
-  relicId?: string;
-  relicIndex?: number;
-  rarity?: 'common' | 'rare' | 'epic';
+  rewardId?: string;
+  activationIndex?: number;
+  rewardResult?: Record<string, unknown>;
   checkpointStar?: number;
   optionId?: string;
   provisionalCardId?: number;
   recipeId?: string;
   recipeIds?: string[];
   outputStar?: number;
+  outputCardId?: number;
+  targetSlotKind?: 'cards' | 'equipment';
+  targetSlotIndex?: number;
+  materialCardIds?: [number, number];
+  delivery?: 'hand' | 'drop';
+  assistBudgetUsed?: number;
+  settleSeconds?: number;
   affixStat?: string;
   affixValue?: number;
   consumableDuration?: number;

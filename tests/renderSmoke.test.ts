@@ -9,7 +9,7 @@ import { drawBountyOffers } from '../src/render/drawBountyOffers';
 import { drawBountyEffects } from '../src/render/drawBountyEffects';
 import { drawBeams } from '../src/render/drawBeams';
 import { drawBullets } from '../src/render/drawBullets';
-import { drawSummonsAndShield, drawTauntRanges } from '../src/render/drawEffects';
+import { drawSummonsAndShield, drawTauntRanges, drawZones } from '../src/render/drawEffects';
 import { drawVfx } from '../src/render/drawVfx';
 import { spawnGroundDrop, spawnWildcardDrop } from '../src/core/systems/dropSystem';
 import { registerSkillDefs } from '../src/core/effects/interpreter';
@@ -56,13 +56,19 @@ describe('渲染冒烟 · 战斗表现实体', () => {
   it('光束、榴弹弧线、落点/爆炸、嘲讽与召唤事件均可绘制', () => {
     const s = freshState();
     s.beams.push({
-      attackId: 1, delivery: 'line', baseDamage: 10, damage: 2, riders: [], hitIds: [], impacts: [], sourceStar: 6,
+      attackId: 1, delivery: 'line', baseDamage: 10, impactBudget: 10,
+      damage: 2, riders: [], hitIds: [], impacts: [], sourceStar: 6,
       angle: 0, width: 30, range: 250, remaining: 0.4, duration: 0.6, tickTimer: 0.1, tickInterval: 0.1, damagePerTick: 2,
     });
     s.bullets.push({ x: 100, y: 100, vx: 10, vy: 0, r: 8, life: 1, damage: 10, kind: 'mortar', flightProgress: 0.5 });
     const taunted = enemy({ id: 7, x: 150, y: 100 });
     s.enemies = [taunted];
-    s.summons.push({ id: 8, kind: 'decoy', x: 210, y: 100, hp: 20, maxHp: 40, tauntRadius: 140 });
+    s.summons.push({ id: 8, kind: 'decoy', x: 210, y: 100, hp: 20, maxHp: 40, tauntRadius: 140, fireInterval: 0 });
+    s.zones.push({
+      id: 9, x: 100, y: 120, radius: 40, shape: 'line',
+      lineStartX: 100, lineStartY: 120, lineDirX: 1, lineDirY: 0, lineLength: 80, lineWidth: 40,
+      remaining: 2, tickInterval: 0.5, tickTimer: 0, effects: [], baseDamage: 10,
+    });
     s.vfx.push(
       { kind: 'mortarTarget', x: 100, y: 100, radius: 60, remaining: 0.4 },
       { kind: 'mortarImpact', x: 120, y: 100, radius: 60, remaining: 0.2 },
@@ -77,6 +83,7 @@ describe('渲染冒烟 · 战斗表现实体', () => {
     );
     s.shield = { hits: 2, maxHits: 3, regenRemaining: null, regenSeconds: 2 };
     const ctx = fakeCtx();
+    expect(() => drawZones(ctx, s)).not.toThrow();
     expect(() => drawTauntRanges(ctx, s)).not.toThrow();
     expect(() => drawBullets(ctx, s)).not.toThrow();
     expect(() => drawBeams(ctx, s)).not.toThrow();
@@ -145,8 +152,8 @@ describe('渲染冒烟 · 手牌/装备卡面', () => {
     const { resolveCardMeta } = await import('../src/ui/cardMeta');
     expect(resolveCardMeta('pierce', 3, 'hand').desc).not.toBe(resolveCardMeta('pierce', 3, 'equipment').desc);
     expect(resolveCardMeta('pierce', 4, 'equipment').desc).toBe(resolveCardMeta('pierce', 3, 'equipment').desc);
-    expect(resolveCardMeta('pierce', 5, 'equipment').desc).toContain('叠加');
-    expect(resolveCardMeta('pierce', 6, 'equipment').desc).toContain('终态');
+    expect(resolveCardMeta('pierce', 5, 'equipment').desc).toContain('多打一下');
+    expect(resolveCardMeta('pierce', 6, 'equipment').desc).toContain('迫击炮');
     expect(resolveCardMeta('pierce', 5, 'equipment').desc).not.toContain('第二分支');
   });
 });

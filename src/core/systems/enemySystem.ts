@@ -1,15 +1,16 @@
 import { cfg } from '../../config';
 import type { CardType, Config, Enemy, EnemyType, GameEvent, GameState, Rng, Summon } from '../types';
-import type { ValidationRewardSpec } from '../../config/types';
+import type { ValidationCompositionConfig, ValidationRewardSpec } from '../../config/types';
 import { endGame } from '../endGame';
 import { spawnParticle } from './particleSystem';
 import { killEnemy } from './damageSystem';
-import { emptyStatus, isImmobile, speedMultiplier } from '../effects/statusSystem';
+import { activeTaunt, emptyStatus, isImmobile, speedMultiplier } from '../effects/statusSystem';
 import { absorbBreach } from '../effects/runtime';
 import { fireTrigger, getModifiers } from '../effects/interpreter';
 import { notifyBountyMemberBreached, notifyBountyMemberKilled } from './bountySystem';
 import { difficultyMultipliersFor } from '../difficulty';
 import { totalRange } from '../stats';
+import { resolveActiveWavePlan } from '../runStage';
 
 /**
  * 敌人类型判定：roll < tankBase + wave*tankPerWave → 重装；
@@ -18,6 +19,16 @@ import { totalRange } from '../stats';
 export function determineType(wave: number, roll: number, _spawnLeft: number): EnemyType {
   const tr = cfg.waves.typeRoll;
   return roll < tr.tankBase + wave * tr.tankPerWave ? 'tank' : roll < tr.fastThreshold ? 'fast' : 'normal';
+}
+
+/** Validation-wave composition is independent from the global typeRoll curve. */
+export function determineValidationType(composition: ValidationCompositionConfig, roll: number): EnemyType {
+  const total = composition.normal + composition.fast + composition.tank;
+  if (!(total > 0)) return 'normal';
+  const scaled = roll * total;
+  if (scaled < composition.normal) return 'normal';
+  if (scaled < composition.normal + composition.fast) return 'fast';
+  return 'tank';
 }
 
 export interface EnemyModifiers {
@@ -112,9 +123,17 @@ export function randomEdgeSpawnPosition(rng: Rng): { x: number; y: number } {
 
 export function spawnEnemy(state: GameState, rng: Rng): void {
   const roll = rng();
-  const type = determineType(state.wave, roll, state.spawnLeft);
+  const swarm = resolveActiveWavePlan(cfg, state.wave).validation?.swarm;
+  const type = swarm
+    ? determineValidationType(swarm.composition, roll)
+    : determineType(state.wave, roll, state.spawnLeft);
   const spawn = randomEdgeSpawnPosition(rng);
-  state.enemies.push(createEnemy(state, type, state.wave, spawn));
+  state.enemies.push(createEnemy(state, type, state.wave, spawn, swarm ? {
+    spawnKind: 'validationMinion',
+    hpMul: swarm.hpMul,
+    damageMul: swarm.damageMul,
+    speedMul: swarm.speedMul,
+  } : undefined));
 }
 
 /** Spawn the explicit end-of-wave Boss without consuming the regular quota. */
@@ -131,25 +150,39 @@ export function spawnWaveBoss(state: GameState, rng: Rng): Enemy {
   return boss;
 }
 
-/** 移动目标解析（仲裁规则 6）：嘲讽（点/召唤物）> 嘲讽半径内的召唤物 > 炮台。 */
-function moveTargetFor(state: GameState, e: Enemy): { x: number; y: number; summon: Summon | null } {
-  if (e.status.taunt) {
-    const summon = e.status.taunt.summonId != null
-      ? state.summons.find(s => s.id === e.status.taunt!.summonId) ?? null
+function summonTieKey(summon: Summon): string {
+  if (summon.sourceCardType != null && summon.sourceCardId != null && summon.sourceBindingIndex != null) {
+    return `${summon.sourceCardType}/${summon.sourceCardId}/${summon.sourceBindingIndex}/${summon.sourceEffectIndex ?? 0}`;
+  }
+  return `summon/${summon.id}`;
+}
+
+/** 移动目标解析（仲裁规则 6）：显式嘲讽 > 嘲讽半径内的环境召唤物 > 炮台。 */
+export function moveTargetFor(state: GameState, e: Enemy): { x: number; y: number; summon: Summon | null; tauntKey: string | null } {
+  const taunt = activeTaunt(e);
+  if (taunt) {
+    const summon = taunt.summonId != null
+      ? state.summons.find(s => s.id === taunt.summonId) ?? null
       : null;
-    if (summon) return { x: summon.x, y: summon.y, summon };
-    return { x: e.status.taunt.x, y: e.status.taunt.y, summon: null };
+    if (summon) return { x: summon.x, y: summon.y, summon, tauntKey: `taunt/${taunt.sourceKey}` };
+    return { x: taunt.x, y: taunt.y, summon: null, tauntKey: `taunt/${taunt.sourceKey}` };
   }
   let best: Summon | null = null;
-  let bestWeight = 0;
+  let bestWeight = -Infinity;
+  let bestKey = '';
   for (const s of state.summons) {
     if (!s.tauntRadius || s.tauntRadius <= 0) continue;
     if (Math.hypot(s.x - e.x, s.y - e.y) > s.tauntRadius) continue;
     const w = s.priorityWeight ?? 1;
-    if (w > bestWeight) { best = s; bestWeight = w; }
+    const key = summonTieKey(s);
+    if (w > bestWeight || (w === bestWeight && (!best || key.localeCompare(bestKey) < 0))) {
+      best = s;
+      bestWeight = w;
+      bestKey = key;
+    }
   }
-  if (best) return { x: best.x, y: best.y, summon: best };
-  return { x: cfg.combat.turret.x, y: cfg.combat.turret.y, summon: null };
+  if (best) return { x: best.x, y: best.y, summon: best, tauntKey: `summon/${bestKey}` };
+  return { x: cfg.combat.turret.x, y: cfg.combat.turret.y, summon: null, tauntKey: null };
 }
 
 function ensureBossRuntime(boss: Enemy): NonNullable<Enemy['bossRuntime']> {
@@ -186,6 +219,7 @@ function enterBossContact(
     damage: 0,
     point: { x: boss.x, y: boss.y },
   }));
+  state.effectRuntime.lastBreachAt = state.time;
   events.push({ type: 'bossContactStarted', enemyId: boss.id });
 }
 
@@ -268,7 +302,7 @@ function moveBossApproach(
   config: Config,
   rng: Rng,
   boss: Enemy,
-  target: { x: number; y: number; summon: Summon | null },
+  target: { x: number; y: number; summon: Summon | null; tauntKey: string | null },
   dt: number,
   events: GameEvent[],
 ): void {
@@ -287,7 +321,7 @@ function moveBossApproach(
   const targetDist = Math.hypot(targetDx, targetDy) || 1;
   let dirX = targetDx / targetDist;
   let dirY = targetDy / targetDist;
-  if (!target.summon && !boss.status.taunt) {
+  if (!target.summon && !activeTaunt(boss)) {
     const orbitStart = Math.min(
       totalRange(state, config) * bb.orbitStartRangeRatio,
       bb.orbitStartMaxDistance,
@@ -310,7 +344,7 @@ function moveBossApproach(
 
   const rawStep = boss.speed * speedMultiplier(boss) * config.enemySpeed * dt;
   const contactGap = turretDist - bb.contactDistance;
-  if (!target.summon && !boss.status.taunt && rawStep + 1e-6 >= contactGap) {
+  if (!target.summon && !activeTaunt(boss) && rawStep + 1e-6 >= contactGap) {
     boss.x = t.x - (turretDx / turretDist) * bb.contactDistance;
     boss.y = t.y - (turretDy / turretDist) * bb.contactDistance;
     enterBossContact(state, config, rng, boss, events);
@@ -326,7 +360,7 @@ function moveBossApproach(
       event: 'hit', remaining: 0.22,
     });
     for (let k = 0; k < 6; k++) spawnParticle(state, rng, boss.x, boss.y, '#8793a3', 120);
-    boss.status.taunt = null;
+    boss.status.taunt = boss.status.taunt.filter(candidate => candidate.summonId !== target.summon!.id);
     return;
   }
 
@@ -347,7 +381,7 @@ function moveWaveBoss(
   config: Config,
   rng: Rng,
   boss: Enemy,
-  target: { x: number; y: number; summon: Summon | null },
+  target: { x: number; y: number; summon: Summon | null; tauntKey: string | null },
   dt: number,
   events: GameEvent[],
 ): void {
@@ -373,10 +407,9 @@ export function moveEnemies(state: GameState, config: Config, rng: Rng, dt: numb
   for (let i = state.enemies.length - 1; i >= 0; i--) {
     const e = state.enemies[i];
     const target = moveTargetFor(state, e);
-    const targetId = target.summon?.id;
-    if (targetId !== e.tauntVfxTargetId) {
-      if (targetId != null) state.vfx.push({ kind: 'tauntPulse', enemyId: e.id, remaining: 0.6 });
-      e.tauntVfxTargetId = targetId;
+    if (target.tauntKey !== (e.tauntVfxSourceKey ?? null)) {
+      if (target.tauntKey != null) state.vfx.push({ kind: 'tauntPulse', enemyId: e.id, remaining: 0.6 });
+      e.tauntVfxSourceKey = target.tauntKey ?? undefined;
     }
     if (isWaveBoss(e)) {
       moveWaveBoss(state, config, rng, e, target, dt, events);
@@ -399,7 +432,7 @@ export function moveEnemies(state: GameState, config: Config, rng: Rng, dt: numb
       });
       for (let k = 0; k < 6; k++) spawnParticle(state, rng, e.x, e.y, '#8793a3', 120);
       if (e.spawnKind === 'waveBoss') {
-        e.status.taunt = null;
+        e.status.taunt = e.status.taunt.filter(candidate => candidate.summonId !== target.summon!.id);
         continue;
       }
       state.enemies.splice(i, 1);
@@ -428,6 +461,7 @@ export function moveEnemies(state: GameState, config: Config, rng: Rng, dt: numb
         events.push({ type: 'breakthrough', damage });
       }
       events.push(...fireTrigger(state, config, rng, 'onBreach', { enemy: e, damage: damage ?? 0, point: { x: e.x, y: e.y } }));
+      state.effectRuntime.lastBreachAt = state.time;
       if (state.hp <= 0) events.push(...endGame(state, false));
     }
   }

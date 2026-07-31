@@ -137,7 +137,17 @@ export function createUpgradeFeedback(refs: DomRefs) {
 
   return {
     handle(events: GameEvent[]): void {
-      const suppressCelebration = events.some(event => event.type === 'levelUp');
+      for (const event of events) {
+        if (event.type !== 'recipeCompleted') continue;
+        const card = [...refs.cards.querySelectorAll<HTMLElement>('.card'), ...refs.equipmentSlots.querySelectorAll<HTMLElement>('.card')]
+          .find(element => element.dataset.id === String(event.outputCardId));
+        if (!card) continue;
+        card.classList.remove('recipe-transform');
+        void card.offsetWidth;
+        card.classList.add('recipe-transform');
+        setTimeout(() => card.classList.remove('recipe-transform'), 560);
+      }
+      const suppressCelebration = events.some(event => event.type === 'rewardTriggered');
       const candidates = resolveUpgradeCandidates(events).map(candidate => ({ ...candidate, suppressCelebration }));
       if (!candidates.length) return;
       if (!active) {

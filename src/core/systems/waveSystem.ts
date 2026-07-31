@@ -1,12 +1,12 @@
 import { cfg } from '../../config';
 import type { Config, GameEvent, GameState, Rng } from '../types';
 import { endGame } from '../endGame';
-import { createEnemy, randomEdgeSpawnPosition, spawnEnemy, spawnWaveBoss } from './enemySystem';
+import { createEnemy, determineValidationType, randomEdgeSpawnPosition, spawnEnemy, spawnWaveBoss } from './enemySystem';
 import { fireTrigger, reconcileEquipmentPassives } from '../effects/interpreter';
 import { budgetAdmission, budgetWaveQuotaFor } from './budgetRules';
 import { resolveActiveWavePlan } from '../runStage';
 import { clearDecisionQueue } from './decisionQueueSystem';
-import { beginIntermission, endIntermission, tickIntermission } from './intermissionSystem';
+import { beginIntermission, beginValidationRewardSettle, endIntermission, tickIntermission } from './intermissionSystem';
 import { generateActivePool } from './activePoolSystem';
 export { budgetAdmission } from './budgetRules';
 
@@ -21,6 +21,7 @@ export function enemyCountFor(wave: number): number {
 export function startNextWave(state: GameState, config: Config, rng: Rng): GameEvent[] {
   endIntermission(state);
   state.wave++;
+  state.effectRuntime.pickupsThisWave = 0;
   const activePool = generateActivePool(state, state.wave, rng);
   state.combatTelemetry = { wave: state.wave, perCard: {} };
   state.ordinaryDrop.credit = Math.min(cfg.economy.ordinaryDropRate.carryCap, state.ordinaryDrop.credit);
@@ -35,6 +36,9 @@ export function startNextWave(state: GameState, config: Config, rng: Rng): GameE
   state.spawnTimer = cfg.waves.firstSpawnDelay;
   state.lastSpawnCheckCount = 0;
   state.wavePhase = 'regular';
+  state.validationRewardSettleRemaining = 0;
+  state.validationRewardSettleConfirmed = false;
+  state.validationRuntime = { spawnedEliteIndexes: [], bossEscortTimer: 0, bossEscortsCleared: false };
   state.waveBossId = null;
   state.waveBossSpawnedAt = null;
   state.bountyOffers.length = 0;
@@ -43,21 +47,6 @@ export function startNextWave(state: GameState, config: Config, rng: Rng): GameE
   state.bountyDirector.completedThisWave = 0;
   state.bountyDirector.guaranteedThisWave = false;
   state.bountyDirector.checkTimer = cfg.bounty.offer.checkIntervalSeconds;
-  if (wavePlan.validation) {
-    state.spawnLeft = 0;
-    state.waveSpawnQuota = 0;
-    for (const spec of wavePlan.validation.enemies) {
-      state.enemies.push(createEnemy(state, spec.type, state.wave, randomEdgeSpawnPosition(rng), {
-        hpMul: spec.hpMul,
-        damageMul: spec.damageMul,
-        speedMul: spec.speedMul,
-        spawnKind: 'validationElite',
-        ccResistOverride: spec.ccResistOverride,
-        knockbackResistOverride: spec.knockbackResistOverride,
-        validationReward: spec.reward,
-      }));
-    }
-  }
   const events: GameEvent[] = [
     { type: 'waveStart', wave: state.wave },
     ...(state.godPool.mainGod ? [{
@@ -120,6 +109,68 @@ export function tickSpawns(state: GameState, rng: Rng, dt: number): void {
   SPAWN_STRATEGIES[cfg.waves.spawnMode].tick(state, rng, dt);
 }
 
+/** Validation director: milestone elites, Boss escorts, and post-Boss escort cleanup. */
+export function tickValidationDirector(state: GameState, _config: Config, rng: Rng, dt: number): GameEvent[] {
+  if (state.mode !== 'playing') return [];
+  const plan = resolveActiveWavePlan(cfg, state.wave);
+  if (!plan.validation) return [];
+  const events: GameEvent[] = [];
+
+  if (state.wavePhase === 'regular') {
+    const quota = state.waveSpawnQuota;
+    const progress = quota > 0 ? 1 - state.spawnLeft / quota : 1;
+    for (let eliteIndex = 0; eliteIndex < plan.validation.elites.length; eliteIndex++) {
+      if (state.validationRuntime.spawnedEliteIndexes.includes(eliteIndex)) continue;
+      const spec = plan.validation.elites[eliteIndex];
+      if (spec.spawnAtProgress > progress) continue;
+      const elite = createEnemy(state, spec.type, state.wave, randomEdgeSpawnPosition(rng), {
+        hpMul: spec.hpMul,
+        damageMul: spec.damageMul,
+        speedMul: spec.speedMul,
+        spawnKind: 'validationElite',
+        ccResistOverride: spec.ccResistOverride,
+        knockbackResistOverride: spec.knockbackResistOverride,
+        validationReward: spec.reward,
+      });
+      state.enemies.push(elite);
+      state.validationRuntime.spawnedEliteIndexes.push(eliteIndex);
+      events.push({ type: 'validationEliteSpawned', wave: state.wave, eliteIndex, enemyId: elite.id });
+    }
+  }
+
+  const bossAlive = state.waveBossId !== null
+    && state.enemies.some(enemy => enemy.id === state.waveBossId);
+  const escort = plan.validation.bossEscort;
+  if (state.wavePhase === 'boss' && escort && bossAlive) {
+    state.validationRuntime.bossEscortTimer -= dt;
+    while (state.validationRuntime.bossEscortTimer <= 0) {
+      const alive = state.enemies.filter(enemy => enemy.spawnKind === 'validationMinion').length;
+      const count = Math.min(escort.count, Math.max(0, escort.maxAlive - alive));
+      for (let index = 0; index < count; index++) {
+        const type = determineValidationType(escort.composition, rng());
+        state.enemies.push(createEnemy(state, type, state.wave, randomEdgeSpawnPosition(rng), {
+          spawnKind: 'validationMinion',
+          hpMul: escort.hpMul,
+          damageMul: escort.damageMul,
+          speedMul: escort.speedMul,
+        }));
+      }
+      if (count > 0) events.push({ type: 'validationEscortSpawned', wave: state.wave, count });
+      state.validationRuntime.bossEscortTimer += escort.intervalSeconds;
+    }
+  }
+
+  if (state.wavePhase === 'boss' && state.waveBossId !== null && !bossAlive
+    && !state.validationRuntime.bossEscortsCleared) {
+    const before = state.enemies.length;
+    state.enemies = state.enemies.filter(enemy => enemy.spawnKind !== 'validationMinion');
+    const removed = before - state.enemies.length;
+    state.validationRuntime.bossEscortsCleared = true;
+    events.push({ type: 'validationEscortsCleared', wave: state.wave, removed });
+  }
+  return events;
+}
+
 /**
  * 波次清空判定：本波敌人生成完且场上清空时，最后一波→胜利结束，
  * 否则进入正式波间阶段并产出 waveCleared。
@@ -136,16 +187,34 @@ export function advanceWavePhase(state: GameState, _config: Config, rng: Rng): G
   if (state.mode !== 'playing') return [];
   const bountyActive = state.bountyEncounters.some(encounter => encounter.status === 'spawning' || encounter.status === 'active');
   if (state.wavePhase === 'regular') {
-    const blockingEnemy = state.enemies.some(enemy => enemy.spawnKind === 'regular' || enemy.spawnKind === 'bounty' || enemy.spawnKind === 'validationElite');
+    const blockingEnemy = state.enemies.some(enemy =>
+      enemy.spawnKind === 'regular'
+      || enemy.spawnKind === 'bounty'
+      || enemy.spawnKind === 'validationElite'
+      || enemy.spawnKind === 'validationMinion');
     if (state.spawnLeft !== 0 || blockingEnemy || bountyActive) return [];
     const events: GameEvent[] = state.bountyOffers.map(offer => ({ type: 'bountyOfferExpired' as const, offerId: offer.id }));
     state.bountyOffers.length = 0;
     if (!cfg.waves.bossWaves.includes(state.wave)) return [...events, ...finishWave(state)];
+    if (resolveActiveWavePlan(cfg, state.wave).validation) {
+      return [...events, ...beginValidationRewardSettle(state)];
+    }
     const boss = spawnWaveBoss(state, rng);
     state.wavePhase = 'boss';
     state.waveBossId = boss.id;
     state.waveBossSpawnedAt = state.time;
+    state.validationRuntime.bossEscortTimer = resolveActiveWavePlan(cfg, state.wave).validation?.bossEscort?.intervalSeconds ?? 0;
     return [...events, { type: 'waveBossSpawned', wave: state.wave }];
+  }
+  if (state.wavePhase === 'validationRewardSettle') {
+    if (!state.validationRewardSettleConfirmed && state.validationRewardSettleRemaining > 0) return [];
+    const boss = spawnWaveBoss(state, rng);
+    state.wavePhase = 'boss';
+    state.waveBossId = boss.id;
+    state.waveBossSpawnedAt = state.time;
+    state.validationRuntime.bossEscortTimer = resolveActiveWavePlan(cfg, state.wave).validation?.bossEscort?.intervalSeconds ?? 0;
+    state.validationRewardSettleRemaining = 0;
+    return [{ type: 'waveBossSpawned', wave: state.wave }];
   }
   if (state.wavePhase === 'boss'
     && state.waveBossId !== null
@@ -194,6 +263,8 @@ export function jumpToWave(state: GameState, config: Config, rng: Rng, targetWav
   state.waveRewardsClaimedWave = Math.max(state.waveRewardsClaimedWave, wave - 1);
   state.waveChoiceOfferedWave = Math.max(state.waveChoiceOfferedWave ?? 0, wave - 1);
   state.wavePhase = 'regular';
+  state.validationRewardSettleRemaining = 0;
+  state.validationRewardSettleConfirmed = false;
   state.waveBossId = null;
   state.waveBossSpawnedAt = null;
   state.bossRewardClaimedWave = 0;

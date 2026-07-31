@@ -1,15 +1,15 @@
 // 纯规则层类型定义。core/ 内禁止出现 DOM / Canvas / 浏览器 API。（P3 重构版）
-import type { BuildTag, EffectDef } from './effects/defs';
+import type { BuildTag, EffectDef, RuntimeStatKind } from './effects/defs';
 import type { RunSummary } from './settlement';
-import type { CardStatKind, DifficultyId, GodId, RunBaseStatKind, WaveChoiceStatKind } from '../config/types';
+import type { CardAffixStatKind, DifficultyId, GodId, RunBaseStatKind, WaveChoiceStatKind } from '../config/types';
 import type { ValidationRewardSpec, ValidationRewardTypePolicy } from '../config/types';
 
 /** 卡牌类型 = 技能 id 字符串（schema: ^[a-z][a-zA-Z0-9]*$），由 skills.json 的 cards[].id 决定。 */
 export type CardType = string;
 export type EnemyType = 'normal' | 'fast' | 'tank' | 'boss';
 export type GameMode = 'ready' | 'playing' | 'ended';
-export type WavePhase = 'regular' | 'boss' | 'between';
-export type EnemySpawnKind = 'regular' | 'waveBoss' | 'bounty' | 'validationElite';
+export type WavePhase = 'regular' | 'validationRewardSettle' | 'boss' | 'between';
+export type EnemySpawnKind = 'regular' | 'waveBoss' | 'bounty' | 'validationElite' | 'validationMinion';
 export type BountySide = 'top' | 'right' | 'bottom' | 'left';
 
 export interface BountyOffer {
@@ -95,7 +95,7 @@ export interface OrdinaryDropBudgetState {
 export type Rng = () => number;
 
 export interface CardAffixRoll {
-  stat: CardStatKind;
+  stat: CardAffixStatKind;
   value: number;
   consumableDuration: number;
 }
@@ -108,6 +108,20 @@ export interface Card {
   /** Checkpoint merge product waiting for this card's branch choice. */
   provisional?: boolean;
   affixes?: CardAffixRoll[];
+  /** recipeOnly 产物的静态归属快照；不参与双神加成结算。 */
+  primaryGod?: GodId;
+  sourceGods?: GodId[];
+  recipeLineage?: RecipeLineage;
+}
+
+export interface RecipeLineageMaterial {
+  cardType: CardType;
+  evolutionPath: string[];
+}
+
+export interface RecipeLineage {
+  recipeId: string;
+  materials: [RecipeLineageMaterial, RecipeLineageMaterial];
 }
 
 export interface CardRef {
@@ -120,8 +134,6 @@ export type RunDecision =
   | { kind: 'godDraft'; wave: number; candidates: GodId[]; role: 'main' | 'sub' }
   | { kind: 'godFocus'; wave: number; candidates: GodId[] }
   | { kind: 'evolutionBranch'; cardType: CardType; checkpointStar: number; options: string[]; provisionalCardId: number }
-  | { kind: 'recipeEvolution'; recipeId: string }
-  | { kind: 'relic'; relicIndex: number; options: string[] }
   | { kind: 'waveBaseReward'; wave: number; candidates: string[]; capped: string[] };
 
 export interface DecisionQueueState {
@@ -146,6 +158,20 @@ export interface GodPoolState {
   offerRosterPreviews: Record<GodId, CardType[]>;
 }
 
+export interface RecipeRunState {
+  compatibleRecipeIds: string[];
+  /** Invisible deterministic assistance target; never exposed as a player choice. */
+  directedRecipeId: string | null;
+  readyRecipeIds: string[];
+  notifiedRecipeIds: string[];
+  completedRecipeIds: string[];
+  assistBudgetUsed: number;
+  /** 每种材料已消耗的定向修正次数。 */
+  assistCorrectionsByMaterial: Record<CardType, number>;
+  assistClosed: boolean;
+  firstReadyWave: number | null;
+}
+
 export interface RunBaseStats {
   damageAdd: number;
   fireRateAdd: number;
@@ -159,7 +185,7 @@ export interface WaveRewardGrant {
   add: number;
 }
 
-export type IntermissionStep = 'settle' | 'decide' | 'free';
+export type IntermissionStep = 'rewardChoice' | 'settle' | 'godDecision' | 'free';
 
 export interface IntermissionState {
   active: boolean;
@@ -169,6 +195,8 @@ export interface IntermissionState {
   freeRemaining: number;
   readyConfirmed: boolean;
   rewardsGranted: WaveRewardGrant[];
+  /** 本波玩家在「强化炮台」中选中的项；开局波与无可选项时为 null。 */
+  selectedReward: { id: string; stat: WaveChoiceStatKind; add: number } | null;
 }
 
 export type WildcardInventory = Record<number, number>;
@@ -191,10 +219,25 @@ export interface EnemyStatus {
   dots: { dps: number; remaining: number }[];
   /** 烙印（focusPriority）：炮台索敌优先级权重。 */
   brand: { weight: number; remaining: number } | null;
-  /** 嘲讽：移动目标改为坐标/召唤物。 */
-  taunt: { x: number; y: number; remaining: number; summonId?: number } | null;
+  /** 嘲讽候选集：由 activeTaunt 统一仲裁移动目标。 */
+  taunt: TauntCandidate[];
   /** 击退疲劳:短窗口内连续击退按 multiplier 递减;窗口过期重置。 */
   kbFatigue: { multiplier: number; remaining: number } | null;
+}
+
+export interface PendingMergeRefund {
+  cardType: CardType;
+  star: number;
+  count: number;
+}
+
+export interface TauntCandidate {
+  sourceKey: string;
+  priorityWeight: number;
+  x: number;
+  y: number;
+  summonId?: number;
+  remaining: number;
 }
 
 export interface BossRuntimeState {
@@ -228,15 +271,16 @@ export interface Enemy {
   ccResistOverride?: number;
   knockbackResistOverride?: number;
   validationReward?: ValidationRewardSpec;
-  /** Presentation-only memory used to emit a pulse when taunt target changes. */
-  tauntVfxTargetId?: number;
+  /** Presentation-only memory used to emit a pulse when the arbitrated taunt source changes. */
+  tauntVfxSourceKey?: string;
   bossRuntime?: BossRuntimeState;
 }
 
-export interface AttackRider extends EffectDef {
+/** EffectDef 是判别联合，故用交叉类型扩展而非 interface extends。 */
+export type AttackRider = EffectDef & {
   /** Equipment card that attached this rider, for DEV attribution only. */
   sourceCardId?: number;
-}
+};
 
 export interface Bullet {
   x: number;
@@ -294,8 +338,10 @@ export interface WeaponImpactSpec {
 export interface AttackInstance {
   attackId: number;
   delivery: AttackDelivery;
-  /** 开火时快照的炮台基础伤害，供融合 impact 使用。 */
+  /** 开火时快照的炮台基础伤害，供 riders 与 legacy fallback 使用。 */
   baseDamage: number;
+  /** 按 delivery 分配的单次范围形态预算；不改变 baseDamage 的 legacy 语义。 */
+  impactBudget: number;
   damage: number;
   riders: AttackRider[];
   hitIds: number[];
@@ -389,13 +435,27 @@ export interface Zone {
   x: number;
   y: number;
   radius: number;
+  initialRadius?: number;
+  radiusOverTime?: { from: number; to: number; easing?: 'linear' };
+  totalDuration?: number;
   /** 环带内径（shape=ring 时生效）。 */
   innerRadius?: number;
-  shape: 'circle' | 'ring';
+  shape: 'circle' | 'ring' | 'line';
+  /** 线形区域几何；仅 shape=line 时写入，x/y 仍保留为空间锚点。 */
+  lineStartX?: number;
+  lineStartY?: number;
+  lineDirX?: number;
+  lineDirY?: number;
+  lineLength?: number;
+  lineWidth?: number;
+  lineFrom?: 'turretToPoint' | 'bulletPath';
   remaining: number;
   tickInterval: number;
   tickTimer: number;
   effects: EffectDef[];
+  sourceCardId?: number;
+  sourceCardType?: CardType;
+  sourceBindingIndex?: number;
   /** 效果结算的伤害基准（创建时的炮台总伤）。 */
   baseDamage: number;
   color?: string;
@@ -404,12 +464,14 @@ export interface Zone {
 /** 召唤物：诱饵图腾 / 镜像炮台 / 环绕球。 */
 export interface Summon {
   id: number;
-  kind: 'decoy' | 'mirrorTurret' | 'orbital';
+  kind: 'decoy' | 'mirrorTurret' | 'orbital' | 'wall' | 'goldenTree' | 'rootSegment' | 'crystal' | 'pylon' | 'iceSpire' | 'iceDecoy';
   /** 装备态召唤物来源；无来源表示消耗态/其他临时召唤物，仍走自身 duration。 */
   sourceCardId?: number;
+  sourceCardType?: CardType;
   sourceBindingIndex?: number;
+  sourceEffectIndex?: number;
   /** 装备态重生/换波刷新复用的放置策略。 */
-  placement?: 'threatDirection';
+  placement?: 'threatDirection' | 'ring';
   distanceFromTurret?: number;
   x: number;
   y: number;
@@ -419,8 +481,9 @@ export interface Summon {
   remaining?: number;
   tauntRadius?: number;
   priorityWeight?: number;
-  /** 镜像炮台：本体伤害比例与开火冷却。 */
+  /** 镜像炮台/环绕球：本体伤害比例、配置冷却与当前冷却。 */
   damageRatio?: number;
+  fireInterval: number;
   fireCd?: number;
   /** 环绕球公转角。 */
   angle?: number;
@@ -429,6 +492,15 @@ export interface Summon {
   /** 被摧毁时在新位置重生一次（decoy 5★ 修饰）；respawned 标记该次重生已用掉。 */
   respawnOnce?: boolean;
   respawned?: boolean;
+  chainRelay?: boolean;
+  onDeathEffects?: EffectDef[];
+  intervalEffects?: EffectDef[];
+  intervalSeconds?: number;
+  intervalTimer?: number;
+  auraRadius?: number;
+  auraEffects?: EffectDef[];
+  buffLevel?: number;
+  baseDamage?: number;
 }
 
 /** 炮台护盾：按可吸收突破次数计。 */
@@ -443,10 +515,32 @@ export interface ShieldState {
 /** Generic runtime stat modifier. Consumable affixes always set remaining. */
 export interface RuntimeStatModifier {
   sourceId: string;
-  stat: CardStatKind | 'damage' | 'fireRate' | 'dropRateMul' | 'dropLifetimeMul' | 'xpMul';
+  stat: RuntimeStatKind;
   operation: 'add' | 'mul';
   value: number;
   remaining?: number;
+}
+
+export interface RewardExecutionResult {
+  damageDealt?: number;
+  enemiesKilled?: number;
+  healingGranted?: number;
+  shieldHitsGranted?: number;
+  frozenCount?: number;
+  wildcardGrants?: Array<{ star: number; count: number }>;
+  surgeTag?: BuildTag;
+  surgeDuration?: number;
+}
+export interface RewardReceipt { rewardId: string; activationIndex: number; result: RewardExecutionResult; }
+export interface RewardMeterState {
+  points: number;
+  thresholdIndex: number;
+  threshold: number;
+  currentReceipt: RewardReceipt | null;
+  lastRewardId: string | null;
+  activationCount: number;
+  pointGainBonus: number;
+  suppressDepth: number;
 }
 
 /** 运行期可调参数（对应调参面板；由 cfg 各域 defaults 组装）。 */
@@ -462,14 +556,6 @@ export interface Config {
 export interface BuildState {
   /** BuildTag affinity is retained as a read-only compatibility snapshot for one release. */
   affinity: Record<BuildTag, number>;
-  /** Relic routing affinity is god-scoped; neutral relics never increment it. */
-  godAffinity: Record<GodId, number>;
-  /** Relics in selection order. */
-  relicHistory: string[];
-  /** Incremented whenever a relic is applied, invalidating cached build-scaling totals. */
-  scalingVersion: number;
-  /** Forces a card from the selected god within this many build-role drops. */
-  dropPity?: { god: GodId; remaining: number };
 }
 
 export interface RunBuildState {
@@ -491,6 +577,7 @@ export interface GameState {
   /** Run-scoped build data; evolution routes themselves are stored per card instance. */
   runBuild: RunBuildState;
   godPool: GodPoolState;
+  recipes: RecipeRunState;
   intermission: IntermissionState;
   enemies: Enemy[];
   bullets: Bullet[];
@@ -499,6 +586,8 @@ export interface GameState {
   particles: Particle[];
   groundDrops: GroundDrop[];
   cards: (Card | null)[];
+  /** 合成返还先进入此队列，待当前自动合并循环稳定后再发牌，避免循环中途重入。 */
+  pendingMergeRefunds: PendingMergeRefund[];
   /** 独立装备格；装备卡可拖到战场消耗释放，不可回到手牌。 */
   equipment: (Card | null)[];
   /** 按目标当前星级储存的万能卡数量；合法键 1..maxStar-1（当前 1..5）。独立于 cards/equipment。 */
@@ -511,6 +600,14 @@ export interface GameState {
   intervalClocks: Record<string, number>;
   /** 任意触发器绑定的冷却截止时刻（state.time 基准；key = cd:卡id:绑定序号），供 triggerParams.cooldownSeconds 使用。 */
   cooldowns: Record<string, number>;
+  /** Shared counters/state for generic effect primitives; never card-specific. */
+  effectRuntime: {
+    lastBreachAt: number;
+    killsAtLastRelease: number;
+    pickupsThisWave: number;
+    auraOrigins: Record<string, { x: number; y: number; startedAt: number }>;
+    charges: Record<string, number>;
+  };
   nextCardId: number;
   nextDropId: number;
   nextEnemyId: number;
@@ -525,6 +622,13 @@ export interface GameState {
   /** DEV-visible result of the latest Budget admission check (not configuration). */
   lastSpawnCheckCount: number;
   wavePhase: WavePhase;
+  validationRewardSettleRemaining: number;
+  validationRewardSettleConfirmed: boolean;
+  validationRuntime: {
+    spawnedEliteIndexes: number[];
+    bossEscortTimer: number;
+    bossEscortsCleared: boolean;
+  };
   waveBossId: number | null;
   waveBossSpawnedAt: number | null;
   bossRewardClaimedWave: number;
@@ -541,18 +645,12 @@ export interface GameState {
   multi: number;
   shotCd: number;
   turretAngle: number;
-  xp: number;
-  xpNeed: number;
-  level: number;
-  relicStacks: Record<string, number>;
+  rewardMeter: RewardMeterState;
   buildState: BuildState;
-  xpGainBonus: number;
   /** Legacy perk percentage source; C2 wave growth is pixel-based runBaseStats.rangeAdd. */
   rangeBonus: number;
   kills: number;
   merges: number;
-  /** Fixed recipes completed during this run, in completion order. */
-  completedRecipes: string[];
   /** 遥测拆分（原 uses）：consumes=消耗释放次数；equipOps=装备操作次数。 */
   consumes: number;
   equipOps: number;
@@ -593,14 +691,33 @@ export type GameEvent =
   | { type: 'waveBaseRewardOffered'; wave: number; candidates: string[] }
   | { type: 'waveBaseRewardChosen'; wave: number; stat: WaveChoiceStatKind; add: number }
   | { type: 'bossRewardGranted'; wave: number; grants: Array<{ star: number; count: number }> }
-  | { type: 'levelUp' }
-  | { type: 'relicOffered'; relicIndex: number; options: string[] }
-  | { type: 'relicSelected'; relicId: string; title: string; rarity: 'common' | 'rare' | 'epic'; god?: GodId }
+  | { type: 'validationRewardGranted'; wave: number; cardType: CardType; star: number; delivery: 'hand' | 'drop' }
+  | { type: 'validationRewardSettleStarted'; wave: number; seconds: number }
+  | { type: 'validationEliteSpawned'; wave: number; eliteIndex: number; enemyId: number }
+  | { type: 'validationEscortSpawned'; wave: number; count: number }
+  | { type: 'validationEscortsCleared'; wave: number; removed: number }
+  // 只带 id：显示名属表现层，由 UI 文案映射解析（core 不得依赖 texts）。
+  | { type: 'rewardPointsGained'; amount: number; total: number }
+  | { type: 'rewardTriggered'; rewardId: string; activationIndex: number; result: RewardExecutionResult }
+  | { type: 'rewardConfirmed'; rewardId: string }
   | { type: 'evolutionBranchOffered'; cardType: CardType; checkpointStar: number; options: string[]; provisionalCardId: number }
   | { type: 'evolutionBranchSelected'; cardType: CardType; checkpointStar: number; optionId: string; provisionalCardId: number }
   | { type: 'recipeAvailable'; recipeIds: string[] }
-  | { type: 'recipeCompleted'; recipeId: string; outputCardType: CardType; outputStar: number }
-  | { type: 'recipeRejected'; recipeId: string; reason: 'phase' | 'materials' | 'slots' }
+  | {
+    type: 'recipeCompleted';
+    recipeId: string;
+    outputCardType: CardType;
+    outputStar: number;
+    outputCardId: number;
+    target: { slotKind: SlotKind; index: number };
+    materialCardIds: [number, number];
+  }
+  | {
+    type: 'recipeRejected';
+    recipeId: string;
+    reason: 'mode' | 'paused' | 'decision' | 'intermission' | 'phase' | 'limit' | 'completed'
+      | 'materials' | 'star' | 'provisional' | 'stale' | 'slots';
+  }
   | { type: 'affixRolled'; cardType: CardType; affixes: CardAffixRoll[] }
   | { type: 'gameEnd'; win: boolean }
   | { type: 'breakthrough'; damage: number }
@@ -614,6 +731,7 @@ export type GameEvent =
   | { type: 'moved'; cardType: CardType; merges: number }
   | { type: 'swapped'; a: CardType; b: CardType }
   | { type: 'merged'; cardType: CardType; resultStar: number; resultCardId?: number }
+  | { type: 'mergeRefunded'; cardType: CardType; star: number; granted: number; lost: number }
   | { type: 'skillConsumed'; cardType: CardType; star: number; x: number; y: number }
   | { type: 'equipped'; cardType: CardType; star: number; slotIndex: number }
   | { type: 'fed'; cardType: CardType; resultStar: number; slotIndex?: number; targetCardId?: number }

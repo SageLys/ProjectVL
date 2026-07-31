@@ -1,0 +1,435 @@
+{
+  "spec": {
+    "id": "05-run-defeat",
+    "seed": 5,
+    "variants": [
+      "dev-short"
+    ],
+    "dt": 0.03333333333333333,
+    "frames": 9000,
+    "start": "wave1"
+  },
+  "framesRun": 625,
+  "mode": "ended",
+  "win": false,
+  "hp": -8,
+  "maxHp": 60,
+  "wave": {
+    "wave": 1,
+    "phase": "regular",
+    "spawnLeft": 54,
+    "waveSpawnQuota": 75,
+    "intermission": {
+      "active": false,
+      "step": "godDecision",
+      "afterWave": 0
+    }
+  },
+  "enemiesRemaining": 9,
+  "cumulativeDamageDealt": 438,
+  "cumulativeDamageTaken": 68,
+  "counters": {
+    "kills": 4,
+    "collected": 0,
+    "expired": 4,
+    "merges": 0,
+    "consumes": 0,
+    "equipOps": 0,
+    "rewardPoints": 4,
+    "rewardActivations": 0
+  },
+  "cards": [],
+  "equipment": [],
+  "wildcards": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "4": 0,
+    "5": 0
+  },
+  "rewards": [],
+  "enemySequence": [
+    {
+      "frame": 13,
+      "id": 1,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": -24.265719294981228,
+      "y": 180.50395941004848
+    },
+    {
+      "frame": 13,
+      "id": 2,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 313.2218490677359,
+      "y": -24.138630264428418
+    },
+    {
+      "frame": 13,
+      "id": 3,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 564.358208141649,
+      "y": 632.1277690590858
+    },
+    {
+      "frame": 13,
+      "id": 4,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": -23.679215427919143,
+      "y": 523.0934512953364
+    },
+    {
+      "frame": 13,
+      "id": 5,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 253.77476670992533,
+      "y": -24.134085717457747
+    },
+    {
+      "frame": 13,
+      "id": 6,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": -23.64458292676249,
+      "y": 225.79901014069435
+    },
+    {
+      "frame": 72,
+      "id": 7,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 154.42843055198742,
+      "y": 754.1691942489359
+    },
+    {
+      "frame": 72,
+      "id": 8,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 135,
+      "speed": 16.5,
+      "damage": 14,
+      "x": -24.539413475727187,
+      "y": 172.77032556959273
+    },
+    {
+      "frame": 72,
+      "id": 9,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": 255.9905414662379,
+      "y": -23.50097430838886
+    },
+    {
+      "frame": 72,
+      "id": 10,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 73.43477589279142,
+      "y": -24.22638789522108
+    },
+    {
+      "frame": 190,
+      "id": 11,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 564.2830115187829,
+      "y": 564.8308687080814
+    },
+    {
+      "frame": 249,
+      "id": 12,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": 563.6609102069732,
+      "y": 513.2237517742309
+    },
+    {
+      "frame": 308,
+      "id": 13,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": -24.30596064841109,
+      "y": 144.8948150791609
+    },
+    {
+      "frame": 367,
+      "id": 14,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 135,
+      "speed": 16.5,
+      "damage": 14,
+      "x": -24.4667279430867,
+      "y": 439.3322783388585
+    },
+    {
+      "frame": 426,
+      "id": 15,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 258.18829428201303,
+      "y": -24.133732311928437
+    },
+    {
+      "frame": 426,
+      "id": 16,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 564.2315752105687,
+      "y": 211.53573599362304
+    },
+    {
+      "frame": 426,
+      "id": 17,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": -24.32871422995139,
+      "y": 124.6535601202303
+    },
+    {
+      "frame": 485,
+      "id": 18,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 90.77539015928775,
+      "y": 754.212785058405
+    },
+    {
+      "frame": 544,
+      "id": 19,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 135,
+      "speed": 16.5,
+      "damage": 14,
+      "x": 564.6324640284072,
+      "y": 36.99465096032174
+    },
+    {
+      "frame": 544,
+      "id": 20,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": -23.524943296380933,
+      "y": 310.7923170051734
+    },
+    {
+      "frame": 603,
+      "id": 21,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 55.129854474921714,
+      "y": 754.2412619528341
+    }
+  ],
+  "dropSequence": [
+    {
+      "frame": 164,
+      "action": "spawned",
+      "dropId": 1,
+      "kind": "card",
+      "cardType": "decoy",
+      "star": 1
+    },
+    {
+      "frame": 198,
+      "action": "spawned",
+      "dropId": 2,
+      "kind": "card",
+      "cardType": "pierce",
+      "star": 1
+    },
+    {
+      "frame": 266,
+      "action": "spawned",
+      "dropId": 3,
+      "kind": "card",
+      "cardType": "stormcall",
+      "star": 1
+    },
+    {
+      "frame": 314,
+      "action": "expired",
+      "dropId": 1,
+      "kind": "card",
+      "cardType": null,
+      "star": 1
+    },
+    {
+      "frame": 319,
+      "action": "spawned",
+      "dropId": 4,
+      "kind": "card",
+      "cardType": "bountyCall",
+      "star": 1
+    },
+    {
+      "frame": 348,
+      "action": "expired",
+      "dropId": 2,
+      "kind": "card",
+      "cardType": null,
+      "star": 1
+    },
+    {
+      "frame": 416,
+      "action": "expired",
+      "dropId": 3,
+      "kind": "card",
+      "cardType": null,
+      "star": 1
+    },
+    {
+      "frame": 469,
+      "action": "expired",
+      "dropId": 4,
+      "kind": "card",
+      "cardType": null,
+      "star": 1
+    }
+  ],
+  "eventSequence": [
+    {
+      "frame": 0,
+      "type": "waveStart"
+    },
+    {
+      "frame": 164,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 198,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 266,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 314,
+      "type": "dropExpired"
+    },
+    {
+      "frame": 319,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 348,
+      "type": "dropExpired"
+    },
+    {
+      "frame": 408,
+      "type": "breakthrough"
+    },
+    {
+      "frame": 410,
+      "type": "breakthrough"
+    },
+    {
+      "frame": 416,
+      "type": "dropExpired"
+    },
+    {
+      "frame": 417,
+      "type": "breakthrough"
+    },
+    {
+      "frame": 437,
+      "type": "breakthrough"
+    },
+    {
+      "frame": 469,
+      "type": "dropExpired"
+    },
+    {
+      "frame": 486,
+      "type": "breakthrough"
+    },
+    {
+      "frame": 520,
+      "type": "breakthrough"
+    },
+    {
+      "frame": 546,
+      "type": "breakthrough"
+    },
+    {
+      "frame": 625,
+      "type": "breakthrough"
+    },
+    {
+      "frame": 625,
+      "type": "gameEnd"
+    }
+  ],
+  "eventCounts": {
+    "waveStart": 1,
+    "rewardPointsGained": 4,
+    "dropExpired": 4,
+    "breakthrough": 8,
+    "gameEnd": 1
+  },
+  "rng": {
+    "draws": 2164,
+    "last": 0.2340710514690727
+  }
+}

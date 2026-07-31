@@ -5,22 +5,28 @@ import type { DomRefs } from './domRefs';
 import { cardDisplayName, evolutionChoiceCopy } from './cardMeta';
 import { fmt } from './format';
 import { buildEvolutionOptionViewModel } from './cardDetailModel';
+import { modalShell } from './modalShell';
 
-/** 升级三选一 / 结算 / 中心引导文案的显隐控制。 */
+/** 局内抉择 / 结算 / 中心引导文案的显隐控制。 */
 export function createModals(refs: DomRefs, hooks: { onDecision(choice: string): void; onRestart(): void }) {
-  const decisionModal = document.createElement('div');
-  const decisionCard = document.createElement('div');
+  const decisionShell = modalShell({
+    mode: 'centered',
+    dismissible: false,
+    className: 'modal',
+    labelledBy: 'decisionModalTitle',
+  });
+  const decisionModal = decisionShell.overlay;
+  const decisionCard = decisionShell.dialog;
   const decisionTitle = document.createElement('h2');
   const decisionBody = document.createElement('p');
   const decisionChoices = document.createElement('div');
   let renderedDecision: RunDecision | null = null;
-  decisionModal.className = 'modal';
   decisionModal.id = 'decisionModal';
-  decisionCard.className = 'modal-card';
-  decisionChoices.className = 'choices';
-  decisionCard.append(decisionTitle, decisionBody, decisionChoices);
-  decisionModal.append(decisionCard);
-  document.body.append(decisionModal);
+  decisionCard.classList.add('modal-card');
+  decisionTitle.id = 'decisionModalTitle';
+  decisionChoices.className = 'choices modal-shell-body';
+  decisionShell.header.append(decisionTitle, decisionBody);
+  decisionShell.body.replaceWith(decisionChoices);
 
   decisionChoices.addEventListener('click', event => {
     const button = (event.target as Element).closest<HTMLButtonElement>('[data-decision-choice]');
@@ -28,12 +34,18 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
     if (choice) hooks.onDecision(choice);
   });
   refs.restartBtn.addEventListener('click', () => hooks.onRestart());
+  refs.resultModal?.addEventListener('keydown', event => {
+    if (event.key !== 'Tab' || !refs.resultModal.classList.contains('show')) return;
+    event.preventDefault();
+    refs.restartBtn.focus();
+  });
 
   return {
     /** 中心引导文案。show=false 时隐藏。 */
     message(title: string, body: string, show: boolean): void {
-      refs.centerMsg.innerHTML = `<h2>${title}</h2><p>${body}</p>`;
-      refs.centerMsg.style.display = show ? 'block' : 'none';
+      refs.centerMsg.querySelector('h2')!.textContent = title;
+      refs.centerMsg.querySelector('p')!.textContent = body;
+      refs.centerMsg.hidden = !show;
     },
     showDecision(decision: RunDecision, state?: GameState): void {
       // dispatch() synchronizes this modal every animation frame. Replacing a
@@ -46,10 +58,11 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
             ? cfg.waveRewards.choice
               .map(option => option.id)
               .filter(id => decision.candidates.includes(id) || decision.capped.includes(id))
-          : decision.kind === 'evolutionBranch' || decision.kind === 'relic'
+          : decision.kind === 'evolutionBranch'
             ? decision.options
-            : [decision.recipeId];
+            : [];
         decisionTitle.textContent = copy.title;
+        decisionCard.dataset.kind = decision.kind;
         decisionBody.textContent = decision.kind === 'evolutionBranch'
           ? `${copy.body} ${decision.checkpointStar === 5 ? '该分支会叠加到当前 3★ 路线上，不会替换之前的选择。 ' : ''}${texts.evolution.lockNotice}`
           : copy.body;
@@ -66,12 +79,11 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
             theme.className = 'choice-desc';
             theme.textContent = godCopy?.theme ?? '';
             button.append(label, theme);
-            if (decision.kind === 'godDraft' && decision.role === 'main' && state) {
+            if (decision.kind === 'godDraft' && state) {
+              const roster = state.godPool.offerRosterPreviews[option] ?? [];
               const preview = document.createElement('span');
               preview.className = 'god-roster-preview';
-              preview.textContent = (state.godPool.offerRosterPreviews[option] ?? [])
-                .map(cardDisplayName)
-                .join(' · ');
+              preview.textContent = roster.map(cardDisplayName).join(' · ');
               button.append(preview);
             }
           } else if (decision.kind === 'evolutionBranch') {
@@ -94,7 +106,7 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
             label.textContent = optionModel?.name ?? optionDef?.textKey ?? option;
             const desc = document.createElement('span');
             desc.className = 'choice-desc';
-            desc.textContent = optionModel?.intent ?? '';
+            desc.textContent = optionModel?.summary ?? '';
             const effects = document.createElement('ul');
             effects.className = 'choice-effects';
             for (const line of optionModel?.exactEffects.flatMap(block => block.lines) ?? []) {
@@ -102,37 +114,7 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
               item.textContent = line.text;
               effects.append(item);
             }
-            const fit = document.createElement('span');
-            fit.className = 'choice-fit';
-            fit.textContent = `适合：${optionModel?.keywords.join('、') || '当前机制强化'}`;
-            button.append(label, desc, effects, fit);
-          } else if (decision.kind === 'relic') {
-            const relic = cfg.relics.relics.find(item => item.id === option);
-            label.textContent = relic?.title ?? option;
-            const meta = document.createElement('span');
-            meta.className = 'choice-desc';
-            const godName = relic?.god
-              ? (texts.gods as Record<string, { name: string }>)[relic.god]?.name ?? relic.god
-              : '中立';
-            meta.textContent = `${godName} · ${relic?.rarity ?? ''}`;
-            const desc = document.createElement('span');
-            desc.className = 'choice-desc';
-            desc.textContent = relic?.desc ?? '';
-            button.append(label, meta, desc);
-            if (relic && state) {
-              const heldTypes = new Set([...state.cards, ...state.equipment]
-                .filter(card => card !== null).map(card => card.type));
-              const names = cfg.skills.cards
-                .filter(card => heldTypes.has(card.id)
-                  && card.synergyTags.some(tag => relic.targetTags.includes(tag)))
-                .map(card => cardDisplayName(card.id));
-              if (names.length) {
-                const benefits = document.createElement('span');
-                benefits.className = 'choice-benefits';
-                benefits.textContent = fmt(texts.levelup.benefits, { names: [...new Set(names)].join('、') });
-                button.append(benefits);
-              }
-            }
+            button.append(label, desc, effects);
           } else if (decision.kind === 'waveBaseReward') {
             const optionDef = cfg.waveRewards.choice.find(item => item.id === option);
             label.textContent = optionDef
@@ -147,6 +129,7 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
                 ? `+${optionDef.add * 100}%`
                 : `+${optionDef?.add ?? 0}`;
             button.disabled = capped;
+            button.setAttribute('aria-disabled', String(capped));
             button.classList.toggle('choice-capped', capped);
             button.append(label, desc);
           } else {
@@ -157,9 +140,9 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
         }));
         renderedDecision = decision;
       }
-      decisionModal.classList.add('show');
+      decisionShell.open();
     },
-    hideDecision(): void { decisionModal.classList.remove('show'); },
+    hideDecision(): void { decisionShell.close(); },
     hideResult(): void { refs.resultModal.classList.remove('show'); },
     showResult(win: boolean, state: GameState): void {
       refs.resultTitle.textContent = win ? texts.result.winTitle : texts.result.loseTitle;
@@ -198,9 +181,6 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
           highest.textContent = fmt(texts.result.highestCard, { star: summary.highestCard.star, name: cardDisplayName(summary.highestCard.type) });
           refs.resultBuildMeta.append(highest);
         }
-        const relics = document.createElement('span');
-        relics.textContent = `遗物 ${summary.relics.count} · 普通 ${summary.relics.rarity.common} / 稀有 ${summary.relics.rarity.rare} / 史诗 ${summary.relics.rarity.epic}`;
-        refs.resultBuildMeta.append(relics);
         for (const card of summary.cardEvolutions.filter(item => item.path.length > 0)) {
           const route = document.createElement('span');
           const names = card.path.map(entry => {
@@ -212,6 +192,7 @@ export function createModals(refs: DomRefs, hooks: { onDecision(choice: string):
         }
       }
       refs.resultModal.classList.add('show');
+      refs.restartBtn.focus();
     },
   };
 }

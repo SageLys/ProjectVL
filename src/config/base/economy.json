@@ -38,20 +38,47 @@
     "carryCap": 1.5,
     "modifiersAffectTarget": true
   },
+  "evolution": {
+    "maxRecipeCompletions": 2,
+    "completionLimitPerRecipe": 1,
+    "assistWindowWaves": [
+      4,
+      8
+    ],
+    "assistCheckpoints": [
+      6,
+      8
+    ],
+    "assistMaxCorrections": 2,
+    "assistMaxCorrectionsPerMaterial": 1,
+    "assistRewardPolicy": "minimumMergeCompletion",
+    "allowDirectFiveStarAssist": false,
+    "recipeProtectionSlots": 2,
+    "bountyRecipeMaterialBonus": 1.6,
+    "bountyReadySideMultiplier": 0.5
+  },
   "normalDropTypePolicy": {
     "enabled": true,
     "roleBagSize": 10,
-    "earlyMix": { "discovery": 6, "build": 3, "pivot": 1 },
-    "lateMix": { "discovery": 1, "build": 7, "pivot": 2 },
+    "earlyMix": {
+      "discovery": 6,
+      "build": 3,
+      "pivot": 1
+    },
+    "lateMix": {
+      "discovery": 1,
+      "build": 7,
+      "pivot": 2
+    },
     "bootstrapMinDiscovery": 6,
-    "godAffinity": { "scorePerStack": 2.5, "scoreCap": 6 },
+    "bootstrapForcedDrops": 9,
     "maturity": {
       "fullMergeOps": 10,
       "fullHighestStar": 4,
       "fullEquippedTypes": 2,
       "mergeWeight": 0.25,
       "starWeight": 0.35,
-      "equipWeight": 0.40
+      "equipWeight": 0.4
     },
     "build": {
       "topK": 3,
@@ -63,7 +90,10 @@
       "historicalMergeCap": 8,
       "maxWeightRatio": 6
     },
-    "pivot": { "excludeTopK": 2, "candidateFraction": 0.5 },
+    "pivot": {
+      "excludeTopK": 2,
+      "candidateFraction": 0.5
+    },
     "maxSameTypeStreak": 2
   }
 }

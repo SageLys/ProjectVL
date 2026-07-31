@@ -6,6 +6,7 @@ import { deriveMetrics } from '../src/ui/derivedMetrics';
 describe('Budget derived event estimate', () => {
   function tuned() {
     const game = buildConfig([]); game.waves.spawnMode = 'budget'; game.waves.totalWaves = 3;
+    game.waves.stagePlan.enabled = false;
     game.economy.ordinaryDropRate.enabled = false;
     game.waves.enemyCountBase = 24; game.waves.enemyCountPerWave = 0; game.waves.budget.targetOnScreen = { base: 4, perWave: 0 };
     game.waves.budget.checkInterval = .5; game.waves.budget.batchMax = 4; game.waves.budget.maxAlive = 10;
@@ -59,7 +60,7 @@ describe('Budget derived event estimate', () => {
     }
   });
 
-  it('projects stage targets and suppresses regular validation projections', () => {
+  it('projects validation swarms together with milestone elites', () => {
     const derived = deriveMetrics(buildConfig([]), createDefaultConfig());
     const metrics = derived.budget!;
     expect(metrics.projections[0]).toMatchObject({ normalTarget: 7, sprintTriggered: false });
@@ -68,8 +69,8 @@ describe('Budget derived event estimate', () => {
     expect(metrics.projections[3].normalTarget).toBe(14);
     expect(metrics.projections[7].normalTarget).toBe(28);
     expect(metrics.projections[8]).toMatchObject({
-      normalTarget: 0,
-      peakOnScreen: 1,
+      normalTarget: 36,
+      peakOnScreen: 54,
       validationEncounter: { enemyCount: 1, estimatedTtk: expect.any(Number) },
     });
     expect(derived.waves.map(wave => wave.stage)).toEqual([
@@ -78,6 +79,32 @@ describe('Budget derived event estimate', () => {
       'validation', 'validation',
     ]);
     expect(derived.waves.map(wave => wave.ordinaryDropsTargetPerMinute)).toEqual([35, 35, 35, 40, 40, 40, 40, 40, 0, 0]);
-    expect(derived.waves[8]).toMatchObject({ projectedOnScreenP50: 1, projectedOnScreenP95: 1 });
+    expect(derived.waves[8]).toMatchObject({
+      projectedOnScreenP50: expect.any(Number),
+      projectedOnScreenP95: 54,
+      validationEncounter: { enemyCount: 1 },
+    });
+  });
+
+  it('projects active time-based drop rates independently of legacy chance', () => {
+    const game = buildConfig([]);
+    const runtime = createDefaultConfig();
+    const baseline = deriveMetrics(game, runtime).expectedDrops;
+
+    expect(deriveMetrics(game, { ...runtime, dropChance: 0 }).expectedDrops).toBeCloseTo(baseline, 10);
+    expect(deriveMetrics(game, { ...runtime, dropChance: 1 }).expectedDrops).toBeCloseTo(baseline, 10);
+
+    const fasterSelection = structuredClone(game);
+    fasterSelection.economy.ordinaryDropRate.selectionPerMinute += 10;
+    expect(deriveMetrics(fasterSelection, runtime).expectedDrops).toBeGreaterThan(baseline);
+
+    const fasterBuild = structuredClone(game);
+    fasterBuild.economy.ordinaryDropRate.buildPerMinute += 10;
+    expect(deriveMetrics(fasterBuild, runtime).expectedDrops).toBeGreaterThan(baseline);
+
+    const longerValidation = structuredClone(game);
+    longerValidation.waves.stagePlan.validationWaves += 1;
+    longerValidation.waves.stagePlan.validation.unshift(structuredClone(longerValidation.waves.stagePlan.validation[0]));
+    expect(deriveMetrics(longerValidation, runtime).expectedDrops).toBeLessThan(baseline);
   });
 });

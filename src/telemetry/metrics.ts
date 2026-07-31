@@ -26,6 +26,10 @@ export interface WaveMetrics {
   dropRejectedFullHand: number;
   validationRewardDrops: number;
   validationOrdinaryDrops: number;
+  killsPerSecond: number | null;
+  manualPickups: number;
+  decisionPopups: number;
+  rewardActivations: number;
   buildAtStart: { maturity: number | null; highestStar: number | null; equippedCount: number | null };
   e1: { p50: number | null; p95: number | null };
   e2: number | null;
@@ -138,6 +142,10 @@ export function computeExperienceMetrics(session: TelemetrySession): ExperienceM
       validationOrdinaryDrops: (startEvent?.stage ?? clearEvent?.stage) === 'validation'
         ? waveEvents.filter(event => event.type === 'dropLanded' && event.source === 'normalKill').length
         : 0,
+      killsPerSecond: end > start ? kills.length / (end - start) : null,
+      manualPickups: waveEvents.filter(event => event.type === 'pickup' || event.type === 'validationRewardPickup').length,
+      decisionPopups: waveEvents.filter(event => event.type === 'decision_offered' || event.type === 'perkPopup').length,
+      rewardActivations: waveEvents.filter(event => event.type === 'reward_triggered').length,
       buildAtStart: {
         maturity: startEvent?.maturity ?? null,
         highestStar: startEvent?.highestStar ?? null,

@@ -237,42 +237,6 @@
       "accent": "#DBC252",
       "shape": "verticalHexagon",
       "glyph": "crosshair"
-    },
-    "frozenThunder": {
-      "hueOffset": 15,
-      "accent": "#55C8FF",
-      "shape": "hexagon",
-      "glyph": "barrier"
-    },
-    "solarLance": {
-      "hueOffset": 16,
-      "accent": "#56C9FF",
-      "shape": "triangle",
-      "glyph": "zigzag"
-    },
-    "avalanche": {
-      "hueOffset": 17,
-      "accent": "#70EDFC",
-      "shape": "circle",
-      "glyph": "impact"
-    },
-    "pyrestorm": {
-      "hueOffset": 18,
-      "accent": "#FF6E54",
-      "shape": "ring",
-      "glyph": "crosshair"
-    },
-    "crownOfThorns": {
-      "hueOffset": 19,
-      "accent": "#62D197",
-      "shape": "verticalHexagon",
-      "glyph": "barrier"
-    },
-    "goldenIdol": {
-      "hueOffset": 20,
-      "accent": "#E1C858",
-      "shape": "verticalHexagon",
-      "glyph": "zigzag"
     }
   }
 }

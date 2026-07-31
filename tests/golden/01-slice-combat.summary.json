@@ -1,0 +1,325 @@
+{
+  "spec": {
+    "id": "01-slice-combat",
+    "seed": 42,
+    "variants": [],
+    "dt": 0.03333333333333333,
+    "frames": 480,
+    "start": "wave1"
+  },
+  "framesRun": 480,
+  "mode": "playing",
+  "win": null,
+  "hp": 100,
+  "maxHp": 100,
+  "wave": {
+    "wave": 1,
+    "phase": "regular",
+    "spawnLeft": 47,
+    "waveSpawnQuota": 60,
+    "intermission": {
+      "active": false,
+      "step": "godDecision",
+      "afterWave": 0
+    }
+  },
+  "enemiesRemaining": 6,
+  "cumulativeDamageDealt": 234,
+  "cumulativeDamageTaken": 0,
+  "counters": {
+    "kills": 7,
+    "collected": 0,
+    "expired": 3,
+    "merges": 0,
+    "consumes": 0,
+    "equipOps": 0,
+    "rewardPoints": 7,
+    "rewardActivations": 0
+  },
+  "cards": [],
+  "equipment": [],
+  "wildcards": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "4": 0,
+    "5": 0
+  },
+  "rewards": [],
+  "enemySequence": [
+    {
+      "frame": 13,
+      "id": 1,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 564.3194684639869,
+      "y": 597.0907786257999
+    },
+    {
+      "frame": 13,
+      "id": 2,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 282.470734645487,
+      "y": -24.133778040310183
+    },
+    {
+      "frame": 13,
+      "id": 3,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": 441.168466407027,
+      "y": 753.6272521301996
+    },
+    {
+      "frame": 13,
+      "id": 4,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 449.20518759446173,
+      "y": -24.212770139604675
+    },
+    {
+      "frame": 13,
+      "id": 5,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 564.2824408296195,
+      "y": 165.6735576834718
+    },
+    {
+      "frame": 13,
+      "id": 6,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 321.87729806892185,
+      "y": 754.140933459758
+    },
+    {
+      "frame": 72,
+      "id": 7,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 135,
+      "speed": 16.5,
+      "damage": 14,
+      "x": 564.560996820018,
+      "y": 587.3113761724803
+    },
+    {
+      "frame": 249,
+      "id": 8,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": 182.81199437782206,
+      "y": -23.536397891483126
+    },
+    {
+      "frame": 308,
+      "id": 9,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 564.1925344202056,
+      "y": 479.7010384898734
+    },
+    {
+      "frame": 308,
+      "id": 10,
+      "type": "tank",
+      "spawnKind": "regular",
+      "maxHp": 135,
+      "speed": 16.5,
+      "damage": 14,
+      "x": -24.557166604511366,
+      "y": 581.9687327576631
+    },
+    {
+      "frame": 367,
+      "id": 11,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": 563.5581120624252,
+      "y": 280.82002651340076
+    },
+    {
+      "frame": 367,
+      "id": 12,
+      "type": "fast",
+      "spawnKind": "regular",
+      "maxHp": 33,
+      "speed": 45,
+      "damage": 6,
+      "x": 444.0314743040692,
+      "y": 753.6309962560715
+    },
+    {
+      "frame": 367,
+      "id": 13,
+      "type": "normal",
+      "spawnKind": "regular",
+      "maxHp": 50,
+      "speed": 26,
+      "damage": 8,
+      "x": 312.08950296722037,
+      "y": -24.138358741716672
+    }
+  ],
+  "dropSequence": [
+    {
+      "frame": 209,
+      "action": "spawned",
+      "dropId": 1,
+      "kind": "card",
+      "cardType": "galvanicWard",
+      "star": 1
+    },
+    {
+      "frame": 269,
+      "action": "spawned",
+      "dropId": 2,
+      "kind": "card",
+      "cardType": "stormcall",
+      "star": 1
+    },
+    {
+      "frame": 309,
+      "action": "spawned",
+      "dropId": 3,
+      "kind": "card",
+      "cardType": "magmaPool",
+      "star": 1
+    },
+    {
+      "frame": 353,
+      "action": "spawned",
+      "dropId": 4,
+      "kind": "card",
+      "cardType": "sentinel",
+      "star": 1
+    },
+    {
+      "frame": 359,
+      "action": "expired",
+      "dropId": 1,
+      "kind": "card",
+      "cardType": null,
+      "star": 1
+    },
+    {
+      "frame": 419,
+      "action": "expired",
+      "dropId": 2,
+      "kind": "card",
+      "cardType": null,
+      "star": 1
+    },
+    {
+      "frame": 427,
+      "action": "spawned",
+      "dropId": 5,
+      "kind": "card",
+      "cardType": "impact",
+      "star": 1
+    },
+    {
+      "frame": 459,
+      "action": "expired",
+      "dropId": 3,
+      "kind": "card",
+      "cardType": null,
+      "star": 1
+    }
+  ],
+  "eventSequence": [
+    {
+      "frame": 0,
+      "type": "waveStart"
+    },
+    {
+      "frame": 121,
+      "type": "bountyOfferSpawned"
+    },
+    {
+      "frame": 209,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 269,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 291,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 309,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 327,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 353,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 359,
+      "type": "dropExpired"
+    },
+    {
+      "frame": 362,
+      "type": "bountyOfferExpired"
+    },
+    {
+      "frame": 419,
+      "type": "dropExpired"
+    },
+    {
+      "frame": 427,
+      "type": "rewardPointsGained"
+    },
+    {
+      "frame": 459,
+      "type": "dropExpired"
+    }
+  ],
+  "eventCounts": {
+    "waveStart": 1,
+    "bountyOfferSpawned": 1,
+    "rewardPointsGained": 7,
+    "dropExpired": 3,
+    "bountyOfferExpired": 1
+  },
+  "rng": {
+    "draws": 854,
+    "last": 0.724326335825026
+  }
+}

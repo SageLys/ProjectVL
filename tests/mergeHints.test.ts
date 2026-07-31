@@ -70,11 +70,13 @@ describe('merge hint links', () => {
 
   it('renders an independent recipe link between the exact selected materials with full copy', () => {
     const state = freshState();
-    const chain = card('chainLightning', 5);
-    const frost = card('frost', 5);
-    state.cards[0] = chain;
-    state.equipment[0] = frost;
-    document.body.innerHTML = `<section id="dock"><button class="card" data-id="${chain.id}"></button><button class="card" data-id="${frost.id}"></button></section>`;
+    const recipe = cfg.evolutionRecipes.recipes[0];
+    const variable = card(recipe.ingredientVariable.cardId, 5);
+    const anchor = card(recipe.ingredientAnchor.cardId, 5);
+    state.cards[0] = variable;
+    state.equipment[0] = anchor;
+    state.recipes.compatibleRecipeIds = [recipe.id];
+    document.body.innerHTML = `<section id="dock"><button class="card" data-id="${variable.id}"></button><button class="card" data-id="${anchor.id}"></button></section>`;
     const dock = document.querySelector<HTMLElement>('#dock')!;
     const cards = dock.querySelectorAll<HTMLElement>('.card');
     vi.spyOn(dock, 'getBoundingClientRect').mockReturnValue(rect(10, 20, 500, 220));
@@ -82,10 +84,10 @@ describe('merge hint links', () => {
     vi.spyOn(cards[1], 'getBoundingClientRect').mockReturnValue(rect(300, 120, 100, 70));
 
     expect(findRecipeHintPairs(state)).toEqual([{
-      recipeId: 'frozenThunder',
-      aCardId: chain.id,
-      bCardId: frost.id,
-      outputCardId: 'frozenThunder',
+      recipeId: recipe.id,
+      aCardId: variable.id,
+      bCardId: anchor.id,
+      outputCardId: recipe.outputCardId,
       outputStar: 6,
     }]);
     renderMergeHints(dock, state);
@@ -95,13 +97,52 @@ describe('merge hint links', () => {
     expect(svg?.getAttribute('aria-hidden')).toBe('true');
     expect(line?.classList.contains('merge-hint-line')).toBe(false);
     expect(line?.dataset).toMatchObject({
-      recipeId: 'frozenThunder',
-      aCardId: String(chain.id),
-      bCardId: String(frost.id),
+      recipeId: recipe.id,
+      aCardId: String(variable.id),
+      bCardId: String(anchor.id),
     });
     expect(cards[0].classList.contains('recipe-ready')).toBe(true);
     expect(cards[1].classList.contains('recipe-ready')).toBe(true);
     expect(dock.querySelector('.recipe-evolution-hint')?.textContent)
-      .toContain('连环闪电 5★ ＋ 霜寒 5★ → 霜雷 6★');
+      .toContain('卡间进化就绪：拖动任一材料至另一张，进化为');
+  });
+
+  it('hides the recipe hint for every invalid readiness condition and clears it in the same render', () => {
+    const recipe = cfg.evolutionRecipes.recipes[0];
+    const make = () => {
+      const state = freshState();
+      state.cards[0] = card(recipe.ingredientVariable.cardId, 5);
+      state.equipment[0] = card(recipe.ingredientAnchor.cardId, 5);
+      state.recipes.compatibleRecipeIds = [recipe.id];
+      return state;
+    };
+    const mutations = [
+      (state: ReturnType<typeof make>) => { state.cards[0] = null; },
+      (state: ReturnType<typeof make>) => { state.cards[0]!.star = 4; },
+      (state: ReturnType<typeof make>) => { state.cards[0]!.provisional = true; },
+      (state: ReturnType<typeof make>) => { state.recipes.completedRecipeIds = [recipe.id]; },
+      (state: ReturnType<typeof make>) => { state.recipes.completedRecipeIds = cfg.evolutionRecipes.recipes.slice(1, 3).map(item => item.id); },
+      (state: ReturnType<typeof make>) => { state.paused = true; },
+      (state: ReturnType<typeof make>) => { state.decisions.current = { kind: 'godFocus', wave: 2, candidates: ['storm'] }; },
+      (state: ReturnType<typeof make>) => { state.wavePhase = 'between'; state.intermission.active = true; state.intermission.step = 'settle'; },
+    ];
+    for (const mutate of mutations) {
+      const state = make();
+      mutate(state);
+      expect(findRecipeHintPairs(state)).toEqual([]);
+    }
+
+    const state = make();
+    document.body.innerHTML = `<section id="dock"><button class="card" data-id="${state.cards[0]!.id}"></button><button class="card" data-id="${state.equipment[0]!.id}"></button></section>`;
+    const dock = document.querySelector<HTMLElement>('#dock')!;
+    vi.spyOn(dock, 'getBoundingClientRect').mockReturnValue(rect(0, 0, 400, 200));
+    dock.querySelectorAll<HTMLElement>('.card').forEach((element, index) => vi.spyOn(element, 'getBoundingClientRect').mockReturnValue(rect(20 + index * 180, 50, 100, 70)));
+    renderMergeHints(dock, state);
+    expect(dock.querySelector('.recipe-hints')).not.toBeNull();
+    state.cards[0] = null;
+    renderMergeHints(dock, state);
+    expect(dock.querySelector('.recipe-hints')).toBeNull();
+    expect(dock.querySelector('.recipe-evolution-hints')).toBeNull();
+    expect(dock.querySelector('.recipe-ready')).toBeNull();
   });
 });

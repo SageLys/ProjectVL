@@ -5,20 +5,20 @@ import { validateSkillsConfig } from '../src/config/skillValidator';
 import { createCardInstance } from '../src/core/createInitialState';
 
 describe('神池构筑 C0 数据契约', () => {
-  it('加载 5 个神、35 张正式卡与 6 张配方终态，且神归属完整', () => {
+  it('加载 5 个神、35 张正式卡与 25 张配方终态，且神归属完整', () => {
     const config = buildConfig();
     const godIds = new Set(config.gods.gods.map(god => god.id));
 
     expect(config.gods.gods).toHaveLength(5);
-    expect(config.skills.cards).toHaveLength(41);
+    expect(config.skills.cards).toHaveLength(60);
     expect(config.skills.cards.filter(card => !card.recipeOnly)).toHaveLength(35);
-    expect(config.skills.cards.filter(card => card.recipeOnly)).toHaveLength(6);
+    expect(config.skills.cards.filter(card => card.recipeOnly)).toHaveLength(25);
     expect(config.skills.cards.every(card => card.god !== undefined && godIds.has(card.god))).toBe(true);
-    expect(config.relics.relics.length).toBeGreaterThanOrEqual(20);
-    expect(config.evolutionRecipes.recipes).toHaveLength(6);
+    expect(config.rewardMeter.rewards).toHaveLength(5);
+    expect(config.evolutionRecipes.recipes).toHaveLength(25);
     expect(config.evolutionRecipes.recipes).toEqual(expect.arrayContaining([
-      expect.objectContaining({ id: 'frozenThunder', outputCardId: 'frozenThunder', outputStar: 6 }),
-      expect.objectContaining({ id: 'goldenIdol', outputCardId: 'goldenIdol', outputStar: 6 }),
+      expect.objectContaining({ id: 'r_arcSplitter_pierce', outputCardId: 'stormLattice', outputStar: 6 }),
+      expect.objectContaining({ id: 'r_overgrowth_harvest', outputCardId: 'goldenGrove', outputStar: 6 }),
     ]));
     expect(config.waveRewards.floor).toHaveLength(3);
     expect(config.waveRewards.choice).toHaveLength(5);
@@ -56,13 +56,12 @@ describe('神池构筑 C0 数据契约', () => {
     expect(() => validateSkillsConfig(invalid)).toThrow(/evolutionTree.*star.*只能为 3 或 5/);
   });
 
-  it('空的新配置域按兼容层通过校验', () => {
+  it('配方域为空时按 v2 硬契约拒绝', () => {
     const compatible = structuredClone(buildConfig());
     compatible.gods.gods = [];
-    compatible.relics.relics = [];
     compatible.evolutionRecipes.recipes = [];
 
-    expect(() => validateGodConfig(compatible)).not.toThrow();
+    expect(() => validateGodConfig(compatible)).toThrow(/必须恰好 25 条/);
   });
 
   it('新建卡实例为后续进化与词条字段写入空默认值', () => {

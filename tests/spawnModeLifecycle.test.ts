@@ -9,7 +9,7 @@ import { constRng, freshState, resetTestEnv } from './helpers';
 beforeEach(resetTestEnv);
 describe('spawn-mode wave boundary lifecycle', () => {
   it('keeps active Interval unchanged and applies pending Budget before the next wave begins', () => {
-    cfg.economy.ordinaryDropRate.enabled = false;
+    cfg.waves.stagePlan.enabled = false;
     const state = freshState(); const runtime = createDefaultConfig(); cfg.waves.spawnMode = 'interval'; cfg.waves.firstSpawnDelay = 0; cfg.waves.bossWaves = [];
     cfg.waves.spawnInterval = { base: 5, perWave: 0, min: 5 }; cfg.waves.enemyCountBase = 4; cfg.waves.enemyCountPerWave = 0;
     startNextWave(state, runtime, constRng(.5)); updateGame(state, runtime, constRng(.5), 0);
@@ -19,7 +19,7 @@ describe('spawn-mode wave boundary lifecycle', () => {
     cfg.waves.intermission.settleSeconds = 0;
     cfg.waves.intermission.freeSeconds = { selection: 0, buildEarly: 0, buildLate: 0, validation: 0 };
     state.spawnLeft = 0; state.enemies.length = 0;
-    for (let step = 0; step < 5; step++) {
+    for (let step = 0; step < 7; step++) {
       updateGame(state, runtime, constRng(.5), 0, () => { if (pending) { cfg.waves.spawnMode = pending; pending = null; } });
       const decision = state.decisions.current;
       if (decision?.kind === 'waveBaseReward') {
@@ -30,7 +30,7 @@ describe('spawn-mode wave boundary lifecycle', () => {
     expect(cfg.waves.spawnMode).toBe('budget'); expect(state.enemies).toHaveLength(4);
   });
   it('restart begins from the configuration committed immediately before it', () => {
-    cfg.economy.ordinaryDropRate.enabled = false;
+    cfg.waves.stagePlan.enabled = false;
     const state = freshState(); const runtime = createDefaultConfig(); cfg.waves.spawnMode = 'budget'; cfg.waves.firstSpawnDelay = 0;
     cfg.waves.budget.targetOnScreen = { base: 4, perWave: 0 }; cfg.waves.budget.batchMax = 4; cfg.waves.budget.maxAlive = 4;
     restartWave(state, runtime, constRng(.5)); updateGame(state, runtime, constRng(.5), 0);

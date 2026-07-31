@@ -2,7 +2,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ATOMS, type EffectCtx } from '../src/core/effects/registry';
 import {
-  CONFLICT_RULES, applyFreeze, applySlow, applyStun, applyVulnerable,
+  CONFLICT_RULES, activeTaunt, applyFreeze, applySlow, applyStun, applyVulnerable,
   applyKnockback, damageTakenMultiplier, isImmobile, speedMultiplier, tickStatusTimers,
 } from '../src/core/effects/statusSystem';
 import { dealDamage } from '../src/core/systems/damageSystem';
@@ -315,7 +315,7 @@ describe('控制原子', () => {
     const e = enemy({ x: 500, y: 300, hp: 100, maxHp: 100 });
     s.enemies = [e];
     ATOMS.taunt(ctxFor(s, { origin: { x: 520, y: 300 } }), { radius: 120, duration: 3 });
-    expect(e.status.taunt).toMatchObject({ x: 520, y: 300 });
+    expect(activeTaunt(e)).toMatchObject({ x: 520, y: 300 });
   });
 
   it('vulnerable + focusPriority（烙印）', () => {

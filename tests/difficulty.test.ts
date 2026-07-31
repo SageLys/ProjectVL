@@ -136,12 +136,12 @@ describe('difficulty configuration boundaries', () => {
 
   it('does not mutate protected configuration domains', () => {
     const base = buildConfig();
-    const protectedDomains = structuredClone({ waves: base.waves, economy: base.economy, progression: base.progression, skills: base.skills });
+    const protectedDomains = structuredClone({ waves: base.waves, economy: base.economy, rewardMeter: base.rewardMeter, skills: base.skills });
     for (const id of IDS) {
       createInitialState(id);
       for (const type of TYPES) difficultyMultipliersFor(id, type, 1);
     }
-    expect({ waves: cfg.waves, economy: cfg.economy, progression: cfg.progression, skills: cfg.skills }).toEqual(protectedDomains);
+    expect({ waves: cfg.waves, economy: cfg.economy, rewardMeter: cfg.rewardMeter, skills: cfg.skills }).toEqual(protectedDomains);
   });
 });
 

@@ -1,5 +1,4 @@
 import { cfg } from '../../config';
-import { getSkillDef } from '../effects/interpreter';
 import type { CardDropSource, CardType, GameState, NormalDropRole, Rng } from '../types';
 import { cardGodInRun, getActivePool, isCardFromSelectedGod } from './activePoolSystem';
 import {
@@ -51,15 +50,6 @@ function withoutTypeIfPossible(values: CardType[], excludedType?: CardType): Car
   if (excludedType === undefined) return values;
   const filtered = values.filter(type => type !== excludedType);
   return filtered.length ? filtered : values;
-}
-
-/** Relic affinity is god-scoped and only contributes to build-role scoring. */
-export function calculateAffinityScore(state: GameState, type: CardType): number {
-  const def = getSkillDef(type);
-  if (!def?.god) return 0;
-  const affinity = cfg.economy.normalDropTypePolicy.godAffinity;
-  const raw = state.buildState.godAffinity[def.god] ?? 0;
-  return Math.min(affinity.scoreCap, raw * affinity.scorePerStack);
 }
 
 function shuffleInPlace<T>(values: T[], rng: Rng): void {
@@ -158,9 +148,25 @@ function buildCandidatesByCommitment(state: GameState): Array<{ type: CardType; 
     .sort((left, right) => right.score - left.score);
 }
 
+function trackedRecipeMaterials(state: GameState): CardType[] {
+  if (state.wave < cfg.economy.evolution.assistWindowWaves[0]
+    || state.wave > cfg.economy.evolution.assistWindowWaves[1]
+    || state.recipes.assistClosed) return [];
+  const recipe = cfg.evolutionRecipes.recipes.find(item => item.id === state.recipes.directedRecipeId);
+  return recipe ? [recipe.ingredientVariable.cardId, recipe.ingredientAnchor.cardId] : [];
+}
+
 function buildCandidatesForBuildRole(state: GameState): Array<{ type: CardType; score: number }> {
+  const tracked = new Set(trackedRecipeMaterials(state));
   return getActivePool(state)
-    .map(type => ({ type, score: calculateCommitmentScore(state, type) + calculateAffinityScore(state, type) }))
+    .map(type => {
+      const commitment = calculateCommitmentScore(state, type);
+      const baseScore = commitment;
+      return {
+        type,
+        score: tracked.has(type) ? Math.max(0, 16 - commitment) : baseScore,
+      };
+    })
     .sort((left, right) => right.score - left.score);
 }
 
@@ -189,8 +195,7 @@ function selectBuildTypeBase(state: GameState, rng: Rng, excludedType?: CardType
   const hasCommittedInvestment = state.equipment.some(card => card !== null)
     || state.cards.some(card => card !== null && card.star > 1)
     || Object.values(state.normalDropDirector.typeStats).some(stats => stats.mergeOps > 0);
-  const hasAffinity = scored.some(entry => calculateAffinityScore(state, entry.type) > 0);
-  if ((!hasCommittedInvestment && !hasAffinity) || scored.every(entry => entry.score === 0)) {
+  if (!hasCommittedInvestment || scored.every(entry => entry.score === 0)) {
     const activeTypes = new Set(getActivePool(state));
     const mergeReadyTypes = [...new Set(
       state.cards
@@ -205,45 +210,22 @@ function selectBuildTypeBase(state: GameState, rng: Rng, excludedType?: CardType
 
   const policy = cfg.economy.normalDropTypePolicy.build;
   let candidates = scored.slice(0, Math.max(1, Math.round(policy.topK)));
+  const tracked = trackedRecipeMaterials(state)
+    .map(type => scored.find(entry => entry.type === type))
+    .filter(entry => entry !== undefined)
+    .sort((left, right) => right.score - left.score);
+  for (const entry of tracked) {
+    if (candidates.some(candidate => candidate.type === entry.type)) continue;
+    if (candidates.length >= Math.max(1, Math.round(policy.topK))) candidates.pop();
+    candidates.push(entry);
+  }
   const allowedTypes = new Set(withoutTypeIfPossible(candidates.map(entry => entry.type), excludedType));
   candidates = candidates.filter(entry => allowedTypes.has(entry.type));
   return weightedBuildChoice(state, candidates, rng);
 }
 
-function hasGod(type: CardType, god: string): boolean {
-  return getSkillDef(type)?.god === god;
-}
-
-function applyGodPity(
-  state: GameState,
-  selectedType: CardType,
-  rng: Rng,
-  streakExcludedType?: CardType,
-): CardType {
-  const pity = state.buildState.dropPity;
-  if (!pity) return selectedType;
-  if (hasGod(selectedType, pity.god)) {
-    state.buildState.dropPity = undefined;
-    return selectedType;
-  }
-  pity.remaining--;
-  if (pity.remaining > 0) return selectedType;
-
-  const matching = buildCandidatesForBuildRole(state).filter(entry => hasGod(entry.type, pity.god));
-  if (!matching.length) {
-    state.buildState.dropPity = undefined;
-    return selectedType;
-  }
-  const allowed = new Set(withoutTypeIfPossible(matching.map(entry => entry.type), streakExcludedType));
-  const candidates = matching.filter(entry => allowed.has(entry.type));
-  // 若该流派只有一个合法卡型，withoutTypeIfPossible 会允许它突破连发保护，保证 pity 可兑现。
-  const forced = weightedBuildChoice(state, candidates, rng);
-  state.buildState.dropPity = undefined;
-  return forced;
-}
-
 export function selectBuildType(state: GameState, rng: Rng, excludedType?: CardType): CardType {
-  return applyGodPity(state, selectBuildTypeBase(state, rng, excludedType), rng, excludedType);
+  return selectBuildTypeBase(state, rng, excludedType);
 }
 
 export function selectPivotType(state: GameState, rng: Rng, excludedType?: CardType): CardType {
@@ -316,11 +298,6 @@ export function selectNormalEnemyDropType(state: GameState, rng: Rng): CardType 
     && recent.slice(-streakLimit).every(recentType => recentType === type)) {
     type = selectForRole(type);
   }
-  const streakExcludedType = recent.length >= streakLimit
-    && recent.slice(-streakLimit).every(recentType => recentType === recent[recent.length - 1])
-    ? recent[recent.length - 1]
-    : undefined;
-  type = applyGodPity(state, type, rng, streakExcludedType);
   recordCardDropShown(state, type, 'normalKill');
   state.normalDropDirector.ordinaryDropCount++;
   return type;

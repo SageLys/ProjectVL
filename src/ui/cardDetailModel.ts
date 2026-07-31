@@ -1,7 +1,8 @@
 import { cfg } from '../config';
 import { AFFIX_SINKS } from '../config/affixSinks';
-import type { CardStatKind, EvolutionOptionDef } from '../config/types';
+import type { CardAffixStatKind, EvolutionOptionDef } from '../config/types';
 import type { BindingDef, CardDef, EffectDef } from '../core/effects/defs';
+import { nestedEffectsOf } from '../core/effects/atomContract';
 import { getSkillDef, resolveCardBindings, resolveConsumableTier } from '../core/effects/interpreter';
 import type { Card, CardAffixRoll } from '../core/types';
 import { texts } from '../data';
@@ -9,7 +10,6 @@ import { resolveCardVisual } from '../presentation/cardVisual';
 import { glyphToSvg } from '../presentation/skillGeometry';
 import { cardDisplayName, formatAffixRoll } from './cardMeta';
 import { ATOM_LABELS, formatBinding, formatEffect, type EffectTextBlock, type EffectTextLine } from './effectText';
-import { fmt } from './format';
 
 export interface EffectSection {
   title: string;
@@ -19,7 +19,7 @@ export interface EffectSection {
 }
 
 export interface AffixDetail {
-  stat: CardStatKind;
+  stat: CardAffixStatKind;
   value: string;
   equipment: string;
   consumable: string;
@@ -34,8 +34,10 @@ export interface GlossaryEntry {
 export interface SkillTreeOption {
   id: string;
   name: string;
+  /** 玩家向一句话效果说明，显示于三选一弹窗与技能树选项正文。 */
+  summary: string;
+  /** 设计向定位，仅设计工作台使用，玩家侧不显示。 */
   intent: string;
-  keywords: string[];
   exactEffects: EffectTextBlock[];
   selected: boolean;
   available: boolean;
@@ -52,30 +54,8 @@ export interface SkillTreeNode {
   locked: boolean;
 }
 
-export interface RecipeViewModel {
-  ingredientA: string;
-  ingredientB: string;
-  output: string;
-  exactEffects: EffectTextBlock[];
-  notice: string;
-}
-
-export interface RecipeIngredientViewModel {
-  recipeId: string;
-  selfMinStar: number;
-  partnerCardId: string;
-  partner: string;
-  partnerMinStar: number;
-  outputCardId: string;
-  output: string;
-  outputStar: number;
-  notice: string;
-}
-
 export interface SkillTreeViewModel {
   nodes: SkillTreeNode[];
-  recipe?: RecipeViewModel;
-  asIngredient: RecipeIngredientViewModel[];
 }
 
 export interface CardDetailViewModel {
@@ -103,11 +83,9 @@ type DetailTexts = {
     name?: string;
     summary?: string;
     intent?: string;
-    keywords?: string[];
-    buildFit?: string;
   }>>;
   glossary?: Record<string, string | { term?: string; description?: string }>;
-  affixHelp?: Partial<Record<CardStatKind, string>>;
+  affixHelp?: Partial<Record<CardAffixStatKind, string>>;
 };
 
 const detailTexts = texts as unknown as DetailTexts;
@@ -129,42 +107,45 @@ const GLOBAL_CONSUMERS: Record<string, string> = {
   runtimeScalingFor: '本卡效果',
   'getModifiers.dropRateMul': '掉落概率',
   'getModifiers.dropLifetimeMul': '掉落物存在时间',
-  'getModifiers.xpMul': '经验获取',
+  'getModifiers.xpMul': '奖励积分获取',
 };
-const DEFAULT_GLOSSARY: Record<string, string> = {
-  pierce: '弹道命中后继续前进，可再次命中后续目标。',
-  chain: '命中后在搜索范围内寻找新目标并继续传递伤害。',
-  split: '一枚弹道生成多枚子弹道，子弹道按独立伤害倍率结算。',
-  ricochet: '弹道命中后改变方向并继续寻找目标。',
-  aoeOnHit: '在命中点对一定半径内的敌人结算伤害。',
-  beamMorph: '把主炮投射方式改为持续或周期结算的直线光束。',
-  mortarMorph: '把主炮投射方式改为落点爆炸的抛射攻击。',
-  slow: '按比例降低目标移动速度，持续时间结束后恢复。',
-  freeze: '目标暂时无法移动；重复控制仍受抗性与免疫窗限制。',
-  stun: '目标暂时无法行动；重复控制仍受抗性与免疫窗限制。',
-  knockback: '把目标沿远离作用点的方向推开。',
-  taunt: '提高指定单位的索敌优先级，使敌人更倾向攻击它。',
-  vulnerable: '提高目标受到的伤害，可按配置叠层。',
-  aura: '以持续存在的来源为中心，周期影响范围内目标。',
-  groundZone: '在固定位置生成持续区域，并按间隔结算内部效果。',
-  dot: '在一段时间内按固定间隔重复造成伤害。',
-  summon: '生成拥有独立生命与行为的临时单位。',
-  dropRateMul: '乘算调整普通掉落物的生成概率。',
-  dropLifetimeMul: '乘算调整掉落物从生成到过期的时间。',
-  xpMul: '乘算调整本局获得的经验。',
-  extraDrop: '满足触发条件时额外生成掉落物。',
-  expiryConvert: '掉落物自然过期时把一部分价值转为其他收益。',
-  mergeRule: '改变同类同星卡牌合并时使用的规则。',
-  mergePulse: '完成卡牌合成时，以炮台为中心释放一次范围效果。',
-  shield: '抵挡指定次数的突破或伤害，耗尽后按规则恢复。',
-  thorns: '受到伤害后，按比例向攻击来源返还伤害。',
-  breachReduction: '降低敌人突破防线时造成的生命损失。',
-  novaOnBreak: '护盾耗尽时自动释放一次范围反击。',
-  execute: '目标生命比例低于阈值时直接完成击杀。',
-  burstDamage: '按倍率立即结算一次独立伤害。',
-  focusPriority: '临时改变索敌评分，让符合条件的目标更早被选中。',
-  restore: '立即恢复固定数值或最大生命比例的生命。',
-  statBuff: '在指定时间内提高一项基础属性，可按配置叠层。',
+export const DEFAULT_GLOSSARY: Record<string, string> = {
+  pierce: '打穿一个不算完，弹道会接着往前飞，能接着命中后面的目标。',
+  chain: '命中之后伤害不会停，会在附近继续找下一个追求者接着传。',
+  split: '一发子弹炸成好几发，每一发子弹道都单独算伤害。',
+  ricochet: '打中一个不会停，弹道会拐个弯，接着找下一个目标。',
+  aoeOnHit: '命中的地方会炸开一圈，范围内的追求者一起挨打。',
+  beamMorph: '主炮不再一发一发打，换成持续输出的直线光束。',
+  mortarMorph: '主炮换成抛物线砸落点的打法，落地就是一圈爆炸。',
+  slow: '让目标腿变慢，时间到了自动恢复原速。',
+  freeze: '目标原地定住动不了；反复叠控制照样受抗性和免疫窗口限制。',
+  stun: '目标当场断片，啥都干不了；反复叠控制同样受抗性和免疫窗口限制。',
+  knockback: '一巴掌把目标从原地推远。',
+  taunt: '拉高指定单位的仇恨值，让追求者更爱往它身上冲。',
+  vulnerable: '让目标变得更好打——受到的伤害提高，还能按配置叠层，这就是感电。',
+  aura: '围着来源转的常驻范围，每隔一段时间自动结算一次。',
+  groundZone: '在地上钉一块持续存在的区域，每隔一段时间对区域内结算一次。',
+  dot: '让目标在一段时间里持续掉血，这就是灼烧。',
+  summon: '召唤一个有自己血量、会自己行动的临时打手。',
+  dropRateMul: '按倍率调整心意掉落的概率。',
+  dropLifetimeMul: '按倍率调整心意从掉落到消失能撑多久。',
+  xpMul: '按倍率调整本局能拿到的奖励积分。',
+  extraDrop: '条件一满足，就多掉一份心意。',
+  expiryConvert: '心意过期消失前，把没捡到的那部分价值换成别的收益，不算完全浪费。',
+  mergeMaterialRefund: '普通合并或喂养装备升星成功后，有概率退回同型的低星素材卡。',
+  wildcardRewardBonus: '赏金或波末 Boss 掉的万能卡，在基础数量上再多给一点。',
+  mergePulse: '卡牌合成成功的瞬间，以炮台为中心炸一圈。',
+  shield: '能抵挡固定次数的伤害，这就是壁垒；打空之后按规则重新补上。',
+  thorns: '挨打不吃亏，按比例把伤害原样弹回攻击者身上。',
+  breachReduction: '追求者硬闯过防线时，少掉一些心防。',
+  novaOnBreak: '壁垒被打空的瞬间，自动对周围放一次反击。',
+  execute: '目标血量掉到阈值以下，直接送走，不用磨。',
+  burstDamage: '按倍率立刻单独打一下爆发伤害。',
+  focusPriority: '临时改索敌权重，让符合条件的目标更容易被优先盯上。',
+  restore: '立刻回一口血，按固定数值或按生命上限比例算。',
+  statBuff: '让某项基础属性在一段时间内变强，能按配置叠层。',
+  charge: '按指定战斗事件攒一条能量条，攒满或到点了就把内嵌效果一次放出来。',
+  summonBuff: '给符合条件的召唤物加强化，强化幅度受等级上限约束。',
 };
 
 function getDef(type: string): CardDef | undefined {
@@ -187,8 +168,7 @@ function effectAtoms(effects: EffectDef[]): string[] {
   const result: string[] = [];
   for (const effect of effects) {
     result.push(effect.atom);
-    const nested = effect.params?.effects;
-    if (Array.isArray(nested)) result.push(...effectAtoms(nested.filter(
+    result.push(...effectAtoms(nestedEffectsOf(effect).filter(
       item => item && typeof item === 'object' && 'atom' in item,
     ) as EffectDef[]));
   }
@@ -234,9 +214,10 @@ function optionCopy(cardType: string, option: EvolutionOptionDef) {
   const effectKeywords = [...new Set(blocks.flatMap(block => block.keywords))];
   return {
     name: copy?.name ?? option.textKey,
-    intent: copy?.intent ?? copy?.summary ?? `强化${effectKeywords.join('与') || '当前机制'}`,
-    keywords: copy?.keywords?.length ? copy.keywords : effectKeywords,
-    buildFit: copy?.buildFit,
+    /** 玩家向：summary → intent → 自动兜底 */
+    summary: copy?.summary ?? copy?.intent ?? `强化${effectKeywords.join('与') || '当前机制'}`,
+    /** 设计向 */
+    intent: copy?.intent ?? `强化${effectKeywords.join('与') || '当前机制'}`,
   };
 }
 
@@ -252,8 +233,8 @@ export function buildEvolutionOptionViewModel(
   return {
     id: option.id,
     name: copy.name,
+    summary: copy.summary,
     intent: copy.intent,
-    keywords: copy.keywords,
     exactEffects: option.equip.map(formatBinding),
     selected: selectedId === option.id,
     available: currentStar >= checkpointStar && (!selectedId || selectedId === option.id),
@@ -264,51 +245,18 @@ function syntheticBlock(trigger: string, lines: EffectTextLine[]): EffectTextBlo
   return { trigger, lines, keywords: [...new Set(lines.flatMap(line => line.keywords))] };
 }
 
-function ingredientRecipeViewModels(cardType: string): RecipeIngredientViewModel[] {
-  return cfg.evolutionRecipes.recipes.flatMap(recipe => {
-    const isIngredientA = recipe.ingredientA.cardId === cardType;
-    const isIngredientB = recipe.ingredientB.cardId === cardType;
-    if (!isIngredientA && !isIngredientB) return [];
-    const self = isIngredientA ? recipe.ingredientA : recipe.ingredientB;
-    const partner = isIngredientA ? recipe.ingredientB : recipe.ingredientA;
-    const partnerName = cardDisplayName(partner.cardId);
-    const outputName = cardDisplayName(recipe.outputCardId);
-    return [{
-      recipeId: recipe.id,
-      selfMinStar: self.minStar,
-      partnerCardId: partner.cardId,
-      partner: partnerName,
-      partnerMinStar: partner.minStar,
-      outputCardId: recipe.outputCardId,
-      output: outputName,
-      outputStar: recipe.outputStar,
-      notice: fmt(texts.evolution.recipeAsIngredient, {
-        selfStar: self.minStar,
-        partner: partnerName,
-        partnerStar: partner.minStar,
-        output: outputName,
-        outputStar: recipe.outputStar,
-      }),
-    }];
-  });
-}
-
-export function buildSkillTreeViewModel(card: Card, def = getDef(card.type)): SkillTreeViewModel {
-  const asIngredient = ingredientRecipeViewModels(card.type);
-  if (!def) return { nodes: [], asIngredient };
+export function buildSkillTreeViewModel(
+  card: Card,
+  def = getDef(card.type),
+): SkillTreeViewModel {
+  if (!def) return { nodes: [] };
   if (def.recipeOnly && !def.evolutionTree) {
-    const recipe = cfg.evolutionRecipes.recipes.find(item => item.outputCardId === card.type);
     const bindings = resolveCardBindings(def, card.evolutionPath ?? [], 6);
     return {
-      nodes: [],
-      asIngredient,
-      recipe: recipe ? {
-        ingredientA: `${cardDisplayName(recipe.ingredientA.cardId)} ≥${recipe.ingredientA.minStar}★`,
-        ingredientB: `${cardDisplayName(recipe.ingredientB.cardId)} ≥${recipe.ingredientB.minStar}★`,
-        output: `${cardDisplayName(recipe.outputCardId)} ${recipe.outputStar}★`,
-        exactEffects: bindings.map(formatBinding),
-        notice: '此卡不可通过普通合成获得，只能在波间阶段按配方进化。',
-      } : undefined,
+      nodes: [{
+        star: 6, kind: 'terminal', label: '终极形态效果', exactEffects: bindings.map(formatBinding),
+        reached: true, current: true, locked: false,
+      }],
     };
   }
 
@@ -350,7 +298,7 @@ export function buildSkillTreeViewModel(card: Card, def = getDef(card.type)): Sk
       locked: card.star < star,
     });
   }
-  return { nodes, asIngredient };
+  return { nodes };
 }
 
 function glossaryFor(atoms: string[]): GlossaryEntry[] {
@@ -381,7 +329,7 @@ export function buildCardDetailViewModel(
       currentRoute: '尚未选择路线',
       consume: { title: '消耗释放效果', hint: '', blocks: [], empty: '暂无可用效果。' },
       equip: { title: '装备持续效果', hint: '', blocks: [], empty: '暂无可用效果。' },
-      affixes: [], glossary: [], tree: { nodes: [], asIngredient: ingredientRecipeViewModels(card.type) },
+      affixes: [], glossary: [], tree: { nodes: [] },
     };
   }
   const path = card.evolutionPath ?? [];
@@ -401,7 +349,7 @@ export function buildCardDetailViewModel(
     god: def.god ? detailTexts.gods?.[def.god]?.name ?? def.god : '中立',
     overview: detailTexts.cards?.[card.type]?.overview ?? `以${CATEGORY_LABELS[def.category]}机制为核心的技能卡。`,
     sourceLabel: source === 'equipment' ? '已装备' : '手牌',
-    currentRoute: routeNames.length ? routeNames.join(' → ') : def.recipeOnly ? '配方终态' : '尚未选择路线',
+    currentRoute: routeNames.length ? routeNames.join(' → ') : def.recipeOnly ? '终极形态' : '尚未选择路线',
     consume: {
       title: '消耗释放效果',
       hint: '将卡牌拖到战场后结算；下列数值为当前星级精确值。',

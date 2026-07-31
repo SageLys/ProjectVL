@@ -136,14 +136,6 @@ export function createDevTelemetry(options: Options): DevTelemetry {
       if ((resultingStar ?? 0) >= 6) pending.telemetry.reached6BeforeFinalBoss = true;
     }
   }
-  function affinityMatch(cardType: string): Pick<TelemetryEvent, 'godId' | 'laneMatch'> {
-    const gods = options.getConfig().gods.gods.map(god => god.id);
-    const max = Math.max(0, ...gods.map(god => state().buildState.godAffinity[god] ?? 0));
-    if (max <= 0) return { laneMatch: undefined };
-    const godId = gods.find(god => state().buildState.godAffinity[god] === max);
-    const def = options.getConfig().skills.cards.find(card => card.id === cardType);
-    return { godId, laneMatch: def?.god === godId };
-  }
   function add(event: Omit<TelemetryEvent, 'at' | 'wave'> & Partial<Pick<TelemetryEvent, 'at' | 'wave'>>): TelemetryEvent {
     const item = { at: at(), wave: state().wave, ...event } as TelemetryEvent;
     events.push(item);
@@ -184,7 +176,6 @@ export function createDevTelemetry(options: Options): DevTelemetry {
         stage: stage(),
         star: drop.star,
         secure: drop.secure,
-        ...(drop.kind === 'card' && drop.source === 'normalKill' ? affinityMatch(drop.type) : {}),
       });
       if (drop.kind === 'card') {
         const godId = cardGodInRun(state(), drop.type);
@@ -366,17 +357,11 @@ export function createDevTelemetry(options: Options): DevTelemetry {
         });
         shouldExport = true;
       }
-      if (event.type === 'relicOffered') add({
-        type: 'relic_offered',
-        relicIndex: event.relicIndex,
-        candidates: [...event.options],
+      if (event.type === 'rewardTriggered') add({
+        type: 'reward_triggered', rewardId: event.rewardId,
+        activationIndex: event.activationIndex, rewardResult: { ...event.result },
       });
-      if (event.type === 'relicSelected') add({
-        type: 'relic_selected',
-        relicId: event.relicId,
-        rarity: event.rarity,
-        godId: event.god,
-      });
+      if (event.type === 'rewardConfirmed') add({ type: 'reward_confirmed', rewardId: event.rewardId });
       if (event.type === 'evolutionBranchOffered') add({
         type: 'evolution_branch_offered',
         cardType: event.cardType,
@@ -400,6 +385,25 @@ export function createDevTelemetry(options: Options): DevTelemetry {
         recipeId: event.recipeId,
         cardType: event.outputCardType,
         outputStar: event.outputStar,
+        outputCardId: event.outputCardId,
+        targetSlotKind: event.target.slotKind,
+        targetSlotIndex: event.target.index,
+        materialCardIds: [...event.materialCardIds],
+        assistBudgetUsed: state().recipes.assistBudgetUsed,
+      });
+      if (event.type === 'validationRewardGranted') add({
+        type: 'validation_reward_granted',
+        wave: event.wave,
+        cardType: event.cardType,
+        star: event.star,
+        delivery: event.delivery,
+        assistBudgetUsed: state().recipes.assistBudgetUsed,
+      });
+      if (event.type === 'validationRewardSettleStarted') add({
+        type: 'validation_reward_settle_started',
+        wave: event.wave,
+        settleSeconds: event.seconds,
+        assistBudgetUsed: state().recipes.assistBudgetUsed,
       });
       if (event.type === 'affixRolled') {
         for (const affix of event.affixes) add({
@@ -551,7 +555,6 @@ export function createDevTelemetry(options: Options): DevTelemetry {
           rewardCardStar: offer?.rewardCardStar,
           wildcardStar: offer?.wildcardStar,
           guaranteed: event.guaranteed,
-          ...affinityMatch(event.rewardCardType),
         });
       }
       if (event.type === 'bountyOfferExpired') add({ type: 'bountyOfferExpired', offerId: event.offerId });

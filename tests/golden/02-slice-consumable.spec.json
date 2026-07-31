@@ -1,0 +1,20 @@
+{
+  "id": "02-slice-consumable",
+  "description": "纵向切片②：消耗态落点释放 + 状态控制。脚本化生成两枚 frost 掉落 → 拾取 → 在敌群落点释放 1★ 冻结、3★（合成后）冻结，覆盖 freeze 状态与控制预算仲裁。",
+  "seed": 7,
+  "variants": [],
+  "dt": 0.03333333333333333,
+  "frames": 900,
+  "start": "wave1",
+  "decisionPolicy": "firstCandidate",
+  "inputs": [
+    { "frame": 120, "kind": "spawnDrop", "x": 400, "y": 300, "cardType": "frost", "star": 1 },
+    { "frame": 130, "kind": "collectAt", "x": 400, "y": 300 },
+    { "frame": 200, "kind": "consumeAt", "index": 0, "x": 480, "y": 200 },
+    { "frame": 300, "kind": "spawnDrop", "x": 400, "y": 300, "cardType": "frost", "star": 1 },
+    { "frame": 310, "kind": "collectAt", "x": 400, "y": 300 },
+    { "frame": 320, "kind": "spawnDrop", "x": 420, "y": 300, "cardType": "frost", "star": 1 },
+    { "frame": 330, "kind": "collectAt", "x": 420, "y": 300 },
+    { "frame": 400, "kind": "consumeAt", "index": 0, "x": 480, "y": 400 }
+  ]
+}
