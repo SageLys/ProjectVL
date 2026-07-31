@@ -108,6 +108,54 @@ namespace ProjectVL.Tests
                 Is.EqualTo(raw.SplashDamageRatio));
         }
 
+        [Test]
+        public void ResolverUsesCompiledDataForNewRoutesAndKeepsLegacyAlias()
+        {
+            CombatConfig combat = CombatConfigLoader.LoadDefault();
+            GameState rawState = GameStateFactory.Create(combat);
+            CardState raw = rawState.CreateCard("pierce", 5);
+            raw.EvolutionPath.Add("3:pierceA");
+            raw.EvolutionPath.Add("5:pierce2x");
+            rawState.Equipment[0] = raw;
+
+            GameState legacyState = GameStateFactory.Create(combat);
+            CardState legacy = legacyState.CreateCard("pierce", 5);
+            legacy.EvolutionPath.Add("3:pierceA");
+            legacy.EvolutionPath.Add("5:pierceA2");
+            legacyState.Equipment[0] = legacy;
+
+            CardCombatProfile rawProfile = CardEffectResolver.Resolve(rawState);
+            CardCombatProfile legacyProfile =
+                CardEffectResolver.Resolve(legacyState);
+
+            Assert.That(rawProfile.SplashRadius, Is.EqualTo(80f));
+            Assert.That(rawProfile.SplashDamageRatio, Is.EqualTo(0.5f));
+            Assert.That(rawProfile.RicochetBounces, Is.Zero);
+            Assert.That(legacyProfile.RicochetBounces, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void RuntimeSwitchCoversNinetyNineFiveStarOptions()
+        {
+            EvolutionBranchEffectsConfig config =
+                GameConfigLoader.LoadEvolutionBranchEffects();
+            int supported = 0;
+            foreach (CompiledEvolutionCardConfig card in config.cards)
+            {
+                foreach (CompiledEvolutionOptionConfig option in card.options)
+                {
+                    if (EvolutionBranchProfileCompiler.IsRuntimeSupported(
+                        card.cardId,
+                        option.optionId))
+                    {
+                        supported++;
+                    }
+                }
+            }
+
+            Assert.That(supported, Is.EqualTo(99));
+        }
+
         private static int CountAtoms(CompiledEffectAtomConfig atom)
         {
             int count = 1;

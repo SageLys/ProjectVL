@@ -35,6 +35,25 @@ namespace ProjectVL.Systems
                     profile);
         }
 
+        public static bool IsRuntimeSupported(
+            string cardId,
+            string optionId)
+        {
+            switch (optionId)
+            {
+                case "scorch2x":
+                case "magmaPool2x":
+                case "aegis1x":
+                case "thorns1x":
+                case "decoy1x":
+                case "retribution1x":
+                    return false;
+                default:
+                    return !string.IsNullOrEmpty(cardId)
+                        && !string.IsNullOrEmpty(optionId);
+            }
+        }
+
         private static string RouteAt(CardState card, int checkpoint)
         {
             string prefix = checkpoint + ":";

@@ -152,6 +152,13 @@ namespace ProjectVL.Systems
                                 profile);
                         break;
                 }
+
+                if (card.Star >= 5 && UsesCompiledFiveStarRoute(card))
+                {
+                    EvolutionBranchProfileCompiler.ApplyFiveStar(
+                        card,
+                        profile);
+                }
             }
 
             RelicScalingSystem.Apply(state, profile);
@@ -2307,12 +2314,18 @@ namespace ProjectVL.Systems
                     string route = entry.Substring(prefix.Length);
                     if (checkpoint == 5)
                     {
-                        if (route == card.Type + "1x")
-                            return card.Type + "A2";
-                        if (route == card.Type + "2x")
-                            return card.Type + "B2";
-                        if (route == card.Type + "3x")
+                        if (route == card.Type + "1x"
+                            || route == card.Type + "2x"
+                            || route == card.Type + "3x")
+                        {
+                            if (UsesCompiledFiveStarRoute(card))
+                                return "";
+                            if (route == card.Type + "1x")
+                                return card.Type + "A2";
+                            if (route == card.Type + "2x")
+                                return card.Type + "B2";
                             return card.Type + "C2";
+                        }
                     }
 
                     return route;
@@ -2320,6 +2333,23 @@ namespace ProjectVL.Systems
             }
 
             return "";
+        }
+
+        private static bool UsesCompiledFiveStarRoute(CardState card)
+        {
+            string prefix = "5:" + card.Type;
+            foreach (string entry in card.EvolutionPath)
+            {
+                if (entry == prefix + "1x"
+                    || entry == prefix + "2x"
+                    || entry == prefix + "3x")
+                {
+                    return EvolutionBranchProfileCompiler.IsRuntimeSupported(
+                        card.Type,
+                        entry.Substring(2));
+                }
+            }
+            return false;
         }
 
         private static float Max(float left, float right)
