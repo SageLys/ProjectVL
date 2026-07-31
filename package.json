@@ -6,13 +6,14 @@
   "description": "魅魔心防战 · 360° 塔防可玩原型（Vite + TypeScript + Canvas 2D）",
   "scripts": {
     "dev": "vite --host",
-    "build": "tsc --noEmit && vite build",
+    "build": "npm run validate:texts && tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
     "metrics": "node scripts/computeExperienceMetrics.ts",
     "replay:record": "vite-node scripts/recordGoldenReplay.ts",
     "validate": "vite-node scripts/validateConfig.ts",
+    "validate:texts": "vite-node scripts/validateTextsFile.ts",
     "format:config": "vite-node scripts/formatConfig.ts",
     "config:export-xlsx": "vite-node scripts/exportConfigXlsx.ts",
     "config:import-xlsx": "vite-node scripts/importConfigXlsx.ts"
