@@ -14,13 +14,19 @@ namespace ProjectVL.Config
     public sealed class EvolutionRecipeConfig
     {
         public string id;
-        public CardRequirementConfig ingredientA =
+        public string recipeType;
+        public string variableGod;
+        public string anchorGod;
+        public CardRequirementConfig ingredientVariable =
             new CardRequirementConfig();
-        public CardRequirementConfig ingredientB =
+        public CardRequirementConfig ingredientAnchor =
             new CardRequirementConfig();
         public string outputCardId;
         public int outputStar;
         public string allowedPhase;
+
+        public CardRequirementConfig ingredientA => ingredientVariable;
+        public CardRequirementConfig ingredientB => ingredientAnchor;
     }
 
     [Serializable]

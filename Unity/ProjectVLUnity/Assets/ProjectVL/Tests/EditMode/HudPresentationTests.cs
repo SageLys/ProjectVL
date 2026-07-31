@@ -49,18 +49,18 @@ namespace ProjectVL.Tests
             var card = new CardState(1, "pierce", 5);
             card.EvolutionPath.Add("pierceA");
             card.Affixes.Add(new CardAffixRoll(
-                "damageAdd",
-                2.5f,
+                "damageMul",
+                0.08f,
                 0f));
 
             string detail = CardDetailFormatter.Format(card);
 
             StringAssert.Contains("5★", detail);
-            StringAssert.Contains("雷霆贯枪", detail);
+            StringAssert.Contains("打包处理", detail);
             StringAssert.Contains("迅霆", detail);
             StringAssert.Contains("可拖到战场施放", detail);
             StringAssert.Contains("进化：", detail);
-            StringAssert.Contains("词缀：伤害 +2.5", detail);
+            StringAssert.Contains("词缀：伤害倍率 +8%", detail);
         }
 
         [Test]
@@ -71,9 +71,9 @@ namespace ProjectVL.Tests
 
             string detail = CardDetailFormatter.FormatRecipe(recipe);
 
-            StringAssert.Contains("5★ 连环闪电", detail);
-            StringAssert.Contains("5★ 霜寒", detail);
-            StringAssert.Contains("→ 6★ 霜雷", detail);
+            StringAssert.Contains("5★ 雨露均沾", detail);
+            StringAssert.Contains("5★ 打包处理", detail);
+            StringAssert.Contains("→ 6★ 一矛拉出电网", detail);
         }
     }
 }

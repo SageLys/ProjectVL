@@ -1,3 +1,4 @@
+using ProjectVL.Config;
 using ProjectVL.Core;
 
 namespace ProjectVL.Systems
@@ -144,12 +145,44 @@ namespace ProjectVL.Systems
                     case "luckyStar":
                         ApplyLuckyStar(card, profile);
                         break;
+                    default:
+                        ApplyRecipeProductFallback(card, profile);
+                        break;
                 }
             }
 
             RelicScalingSystem.Apply(state, profile);
             CardAffixSystem.ApplyProfile(state, profile);
             return profile;
+        }
+
+        private static void ApplyRecipeProductFallback(
+            CardState card,
+            CardCombatProfile profile)
+        {
+            CardDefinitionConfig definition =
+                CardCatalog.Default.Find(card.Type);
+            if (definition?.recipeOnly != true || card.Star < 6)
+                return;
+
+            switch (definition.category)
+            {
+                case "projectile":
+                    ApplyPierce(card, profile);
+                    break;
+                case "control":
+                    ApplyFrost(card, profile);
+                    break;
+                case "domain":
+                    ApplyScorch(card, profile);
+                    break;
+                case "defense":
+                    ApplyAegis(card, profile);
+                    break;
+                case "economy":
+                    ApplyHarvest(card, profile);
+                    break;
+            }
         }
 
         private static void ApplyPierce(
@@ -2297,7 +2330,18 @@ namespace ProjectVL.Systems
             {
                 if (entry.StartsWith(prefix))
                 {
-                    return entry.Substring(prefix.Length);
+                    string route = entry.Substring(prefix.Length);
+                    if (checkpoint == 5)
+                    {
+                        if (route == card.Type + "1x")
+                            return card.Type + "A2";
+                        if (route == card.Type + "2x")
+                            return card.Type + "B2";
+                        if (route == card.Type + "3x")
+                            return card.Type + "C2";
+                    }
+
+                    return route;
                 }
             }
 

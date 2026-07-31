@@ -364,13 +364,151 @@ MonoBehaviour:
     animator: {fileID: 0}
     material: {fileID: 0}
     statusOverlay: {fileID: 0}
-  - id: frozenThunder
+  - id: stormLattice
     sprite: {fileID: 0}
     prefab: {fileID: 0}
     animator: {fileID: 0}
     material: {fileID: 0}
     statusOverlay: {fileID: 0}
-  - id: solarLance
+  - id: thunderRime
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: emberSpark
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: voltBastion
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: ampereFlow
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: crystalRelay
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: glacialEpoch
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: rimeShell
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: tombSpire
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: stasisLedger
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: solarPiercer
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: steamBurst
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: volcanoCore
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: emberMoat
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: emberYield
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: pylonCircuit
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: glacialEffigy
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: wrathMortar
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: aegisCitadel
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: rootLoom
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: midasChain
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: frostDew
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: pyreBrand
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: fortuneThorns
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: goldenGrove
     sprite: {fileID: 0}
     prefab: {fileID: 0}
     animator: {fileID: 0}
@@ -382,19 +520,31 @@ MonoBehaviour:
     animator: {fileID: 0}
     material: {fileID: 0}
     statusOverlay: {fileID: 0}
-  - id: pyrestorm
-    sprite: {fileID: 0}
-    prefab: {fileID: 0}
-    animator: {fileID: 0}
-    material: {fileID: 0}
-    statusOverlay: {fileID: 0}
   - id: crownOfThorns
     sprite: {fileID: 0}
     prefab: {fileID: 0}
     animator: {fileID: 0}
     material: {fileID: 0}
     statusOverlay: {fileID: 0}
+  - id: frozenThunder
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
   - id: goldenIdol
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: pyrestorm
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: solarLance
     sprite: {fileID: 0}
     prefab: {fileID: 0}
     animator: {fileID: 0}
@@ -665,13 +815,151 @@ MonoBehaviour:
     animator: {fileID: 0}
     material: {fileID: 0}
     statusOverlay: {fileID: 0}
-  - id: frozenThunder
+  - id: stormLattice
     sprite: {fileID: 0}
     prefab: {fileID: 0}
     animator: {fileID: 0}
     material: {fileID: 0}
     statusOverlay: {fileID: 0}
-  - id: solarLance
+  - id: thunderRime
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: emberSpark
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: voltBastion
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: ampereFlow
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: crystalRelay
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: glacialEpoch
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: rimeShell
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: tombSpire
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: stasisLedger
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: solarPiercer
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: steamBurst
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: volcanoCore
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: emberMoat
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: emberYield
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: pylonCircuit
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: glacialEffigy
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: wrathMortar
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: aegisCitadel
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: rootLoom
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: midasChain
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: frostDew
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: pyreBrand
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: fortuneThorns
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: goldenGrove
     sprite: {fileID: 0}
     prefab: {fileID: 0}
     animator: {fileID: 0}
@@ -683,19 +971,31 @@ MonoBehaviour:
     animator: {fileID: 0}
     material: {fileID: 0}
     statusOverlay: {fileID: 0}
-  - id: pyrestorm
-    sprite: {fileID: 0}
-    prefab: {fileID: 0}
-    animator: {fileID: 0}
-    material: {fileID: 0}
-    statusOverlay: {fileID: 0}
   - id: crownOfThorns
     sprite: {fileID: 0}
     prefab: {fileID: 0}
     animator: {fileID: 0}
     material: {fileID: 0}
     statusOverlay: {fileID: 0}
+  - id: frozenThunder
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
   - id: goldenIdol
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: pyrestorm
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: solarLance
     sprite: {fileID: 0}
     prefab: {fileID: 0}
     animator: {fileID: 0}
@@ -912,13 +1212,151 @@ MonoBehaviour:
     animator: {fileID: 0}
     material: {fileID: 0}
     statusOverlay: {fileID: 0}
-  - id: frozenThunder
+  - id: stormLattice
     sprite: {fileID: 0}
     prefab: {fileID: 0}
     animator: {fileID: 0}
     material: {fileID: 0}
     statusOverlay: {fileID: 0}
-  - id: solarLance
+  - id: thunderRime
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: emberSpark
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: voltBastion
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: ampereFlow
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: crystalRelay
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: glacialEpoch
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: rimeShell
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: tombSpire
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: stasisLedger
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: solarPiercer
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: steamBurst
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: volcanoCore
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: emberMoat
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: emberYield
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: pylonCircuit
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: glacialEffigy
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: wrathMortar
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: aegisCitadel
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: rootLoom
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: midasChain
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: frostDew
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: pyreBrand
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: fortuneThorns
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: goldenGrove
     sprite: {fileID: 0}
     prefab: {fileID: 0}
     animator: {fileID: 0}
@@ -930,19 +1368,31 @@ MonoBehaviour:
     animator: {fileID: 0}
     material: {fileID: 0}
     statusOverlay: {fileID: 0}
-  - id: pyrestorm
-    sprite: {fileID: 0}
-    prefab: {fileID: 0}
-    animator: {fileID: 0}
-    material: {fileID: 0}
-    statusOverlay: {fileID: 0}
   - id: crownOfThorns
     sprite: {fileID: 0}
     prefab: {fileID: 0}
     animator: {fileID: 0}
     material: {fileID: 0}
     statusOverlay: {fileID: 0}
+  - id: frozenThunder
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
   - id: goldenIdol
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: pyrestorm
+    sprite: {fileID: 0}
+    prefab: {fileID: 0}
+    animator: {fileID: 0}
+    material: {fileID: 0}
+    statusOverlay: {fileID: 0}
+  - id: solarLance
     sprite: {fileID: 0}
     prefab: {fileID: 0}
     animator: {fileID: 0}

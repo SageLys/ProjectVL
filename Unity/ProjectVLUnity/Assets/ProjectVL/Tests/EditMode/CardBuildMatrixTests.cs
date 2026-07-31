@@ -250,10 +250,10 @@ namespace ProjectVL.Tests
             // strongest-wins status, so their resolved combat result is
             // intentionally equivalent even though the route is recorded.
             return cardId == "sanctum"
-                    && (choice == "sanctumB2"
-                        || choice == "sanctumC2")
+                    && (choice == "sanctum2x"
+                        || choice == "sanctum3x")
                 || cardId == "bountyCall"
-                    && choice == "bountyCallC2";
+                    && choice == "bountyCall3x";
         }
 
         private static string ProfileSignature(

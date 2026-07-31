@@ -29,6 +29,18 @@ namespace ProjectVL.Config
                 },
                 StringComparer.Ordinal);
 
+        private static readonly HashSet<string> ValidSynergyTags =
+            new HashSet<string>(
+                new[]
+                {
+                    "projectile",
+                    "control",
+                    "domain",
+                    "defense",
+                    "utility"
+                },
+                StringComparer.Ordinal);
+
         public static IReadOnlyList<string> Validate(
             CardsConfig cards,
             GodsConfig gods = null,
@@ -72,6 +84,26 @@ namespace ProjectVL.Config
                     errors.Add(
                         $"Unknown category for {card.id}: {card.category}.");
                 }
+                if (card.synergyTags == null
+                    || card.synergyTags.Length < 1
+                    || card.synergyTags.Length > 2)
+                {
+                    errors.Add(
+                        $"{card.id} requires one or two synergy tags.");
+                }
+                else
+                {
+                    var tags = new HashSet<string>(StringComparer.Ordinal);
+                    foreach (string tag in card.synergyTags)
+                    {
+                        if (!ValidSynergyTags.Contains(tag)
+                            || !tags.Add(tag))
+                        {
+                            errors.Add(
+                                $"Invalid synergy tag for {card.id}: {tag}.");
+                        }
+                    }
+                }
                 if (string.IsNullOrWhiteSpace(card.displayName))
                 {
                     errors.Add($"Display name is required for {card.id}.");
@@ -84,6 +116,14 @@ namespace ProjectVL.Config
                 if (card.recipeOnly)
                 {
                     recipeCount++;
+                    if (string.IsNullOrWhiteSpace(card.primaryGod)
+                        || card.primaryGod != card.god
+                        || card.sourceGods == null
+                        || card.sourceGods.Length < 1)
+                    {
+                        errors.Add(
+                            $"Recipe card {card.id} requires ownership metadata.");
+                    }
                     if ((card.evolution3?.Length ?? 0) != 0
                         || (card.evolution5?.Length ?? 0) != 0)
                     {
@@ -104,10 +144,10 @@ namespace ProjectVL.Config
                 errors.Add(
                     $"Expected 35 playable cards, found {playableCount}.");
             }
-            if (recipeCount != 6)
+            if (recipeCount != 25)
             {
                 errors.Add(
-                    $"Expected 6 recipe cards, found {recipeCount}.");
+                    $"Expected 25 recipe cards, found {recipeCount}.");
             }
 
             ValidateGodRosters(gods, definitions, errors);
@@ -142,16 +182,15 @@ namespace ProjectVL.Config
                 return;
             }
 
-            string suffix = checkpoint == 3 ? "" : "2";
-            for (int index = 0; index < options.Length; index++)
+            var unique = new HashSet<string>(StringComparer.Ordinal);
+            foreach (string option in options)
             {
-                string expected =
-                    card.id + (char)('A' + index) + suffix;
-                if (options[index] != expected)
+                if (string.IsNullOrWhiteSpace(option)
+                    || !unique.Add(option))
                 {
                     errors.Add(
-                        $"{card.id} {checkpoint}-star choice {index} "
-                        + $"must be {expected}, found {options[index]}.");
+                        $"{card.id} {checkpoint}-star choices must be "
+                        + "non-empty and unique.");
                 }
             }
         }
@@ -226,31 +265,72 @@ namespace ProjectVL.Config
                 return;
             }
 
+            if (recipes.recipes.Length != 25)
+            {
+                errors.Add(
+                    $"Expected 25 recipes, found {recipes.recipes.Length}.");
+            }
+
+            var recipeIds = new HashSet<string>(StringComparer.Ordinal);
+            var outputReferences =
+                new Dictionary<string, int>(StringComparer.Ordinal);
             foreach (EvolutionRecipeConfig recipe in recipes.recipes)
             {
+                if (recipe == null
+                    || string.IsNullOrWhiteSpace(recipe.id)
+                    || !recipeIds.Add(recipe.id))
+                {
+                    errors.Add($"Invalid or duplicate recipe id: {recipe?.id}.");
+                    continue;
+                }
                 ValidateRecipeCard(
-                    recipe?.id,
-                    recipe?.ingredientA?.cardId,
+                    recipe.id,
+                    recipe.ingredientVariable?.cardId,
                     false,
                     definitions,
                     errors);
                 ValidateRecipeCard(
-                    recipe?.id,
-                    recipe?.ingredientB?.cardId,
+                    recipe.id,
+                    recipe.ingredientAnchor?.cardId,
                     false,
                     definitions,
                     errors);
                 ValidateRecipeCard(
-                    recipe?.id,
-                    recipe?.outputCardId,
+                    recipe.id,
+                    recipe.outputCardId,
                     true,
                     definitions,
                     errors);
-                if (recipe != null
-                    && recipe.id != recipe.outputCardId)
+                if (recipe.outputStar != 6)
                 {
                     errors.Add(
-                        $"Recipe {recipe.id} output must use the same card id.");
+                        $"Recipe {recipe.id} output must be 6-star.");
+                }
+                if (recipe.ingredientVariable?.minStar != 5
+                    || recipe.ingredientAnchor?.minStar != 5)
+                {
+                    errors.Add(
+                        $"Recipe {recipe.id} ingredients must require 5-star cards.");
+                }
+
+                outputReferences[recipe.outputCardId] =
+                    outputReferences.TryGetValue(
+                        recipe.outputCardId,
+                        out int count)
+                        ? count + 1
+                        : 1;
+            }
+
+            foreach (CardDefinitionConfig definition in definitions.Values)
+            {
+                if (definition.recipeOnly
+                    && (!outputReferences.TryGetValue(
+                            definition.id,
+                            out int count)
+                        || count != 1))
+                {
+                    errors.Add(
+                        $"Recipe card {definition.id} must be output by exactly one recipe.");
                 }
             }
         }

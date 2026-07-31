@@ -1,47 +1,1294 @@
 {
   "version": "1.0.0",
-  "sourceVersion": "0.4.0",
+  "sourceVersion": "0.6.0",
   "cards": [
-    {"id":"chainLightning","god":"storm","category":"projectile","textKey":"cards.chainLightning","displayName":"连环闪电","recipeOnly":false,"consumable":true,"evolution3":["chainLightningA","chainLightningB","chainLightningC"],"evolution5":["chainLightningA2","chainLightningB2","chainLightningC2"]},
-    {"id":"pierce","god":"storm","category":"projectile","textKey":"cards.pierce","displayName":"雷霆贯枪","recipeOnly":false,"consumable":true,"evolution3":["pierceA","pierceB","pierceC"],"evolution5":["pierceA2","pierceB2","pierceC2"]},
-    {"id":"staticSurge","god":"storm","category":"control","textKey":"cards.staticSurge","displayName":"静电充能","recipeOnly":false,"consumable":true,"evolution3":["staticSurgeA","staticSurgeB","staticSurgeC"],"evolution5":["staticSurgeA2","staticSurgeB2","staticSurgeC2"]},
-    {"id":"stormcall","god":"storm","category":"domain","textKey":"cards.stormcall","displayName":"唤雷","recipeOnly":false,"consumable":true,"evolution3":["stormcallA","stormcallB","stormcallC"],"evolution5":["stormcallA2","stormcallB2","stormcallC2"]},
-    {"id":"arcSplitter","god":"storm","category":"projectile","textKey":"cards.arcSplitter","displayName":"弧光裂片","recipeOnly":false,"consumable":true,"evolution3":["arcSplitterA","arcSplitterB","arcSplitterC"],"evolution5":["arcSplitterA2","arcSplitterB2","arcSplitterC2"]},
-    {"id":"galvanicWard","god":"storm","category":"defense","textKey":"cards.galvanicWard","displayName":"电磁壁垒","recipeOnly":false,"consumable":true,"evolution3":["galvanicWardA","galvanicWardB","galvanicWardC"],"evolution5":["galvanicWardA2","galvanicWardB2","galvanicWardC2"]},
-    {"id":"overcharge","god":"storm","category":"economy","textKey":"cards.overcharge","displayName":"过载核心","recipeOnly":false,"consumable":true,"evolution3":["overchargeA","overchargeB","overchargeC"],"evolution5":["overchargeA2","overchargeB2","overchargeC2"]},
-    {"id":"frost","god":"winter","category":"control","textKey":"cards.frost","displayName":"霜寒","recipeOnly":false,"consumable":true,"evolution3":["frostA","frostB","frostC"],"evolution5":["frostA2","frostB2","frostC2"]},
-    {"id":"impact","god":"winter","category":"control","textKey":"cards.impact","displayName":"凛冬重锤","recipeOnly":false,"consumable":true,"evolution3":["impactA","impactB","impactC"],"evolution5":["impactA2","impactB2","impactC2"]},
-    {"id":"glacialSpike","god":"winter","category":"projectile","textKey":"cards.glacialSpike","displayName":"冰锥","recipeOnly":false,"consumable":true,"evolution3":["glacialSpikeA","glacialSpikeB","glacialSpikeC"],"evolution5":["glacialSpikeA2","glacialSpikeB2","glacialSpikeC2"]},
-    {"id":"permafrost","god":"winter","category":"domain","textKey":"cards.permafrost","displayName":"冻土","recipeOnly":false,"consumable":true,"evolution3":["permafrostA","permafrostB","permafrostC"],"evolution5":["permafrostA2","permafrostB2","permafrostC2"]},
-    {"id":"iceTomb","god":"winter","category":"control","textKey":"cards.iceTomb","displayName":"冰棺","recipeOnly":false,"consumable":true,"evolution3":["iceTombA","iceTombB","iceTombC"],"evolution5":["iceTombA2","iceTombB2","iceTombC2"]},
-    {"id":"frozenBulwark","god":"winter","category":"defense","textKey":"cards.frozenBulwark","displayName":"冰晶壁垒","recipeOnly":false,"consumable":true,"evolution3":["frozenBulwarkA","frozenBulwarkB","frozenBulwarkC"],"evolution5":["frozenBulwarkA2","frozenBulwarkB2","frozenBulwarkC2"]},
-    {"id":"hoarfrostTithe","god":"winter","category":"economy","textKey":"cards.hoarfrostTithe","displayName":"霜税","recipeOnly":false,"consumable":true,"evolution3":["hoarfrostTitheA","hoarfrostTitheB","hoarfrostTitheC"],"evolution5":["hoarfrostTitheA2","hoarfrostTitheB2","hoarfrostTitheC2"]},
-    {"id":"scorch","god":"inferno","category":"domain","textKey":"cards.scorch","displayName":"灼心","recipeOnly":false,"consumable":true,"evolution3":["scorchA","scorchB","scorchC"],"evolution5":["scorchA2","scorchB2","scorchC2"]},
-    {"id":"splitBlast","god":"inferno","category":"projectile","textKey":"cards.splitBlast","displayName":"爆裂弹","recipeOnly":false,"consumable":true,"evolution3":["splitBlastA","splitBlastB","splitBlastC"],"evolution5":["splitBlastA2","splitBlastB2","splitBlastC2"]},
-    {"id":"meteor","god":"inferno","category":"projectile","textKey":"cards.meteor","displayName":"陨星","recipeOnly":false,"consumable":true,"evolution3":["meteorA","meteorB","meteorC"],"evolution5":["meteorA2","meteorB2","meteorC2"]},
-    {"id":"magmaPool","god":"inferno","category":"domain","textKey":"cards.magmaPool","displayName":"熔岩池","recipeOnly":false,"consumable":true,"evolution3":["magmaPoolA","magmaPoolB","magmaPoolC"],"evolution5":["magmaPoolA2","magmaPoolB2","magmaPoolC2"]},
-    {"id":"flashfire","god":"inferno","category":"control","textKey":"cards.flashfire","displayName":"爆燃冲击","recipeOnly":false,"consumable":true,"evolution3":["flashfireA","flashfireB","flashfireC"],"evolution5":["flashfireA2","flashfireB2","flashfireC2"]},
-    {"id":"cinderheart","god":"inferno","category":"defense","textKey":"cards.cinderheart","displayName":"烬心","recipeOnly":false,"consumable":true,"evolution3":["cinderheartA","cinderheartB","cinderheartC"],"evolution5":["cinderheartA2","cinderheartB2","cinderheartC2"]},
-    {"id":"ashHarvest","god":"inferno","category":"economy","textKey":"cards.ashHarvest","displayName":"燃灰","recipeOnly":false,"consumable":true,"evolution3":["ashHarvestA","ashHarvestB","ashHarvestC"],"evolution5":["ashHarvestA2","ashHarvestB2","ashHarvestC2"]},
-    {"id":"aegis","god":"bulwark","category":"defense","textKey":"cards.aegis","displayName":"神盾","recipeOnly":false,"consumable":true,"evolution3":["aegisA","aegisB","aegisC"],"evolution5":["aegisA2","aegisB2","aegisC2"]},
-    {"id":"thorns","god":"bulwark","category":"defense","textKey":"cards.thorns","displayName":"荆棘","recipeOnly":false,"consumable":true,"evolution3":["thornsA","thornsB","thornsC"],"evolution5":["thornsA2","thornsB2","thornsC2"]},
-    {"id":"decoy","god":"bulwark","category":"control","textKey":"cards.decoy","displayName":"磐垒图腾","recipeOnly":false,"consumable":true,"evolution3":["decoyA","decoyB","decoyC"],"evolution5":["decoyA2","decoyB2","decoyC2"]},
-    {"id":"sanctum","god":"bulwark","category":"domain","textKey":"cards.sanctum","displayName":"圣域","recipeOnly":false,"consumable":true,"evolution3":["sanctumA","sanctumB","sanctumC"],"evolution5":["sanctumA2","sanctumB2","sanctumC2"]},
-    {"id":"sentinel","god":"bulwark","category":"projectile","textKey":"cards.sentinel","displayName":"哨戒炮塔","recipeOnly":false,"consumable":true,"evolution3":["sentinelA","sentinelB","sentinelC"],"evolution5":["sentinelA2","sentinelB2","sentinelC2"]},
-    {"id":"retribution","god":"bulwark","category":"control","textKey":"cards.retribution","displayName":"天罚","recipeOnly":false,"consumable":true,"evolution3":["retributionA","retributionB","retributionC"],"evolution5":["retributionA2","retributionB2","retributionC2"]},
-    {"id":"ironvine","god":"bulwark","category":"economy","textKey":"cards.ironvine","displayName":"铁蔓","recipeOnly":false,"consumable":true,"evolution3":["ironvineA","ironvineB","ironvineC"],"evolution5":["ironvineA2","ironvineB2","ironvineC2"]},
-    {"id":"harvest","god":"plenty","category":"economy","textKey":"cards.harvest","displayName":"眷恋","recipeOnly":false,"consumable":true,"evolution3":["harvestA","harvestB","harvestC"],"evolution5":["harvestA2","harvestB2","harvestC2"]},
-    {"id":"fateLoom","god":"plenty","category":"economy","textKey":"cards.fateLoom","displayName":"命运织机","recipeOnly":false,"consumable":true,"evolution3":["fateLoomA","fateLoomB","fateLoomC"],"evolution5":["fateLoomA2","fateLoomB2","fateLoomC2"]},
-    {"id":"goldenVolley","god":"plenty","category":"projectile","textKey":"cards.goldenVolley","displayName":"鎏金弹","recipeOnly":false,"consumable":true,"evolution3":["goldenVolleyA","goldenVolleyB","goldenVolleyC"],"evolution5":["goldenVolleyA2","goldenVolleyB2","goldenVolleyC2"]},
-    {"id":"bountyCall","god":"plenty","category":"control","textKey":"cards.bountyCall","displayName":"富集号令","recipeOnly":false,"consumable":true,"evolution3":["bountyCallA","bountyCallB","bountyCallC"],"evolution5":["bountyCallA2","bountyCallB2","bountyCallC2"]},
-    {"id":"overgrowth","god":"plenty","category":"domain","textKey":"cards.overgrowth","displayName":"蔓生","recipeOnly":false,"consumable":true,"evolution3":["overgrowthA","overgrowthB","overgrowthC"],"evolution5":["overgrowthA2","overgrowthB2","overgrowthC2"]},
-    {"id":"springOfLife","god":"plenty","category":"defense","textKey":"cards.springOfLife","displayName":"生命涌泉","recipeOnly":false,"consumable":true,"evolution3":["springOfLifeA","springOfLifeB","springOfLifeC"],"evolution5":["springOfLifeA2","springOfLifeB2","springOfLifeC2"]},
-    {"id":"luckyStar","god":"plenty","category":"economy","textKey":"cards.luckyStar","displayName":"吉星","recipeOnly":false,"consumable":true,"evolution3":["luckyStarA","luckyStarB","luckyStarC"],"evolution5":["luckyStarA2","luckyStarB2","luckyStarC2"]},
-    {"id":"frozenThunder","god":"storm","category":"projectile","textKey":"cards.frozenThunder","displayName":"霜雷","recipeOnly":true,"consumable":true,"evolution3":[],"evolution5":[]},
-    {"id":"solarLance","god":"storm","category":"projectile","textKey":"cards.solarLance","displayName":"日炙长枪","recipeOnly":true,"consumable":true,"evolution3":[],"evolution5":[]},
-    {"id":"avalanche","god":"winter","category":"control","textKey":"cards.avalanche","displayName":"雪崩","recipeOnly":true,"consumable":true,"evolution3":[],"evolution5":[]},
-    {"id":"pyrestorm","god":"inferno","category":"domain","textKey":"cards.pyrestorm","displayName":"焚风暴","recipeOnly":true,"consumable":true,"evolution3":[],"evolution5":[]},
-    {"id":"crownOfThorns","god":"bulwark","category":"defense","textKey":"cards.crownOfThorns","displayName":"荆棘王冠","recipeOnly":true,"consumable":true,"evolution3":[],"evolution5":[]},
-    {"id":"goldenIdol","god":"plenty","category":"economy","textKey":"cards.goldenIdol","displayName":"黄金偶像","recipeOnly":true,"consumable":true,"evolution3":[],"evolution5":[]}
+    {
+      "id": "chainLightning",
+      "god": "storm",
+      "category": "projectile",
+      "synergyTags": [
+        "projectile",
+        "control"
+      ],
+      "textKey": "cards.chainLightning",
+      "displayName": "一个都别想跑",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "chainLightningA",
+        "chainLightningB",
+        "chainLightningC"
+      ],
+      "evolution5": [
+        "chainLightning1x",
+        "chainLightning2x",
+        "chainLightning3x"
+      ]
+    },
+    {
+      "id": "pierce",
+      "god": "storm",
+      "category": "projectile",
+      "synergyTags": [
+        "projectile"
+      ],
+      "textKey": "cards.pierce",
+      "displayName": "打包处理",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "pierceA",
+        "pierceB",
+        "pierceC"
+      ],
+      "evolution5": [
+        "pierce1x",
+        "pierce2x",
+        "pierce3x"
+      ]
+    },
+    {
+      "id": "staticSurge",
+      "god": "storm",
+      "category": "control",
+      "synergyTags": [
+        "control"
+      ],
+      "textKey": "cards.staticSurge",
+      "displayName": "麻到你不会动",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "staticSurgeA",
+        "staticSurgeB",
+        "staticSurgeC"
+      ],
+      "evolution5": [
+        "staticSurge1x",
+        "staticSurge2x",
+        "staticSurge3x"
+      ]
+    },
+    {
+      "id": "stormcall",
+      "god": "storm",
+      "category": "domain",
+      "synergyTags": [
+        "domain",
+        "projectile"
+      ],
+      "textKey": "cards.stormcall",
+      "displayName": "天降正义",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "stormcallA",
+        "stormcallB",
+        "stormcallC"
+      ],
+      "evolution5": [
+        "stormcall1x",
+        "stormcall2x",
+        "stormcall3x"
+      ]
+    },
+    {
+      "id": "arcSplitter",
+      "god": "storm",
+      "category": "projectile",
+      "synergyTags": [
+        "projectile"
+      ],
+      "textKey": "cards.arcSplitter",
+      "displayName": "雨露均沾",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "arcSplitterA",
+        "arcSplitterB",
+        "arcSplitterC"
+      ],
+      "evolution5": [
+        "arcSplitter1x",
+        "arcSplitter2x",
+        "arcSplitter3x"
+      ]
+    },
+    {
+      "id": "galvanicWard",
+      "god": "storm",
+      "category": "defense",
+      "synergyTags": [
+        "defense",
+        "control"
+      ],
+      "textKey": "cards.galvanicWard",
+      "displayName": "别碰我，会电",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "galvanicWardA",
+        "galvanicWardB",
+        "galvanicWardC"
+      ],
+      "evolution5": [
+        "galvanicWard1x",
+        "galvanicWard2x",
+        "galvanicWard3x"
+      ]
+    },
+    {
+      "id": "overcharge",
+      "god": "storm",
+      "category": "economy",
+      "synergyTags": [
+        "utility"
+      ],
+      "textKey": "cards.overcharge",
+      "displayName": "越电越亏",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "overchargeA",
+        "overchargeB",
+        "overchargeC"
+      ],
+      "evolution5": [
+        "overcharge1x",
+        "overcharge2x",
+        "overcharge3x"
+      ]
+    },
+    {
+      "id": "frost",
+      "god": "winter",
+      "category": "control",
+      "synergyTags": [
+        "control",
+        "domain"
+      ],
+      "textKey": "cards.frost",
+      "displayName": "先晾着你吧",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "frostA",
+        "frostB",
+        "frostC"
+      ],
+      "evolution5": [
+        "frost1x",
+        "frost2x",
+        "frost3x"
+      ]
+    },
+    {
+      "id": "impact",
+      "god": "winter",
+      "category": "control",
+      "synergyTags": [
+        "control",
+        "defense"
+      ],
+      "textKey": "cards.impact",
+      "displayName": "一锤就完事了",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "impactA",
+        "impactB",
+        "impactC"
+      ],
+      "evolution5": [
+        "impact1x",
+        "impact2x",
+        "impact3x"
+      ]
+    },
+    {
+      "id": "glacialSpike",
+      "god": "winter",
+      "category": "projectile",
+      "synergyTags": [
+        "projectile",
+        "control"
+      ],
+      "textKey": "cards.glacialSpike",
+      "displayName": "扎心不扎肉",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "glacialSpikeA",
+        "glacialSpikeB",
+        "glacialSpikeC"
+      ],
+      "evolution5": [
+        "glacialSpike1x",
+        "glacialSpike2x",
+        "glacialSpike3x"
+      ]
+    },
+    {
+      "id": "permafrost",
+      "god": "winter",
+      "category": "domain",
+      "synergyTags": [
+        "domain",
+        "control"
+      ],
+      "textKey": "cards.permafrost",
+      "displayName": "别进我地盘",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "permafrostA",
+        "permafrostB",
+        "permafrostC"
+      ],
+      "evolution5": [
+        "permafrost1x",
+        "permafrost2x",
+        "permafrost3x"
+      ]
+    },
+    {
+      "id": "iceTomb",
+      "god": "winter",
+      "category": "control",
+      "synergyTags": [
+        "control"
+      ],
+      "textKey": "cards.iceTomb",
+      "displayName": "你先冷静一下",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "iceTombA",
+        "iceTombB",
+        "iceTombC"
+      ],
+      "evolution5": [
+        "iceTomb1x",
+        "iceTomb2x",
+        "iceTomb3x"
+      ]
+    },
+    {
+      "id": "frozenBulwark",
+      "god": "winter",
+      "category": "defense",
+      "synergyTags": [
+        "defense",
+        "control"
+      ],
+      "textKey": "cards.frozenBulwark",
+      "displayName": "过不来就对了",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "frozenBulwarkA",
+        "frozenBulwarkB",
+        "frozenBulwarkC"
+      ],
+      "evolution5": [
+        "frozenBulwark1x",
+        "frozenBulwark2x",
+        "frozenBulwark3x"
+      ]
+    },
+    {
+      "id": "hoarfrostTithe",
+      "god": "winter",
+      "category": "economy",
+      "synergyTags": [
+        "utility",
+        "control"
+      ],
+      "textKey": "cards.hoarfrostTithe",
+      "displayName": "冷静费另计",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "hoarfrostTitheA",
+        "hoarfrostTitheB",
+        "hoarfrostTitheC"
+      ],
+      "evolution5": [
+        "hoarfrostTithe1x",
+        "hoarfrostTithe2x",
+        "hoarfrostTithe3x"
+      ]
+    },
+    {
+      "id": "scorch",
+      "god": "inferno",
+      "category": "domain",
+      "synergyTags": [
+        "domain"
+      ],
+      "textKey": "cards.scorch",
+      "displayName": "着火了！",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "scorchA",
+        "scorchB",
+        "scorchC"
+      ],
+      "evolution5": [
+        "scorch1x",
+        "scorch2x",
+        "scorch3x"
+      ]
+    },
+    {
+      "id": "splitBlast",
+      "god": "inferno",
+      "category": "projectile",
+      "synergyTags": [
+        "projectile",
+        "domain"
+      ],
+      "textKey": "cards.splitBlast",
+      "displayName": "专炸着火的",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "splitBlastA",
+        "splitBlastB",
+        "splitBlastC"
+      ],
+      "evolution5": [
+        "splitBlast1x",
+        "splitBlast2x",
+        "splitBlast3x"
+      ]
+    },
+    {
+      "id": "meteor",
+      "god": "inferno",
+      "category": "projectile",
+      "synergyTags": [
+        "projectile",
+        "domain"
+      ],
+      "textKey": "cards.meteor",
+      "displayName": "老天罚你",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "meteorA",
+        "meteorB",
+        "meteorC"
+      ],
+      "evolution5": [
+        "meteor1x",
+        "meteor2x",
+        "meteor3x"
+      ]
+    },
+    {
+      "id": "magmaPool",
+      "god": "inferno",
+      "category": "domain",
+      "synergyTags": [
+        "domain"
+      ],
+      "textKey": "cards.magmaPool",
+      "displayName": "脚下是火",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "magmaPoolA",
+        "magmaPoolB",
+        "magmaPoolC"
+      ],
+      "evolution5": [
+        "magmaPool1x",
+        "magmaPool2x",
+        "magmaPool3x"
+      ]
+    },
+    {
+      "id": "flashfire",
+      "god": "inferno",
+      "category": "control",
+      "synergyTags": [
+        "control",
+        "domain"
+      ],
+      "textKey": "cards.flashfire",
+      "displayName": "先炸为敬",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "flashfireA",
+        "flashfireB",
+        "flashfireC"
+      ],
+      "evolution5": [
+        "flashfire1x",
+        "flashfire2x",
+        "flashfire3x"
+      ]
+    },
+    {
+      "id": "cinderheart",
+      "god": "inferno",
+      "category": "defense",
+      "synergyTags": [
+        "defense",
+        "domain"
+      ],
+      "textKey": "cards.cinderheart",
+      "displayName": "靠近烫手",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "cinderheartA",
+        "cinderheartB",
+        "cinderheartC"
+      ],
+      "evolution5": [
+        "cinderheart1x",
+        "cinderheart2x",
+        "cinderheart3x"
+      ]
+    },
+    {
+      "id": "ashHarvest",
+      "god": "inferno",
+      "category": "economy",
+      "synergyTags": [
+        "utility",
+        "domain"
+      ],
+      "textKey": "cards.ashHarvest",
+      "displayName": "烧完就赚",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "ashHarvestA",
+        "ashHarvestB",
+        "ashHarvestC"
+      ],
+      "evolution5": [
+        "ashHarvest1x",
+        "ashHarvest2x",
+        "ashHarvest3x"
+      ]
+    },
+    {
+      "id": "aegis",
+      "god": "bulwark",
+      "category": "defense",
+      "synergyTags": [
+        "defense"
+      ],
+      "textKey": "cards.aegis",
+      "displayName": "壁垒批发商",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "aegisA",
+        "aegisB",
+        "aegisC"
+      ],
+      "evolution5": [
+        "aegis1x",
+        "aegis2x",
+        "aegis3x"
+      ]
+    },
+    {
+      "id": "thorns",
+      "god": "bulwark",
+      "category": "defense",
+      "synergyTags": [
+        "defense",
+        "domain"
+      ],
+      "textKey": "cards.thorns",
+      "displayName": "碰我就疼",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "thornsA",
+        "thornsB",
+        "thornsC"
+      ],
+      "evolution5": [
+        "thorns1x",
+        "thorns2x",
+        "thorns3x"
+      ]
+    },
+    {
+      "id": "decoy",
+      "god": "bulwark",
+      "category": "control",
+      "synergyTags": [
+        "control",
+        "defense"
+      ],
+      "textKey": "cards.decoy",
+      "displayName": "找他不找我",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "decoyA",
+        "decoyB",
+        "decoyC"
+      ],
+      "evolution5": [
+        "decoy1x",
+        "decoy2x",
+        "decoy3x"
+      ]
+    },
+    {
+      "id": "sanctum",
+      "god": "bulwark",
+      "category": "domain",
+      "synergyTags": [
+        "domain",
+        "control"
+      ],
+      "textKey": "cards.sanctum",
+      "displayName": "圈内保平安",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "sanctumA",
+        "sanctumB",
+        "sanctumC"
+      ],
+      "evolution5": [
+        "sanctum1x",
+        "sanctum2x",
+        "sanctum3x"
+      ]
+    },
+    {
+      "id": "sentinel",
+      "god": "bulwark",
+      "category": "projectile",
+      "synergyTags": [
+        "projectile",
+        "defense"
+      ],
+      "textKey": "cards.sentinel",
+      "displayName": "人多力量大",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "sentinelA",
+        "sentinelB",
+        "sentinelC"
+      ],
+      "evolution5": [
+        "sentinel1x",
+        "sentinel2x",
+        "sentinel3x"
+      ]
+    },
+    {
+      "id": "retribution",
+      "god": "bulwark",
+      "category": "control",
+      "synergyTags": [
+        "control",
+        "defense"
+      ],
+      "textKey": "cards.retribution",
+      "displayName": "敢闯试试",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "retributionA",
+        "retributionB",
+        "retributionC"
+      ],
+      "evolution5": [
+        "retribution1x",
+        "retribution2x",
+        "retribution3x"
+      ]
+    },
+    {
+      "id": "ironvine",
+      "god": "bulwark",
+      "category": "economy",
+      "synergyTags": [
+        "utility",
+        "defense"
+      ],
+      "textKey": "cards.ironvine",
+      "displayName": "守住就有赚",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "ironvineA",
+        "ironvineB",
+        "ironvineC"
+      ],
+      "evolution5": [
+        "ironvine1x",
+        "ironvine2x",
+        "ironvine3x"
+      ]
+    },
+    {
+      "id": "harvest",
+      "god": "plenty",
+      "category": "economy",
+      "synergyTags": [
+        "utility"
+      ],
+      "textKey": "cards.harvest",
+      "displayName": "看上就是你",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "harvestA",
+        "harvestB",
+        "harvestC"
+      ],
+      "evolution5": [
+        "harvest1x",
+        "harvest2x",
+        "harvest3x"
+      ]
+    },
+    {
+      "id": "fateLoom",
+      "god": "plenty",
+      "category": "economy",
+      "synergyTags": [
+        "utility",
+        "domain"
+      ],
+      "textKey": "cards.fateLoom",
+      "displayName": "合成即暴击",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "fateLoomA",
+        "fateLoomB",
+        "fateLoomC"
+      ],
+      "evolution5": [
+        "fateLoom1x",
+        "fateLoom2x",
+        "fateLoom3x"
+      ]
+    },
+    {
+      "id": "goldenVolley",
+      "god": "plenty",
+      "category": "projectile",
+      "synergyTags": [
+        "projectile",
+        "utility"
+      ],
+      "textKey": "cards.goldenVolley",
+      "displayName": "打中就是钱",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "goldenVolleyA",
+        "goldenVolleyB",
+        "goldenVolleyC"
+      ],
+      "evolution5": [
+        "goldenVolley1x",
+        "goldenVolley2x",
+        "goldenVolley3x"
+      ]
+    },
+    {
+      "id": "bountyCall",
+      "god": "plenty",
+      "category": "control",
+      "synergyTags": [
+        "control",
+        "utility"
+      ],
+      "textKey": "cards.bountyCall",
+      "displayName": "点名交心意",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "bountyCallA",
+        "bountyCallB",
+        "bountyCallC"
+      ],
+      "evolution5": [
+        "bountyCall1x",
+        "bountyCall2x",
+        "bountyCall3x"
+      ]
+    },
+    {
+      "id": "overgrowth",
+      "god": "plenty",
+      "category": "domain",
+      "synergyTags": [
+        "domain",
+        "control"
+      ],
+      "textKey": "cards.overgrowth",
+      "displayName": "圈内归我",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "overgrowthA",
+        "overgrowthB",
+        "overgrowthC"
+      ],
+      "evolution5": [
+        "overgrowth1x",
+        "overgrowth2x",
+        "overgrowth3x"
+      ]
+    },
+    {
+      "id": "springOfLife",
+      "god": "plenty",
+      "category": "defense",
+      "synergyTags": [
+        "defense",
+        "utility"
+      ],
+      "textKey": "cards.springOfLife",
+      "displayName": "捡了就回血",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "springOfLifeA",
+        "springOfLifeB",
+        "springOfLifeC"
+      ],
+      "evolution5": [
+        "springOfLife1x",
+        "springOfLife2x",
+        "springOfLife3x"
+      ]
+    },
+    {
+      "id": "luckyStar",
+      "god": "plenty",
+      "category": "economy",
+      "synergyTags": [
+        "utility"
+      ],
+      "textKey": "cards.luckyStar",
+      "displayName": "运气也是钱",
+      "recipeOnly": false,
+      "consumable": true,
+      "evolution3": [
+        "luckyStarA",
+        "luckyStarB",
+        "luckyStarC"
+      ],
+      "evolution5": [
+        "luckyStar1x",
+        "luckyStar2x",
+        "luckyStar3x"
+      ]
+    },
+    {
+      "id": "stormLattice",
+      "god": "storm",
+      "primaryGod": "storm",
+      "sourceGods": [
+        "storm"
+      ],
+      "category": "projectile",
+      "synergyTags": [
+        "projectile",
+        "domain"
+      ],
+      "textKey": "cards.stormLattice",
+      "displayName": "一矛拉出电网",
+      "recipeOnly": true,
+      "consumable": true,
+      "evolution3": [],
+      "evolution5": []
+    },
+    {
+      "id": "thunderRime",
+      "god": "winter",
+      "primaryGod": "winter",
+      "sourceGods": [
+        "storm",
+        "winter"
+      ],
+      "category": "domain",
+      "synergyTags": [
+        "domain",
+        "control"
+      ],
+      "textKey": "cards.thunderRime",
+      "displayName": "雷云黏着你呢",
+      "recipeOnly": true,
+      "consumable": true,
+      "evolution3": [],
+      "evolution5": []
+    },
+    {
+      "id": "emberSpark",
+      "god": "inferno",
+      "primaryGod": "inferno",
+      "sourceGods": [
+        "storm",
+        "inferno"
+      ],
+      "category": "domain",
+      "synergyTags": [
+        "domain",
+        "control"
+      ],
+      "textKey": "cards.emberSpark",
+      "displayName": "烧着的会导电",
+      "recipeOnly": true,
+      "consumable": true,
+      "evolution3": [],
+      "evolution5": []
+    },
+    {
+      "id": "voltBastion",
+      "god": "bulwark",
+      "primaryGod": "bulwark",
+      "sourceGods": [
+        "storm",
+        "bulwark"
+      ],
+      "category": "defense",
+      "synergyTags": [
+        "defense",
+        "control"
+      ],
+      "textKey": "cards.voltBastion",
+      "displayName": "打我给你电呀",
+      "recipeOnly": true,
+      "consumable": true,
+      "evolution3": [],
+      "evolution5": []
+    },
+    {
+      "id": "ampereFlow",
+      "god": "plenty",
+      "primaryGod": "plenty",
+      "sourceGods": [
+        "storm",
+        "plenty"
+      ],
+      "category": "economy",
+      "synergyTags": [
+        "utility"
+      ],
+      "textKey": "cards.ampereFlow",
+      "displayName": "电到就掉钱啦",
+      "recipeOnly": true,
+      "consumable": true,
+      "evolution3": [],
+      "evolution5": []
+    },
+    {
+      "id": "crystalRelay",
+      "god": "storm",
+      "primaryGod": "storm",
+      "sourceGods": [
+        "winter",
+        "storm"
+      ],
+      "category": "projectile",
+      "synergyTags": [
+        "projectile",
+        "control"
+      ],
+      "textKey": "cards.crystalRelay",
+      "displayName": "晶柱",
+      "recipeOnly": true,
+      "consumable": true,
+      "evolution3": [],
+      "evolution5": []
+    },
+    {
+      "id": "glacialEpoch",
+      "god": "winter",
+      "primaryGod": "winter",
+      "sourceGods": [
+        "winter"
+      ],
+      "category": "domain",
+      "synergyTags": [
+        "domain",
+        "control"
+      ],
+      "textKey": "cards.glacialEpoch",
+      "displayName": "冰墙推过来",
+      "recipeOnly": true,
+      "consumable": true,
+      "evolution3": [],
+      "evolution5": []
+    },
+    {
+      "id": "rimeShell",
+      "god": "inferno",
+      "primaryGod": "inferno",
+      "sourceGods": [
+        "winter",
+        "inferno"
+      ],
+      "category": "projectile",
+      "synergyTags": [
+        "projectile",
+        "control"
+      ],
+      "textKey": "cards.rimeShell",
+      "displayName": "冰火弹",
+      "recipeOnly": true,
+      "consumable": true,
+      "evolution3": [],
+      "evolution5": []
+    },
+    {
+      "id": "tombSpire",
+      "god": "bulwark",
+      "primaryGod": "bulwark",
+      "sourceGods": [
+        "winter",
+        "bulwark"
+      ],
+      "category": "defense",
+      "synergyTags": [
+        "defense",
+        "control"
+      ],
+      "textKey": "cards.tombSpire",
+      "displayName": "缺口自己长塔",
+      "recipeOnly": true,
+      "consumable": true,
+      "evolution3": [],
+      "evolution5": []
+    },
+    {
+      "id": "stasisLedger",
+      "god": "plenty",
+      "primaryGod": "plenty",
+      "sourceGods": [
+        "winter",
+        "plenty"
+      ],
+      "category": "economy",
+      "synergyTags": [
+        "utility",
+        "control"
+      ],
+      "textKey": "cards.stasisLedger",
+      "displayName": "冻上就打折啦",
+      "recipeOnly": true,
+      "consumable": true,
+      "evolution3": [],
+      "evolution5": []
+    },
+    {
+      "id": "solarPiercer",
+      "god": "storm",
+      "primaryGod": "storm",
+      "sourceGods": [
+        "inferno",
+        "storm"
+      ],
+      "category": "projectile",
+      "synergyTags": [
+        "projectile",
+        "domain"
+      ],
+      "textKey": "cards.solarPiercer",
+      "displayName": "贯日烧一路！",
+      "recipeOnly": true,
+      "consumable": true,
+      "evolution3": [],
+      "evolution5": []
+    },
+    {
+      "id": "steamBurst",
+      "god": "winter",
+      "primaryGod": "winter",
+      "sourceGods": [
+        "inferno",
+        "winter"
+      ],
+      "category": "control",
+      "synergyTags": [
+        "control",
+        "domain"
+      ],
+      "textKey": "cards.steamBurst",
+      "displayName": "又冻又烧就炸",
+      "recipeOnly": true,
+      "consumable": true,
+      "evolution3": [],
+      "evolution5": []
+    },
+    {
+      "id": "volcanoCore",
+      "god": "inferno",
+      "primaryGod": "inferno",
+      "sourceGods": [
+        "inferno"
+      ],
+      "category": "domain",
+      "synergyTags": [
+        "domain"
+      ],
+      "textKey": "cards.volcanoCore",
+      "displayName": "自己会喷发",
+      "recipeOnly": true,
+      "consumable": true,
+      "evolution3": [],
+      "evolution5": []
+    },
+    {
+      "id": "emberMoat",
+      "god": "bulwark",
+      "primaryGod": "bulwark",
+      "sourceGods": [
+        "inferno",
+        "bulwark"
+      ],
+      "category": "defense",
+      "synergyTags": [
+        "defense",
+        "domain"
+      ],
+      "textKey": "cards.emberMoat",
+      "displayName": "壁垒烧起来了",
+      "recipeOnly": true,
+      "consumable": true,
+      "evolution3": [],
+      "evolution5": []
+    },
+    {
+      "id": "emberYield",
+      "god": "plenty",
+      "primaryGod": "plenty",
+      "sourceGods": [
+        "inferno",
+        "plenty"
+      ],
+      "category": "economy",
+      "synergyTags": [
+        "utility",
+        "domain"
+      ],
+      "textKey": "cards.emberYield",
+      "displayName": "烧完还有提成",
+      "recipeOnly": true,
+      "consumable": true,
+      "evolution3": [],
+      "evolution5": []
+    },
+    {
+      "id": "pylonCircuit",
+      "god": "storm",
+      "primaryGod": "storm",
+      "sourceGods": [
+        "bulwark",
+        "storm"
+      ],
+      "category": "projectile",
+      "synergyTags": [
+        "projectile",
+        "domain"
+      ],
+      "textKey": "cards.pylonCircuit",
+      "displayName": "三塔连电网啦",
+      "recipeOnly": true,
+      "consumable": true,
+      "evolution3": [],
+      "evolution5": []
+    },
+    {
+      "id": "glacialEffigy",
+      "god": "winter",
+      "primaryGod": "winter",
+      "sourceGods": [
+        "bulwark",
+        "winter"
+      ],
+      "category": "control",
+      "synergyTags": [
+        "control",
+        "domain"
+      ],
+      "textKey": "cards.glacialEffigy",
+      "displayName": "冰像专门挨打",
+      "recipeOnly": true,
+      "consumable": true,
+      "evolution3": [],
+      "evolution5": []
+    },
+    {
+      "id": "wrathMortar",
+      "god": "inferno",
+      "primaryGod": "inferno",
+      "sourceGods": [
+        "bulwark",
+        "inferno"
+      ],
+      "category": "projectile",
+      "synergyTags": [
+        "projectile",
+        "defense"
+      ],
+      "textKey": "cards.wrathMortar",
+      "displayName": "闯一次炸一次",
+      "recipeOnly": true,
+      "consumable": true,
+      "evolution3": [],
+      "evolution5": []
+    },
+    {
+      "id": "aegisCitadel",
+      "god": "bulwark",
+      "primaryGod": "bulwark",
+      "sourceGods": [
+        "bulwark"
+      ],
+      "category": "defense",
+      "synergyTags": [
+        "defense",
+        "domain"
+      ],
+      "textKey": "cards.aegisCitadel",
+      "displayName": "圣墙塌了会炸",
+      "recipeOnly": true,
+      "consumable": true,
+      "evolution3": [],
+      "evolution5": []
+    },
+    {
+      "id": "rootLoom",
+      "god": "plenty",
+      "primaryGod": "plenty",
+      "sourceGods": [
+        "bulwark",
+        "plenty"
+      ],
+      "category": "economy",
+      "synergyTags": [
+        "utility",
+        "defense"
+      ],
+      "textKey": "cards.rootLoom",
+      "displayName": "合成就生根喽",
+      "recipeOnly": true,
+      "consumable": true,
+      "evolution3": [],
+      "evolution5": []
+    },
+    {
+      "id": "midasChain",
+      "god": "storm",
+      "primaryGod": "storm",
+      "sourceGods": [
+        "plenty",
+        "storm"
+      ],
+      "category": "projectile",
+      "synergyTags": [
+        "projectile",
+        "utility"
+      ],
+      "textKey": "cards.midasChain",
+      "displayName": "跳一下铸一次",
+      "recipeOnly": true,
+      "consumable": true,
+      "evolution3": [],
+      "evolution5": []
+    },
+    {
+      "id": "frostDew",
+      "god": "winter",
+      "primaryGod": "winter",
+      "sourceGods": [
+        "plenty",
+        "winter"
+      ],
+      "category": "defense",
+      "synergyTags": [
+        "defense",
+        "utility"
+      ],
+      "textKey": "cards.frostDew",
+      "displayName": "圈里养人养血",
+      "recipeOnly": true,
+      "consumable": true,
+      "evolution3": [],
+      "evolution5": []
+    },
+    {
+      "id": "pyreBrand",
+      "god": "inferno",
+      "primaryGod": "inferno",
+      "sourceGods": [
+        "plenty",
+        "inferno"
+      ],
+      "category": "control",
+      "synergyTags": [
+        "control",
+        "utility"
+      ],
+      "textKey": "cards.pyreBrand",
+      "displayName": "烧完接着烧啊",
+      "recipeOnly": true,
+      "consumable": true,
+      "evolution3": [],
+      "evolution5": []
+    },
+    {
+      "id": "fortuneThorns",
+      "god": "bulwark",
+      "primaryGod": "bulwark",
+      "sourceGods": [
+        "plenty",
+        "bulwark"
+      ],
+      "category": "defense",
+      "synergyTags": [
+        "defense",
+        "utility"
+      ],
+      "textKey": "cards.fortuneThorns",
+      "displayName": "扎人也分红",
+      "recipeOnly": true,
+      "consumable": true,
+      "evolution3": [],
+      "evolution5": []
+    },
+    {
+      "id": "goldenGrove",
+      "god": "plenty",
+      "primaryGod": "plenty",
+      "sourceGods": [
+        "plenty"
+      ],
+      "category": "economy",
+      "synergyTags": [
+        "utility",
+        "domain"
+      ],
+      "textKey": "cards.goldenGrove",
+      "displayName": "捡到就种树",
+      "recipeOnly": true,
+      "consumable": true,
+      "evolution3": [],
+      "evolution5": []
+    }
   ]
 }

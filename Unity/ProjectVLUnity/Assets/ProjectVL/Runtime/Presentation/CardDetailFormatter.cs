@@ -110,12 +110,9 @@ namespace ProjectVL.Presentation
         {
             switch (stat)
             {
-                case "damageAdd": return "伤害";
-                case "fireRateAdd": return "攻速";
-                case "rangeAdd": return "射程";
-                case "multiAdd": return "弹道";
-                case "maxHpAdd": return "生命上限";
-                case "heal": return "治疗";
+                case "damageMul": return "伤害倍率";
+                case "fireRateMul": return "攻速倍率";
+                case "maxHpMul": return "生命倍率";
                 case "effectDamageMul": return "效果伤害";
                 case "quantityAdd": return "效果数量";
                 case "controlPotencyMul": return "控制强度";

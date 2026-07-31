@@ -1,47 +1,1806 @@
 {
   "version": "1.0.0",
-  "sourceVersion": "0.4.0",
+  "sourceVersion": "0.6.0",
   "cards": [
-    {"cardId":"chainLightning","count":2,"candidates":[{"stat":"damageAdd","weight":1,"min":1,"max":3,"step":1,"consumableDuration":5},{"stat":"fireRateAdd","weight":1,"min":0.1,"max":0.25,"step":0.05,"consumableDuration":5},{"stat":"effectDamageMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5}]},
-    {"cardId":"pierce","count":2,"candidates":[{"stat":"damageAdd","weight":1,"min":1,"max":3,"step":1,"consumableDuration":5},{"stat":"fireRateAdd","weight":1,"min":0.1,"max":0.25,"step":0.05,"consumableDuration":5},{"stat":"effectDamageMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5}]},
-    {"cardId":"staticSurge","count":2,"candidates":[{"stat":"controlPotencyMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5},{"stat":"effectDamageMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5},{"stat":"damageAdd","weight":1,"min":1,"max":2,"step":1,"consumableDuration":5}]},
-    {"cardId":"stormcall","count":2,"candidates":[{"stat":"areaScaleMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5},{"stat":"effectDamageMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5},{"stat":"fireRateAdd","weight":1,"min":0.1,"max":0.2,"step":0.05,"consumableDuration":5}]},
-    {"cardId":"arcSplitter","count":2,"candidates":[{"stat":"damageAdd","weight":1,"min":1,"max":3,"step":1,"consumableDuration":5},{"stat":"effectDamageMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5},{"stat":"multiAdd","weight":1,"min":1,"max":1,"step":1,"consumableDuration":5}]},
-    {"cardId":"galvanicWard","count":2,"candidates":[{"stat":"defenseDurabilityMul","weight":1,"min":0.1,"max":0.25,"step":0.05,"consumableDuration":5},{"stat":"retaliationMul","weight":1,"min":0.1,"max":0.2,"step":0.05,"consumableDuration":5},{"stat":"maxHpAdd","weight":1,"min":5,"max":10,"step":5,"consumableDuration":5}]},
-    {"cardId":"overcharge","count":2,"candidates":[{"stat":"fireRateAdd","weight":1,"min":0.1,"max":0.3,"step":0.05,"consumableDuration":5},{"stat":"effectDamageMul","weight":1,"min":0.05,"max":0.1,"step":0.05,"consumableDuration":5},{"stat":"dropRateMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5}]},
-    {"cardId":"frost","count":2,"candidates":[{"stat":"controlPotencyMul","weight":1,"min":0.05,"max":0.2,"step":0.05,"consumableDuration":5},{"stat":"controlledDamageTakenMul","weight":1,"min":0.05,"max":0.1,"step":0.05,"consumableDuration":5},{"stat":"damageAdd","weight":1,"min":1,"max":2,"step":1,"consumableDuration":5}]},
-    {"cardId":"impact","count":2,"candidates":[{"stat":"controlPotencyMul","weight":1,"min":0.05,"max":0.2,"step":0.05,"consumableDuration":5},{"stat":"areaScaleMul","weight":1,"min":0.1,"max":0.2,"step":0.05,"consumableDuration":5},{"stat":"maxHpAdd","weight":1,"min":5,"max":10,"step":5,"consumableDuration":5}]},
-    {"cardId":"glacialSpike","count":2,"candidates":[{"stat":"damageAdd","weight":1,"min":1,"max":3,"step":1,"consumableDuration":5},{"stat":"controlPotencyMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5},{"stat":"effectDamageMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5}]},
-    {"cardId":"permafrost","count":2,"candidates":[{"stat":"areaScaleMul","weight":1,"min":0.05,"max":0.2,"step":0.05,"consumableDuration":5},{"stat":"controlPotencyMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5},{"stat":"rangeAdd","weight":1,"min":4,"max":8,"step":2,"consumableDuration":5}]},
-    {"cardId":"iceTomb","count":2,"candidates":[{"stat":"controlPotencyMul","weight":1,"min":0.1,"max":0.2,"step":0.05,"consumableDuration":5},{"stat":"controlledDamageTakenMul","weight":1,"min":0.05,"max":0.1,"step":0.05,"consumableDuration":5},{"stat":"damageAdd","weight":1,"min":1,"max":2,"step":1,"consumableDuration":5}]},
-    {"cardId":"frozenBulwark","count":2,"candidates":[{"stat":"defenseDurabilityMul","weight":1,"min":0.1,"max":0.25,"step":0.05,"consumableDuration":5},{"stat":"maxHpAdd","weight":1,"min":5,"max":10,"step":5,"consumableDuration":5},{"stat":"controlPotencyMul","weight":1,"min":0.05,"max":0.1,"step":0.05,"consumableDuration":5}]},
-    {"cardId":"hoarfrostTithe","count":2,"candidates":[{"stat":"damageAdd","weight":1,"min":1,"max":3,"step":1,"consumableDuration":5},{"stat":"fireRateAdd","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5},{"stat":"rangeAdd","weight":1,"min":5,"max":15,"step":5,"consumableDuration":5}]},
-    {"cardId":"scorch","count":2,"candidates":[{"stat":"dotDamageMul","weight":1,"min":0.1,"max":0.2,"step":0.05,"consumableDuration":5},{"stat":"areaScaleMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5},{"stat":"damageAdd","weight":1,"min":1,"max":2,"step":1,"consumableDuration":5}]},
-    {"cardId":"splitBlast","count":2,"candidates":[{"stat":"damageAdd","weight":1,"min":1,"max":3,"step":1,"consumableDuration":5},{"stat":"effectDamageMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5},{"stat":"dotDamageMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5}]},
-    {"cardId":"meteor","count":2,"candidates":[{"stat":"damageAdd","weight":1,"min":2,"max":4,"step":1,"consumableDuration":5},{"stat":"areaScaleMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5},{"stat":"dotDamageMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5}]},
-    {"cardId":"magmaPool","count":2,"candidates":[{"stat":"dotDamageMul","weight":1,"min":0.1,"max":0.25,"step":0.05,"consumableDuration":5},{"stat":"areaScaleMul","weight":1,"min":0.05,"max":0.2,"step":0.05,"consumableDuration":5},{"stat":"rangeAdd","weight":1,"min":4,"max":8,"step":2,"consumableDuration":5}]},
-    {"cardId":"flashfire","count":2,"candidates":[{"stat":"controlPotencyMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5},{"stat":"dotDamageMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5},{"stat":"retaliationMul","weight":1,"min":0.1,"max":0.2,"step":0.05,"consumableDuration":5}]},
-    {"cardId":"cinderheart","count":2,"candidates":[{"stat":"defenseDurabilityMul","weight":1,"min":0.1,"max":0.2,"step":0.05,"consumableDuration":5},{"stat":"dotDamageMul","weight":1,"min":0.1,"max":0.2,"step":0.05,"consumableDuration":5},{"stat":"maxHpAdd","weight":1,"min":5,"max":10,"step":5,"consumableDuration":5}]},
-    {"cardId":"ashHarvest","count":2,"candidates":[{"stat":"damageAdd","weight":1,"min":1,"max":3,"step":1,"consumableDuration":5},{"stat":"fireRateAdd","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5},{"stat":"rangeAdd","weight":1,"min":5,"max":10,"step":5,"consumableDuration":5}]},
-    {"cardId":"aegis","count":2,"candidates":[{"stat":"defenseDurabilityMul","weight":1,"min":0.1,"max":0.25,"step":0.05,"consumableDuration":5},{"stat":"maxHpAdd","weight":1,"min":5,"max":15,"step":5,"consumableDuration":5},{"stat":"retaliationMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5}]},
-    {"cardId":"thorns","count":2,"candidates":[{"stat":"retaliationMul","weight":1,"min":0.1,"max":0.25,"step":0.05,"consumableDuration":5},{"stat":"areaScaleMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5},{"stat":"damageAdd","weight":1,"min":1,"max":2,"step":1,"consumableDuration":5}]},
-    {"cardId":"decoy","count":2,"candidates":[{"stat":"defenseDurabilityMul","weight":1,"min":0.1,"max":0.2,"step":0.05,"consumableDuration":5},{"stat":"controlPotencyMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5},{"stat":"maxHpAdd","weight":1,"min":5,"max":10,"step":5,"consumableDuration":5}]},
-    {"cardId":"sanctum","count":2,"candidates":[{"stat":"areaScaleMul","weight":1,"min":0.05,"max":0.2,"step":0.05,"consumableDuration":5},{"stat":"controlPotencyMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5},{"stat":"fireRateAdd","weight":1,"min":0.1,"max":0.2,"step":0.05,"consumableDuration":5}]},
-    {"cardId":"sentinel","count":2,"candidates":[{"stat":"effectDamageMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5},{"stat":"defenseDurabilityMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5},{"stat":"damageAdd","weight":1,"min":1,"max":3,"step":1,"consumableDuration":5}]},
-    {"cardId":"retribution","count":2,"candidates":[{"stat":"retaliationMul","weight":1,"min":0.1,"max":0.25,"step":0.05,"consumableDuration":5},{"stat":"controlPotencyMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5},{"stat":"maxHpAdd","weight":1,"min":5,"max":10,"step":5,"consumableDuration":5}]},
-    {"cardId":"ironvine","count":2,"candidates":[{"stat":"dropRateMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5},{"stat":"dropLifetimeMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5},{"stat":"defenseDurabilityMul","weight":1,"min":0.05,"max":0.1,"step":0.05,"consumableDuration":5}]},
-    {"cardId":"harvest","count":2,"candidates":[{"stat":"dropRateMul","weight":1,"min":0.1,"max":0.2,"step":0.05,"consumableDuration":5},{"stat":"dropLifetimeMul","weight":1,"min":0.1,"max":0.2,"step":0.05,"consumableDuration":5},{"stat":"xpMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5}]},
-    {"cardId":"fateLoom","count":2,"candidates":[{"stat":"controlPotencyMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5},{"stat":"damageAdd","weight":1,"min":1,"max":2,"step":1,"consumableDuration":5},{"stat":"fireRateAdd","weight":1,"min":0.1,"max":0.2,"step":0.05,"consumableDuration":5}]},
-    {"cardId":"goldenVolley","count":2,"candidates":[{"stat":"damageAdd","weight":1,"min":1,"max":3,"step":1,"consumableDuration":5},{"stat":"quantityAdd","weight":1,"min":0.05,"max":0.1,"step":0.05,"consumableDuration":5},{"stat":"effectDamageMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5}]},
-    {"cardId":"bountyCall","count":2,"candidates":[{"stat":"controlPotencyMul","weight":1,"min":0.05,"max":0.1,"step":0.05,"consumableDuration":5},{"stat":"areaScaleMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5},{"stat":"damageAdd","weight":1,"min":1,"max":2,"step":1,"consumableDuration":5}]},
-    {"cardId":"overgrowth","count":2,"candidates":[{"stat":"areaScaleMul","weight":1,"min":0.05,"max":0.2,"step":0.05,"consumableDuration":5},{"stat":"controlPotencyMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5},{"stat":"damageAdd","weight":1,"min":1,"max":2,"step":1,"consumableDuration":5}]},
-    {"cardId":"springOfLife","count":2,"candidates":[{"stat":"maxHpAdd","weight":1,"min":5,"max":15,"step":5,"consumableDuration":5},{"stat":"defenseDurabilityMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5},{"stat":"effectDamageMul","weight":1,"min":0.05,"max":0.1,"step":0.05,"consumableDuration":5}]},
-    {"cardId":"luckyStar","count":2,"candidates":[{"stat":"dropRateMul","weight":1,"min":0.1,"max":0.2,"step":0.05,"consumableDuration":5},{"stat":"xpMul","weight":1,"min":0.1,"max":0.2,"step":0.05,"consumableDuration":5},{"stat":"dropLifetimeMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5}]},
-    {"cardId":"frozenThunder","count":2,"candidates":[{"stat":"damageAdd","weight":1,"min":1,"max":3,"step":1,"consumableDuration":5},{"stat":"controlPotencyMul","weight":1,"min":0.05,"max":0.2,"step":0.05,"consumableDuration":5},{"stat":"effectDamageMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5}]},
-    {"cardId":"solarLance","count":2,"candidates":[{"stat":"damageAdd","weight":1,"min":1,"max":3,"step":1,"consumableDuration":5},{"stat":"dotDamageMul","weight":1,"min":0.1,"max":0.2,"step":0.05,"consumableDuration":5},{"stat":"effectDamageMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5}]},
-    {"cardId":"avalanche","count":2,"candidates":[{"stat":"controlPotencyMul","weight":1,"min":0.05,"max":0.2,"step":0.05,"consumableDuration":5},{"stat":"effectDamageMul","weight":1,"min":0.1,"max":0.2,"step":0.05,"consumableDuration":5},{"stat":"damageAdd","weight":1,"min":1,"max":3,"step":1,"consumableDuration":5}]},
-    {"cardId":"pyrestorm","count":2,"candidates":[{"stat":"areaScaleMul","weight":1,"min":0.05,"max":0.2,"step":0.05,"consumableDuration":5},{"stat":"dotDamageMul","weight":1,"min":0.1,"max":0.2,"step":0.05,"consumableDuration":5},{"stat":"effectDamageMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5}]},
-    {"cardId":"crownOfThorns","count":2,"candidates":[{"stat":"defenseDurabilityMul","weight":1,"min":0.1,"max":0.25,"step":0.05,"consumableDuration":5},{"stat":"retaliationMul","weight":1,"min":0.1,"max":0.25,"step":0.05,"consumableDuration":5},{"stat":"areaScaleMul","weight":1,"min":0.05,"max":0.15,"step":0.05,"consumableDuration":5}]},
-    {"cardId":"goldenIdol","count":2,"candidates":[{"stat":"damageAdd","weight":1,"min":1,"max":3,"step":1,"consumableDuration":5},{"stat":"defenseDurabilityMul","weight":1,"min":0.1,"max":0.2,"step":0.05,"consumableDuration":5},{"stat":"fireRateAdd","weight":1,"min":0.1,"max":0.3,"step":0.05,"consumableDuration":5}]}
+    {
+      "cardId": "chainLightning",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "damageMul",
+          "weight": 1,
+          "min": 0.04,
+          "max": 0.12,
+          "step": 0.04,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "fireRateMul",
+          "weight": 1,
+          "min": 0.02,
+          "max": 0.05,
+          "step": 0.01,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "effectDamageMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "pierce",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "damageMul",
+          "weight": 1,
+          "min": 0.04,
+          "max": 0.12,
+          "step": 0.04,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "fireRateMul",
+          "weight": 1,
+          "min": 0.02,
+          "max": 0.05,
+          "step": 0.01,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "effectDamageMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "staticSurge",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "damageMul",
+          "weight": 1,
+          "min": 0.04,
+          "max": 0.12,
+          "step": 0.04,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "fireRateMul",
+          "weight": 1,
+          "min": 0.02,
+          "max": 0.05,
+          "step": 0.01,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "effectDamageMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "stormcall",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "damageMul",
+          "weight": 1,
+          "min": 0.04,
+          "max": 0.12,
+          "step": 0.04,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "fireRateMul",
+          "weight": 1,
+          "min": 0.02,
+          "max": 0.05,
+          "step": 0.01,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "effectDamageMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "arcSplitter",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "damageMul",
+          "weight": 1,
+          "min": 0.04,
+          "max": 0.12,
+          "step": 0.04,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "fireRateMul",
+          "weight": 1,
+          "min": 0.02,
+          "max": 0.05,
+          "step": 0.01,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "effectDamageMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "galvanicWard",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "damageMul",
+          "weight": 1,
+          "min": 0.04,
+          "max": 0.12,
+          "step": 0.04,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "fireRateMul",
+          "weight": 1,
+          "min": 0.02,
+          "max": 0.05,
+          "step": 0.01,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "effectDamageMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "overcharge",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "damageMul",
+          "weight": 1,
+          "min": 0.04,
+          "max": 0.12,
+          "step": 0.04,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "fireRateMul",
+          "weight": 1,
+          "min": 0.02,
+          "max": 0.05,
+          "step": 0.01,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "effectDamageMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "frost",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "controlPotencyMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "controlledDamageTakenMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.1,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "effectDamageMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "impact",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "controlPotencyMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "controlledDamageTakenMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.1,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "effectDamageMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "glacialSpike",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "controlPotencyMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "controlledDamageTakenMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.1,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "effectDamageMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "permafrost",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "controlPotencyMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "controlledDamageTakenMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.1,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "effectDamageMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "iceTomb",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "controlPotencyMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "controlledDamageTakenMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.1,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "effectDamageMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "frozenBulwark",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "controlPotencyMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "controlledDamageTakenMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.1,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "effectDamageMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "hoarfrostTithe",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "controlPotencyMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "controlledDamageTakenMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.1,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "effectDamageMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "scorch",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "dotDamageMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "areaScaleMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "damageMul",
+          "weight": 1,
+          "min": 0.04,
+          "max": 0.08,
+          "step": 0.04,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "splitBlast",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "dotDamageMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "areaScaleMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "damageMul",
+          "weight": 1,
+          "min": 0.04,
+          "max": 0.08,
+          "step": 0.04,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "meteor",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "dotDamageMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "areaScaleMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "damageMul",
+          "weight": 1,
+          "min": 0.04,
+          "max": 0.08,
+          "step": 0.04,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "magmaPool",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "dotDamageMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "areaScaleMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "damageMul",
+          "weight": 1,
+          "min": 0.04,
+          "max": 0.08,
+          "step": 0.04,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "flashfire",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "dotDamageMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "areaScaleMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "damageMul",
+          "weight": 1,
+          "min": 0.04,
+          "max": 0.08,
+          "step": 0.04,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "cinderheart",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "dotDamageMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "areaScaleMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "damageMul",
+          "weight": 1,
+          "min": 0.04,
+          "max": 0.08,
+          "step": 0.04,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "ashHarvest",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "dotDamageMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "areaScaleMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "damageMul",
+          "weight": 1,
+          "min": 0.04,
+          "max": 0.08,
+          "step": 0.04,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "aegis",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "maxHpMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "defenseDurabilityMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.25,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "retaliationMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "thorns",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "maxHpMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "defenseDurabilityMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.25,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "retaliationMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "decoy",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "maxHpMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "defenseDurabilityMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.25,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "retaliationMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "sanctum",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "maxHpMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "defenseDurabilityMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.25,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "retaliationMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "sentinel",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "maxHpMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "defenseDurabilityMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.25,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "retaliationMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "retribution",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "maxHpMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "defenseDurabilityMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.25,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "retaliationMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "ironvine",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "maxHpMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "defenseDurabilityMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.25,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "retaliationMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "harvest",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "dropRateMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "dropLifetimeMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "xpMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "fateLoom",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "dropRateMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "dropLifetimeMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "xpMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "goldenVolley",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "dropRateMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "dropLifetimeMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "xpMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "bountyCall",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "dropRateMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "dropLifetimeMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "xpMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "overgrowth",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "dropRateMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "dropLifetimeMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "xpMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "springOfLife",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "dropRateMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "dropLifetimeMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "maxHpMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "luckyStar",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "dropRateMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "dropLifetimeMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "xpMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "stormLattice",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "damageMul",
+          "weight": 1,
+          "min": 0.04,
+          "max": 0.12,
+          "step": 0.04,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "fireRateMul",
+          "weight": 1,
+          "min": 0.02,
+          "max": 0.05,
+          "step": 0.01,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "effectDamageMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "thunderRime",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "controlPotencyMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "controlledDamageTakenMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.1,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "effectDamageMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "emberSpark",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "dotDamageMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "areaScaleMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "damageMul",
+          "weight": 1,
+          "min": 0.04,
+          "max": 0.08,
+          "step": 0.04,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "voltBastion",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "maxHpMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "defenseDurabilityMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.25,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "retaliationMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "ampereFlow",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "dropRateMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "dropLifetimeMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "xpMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "crystalRelay",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "damageMul",
+          "weight": 1,
+          "min": 0.04,
+          "max": 0.12,
+          "step": 0.04,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "fireRateMul",
+          "weight": 1,
+          "min": 0.02,
+          "max": 0.05,
+          "step": 0.01,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "effectDamageMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "glacialEpoch",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "controlPotencyMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "controlledDamageTakenMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.1,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "effectDamageMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "rimeShell",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "dotDamageMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "areaScaleMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "damageMul",
+          "weight": 1,
+          "min": 0.04,
+          "max": 0.08,
+          "step": 0.04,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "tombSpire",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "maxHpMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "defenseDurabilityMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.25,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "retaliationMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "stasisLedger",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "dropRateMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "dropLifetimeMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "xpMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "solarPiercer",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "damageMul",
+          "weight": 1,
+          "min": 0.04,
+          "max": 0.12,
+          "step": 0.04,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "fireRateMul",
+          "weight": 1,
+          "min": 0.02,
+          "max": 0.05,
+          "step": 0.01,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "effectDamageMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "steamBurst",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "controlPotencyMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "controlledDamageTakenMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.1,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "effectDamageMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "volcanoCore",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "dotDamageMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "areaScaleMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "damageMul",
+          "weight": 1,
+          "min": 0.04,
+          "max": 0.08,
+          "step": 0.04,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "emberMoat",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "maxHpMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "defenseDurabilityMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.25,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "retaliationMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "emberYield",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "dropRateMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "dropLifetimeMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "xpMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "pylonCircuit",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "damageMul",
+          "weight": 1,
+          "min": 0.04,
+          "max": 0.12,
+          "step": 0.04,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "fireRateMul",
+          "weight": 1,
+          "min": 0.02,
+          "max": 0.05,
+          "step": 0.01,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "effectDamageMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "glacialEffigy",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "controlPotencyMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "controlledDamageTakenMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.1,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "effectDamageMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "wrathMortar",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "dotDamageMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "areaScaleMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "damageMul",
+          "weight": 1,
+          "min": 0.04,
+          "max": 0.08,
+          "step": 0.04,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "aegisCitadel",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "maxHpMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "defenseDurabilityMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.25,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "retaliationMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "rootLoom",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "dropRateMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "dropLifetimeMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "xpMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "midasChain",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "damageMul",
+          "weight": 1,
+          "min": 0.04,
+          "max": 0.12,
+          "step": 0.04,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "fireRateMul",
+          "weight": 1,
+          "min": 0.02,
+          "max": 0.05,
+          "step": 0.01,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "effectDamageMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "frostDew",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "controlPotencyMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "controlledDamageTakenMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.1,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "effectDamageMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "pyreBrand",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "dotDamageMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "areaScaleMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "damageMul",
+          "weight": 1,
+          "min": 0.04,
+          "max": 0.08,
+          "step": 0.04,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "fortuneThorns",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "maxHpMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "defenseDurabilityMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.25,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "retaliationMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    },
+    {
+      "cardId": "goldenGrove",
+      "count": 2,
+      "candidates": [
+        {
+          "stat": "dropRateMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "dropLifetimeMul",
+          "weight": 1,
+          "min": 0.1,
+          "max": 0.2,
+          "step": 0.05,
+          "consumableDuration": 5
+        },
+        {
+          "stat": "xpMul",
+          "weight": 1,
+          "min": 0.05,
+          "max": 0.15,
+          "step": 0.05,
+          "consumableDuration": 5
+        }
+      ]
+    }
   ]
 }

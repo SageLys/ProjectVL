@@ -37,10 +37,10 @@ namespace ProjectVL.Tests
             _affixes.Attach(_state, card);
 
             Assert.That(card.Affixes, Has.Count.EqualTo(2));
-            Assert.That(card.Affixes[0].Stat, Is.EqualTo("damageAdd"));
-            Assert.That(card.Affixes[0].Value, Is.EqualTo(1f));
-            Assert.That(card.Affixes[1].Stat, Is.EqualTo("fireRateAdd"));
-            Assert.That(card.Affixes[1].Value, Is.EqualTo(0.1f));
+            Assert.That(card.Affixes[0].Stat, Is.EqualTo("damageMul"));
+            Assert.That(card.Affixes[0].Value, Is.EqualTo(0.04f));
+            Assert.That(card.Affixes[1].Stat, Is.EqualTo("fireRateMul"));
+            Assert.That(card.Affixes[1].Value, Is.EqualTo(0.02f));
         }
 
         [Test]
@@ -89,8 +89,8 @@ namespace ProjectVL.Tests
         {
             CardState card = _state.CreateCard("pierce", 1);
             card.Affixes.Add(new CardAffixRoll(
-                "damageAdd",
-                5f,
+                "damageMul",
+                0.1f,
                 5f));
             EnemyState enemy = AddEnemy(
                 new Float2(250f, 437f),
@@ -102,12 +102,12 @@ namespace ProjectVL.Tests
                 enemy.Position);
 
             Assert.That(cast, Is.True);
-            Assert.That(enemy.Hp, Is.EqualTo(31f).Within(0.001f));
+            Assert.That(enemy.Hp, Is.EqualTo(40.6f).Within(0.001f));
             Assert.That(
-                CardAffixSystem.RuntimeAdd(
+                CardAffixSystem.RuntimeScaling(
                     _state,
-                    "damageAdd"),
-                Is.EqualTo(5f));
+                    "damageMul"),
+                Is.EqualTo(0.1f).Within(0.000001f));
         }
 
         [Test]
@@ -115,8 +115,8 @@ namespace ProjectVL.Tests
         {
             CardState card = _state.CreateCard("unknown", 1);
             card.Affixes.Add(new CardAffixRoll(
-                "damageAdd",
-                5f,
+                "damageMul",
+                0.1f,
                 5f));
 
             bool cast = _combatSystem.CastConsumable(
@@ -133,8 +133,8 @@ namespace ProjectVL.Tests
         {
             CardState card = _state.CreateCard("pierce", 1);
             card.Affixes.Add(new CardAffixRoll(
-                "damageAdd",
-                2f,
+                "damageMul",
+                0.1f,
                 5f));
             CardAffixSystem.ActivateConsumable(_state, card);
 
@@ -168,8 +168,8 @@ namespace ProjectVL.Tests
             var inventory = new CardInventorySystem(new EconomyConfig());
             CardState card = _state.CreateCard("aegis", 3);
             card.Affixes.Add(new CardAffixRoll(
-                "maxHpAdd",
-                10f,
+                "maxHpMul",
+                0.1f,
                 5f));
             _state.Hand[0] = card;
 
@@ -211,28 +211,28 @@ namespace ProjectVL.Tests
             Assert.That(_state.Hand[0].Affixes, Has.Count.EqualTo(2));
             Assert.That(
                 _state.Hand[0].Affixes[0].Stat,
-                Is.EqualTo("damageAdd"));
+                Is.EqualTo("damageMul"));
         }
 
         [Test]
         public void CraftedRecipeReceivesItsOwnAffixTemplate()
         {
             _state.SetIntermission(true);
-            _state.Hand[0] = _state.CreateCard("pierce", 5);
-            _state.Hand[1] = _state.CreateCard("scorch", 5);
+            _state.Hand[0] = _state.CreateCard("meteor", 5);
+            _state.Hand[1] = _state.CreateCard("pierce", 5);
             var recipes = new RecipeSystem(
                 GameConfigLoader.LoadEvolutionRecipes(),
                 _affixes);
 
             RecipeCraftResult result = recipes.Craft(
                 _state,
-                "solarLance");
+                "r_meteor_pierce");
 
             Assert.That(result, Is.EqualTo(RecipeCraftResult.Crafted));
-            Assert.That(_state.Hand[0].Type, Is.EqualTo("solarLance"));
+            Assert.That(_state.Hand[0].Type, Is.EqualTo("solarPiercer"));
             Assert.That(_state.Hand[0].Affixes, Has.Count.EqualTo(2));
             Assert.That(
-                _state.CardAffixRolls.ContainsKey("solarLance"),
+                _state.CardAffixRolls.ContainsKey("solarPiercer"),
                 Is.True);
         }
 

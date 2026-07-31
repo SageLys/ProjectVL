@@ -261,8 +261,9 @@ namespace ProjectVL.Systems
             }
 
             state.ReconcileAffixMaxHp(
-                EquipmentValue(state, "maxHpAdd")
-                + RuntimeAdd(state, "maxHpAdd"));
+                state.BaseMaxHp
+                * (EquipmentValue(state, "maxHpMul")
+                    + RuntimeScaling(state, "maxHpMul")));
         }
 
         private CardAffixCandidateConfig TakeWeighted(

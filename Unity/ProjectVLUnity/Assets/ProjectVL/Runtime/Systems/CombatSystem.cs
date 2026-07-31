@@ -189,8 +189,45 @@ namespace ProjectVL.Systems
                     CastLuckyStar(state, card.Star);
                     return true;
                 default:
+                    return CastRecipeProductFallback(
+                        state,
+                        card,
+                        point);
+            }
+        }
+
+        private bool CastRecipeProductFallback(
+            GameState state,
+            CardState card,
+            Float2 point)
+        {
+            CardDefinitionConfig definition =
+                CardCatalog.Default.Find(card.Type);
+            if (definition?.recipeOnly != true || card.Star < 6)
+                return false;
+
+            switch (definition.category)
+            {
+                case "projectile":
+                    CastPierce(state, 6, point);
+                    break;
+                case "control":
+                    CastFrost(state, 6, point);
+                    break;
+                case "domain":
+                    CastScorch(state, 6, point);
+                    break;
+                case "defense":
+                    CastAegis(state, 6, point);
+                    break;
+                case "economy":
+                    CastHarvest(state, 6, point);
+                    break;
+                default:
                     return false;
             }
+
+            return true;
         }
 
         public static bool SupportsConsumable(CardState card)
@@ -1781,13 +1818,14 @@ namespace ProjectVL.Systems
             return Math.Max(
                 0f,
                 (_combat.defaults.damage
-                    + state.RunDamageAdd
-                    + CardAffixSystem.EquipmentValue(
-                        state,
-                        "damageAdd")
-                    + CardAffixSystem.RuntimeAdd(
-                        state,
-                        "damageAdd"))
+                    + state.RunDamageAdd)
+                    * (1f
+                        + CardAffixSystem.EquipmentValue(
+                            state,
+                            "damageMul")
+                        + CardAffixSystem.RuntimeScaling(
+                            state,
+                            "damageMul"))
                     * state.DamageMultiplier
                     * state.RewardDamageMultiplier);
         }
@@ -1796,14 +1834,15 @@ namespace ProjectVL.Systems
         {
             return Math.Max(
                 0.01f,
-                _combat.defaults.fireRate
-                    + state.RunFireRateAdd
-                    + CardAffixSystem.EquipmentValue(
-                        state,
-                        "fireRateAdd")
-                    + CardAffixSystem.RuntimeAdd(
-                        state,
-                        "fireRateAdd"));
+                (_combat.defaults.fireRate
+                    + state.RunFireRateAdd)
+                    * (1f
+                        + CardAffixSystem.EquipmentValue(
+                            state,
+                            "fireRateMul")
+                        + CardAffixSystem.RuntimeScaling(
+                            state,
+                            "fireRateMul")));
         }
 
         private float AttackRange(GameState state)

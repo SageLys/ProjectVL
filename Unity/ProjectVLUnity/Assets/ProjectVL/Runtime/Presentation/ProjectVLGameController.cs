@@ -132,12 +132,31 @@ namespace ProjectVL.Presentation
             "thorns",
             "decoy",
             "harvest",
-            "frozenThunder",
-            "solarLance",
-            "avalanche",
-            "pyrestorm",
-            "crownOfThorns",
-            "goldenIdol"
+            "stormLattice",
+            "thunderRime",
+            "emberSpark",
+            "voltBastion",
+            "ampereFlow",
+            "crystalRelay",
+            "glacialEpoch",
+            "rimeShell",
+            "tombSpire",
+            "stasisLedger",
+            "solarPiercer",
+            "steamBurst",
+            "volcanoCore",
+            "emberMoat",
+            "emberYield",
+            "pylonCircuit",
+            "glacialEffigy",
+            "wrathMortar",
+            "aegisCitadel",
+            "rootLoom",
+            "midasChain",
+            "frostDew",
+            "pyreBrand",
+            "fortuneThorns",
+            "goldenGrove"
         };
 
         public GameState State => _simulation?.State;
@@ -595,12 +614,9 @@ namespace ProjectVL.Presentation
         {
             switch (stat)
             {
-                case "damageAdd": return "伤害";
-                case "fireRateAdd": return "攻速";
-                case "rangeAdd": return "射程";
-                case "multiAdd": return "弹道";
-                case "maxHpAdd": return "生命上限";
-                case "heal": return "治疗";
+                case "damageMul": return "伤害倍率";
+                case "fireRateMul": return "攻速倍率";
+                case "maxHpMul": return "生命倍率";
                 case "effectDamageMul": return "效果伤害";
                 case "quantityAdd": return "效果数量";
                 case "controlPotencyMul": return "控制强度";
@@ -822,8 +838,8 @@ namespace ProjectVL.Presentation
 
             if (emptySlots >= 2)
             {
+                AddResolvedDemoCard("meteor");
                 AddResolvedDemoCard("pierce");
-                AddResolvedDemoCard("scorch");
                 LastCardAction =
                     "已加入 5★ 穿透与灼烧配方材料。";
             }
@@ -1135,10 +1151,17 @@ namespace ProjectVL.Presentation
                 }
 
                 CardState card = State.CreateCard(type, star);
-                card.EvolutionPath.Add($"3:{type}A");
-                if (star >= 5)
+                CardDefinitionConfig definition =
+                    CardCatalog.Default.Find(type);
+                if (definition?.recipeOnly != true)
                 {
-                    card.EvolutionPath.Add($"5:{type}A2");
+                    if ((definition?.evolution3?.Length ?? 0) > 0)
+                        card.EvolutionPath.Add(
+                            $"3:{definition.evolution3[0]}");
+                    if (star >= 5
+                        && (definition?.evolution5?.Length ?? 0) > 0)
+                        card.EvolutionPath.Add(
+                            $"5:{definition.evolution5[0]}");
                 }
                 State.Hand[i] = card;
                 return true;
@@ -1159,10 +1182,13 @@ namespace ProjectVL.Presentation
                 }
 
                 CardState card = State.CreateCard(type, 5);
+                int branchIndex = branch == "B" ? 1 : branch == "C" ? 2 : 0;
+                CardDefinitionConfig definition =
+                    CardCatalog.Default.Find(type);
                 card.EvolutionPath.Add(
-                    $"3:{type}{branch}");
+                    $"3:{definition.evolution3[branchIndex]}");
                 card.EvolutionPath.Add(
-                    $"5:{type}{branch}2");
+                    $"5:{definition.evolution5[branchIndex]}");
                 State.Hand[i] = card;
                 return true;
             }
@@ -1180,8 +1206,17 @@ namespace ProjectVL.Presentation
                 }
 
                 CardState card = State.CreateCard(type, 6);
-                card.EvolutionPath.Add($"3:{type}A");
-                card.EvolutionPath.Add($"5:{type}A2");
+                CardDefinitionConfig definition =
+                    CardCatalog.Default.Find(type);
+                if (definition?.recipeOnly != true)
+                {
+                    if ((definition?.evolution3?.Length ?? 0) > 0)
+                        card.EvolutionPath.Add(
+                            $"3:{definition.evolution3[0]}");
+                    if ((definition?.evolution5?.Length ?? 0) > 0)
+                        card.EvolutionPath.Add(
+                            $"5:{definition.evolution5[0]}");
+                }
                 State.Hand[i] = card;
                 return true;
             }

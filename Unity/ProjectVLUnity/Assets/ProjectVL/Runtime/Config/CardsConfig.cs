@@ -16,7 +16,10 @@ namespace ProjectVL.Config
     {
         public string id;
         public string god;
+        public string primaryGod;
+        public string[] sourceGods = Array.Empty<string>();
         public string category;
+        public string[] synergyTags = Array.Empty<string>();
         public string textKey;
         public string displayName;
         public bool recipeOnly;

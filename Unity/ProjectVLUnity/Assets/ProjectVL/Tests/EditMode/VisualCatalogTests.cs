@@ -117,7 +117,7 @@ namespace ProjectVL.Tests
             GodsConfig gods = GameConfigLoader.LoadGods();
 
             Assert.That(catalog, Is.Not.Null);
-            Assert.That(cards.cards.Length, Is.EqualTo(41));
+            Assert.That(cards.cards.Length, Is.EqualTo(60));
             Assert.That(gods.gods.Length, Is.EqualTo(5));
             foreach (CardDefinitionConfig card in cards.cards)
             {

@@ -20,8 +20,8 @@ namespace ProjectVL.Tests
         public void LoadsCompleteWebCardCatalog()
         {
             Assert.That(_cards.version, Is.EqualTo("1.0.0"));
-            Assert.That(_cards.sourceVersion, Is.EqualTo("0.4.0"));
-            Assert.That(_cards.cards, Has.Length.EqualTo(41));
+            Assert.That(_cards.sourceVersion, Is.EqualTo("0.6.0"));
+            Assert.That(_cards.cards, Has.Length.EqualTo(60));
             Assert.That(_catalog.PlayableIds.Count, Is.EqualTo(35));
         }
 
@@ -83,10 +83,10 @@ namespace ProjectVL.Tests
         {
             Assert.That(
                 _catalog.DisplayName("pierce"),
-                Is.EqualTo("雷霆贯枪"));
+                Is.EqualTo("打包处理"));
             Assert.That(
-                _catalog.DisplayName("goldenIdol"),
-                Is.EqualTo("黄金偶像"));
+                _catalog.DisplayName("stormLattice"),
+                Is.EqualTo("一矛拉出电网"));
             Assert.That(
                 _catalog.DisplayName("unknown"),
                 Is.EqualTo("unknown"));

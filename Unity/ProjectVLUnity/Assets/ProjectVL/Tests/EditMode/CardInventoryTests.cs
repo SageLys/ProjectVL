@@ -187,7 +187,7 @@ namespace ProjectVL.Tests
             Assert.That(_state.Hand[0].Star, Is.EqualTo(2));
         }
 
-        [TestCase("solarLance")]
+        [TestCase("solarPiercer")]
         [TestCase("not-a-card")]
         public void AddCardRejectsRecipeOnlyAndUnknownCards(string type)
         {
@@ -288,14 +288,14 @@ namespace ProjectVL.Tests
             Assert.That(
                 _state.PendingEvolution.Options,
                 Is.EqualTo(
-                    new[] { "sanctumA2", "sanctumB2", "sanctumC2" }));
+                    new[] { "sanctum1x", "sanctum2x", "sanctum3x" }));
 
             _inventory.ResolveEvolutionChoice(_state, 2);
 
             Assert.That(
                 _state.Hand[0].EvolutionPath,
                 Is.EqualTo(
-                    new[] { "3:sanctumA", "5:sanctumC2" }));
+                    new[] { "3:sanctumA", "5:sanctum3x" }));
             Assert.That(_state.PendingEvolution, Is.Null);
         }
 

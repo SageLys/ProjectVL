@@ -21,56 +21,57 @@ namespace ProjectVL.Tests
         }
 
         [Test]
-        public void LoadsAllSixWebFixedRecipes()
+        public void LoadsAllTwentyFiveDirectedRecipes()
         {
-            Assert.That(_recipes.recipes, Has.Length.EqualTo(6));
+            Assert.That(_recipes.version, Is.EqualTo("0.2.0"));
+            Assert.That(_recipes.recipes, Has.Length.EqualTo(25));
             Assert.That(
                 _recipes.recipes[0].id,
-                Is.EqualTo("frozenThunder"));
+                Is.EqualTo("r_arcSplitter_pierce"));
             Assert.That(
-                _recipes.recipes[5].id,
-                Is.EqualTo("goldenIdol"));
+                _recipes.recipes[24].id,
+                Is.EqualTo("r_overgrowth_harvest"));
         }
 
         [Test]
         public void RecipeCanOnlyBeCraftedDuringIntermission()
         {
-            AddResolvedCard("pierce", 5, 0);
-            AddResolvedCard("scorch", 5, 1);
+            AddResolvedCard("meteor", 5, 0);
+            AddResolvedCard("pierce", 5, 1);
 
             RecipeCraftResult result = _system.Craft(
                 _state,
-                "solarLance");
+                "r_meteor_pierce");
 
             Assert.That(result, Is.EqualTo(RecipeCraftResult.WrongPhase));
-            Assert.That(_state.Hand[0].Type, Is.EqualTo("pierce"));
-            Assert.That(_state.Hand[1].Type, Is.EqualTo("scorch"));
+            Assert.That(_state.Hand[0].Type, Is.EqualTo("meteor"));
+            Assert.That(_state.Hand[1].Type, Is.EqualTo("pierce"));
         }
 
         [Test]
-        public void SolarLanceConsumesMaterialsAndCreatesTerminalCard()
+        public void SolarPiercerConsumesMaterialsAndCreatesTerminalCard()
         {
             _state.SetIntermission(true);
-            AddResolvedCard("pierce", 5, 0);
-            AddResolvedCard("scorch", 5, 1);
+            AddResolvedCard("meteor", 5, 0);
+            AddResolvedCard("pierce", 5, 1);
 
             RecipeCraftResult result = _system.Craft(
                 _state,
-                "solarLance");
+                "r_meteor_pierce");
 
             Assert.That(result, Is.EqualTo(RecipeCraftResult.Crafted));
-            Assert.That(_state.Hand[0].Type, Is.EqualTo("solarLance"));
+            Assert.That(_state.Hand[0].Type, Is.EqualTo("solarPiercer"));
             Assert.That(_state.Hand[0].Star, Is.EqualTo(6));
             Assert.That(_state.Hand[0].Provisional, Is.False);
             Assert.That(_state.Hand[1], Is.Null);
             Assert.That(
                 _state.CompletedRecipes,
-                Does.Contain("solarLance"));
+                Does.Contain("r_meteor_pierce"));
             Assert.That(
-                _state.CardTypeRunStats["solarLance"].Collected,
+                _state.CardTypeRunStats["solarPiercer"].Collected,
                 Is.EqualTo(1));
             Assert.That(
-                _state.CardTypeRunStats["solarLance"].HighestStarReached,
+                _state.CardTypeRunStats["solarPiercer"].HighestStarReached,
                 Is.EqualTo(6));
         }
 
@@ -81,17 +82,17 @@ namespace ProjectVL.Tests
             typeof(GameState)
                 .GetProperty(nameof(GameState.EquipmentEffectWave))
                 ?.SetValue(_state, 9);
-            _state.Equipment[0] = CreateResolvedCard("aegis", 5);
-            _state.Equipment[1] = CreateResolvedCard("thorns", 5);
+            _state.Equipment[0] = CreateResolvedCard("sanctum", 5);
+            _state.Equipment[1] = CreateResolvedCard("aegis", 5);
 
             RecipeCraftResult result = _system.Craft(
                 _state,
-                "crownOfThorns");
+                "r_sanctum_aegis");
 
             Assert.That(result, Is.EqualTo(RecipeCraftResult.Crafted));
             Assert.That(_state.Equipment[0], Is.Null);
             Assert.That(_state.Equipment[1], Is.Null);
-            Assert.That(_state.Hand[0].Type, Is.EqualTo("crownOfThorns"));
+            Assert.That(_state.Hand[0].Type, Is.EqualTo("aegisCitadel"));
             Assert.That(_state.EquipmentEffectWave, Is.Zero);
         }
 
@@ -99,26 +100,26 @@ namespace ProjectVL.Tests
         public void AvailableRecipeMatchesCurrentMaterials()
         {
             _state.SetIntermission(true);
-            AddResolvedCard("aegis", 5, 0);
-            AddResolvedCard("thorns", 5, 1);
+            AddResolvedCard("sanctum", 5, 0);
+            AddResolvedCard("aegis", 5, 1);
 
             string recipe = _system.FirstAvailableRecipe(_state);
 
-            Assert.That(recipe, Is.EqualTo("crownOfThorns"));
+            Assert.That(recipe, Is.EqualTo("r_sanctum_aegis"));
         }
 
         [Test]
         public void MissingMaterialsDoNotMutateInventory()
         {
             _state.SetIntermission(true);
-            AddResolvedCard("pierce", 5, 0);
+            AddResolvedCard("meteor", 5, 0);
 
             RecipeCraftResult result = _system.Craft(
                 _state,
-                "solarLance");
+                "r_meteor_pierce");
 
             Assert.That(result, Is.EqualTo(RecipeCraftResult.MissingMaterials));
-            Assert.That(_state.Hand[0].Type, Is.EqualTo("pierce"));
+            Assert.That(_state.Hand[0].Type, Is.EqualTo("meteor"));
             Assert.That(_state.CompletedRecipes, Is.Empty);
         }
 
@@ -126,15 +127,15 @@ namespace ProjectVL.Tests
         public void CompletedRecipeCannotBeCraftedTwice()
         {
             _state.SetIntermission(true);
-            AddResolvedCard("pierce", 5, 0);
-            AddResolvedCard("scorch", 5, 1);
-            _system.Craft(_state, "solarLance");
+            AddResolvedCard("meteor", 5, 0);
             AddResolvedCard("pierce", 5, 1);
-            AddResolvedCard("scorch", 5, 2);
+            _system.Craft(_state, "r_meteor_pierce");
+            AddResolvedCard("meteor", 5, 1);
+            AddResolvedCard("pierce", 5, 2);
 
             RecipeCraftResult result = _system.Craft(
                 _state,
-                "solarLance");
+                "r_meteor_pierce");
 
             Assert.That(result, Is.EqualTo(RecipeCraftResult.AlreadyCompleted));
         }

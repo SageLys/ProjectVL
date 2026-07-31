@@ -8,12 +8,9 @@ namespace ProjectVL.Config
         private static readonly HashSet<string> AllowedStats =
             new HashSet<string>(StringComparer.Ordinal)
             {
-                "damageAdd",
-                "fireRateAdd",
-                "rangeAdd",
-                "multiAdd",
-                "maxHpAdd",
-                "heal",
+                "damageMul",
+                "fireRateMul",
+                "maxHpMul",
                 "effectDamageMul",
                 "quantityAdd",
                 "controlPotencyMul",

@@ -14,7 +14,7 @@ namespace ProjectVL.Tests
                 GameConfigLoader.LoadCardAffixes(),
                 cards);
 
-            Assert.That(cards.Cards.Count, Is.EqualTo(41));
+            Assert.That(cards.Cards.Count, Is.EqualTo(60));
             foreach (CardDefinitionConfig card in cards.Cards)
             {
                 CardAffixPoolConfig pool = affixes.Find(card.id);

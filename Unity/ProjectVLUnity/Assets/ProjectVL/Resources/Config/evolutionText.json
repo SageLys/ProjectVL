@@ -1,40 +1,1230 @@
 {
   "version": "1.0.0",
   "cards": [
-    {"cardId":"chainLightning","options":[{"id":"chainLightningA","name":"长链","summary":"强化连锁与减速。"},{"id":"chainLightningB","name":"高压","summary":"强化高伤连锁。"},{"id":"chainLightningC","name":"感电","summary":"连锁附加易伤。"},{"id":"chainLightningA2","name":"断链重引","summary":"连锁击杀后重新起链。"},{"id":"chainLightningB2","name":"感电灼流","summary":"连锁附加持续伤害。"},{"id":"chainLightningC2","name":"链末爆","summary":"连锁末端产生范围爆发。"}]},
-    {"cardId":"pierce","options":[{"id":"pierceA","name":"贯影","summary":"强化连续穿透。"},{"id":"pierceB","name":"重击","summary":"减少穿透次数并提高单次伤害。"},{"id":"pierceC","name":"破甲","summary":"穿透命中附加易伤。"},{"id":"pierceA2","name":"弹射","summary":"穿透后获得弹射。"},{"id":"pierceB2","name":"贯序增伤","summary":"穿透次数越多伤害越高。"},{"id":"pierceC2","name":"穿透分裂","summary":"穿透命中产生分裂弹。"}]},
-    {"cardId":"staticSurge","options":[{"id":"staticSurgeA","name":"层容扩展","summary":"提高静电层数容量。"},{"id":"staticSurgeB","name":"高压感电","summary":"提高静电易伤。"},{"id":"staticSurgeC","name":"满载震慑","summary":"满层时附加眩晕。"},{"id":"staticSurgeA2","name":"电荷传染","summary":"击杀后向附近传递电荷。"},{"id":"staticSurgeB2","name":"静电引爆","summary":"满层造成爆发伤害。"},{"id":"staticSurgeC2","name":"长效蓄电","summary":"延长静电持续时间。"}]},
-    {"cardId":"stormcall","options":[{"id":"stormcallA","name":"疾雷","summary":"提高落雷频率。"},{"id":"stormcallB","name":"重雷","summary":"提高单次落雷伤害。"},{"id":"stormcallC","name":"静电余场","summary":"落雷留下减速领域。"},{"id":"stormcallA2","name":"双雷","summary":"每次召唤双重落雷。"},{"id":"stormcallB2","name":"裁决高血","summary":"优先打击高生命目标。"},{"id":"stormcallC2","name":"雷附感电","summary":"雷区附加易伤。"}]},
-    {"cardId":"arcSplitter","options":[{"id":"arcSplitterA","name":"多重裂片","summary":"增加分裂数量。"},{"id":"arcSplitterB","name":"高能裂片","summary":"提高裂片伤害。"},{"id":"arcSplitterC","name":"感电裂片","summary":"裂片附加易伤。"},{"id":"arcSplitterA2","name":"二次分裂","summary":"裂片可以再次分裂。"},{"id":"arcSplitterB2","name":"折返裂片","summary":"裂片获得弹射。"},{"id":"arcSplitterC2","name":"充能裂片","summary":"命中后提高攻速。"}]},
-    {"cardId":"galvanicWard","options":[{"id":"galvanicWardA","name":"增层矩阵","summary":"增加护盾层数。"},{"id":"galvanicWardB","name":"爆裂矩阵","summary":"强化破盾爆发。"},{"id":"galvanicWardC","name":"感电矩阵","summary":"破盾附加易伤。"},{"id":"galvanicWardA2","name":"快速再生","summary":"缩短护盾再生时间。"},{"id":"galvanicWardB2","name":"满盾超频","summary":"满盾时提高攻速。"},{"id":"galvanicWardC2","name":"破盾过压","summary":"破盾扩大易伤范围。"}]},
-    {"cardId":"overcharge","options":[{"id":"overchargeA","name":"长效过载","summary":"延长过载增益。"},{"id":"overchargeB","name":"强效过载","summary":"提高过载强度。"},{"id":"overchargeC","name":"连杀电池","summary":"击杀可叠加过载。"},{"id":"overchargeA2","name":"满载放电","summary":"过载结束时爆发。"},{"id":"overchargeB2","name":"击杀回流","summary":"击杀恢复生命。"},{"id":"overchargeC2","name":"磁暴丰收","summary":"过载期间提高掉率。"}]},
-    {"cardId":"frost","options":[{"id":"frostA","name":"凝霜","summary":"稳定减速与冻结。"},{"id":"frostB","name":"速冻","summary":"减少触发冻结所需层数。"},{"id":"frostC","name":"冰痕","summary":"命中留下减速领域。"},{"id":"frostA2","name":"碎冰","summary":"冻结击杀产生减速爆发。"},{"id":"frostB2","name":"寒创","summary":"冻结击杀造成范围伤害。"},{"id":"frostC2","name":"冻伤易感","summary":"命中冻结目标附加易伤。"}]},
-    {"cardId":"impact","options":[{"id":"impactA","name":"重锤","summary":"强化击退。"},{"id":"impactB","name":"寒锤","summary":"击退附加减速。"},{"id":"impactC","name":"撞击","summary":"碰撞造成额外伤害。"},{"id":"impactA2","name":"破门反制","summary":"突破时触发击退与眩晕。"},{"id":"impactB2","name":"冲击波","summary":"周期释放冲击波。"},{"id":"impactC2","name":"撞晕","summary":"命中可触发眩晕。"}]},
-    {"cardId":"glacialSpike","options":[{"id":"glacialSpikeA","name":"长锥","summary":"增加冰锥穿透。"},{"id":"glacialSpikeB","name":"深冻","summary":"强化冻结。"},{"id":"glacialSpikeC","name":"冻创","summary":"命中冻结目标造成爆发。"},{"id":"glacialSpikeA2","name":"冰爆","summary":"命中产生减速爆发。"},{"id":"glacialSpikeB2","name":"寒链","summary":"命中触发寒冰连锁。"},{"id":"glacialSpikeC2","name":"碎冰处决","summary":"处决低生命冻结目标。"}]},
-    {"cardId":"permafrost","options":[{"id":"permafrostA","name":"广域冻土","summary":"扩大冻土领域。"},{"id":"permafrostB","name":"酷寒冻土","summary":"强化冻土减速。"},{"id":"permafrostC","name":"积霜冻土","summary":"冻土可触发冻结。"},{"id":"permafrostA2","name":"双生冻土","summary":"同时生成两个冻土。"},{"id":"permafrostB2","name":"冻土易感","summary":"冻土附加易伤。"},{"id":"permafrostC2","name":"余寒","summary":"离开冻土后保留减速。"}]},
-    {"cardId":"iceTomb","options":[{"id":"iceTombA","name":"速封","summary":"更快触发冰封。"},{"id":"iceTombB","name":"深封","summary":"延长冻结时间。"},{"id":"iceTombC","name":"冰棺反噬","summary":"冰封期间强化反伤。"},{"id":"iceTombA2","name":"爆棺","summary":"冰封结束产生爆发。"},{"id":"iceTombB2","name":"冰封传染","summary":"冰封向附近目标扩散。"},{"id":"iceTombC2","name":"棺中易感","summary":"冰封目标承受更多伤害。"}]},
-    {"cardId":"frozenBulwark","options":[{"id":"frozenBulwarkA","name":"厚冰","summary":"提高冰盾耐久。"},{"id":"frozenBulwarkB","name":"广寒碎裂","summary":"破盾时冻结周围敌人。"},{"id":"frozenBulwarkC","name":"冰镜远射","summary":"护盾存在时强化射程。"},{"id":"frozenBulwarkA2","name":"冰盾再生","summary":"加快冰盾恢复。"},{"id":"frozenBulwarkB2","name":"碎冰新星","summary":"破盾造成冻结爆发。"},{"id":"frozenBulwarkC2","name":"控场增幅","summary":"护盾存在时强化控制。"}]},
-    {"cardId":"hoarfrostTithe","options":[{"id":"hoarfrostTitheA","name":"寒获经验","summary":"受控击杀提高经验。"},{"id":"hoarfrostTitheB","name":"寒获掉落","summary":"受控击杀追加掉落。"},{"id":"hoarfrostTitheC","name":"冬藏延时","summary":"延长掉落存在时间。"},{"id":"hoarfrostTitheA2","name":"冻杀回春","summary":"冻结击杀恢复生命。"},{"id":"hoarfrostTitheB2","name":"冻杀合鸣","summary":"冻结击杀触发合成脉冲。"},{"id":"hoarfrostTitheC2","name":"霜税加征","summary":"提高额外掉落概率。"}]},
-    {"cardId":"scorch","options":[{"id":"scorchA","name":"灼心","summary":"提高灼烧伤害。"},{"id":"scorchB","name":"长燃","summary":"延长灼烧持续时间。"},{"id":"scorchC","name":"灼缓","summary":"灼烧领域附加减速。"},{"id":"scorchA2","name":"蔓延","summary":"灼烧击杀生成领域。"},{"id":"scorchB2","name":"灼烧易感","summary":"灼烧命中附加易伤。"},{"id":"scorchC2","name":"速燃","summary":"加快持续伤害结算。"}]},
-    {"cardId":"splitBlast","options":[{"id":"splitBlastA","name":"爆裂","summary":"增加分裂数量。"},{"id":"splitBlastB","name":"重爆","summary":"强化爆炸伤害。"},{"id":"splitBlastC","name":"燃片","summary":"裂片附加持续伤害。"},{"id":"splitBlastA2","name":"连环裂变","summary":"分裂弹再次分裂。"},{"id":"splitBlastB2","name":"大爆心","summary":"扩大爆炸范围。"},{"id":"splitBlastC2","name":"爆炸推拒","summary":"爆炸附加击退。"}]},
-    {"cardId":"meteor","options":[{"id":"meteorA","name":"广域陨星","summary":"扩大陨星范围。"},{"id":"meteorB","name":"重陨","summary":"提高陨星伤害。"},{"id":"meteorC","name":"熔痕","summary":"陨星留下燃烧领域。"},{"id":"meteorA2","name":"三连陨","summary":"连续召唤三颗陨星。"},{"id":"meteorB2","name":"震地陨星","summary":"陨星附加眩晕。"},{"id":"meteorC2","name":"长燃熔痕","summary":"延长燃烧领域。"}]},
-    {"cardId":"magmaPool","options":[{"id":"magmaPoolA","name":"广域熔岩","summary":"扩大熔岩池。"},{"id":"magmaPoolB","name":"炽烈熔岩","summary":"提高熔岩伤害。"},{"id":"magmaPoolC","name":"熔岩易感","summary":"熔岩附加易伤。"},{"id":"magmaPoolA2","name":"双池","summary":"同时生成两个熔岩池。"},{"id":"magmaPoolB2","name":"迟滞池缘","summary":"熔岩附加减速。"},{"id":"magmaPoolC2","name":"熔亡爆裂","summary":"熔岩击杀产生爆发。"}]},
-    {"cardId":"flashfire","options":[{"id":"flashfireA","name":"强震","summary":"强化爆燃击退。"},{"id":"flashfireB","name":"烈燃","summary":"提高爆燃持续伤害。"},{"id":"flashfireC","name":"广域冲击","summary":"扩大爆燃范围。"},{"id":"flashfireA2","name":"燃烧撞击","summary":"碰撞造成爆发。"},{"id":"flashfireB2","name":"爆燃眩晕","summary":"爆燃附加眩晕。"},{"id":"flashfireC2","name":"火线","summary":"突破后留下火焰领域。"}]},
-    {"cardId":"cinderheart","options":[{"id":"cinderheartA","name":"烈焰反噬","summary":"突破时反伤并灼烧。"},{"id":"cinderheartB","name":"耐火心防","summary":"提高突破减伤。"},{"id":"cinderheartC","name":"余烬护盾","summary":"波次开始获得护盾。"},{"id":"cinderheartA2","name":"爆心","summary":"破盾触发爆发。"},{"id":"cinderheartB2","name":"近身灼环","summary":"获得近身灼烧光环。"},{"id":"cinderheartC2","name":"突破重灼","summary":"突破时施加重度灼烧。"}]},
-    {"cardId":"ashHarvest","options":[{"id":"ashHarvestA","name":"灰烬经验","summary":"持续伤害击杀提高经验。"},{"id":"ashHarvestB","name":"灰烬掉落","summary":"持续伤害击杀追加掉落。"},{"id":"ashHarvestC","name":"余烬延时","summary":"延长掉落存在时间。"},{"id":"ashHarvestA2","name":"灰烬转化","summary":"过期掉落转为资源。"},{"id":"ashHarvestB2","name":"焚杀振奋","summary":"持续伤害击杀提高伤害。"},{"id":"ashHarvestC2","name":"焚杀回春","summary":"持续伤害击杀恢复生命。"}]},
-    {"cardId":"aegis","options":[{"id":"aegisA","name":"增层","summary":"增加神盾层数。"},{"id":"aegisB","name":"速生","summary":"加快神盾恢复。"},{"id":"aegisC","name":"碎盾新星","summary":"破盾造成范围爆发。"},{"id":"aegisA2","name":"碎盾反制","summary":"破盾强化反击。"},{"id":"aegisB2","name":"壁垒减伤","summary":"提高突破减伤。"},{"id":"aegisC2","name":"震退新星","summary":"破盾附加大范围击退。"}]},
-    {"cardId":"thorns","options":[{"id":"thornsA","name":"反噬","summary":"强化荆棘反伤。"},{"id":"thornsB","name":"广域荆棘","summary":"扩大荆棘范围。"},{"id":"thornsC","name":"迟滞荆棘","summary":"荆棘附加减速。"},{"id":"thornsA2","name":"荆棘领域","summary":"获得持续伤害光环。"},{"id":"thornsB2","name":"刺伤易感","summary":"荆棘附加易伤。"},{"id":"thornsC2","name":"残血处决","summary":"处决光环内低生命敌人。"}]},
-    {"cardId":"decoy","options":[{"id":"decoyA","name":"坚固图腾","summary":"提高图腾生命。"},{"id":"decoyB","name":"广域嘲讽","summary":"扩大嘲讽范围。"},{"id":"decoyC","name":"亡语爆裂","summary":"图腾死亡时爆炸。"},{"id":"decoyA2","name":"重生图腾","summary":"图腾可以重生。"},{"id":"decoyB2","name":"双图腾","summary":"同时召唤两个图腾。"},{"id":"decoyC2","name":"寒意图腾","summary":"图腾获得减速光环。"}]},
-    {"cardId":"sanctum","options":[{"id":"sanctumA","name":"审判圣域","summary":"圣域施加易伤与减速。"},{"id":"sanctumB","name":"迟滞圣域","summary":"强化圣域减速。"},{"id":"sanctumC","name":"迅捷圣域","summary":"波次开始提高攻速。"},{"id":"sanctumA2","name":"处刑印记","summary":"优先锁定低生命目标。"},{"id":"sanctumB2","name":"易感圣域","summary":"增加圣域易伤来源。"},{"id":"sanctumC2","name":"双重圣域","summary":"增加易伤与减速圣域。"}]},
-    {"cardId":"sentinel","options":[{"id":"sentinelA","name":"重炮哨戒","summary":"提高哨戒伤害。"},{"id":"sentinelB","name":"速射哨戒","summary":"提高哨戒攻速。"},{"id":"sentinelC","name":"加固哨戒","summary":"提高哨戒耐久。"},{"id":"sentinelA2","name":"双哨戒","summary":"同时部署两个哨戒。"},{"id":"sentinelB2","name":"寒弹哨戒","summary":"哨戒命中附加减速。"},{"id":"sentinelC2","name":"亡语哨戒","summary":"哨戒死亡时爆炸。"}]},
-    {"cardId":"retribution","options":[{"id":"retributionA","name":"长晕反制","summary":"延长反制眩晕。"},{"id":"retributionB","name":"重罚反制","summary":"提高反制伤害。"},{"id":"retributionC","name":"迅捷反制","summary":"缩短反制冷却。"},{"id":"retributionA2","name":"易感审判","summary":"反制附加易伤。"},{"id":"retributionB2","name":"反制回盾","summary":"反制恢复护盾。"},{"id":"retributionC2","name":"全向震退","summary":"反制产生全向击退。"}]},
-    {"cardId":"ironvine","options":[{"id":"ironvineA","name":"守成丰收","summary":"防守期间提高掉率。"},{"id":"ironvineB","name":"守成延时","summary":"防守期间延长掉落时限。"},{"id":"ironvineC","name":"铁蔓转化","summary":"过期掉落转化为资源。"},{"id":"ironvineA2","name":"守成经验","summary":"防守期间提高经验。"},{"id":"ironvineB2","name":"壁垒回春","summary":"护盾恢复时治疗。"},{"id":"ironvineC2","name":"反击战利","summary":"反击击杀追加掉落。"}]},
-    {"cardId":"harvest","options":[{"id":"harvestA","name":"丰收","summary":"提高掉率。"},{"id":"harvestB","name":"长留","summary":"延长掉落存在时间。"},{"id":"harvestC","name":"拾取回春","summary":"拾取时恢复生命。"},{"id":"harvestA2","name":"过期转化","summary":"过期掉落转化为资源。"},{"id":"harvestB2","name":"智慧收获","summary":"提高经验获取。"},{"id":"harvestC2","name":"合成脉冲","summary":"合成时释放脉冲。"}]},
-    {"cardId":"fateLoom","options":[{"id":"fateLoomA","name":"强命脉冲","summary":"强化合成脉冲。"},{"id":"fateLoomB","name":"迅捷织命","summary":"合成后提高攻速。"},{"id":"fateLoomC","name":"迟滞织命","summary":"合成脉冲附加减速。"},{"id":"fateLoomA2","name":"易感命纹","summary":"合成脉冲附加易伤。"},{"id":"fateLoomB2","name":"合成回春","summary":"合成后恢复生命。"},{"id":"fateLoomC2","name":"合成振奋","summary":"合成后提高伤害。"}]},
-    {"cardId":"goldenVolley","options":[{"id":"goldenVolleyA","name":"吉运连发","summary":"提高追加弹频率。"},{"id":"goldenVolleyB","name":"重金追加","summary":"提高追加弹伤害。"},{"id":"goldenVolleyC","name":"鎏金烙印","summary":"命中附加优先标记。"},{"id":"goldenVolleyA2","name":"烙印增伤","summary":"对标记目标提高伤害。"},{"id":"goldenVolleyB2","name":"赏金标记","summary":"击杀可追加掉落。"},{"id":"goldenVolleyC2","name":"金弹裂变","summary":"金弹产生分裂。"}]},
-    {"cardId":"bountyCall","options":[{"id":"bountyCallA","name":"重赏标记","summary":"提高优先标记权重。"},{"id":"bountyCallB","name":"易感号令","summary":"标记同时附加易伤。"},{"id":"bountyCallC","name":"迟滞号令","summary":"标记同时附加减速。"},{"id":"bountyCallA2","name":"标记传染","summary":"标记击杀生成集火领域。"},{"id":"bountyCallB2","name":"富集经验","summary":"标记击杀提高经验。"},{"id":"bountyCallC2","name":"双重号令","summary":"施加双重优先标记。"}]},
-    {"cardId":"overgrowth","options":[{"id":"overgrowthA","name":"广域蔓生","summary":"扩大藤蔓领域。"},{"id":"overgrowthB","name":"缠足蔓生","summary":"强化藤蔓减速。"},{"id":"overgrowthC","name":"易感蔓生","summary":"藤蔓附加易伤。"},{"id":"overgrowthA2","name":"入域缠绕","summary":"进入领域时触发眩晕。"},{"id":"overgrowthB2","name":"沃土经验","summary":"领域内提高经验。"},{"id":"overgrowthC2","name":"双生藤域","summary":"同时生成两个藤蔓领域。"}]},
-    {"cardId":"springOfLife","options":[{"id":"springOfLifeA","name":"丰沛涌泉","summary":"提高周期恢复量。"},{"id":"springOfLifeB","name":"急流涌泉","summary":"缩短恢复间隔。"},{"id":"springOfLifeC","name":"溢流护盾","summary":"溢出治疗转为护盾。"},{"id":"springOfLifeA2","name":"应急回春","summary":"低生命时获得额外恢复。"},{"id":"springOfLifeB2","name":"生命脉冲","summary":"恢复时释放伤害脉冲。"},{"id":"springOfLifeC2","name":"茁壮心防","summary":"波次开始提高生命与防御。"}]},
-    {"cardId":"luckyStar","options":[{"id":"luckyStarA","name":"旺运","summary":"提高掉率与经验。"},{"id":"luckyStarB","name":"长运","summary":"延长掉落存在时间。"},{"id":"luckyStarC","name":"慧运","summary":"重点提高经验。"},{"id":"luckyStarA2","name":"福运掉落","summary":"击杀可追加掉落。"},{"id":"luckyStarB2","name":"惜福转化","summary":"过期掉落转为资源。"},{"id":"luckyStarC2","name":"合福脉冲","summary":"合成时触发幸运脉冲。"}]}
+    {
+      "cardId": "chainLightning",
+      "options": [
+        {
+          "id": "chainLightningA",
+          "name": "一个传一个",
+          "summary": "命中后电流在追求者之间弹跳 2 次，每跳都让对方更容易受伤。"
+        },
+        {
+          "id": "chainLightningB",
+          "name": "全程直播",
+          "summary": "主炮变成一道持续电光，扫过的追求者统统更好打。"
+        },
+        {
+          "id": "chainLightningC",
+          "name": "准时上门",
+          "summary": "每 2.2 秒自动朝人群甩一条四连跳的链，不用你动手。"
+        },
+        {
+          "id": "chainLightning1x",
+          "name": "补刀费另算",
+          "summary": "感电追求者被命中时，原地小范围再炸一下，伤害直接兑现。"
+        },
+        {
+          "id": "chainLightning2x",
+          "name": "死也要拉人陪",
+          "summary": "被电链击杀时，原地留下一小片带电区域，还会顺手再起一条链。"
+        },
+        {
+          "id": "chainLightning3x",
+          "name": "越电越上头",
+          "summary": "感电追求者被命中时（每 1.5 秒限一次），自己的攻速跟着往上叠。"
+        }
+      ]
+    },
+    {
+      "cardId": "pierce",
+      "options": [
+        {
+          "id": "pierceA",
+          "name": "一视同仁",
+          "summary": "每次开火穿透两个追求者，被穿过的都会感电。"
+        },
+        {
+          "id": "pierceB",
+          "name": "分你们几个",
+          "summary": "命中后分裂出三枚弹片，弹片各自命中都会让人更好打。"
+        },
+        {
+          "id": "pierceC",
+          "name": "定期爆改",
+          "summary": "每 2.8 秒换成迫击炮打一发，落点范围内的追求者都更好打。"
+        },
+        {
+          "id": "pierce1x",
+          "name": "一穿一个准",
+          "summary": "感电追求者被穿过时，每穿一个都追加一次爆发，穿几个炸几个。"
+        },
+        {
+          "id": "pierce2x",
+          "name": "顺手安利",
+          "summary": "感电追求者被命中时，小范围炸开，波及的人也一起感电。"
+        },
+        {
+          "id": "pierce3x",
+          "name": "顺手捞一笔",
+          "summary": "感电追求者被命中时（每 2 秒限一次），回一点心防，偶尔还能多捡一份心意。"
+        }
+      ]
+    },
+    {
+      "cardId": "staticSurge",
+      "options": [
+        {
+          "id": "staticSurgeA",
+          "name": "先下手为强",
+          "summary": "每次命中都会让追求者更好打，持续时间拉得比较长，覆盖广。"
+        },
+        {
+          "id": "staticSurgeB",
+          "name": "自带信号塔",
+          "summary": "炮台常驻一圈感应光环，圈内追求者会被自动周期感电。"
+        },
+        {
+          "id": "staticSurgeC",
+          "name": "定时放个大招",
+          "summary": "每 4 秒对最近的一片区域放电，范围内的追求者一起感电。"
+        },
+        {
+          "id": "staticSurge1x",
+          "name": "电到你定住",
+          "summary": "感电追求者被命中时（每秒限一次），当场短暂定住不能动。"
+        },
+        {
+          "id": "staticSurge2x",
+          "name": "传染性很强",
+          "summary": "感电追求者被命中时，以命中点为圆心把感电传给周围的人（不额外造成伤害）。"
+        },
+        {
+          "id": "staticSurge3x",
+          "name": "越电越来劲",
+          "summary": "感电追求者被命中时（每 3 秒限一次），自己的伤害跟着短时飙升。"
+        }
+      ]
+    },
+    {
+      "cardId": "stormcall",
+      "options": [
+        {
+          "id": "stormcallA",
+          "name": "指哪打哪",
+          "summary": "主炮换成落雷打法，每次落点范围内的追求者都会感电。"
+        },
+        {
+          "id": "stormcallB",
+          "name": "自带跟班",
+          "summary": "召唤一朵会追着最密集处飘的雷云，持续给周围的人感电。"
+        },
+        {
+          "id": "stormcallC",
+          "name": "整点报时",
+          "summary": "每波开始和每 5 秒，会朝人最多的地方甩出两条弹跳链。"
+        },
+        {
+          "id": "stormcall1x",
+          "name": "只闻雷声",
+          "summary": "感电追求者被命中时，大范围来一发爆发，倍率不高但覆盖广。"
+        },
+        {
+          "id": "stormcall2x",
+          "name": "顺路带货",
+          "summary": "每 3 秒在人最密集的地方自动炸一次，顺带把感电传出去。"
+        },
+        {
+          "id": "stormcall3x",
+          "name": "一个带走一片",
+          "summary": "被链电击杀时，死亡位留下增伤光环，还顺手扩大连锁范围。"
+        }
+      ]
+    },
+    {
+      "cardId": "arcSplitter",
+      "options": [
+        {
+          "id": "arcSplitterA",
+          "name": "分你一半",
+          "summary": "命中后分裂出两枚弹片，弹片各自命中都会让人更好打。"
+        },
+        {
+          "id": "arcSplitterB",
+          "name": "撒开了打",
+          "summary": "每次开火同时撒出四枚低伤弹片，覆盖面很大。"
+        },
+        {
+          "id": "arcSplitterC",
+          "name": "多弹一会儿",
+          "summary": "子弹额外弹射三次，每弹一下命中都会让人更好打。"
+        },
+        {
+          "id": "arcSplitter1x",
+          "name": "越打越顺手",
+          "summary": "感电追求者被命中时，这一下伤害直接往上跳。"
+        },
+        {
+          "id": "arcSplitter2x",
+          "name": "越分越碎",
+          "summary": "感电追求者被命中时，再分裂一代弹片，覆盖面继续扩大。"
+        },
+        {
+          "id": "arcSplitter3x",
+          "name": "顺手捡个漏",
+          "summary": "击杀时，有概率在原地多捡一份心意。"
+        }
+      ]
+    },
+    {
+      "cardId": "galvanicWard",
+      "options": [
+        {
+          "id": "galvanicWardA",
+          "name": "先推开再说",
+          "summary": "命中时直接把人推开，顺带让他更好打——物理意义上的拒绝。"
+        },
+        {
+          "id": "galvanicWardB",
+          "name": "别越界",
+          "summary": "炮台常驻一圈放电区，闯进来的人会被电，偶尔还会愣一下。"
+        },
+        {
+          "id": "galvanicWardC",
+          "name": "越线必炸",
+          "summary": "追求者一旦突破防线，突破点就是一次范围爆炸加感电。"
+        },
+        {
+          "id": "galvanicWard1x",
+          "name": "碰一下就定住",
+          "summary": "感电追求者被命中时（每 1.5 秒限一次），当场短暂定住。"
+        },
+        {
+          "id": "galvanicWard2x",
+          "name": "越界连坐",
+          "summary": "突破时（每 4 秒限一次），突破点短时展开放电圈，殃及周围。"
+        },
+        {
+          "id": "galvanicWard3x",
+          "name": "碎防补偿",
+          "summary": "突破时（每 6 秒限一次），回一点点心防。"
+        }
+      ]
+    },
+    {
+      "cardId": "overcharge",
+      "options": [
+        {
+          "id": "overchargeA",
+          "name": "先记你一笔",
+          "summary": "命中时施加感电，同时给自己叠一层伤害加成（最多两层）。"
+        },
+        {
+          "id": "overchargeB",
+          "name": "人越挤越亏",
+          "summary": "常驻范围光环，圈内追求者持续感电，人越多伤害加成越高。"
+        },
+        {
+          "id": "overchargeC",
+          "name": "定期结算",
+          "summary": "每 4 秒向最近的区域放一次电，范围内的追求者一起感电。"
+        },
+        {
+          "id": "overcharge1x",
+          "name": "一次性结清",
+          "summary": "感电追求者被命中时（每 2 秒限一次），原地炸一下。"
+        },
+        {
+          "id": "overcharge2x",
+          "name": "亏损也要分摊",
+          "summary": "感电追求者被命中时，以命中点为圆心把感电传给周围的人（不额外造成伤害）。"
+        },
+        {
+          "id": "overcharge3x",
+          "name": "死也要交心意",
+          "summary": "感电追求者被击杀时，有概率多掉一份心意，还能短时提升攻速。"
+        }
+      ]
+    },
+    {
+      "cardId": "frost",
+      "options": [
+        {
+          "id": "frostA",
+          "name": "慢慢来",
+          "summary": "每次命中都让人变慢，持续时间比较长，覆盖也广。"
+        },
+        {
+          "id": "frostB",
+          "name": "自带冷气",
+          "summary": "炮台常驻一圈冰雾，圈内追求者会一直被减速。"
+        },
+        {
+          "id": "frostC",
+          "name": "攒够就翻脸",
+          "summary": "每 2.5 秒给最近的人叠一层冻结层，攒满三层直接冰封。"
+        },
+        {
+          "id": "frost1x",
+          "name": "碎冰就是暴击",
+          "summary": "冰封追求者被命中时，高倍率爆发一下，直接打碎。"
+        },
+        {
+          "id": "frost2x",
+          "name": "一起变慢",
+          "summary": "受控追求者被命中时，减速范围往外扩散一圈。"
+        },
+        {
+          "id": "frost3x",
+          "name": "破冰给点安慰",
+          "summary": "冰封追求者被命中时（每 2 秒限一次），回一点心防。"
+        }
+      ]
+    },
+    {
+      "cardId": "impact",
+      "options": [
+        {
+          "id": "impactA",
+          "name": "先砸后聊",
+          "summary": "命中时直接把人砸开，还顺带让他变慢。"
+        },
+        {
+          "id": "impactB",
+          "name": "一锤震一片",
+          "summary": "命中处范围震荡，圈内追求者一起被砸退还变慢。"
+        },
+        {
+          "id": "impactC",
+          "name": "定时落锤",
+          "summary": "每 3 秒换成迫击炮砸一发，落点叠两层冻结。"
+        },
+        {
+          "id": "impact1x",
+          "name": "碎了就送走",
+          "summary": "冰封追求者被命中时，爆发一下，血量见底的直接处决。"
+        },
+        {
+          "id": "impact2x",
+          "name": "一起倒下",
+          "summary": "受控追求者被命中时，范围内一起被砸退、变慢。"
+        },
+        {
+          "id": "impact3x",
+          "name": "砸完给点安慰",
+          "summary": "冰封追求者被命中时（每 3 秒限一次），回一点心防。"
+        }
+      ]
+    },
+    {
+      "cardId": "glacialSpike",
+      "options": [
+        {
+          "id": "glacialSpikeA",
+          "name": "扎一路",
+          "summary": "子弹穿透，每穿一个追求者都会让他变慢。"
+        },
+        {
+          "id": "glacialSpikeB",
+          "name": "碎成一片",
+          "summary": "命中后分裂出三枚冰片，弹片各自命中都会让人变慢。"
+        },
+        {
+          "id": "glacialSpikeC",
+          "name": "冰枪不离手",
+          "summary": "主炮换成持续冰束，路径上的追求者会不断叠冻结层。"
+        },
+        {
+          "id": "glacialSpike1x",
+          "name": "穿一个碎一个",
+          "summary": "冰封追求者被穿过时，每穿一个都触发一次小范围爆发。"
+        },
+        {
+          "id": "glacialSpike2x",
+          "name": "一路凉过去",
+          "summary": "受控追求者被命中时，沿击中方向拉出一条减速区域。"
+        },
+        {
+          "id": "glacialSpike3x",
+          "name": "冻死还有赏",
+          "summary": "冰封追求者被击杀时，有概率多掉一份心意。"
+        }
+      ]
+    },
+    {
+      "cardId": "permafrost",
+      "options": [
+        {
+          "id": "permafrostA",
+          "name": "常驻冷圈",
+          "summary": "炮台常驻一圈减速光环，圈内追求者持续变慢。"
+        },
+        {
+          "id": "permafrostB",
+          "name": "圈子越推越大",
+          "summary": "每 3 秒向外推出一圈扩张光环，扫过的人立刻变慢。"
+        },
+        {
+          "id": "permafrostC",
+          "name": "定时敲打",
+          "summary": "每波开始和每 5 秒，会给最近的目标叠一层冻结层。"
+        },
+        {
+          "id": "permafrost1x",
+          "name": "冰封挨个炸",
+          "summary": "每 3 秒，场上所有冰封追求者各触发一次爆发。"
+        },
+        {
+          "id": "permafrost2x",
+          "name": "越推越冷",
+          "summary": "受控追求者被命中时，短时扩展减速光环的范围。"
+        },
+        {
+          "id": "permafrost3x",
+          "name": "地盘费返还",
+          "summary": "每 4 秒回一点心防。"
+        }
+      ]
+    },
+    {
+      "cardId": "iceTomb",
+      "options": [
+        {
+          "id": "iceTombA",
+          "name": "两下就封",
+          "summary": "每次命中叠两层冻结层，攒满两层直接冰封。"
+        },
+        {
+          "id": "iceTombB",
+          "name": "一片一起封",
+          "summary": "命中处范围内全体一起叠冻结层，覆盖面很大。"
+        },
+        {
+          "id": "iceTombC",
+          "name": "定点点名",
+          "summary": "每 4 秒直接对最近的目标施加冰封，不需要叠层。"
+        },
+        {
+          "id": "iceTomb1x",
+          "name": "封完留纪念",
+          "summary": "冰封追求者被击杀时，死亡位留下短时减速光环。"
+        },
+        {
+          "id": "iceTomb2x",
+          "name": "一起凉透",
+          "summary": "冰封追求者被命中时，范围爆发并把冻结层传播出去。"
+        },
+        {
+          "id": "iceTomb3x",
+          "name": "封完还有回扣",
+          "summary": "冰封追求者被击杀时，回一点心防，偶尔还能多捡一份心意。"
+        }
+      ]
+    },
+    {
+      "cardId": "frozenBulwark",
+      "options": [
+        {
+          "id": "frozenBulwarkA",
+          "name": "先推再冻",
+          "summary": "命中时把人推开，还顺带叠冻结层，越靠近核心推得越狠。"
+        },
+        {
+          "id": "frozenBulwarkB",
+          "name": "自带寒气",
+          "summary": "炮台外围常驻冰墙圈，进入者会被强力减速。"
+        },
+        {
+          "id": "frozenBulwarkC",
+          "name": "越线直接封",
+          "summary": "追求者一旦突破防线，突破点就是一次范围冰封加击退。"
+        },
+        {
+          "id": "frozenBulwark1x",
+          "name": "破防就得挨炸",
+          "summary": "追求者突破防线时，在突破点触发一次范围爆发。"
+        },
+        {
+          "id": "frozenBulwark2x",
+          "name": "拖朋友下水",
+          "summary": "突破时（每 5 秒限一次），短时扩展减速光环的范围。"
+        },
+        {
+          "id": "frozenBulwark3x",
+          "name": "破防照样叠层",
+          "summary": "突破时（每 6 秒限一次），回一点心防并叠冻结层。"
+        }
+      ]
+    },
+    {
+      "cardId": "hoarfrostTithe",
+      "options": [
+        {
+          "id": "hoarfrostTitheA",
+          "name": "按人头收",
+          "summary": "命中施加减速，场上受控目标越多，自己伤害加成越高。"
+        },
+        {
+          "id": "hoarfrostTitheB",
+          "name": "常驻收税点",
+          "summary": "常驻收缴光环，圈内追求者被减速，圈内人越多伤害加成越高。"
+        },
+        {
+          "id": "hoarfrostTitheC",
+          "name": "定期收税",
+          "summary": "每 4 秒给最近区域叠冻结层，冰封数量影响下次结算强度。"
+        },
+        {
+          "id": "hoarfrostTithe1x",
+          "name": "收完顺手打包",
+          "summary": "冰封追求者被击杀时，有概率在原地多掉一份心意。"
+        },
+        {
+          "id": "hoarfrostTithe2x",
+          "name": "税网撒开",
+          "summary": "受控追求者被命中时，减速范围往外扩散一圈。"
+        },
+        {
+          "id": "hoarfrostTithe3x",
+          "name": "收税带利息",
+          "summary": "受控追求者被击杀时，提升攻速并回一点心防。"
+        }
+      ]
+    },
+    {
+      "cardId": "scorch",
+      "options": [
+        {
+          "id": "scorchA",
+          "name": "碰一下就着",
+          "summary": "每次命中都会点燃对方，让他持续掉血。"
+        },
+        {
+          "id": "scorchB",
+          "name": "顺手放把火",
+          "summary": "命中处留下一片火场，路过的追求者都会持续掉血。"
+        },
+        {
+          "id": "scorchC",
+          "name": "定时点名烧",
+          "summary": "每 2.2 秒对最近的人点一把火，让他持续掉血。"
+        },
+        {
+          "id": "scorch1x",
+          "name": "越烧越炸",
+          "summary": "灼烧追求者被命中时，原地炸一下，还顺带续一把火。"
+        },
+        {
+          "id": "scorch2x",
+          "name": "火借风势",
+          "summary": "灼烧追求者被命中时，火会往周围传，不额外加伤害。"
+        },
+        {
+          "id": "scorch3x",
+          "name": "烧完自己爽",
+          "summary": "被烧死时，自己的伤害会短时提升。"
+        }
+      ]
+    },
+    {
+      "cardId": "splitBlast",
+      "options": [
+        {
+          "id": "splitBlastA",
+          "name": "近身小爆炸",
+          "summary": "命中处小范围爆炸，范围内的人都会被点着。"
+        },
+        {
+          "id": "splitBlastB",
+          "name": "弹片各自点火",
+          "summary": "命中后分裂出三枚弹片，弹片各自命中都会点火。"
+        },
+        {
+          "id": "splitBlastC",
+          "name": "定时留火场",
+          "summary": "每 3 秒换成迫击炮打一发，落点留下一片火场。"
+        },
+        {
+          "id": "splitBlast1x",
+          "name": "越炸越准",
+          "summary": "灼烧追求者被命中时，高倍率爆发（弹片各自触发一次）。"
+        },
+        {
+          "id": "splitBlast2x",
+          "name": "火续着别灭",
+          "summary": "灼烧追求者被命中时，火焰持续时间被刷新延长。"
+        },
+        {
+          "id": "splitBlast3x",
+          "name": "烧完还能捡",
+          "summary": "被烧死时，有概率多掉一份心意。"
+        }
+      ]
+    },
+    {
+      "cardId": "meteor",
+      "options": [
+        {
+          "id": "meteorA",
+          "name": "指哪砸哪",
+          "summary": "主炮换成落石打法，落点范围内的人都会被点着。"
+        },
+        {
+          "id": "meteorB",
+          "name": "多点连环砸",
+          "summary": "每 3 秒散落多枚流星，各留下一片小火场。"
+        },
+        {
+          "id": "meteorC",
+          "name": "定点重型轰炸",
+          "summary": "每 4 秒大范围轰炸，落点留下一片大火场。"
+        },
+        {
+          "id": "meteor1x",
+          "name": "砸完再推一把",
+          "summary": "灼烧追求者被命中时，爆发并击退，顺带续一把火。"
+        },
+        {
+          "id": "meteor2x",
+          "name": "火雨带着推",
+          "summary": "灼烧追求者被命中时，范围内传播火焰并伴随击退。"
+        },
+        {
+          "id": "meteor3x",
+          "name": "烧完给点安慰",
+          "summary": "被烧死时，回一点心防。"
+        }
+      ]
+    },
+    {
+      "cardId": "magmaPool",
+      "options": [
+        {
+          "id": "magmaPoolA",
+          "name": "踩一脚就烧",
+          "summary": "命中处留下持续熔池，路过的追求者都会掉血。"
+        },
+        {
+          "id": "magmaPoolB",
+          "name": "岩浆到处涌",
+          "summary": "每 3 秒在人最密集的地方生成一大片低伤岩浆。"
+        },
+        {
+          "id": "magmaPoolC",
+          "name": "死了还要喷发",
+          "summary": "击杀时会在击杀位爆发，还留下一片大熔池。"
+        },
+        {
+          "id": "magmaPool1x",
+          "name": "火场轮流炸",
+          "summary": "每 3 秒，所有活跃的熔池各触发一次爆发。"
+        },
+        {
+          "id": "magmaPool2x",
+          "name": "死了再留一块",
+          "summary": "被烧死时，在原地再生成一小片熔池。"
+        },
+        {
+          "id": "magmaPool3x",
+          "name": "烧完顺手捡",
+          "summary": "被烧死时，有概率多掉一份心意。"
+        }
+      ]
+    },
+    {
+      "cardId": "flashfire",
+      "options": [
+        {
+          "id": "flashfireA",
+          "name": "碰一下就炸",
+          "summary": "命中处直接小爆燃，还顺带把人点着。"
+        },
+        {
+          "id": "flashfireB",
+          "name": "一炸带走一片",
+          "summary": "命中点范围冲击，圈内追求者全体被击退还点着。"
+        },
+        {
+          "id": "flashfireC",
+          "name": "定时大爆燃",
+          "summary": "每 3 秒在人最密集的地方引发一次大爆燃。"
+        },
+        {
+          "id": "flashfire1x",
+          "name": "炸完再推",
+          "summary": "灼烧追求者被命中时，爆发并击退，顺带续一把火。"
+        },
+        {
+          "id": "flashfire2x",
+          "name": "火气往外冒",
+          "summary": "灼烧追求者被命中时，范围内传播火焰。"
+        },
+        {
+          "id": "flashfire3x",
+          "name": "越炸越猛",
+          "summary": "灼烧追求者被命中时（每 2 秒限一次），短时提升自己的伤害。"
+        }
+      ]
+    },
+    {
+      "cardId": "cinderheart",
+      "options": [
+        {
+          "id": "cinderheartA",
+          "name": "常驻高温",
+          "summary": "炮台外围常驻灼烧光环，靠近的追求者会直接中招。"
+        },
+        {
+          "id": "cinderheartB",
+          "name": "定期补火",
+          "summary": "每波开始和每 6 秒，核心周围会铺一片新的火场。"
+        },
+        {
+          "id": "cinderheartC",
+          "name": "越线就爆燃",
+          "summary": "追求者一旦突破防线，突破点就会爆燃并留下火场。"
+        },
+        {
+          "id": "cinderheart1x",
+          "name": "顺手补一刀",
+          "summary": "每 3 秒对最近的追求者追加一次点火。"
+        },
+        {
+          "id": "cinderheart2x",
+          "name": "越线火更大",
+          "summary": "突破时（每 5 秒限一次），突破点会扩展出一大片火场。"
+        },
+        {
+          "id": "cinderheart3x",
+          "name": "烧死给点补偿",
+          "summary": "被烧死时（每 3 秒限一次），回一点心防。"
+        }
+      ]
+    },
+    {
+      "cardId": "ashHarvest",
+      "options": [
+        {
+          "id": "ashHarvestA",
+          "name": "点火就赚",
+          "summary": "命中施加灼烧，场上烧着的人越多，自己伤害加成越高。"
+        },
+        {
+          "id": "ashHarvestB",
+          "name": "灰堆越铺越大",
+          "summary": "每 3 秒铺一片灰烬火场，场内人越多加成越高。"
+        },
+        {
+          "id": "ashHarvestC",
+          "name": "定时补一把火",
+          "summary": "每 2.5 秒给最近的追求者补一把强力的火。"
+        },
+        {
+          "id": "ashHarvest1x",
+          "name": "越旺炸越狠",
+          "summary": "灼烧追求者被命中时，原地炸一下（烧着的人越多倍率越高）。"
+        },
+        {
+          "id": "ashHarvest2x",
+          "name": "死了也要冒烟",
+          "summary": "被烧死时，在原地留下一小片火场。"
+        },
+        {
+          "id": "ashHarvest3x",
+          "name": "烧完顺手加速",
+          "summary": "灼烧追求者被击杀时，有概率多掉一份心意，还能提升攻速。"
+        }
+      ]
+    },
+    {
+      "cardId": "aegis",
+      "options": [
+        {
+          "id": "aegisA",
+          "name": "按波供货",
+          "summary": "每波开始获得可抵挡两次的壁垒，九秒后自动重铸。"
+        },
+        {
+          "id": "aegisB",
+          "name": "少量但常有",
+          "summary": "壁垒容量只有一次，但会自己回血，不依赖波次节奏。"
+        },
+        {
+          "id": "aegisC",
+          "name": "自动补货",
+          "summary": "每 9 秒自动补充壁垒，不依赖波次节奏。"
+        },
+        {
+          "id": "aegis1x",
+          "name": "碎了就崩你",
+          "summary": "壁垒破裂时，对周围追求者爆发并击退。"
+        },
+        {
+          "id": "aegis2x",
+          "name": "全体打折",
+          "summary": "常驻减伤光环，保护范围内所有友方单位。"
+        },
+        {
+          "id": "aegis3x",
+          "name": "供货带回扣",
+          "summary": "每波开始回一点心防并短时提升属性。"
+        }
+      ]
+    },
+    {
+      "cardId": "thorns",
+      "options": [
+        {
+          "id": "thornsA",
+          "name": "谁碰谁疼",
+          "summary": "持续被动：承受伤害时会把部分伤害反弹给攻击者。"
+        },
+        {
+          "id": "thornsB",
+          "name": "自带刺圈",
+          "summary": "炮台外围常驻一圈荆棘，进入者持续受伤，同时保持反伤。"
+        },
+        {
+          "id": "thornsC",
+          "name": "破防刺更狠",
+          "summary": "追求者一旦突破防线，突破点就会爆发，反伤也大幅提升。"
+        },
+        {
+          "id": "thorns1x",
+          "name": "破防再挨炸",
+          "summary": "突破时（每 3 秒限一次），在突破点再触发一次爆发。"
+        },
+        {
+          "id": "thorns2x",
+          "name": "刺圈越扎越广",
+          "summary": "持续展开荆棘光环，圈内追求者同样受到反伤效果。"
+        },
+        {
+          "id": "thorns3x",
+          "name": "破防给点安慰",
+          "summary": "突破时（每 5 秒限一次），回一点心防。"
+        }
+      ]
+    },
+    {
+      "cardId": "decoy",
+      "options": [
+        {
+          "id": "decoyA",
+          "name": "每波来一个",
+          "summary": "每波开始召唤一具替身，引走追求者的注意力。"
+        },
+        {
+          "id": "decoyB",
+          "name": "替身接力上",
+          "summary": "每 9 秒补充一具替身，场上可以同时存在多具。"
+        },
+        {
+          "id": "decoyC",
+          "name": "替身会自爆",
+          "summary": "召唤两具会自爆的替身，替身被消灭时会爆炸。"
+        },
+        {
+          "id": "decoy1x",
+          "name": "自爆威力加倍",
+          "summary": "持续强化：替身消灭时爆炸的伤害大幅提升。"
+        },
+        {
+          "id": "decoy2x",
+          "name": "多来一具带盾",
+          "summary": "每波开始额外多召唤一具，替身存在时展开减伤光环。"
+        },
+        {
+          "id": "decoy3x",
+          "name": "替身在就省心",
+          "summary": "替身存活时降低突破伤害，每 5 秒还能回一点心防。"
+        }
+      ]
+    },
+    {
+      "cardId": "sanctum",
+      "options": [
+        {
+          "id": "sanctumA",
+          "name": "常驻安全圈",
+          "summary": "炮台外围常驻减伤圣域，进入者会持续受到反伤。"
+        },
+        {
+          "id": "sanctumB",
+          "name": "圈子会外推",
+          "summary": "每 4 秒向外推出扩张环，短时覆盖更远的范围。"
+        },
+        {
+          "id": "sanctumC",
+          "name": "开波先加固",
+          "summary": "每波开始建立强化圣域，并降低突破伤害。"
+        },
+        {
+          "id": "sanctum1x",
+          "name": "破防就挨炸",
+          "summary": "追求者突破防线时，在突破点触发一次爆发。"
+        },
+        {
+          "id": "sanctum2x",
+          "name": "圈子附赠壁垒",
+          "summary": "持续展开减伤光环，每波开始附加一次壁垒。"
+        },
+        {
+          "id": "sanctum3x",
+          "name": "圣域自动回血",
+          "summary": "每 5 秒回一点心防。"
+        }
+      ]
+    },
+    {
+      "cardId": "sentinel",
+      "options": [
+        {
+          "id": "sentinelA",
+          "name": "每波添人手",
+          "summary": "每波开始召唤一座协同射击的镜像炮塔。"
+        },
+        {
+          "id": "sentinelB",
+          "name": "轨道也带炮",
+          "summary": "召唤环绕轨道单位，覆盖面更广，弹道还能穿透。"
+        },
+        {
+          "id": "sentinelC",
+          "name": "破防紧急支援",
+          "summary": "追求者突破防线时，在突破点紧急部署两座哨戒炮塔。"
+        },
+        {
+          "id": "sentinel1x",
+          "name": "壁垒在就更猛",
+          "summary": "持续强化：哨戒炮塔的爆发伤害提升，壁垒存在时进一步提升。"
+        },
+        {
+          "id": "sentinel2x",
+          "name": "编队再扩编",
+          "summary": "每波开始额外多召唤一座哨戒炮塔。"
+        },
+        {
+          "id": "sentinel3x",
+          "name": "人越多越稳",
+          "summary": "持续强化：每有一座哨戒存活，就提供一档突破减伤。"
+        }
+      ]
+    },
+    {
+      "cardId": "retribution",
+      "options": [
+        {
+          "id": "retributionA",
+          "name": "定点还击",
+          "summary": "追求者突破防线时，突破坐标范围内一次爆发打击。"
+        },
+        {
+          "id": "retributionB",
+          "name": "大范围震慑",
+          "summary": "突破时，大范围震慑并击退周围的追求者。"
+        },
+        {
+          "id": "retributionC",
+          "name": "越守越狠",
+          "summary": "突破爆发的倍率随距上次突破的时间累积，守得越久打得越重。"
+        },
+        {
+          "id": "retribution1x",
+          "name": "壁垒越厚越炸",
+          "summary": "突破时，爆发倍率随壁垒剩余容量提升。"
+        },
+        {
+          "id": "retribution2x",
+          "name": "全场一起硬",
+          "summary": "突破时（每 5 秒限一次），全场短时增伤并召唤替身。"
+        },
+        {
+          "id": "retribution3x",
+          "name": "破防也有赏",
+          "summary": "突破时（每 6 秒限一次），回一点心防并短时提升伤害。"
+        }
+      ]
+    },
+    {
+      "cardId": "ironvine",
+      "options": [
+        {
+          "id": "ironvineA",
+          "name": "越守越值钱",
+          "summary": "持续反伤，距上次突破的时间越长，自己伤害加成越高。"
+        },
+        {
+          "id": "ironvineB",
+          "name": "常驻铁蔓圈",
+          "summary": "常驻一圈铁蔓光环，范围内的追求者会持续受伤。"
+        },
+        {
+          "id": "ironvineC",
+          "name": "稳一波就发",
+          "summary": "上一波没被突破，这一波开始就能拿到整波强化加成。"
+        },
+        {
+          "id": "ironvine1x",
+          "name": "破防先炸一下",
+          "summary": "突破时（每 3 秒限一次），在突破点触发一次范围爆发。"
+        },
+        {
+          "id": "ironvine2x",
+          "name": "生意再扩张",
+          "summary": "光环范围扩张，并追加一档反伤效果。"
+        },
+        {
+          "id": "ironvine3x",
+          "name": "投资有保障",
+          "summary": "合成时有概率返还素材，无突破的波次结束时额外产出心意。"
+        }
+      ]
+    },
+    {
+      "cardId": "harvest",
+      "options": [
+        {
+          "id": "harvestA",
+          "name": "锁定最贵的",
+          "summary": "持续标记场上最高价值的追求者，提高心意掉落率。"
+        },
+        {
+          "id": "harvestB",
+          "name": "多个一起标",
+          "summary": "每 3 秒同时标记场上多个追求者。"
+        },
+        {
+          "id": "harvestC",
+          "name": "捡完就再标",
+          "summary": "每次拾取心意后，立刻标记一个新的追求者。"
+        },
+        {
+          "id": "harvest1x",
+          "name": "标记就是稳赚",
+          "summary": "有赏印的追求者被击杀时，额外多掉一份心意。"
+        },
+        {
+          "id": "harvest2x",
+          "name": "捡完再加标",
+          "summary": "每次拾取心意后，追加一个额外的赏印标记。"
+        },
+        {
+          "id": "harvest3x",
+          "name": "过期也不亏",
+          "summary": "心意在地上存续更久，过期时还能转化部分价值。"
+        }
+      ]
+    },
+    {
+      "cardId": "fateLoom",
+      "options": [
+        {
+          "id": "fateLoomA",
+          "name": "合成就开炮",
+          "summary": "每次合成时向场上释放一次脉冲伤害。"
+        },
+        {
+          "id": "fateLoomB",
+          "name": "炮弹带余震",
+          "summary": "合成时脉冲范围扩大，并留下短时的增伤区域。"
+        },
+        {
+          "id": "fateLoomC",
+          "name": "开波自动炸",
+          "summary": "每波开始时自动触发一次脉冲，不依赖合成频率。"
+        },
+        {
+          "id": "fateLoom1x",
+          "name": "标记就是靶心",
+          "summary": "有赏印的追求者被击杀时，爆发一下，偶尔还能多掉心意。"
+        },
+        {
+          "id": "fateLoom2x",
+          "name": "炸完顺手标记",
+          "summary": "每次合成后，全场短时展开增伤光环。"
+        },
+        {
+          "id": "fateLoom3x",
+          "name": "合成也能中奖",
+          "summary": "每次合成后，短时提升伤害，并提高万能卡奖励的获取概率。"
+        }
+      ]
+    },
+    {
+      "cardId": "goldenVolley",
+      "options": [
+        {
+          "id": "goldenVolleyA",
+          "name": "穿一个标一个",
+          "summary": "子弹穿透，每个被穿过的追求者都会被标记赏印。"
+        },
+        {
+          "id": "goldenVolleyB",
+          "name": "弹片各自标价",
+          "summary": "命中后分裂出三枚弹片，弹片各自标记追求者。"
+        },
+        {
+          "id": "goldenVolleyC",
+          "name": "光束逐个标",
+          "summary": "主炮换成持续光束，路径上的追求者会持续被标记。"
+        },
+        {
+          "id": "goldenVolley1x",
+          "name": "标价就得兑现",
+          "summary": "有赏印的追求者被命中时，触发爆发（穿透各自独立结算）。"
+        },
+        {
+          "id": "goldenVolley2x",
+          "name": "标记往外传",
+          "summary": "有赏印的追求者被命中时，范围内传播赏印。"
+        },
+        {
+          "id": "goldenVolley3x",
+          "name": "标记结算了",
+          "summary": "有赏印的追求者被击杀时，多掉一份心意。"
+        }
+      ]
+    },
+    {
+      "cardId": "bountyCall",
+      "options": [
+        {
+          "id": "bountyCallA",
+          "name": "开波先点名",
+          "summary": "每波开始标记若干高价值追求者。"
+        },
+        {
+          "id": "bountyCallB",
+          "name": "滚动点名单",
+          "summary": "每 3 秒滚动标记多个目标，持续维持赏印覆盖。"
+        },
+        {
+          "id": "bountyCallC",
+          "name": "捡完就点名",
+          "summary": "每次拾取心意后立刻追加标记，拾取节奏决定赏印数量。"
+        },
+        {
+          "id": "bountyCall1x",
+          "name": "点名就得炸",
+          "summary": "有赏印的追求者被击杀时，爆发并偶尔多掉心意。"
+        },
+        {
+          "id": "bountyCall2x",
+          "name": "点名留印记",
+          "summary": "有赏印的追求者被击杀时，死亡位留下短时赏印光环。"
+        },
+        {
+          "id": "bountyCall3x",
+          "name": "点名带补贴",
+          "summary": "持续提高心意掉落率和奖励积分获取。"
+        }
+      ]
+    },
+    {
+      "cardId": "overgrowth",
+      "options": [
+        {
+          "id": "overgrowthA",
+          "name": "常驻圈地",
+          "summary": "炮台常驻蔓生光环，圈内追求者会被标记，心意掉落存续更久。"
+        },
+        {
+          "id": "overgrowthB",
+          "name": "圈子往外扩",
+          "summary": "每 4 秒向外推出扩张蔓生环，覆盖更远的追求者。"
+        },
+        {
+          "id": "overgrowthC",
+          "name": "开波先丰收",
+          "summary": "每波开始建立强化蔓生，延长本波心意的掉落存续时间。"
+        },
+        {
+          "id": "overgrowth1x",
+          "name": "标记就挨炸",
+          "summary": "每 3 秒对场上所有有赏印的追求者各触发一次爆发。"
+        },
+        {
+          "id": "overgrowth2x",
+          "name": "捡完圈更大",
+          "summary": "每次拾取心意后，短时扩展蔓生光环的范围。"
+        },
+        {
+          "id": "overgrowth3x",
+          "name": "拾取带回血",
+          "summary": "心意在地上存续更久，且每次拾取时回一点心防。"
+        }
+      ]
+    },
+    {
+      "cardId": "springOfLife",
+      "options": [
+        {
+          "id": "springOfLifeA",
+          "name": "捡一份回一口",
+          "summary": "每次拾取心意时回复少量心防。"
+        },
+        {
+          "id": "springOfLifeB",
+          "name": "常驻小泉眼",
+          "summary": "常驻泉域，圈内追求者被标记，每 4 秒自动回复心防。"
+        },
+        {
+          "id": "springOfLifeC",
+          "name": "开波大回血",
+          "summary": "每波开始大幅回复心防并提升生命上限。"
+        },
+        {
+          "id": "springOfLife1x",
+          "name": "标记也能回血",
+          "summary": "有赏印的追求者被击杀时，回复少量心防。"
+        },
+        {
+          "id": "springOfLife2x",
+          "name": "捡完泉眼扩大",
+          "summary": "每次拾取心意后，短时展开范围心防回复光环。"
+        },
+        {
+          "id": "springOfLife3x",
+          "name": "过期也能回血",
+          "summary": "心意过期时，将部分价值转化为心防回复。"
+        }
+      ]
+    },
+    {
+      "cardId": "luckyStar",
+      "options": [
+        {
+          "id": "luckyStarA",
+          "name": "持续攒人品",
+          "summary": "持续提高心意掉落率和奖励积分获取。"
+        },
+        {
+          "id": "luckyStarB",
+          "name": "星星会掉钱",
+          "summary": "每 5 秒在人最密集处直接掉落心意。"
+        },
+        {
+          "id": "luckyStarC",
+          "name": "捡完还有连锁",
+          "summary": "每次拾取心意后有概率再掉一份，形成拾取连锁。"
+        },
+        {
+          "id": "luckyStar1x",
+          "name": "标记高概率爆",
+          "summary": "有赏印的追求者被击杀时，高概率多掉一份心意。"
+        },
+        {
+          "id": "luckyStar2x",
+          "name": "合成带彩蛋",
+          "summary": "每次合成后，释放一次脉冲并追加一个赏印标记。"
+        },
+        {
+          "id": "luckyStar3x",
+          "name": "过期也不浪费",
+          "summary": "心意过期时按比例转化为收益，并持续提高积分获取。"
+        }
+      ]
+    }
   ]
 }
