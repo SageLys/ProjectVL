@@ -41,6 +41,23 @@
       "dropRateMul": "掉落率",
       "dropLifetimeMul": "掉落时限",
       "xpMul": "奖励积分"
+    },
+    "shortStats": {
+      "damageMul": "伤害",
+      "fireRateMul": "射速",
+      "rangeMul": "射程",
+      "maxHpMul": "生命",
+      "effectDamageMul": "效伤",
+      "quantityAdd": "数量",
+      "controlPotencyMul": "控制",
+      "controlledDamageTakenMul": "增伤",
+      "areaScaleMul": "范围",
+      "dotDamageMul": "续伤",
+      "defenseDurabilityMul": "耐久",
+      "retaliationMul": "反击",
+      "dropRateMul": "掉率",
+      "dropLifetimeMul": "时限",
+      "xpMul": "积分"
     }
   },
   "gods": {

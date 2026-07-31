@@ -15,9 +15,11 @@ describe('compact stage proportions', () => {
 
   it('uses taller cards, smaller titles, and three visible effect lines on short screens', () => {
     expect(css).toContain('.game-stage[data-layout="compact"] .card-slot { height:118px; min-height:118px; }');
-    expect(css).toContain('.game-stage[data-layout="compact"] .card-name { font-size:14px; }');
+    expect(css).toContain('.game-stage[data-layout="compact"] .equip-slot { height:72px; min-height:72px; }');
+    expect(css).toContain('.game-stage[data-layout="compact"] .card-name { font-size:12px; }');
     expect(css).toMatch(
-      /\.game-stage\[data-layout="compact"\] \.card-affix-compact\s*\{[^}]*-webkit-line-clamp:3;[^}]*font-size:14px;/s,
+      /\.game-stage\[data-layout="compact"\] \.card-overview\s*\{[^}]*-webkit-line-clamp:3;/s,
     );
+    expect(css).toContain('.game-stage[data-layout="compact"] .card-affix-compact { font-size:10px; line-height:1.15; }');
   });
 });

@@ -19,7 +19,9 @@ export function renderEquipment(refs: DomRefs, state: GameState, handlers: SlotH
       note.className = 'card-fusion-badge';
       note.textContent = '⌁';
       note.setAttribute('aria-label', '已参与武器形态融合');
-      slot.querySelector('.card')?.append(note);
+      const cardElement = slot.querySelector('.card');
+      cardElement?.classList.add('has-fusion-badge');
+      cardElement?.append(note);
     }
     refs.equipmentSlots.append(slot);
   }
