@@ -25,6 +25,8 @@ namespace ProjectVL.Config
         public EconomyDefaultsConfig defaults = new EconomyDefaultsConfig();
         public OrdinaryDropRateConfig ordinaryDropRate =
             new OrdinaryDropRateConfig();
+        public EconomyEvolutionConfig evolution =
+            new EconomyEvolutionConfig();
         public NormalDropTypePolicyConfig normalDropTypePolicy =
             new NormalDropTypePolicyConfig();
     }
@@ -72,6 +74,22 @@ namespace ProjectVL.Config
     }
 
     [Serializable]
+    public sealed class EconomyEvolutionConfig
+    {
+        public int maxRecipeCompletions = 2;
+        public int completionLimitPerRecipe = 1;
+        public int[] assistWindowWaves = Array.Empty<int>();
+        public int[] assistCheckpoints = Array.Empty<int>();
+        public int assistMaxCorrections;
+        public int assistMaxCorrectionsPerMaterial;
+        public string assistRewardPolicy;
+        public bool allowDirectFiveStarAssist;
+        public int recipeProtectionSlots;
+        public float bountyRecipeMaterialBonus = 1f;
+        public float bountyReadySideMultiplier = 1f;
+    }
+
+    [Serializable]
     public sealed class NormalDropTypePolicyConfig
     {
         public bool enabled = true;
@@ -81,6 +99,7 @@ namespace ProjectVL.Config
         public NormalDropRoleMixConfig lateMix =
             new NormalDropRoleMixConfig(1, 7, 2);
         public int bootstrapMinDiscovery = 6;
+        public int bootstrapForcedDrops = 9;
         public GodAffinityPolicyConfig godAffinity =
             new GodAffinityPolicyConfig();
         public BuildMaturityPolicyConfig maturity =

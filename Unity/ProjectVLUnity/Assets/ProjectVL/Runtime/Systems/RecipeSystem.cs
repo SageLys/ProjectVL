@@ -8,20 +8,31 @@ namespace ProjectVL.Systems
     {
         private readonly EvolutionRecipesConfig _config;
         private readonly CardAffixSystem _affixes;
+        private readonly EconomyEvolutionConfig _evolution;
+        private readonly CardCatalog _cards;
         private readonly HashSet<string> _announced =
             new HashSet<string>();
 
         public RecipeSystem(
             EvolutionRecipesConfig config,
-            CardAffixSystem affixes = null)
+            CardAffixSystem affixes = null,
+            EconomyEvolutionConfig evolution = null,
+            CardCatalog cards = null)
         {
             _config = config;
             _affixes = affixes;
+            _evolution = evolution ?? new EconomyEvolutionConfig();
+            _cards = cards ?? CardCatalog.Default;
         }
 
         public string FirstAvailableRecipe(GameState state)
         {
             if (state == null || !state.IntermissionActive)
+            {
+                return null;
+            }
+            if (state.CompletedRecipes.Count
+                >= _evolution.maxRecipeCompletions)
             {
                 return null;
             }
@@ -70,6 +81,11 @@ namespace ProjectVL.Systems
             {
                 return RecipeCraftResult.AlreadyCompleted;
             }
+            if (state.CompletedRecipes.Count
+                >= _evolution.maxRecipeCompletions)
+            {
+                return RecipeCraftResult.LimitReached;
+            }
 
             if (!TryFindMaterials(
                 state,
@@ -109,6 +125,86 @@ namespace ProjectVL.Systems
             return RecipeCraftResult.Crafted;
         }
 
+        public RecipeCraftResult CraftPair(
+            GameState state,
+            CardSlotKind sourceKind,
+            int sourceIndex,
+            CardSlotKind targetKind,
+            int targetIndex)
+        {
+            if (state == null)
+                return RecipeCraftResult.UnknownRecipe;
+
+            CardState[] source = Slots(state, sourceKind);
+            CardState[] target = Slots(state, targetKind);
+            if (sourceIndex < 0
+                || sourceIndex >= source.Length
+                || targetIndex < 0
+                || targetIndex >= target.Length
+                || (sourceKind == targetKind && sourceIndex == targetIndex))
+            {
+                return RecipeCraftResult.UnknownRecipe;
+            }
+
+            CardState first = source[sourceIndex];
+            CardState second = target[targetIndex];
+            EvolutionRecipeConfig recipe = FindPairRecipe(first, second);
+            if (recipe == null
+                || state.CompletedRecipes.Contains(recipe.id)
+                || state.CompletedRecipes.Count
+                    >= _evolution.maxRecipeCompletions)
+            {
+                return RecipeCraftResult.UnknownRecipe;
+            }
+
+            if (state.Mode != GameMode.Playing
+                || state.Paused
+                || state.DecisionLocked
+                || state.WavePhase == WavePhase.BossReward)
+            {
+                return RecipeCraftResult.WrongPhase;
+            }
+
+            CardDefinitionConfig outputDefinition =
+                _cards.Find(recipe.outputCardId);
+            if (outputDefinition?.recipeOnly != true)
+            {
+                return RecipeCraftResult.UnknownRecipe;
+            }
+
+            source[sourceIndex] = null;
+            CardState output = state.CreateCard(
+                recipe.outputCardId,
+                recipe.outputStar);
+            _affixes?.Attach(state, output);
+            output.PrimaryGod = outputDefinition.primaryGod;
+            output.SourceGods.AddRange(
+                outputDefinition.sourceGods
+                    ?? System.Array.Empty<string>());
+            output.RecipeId = recipe.id;
+            output.RecipeMaterialTypes.Add(
+                recipe.ingredientVariable.cardId);
+            output.RecipeMaterialTypes.Add(
+                recipe.ingredientAnchor.cardId);
+            target[targetIndex] = output;
+
+            state.CompletedRecipes.Add(recipe.id);
+            state.Merges++;
+            state.MergeResultStarTotal += output.Star;
+            state.RecordCardMerge(output.Type, output.Star);
+            state.RecordCardCollected(output.Type, output.Star);
+            state.EquipmentEffectWave = 0;
+            CardAffixSystem.ReconcileMaxHp(state);
+            state.EmitTelemetry(new TelemetryEventRecord
+            {
+                type = "recipe_completed",
+                recipeId = recipe.id,
+                cardType = recipe.outputCardId,
+                outputStar = recipe.outputStar
+            });
+            return RecipeCraftResult.Crafted;
+        }
+
         public EvolutionRecipeConfig FindRecipe(string recipeId)
         {
             foreach (EvolutionRecipeConfig recipe in _config.recipes)
@@ -120,6 +216,42 @@ namespace ProjectVL.Systems
             }
 
             return null;
+        }
+
+        private EvolutionRecipeConfig FindPairRecipe(
+            CardState first,
+            CardState second)
+        {
+            if (first == null
+                || second == null
+                || first.Provisional
+                || second.Provisional
+                || first.Type == second.Type)
+            {
+                return null;
+            }
+
+            foreach (EvolutionRecipeConfig recipe in _config.recipes)
+            {
+                bool forward = Matches(first, recipe.ingredientVariable)
+                    && Matches(second, recipe.ingredientAnchor);
+                bool reverse = Matches(second, recipe.ingredientVariable)
+                    && Matches(first, recipe.ingredientAnchor);
+                if (forward || reverse)
+                    return recipe;
+            }
+
+            return null;
+        }
+
+        private static bool Matches(
+            CardState card,
+            CardRequirementConfig requirement)
+        {
+            return card != null
+                && requirement != null
+                && card.Type == requirement.cardId
+                && card.Star >= requirement.minStar;
         }
 
         private static bool TryFindMaterials(

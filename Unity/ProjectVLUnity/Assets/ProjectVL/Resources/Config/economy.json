@@ -38,6 +38,25 @@
     "carryCap": 1.5,
     "modifiersAffectTarget": true
   },
+  "evolution": {
+    "maxRecipeCompletions": 2,
+    "completionLimitPerRecipe": 1,
+    "assistWindowWaves": [
+      4,
+      8
+    ],
+    "assistCheckpoints": [
+      6,
+      8
+    ],
+    "assistMaxCorrections": 2,
+    "assistMaxCorrectionsPerMaterial": 1,
+    "assistRewardPolicy": "minimumMergeCompletion",
+    "allowDirectFiveStarAssist": false,
+    "recipeProtectionSlots": 2,
+    "bountyRecipeMaterialBonus": 1.6,
+    "bountyReadySideMultiplier": 0.5
+  },
   "normalDropTypePolicy": {
     "enabled": true,
     "roleBagSize": 10,
@@ -52,10 +71,7 @@
       "pivot": 2
     },
     "bootstrapMinDiscovery": 6,
-    "godAffinity": {
-      "scorePerStack": 2.5,
-      "scoreCap": 6
-    },
+    "bootstrapForcedDrops": 9,
     "maturity": {
       "fullMergeOps": 10,
       "fullHighestStar": 4,

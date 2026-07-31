@@ -6,6 +6,7 @@ namespace ProjectVL.Core
         WrongPhase,
         UnknownRecipe,
         AlreadyCompleted,
+        LimitReached,
         MissingMaterials,
         HandFull
     }

@@ -9,6 +9,12 @@ namespace ProjectVL.Core
         public string Type { get; }
         public int Star { get; internal set; }
         public bool Provisional { get; internal set; }
+        public string PrimaryGod { get; internal set; }
+        public string RecipeId { get; internal set; }
+        public List<string> SourceGods { get; } =
+            new List<string>();
+        public List<string> RecipeMaterialTypes { get; } =
+            new List<string>();
         public List<string> EvolutionPath { get; } =
             new List<string>();
         public List<CardAffixRoll> Affixes { get; } =

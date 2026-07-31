@@ -187,6 +187,31 @@ namespace ProjectVL.Tests
             Assert.That(_state.Hand[0].Star, Is.EqualTo(2));
         }
 
+        [Test]
+        public void DraggingConfiguredMaterialsCraftsBeforeGenericSwap()
+        {
+            _state.StartRun();
+            var recipes = new RecipeSystem(
+                GameConfigLoader.LoadEvolutionRecipes(),
+                evolution: _economy.evolution);
+            var inventory = new CardInventorySystem(
+                _economy,
+                recipes: recipes);
+            _state.Hand[0] = _state.CreateCard("meteor", 5);
+            _state.Hand[1] = _state.CreateCard("pierce", 5);
+
+            CardMoveResult result = inventory.MoveOrSwap(
+                _state,
+                CardSlotKind.Hand,
+                0,
+                CardSlotKind.Hand,
+                1);
+
+            Assert.That(result, Is.EqualTo(CardMoveResult.RecipeCrafted));
+            Assert.That(_state.Hand[0], Is.Null);
+            Assert.That(_state.Hand[1].Type, Is.EqualTo("solarPiercer"));
+        }
+
         [TestCase("solarPiercer")]
         [TestCase("not-a-card")]
         public void AddCardRejectsRecipeOnlyAndUnknownCards(string type)

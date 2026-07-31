@@ -11,18 +11,21 @@ namespace ProjectVL.Systems
         private readonly CardPoolSystem _cardPool;
         private readonly CardCatalog _catalog;
         private readonly CardAffixSystem _affixes;
+        private readonly RecipeSystem _recipes;
         private int _nextRewardType;
 
         public CardInventorySystem(
             EconomyConfig config,
             CardPoolSystem cardPool = null,
             CardCatalog catalog = null,
-            CardAffixSystem affixes = null)
+            CardAffixSystem affixes = null,
+            RecipeSystem recipes = null)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _cardPool = cardPool;
             _catalog = catalog ?? CardCatalog.Default;
             _affixes = affixes;
+            _recipes = recipes;
         }
 
         public bool GrantReward(GameState state, RunReward reward)
@@ -309,6 +312,20 @@ namespace ProjectVL.Systems
                     || targetKind == CardSlotKind.Equipment))
             {
                 return CardMoveResult.EvolutionPending;
+            }
+
+            if (_recipes != null && replaced != null)
+            {
+                RecipeCraftResult recipeResult = _recipes.CraftPair(
+                    state,
+                    sourceKind,
+                    sourceIndex,
+                    targetKind,
+                    targetIndex);
+                if (recipeResult == RecipeCraftResult.Crafted)
+                    return CardMoveResult.RecipeCrafted;
+                if (recipeResult == RecipeCraftResult.WrongPhase)
+                    return CardMoveResult.RecipeRejected;
             }
 
             if (_config.feedEquipped

@@ -23,8 +23,13 @@ namespace ProjectVL.Tests
         [Test]
         public void LoadsAllTwentyFiveDirectedRecipes()
         {
+            EconomyEvolutionConfig evolution =
+                GameConfigLoader.LoadEconomy().evolution;
             Assert.That(_recipes.version, Is.EqualTo("0.2.0"));
             Assert.That(_recipes.recipes, Has.Length.EqualTo(25));
+            Assert.That(evolution.maxRecipeCompletions, Is.EqualTo(2));
+            Assert.That(evolution.recipeProtectionSlots, Is.EqualTo(2));
+            Assert.That(evolution.assistWindowWaves, Is.EqualTo(new[] { 4, 8 }));
             Assert.That(
                 _recipes.recipes[0].id,
                 Is.EqualTo("r_arcSplitter_pierce"));
@@ -138,6 +143,103 @@ namespace ProjectVL.Tests
                 "r_meteor_pierce");
 
             Assert.That(result, Is.EqualTo(RecipeCraftResult.AlreadyCompleted));
+        }
+
+        [Test]
+        public void DragPairCraftsAtomicallyIntoTargetSlot()
+        {
+            _state.StartRun();
+            _state.Hand[0] = CreateResolvedCard("meteor", 5);
+            _state.Equipment[1] = CreateResolvedCard("pierce", 5);
+
+            RecipeCraftResult result = _system.CraftPair(
+                _state,
+                CardSlotKind.Hand,
+                0,
+                CardSlotKind.Equipment,
+                1);
+
+            Assert.That(result, Is.EqualTo(RecipeCraftResult.Crafted));
+            Assert.That(_state.Hand[0], Is.Null);
+            Assert.That(_state.Equipment[1].Type, Is.EqualTo("solarPiercer"));
+            Assert.That(_state.Equipment[1].Star, Is.EqualTo(6));
+            Assert.That(
+                _state.Equipment[1].RecipeId,
+                Is.EqualTo("r_meteor_pierce"));
+            Assert.That(
+                _state.Equipment[1].RecipeMaterialTypes,
+                Is.EqualTo(new[] { "meteor", "pierce" }));
+            Assert.That(
+                _state.CompletedRecipes,
+                Does.Contain("r_meteor_pierce"));
+        }
+
+        [Test]
+        public void PausedRecipePairIsRejectedWithoutMutation()
+        {
+            _state.StartRun();
+            _state.SetPaused(true);
+            CardState meteor = CreateResolvedCard("meteor", 5);
+            CardState pierce = CreateResolvedCard("pierce", 5);
+            _state.Hand[0] = meteor;
+            _state.Hand[1] = pierce;
+
+            RecipeCraftResult result = _system.CraftPair(
+                _state,
+                CardSlotKind.Hand,
+                0,
+                CardSlotKind.Hand,
+                1);
+
+            Assert.That(result, Is.EqualTo(RecipeCraftResult.WrongPhase));
+            Assert.That(_state.Hand[0], Is.SameAs(meteor));
+            Assert.That(_state.Hand[1], Is.SameAs(pierce));
+            Assert.That(_state.CompletedRecipes, Is.Empty);
+        }
+
+        [Test]
+        public void RunCompletionLimitLeavesThirdPairUntouched()
+        {
+            _state.StartRun();
+            string[] types =
+            {
+                "meteor", "pierce",
+                "stormcall", "frost",
+                "staticSurge", "scorch"
+            };
+            for (int index = 0; index < types.Length; index++)
+                _state.Hand[index] = CreateResolvedCard(types[index], 5);
+
+            Assert.That(
+                _system.CraftPair(
+                    _state,
+                    CardSlotKind.Hand,
+                    0,
+                    CardSlotKind.Hand,
+                    1),
+                Is.EqualTo(RecipeCraftResult.Crafted));
+            Assert.That(
+                _system.CraftPair(
+                    _state,
+                    CardSlotKind.Hand,
+                    2,
+                    CardSlotKind.Hand,
+                    3),
+                Is.EqualTo(RecipeCraftResult.Crafted));
+            CardState thirdA = _state.Hand[4];
+            CardState thirdB = _state.Hand[5];
+
+            RecipeCraftResult result = _system.CraftPair(
+                _state,
+                CardSlotKind.Hand,
+                4,
+                CardSlotKind.Hand,
+                5);
+
+            Assert.That(result, Is.EqualTo(RecipeCraftResult.UnknownRecipe));
+            Assert.That(_state.Hand[4], Is.SameAs(thirdA));
+            Assert.That(_state.Hand[5], Is.SameAs(thirdB));
+            Assert.That(_state.CompletedRecipes, Has.Count.EqualTo(2));
         }
 
         private void AddResolvedCard(string type, int star, int slot)

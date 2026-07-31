@@ -5,6 +5,8 @@ namespace ProjectVL.Core
         Moved,
         Swapped,
         Fed,
+        RecipeCrafted,
+        RecipeRejected,
         NoChange,
         EmptySource,
         InvalidSlot,

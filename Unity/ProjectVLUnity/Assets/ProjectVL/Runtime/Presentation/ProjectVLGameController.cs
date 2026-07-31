@@ -237,7 +237,9 @@ namespace ProjectVL.Presentation
             _rewardMeterSystem.Initialize(state);
             _recipeSystem = new RecipeSystem(
                 recipes,
-                cardAffixSystem);
+                cardAffixSystem,
+                economy.evolution,
+                cardCatalog);
             var difficultySystem =
                 new DifficultySystem(difficulty, waves.totalWaves);
             var cardPoolSystem = new CardPoolSystem(
@@ -249,7 +251,8 @@ namespace ProjectVL.Presentation
                 economy,
                 cardPoolSystem,
                 cardCatalog,
-                cardAffixSystem);
+                cardAffixSystem,
+                _recipeSystem);
             state.AttachInventory(_cardInventory);
             var enemyFactory = new EnemyFactory(
                 combat,
@@ -1241,6 +1244,10 @@ namespace ProjectVL.Presentation
                     return "卡牌已交换。";
                 case CardMoveResult.Fed:
                     return "同类装备已吞噬并升级。";
+                case CardMoveResult.RecipeCrafted:
+                    return "配方材料已合成为 6★ 终态卡。";
+                case CardMoveResult.RecipeRejected:
+                    return "当前暂停、决策或波次状态不能执行配方。";
                 case CardMoveResult.StarTooLow:
                     return "装备槽只能放入 3★ 或以上卡牌。";
                 case CardMoveResult.DuplicateType:
@@ -1285,6 +1292,8 @@ namespace ProjectVL.Presentation
                     return "需要空手牌槽位来接收合成结果。";
                 case RecipeCraftResult.AlreadyCompleted:
                     return "该固定配方已经完成。";
+                case RecipeCraftResult.LimitReached:
+                    return "本局最多完成两个终态配方。";
                 default:
                     return "当前没有可用的固定配方。";
             }
