@@ -2,13 +2,11 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
   <title>魅魔心防战｜可玩原型</title>
 </head>
 <body>
-  <div id="viewportHost" class="viewport-host">
-  <div id="safeViewport" class="safe-viewport">
-  <main id="gameStage" class="game-stage" data-layout="standard">
+  <main class="game-shell">
     <header class="game-hud" aria-label="战斗状态">
       <div class="hud-status-row">
         <strong class="hud-wave">波次 <span id="waveText">0</span>/<span id="totalWavesText">5</span></strong>
@@ -33,10 +31,8 @@
 
     <section class="arena" id="arena">
       <canvas id="game" width="540" height="730" aria-label="主画面释放区"></canvas>
-      <div class="stage-overlay-root" id="stageOverlayRoot">
-        <section class="ready-overlay" id="readyOverlay" aria-labelledby="readyTitle">
-          <h2 id="readyTitle">守住心防</h2>
-          <p id="readyDescription">点击拾取心意，拖卡到画面释放</p>
+      <div class="center-msg" id="centerMsg"><h2 id="readyTitle">守住心防</h2><p id="readyDescription">点击拾取心意，拖卡到画面释放</p></div>
+      <div class="start-overlay" id="readyOverlay" aria-labelledby="readyTitle">
           <div class="difficulty-select" role="radiogroup" aria-label="选择难度">
             <button type="button" role="radio" aria-checked="false" data-difficulty="relaxed"></button>
             <button type="button" role="radio" aria-checked="false" data-difficulty="standard"></button>
@@ -44,8 +40,6 @@
             <button type="button" role="radio" aria-checked="false" data-difficulty="hell"></button>
           </div>
           <button class="btn primary" id="startBtn">开始游戏</button>
-        </section>
-        <div class="stage-message" id="centerMsg" hidden><h2></h2><p></p></div>
       </div>
       <div id="upgradeBanner" class="upgrade-banner" aria-live="polite"><strong></strong><span></span></div>
       <div id="celebrationFx" class="celebration-fx" aria-hidden="true"></div>
@@ -72,8 +66,6 @@
       </div>
     </section>
   </main>
-  </div>
-  </div>
 
   <div id="globalOverlayRoot" class="global-overlay-root">
   <div class="modal" id="resultModal" role="dialog" aria-modal="true" aria-labelledby="resultTitle"><div class="modal-card"><h2 id="resultTitle">防守完成</h2><p id="resultDesc"></p><div class="result-grid">

@@ -2,13 +2,13 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-describe('ReadyOverlay architecture', () => {
+describe('restored ready layout', () => {
   const html = readFileSync(resolve(process.cwd(), 'index.html'), 'utf8');
 
-  it('owns one complete central ready layout', () => {
-    expect(html.match(/class="ready-overlay"/g)).toHaveLength(1);
-    expect(html).not.toContain('class="start-overlay"');
-    expect(html).not.toContain('class="center-msg"');
+  it('keeps the pre-rework message and start layers separate', () => {
+    expect(html).not.toContain('class="ready-overlay"');
+    expect(html.match(/class="start-overlay"/g)).toHaveLength(1);
+    expect(html.match(/class="center-msg"/g)).toHaveLength(1);
     expect(html).toContain('id="readyTitle"');
     expect(html).toContain('id="readyDescription"');
     expect(html).toContain('id="startBtn"');
@@ -21,11 +21,11 @@ describe('ReadyOverlay architecture', () => {
     expect(html).not.toContain('type="radio"');
   });
 
-  it('keeps global content overlays outside the transformed stage', () => {
-    const stageEnd = html.indexOf('</main>');
+  it('keeps global content overlays outside the game shell', () => {
+    const shellEnd = html.indexOf('</main>');
     const globalRoot = html.indexOf('id="globalOverlayRoot"');
     const result = html.indexOf('id="resultModal"');
-    expect(globalRoot).toBeGreaterThan(stageEnd);
+    expect(globalRoot).toBeGreaterThan(shellEnd);
     expect(result).toBeGreaterThan(globalRoot);
   });
 });

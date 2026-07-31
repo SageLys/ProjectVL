@@ -46,9 +46,8 @@ import type { DifficultyId } from './config/types';
 import { resyncEnemyStats, type EnemyStatConfigKey } from './core/systems/enemySystem';
 import { DEV_TOOLS_ENABLED } from './debug/devToolsMode';
 import { cardDisplayName } from './ui/cardMeta';
-import { createViewportManager } from './platform/viewportManager';
-import { createLayoutDebug } from './debug/layoutDebug';
 import { simulationSteps } from './core/simulationClock';
+import { resizeCanvasBackingStore } from './render/renderMetrics';
 
 // 技能 = 数据 + 解释器：把配置里的卡定义注入解释器（P5 实装 12 张正式卡后自动生效）。
 registerSkillDefs(cfg.skills.cards);
@@ -98,23 +97,20 @@ if (DEV_TOOLS_ENABLED) {
 }
 const ctx = refs.canvas.getContext('2d');
 if (!ctx) throw new Error('无法获取 canvas 2D 上下文');
-let layoutDebug: ReturnType<typeof createLayoutDebug>;
-const viewportManager = createViewportManager({
-  host: refs.viewportHost,
-  stage: refs.gameStage,
-  canvas: refs.canvas,
-  onChange: () => {
-    renderMergeHints(refs.dock, state);
-    layoutDebug?.update();
-  },
-});
-layoutDebug = createLayoutDebug(viewportManager.getSnapshot);
 const render = createRenderer(ctx, refs.canvas);
 const toast = createToast(refs);
 const upgradeFeedback = createUpgradeFeedback(refs);
 
 const config = createDefaultConfig();
 let state: GameState = createInitialState();
+const syncCanvasLayout = (): void => {
+  resizeCanvasBackingStore(refs.canvas);
+  renderMergeHints(refs.dock, state);
+};
+syncCanvasLayout();
+window.addEventListener('resize', syncCanvasLayout);
+window.visualViewport?.addEventListener('resize', syncCanvasLayout);
+if (typeof ResizeObserver !== 'undefined') new ResizeObserver(syncCanvasLayout).observe(refs.canvas);
 
 refs.totalWavesText.textContent = String(cfg.waves.totalWaves);
 refs.equipmentHint.textContent = `拖入 ${cfg.economy.equipThreshold}★+ 卡装备`;
@@ -328,15 +324,13 @@ function reset(): void {
   rewardCelebration.hide();
   refs.startBtn.textContent = texts.buttons.start;
   refs.readyOverlay.hidden = false;
-  refs.readyTitle.textContent = texts.center.readyTitle;
-  refs.readyDescription.textContent = texts.center.readyBody;
   refs.pauseBtn.textContent = texts.buttons.pause;
   refs.pauseBtn.setAttribute('aria-pressed', 'false');
   refs.pauseBtn.title = texts.buttons.pause;
   refs.pauseBtn.disabled = true;
   refs.speedBtn.disabled = true;
   syncSpeedButton();
-  modals.message('', '', false);
+  modals.message(texts.center.readyTitle, texts.center.readyBody, true);
   refreshSlots();
   renderHud(refs, state, config);
   intermissionPanel.render(state);

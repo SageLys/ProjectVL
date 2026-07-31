@@ -18,7 +18,7 @@ describe('bottom notification layout', () => {
     expect(css).toContain('.dock-toast { position:absolute;');
     expect(css).toContain('right:10px; top:4px;');
     expect(css).not.toMatch(/\.dock-toast\s*\{[^}]*bottom:calc\(100% \+ 4px\)/s);
-    expect(css).not.toContain('100dvh - 345px');
-    expect(css).toContain('transform:translate(var(--stage-x),var(--stage-y)) scale(var(--stage-scale))');
+    expect(css).toContain('.game-shell {');
+    expect(css).not.toContain('transform:translate(var(--stage-x),var(--stage-y)) scale(var(--stage-scale))');
   });
 });

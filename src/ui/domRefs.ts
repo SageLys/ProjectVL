@@ -12,8 +12,6 @@ function maybeEl<T extends Element>(sel: string): T | null {
 
 export function getDomRefs() {
   return {
-    viewportHost: el<HTMLElement>('#viewportHost'),
-    gameStage: el<HTMLElement>('#gameStage'),
     globalOverlayRoot: el<HTMLElement>('#globalOverlayRoot'),
     canvas: el<HTMLCanvasElement>('#game'),
     arena: el<HTMLElement>('#arena'),

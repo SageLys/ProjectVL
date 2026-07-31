@@ -125,10 +125,10 @@ export function createPointerRouter(options: RouterOptions) {
     if (target.kind !== 'arena') return;
     if (preview.placement === 'screen') { options.screenPreview.classList.add('show'); return; }
     const rect = options.canvas.getBoundingClientRect();
-    const arenaScale = rect.width / ARENA_WIDTH;
-    options.aimPreview.style.setProperty('--radius', `${preview.radius}px`);
-    options.aimPreview.style.left = `${target.x}px`;
-    options.aimPreview.style.top = `${target.y - options.input.reticleOffsetY / Math.max(0.01, arenaScale)}px`;
+    const arenaScale = Math.min(rect.width / ARENA_WIDTH, rect.height / ARENA_HEIGHT);
+    options.aimPreview.style.setProperty('--radius', `${preview.radius * arenaScale}px`);
+    options.aimPreview.style.left = `${clientX}px`;
+    options.aimPreview.style.top = `${clientY - options.input.reticleOffsetY}px`;
     options.aimPreview.classList.add('show');
   }
 
