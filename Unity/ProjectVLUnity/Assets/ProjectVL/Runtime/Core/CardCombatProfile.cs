@@ -148,6 +148,11 @@ namespace ProjectVL.Core
         public float PickupRestore { get; set; }
         public float ExpiryConvertRatio { get; set; }
         public float XpMultiplier { get; set; } = 1f;
+        public float MergeMaterialRefundChance { get; set; }
+        public int MergeMaterialRefundCount { get; set; }
+        public int MergeMaterialRefundStar { get; set; }
+        public float WildcardRewardBonusChance { get; set; }
+        public int WildcardRewardBonusCount { get; set; }
         public float MergePulseDamagePerStar { get; set; }
         public int HarvestWaveStartDrops { get; set; }
         public float PyrestormInterval { get; set; }

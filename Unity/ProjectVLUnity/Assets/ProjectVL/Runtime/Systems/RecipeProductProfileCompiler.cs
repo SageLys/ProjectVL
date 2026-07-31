@@ -13,7 +13,17 @@ namespace ProjectVL.Systems
             if (card == null || profile == null)
                 return false;
 
-            foreach (CompiledEffectBindingConfig binding in card.bindings)
+            return Apply(card.bindings, profile);
+        }
+
+        public static bool Apply(
+            CompiledEffectBindingConfig[] bindings,
+            CardCombatProfile profile)
+        {
+            if (bindings == null || profile == null)
+                return false;
+
+            foreach (CompiledEffectBindingConfig binding in bindings)
             {
                 foreach (CompiledEffectAtomConfig atom in binding.effects)
                     ApplyAtom(binding, atom, null, profile);
@@ -90,6 +100,17 @@ namespace ProjectVL.Systems
                 case "burstDamage":
                     ApplyBurst(binding, atom, profile, radius);
                     break;
+                case "aoeOnHit":
+                    profile.SplashRadius = Math.Max(
+                        profile.SplashRadius,
+                        radius);
+                    profile.SplashDamageRatio = Math.Max(
+                        profile.SplashDamageRatio,
+                        Number(atom, "damageRatio"));
+                    profile.SplashFalloff = Math.Max(
+                        profile.SplashFalloff,
+                        Number(atom, "falloff"));
+                    break;
                 case "groundZone":
                     ApplyGroundZone(binding, atom, profile, radius, duration);
                     break;
@@ -165,6 +186,57 @@ namespace ProjectVL.Systems
                     profile.DropRateMultiplier = Math.Max(
                         profile.DropRateMultiplier,
                         1f + Number(atom, "mul"));
+                    break;
+                case "dropLifetimeMul":
+                    profile.DropLifetimeMultiplier = Math.Max(
+                        profile.DropLifetimeMultiplier,
+                        Positive(atom, "mul", 1f));
+                    break;
+                case "xpMul":
+                    profile.XpMultiplier = Math.Max(
+                        profile.XpMultiplier,
+                        Positive(atom, "mul", 1f));
+                    break;
+                case "expiryConvert":
+                    profile.ExpiryConvertRatio = Math.Max(
+                        profile.ExpiryConvertRatio,
+                        ratio);
+                    break;
+                case "execute":
+                    if (binding.trigger == "onBreach")
+                    {
+                        profile.BreachExecuteRadius = Math.Max(
+                            profile.BreachExecuteRadius,
+                            radius);
+                        profile.BreachExecuteThresholdRatio = Math.Max(
+                            profile.BreachExecuteThresholdRatio,
+                            Number(atom, "hpThresholdRatio"));
+                    }
+                    else
+                    {
+                        profile.FrozenHitExecuteThresholdRatio = Math.Max(
+                            profile.FrozenHitExecuteThresholdRatio,
+                            Number(atom, "hpThresholdRatio"));
+                    }
+                    break;
+                case "mergeMaterialRefund":
+                    profile.MergeMaterialRefundChance = Math.Max(
+                        profile.MergeMaterialRefundChance,
+                        Number(atom, "refundChance"));
+                    profile.MergeMaterialRefundCount = Math.Max(
+                        profile.MergeMaterialRefundCount,
+                        Integer(atom, "count"));
+                    profile.MergeMaterialRefundStar = Math.Max(
+                        profile.MergeMaterialRefundStar,
+                        Integer(atom, "star"));
+                    break;
+                case "wildcardRewardBonus":
+                    profile.WildcardRewardBonusChance = Math.Max(
+                        profile.WildcardRewardBonusChance,
+                        Number(atom, "bonusChance"));
+                    profile.WildcardRewardBonusCount = Math.Max(
+                        profile.WildcardRewardBonusCount,
+                        Integer(atom, "count"));
                     break;
                 case "restore":
                     profile.PickupRestore = Math.Max(
@@ -475,6 +547,15 @@ namespace ProjectVL.Systems
                 profile.WaveStartDamageDuration = Math.Max(
                     profile.WaveStartDamageDuration,
                     duration);
+            }
+            else if (binding.trigger == "onKill" && stat == "damage")
+            {
+                profile.DotKillDamageMultiplier = Math.Max(
+                    profile.DotKillDamageMultiplier,
+                    value);
+                profile.DotKillDamageMaxStacks = Math.Max(
+                    profile.DotKillDamageMaxStacks,
+                    Math.Max(1, Integer(atom, "maxStacks")));
             }
         }
 

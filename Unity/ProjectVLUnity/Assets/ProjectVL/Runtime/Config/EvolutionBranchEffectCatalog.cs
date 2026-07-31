@@ -5,6 +5,7 @@ namespace ProjectVL.Config
 {
     public sealed class EvolutionBranchEffectCatalog
     {
+        private static EvolutionBranchEffectCatalog _default;
         private static readonly HashSet<string> SupportedTriggers =
             new HashSet<string>(StringComparer.Ordinal)
             {
@@ -113,6 +114,11 @@ namespace ProjectVL.Config
                 ? option
                 : null;
         }
+
+        public static EvolutionBranchEffectCatalog Default =>
+            _default ?? (_default = new EvolutionBranchEffectCatalog(
+                GameConfigLoader.LoadEvolutionBranchEffects(),
+                GameConfigLoader.LoadCards()));
 
         private static CardDefinitionConfig FindCard(
             CardsConfig cards,

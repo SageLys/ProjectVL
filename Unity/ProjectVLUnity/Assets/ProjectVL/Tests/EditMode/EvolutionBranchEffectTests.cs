@@ -1,6 +1,9 @@
 using System;
+using System.Reflection;
 using NUnit.Framework;
 using ProjectVL.Config;
+using ProjectVL.Core;
+using ProjectVL.Systems;
 
 namespace ProjectVL.Tests
 {
@@ -56,6 +59,55 @@ namespace ProjectVL.Tests
             Assert.That(catalog.Find("pierce", "pierceA2"), Is.Null);
         }
 
+        [Test]
+        public void EveryFiveStarOptionCompilesACombatProfile()
+        {
+            EvolutionBranchEffectsConfig config =
+                GameConfigLoader.LoadEvolutionBranchEffects();
+            foreach (CompiledEvolutionCardConfig card in config.cards)
+            {
+                foreach (CompiledEvolutionOptionConfig option in card.options)
+                {
+                    var profile = new CardCombatProfile();
+                    Assert.That(
+                        EvolutionBranchProfileCompiler.ApplyOption(
+                            card.cardId,
+                            option.optionId,
+                            profile),
+                        Is.True,
+                        option.optionId);
+                    Assert.That(
+                        HasEffect(profile),
+                        Is.True,
+                        option.optionId);
+                }
+            }
+        }
+
+        [Test]
+        public void CompilerAcceptsLegacyAndRawRouteNames()
+        {
+            var rawCard = new CardState(1, "pierce", 5);
+            rawCard.EvolutionPath.Add("5:pierce1x");
+            var legacyCard = new CardState(2, "pierce", 5);
+            legacyCard.EvolutionPath.Add("5:pierceA2");
+            var raw = new CardCombatProfile();
+            var legacy = new CardCombatProfile();
+
+            Assert.That(
+                EvolutionBranchProfileCompiler.ApplyFiveStar(rawCard, raw),
+                Is.True);
+            Assert.That(
+                EvolutionBranchProfileCompiler.ApplyFiveStar(
+                    legacyCard,
+                    legacy),
+                Is.True);
+            Assert.That(raw.SplashDamageRatio, Is.EqualTo(0.55f));
+            Assert.That(
+                legacy.SplashDamageRatio,
+                Is.EqualTo(raw.SplashDamageRatio));
+        }
+
         private static int CountAtoms(CompiledEffectAtomConfig atom)
         {
             int count = 1;
@@ -65,6 +117,23 @@ namespace ProjectVL.Tests
                 count += CountAtoms(child);
             }
             return count;
+        }
+
+        private static bool HasEffect(CardCombatProfile profile)
+        {
+            var baseline = new CardCombatProfile();
+            foreach (PropertyInfo property in
+                typeof(CardCombatProfile).GetProperties(
+                    BindingFlags.Instance | BindingFlags.Public))
+            {
+                if (!Equals(
+                    property.GetValue(profile),
+                    property.GetValue(baseline)))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
