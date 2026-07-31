@@ -34,8 +34,10 @@ export interface GlossaryEntry {
 export interface SkillTreeOption {
   id: string;
   name: string;
+  /** 玩家向一句话效果说明，显示于三选一弹窗与技能树选项正文。 */
+  summary: string;
+  /** 设计向定位，仅设计工作台使用，玩家侧不显示。 */
   intent: string;
-  keywords: string[];
   exactEffects: EffectTextBlock[];
   selected: boolean;
   available: boolean;
@@ -81,8 +83,6 @@ type DetailTexts = {
     name?: string;
     summary?: string;
     intent?: string;
-    keywords?: string[];
-    buildFit?: string;
   }>>;
   glossary?: Record<string, string | { term?: string; description?: string }>;
   affixHelp?: Partial<Record<CardAffixStatKind, string>>;
@@ -114,14 +114,14 @@ const DEFAULT_GLOSSARY: Record<string, string> = {
   chain: '命中后在搜索范围内寻找新目标并继续传递伤害。',
   split: '一枚弹道生成多枚子弹道，子弹道按独立伤害倍率结算。',
   ricochet: '弹道命中后改变方向并继续寻找目标。',
-  aoeOnHit: '在命中点对一定半径内的敌人结算伤害。',
+  aoeOnHit: '在命中点对一定半径内的追求者结算伤害。',
   beamMorph: '把主炮投射方式改为持续或周期结算的直线光束。',
   mortarMorph: '把主炮投射方式改为落点爆炸的抛射攻击。',
   slow: '按比例降低目标移动速度，持续时间结束后恢复。',
   freeze: '目标暂时无法移动；重复控制仍受抗性与免疫窗限制。',
   stun: '目标暂时无法行动；重复控制仍受抗性与免疫窗限制。',
   knockback: '把目标沿远离作用点的方向推开。',
-  taunt: '提高指定单位的索敌优先级，使敌人更倾向攻击它。',
+  taunt: '提高指定单位的索敌优先级，使追求者更倾向攻击它。',
   vulnerable: '提高目标受到的伤害，可按配置叠层。',
   aura: '以持续存在的来源为中心，周期影响范围内目标。',
   groundZone: '在固定位置生成圆形、环形或朝敌方向延伸的线形持续区域，并按间隔结算内部效果。',
@@ -137,7 +137,7 @@ const DEFAULT_GLOSSARY: Record<string, string> = {
   mergePulse: '完成卡牌合成时，以炮台为中心释放一次范围效果。',
   shield: '抵挡指定次数的突破或伤害，耗尽后按规则恢复。',
   thorns: '受到伤害后，按比例向攻击来源返还伤害。',
-  breachReduction: '降低敌人突破防线时造成的生命损失。',
+  breachReduction: '降低追求者突破防线时造成的生命损失。',
   novaOnBreak: '护盾耗尽时自动释放一次范围反击。',
   execute: '目标生命比例低于阈值时直接完成击杀。',
   burstDamage: '按倍率立即结算一次独立伤害。',
@@ -212,9 +212,10 @@ function optionCopy(cardType: string, option: EvolutionOptionDef) {
   const effectKeywords = [...new Set(blocks.flatMap(block => block.keywords))];
   return {
     name: copy?.name ?? option.textKey,
-    intent: copy?.intent ?? copy?.summary ?? `强化${effectKeywords.join('与') || '当前机制'}`,
-    keywords: copy?.keywords?.length ? copy.keywords : effectKeywords,
-    buildFit: copy?.buildFit,
+    /** 玩家向：summary → intent → 自动兜底 */
+    summary: copy?.summary ?? copy?.intent ?? `强化${effectKeywords.join('与') || '当前机制'}`,
+    /** 设计向 */
+    intent: copy?.intent ?? `强化${effectKeywords.join('与') || '当前机制'}`,
   };
 }
 
@@ -230,8 +231,8 @@ export function buildEvolutionOptionViewModel(
   return {
     id: option.id,
     name: copy.name,
+    summary: copy.summary,
     intent: copy.intent,
-    keywords: copy.keywords,
     exactEffects: option.equip.map(formatBinding),
     selected: selectedId === option.id,
     available: currentStar >= checkpointStar && (!selectedId || selectedId === option.id),

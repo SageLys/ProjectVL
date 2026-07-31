@@ -24,7 +24,7 @@ const BASE_COLUMNS: Column[] = [
   ...([3, 5, 6] as const).map(star => ({ slot: `equip.shortByTier.${star}`, label: `装备 ${star}★短文案` })),
   ...([3, 5, 6] as const).map(star => ({ slot: `equip.milestones.${star}`, label: `装备 ${star}★里程碑` })),
 ];
-const EVOLUTION_FIELDS = ['name', 'summary', 'intent', 'keywords', 'buildFit'] as const;
+const EVOLUTION_FIELDS = ['name', 'summary', 'intent'] as const;
 const EVOLUTION_COLUMNS: Column[] = ([3, 5] as const).flatMap(star => [0, 1, 2].flatMap(option =>
   EVOLUTION_FIELDS.map(field => ({ slot: `evolution.${star}.${option}.${field}`, label: `${star}★${'ABC'[option]} ${field}` })),
 ));
@@ -45,31 +45,25 @@ function display(value: unknown): string {
 
 function placeholderFields(options: Array<{ id: string; node: UnknownRecord }>): Set<string> {
   const output = new Set<string>();
+  // summary 与 intent 不得相同（语义调换后的主要防复发规则）
   for (const { id, node } of options) {
     const summary = display(node.summary);
     const intent = display(node.intent);
-    const keywords = display(node.keywords);
-    const buildFit = display(node.buildFit);
-    if (summary && summary === intent) {
+    if (summary && intent && summary === intent) {
       output.add(`${id}.summary`);
       output.add(`${id}.intent`);
     }
-    if (buildFit && buildFit === keywords) {
-      output.add(`${id}.keywords`);
-      output.add(`${id}.buildFit`);
-    }
   }
-  for (const field of EVOLUTION_FIELDS) {
-    const groups = new Map<string, string[]>();
-    for (const { id, node } of options) {
-      const value = display(node[field]);
-      if (!value) continue;
-      const ids = groups.get(value) ?? [];
-      ids.push(id);
-      groups.set(value, ids);
-    }
-    for (const ids of groups.values()) if (ids.length > 1) ids.forEach(id => output.add(`${id}.${field}`));
+  // 同卡同 checkpoint 的多条分支，summary 不得相同（三选一需有辨识度）
+  const groups = new Map<string, string[]>();
+  for (const { id, node } of options) {
+    const value = display(node.summary);
+    if (!value) continue;
+    const ids = groups.get(value) ?? [];
+    ids.push(id);
+    groups.set(value, ids);
   }
+  for (const ids of groups.values()) if (ids.length > 1) ids.forEach(id => output.add(`${id}.summary`));
   return output;
 }
 

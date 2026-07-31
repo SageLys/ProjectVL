@@ -16,10 +16,10 @@ export interface EffectTextBlock {
 
 const FALLBACK_TRIGGERS: Record<Trigger, string> = {
   onFire: '每次开火时',
-  onHit: '命中敌人时',
-  onKill: '击杀敌人时',
+  onHit: '命中追求者时',
+  onKill: '击杀追求者时',
   onWaveStart: '每波开始时',
-  onBreach: '敌人突破防线时',
+  onBreach: '追求者突破防线时',
   onPickup: '拾取掉落时',
   interval: '周期触发',
   onMerge: '完成合成时',
@@ -150,7 +150,7 @@ export function formatEffect(effect: EffectDef, depth = 0): EffectTextLine[] {
       if (p.width != null) text += `，宽度 ${shown(p.width)}`;
       break;
     case 'chain':
-      text = `命中后向附近敌人弹跳 ${shown(p.bounces)} 次`;
+      text = `命中后向附近追求者弹跳 ${shown(p.bounces)} 次`;
       if (p.targets != null) text += `，每次最多连接 ${shown(p.targets)} 个目标`;
       if (p.damageRetention != null) text += `，每次保留 ${pct(p.damageRetention)} 伤害`;
       if (p.searchRange != null) text += `，搜索半径 ${shown(p.searchRange)}`;
@@ -198,7 +198,7 @@ export function formatEffect(effect: EffectDef, depth = 0): EffectTextLine[] {
       if (p.radius != null) text += `，作用半径 ${shown(p.radius)}`;
       break;
     case 'taunt':
-      text = `嘲讽半径 ${shown(p.radius)} 内敌人，持续 ${seconds(p.duration)}`;
+      text = `嘲讽半径 ${shown(p.radius)} 内追求者，持续 ${seconds(p.duration)}`;
       if (p.priorityWeight != null) text += `，索敌权重 ${shown(p.priorityWeight)}`;
       break;
     case 'vulnerable':
@@ -280,7 +280,7 @@ export function formatEffect(effect: EffectDef, depth = 0): EffectTextLine[] {
       text = `受到伤害时反弹 ${pct(p.ratio)} 伤害`;
       break;
     case 'breachReduction':
-      text = `敌人突破造成的伤害降低 ${pct(p.ratio)}`;
+      text = `追求者突破造成的伤害降低 ${pct(p.ratio)}`;
       break;
     case 'novaOnBreak':
       text = `护盾破裂时造成 ${shown(p.damage)} 点范围伤害并击退 ${shown(p.knockbackDistance)} 距离`;

@@ -193,12 +193,10 @@ export function createCardDetailModal(hooks: CardDetailModalHooks): CardDetailMo
             const optionSummary = document.createElement('summary');
             const name = document.createElement('strong');
             name.textContent = option.name;
-            const intent = document.createElement('p');
-            intent.textContent = option.intent;
-            const keywords = document.createElement('small');
-            keywords.textContent = `适合：${option.keywords.join('、') || '当前机制强化'}`;
-            optionSummary.append(name, keywords);
-            optionElement.append(optionSummary, intent, renderBlocks(option.exactEffects));
+            const playerDesc = document.createElement('p');
+            playerDesc.textContent = option.summary;
+            optionSummary.append(name);
+            optionElement.append(optionSummary, playerDesc, renderBlocks(option.exactEffects));
             options.append(optionElement);
           }
           nodeElement.append(options);

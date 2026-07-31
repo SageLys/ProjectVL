@@ -46,23 +46,23 @@
   "gods": {
     "storm": {
       "name": "迅霆",
-      "theme": "雷霆与速度：连锁、穿透、攻速与易伤叠层"
+      "theme": "感电边界感：别乱靠近，感电是我的语言"
     },
     "winter": {
       "name": "凛冬",
-      "theme": "冰封与迟滞：减速、冻结、击退与受控增伤"
+      "theme": "冷暴力：让你减速、冰封、哪儿都去不了"
     },
     "inferno": {
       "name": "焚狱",
-      "theme": "烈焰与蔓延：持续灼烧、区域与爆炸"
+      "theme": "热情即内耗：你的激情会让你持续掉血"
     },
     "bulwark": {
       "name": "磐垒",
-      "theme": "壁垒与反击：护盾、反伤、召唤与嘲讽"
+      "theme": "越靠近越吃亏：壁垒、反伤与嘲讽的防御圈"
     },
     "plenty": {
       "name": "丰饶",
-      "theme": "收获与命运：掉落、奖励积分、合成与标记"
+      "theme": "赏印收割：标记了才是我的，心意照收"
     }
   },
   "decisions": {
@@ -100,4861 +100,301 @@
     "chainLightning": {
       "chainLightningA": {
         "name": "链弧",
-        "summary": "命中后雷链跳跃 2 次，每跳施加感电（spreadStatus:'vulnerable'）",
-        "intent": "链弧以chain @ onHit承担核心机制。",
-        "keywords": [
-          "chain @ onHit"
-        ],
-        "buildFit": "命中后雷链跳跃 2 次，每跳施加感电（spreadStatus:'vulnerable'）"
+        "summary": "命中后雷链额外弹跳两次，顺路施加感电",
+        "intent": "核心机制：命中触发连锁，施加感电，小跳数版"
       },
       "chainLightningB": {
         "name": "电轨",
-        "summary": "换形持续光束，光束每次结算给路径上全部目标施加感电",
-        "intent": "电轨以beamMorph @ passive承担核心机制。",
-        "keywords": [
-          "beamMorph @ passive"
-        ],
-        "buildFit": "换形持续光束，光束每次结算给路径上全部目标施加感电"
+        "summary": "主炮换形为光束，每次结算对光束路径上所有追求者施加感电",
+        "intent": "核心机制：光束变形，命中时施加感电"
       },
       "chainLightningC": {
         "name": "雷暴",
-        "summary": "每 2.2 秒自动对最近 3 个目标各起一条链，每跳施加感电",
-        "intent": "雷暴以chain(targets=3) @ interval 2.2s承担核心机制。",
-        "keywords": [
-          "chain(targets=3) @ interval 2.2s"
-        ],
-        "buildFit": "每 2.2 秒自动对最近 3 个目标各起一条链，每跳施加感电"
+        "summary": "每 2.2 秒自动向最近三个追求者各起一条四跳链",
+        "intent": "核心机制：周期触发，多目标自动连锁"
       },
       "chainLightning1x": {
         "name": "引爆",
-        "summary": "onHit + requiresStatus:'vulnerable' → burstDamage（小范围，按命中点）。贯穿/分裂并发命中时逐个触发",
-        "intent": "兑现接口：onHit + requiresStatus:'vulnerable' → burstDamage（小范围，按命中点）。贯穿/分裂并发命中时逐个触发",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onHit + requiresStatus:'vulnerable' → burstDamage（小范围，按命中点）。贯穿/分裂并发命中时逐个触发"
+        "summary": "感电追求者被命中时，方圆小范围额外爆发一次",
+        "intent": "兑现接口：感电命中触发范围爆发，穿透或分裂时逐个结算"
       },
       "chainLightning2x": {
         "name": "传导",
-        "summary": "onKill + requiresSource:'chain' → 在死亡坐标生成 groundZone 导电区，进入者获得感电",
-        "intent": "传播接口：onKill + requiresSource:'chain' → 在死亡坐标生成 groundZone 导电区，进入者获得感电",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onKill + requiresSource:'chain' → 在死亡坐标生成 groundZone 导电区，进入者获得感电"
+        "summary": "连锁击杀时，在击杀位留下导电区域，进入者持续感电",
+        "intent": "传播接口：击杀触发生成感电领域，连锁来源限定"
       },
       "chainLightning3x": {
         "name": "蓄流",
-        "summary": "onHit + requiresStatus:'vulnerable'（cd 1.5s）→ statBuff 射速短时提升",
-        "intent": "转化接口：onHit + requiresStatus:'vulnerable'（cd 1.5s）→ statBuff 射速短时提升",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "onHit + requiresStatus:'vulnerable'（cd 1.5s）→ statBuff 射速短时提升"
+        "summary": "感电追求者被命中时（每 1.5 秒限一次），大幅提升攻速",
+        "intent": "转化接口：感电命中驱动攻速属性提升，限频保护"
       }
     },
     "pierce": {
       "pierceA": {
         "name": "穿刺",
-        "summary": "子弹穿透 2 个敌人，每个穿透目标施加感电",
-        "intent": "穿刺以pierce @ onFire承担核心机制。",
-        "keywords": [
-          "pierce @ onFire"
-        ],
-        "buildFit": "子弹穿透 2 个敌人，每个穿透目标施加感电"
+        "summary": "每次开火穿透两个追求者，每个被穿过时施加感电",
+        "intent": "核心机制：开火触发穿透，逐个施加感电"
       },
       "pierceB": {
         "name": "裂空",
-        "summary": "命中后分裂 3 枚弹片，弹片各自命中各施加感电并各发一次 onHit",
-        "intent": "裂空以split @ onHit承担核心机制。",
-        "keywords": [
-          "split @ onHit"
-        ],
-        "buildFit": "命中后分裂 3 枚弹片，弹片各自命中各施加感电并各发一次 onHit"
+        "summary": "命中后分裂三枚弹片，弹片各自命中时施加感电",
+        "intent": "核心机制：命中触发分裂，子弹道独立感电"
       },
       "pierceC": {
         "name": "蓄力雷击",
-        "summary": "换形定点重击，落点范围内全体施加感电",
-        "intent": "蓄力雷击以mortarMorph @ interval 2.8s承担核心机制。",
-        "keywords": [
-          "mortarMorph @ interval 2.8s"
-        ],
-        "buildFit": "换形定点重击，落点范围内全体施加感电"
+        "summary": "换形迫击炮，每 2.8 秒落点范围爆炸并施加感电",
+        "intent": "核心机制：周期迫击炮，落点范围感电"
       },
       "pierce1x": {
         "name": "过载穿刺",
-        "summary": "onHit + requiresStatus:'vulnerable' → 本次命中附加 burstDamage。穿 5 个感电目标＝触发 5 次",
-        "intent": "兑现接口：onHit + requiresStatus:'vulnerable' → 本次命中附加 burstDamage。穿 5 个感电目标＝触发 5 次",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onHit + requiresStatus:'vulnerable' → 本次命中附加 burstDamage。穿 5 个感电目标＝触发 5 次"
+        "summary": "感电追求者被穿过时，每穿一个追加一次爆发（穿透可逐个触发）",
+        "intent": "兑现接口：感电命中触发爆发，穿透并发逐个结算"
       },
       "pierce2x": {
         "name": "电弧扩散",
-        "summary": "onHit + requiresStatus:'vulnerable' → aoeOnHit 小范围，范围内敌人获得感电",
-        "intent": "传播接口：onHit + requiresStatus:'vulnerable' → aoeOnHit 小范围，范围内敌人获得感电",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onHit + requiresStatus:'vulnerable' → aoeOnHit 小范围，范围内敌人获得感电"
+        "summary": "感电追求者被命中时，小范围爆开，范围内追求者同样感电",
+        "intent": "传播接口：感电命中触发范围感电扩散"
       },
       "pierce3x": {
         "name": "导能",
-        "summary": "onHit + requiresStatus:'vulnerable'（cd 2s）→ restore 少量生命 + 概率 extraDrop",
-        "intent": "转化接口：onHit + requiresStatus:'vulnerable'（cd 2s）→ restore 少量生命 + 概率 extraDrop",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "onHit + requiresStatus:'vulnerable'（cd 2s）→ restore 少量生命 + 概率 extraDrop"
+        "summary": "感电追求者被命中时（每 2 秒限一次），回复少量心防，偶尔多掉心意",
+        "intent": "转化接口：感电命中驱动心防回复及额外心意产出"
       }
     },
     "staticSurge": {
       "staticSurgeA": {
         "name": "静电场",
-        "summary": "命中施加感电，持续时间较长",
-        "intent": "静电场以vulnerable @ onHit承担核心机制。",
-        "keywords": [
-          "vulnerable @ onHit"
-        ],
-        "buildFit": "命中施加感电，持续时间较长"
+        "summary": "每次命中时施加感电，持续时间较长，覆盖广",
+        "intent": "核心机制：命中触发感电，持续时间优先"
       },
       "staticSurgeB": {
         "name": "感应环",
-        "summary": "炮台常驻感应光环，范围内敌人周期获得感电",
-        "intent": "感应环以aura @ passive承担核心机制。",
-        "keywords": [
-          "aura @ passive"
-        ],
-        "buildFit": "炮台常驻感应光环，范围内敌人周期获得感电"
+        "summary": "炮台常驻感应光环，圈内追求者周期自动感电",
+        "intent": "核心机制：被动光环，周期范围施加感电"
       },
       "staticSurgeC": {
         "name": "蓄电爆",
-        "summary": "周期性对最近区域放电并施加感电",
-        "intent": "蓄电爆以burstDamage+vulnerable @ interval 4s承担核心机制。",
-        "keywords": [
-          "burstDamage+vulnerable @ interval 4s"
-        ],
-        "buildFit": "周期性对最近区域放电并施加感电"
+        "summary": "每 4 秒对最近区域放电，范围内追求者感电",
+        "intent": "核心机制：周期触发范围感电"
       },
       "staticSurge1x": {
         "name": "麻痹",
-        "summary": "onHit + requiresStatus:'vulnerable'（cd 1s）→ stun 短时",
-        "intent": "兑现接口：onHit + requiresStatus:'vulnerable'（cd 1s）→ stun 短时",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onHit + requiresStatus:'vulnerable'（cd 1s）→ stun 短时"
+        "summary": "感电追求者被命中时（每秒限一次），短暂眩晕",
+        "intent": "兑现接口：感电命中触发眩晕，限频保护"
       },
       "staticSurge2x": {
         "name": "感应传染",
-        "summary": "onHit + requiresStatus:'vulnerable' → aoeOnHit 无伤害版，只传染感电",
-        "intent": "传播接口：onHit + requiresStatus:'vulnerable' → aoeOnHit 无伤害版，只传染感电",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onHit + requiresStatus:'vulnerable' → aoeOnHit 无伤害版，只传染感电"
+        "summary": "感电追求者被命中时，以命中点为中心传播感电（无额外伤害）",
+        "intent": "传播接口：感电命中触发范围感电扩散"
       },
       "staticSurge3x": {
         "name": "静电回充",
-        "summary": "onHit + requiresStatus:'vulnerable'（cd 3s）→ statBuff 伤害短时提升",
-        "intent": "转化接口：onHit + requiresStatus:'vulnerable'（cd 3s）→ statBuff 伤害短时提升",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "onHit + requiresStatus:'vulnerable'（cd 3s）→ statBuff 伤害短时提升"
+        "summary": "感电追求者被命中时（每 3 秒限一次），短时提升伤害",
+        "intent": "转化接口：感电命中驱动伤害属性提升"
       }
     },
     "stormcall": {
       "stormcallA": {
         "name": "引雷针",
-        "summary": "主炮换形为落雷，落点施加感电",
-        "intent": "引雷针以mortarMorph @ onFire承担核心机制。",
-        "keywords": [
-          "mortarMorph @ onFire"
-        ],
-        "buildFit": "主炮换形为落雷，落点施加感电"
+        "summary": "主炮换形落雷，每次落点范围爆炸并施加感电",
+        "intent": "核心机制：迫击炮变形，命中施加感电"
       },
       "stormcallB": {
         "name": "雷云",
-        "summary": "移动雷云跟随最密集敌群，范围内周期感电（不用 groundZone，归焚狱）",
-        "intent": "雷云以aura @ interval 3s承担核心机制。",
-        "keywords": [
-          "aura @ interval 3s"
-        ],
-        "buildFit": "移动雷云跟随最密集敌群，范围内周期感电（不用 groundZone，归焚狱）"
+        "summary": "召唤跟踪雷云，持续跟随最密集追求者并周期施加感电",
+        "intent": "核心机制：召唤跟踪单位，周期光环感电"
       },
       "stormcallC": {
         "name": "落雷阵",
-        "summary": "波开始及每 5 秒对场上最密处降下双链",
-        "intent": "落雷阵以chain(targets=2) @ onWaveStart + interval 5s承担核心机制。",
-        "keywords": [
-          "chain(targets=2) @ onWaveStart + interval 5s"
-        ],
-        "buildFit": "波开始及每 5 秒对场上最密处降下双链"
+        "summary": "每波开始及每 5 秒，向最密集处发出两条弹跳链",
+        "intent": "核心机制：波次及周期双触发连锁攻击"
       },
       "stormcall1x": {
         "name": "天罚",
-        "summary": "onHit + requiresStatus:'vulnerable' → burstDamage 大范围低倍",
-        "intent": "兑现接口：onHit + requiresStatus:'vulnerable' → burstDamage 大范围低倍",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onHit + requiresStatus:'vulnerable' → burstDamage 大范围低倍"
+        "summary": "感电追求者被命中时，大范围爆发（低倍率、广覆盖）",
+        "intent": "兑现接口：感电命中触发大范围低倍爆发"
       },
       "stormcall2x": {
         "name": "雷云扩张",
-        "summary": "interval 3s → 对场上全部感电目标各自位置施加 aoeOnHit 传染",
-        "intent": "传播接口：interval 3s → 对场上全部感电目标各自位置施加 aoeOnHit 传染",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "interval 3s → 对场上全部感电目标各自位置施加 aoeOnHit 传染"
+        "summary": "每 3 秒在最密集处自动爆发一次并传播感电",
+        "intent": "传播接口：周期触发范围感电扩散"
       },
       "stormcall3x": {
         "name": "静电云",
-        "summary": "onKill + requiresSource:'chain' → 死亡坐标生成短时 aura 增伤区",
-        "intent": "转化接口：onKill + requiresSource:'chain' → 死亡坐标生成短时 aura 增伤区",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "onKill + requiresSource:'chain' → 死亡坐标生成短时 aura 增伤区"
+        "summary": "连锁击杀时，在击杀位生成增伤光环并扩展连锁范围",
+        "intent": "转化接口：击杀触发增伤光环与连锁强化"
       }
     },
     "arcSplitter": {
       "arcSplitterA": {
         "name": "裂片",
-        "summary": "命中分裂，弹片命中施加感电",
-        "intent": "裂片以split(count=2) @ onHit承担核心机制。",
-        "keywords": [
-          "split(count=2) @ onHit"
-        ],
-        "buildFit": "命中分裂，弹片命中施加感电"
+        "summary": "命中后分裂两枚弹片，弹片各自命中时施加感电",
+        "intent": "核心机制：命中触发分裂，子弹道独立感电"
       },
       "arcSplitterB": {
         "name": "散射",
-        "summary": "开火即散射，覆盖面大伤害低，全部施加感电",
-        "intent": "散射以split(count=4, damageRatio↓) @ onFire承担核心机制。",
-        "keywords": [
-          "split(count=4, damageRatio↓) @ onFire"
-        ],
-        "buildFit": "开火即散射，覆盖面大伤害低，全部施加感电"
+        "summary": "每次开火同时散出四枚低伤弹片，覆盖面大",
+        "intent": "核心机制：开火触发多向分裂散射"
       },
       "arcSplitterC": {
         "name": "跳弹",
-        "summary": "弹跳弹，每次弹跳后的命中施加感电",
-        "intent": "跳弹以ricochet @ onFire承担核心机制。",
-        "keywords": [
-          "ricochet @ onFire"
-        ],
-        "buildFit": "弹跳弹，每次弹跳后的命中施加感电"
+        "summary": "子弹额外弹射三次，每次弹跳后命中时施加感电",
+        "intent": "核心机制：开火触发多段弹射，逐次感电"
       },
       "arcSplitter1x": {
         "name": "聚能",
-        "summary": "onHit + requiresStatus:'vulnerable' → 本次伤害倍率提升（statBuff 瞬时）",
-        "intent": "兑现接口：onHit + requiresStatus:'vulnerable' → 本次伤害倍率提升（statBuff 瞬时）",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onHit + requiresStatus:'vulnerable' → 本次伤害倍率提升（statBuff 瞬时）"
+        "summary": "感电追求者被命中时，本次命中瞬时提升伤害倍率",
+        "intent": "兑现接口：感电命中触发伤害倍率提升"
       },
       "arcSplitter2x": {
         "name": "二次裂变",
-        "summary": "onHit + requiresStatus:'vulnerable' → 再分裂一代（split(maxDepth=2)）",
-        "intent": "传播接口：onHit + requiresStatus:'vulnerable' → 再分裂一代（split(maxDepth=2)）",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onHit + requiresStatus:'vulnerable' → 再分裂一代（split(maxDepth=2)）"
+        "summary": "感电追求者被命中时，再分裂一代弹片，进一步扩大覆盖",
+        "intent": "传播接口：感电命中触发二次分裂扩散"
       },
       "arcSplitter3x": {
         "name": "弹片回收",
-        "summary": "onKill + requiresSource:'weapon' → 概率 extraDrop（挂感电条件：仅当死者生前有感电）",
-        "intent": "转化接口：onKill + requiresSource:'weapon' → 概率 extraDrop（挂感电条件：仅当死者生前有感电）",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "onKill + requiresSource:'weapon' → 概率 extraDrop（挂感电条件：仅当死者生前有感电）"
+        "summary": "击杀时，有概率在击杀位多掉一份心意",
+        "intent": "转化接口：击杀触发额外心意产出"
       }
     },
     "galvanicWard": {
       "galvanicWardA": {
         "name": "斥力场",
-        "summary": "命中附带击退并施加感电，把敌人推离核心",
-        "intent": "斥力场以knockback+vulnerable @ onHit承担核心机制。",
-        "keywords": [
-          "knockback+vulnerable @ onHit"
-        ],
-        "buildFit": "命中附带击退并施加感电，把敌人推离核心"
+        "summary": "命中时附带击退，同时施加感电——物理上推开追求者",
+        "intent": "核心机制：命中触发击退+感电双效"
       },
       "galvanicWardB": {
         "name": "环形放电",
-        "summary": "核心周围常驻放电环，进入者获得感电并被极短 stun（不用 slow，归凛冬）",
-        "intent": "环形放电以aura @ passive承担核心机制。",
-        "keywords": [
-          "aura @ passive"
-        ],
-        "buildFit": "核心周围常驻放电环，进入者获得感电并被极短 stun（不用 slow，归凛冬）"
+        "summary": "炮台常驻放电圈，进入者轻微眩晕并施加感电",
+        "intent": "核心机制：被动光环，周期眩晕+感电"
       },
       "galvanicWardC": {
         "name": "紧急放电",
-        "summary": "突破坐标放电并施加感电",
-        "intent": "紧急放电以burstDamage+vulnerable @ onBreach（按 point）承担核心机制。",
-        "keywords": [
-          "burstDamage+vulnerable @ onBreach（按 point）"
-        ],
-        "buildFit": "突破坐标放电并施加感电"
+        "summary": "追求者突破防线时，突破点范围爆发并施加感电",
+        "intent": "核心机制：突破触发定点爆发+感电"
       },
       "galvanicWard1x": {
         "name": "电磁锁",
-        "summary": "onHit + requiresStatus:'vulnerable'（cd 1.5s）→ stun",
-        "intent": "兑现接口：onHit + requiresStatus:'vulnerable'（cd 1.5s）→ stun",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onHit + requiresStatus:'vulnerable'（cd 1.5s）→ stun"
+        "summary": "感电追求者被命中时（每 1.5 秒限一次），短暂眩晕",
+        "intent": "兑现接口：感电命中触发眩晕，限频保护"
       },
       "galvanicWard2x": {
         "name": "场域扩散",
-        "summary": "onBreach（按 point，cd 4s）→ aura 短时扩张放电环，覆盖者获感电",
-        "intent": "传播接口：onBreach（按 point，cd 4s）→ aura 短时扩张放电环，覆盖者获感电",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onBreach（按 point，cd 4s）→ aura 短时扩张放电环，覆盖者获感电"
+        "summary": "突破时（每 4 秒限一次），突破点短时展开感电光环",
+        "intent": "传播接口：突破触发范围感电扩散"
       },
       "galvanicWard3x": {
         "name": "应急回充",
-        "summary": "onBreach（按 point，cd 6s）→ restore 少量生命",
-        "intent": "转化接口：onBreach（按 point，cd 6s）→ restore 少量生命",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "onBreach（按 point，cd 6s）→ restore 少量生命"
+        "summary": "突破时（每 6 秒限一次），回复少量心防",
+        "intent": "转化接口：突破触发心防回复"
       }
     },
     "overcharge": {
       "overchargeA": {
         "name": "过载",
-        "summary": "命中施加感电；每有一个感电目标在场，射速小幅提升（封顶）",
-        "intent": "过载以vulnerable+statBuff @ onHit承担核心机制。",
-        "keywords": [
-          "vulnerable+statBuff @ onHit"
-        ],
-        "buildFit": "命中施加感电；每有一个感电目标在场，射速小幅提升（封顶）"
+        "summary": "命中时施加感电，同时叠加伤害加成（最多两层）",
+        "intent": "核心机制：命中触发感电+自身伤害叠层"
       },
       "overchargeB": {
         "name": "超载力场",
-        "summary": "常驻力场，范围内敌人获感电；力场内敌人越多，伤害加成越高",
-        "intent": "超载力场以aura @ passive承担核心机制。",
-        "keywords": [
-          "aura @ passive"
-        ],
-        "buildFit": "常驻力场，范围内敌人获感电；力场内敌人越多，伤害加成越高"
+        "summary": "常驻范围光环，圈内追求者持续感电，且圈内越多伤害加成越高",
+        "intent": "核心机制：被动光环，感电+密度驱动增伤"
       },
       "overchargeC": {
         "name": "临界放电",
-        "summary": "周期放电铺感电，放电范围随上次放电以来的击杀数增长",
-        "intent": "临界放电以burstDamage+vulnerable @ interval 4s承担核心机制。",
-        "keywords": [
-          "burstDamage+vulnerable @ interval 4s"
-        ],
-        "buildFit": "周期放电铺感电，放电范围随上次放电以来的击杀数增长"
+        "summary": "每 4 秒向最近区域放电并施加感电",
+        "intent": "核心机制：周期触发范围爆发+感电"
       },
       "overcharge1x": {
         "name": "临界引爆",
-        "summary": "onHit + requiresStatus:'vulnerable'（cd 2s）→ burstDamage，倍率随在场感电目标数提升",
-        "intent": "兑现接口：onHit + requiresStatus:'vulnerable'（cd 2s）→ burstDamage，倍率随在场感电目标数提升",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onHit + requiresStatus:'vulnerable'（cd 2s）→ burstDamage，倍率随在场感电目标数提升"
+        "summary": "感电追求者被命中时（每 2 秒限一次），方圆爆发",
+        "intent": "兑现接口：感电命中触发范围爆发"
       },
       "overcharge2x": {
         "name": "过载传染",
-        "summary": "onHit + requiresStatus:'vulnerable' → aoeOnHit 无伤害传染",
-        "intent": "传播接口：onHit + requiresStatus:'vulnerable' → aoeOnHit 无伤害传染",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onHit + requiresStatus:'vulnerable' → aoeOnHit 无伤害传染"
+        "summary": "感电追求者被命中时，以命中点为中心传播感电（无伤害）",
+        "intent": "传播接口：感电命中触发无伤感电扩散"
       },
       "overcharge3x": {
         "name": "战利回收",
-        "summary": "onKill + requiresStatus:'vulnerable' → 死亡坐标 extraDrop（挂感电条件）+ statBuff 射速",
-        "intent": "转化接口：onKill + requiresStatus:'vulnerable' → 死亡坐标 extraDrop（挂感电条件）+ statBuff 射速",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "onKill + requiresStatus:'vulnerable' → 死亡坐标 extraDrop（挂感电条件）+ statBuff 射速"
+        "summary": "感电追求者被击杀时，有概率多掉心意并短时提升攻速",
+        "intent": "转化接口：感电击杀触发额外心意产出+攻速提升"
       }
     },
     "frost": {
       "frostA": {
         "name": "霜触",
-        "summary": "命中施加寒意，持续较长",
-        "intent": "霜触以slow @ onHit承担核心机制。",
-        "keywords": [
-          "slow @ onHit"
-        ],
-        "buildFit": "命中施加寒意，持续较长"
+        "summary": "每次命中时施加减速，持续时间较长，覆盖广",
+        "intent": "核心机制：命中触发减速，持续时间优先"
       },
       "frostB": {
         "name": "霜幕",
-        "summary": "炮台常驻霜幕，范围内持续施加寒意",
-        "intent": "霜幕以aura @ passive承担核心机制。",
-        "keywords": [
-          "aura @ passive"
-        ],
-        "buildFit": "炮台常驻霜幕，范围内持续施加寒意"
+        "summary": "炮台常驻霜幕光环，圈内追求者持续减速",
+        "intent": "核心机制：被动光环，持续范围减速"
       },
       "frostC": {
         "name": "冰封脉冲",
-        "summary": "周期给最近目标叠冻结层，三层触发冰封",
-        "intent": "冰封脉冲以freeze(stacksToTrigger=3) @ interval 2.5s承担核心机制。",
-        "keywords": [
-          "freeze(stacksToTrigger=3) @ interval 2.5s"
-        ],
-        "buildFit": "周期给最近目标叠冻结层，三层触发冰封"
+        "summary": "每 2.5 秒向最近追求者叠冻结层，三层触发冰封",
+        "intent": "核心机制：周期叠层，累积三次触发冰封"
       },
       "frost1x": {
         "name": "碎裂",
-        "summary": "onHit + requiresStatus:'frozen' → burstDamage 高倍",
-        "intent": "兑现接口：onHit + requiresStatus:'frozen' → burstDamage 高倍",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onHit + requiresStatus:'frozen' → burstDamage 高倍"
+        "summary": "冰封追求者被命中时，以高倍率爆发打裂冰层",
+        "intent": "兑现接口：冻结命中触发高倍爆发"
       },
       "frost2x": {
         "name": "霜蔓",
-        "summary": "onHit + requiresStatus:'controlled' → aoeOnHit 无伤害版，传染寒意",
-        "intent": "传播接口：onHit + requiresStatus:'controlled' → aoeOnHit 无伤害版，传染寒意",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onHit + requiresStatus:'controlled' → aoeOnHit 无伤害版，传染寒意"
+        "summary": "受控追求者被命中时，范围内传播减速",
+        "intent": "传播接口：受控命中触发减速扩散"
       },
       "frost3x": {
         "name": "凛冽",
-        "summary": "onHit + requiresStatus:'frozen'（cd 2s）→ restore 少量",
-        "intent": "转化接口：onHit + requiresStatus:'frozen'（cd 2s）→ restore 少量",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "onHit + requiresStatus:'frozen'（cd 2s）→ restore 少量"
+        "summary": "冰封追求者被命中时（每 2 秒限一次），回复少量心防",
+        "intent": "转化接口：冻结命中触发心防回复"
       }
     },
     "impact": {
       "impactA": {
         "name": "重击",
-        "summary": "命中击退并施加寒意",
-        "intent": "重击以knockback+slow @ onHit承担核心机制。",
-        "keywords": [
-          "knockback+slow @ onHit"
-        ],
-        "buildFit": "命中击退并施加寒意"
+        "summary": "命中时击退追求者并施加减速",
+        "intent": "核心机制：命中触发击退+减速双效"
       },
       "impactB": {
         "name": "震荡波",
-        "summary": "命中范围震荡，全体击退+寒意",
-        "intent": "震荡波以aoeOnHit+slow @ onHit承担核心机制。",
-        "keywords": [
-          "aoeOnHit+slow @ onHit"
-        ],
-        "buildFit": "命中范围震荡，全体击退+寒意"
+        "summary": "命中处范围震荡，圈内追求者全体击退并减速",
+        "intent": "核心机制：命中触发范围击退+减速"
       },
       "impactC": {
         "name": "落锤",
-        "summary": "换形定点落锤，落点叠冻结层",
-        "intent": "落锤以mortarMorph+freeze @ interval 3s承担核心机制。",
-        "keywords": [
-          "mortarMorph+freeze @ interval 3s"
-        ],
-        "buildFit": "换形定点落锤，落点叠冻结层"
+        "summary": "换形落锤，每 3 秒落点叠两层冻结",
+        "intent": "核心机制：周期迫击炮，叠层冻结触发冰封"
       },
       "impact1x": {
         "name": "碎冰",
-        "summary": "onHit + requiresStatus:'frozen' → burstDamage + execute（冰封目标低血处决）",
-        "intent": "兑现接口：onHit + requiresStatus:'frozen' → burstDamage + execute（冰封目标低血处决）",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onHit + requiresStatus:'frozen' → burstDamage + execute（冰封目标低血处决）"
+        "summary": "冰封追求者被命中时，爆发并处决低血量目标",
+        "intent": "兑现接口：冻结命中触发爆发+处决"
       },
       "impact2x": {
         "name": "冲击扩散",
-        "summary": "onHit + requiresStatus:'controlled' → aoeOnHit 传寒意",
-        "intent": "传播接口：onHit + requiresStatus:'controlled' → aoeOnHit 传寒意",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onHit + requiresStatus:'controlled' → aoeOnHit 传寒意"
-      },
-      "impact3x": {
-        "name": "冰甲",
-        "summary": "onHit + requiresStatus:'frozen'（cd 3s）→ restore",
-        "intent": "转化接口：onHit + requiresStatus:'frozen'（cd 3s）→ restore",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "onHit + requiresStatus:'frozen'（cd 3s）→ restore"
-      }
-    },
-    "glacialSpike": {
-      "glacialSpikeA": {
-        "name": "冰锥",
-        "summary": "贯穿弹，每个穿透目标各施加寒意（逐个 onHit）",
-        "intent": "冰锥以pierce+slow @ onFire承担核心机制。",
-        "keywords": [
-          "pierce+slow @ onFire"
-        ],
-        "buildFit": "贯穿弹，每个穿透目标各施加寒意（逐个 onHit）"
-      },
-      "glacialSpikeB": {
-        "name": "冰雨",
-        "summary": "命中分裂冰片，弹片各自施加寒意",
-        "intent": "冰雨以split+slow @ onHit承担核心机制。",
-        "keywords": [
-          "split+slow @ onHit"
-        ],
-        "buildFit": "命中分裂冰片，弹片各自施加寒意"
-      },
-      "glacialSpikeC": {
-        "name": "冰枪",
-        "summary": "换形持续冰束，路径目标叠冻结层",
-        "intent": "冰枪以beamMorph+freeze @ passive承担核心机制。",
-        "keywords": [
-          "beamMorph+freeze @ passive"
-        ],
-        "buildFit": "换形持续冰束，路径目标叠冻结层"
-      },
-      "glacialSpike1x": {
-        "name": "贯穿碎裂",
-        "summary": "onHit + requiresStatus:'frozen' → burstDamage（贯穿并发时逐个触发）",
-        "intent": "兑现接口：onHit + requiresStatus:'frozen' → burstDamage（贯穿并发时逐个触发）",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onHit + requiresStatus:'frozen' → burstDamage（贯穿并发时逐个触发）"
-      },
-      "glacialSpike2x": {
-        "name": "霜刺蔓延",
-        "summary": "onHit + requiresStatus:'controlled' → aoeOnHit 传寒意",
-        "intent": "传播接口：onHit + requiresStatus:'controlled' → aoeOnHit 传寒意",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onHit + requiresStatus:'controlled' → aoeOnHit 传寒意"
-      },
-      "glacialSpike3x": {
-        "name": "冰晶回收",
-        "summary": "onKill + requiresStatus:'frozen' → 死亡坐标 extraDrop（挂冰封条件）",
-        "intent": "转化接口：onKill + requiresStatus:'frozen' → 死亡坐标 extraDrop（挂冰封条件）",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "onKill + requiresStatus:'frozen' → 死亡坐标 extraDrop（挂冰封条件）"
-      }
-    },
-    "permafrost": {
-      "permafrostA": {
-        "name": "冻原",
-        "summary": "炮台常驻冻原光环，范围内持续寒意",
-        "intent": "冻原以aura @ passive承担核心机制。",
-        "keywords": [
-          "aura @ passive"
-        ],
-        "buildFit": "炮台常驻冻原光环，范围内持续寒意"
-      },
-      "permafrostB": {
-        "name": "霜环扩张",
-        "summary": "周期向外推出一圈扩张霜环，扫过者获寒意",
-        "intent": "霜环扩张以aura @ interval 3s承担核心机制。",
-        "keywords": [
-          "aura @ interval 3s"
-        ],
-        "buildFit": "周期向外推出一圈扩张霜环，扫过者获寒意"
-      },
-      "permafrostC": {
-        "name": "冰封地带",
-        "summary": "波开始及每 5 秒冰封最近 N 个目标",
-        "intent": "冰封地带以freeze @ onWaveStart + interval 5s承担核心机制。",
-        "keywords": [
-          "freeze @ onWaveStart + interval 5s"
-        ],
-        "buildFit": "波开始及每 5 秒冰封最近 N 个目标"
-      },
-      "permafrost1x": {
-        "name": "领域碎裂",
-        "summary": "interval 3s → 对场上全部 frozen 目标各自位置施加 burstDamage",
-        "intent": "兑现接口：interval 3s → 对场上全部 frozen 目标各自位置施加 burstDamage",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "interval 3s → 对场上全部 frozen 目标各自位置施加 burstDamage"
-      },
-      "permafrost2x": {
-        "name": "冻土蔓延",
-        "summary": "onHit + requiresStatus:'controlled' → aura 短时扩张",
-        "intent": "传播接口：onHit + requiresStatus:'controlled' → aura 短时扩张",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onHit + requiresStatus:'controlled' → aura 短时扩张"
-      },
-      "permafrost3x": {
-        "name": "严寒庇护",
-        "summary": "interval 4s → 场上存在 frozen 目标时 restore",
-        "intent": "转化接口：interval 4s → 场上存在 frozen 目标时 restore",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "interval 4s → 场上存在 frozen 目标时 restore"
-      }
-    },
-    "iceTomb": {
-      "iceTombA": {
-        "name": "封棺",
-        "summary": "命中叠冻结层，两层成棺",
-        "intent": "封棺以freeze(stacksToTrigger=2) @ onHit承担核心机制。",
-        "keywords": [
-          "freeze(stacksToTrigger=2) @ onHit"
-        ],
-        "buildFit": "命中叠冻结层，两层成棺"
-      },
-      "iceTombB": {
-        "name": "冰牢群",
-        "summary": "命中范围内全体叠冻结层",
-        "intent": "冰牢群以aoeOnHit+freeze @ onHit承担核心机制。",
-        "keywords": [
-          "aoeOnHit+freeze @ onHit"
-        ],
-        "buildFit": "命中范围内全体叠冻结层"
-      },
-      "iceTombC": {
-        "name": "定时冰封",
-        "summary": "周期直接冰封最近目标（无需叠层）",
-        "intent": "定时冰封以freeze @ interval 4s承担核心机制。",
-        "keywords": [
-          "freeze @ interval 4s"
-        ],
-        "buildFit": "周期直接冰封最近目标（无需叠层）"
-      },
-      "iceTomb1x": {
-        "name": "棺爆",
-        "summary": "onKill + requiresStatus:'frozen' → 死亡坐标生成短时 aura 冰爆区，进入者叠冻结层",
-        "intent": "兑现接口：onKill + requiresStatus:'frozen' → 死亡坐标生成短时 aura 冰爆区，进入者叠冻结层",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onKill + requiresStatus:'frozen' → 死亡坐标生成短时 aura 冰爆区，进入者叠冻结层"
-      },
-      "iceTomb2x": {
-        "name": "连锁冰封",
-        "summary": "onHit + requiresStatus:'frozen' → aoeOnHit 无伤害版，传冻结层",
-        "intent": "传播接口：onHit + requiresStatus:'frozen' → aoeOnHit 无伤害版，传冻结层",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onHit + requiresStatus:'frozen' → aoeOnHit 无伤害版，传冻结层"
-      },
-      "iceTomb3x": {
-        "name": "寒气回收",
-        "summary": "onKill + requiresStatus:'frozen' → 死亡坐标 restore + 概率 extraDrop",
-        "intent": "转化接口：onKill + requiresStatus:'frozen' → 死亡坐标 restore + 概率 extraDrop",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "onKill + requiresStatus:'frozen' → 死亡坐标 restore + 概率 extraDrop"
-      }
-    },
-    "frozenBulwark": {
-      "frozenBulwarkA": {
-        "name": "霜盾",
-        "summary": "命中击退并叠冻结层，越近核心击退越强",
-        "intent": "霜盾以knockback+freeze @ onHit承担核心机制。",
-        "keywords": [
-          "knockback+freeze @ onHit"
-        ],
-        "buildFit": "命中击退并叠冻结层，越近核心击退越强"
-      },
-      "frozenBulwarkB": {
-        "name": "冰墙",
-        "summary": "核心周围常驻冰墙环，进入者持续寒意",
-        "intent": "冰墙以aura @ passive承担核心机制。",
-        "keywords": [
-          "aura @ passive"
-        ],
-        "buildFit": "核心周围常驻冰墙环，进入者持续寒意"
-      },
-      "frozenBulwarkC": {
-        "name": "紧急冰封",
-        "summary": "突破坐标范围冰封并击退",
-        "intent": "紧急冰封以freeze+knockback @ onBreach（按 point）承担核心机制。",
-        "keywords": [
-          "freeze+knockback @ onBreach（按 point）"
-        ],
-        "buildFit": "突破坐标范围冰封并击退"
-      },
-      "frozenBulwark1x": {
-        "name": "冻结反击",
-        "summary": "onBreach（按 point，cd 4s）→ burstDamage 范围，对 frozen 目标倍率翻倍",
-        "intent": "兑现接口：onBreach（按 point，cd 4s）→ burstDamage 范围，对 frozen 目标倍率翻倍",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onBreach（按 point，cd 4s）→ burstDamage 范围，对 frozen 目标倍率翻倍"
-      },
-      "frozenBulwark2x": {
-        "name": "寒潮",
-        "summary": "onBreach（按 point，cd 5s）→ aura 短时大幅扩张",
-        "intent": "传播接口：onBreach（按 point，cd 5s）→ aura 短时大幅扩张",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onBreach（按 point，cd 5s）→ aura 短时大幅扩张"
-      },
-      "frozenBulwark3x": {
-        "name": "冰息回复",
-        "summary": "onBreach（按 point，cd 6s）→ restore",
-        "intent": "转化接口：onBreach（按 point，cd 6s）→ restore",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "onBreach（按 point，cd 6s）→ restore"
-      }
-    },
-    "hoarfrostTithe": {
-      "hoarfrostTitheA": {
-        "name": "霜税",
-        "summary": "命中施加寒意；每有一个受控目标在场，伤害小幅提升（封顶）",
-        "intent": "霜税以slow+statBuff @ onHit承担核心机制。",
-        "keywords": [
-          "slow+statBuff @ onHit"
-        ],
-        "buildFit": "命中施加寒意；每有一个受控目标在场，伤害小幅提升（封顶）"
-      },
-      "hoarfrostTitheB": {
-        "name": "收缴领域",
-        "summary": "常驻收缴光环，范围内敌人持续寒意，光环内敌人越多加成越高",
-        "intent": "收缴领域以aura @ passive承担核心机制。",
-        "keywords": [
-          "aura @ passive"
-        ],
-        "buildFit": "常驻收缴光环，范围内敌人持续寒意，光环内敌人越多加成越高"
-      },
-      "hoarfrostTitheC": {
-        "name": "结算脉冲",
-        "summary": "周期冰封，冰封数量决定下次结算强度",
-        "intent": "结算脉冲以freeze @ interval 4s承担核心机制。",
-        "keywords": [
-          "freeze @ interval 4s"
-        ],
-        "buildFit": "周期冰封，冰封数量决定下次结算强度"
-      },
-      "hoarfrostTithe1x": {
-        "name": "收割",
-        "summary": "onKill + requiresStatus:'frozen' → 死亡坐标 extraDrop（挂冰封条件）",
-        "intent": "兑现接口：onKill + requiresStatus:'frozen' → 死亡坐标 extraDrop（挂冰封条件）",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onKill + requiresStatus:'frozen' → 死亡坐标 extraDrop（挂冰封条件）"
-      },
-      "hoarfrostTithe2x": {
-        "name": "税网扩张",
-        "summary": "onHit + requiresStatus:'controlled' → aoeOnHit 传寒意",
-        "intent": "传播接口：onHit + requiresStatus:'controlled' → aoeOnHit 传寒意",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onHit + requiresStatus:'controlled' → aoeOnHit 传寒意"
-      },
-      "hoarfrostTithe3x": {
-        "name": "冰封储备",
-        "summary": "onKill + requiresStatus:'controlled' → 死亡坐标 restore + statBuff",
-        "intent": "转化接口：onKill + requiresStatus:'controlled' → 死亡坐标 restore + statBuff",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "onKill + requiresStatus:'controlled' → 死亡坐标 restore + statBuff"
-      }
-    },
-    "scorch": {
-      "scorchA": {
-        "name": "灼触",
-        "summary": "命中直接施加灼烧",
-        "intent": "灼触以dot @ onHit承担核心机制。",
-        "keywords": [
-          "dot @ onHit"
-        ],
-        "buildFit": "命中直接施加灼烧"
-      },
-      "scorchB": {
-        "name": "火场",
-        "summary": "命中处留下火场",
-        "intent": "火场以groundZone(dot) @ onHit承担核心机制。",
-        "keywords": [
-          "groundZone(dot) @ onHit"
-        ],
-        "buildFit": "命中处留下火场"
-      },
-      "scorchC": {
-        "name": "燃烧脉冲",
-        "summary": "周期给最近 N 个目标施加灼烧",
-        "intent": "燃烧脉冲以dot @ interval 2.2s承担核心机制。",
-        "keywords": [
-          "dot @ interval 2.2s"
-        ],
-        "buildFit": "周期给最近 N 个目标施加灼烧"
-      },
-      "scorch1x": {
-        "name": "引燃",
-        "summary": "onHit + requiresStatus:'dot' → burstDamage",
-        "intent": "兑现接口：onHit + requiresStatus:'dot' → burstDamage",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onHit + requiresStatus:'dot' → burstDamage"
-      },
-      "scorch2x": {
-        "name": "火势蔓延",
-        "summary": "onHit + requiresStatus:'dot' → aoeOnHit 无伤害版，传染灼烧",
-        "intent": "传播接口：onHit + requiresStatus:'dot' → aoeOnHit 无伤害版，传染灼烧",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onHit + requiresStatus:'dot' → aoeOnHit 无伤害版，传染灼烧"
-      },
-      "scorch3x": {
-        "name": "余烬",
-        "summary": "onKill + requiresSource:'dot' → 死亡坐标 statBuff 伤害短时提升",
-        "intent": "转化接口：onKill + requiresSource:'dot' → 死亡坐标 statBuff 伤害短时提升",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "onKill + requiresSource:'dot' → 死亡坐标 statBuff 伤害短时提升"
-      }
-    },
-    "splitBlast": {
-      "splitBlastA": {
-        "name": "爆裂",
-        "summary": "命中小爆炸，范围内施加灼烧",
-        "intent": "爆裂以aoeOnHit+dot @ onHit承担核心机制。",
-        "keywords": [
-          "aoeOnHit+dot @ onHit"
-        ],
-        "buildFit": "命中小爆炸，范围内施加灼烧"
-      },
-      "splitBlastB": {
-        "name": "散弹",
-        "summary": "命中分裂，弹片各自命中各施加灼烧并各发一次 onHit",
-        "intent": "散弹以split+dot @ onHit承担核心机制。",
-        "keywords": [
-          "split+dot @ onHit"
-        ],
-        "buildFit": "命中分裂，弹片各自命中各施加灼烧并各发一次 onHit"
-      },
-      "splitBlastC": {
-        "name": "迫击",
-        "summary": "换形定点迫击，落点留火场",
-        "intent": "迫击以mortarMorph+groundZone(dot) @ interval 3s承担核心机制。",
-        "keywords": [
-          "mortarMorph+groundZone(dot) @ interval 3s"
-        ],
-        "buildFit": "换形定点迫击，落点留火场"
-      },
-      "splitBlast1x": {
-        "name": "引爆",
-        "summary": "onHit + requiresStatus:'dot' → burstDamage 高倍（分裂并发时逐片触发）",
-        "intent": "兑现接口：onHit + requiresStatus:'dot' → burstDamage 高倍（分裂并发时逐片触发）",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onHit + requiresStatus:'dot' → burstDamage 高倍（分裂并发时逐片触发）"
-      },
-      "splitBlast2x": {
-        "name": "连环引燃",
-        "summary": "onHit + requiresStatus:'dot' → 再分裂一代弹片，弹片附带灼烧",
-        "intent": "传播接口：onHit + requiresStatus:'dot' → 再分裂一代弹片，弹片附带灼烧",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onHit + requiresStatus:'dot' → 再分裂一代弹片，弹片附带灼烧"
-      },
-      "splitBlast3x": {
-        "name": "灰烬回收",
-        "summary": "onKill + requiresSource:'dot' → 死亡坐标 extraDrop（挂灼烧来源）",
-        "intent": "转化接口：onKill + requiresSource:'dot' → 死亡坐标 extraDrop（挂灼烧来源）",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "onKill + requiresSource:'dot' → 死亡坐标 extraDrop（挂灼烧来源）"
-      }
-    },
-    "meteor": {
-      "meteorA": {
-        "name": "陨石",
-        "summary": "主炮换形陨石，落点范围施加灼烧",
-        "intent": "陨石以mortarMorph+dot @ onFire承担核心机制。",
-        "keywords": [
-          "mortarMorph+dot @ onFire"
-        ],
-        "buildFit": "主炮换形陨石，落点范围施加灼烧"
-      },
-      "meteorB": {
-        "name": "流星雨",
-        "summary": "周期散落多枚流星，各留小火场",
-        "intent": "流星雨以split+groundZone(dot) @ interval 3s承担核心机制。",
-        "keywords": [
-          "split+groundZone(dot) @ interval 3s"
-        ],
-        "buildFit": "周期散落多枚流星，各留小火场"
-      },
-      "meteorC": {
-        "name": "定点轰击",
-        "summary": "大范围定点轰击，落点留大火场",
-        "intent": "定点轰击以mortarMorph+groundZone(dot) @ interval 4s承担核心机制。",
-        "keywords": [
-          "mortarMorph+groundZone(dot) @ interval 4s"
-        ],
-        "buildFit": "大范围定点轰击，落点留大火场"
-      },
-      "meteor1x": {
-        "name": "冲击引燃",
-        "summary": "onHit + requiresStatus:'dot' → burstDamage + knockback",
-        "intent": "兑现接口：onHit + requiresStatus:'dot' → burstDamage + knockback",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onHit + requiresStatus:'dot' → burstDamage + knockback"
-      },
-      "meteor2x": {
-        "name": "火雨",
-        "summary": "onHit + requiresStatus:'dot' → aoeOnHit 传灼烧",
-        "intent": "传播接口：onHit + requiresStatus:'dot' → aoeOnHit 传灼烧",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onHit + requiresStatus:'dot' → aoeOnHit 传灼烧"
-      },
-      "meteor3x": {
-        "name": "熔渣",
-        "summary": "onKill + requiresSource:'dot' → 死亡坐标 restore",
-        "intent": "转化接口：onKill + requiresSource:'dot' → 死亡坐标 restore",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "onKill + requiresSource:'dot' → 死亡坐标 restore"
-      }
-    },
-    "magmaPool": {
-      "magmaPoolA": {
-        "name": "熔池",
-        "summary": "命中处留下持续熔池",
-        "intent": "熔池以groundZone(dot) @ onHit承担核心机制。",
-        "keywords": [
-          "groundZone(dot) @ onHit"
-        ],
-        "buildFit": "命中处留下持续熔池"
-      },
-      "magmaPoolB": {
-        "name": "岩浆潮",
-        "summary": "周期在最密集敌群处生成大范围低伤岩浆",
-        "intent": "岩浆潮以groundZone(dot) @ interval 3s承担核心机制。",
-        "keywords": [
-          "groundZone(dot) @ interval 3s"
-        ],
-        "buildFit": "周期在最密集敌群处生成大范围低伤岩浆"
-      },
-      "magmaPoolC": {
-        "name": "喷发",
-        "summary": "击杀处喷发，留下熔池",
-        "intent": "喷发以groundZone(dot)+burstDamage @ onKill（按 point）承担核心机制。",
-        "keywords": [
-          "groundZone(dot)+burstDamage @ onKill（按 point）"
-        ],
-        "buildFit": "击杀处喷发，留下熔池"
-      },
-      "magmaPool1x": {
-        "name": "岩浆爆发",
-        "summary": "interval 3s → 对场上全部熔池位置施加 burstDamage",
-        "intent": "兑现接口：interval 3s → 对场上全部熔池位置施加 burstDamage",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "interval 3s → 对场上全部熔池位置施加 burstDamage"
-      },
-      "magmaPool2x": {
-        "name": "池沼蔓延",
-        "summary": "onKill + requiresSource:'dot' → 死亡坐标再生成一小片 groundZone",
-        "intent": "传播接口：onKill + requiresSource:'dot' → 死亡坐标再生成一小片 groundZone",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onKill + requiresSource:'dot' → 死亡坐标再生成一小片 groundZone"
-      },
-      "magmaPool3x": {
-        "name": "熔炼",
-        "summary": "onKill + requiresSource:'dot' → 死亡坐标 extraDrop",
-        "intent": "转化接口：onKill + requiresSource:'dot' → 死亡坐标 extraDrop",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "onKill + requiresSource:'dot' → 死亡坐标 extraDrop"
-      }
-    },
-    "flashfire": {
-      "flashfireA": {
-        "name": "爆燃",
-        "summary": "命中处小爆燃并施加灼烧",
-        "intent": "爆燃以burstDamage+dot @ onHit承担核心机制。",
-        "keywords": [
-          "burstDamage+dot @ onHit"
-        ],
-        "buildFit": "命中处小爆燃并施加灼烧"
-      },
-      "flashfireB": {
-        "name": "冲击波",
-        "summary": "命中范围冲击，全体击退+灼烧",
-        "intent": "冲击波以aoeOnHit+knockback+dot @ onHit承担核心机制。",
-        "keywords": [
-          "aoeOnHit+knockback+dot @ onHit"
-        ],
-        "buildFit": "命中范围冲击，全体击退+灼烧"
-      },
-      "flashfireC": {
-        "name": "定时爆燃",
-        "summary": "周期在最密处引发爆燃",
-        "intent": "定时爆燃以burstDamage+dot @ interval 3s承担核心机制。",
-        "keywords": [
-          "burstDamage+dot @ interval 3s"
-        ],
-        "buildFit": "周期在最密处引发爆燃"
-      },
-      "flashfire1x": {
-        "name": "殉爆",
-        "summary": "onHit + requiresStatus:'dot' → burstDamage + knockback",
-        "intent": "兑现接口：onHit + requiresStatus:'dot' → burstDamage + knockback",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onHit + requiresStatus:'dot' → burstDamage + knockback"
-      },
-      "flashfire2x": {
-        "name": "燃爆链",
-        "summary": "onHit + requiresStatus:'dot' → aoeOnHit 传灼烧",
-        "intent": "传播接口：onHit + requiresStatus:'dot' → aoeOnHit 传灼烧",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onHit + requiresStatus:'dot' → aoeOnHit 传灼烧"
-      },
-      "flashfire3x": {
-        "name": "热能转化",
-        "summary": "onHit + requiresStatus:'dot'（cd 2s）→ statBuff 伤害提升",
-        "intent": "转化接口：onHit + requiresStatus:'dot'（cd 2s）→ statBuff 伤害提升",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "onHit + requiresStatus:'dot'（cd 2s）→ statBuff 伤害提升"
-      }
-    },
-    "cinderheart": {
-      "cinderheartA": {
-        "name": "炽热外壳",
-        "summary": "核心贴身高强度灼烧光环，近身即被点燃（产直接灼烧，V9 供给方）",
-        "intent": "炽热外壳以aura @ passive承担核心机制。",
-        "keywords": [
-          "aura @ passive"
-        ],
-        "buildFit": "核心贴身高强度灼烧光环，近身即被点燃（产直接灼烧，V9 供给方）"
-      },
-      "cinderheartB": {
-        "name": "燃烧地带",
-        "summary": "核心周围周期铺设火场",
-        "intent": "燃烧地带以groundZone(dot) @ onWaveStart + interval 6s承担核心机制。",
-        "keywords": [
-          "groundZone(dot) @ onWaveStart + interval 6s"
-        ],
-        "buildFit": "核心周围周期铺设火场"
-      },
-      "cinderheartC": {
-        "name": "突破焚烧",
-        "summary": "突破坐标生成火场并爆燃",
-        "intent": "突破焚烧以groundZone(dot)+burstDamage @ onBreach（按 point）承担核心机制。",
-        "keywords": [
-          "groundZone(dot)+burstDamage @ onBreach（按 point）"
-        ],
-        "buildFit": "突破坐标生成火场并爆燃"
-      },
-      "cinderheart1x": {
-        "name": "反焰",
-        "summary": "interval 2s → 对贴近核心且带 dot 的目标施加 burstDamage",
-        "intent": "兑现接口：interval 2s → 对贴近核心且带 dot 的目标施加 burstDamage",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "interval 2s → 对贴近核心且带 dot 的目标施加 burstDamage"
-      },
-      "cinderheart2x": {
-        "name": "火墙扩张",
-        "summary": "onBreach（按 point，cd 5s）→ groundZone 大幅扩张",
-        "intent": "传播接口：onBreach（按 point，cd 5s）→ groundZone 大幅扩张",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onBreach（按 point，cd 5s）→ groundZone 大幅扩张"
-      },
-      "cinderheart3x": {
-        "name": "热能回复",
-        "summary": "onKill + requiresSource:'dot'（cd 3s）→ restore",
-        "intent": "转化接口：onKill + requiresSource:'dot'（cd 3s）→ restore",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "onKill + requiresSource:'dot'（cd 3s）→ restore"
-      }
-    },
-    "ashHarvest": {
-      "ashHarvestA": {
-        "name": "燃灰",
-        "summary": "命中施加灼烧；每有一个灼烧目标在场，伤害小幅提升（封顶）",
-        "intent": "燃灰以dot+statBuff @ onHit承担核心机制。",
-        "keywords": [
-          "dot+statBuff @ onHit"
-        ],
-        "buildFit": "命中施加灼烧；每有一个灼烧目标在场，伤害小幅提升（封顶）"
-      },
-      "ashHarvestB": {
-        "name": "灰烬场",
-        "summary": "周期铺灰烬火场，场内敌人数越多加成越高",
-        "intent": "灰烬场以groundZone(dot) @ interval 3s承担核心机制。",
-        "keywords": [
-          "groundZone(dot) @ interval 3s"
-        ],
-        "buildFit": "周期铺灰烬火场，场内敌人数越多加成越高"
-      },
-      "ashHarvestC": {
-        "name": "焚化脉冲",
-        "summary": "周期给最近 N 个目标施加灼烧",
-        "intent": "焚化脉冲以dot @ interval 2.5s承担核心机制。",
-        "keywords": [
-          "dot @ interval 2.5s"
-        ],
-        "buildFit": "周期给最近 N 个目标施加灼烧"
-      },
-      "ashHarvest1x": {
-        "name": "焚化引爆",
-        "summary": "onHit + requiresStatus:'dot' → burstDamage，倍率随在场灼烧目标数提升",
-        "intent": "兑现接口：onHit + requiresStatus:'dot' → burstDamage，倍率随在场灼烧目标数提升",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onHit + requiresStatus:'dot' → burstDamage，倍率随在场灼烧目标数提升"
-      },
-      "ashHarvest2x": {
-        "name": "灰烬蔓延",
-        "summary": "onKill + requiresSource:'dot' → 死亡坐标 groundZone 小火场",
-        "intent": "传播接口：onKill + requiresSource:'dot' → 死亡坐标 groundZone 小火场",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onKill + requiresSource:'dot' → 死亡坐标 groundZone 小火场"
-      },
-      "ashHarvest3x": {
-        "name": "拾灰",
-        "summary": "onKill + requiresStatus:'dot' → 死亡坐标 extraDrop + statBuff",
-        "intent": "转化接口：onKill + requiresStatus:'dot' → 死亡坐标 extraDrop + statBuff",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "onKill + requiresStatus:'dot' → 死亡坐标 extraDrop + statBuff"
-      }
-    },
-    "aegis": {
-      "aegisA": {
-        "name": "护盾",
-        "summary": "每波开始获得 2 次吸收的壁垒",
-        "intent": "护盾以shield(absorbHits=2) @ onWaveStart承担核心机制。",
-        "keywords": [
-          "shield(absorbHits=2) @ onWaveStart"
-        ],
-        "buildFit": "每波开始获得 2 次吸收的壁垒"
-      },
-      "aegisB": {
-        "name": "再生盾",
-        "summary": "容量低但会自行再生",
-        "intent": "再生盾以shield(absorbHits=1, regenSeconds=8) @ onWaveStart承担核心机制。",
-        "keywords": [
-          "shield(absorbHits=1, regenSeconds=8) @ onWaveStart"
-        ],
-        "buildFit": "容量低但会自行再生"
-      },
-      "aegisC": {
-        "name": "应激盾",
-        "summary": "周期补盾，不依赖波次节奏",
-        "intent": "应激盾以shield @ interval 9s承担核心机制。",
-        "keywords": [
-          "shield @ interval 9s"
-        ],
-        "buildFit": "周期补盾，不依赖波次节奏"
-      },
-      "aegis1x": {
-        "name": "破盾新星",
-        "summary": "passive → novaOnBreak（全表唯一持有者）破盾时对周围伤害并击退",
-        "intent": "兑现接口：passive → novaOnBreak（全表唯一持有者）破盾时对周围伤害并击退",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "passive → novaOnBreak（全表唯一持有者）破盾时对周围伤害并击退"
-      },
-      "aegis2x": {
-        "name": "盾域",
-        "summary": "passive → aura 减伤光环，范围内召唤物同享保护",
-        "intent": "传播接口：passive → aura 减伤光环，范围内召唤物同享保护",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "passive → aura 减伤光环，范围内召唤物同享保护"
-      },
-      "aegis3x": {
-        "name": "盾能转化",
-        "summary": "onWaveStart → 若上一波未破盾，则 restore + statBuff",
-        "intent": "转化接口：onWaveStart → 若上一波未破盾，则 restore + statBuff",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "onWaveStart → 若上一波未破盾，则 restore + statBuff"
-      }
-    },
-    "thorns": {
-      "thornsA": {
-        "name": "荆棘",
-        "summary": "突破者受到按比例反伤（反伤致死按击杀结算，有奖励）",
-        "intent": "荆棘以thorns @ passive承担核心机制。",
-        "keywords": [
-          "thorns @ passive"
-        ],
-        "buildFit": "突破者受到按比例反伤（反伤致死按击杀结算，有奖励）"
-      },
-      "thornsB": {
-        "name": "荆棘环",
-        "summary": "核心贴身荆棘环，持续伤害进入者",
-        "intent": "荆棘环以aura @ passive承担核心机制。",
-        "keywords": [
-          "aura @ passive"
-        ],
-        "buildFit": "核心贴身荆棘环，持续伤害进入者"
-      },
-      "thornsC": {
-        "name": "突破反刺",
-        "summary": "突破坐标爆发反刺",
-        "intent": "突破反刺以burstDamage @ onBreach（按 point）承担核心机制。",
-        "keywords": [
-          "burstDamage @ onBreach（按 point）"
-        ],
-        "buildFit": "突破坐标爆发反刺"
-      },
-      "thorns1x": {
-        "name": "荆棘爆发",
-        "summary": "onBreach（按 point，cd 3s）→ burstDamage，倍率随当前 thorns 累计比例提升",
-        "intent": "兑现接口：onBreach（按 point，cd 3s）→ burstDamage，倍率随当前 thorns 累计比例提升",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onBreach（按 point，cd 3s）→ burstDamage，倍率随当前 thorns 累计比例提升"
-      },
-      "thorns2x": {
-        "name": "荆棘蔓延",
-        "summary": "passive → aura 扩张，且 thorns 对光环内敌人也生效",
-        "intent": "传播接口：passive → aura 扩张，且 thorns 对光环内敌人也生效",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "passive → aura 扩张，且 thorns 对光环内敌人也生效"
-      },
-      "thorns3x": {
-        "name": "荆棘吸收",
-        "summary": "onBreach（按 point，cd 5s）→ restore（把承受转成回复）",
-        "intent": "转化接口：onBreach（按 point，cd 5s）→ restore（把承受转成回复）",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "onBreach（按 point，cd 5s）→ restore（把承受转成回复）"
-      }
-    },
-    "decoy": {
-      "decoyA": {
-        "name": "诱饵",
-        "summary": "波开始召唤一具诱饵吸引攻击",
-        "intent": "诱饵以summon(kind='decoy') @ onWaveStart承担核心机制。",
-        "keywords": [
-          "summon(kind='decoy') @ onWaveStart"
-        ],
-        "buildFit": "波开始召唤一具诱饵吸引攻击"
-      },
-      "decoyB": {
-        "name": "诱饵阵",
-        "summary": "周期补充诱饵，场上可同时存在多具",
-        "intent": "诱饵阵以summon(decoy) @ interval 9s承担核心机制。",
-        "keywords": [
-          "summon(decoy) @ interval 9s"
-        ],
-        "buildFit": "周期补充诱饵，场上可同时存在多具"
-      },
-      "decoyC": {
-        "name": "爆裂诱饵",
-        "summary": "诱饵死亡时爆炸",
-        "intent": "爆裂诱饵以summon(decoy, explodeDamageMul>0) @ onWaveStart承担核心机制。",
-        "keywords": [
-          "summon(decoy, explodeDamageMul>0) @ onWaveStart"
-        ],
-        "buildFit": "诱饵死亡时爆炸"
-      },
-      "decoy1x": {
-        "name": "引爆",
-        "summary": "passive → summon.explodeDamageMul 大幅提升",
-        "intent": "兑现接口：passive → summon.explodeDamageMul 大幅提升",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "passive → summon.explodeDamageMul 大幅提升"
-      },
-      "decoy2x": {
-        "name": "图腾阵列",
-        "summary": "onWaveStart → 额外召唤 +1，且诱饵存在时 aura 减伤区以炮台为心展开",
-        "intent": "传播接口：onWaveStart → 额外召唤 +1，且诱饵存在时 aura 减伤区以炮台为心展开",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onWaveStart → 额外召唤 +1，且诱饵存在时 aura 减伤区以炮台为心展开"
-      },
-      "decoy3x": {
-        "name": "献祭",
-        "summary": "passive → 诱饵存在时 breachReduction + interval 5s restore",
-        "intent": "转化接口：passive → 诱饵存在时 breachReduction + interval 5s restore",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "passive → 诱饵存在时 breachReduction + interval 5s restore"
-      }
-    },
-    "sanctum": {
-      "sanctumA": {
-        "name": "圣域",
-        "summary": "核心周围常驻减伤圣域",
-        "intent": "圣域以aura @ passive承担核心机制。",
-        "keywords": [
-          "aura @ passive"
-        ],
-        "buildFit": "核心周围常驻减伤圣域"
-      },
-      "sanctumB": {
-        "name": "扩张圣域",
-        "summary": "周期向外推出扩张环，短时覆盖更远",
-        "intent": "扩张圣域以aura @ interval 4s承担核心机制。",
-        "keywords": [
-          "aura @ interval 4s"
-        ],
-        "buildFit": "周期向外推出扩张环，短时覆盖更远"
-      },
-      "sanctumC": {
-        "name": "波末圣域",
-        "summary": "每波开始建立强化圣域，随波次推进衰减",
-        "intent": "波末圣域以aura+breachReduction @ onWaveStart承担核心机制。",
-        "keywords": [
-          "aura+breachReduction @ onWaveStart"
-        ],
-        "buildFit": "每波开始建立强化圣域，随波次推进衰减"
-      },
-      "sanctum1x": {
-        "name": "圣域反击",
-        "summary": "onBreach（按 point，cd 4s）→ burstDamage 范围，倍率随圣域减伤比提升",
-        "intent": "兑现接口：onBreach（按 point，cd 4s）→ burstDamage 范围，倍率随圣域减伤比提升",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onBreach（按 point，cd 4s）→ burstDamage 范围，倍率随圣域减伤比提升"
-      },
-      "sanctum2x": {
-        "name": "圣域延展",
-        "summary": "passive → aura 半径随场上敌人数增长（封顶）",
-        "intent": "传播接口：passive → aura 半径随场上敌人数增长（封顶）",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "passive → aura 半径随场上敌人数增长（封顶）"
-      },
-      "sanctum3x": {
-        "name": "圣域回复",
-        "summary": "interval 5s → 该周期内无突破则 restore",
-        "intent": "转化接口：interval 5s → 该周期内无突破则 restore",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "interval 5s → 该周期内无突破则 restore"
-      }
-    },
-    "sentinel": {
-      "sentinelA": {
-        "name": "哨戒",
-        "summary": "召唤镜像炮塔协同射击",
-        "intent": "哨戒以summon(kind='mirrorTurret') @ onWaveStart承担核心机制。",
-        "keywords": [
-          "summon(kind='mirrorTurret') @ onWaveStart"
-        ],
-        "buildFit": "召唤镜像炮塔协同射击"
-      },
-      "sentinelB": {
-        "name": "轨道哨戒",
-        "summary": "召唤环绕轨道单位，覆盖面更广",
-        "intent": "轨道哨戒以summon(kind='orbital') @ onWaveStart承担核心机制。",
-        "keywords": [
-          "summon(kind='orbital') @ onWaveStart"
-        ],
-        "buildFit": "召唤环绕轨道单位，覆盖面更广"
-      },
-      "sentinelC": {
-        "name": "应急哨戒",
-        "summary": "突破坐标紧急部署哨戒",
-        "intent": "应急哨戒以summon(mirrorTurret) @ onBreach（按 point）承担核心机制。",
-        "keywords": [
-          "summon(mirrorTurret) @ onBreach（按 point）"
-        ],
-        "buildFit": "突破坐标紧急部署哨戒"
-      },
-      "sentinel1x": {
-        "name": "哨戒火力",
-        "summary": "passive → 哨戒伤害提升；壁垒存在时额外再提升",
-        "intent": "兑现接口：passive → 哨戒伤害提升；壁垒存在时额外再提升",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "passive → 哨戒伤害提升；壁垒存在时额外再提升"
-      },
-      "sentinel2x": {
-        "name": "哨戒阵",
-        "summary": "onWaveStart → 哨戒数量 +1",
-        "intent": "传播接口：onWaveStart → 哨戒数量 +1",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onWaveStart → 哨戒数量 +1"
-      },
-      "sentinel3x": {
-        "name": "哨戒护盾",
-        "summary": "passive → 每有一具哨戒存活，提供一档 breachReduction",
-        "intent": "转化接口：passive → 每有一具哨戒存活，提供一档 breachReduction",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "passive → 每有一具哨戒存活，提供一档 breachReduction"
-      }
-    },
-    "retribution": {
-      "retributionA": {
-        "name": "天罚",
-        "summary": "突破坐标降下天罚",
-        "intent": "天罚以burstDamage @ onBreach（按 point）承担核心机制。",
-        "keywords": [
-          "burstDamage @ onBreach（按 point）"
-        ],
-        "buildFit": "突破坐标降下天罚"
-      },
-      "retributionB": {
-        "name": "震慑",
-        "summary": "大范围震慑并击退",
-        "intent": "震慑以aoeOnHit+knockback @ onBreach（按 point）承担核心机制。",
-        "keywords": [
-          "aoeOnHit+knockback @ onBreach（按 point）"
-        ],
-        "buildFit": "大范围震慑并击退"
-      },
-      "retributionC": {
-        "name": "蓄能天罚",
-        "summary": "倍率随「上次突破以来的时长」累积，越久未破越强",
-        "intent": "蓄能天罚以burstDamage @ onBreach（按 point）承担核心机制。",
-        "keywords": [
-          "burstDamage @ onBreach（按 point）"
-        ],
-        "buildFit": "倍率随「上次突破以来的时长」累积，越久未破越强"
-      },
-      "retribution1x": {
-        "name": "审判",
-        "summary": "onBreach（按 point）→ burstDamage，倍率随壁垒剩余容量提升",
-        "intent": "兑现接口：onBreach（按 point）→ burstDamage，倍率随壁垒剩余容量提升",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onBreach（按 point）→ burstDamage，倍率随壁垒剩余容量提升"
-      },
-      "retribution2x": {
-        "name": "连环天罚",
-        "summary": "onBreach（按 point，cd 5s）→ aura 短时全场增伤",
-        "intent": "传播接口：onBreach（按 point，cd 5s）→ aura 短时全场增伤",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onBreach（按 point，cd 5s）→ aura 短时全场增伤"
-      },
-      "retribution3x": {
-        "name": "罪罚转化",
-        "summary": "onBreach（按 point，cd 6s）→ restore + statBuff 伤害",
-        "intent": "转化接口：onBreach（按 point，cd 6s）→ restore + statBuff 伤害",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "onBreach（按 point，cd 6s）→ restore + statBuff 伤害"
-      }
-    },
-    "ironvine": {
-      "ironvineA": {
-        "name": "铁蔓",
-        "summary": "反伤；且「距上次突破的时长」越久，伤害加成越高（封顶）",
-        "intent": "铁蔓以thorns+statBuff @ passive承担核心机制。",
-        "keywords": [
-          "thorns+statBuff @ passive"
-        ],
-        "buildFit": "反伤；且「距上次突破的时长」越久，伤害加成越高（封顶）"
-      },
-      "ironvineB": {
-        "name": "蔓生领域",
-        "summary": "常驻铁蔓领域，范围内敌人持续受伤",
-        "intent": "蔓生领域以aura @ passive承担核心机制。",
-        "keywords": [
-          "aura @ passive"
-        ],
-        "buildFit": "常驻铁蔓领域，范围内敌人持续受伤"
-      },
-      "ironvineC": {
-        "name": "守成结算",
-        "summary": "上一波无突破则获得整波强化",
-        "intent": "守成结算以statBuff @ onWaveStart承担核心机制。",
-        "keywords": [
-          "statBuff @ onWaveStart"
-        ],
-        "buildFit": "上一波无突破则获得整波强化"
-      },
-      "ironvine1x": {
-        "name": "荆棘收割",
-        "summary": "onBreach（按 point，cd 3s）→ burstDamage，倍率随累计 thorns 提升",
-        "intent": "兑现接口：onBreach（按 point，cd 3s）→ burstDamage，倍率随累计 thorns 提升",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onBreach（按 point，cd 3s）→ burstDamage，倍率随累计 thorns 提升"
-      },
-      "ironvine2x": {
-        "name": "蔓延",
-        "summary": "passive → aura 扩张 + thorns 追加一档",
-        "intent": "传播接口：passive → aura 扩张 + thorns 追加一档",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "passive → aura 扩张 + thorns 追加一档"
-      },
-      "ironvine3x": {
-        "name": "保护投入",
-        "summary": "passive → mergeMaterialRefund（磐垒例外持有的经济规则原子，全表首次启用）+ 无突破波次结束时 extraDrop",
-        "intent": "转化接口：passive → mergeMaterialRefund（磐垒例外持有的经济规则原子，全表首次启用）+ 无突破波次结束时 extraDrop",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "passive → mergeMaterialRefund（磐垒例外持有的经济规则原子，全表首次启用）+ 无突破波次结束时 extraDrop"
-      }
-    },
-    "harvest": {
-      "harvestA": {
-        "name": "眷恋",
-        "summary": "常驻标记场上最高价值目标（赏印），并提高掉率",
-        "intent": "眷恋以focusPriority + dropRateMul @ passive承担核心机制。",
-        "keywords": [
-          "focusPriority + dropRateMul @ passive"
-        ],
-        "buildFit": "常驻标记场上最高价值目标（赏印），并提高掉率"
-      },
-      "harvestB": {
-        "name": "广域眷顾",
-        "summary": "周期同时标记多个目标",
-        "intent": "广域眷顾以focusPriority @ interval 3s承担核心机制。",
-        "keywords": [
-          "focusPriority @ interval 3s"
-        ],
-        "buildFit": "周期同时标记多个目标"
-      },
-      "harvestC": {
-        "name": "拾取眷顾",
-        "summary": "每次拾取掉落时标记一个新目标——把拾取动作接进循环",
-        "intent": "拾取眷顾以focusPriority @ onPickup承担核心机制。",
-        "keywords": [
-          "focusPriority @ onPickup"
-        ],
-        "buildFit": "每次拾取掉落时标记一个新目标——把拾取动作接进循环"
-      },
-      "harvest1x": {
-        "name": "兑现",
-        "summary": "onKill + requiresStatus:'brand' → 死亡坐标 extraDrop",
-        "intent": "兑现接口：onKill + requiresStatus:'brand' → 死亡坐标 extraDrop",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onKill + requiresStatus:'brand' → 死亡坐标 extraDrop"
-      },
-      "harvest2x": {
-        "name": "印记扩散",
-        "summary": "onPickup → 追加 focusPriority 标记，拾取越勤标记越多",
-        "intent": "传播接口：onPickup → 追加 focusPriority 标记，拾取越勤标记越多",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onPickup → 追加 focusPriority 标记，拾取越勤标记越多"
-      },
-      "harvest3x": {
-        "name": "丰收转化",
-        "summary": "passive → dropLifetimeMul + expiryConvert（掉落更久、过期不浪费）",
-        "intent": "转化接口：passive → dropLifetimeMul + expiryConvert（掉落更久、过期不浪费）",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "passive → dropLifetimeMul + expiryConvert（掉落更久、过期不浪费）"
-      }
-    },
-    "fateLoom": {
-      "fateLoomA": {
-        "name": "织机",
-        "summary": "每次合成时向场上释放一次脉冲伤害",
-        "intent": "织机以mergePulse @ onMerge承担核心机制。",
-        "keywords": [
-          "mergePulse @ onMerge"
-        ],
-        "buildFit": "每次合成时向场上释放一次脉冲伤害"
-      },
-      "fateLoomB": {
-        "name": "织网",
-        "summary": "脉冲范围扩大，并留下短时增伤区",
-        "intent": "织网以mergePulse + aura @ onMerge承担核心机制。",
-        "keywords": [
-          "mergePulse + aura @ onMerge"
-        ],
-        "buildFit": "脉冲范围扩大，并留下短时增伤区"
-      },
-      "fateLoomC": {
-        "name": "波末织机",
-        "summary": "波开始自动脉冲，不依赖玩家合成频率",
-        "intent": "波末织机以mergePulse @ onWaveStart承担核心机制。",
-        "keywords": [
-          "mergePulse @ onWaveStart"
-        ],
-        "buildFit": "波开始自动脉冲，不依赖玩家合成频率"
-      },
-      "fateLoom1x": {
-        "name": "命运兑现",
-        "summary": "onKill + requiresStatus:'brand' → 死亡坐标 burstDamage + extraDrop",
-        "intent": "兑现接口：onKill + requiresStatus:'brand' → 死亡坐标 burstDamage + extraDrop",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onKill + requiresStatus:'brand' → 死亡坐标 burstDamage + extraDrop"
-      },
-      "fateLoom2x": {
-        "name": "织网扩张",
-        "summary": "onMerge → aura 短时全场增伤",
-        "intent": "传播接口：onMerge → aura 短时全场增伤",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onMerge → aura 短时全场增伤"
-      },
-      "fateLoom3x": {
-        "name": "命运转化",
-        "summary": "onMerge → wildcardRewardBonus（丰饶独占，全表首次启用）合成推高万能卡奖励",
-        "intent": "转化接口：onMerge → wildcardRewardBonus（丰饶独占，全表首次启用）合成推高万能卡奖励",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "onMerge → wildcardRewardBonus（丰饶独占，全表首次启用）合成推高万能卡奖励"
-      }
-    },
-    "goldenVolley": {
-      "goldenVolleyA": {
-        "name": "鎏金弹",
-        "summary": "贯穿弹，每个穿透目标各获赏印（逐个 onHit）",
-        "intent": "鎏金弹以pierce + focusPriority @ onFire承担核心机制。",
-        "keywords": [
-          "pierce + focusPriority @ onFire"
-        ],
-        "buildFit": "贯穿弹，每个穿透目标各获赏印（逐个 onHit）"
-      },
-      "goldenVolleyB": {
-        "name": "金雨",
-        "summary": "命中分裂，弹片各自标记",
-        "intent": "金雨以split + focusPriority @ onHit承担核心机制。",
-        "keywords": [
-          "split + focusPriority @ onHit"
-        ],
-        "buildFit": "命中分裂，弹片各自标记"
-      },
-      "goldenVolleyC": {
-        "name": "定点鎏金",
-        "summary": "换形金色光束，持续标记路径目标",
-        "intent": "定点鎏金以beamMorph + focusPriority @ passive承担核心机制。",
-        "keywords": [
-          "beamMorph + focusPriority @ passive"
-        ],
-        "buildFit": "换形金色光束，持续标记路径目标"
-      },
-      "goldenVolley1x": {
-        "name": "赏金兑现",
-        "summary": "onHit + requiresStatus:'brand' → burstDamage（贯穿并发时逐个触发）",
-        "intent": "兑现接口：onHit + requiresStatus:'brand' → burstDamage（贯穿并发时逐个触发）",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onHit + requiresStatus:'brand' → burstDamage（贯穿并发时逐个触发）"
-      },
-      "goldenVolley2x": {
-        "name": "印记扩散",
-        "summary": "onHit + requiresStatus:'brand' → aoeOnHit 无伤害版，传染赏印",
-        "intent": "传播接口：onHit + requiresStatus:'brand' → aoeOnHit 无伤害版，传染赏印",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onHit + requiresStatus:'brand' → aoeOnHit 无伤害版，传染赏印"
-      },
-      "goldenVolley3x": {
-        "name": "鎏金回收",
-        "summary": "onKill + requiresStatus:'brand' → 死亡坐标 extraDrop",
-        "intent": "转化接口：onKill + requiresStatus:'brand' → 死亡坐标 extraDrop",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "onKill + requiresStatus:'brand' → 死亡坐标 extraDrop"
-      }
-    },
-    "bountyCall": {
-      "bountyCallA": {
-        "name": "号令",
-        "summary": "波开始标记若干高价值目标",
-        "intent": "号令以focusPriority @ onWaveStart承担核心机制。",
-        "keywords": [
-          "focusPriority @ onWaveStart"
-        ],
-        "buildFit": "波开始标记若干高价值目标"
-      },
-      "bountyCallB": {
-        "name": "广域号令",
-        "summary": "周期滚动标记，始终维持多个赏印",
-        "intent": "广域号令以focusPriority @ interval 3s承担核心机制。",
-        "keywords": [
-          "focusPriority @ interval 3s"
-        ],
-        "buildFit": "周期滚动标记，始终维持多个赏印"
-      },
-      "bountyCallC": {
-        "name": "拾取号令",
-        "summary": "拾取即追加标记，拾取节奏直接决定标记数",
-        "intent": "拾取号令以focusPriority @ onPickup承担核心机制。",
-        "keywords": [
-          "focusPriority @ onPickup"
-        ],
-        "buildFit": "拾取即追加标记，拾取节奏直接决定标记数"
-      },
-      "bountyCall1x": {
-        "name": "悬赏兑现",
-        "summary": "onKill + requiresStatus:'brand' → 死亡坐标 burstDamage + extraDrop",
-        "intent": "兑现接口：onKill + requiresStatus:'brand' → 死亡坐标 burstDamage + extraDrop",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onKill + requiresStatus:'brand' → 死亡坐标 burstDamage + extraDrop"
-      },
-      "bountyCall2x": {
-        "name": "号令扩散",
-        "summary": "onKill + requiresStatus:'brand' → 死亡坐标短时 aura，进入者获赏印",
-        "intent": "传播接口：onKill + requiresStatus:'brand' → 死亡坐标短时 aura，进入者获赏印",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onKill + requiresStatus:'brand' → 死亡坐标短时 aura，进入者获赏印"
-      },
-      "bountyCall3x": {
-        "name": "号令转化",
-        "summary": "passive → 赏印目标死亡时 xpMul 提升 + dropRateMul",
-        "intent": "转化接口：passive → 赏印目标死亡时 xpMul 提升 + dropRateMul",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "passive → 赏印目标死亡时 xpMul 提升 + dropRateMul"
-      }
-    },
-    "overgrowth": {
-      "overgrowthA": {
-        "name": "蔓生",
-        "summary": "常驻蔓生领域，范围内敌人持续受伤且掉落存在更久",
-        "intent": "蔓生以aura @ passive承担核心机制。",
-        "keywords": [
-          "aura @ passive"
-        ],
-        "buildFit": "常驻蔓生领域，范围内敌人持续受伤且掉落存在更久"
-      },
-      "overgrowthB": {
-        "name": "蔓延",
-        "summary": "周期向外扩张一圈蔓生",
-        "intent": "蔓延以aura @ interval 4s承担核心机制。",
-        "keywords": [
-          "aura @ interval 4s"
-        ],
-        "buildFit": "周期向外扩张一圈蔓生"
-      },
-      "overgrowthC": {
-        "name": "波末蔓生",
-        "summary": "每波开始建立强化蔓生，延长本波掉落时限",
-        "intent": "波末蔓生以aura + dropLifetimeMul @ onWaveStart承担核心机制。",
-        "keywords": [
-          "aura + dropLifetimeMul @ onWaveStart"
-        ],
-        "buildFit": "每波开始建立强化蔓生，延长本波掉落时限"
-      },
-      "overgrowth1x": {
-        "name": "蔓生绞杀",
-        "summary": "interval 3s → 对场上全部 brand 目标各自位置施加 burstDamage",
-        "intent": "兑现接口：interval 3s → 对场上全部 brand 目标各自位置施加 burstDamage",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "interval 3s → 对场上全部 brand 目标各自位置施加 burstDamage"
-      },
-      "overgrowth2x": {
-        "name": "蔓延传播",
-        "summary": "onPickup → aura 短时扩张，拾取越勤领域越大",
-        "intent": "传播接口：onPickup → aura 短时扩张，拾取越勤领域越大",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onPickup → aura 短时扩张，拾取越勤领域越大"
-      },
-      "overgrowth3x": {
-        "name": "蔓生丰收",
-        "summary": "passive → dropLifetimeMul + onPickup → restore",
-        "intent": "转化接口：passive → dropLifetimeMul + onPickup → restore",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "passive → dropLifetimeMul + onPickup → restore"
-      }
-    },
-    "springOfLife": {
-      "springOfLifeA": {
-        "name": "涌泉",
-        "summary": "每次拾取掉落回复生命",
-        "intent": "涌泉以restore @ onPickup承担核心机制。",
-        "keywords": [
-          "restore @ onPickup"
-        ],
-        "buildFit": "每次拾取掉落回复生命"
-      },
-      "springOfLifeB": {
-        "name": "泉域",
-        "summary": "常驻泉域，周期回复",
-        "intent": "泉域以aura + restore @ passive + interval 4s承担核心机制。",
-        "keywords": [
-          "aura + restore @ passive + interval 4s"
-        ],
-        "buildFit": "常驻泉域，周期回复"
-      },
-      "springOfLifeC": {
-        "name": "波末涌泉",
-        "summary": "每波开始大幅回复并提升生命上限",
-        "intent": "波末涌泉以restore + statBuff 最大生命 @ onWaveStart承担核心机制。",
-        "keywords": [
-          "restore + statBuff 最大生命 @ onWaveStart"
-        ],
-        "buildFit": "每波开始大幅回复并提升生命上限"
-      },
-      "springOfLife1x": {
-        "name": "涌泉爆发",
-        "summary": "onKill + requiresStatus:'brand' → 死亡坐标 restore 大量",
-        "intent": "兑现接口：onKill + requiresStatus:'brand' → 死亡坐标 restore 大量",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onKill + requiresStatus:'brand' → 死亡坐标 restore 大量"
-      },
-      "springOfLife2x": {
-        "name": "泉水蔓延",
-        "summary": "onPickup → aura 短时扩张",
-        "intent": "传播接口：onPickup → aura 短时扩张",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onPickup → aura 短时扩张"
-      },
-      "springOfLife3x": {
-        "name": "过量转化",
-        "summary": "passive → expiryConvert（过期掉落转为回复而非浪费）",
-        "intent": "转化接口：passive → expiryConvert（过期掉落转为回复而非浪费）",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "passive → expiryConvert（过期掉落转为回复而非浪费）"
-      }
-    },
-    "luckyStar": {
-      "luckyStarA": {
-        "name": "吉星",
-        "summary": "常驻提高掉率与奖励积分",
-        "intent": "吉星以dropRateMul + xpMul @ passive承担核心机制。",
-        "keywords": [
-          "dropRateMul + xpMul @ passive"
-        ],
-        "buildFit": "常驻提高掉率与奖励积分"
-      },
-      "luckyStarB": {
-        "name": "星域",
-        "summary": "周期在最密集敌群处直接掉落",
-        "intent": "星域以extraDrop @ interval 5s承担核心机制。",
-        "keywords": [
-          "extraDrop @ interval 5s"
-        ],
-        "buildFit": "周期在最密集敌群处直接掉落"
-      },
-      "luckyStarC": {
-        "name": "拾取吉星",
-        "summary": "每次拾取有概率再掉一个，形成拾取连锁",
-        "intent": "拾取吉星以extraDrop @ onPickup承担核心机制。",
-        "keywords": [
-          "extraDrop @ onPickup"
-        ],
-        "buildFit": "每次拾取有概率再掉一个，形成拾取连锁"
-      },
-      "luckyStar1x": {
-        "name": "吉星兑现",
-        "summary": "onKill + requiresStatus:'brand' → 死亡坐标高概率 extraDrop",
-        "intent": "兑现接口：onKill + requiresStatus:'brand' → 死亡坐标高概率 extraDrop",
-        "keywords": [
-          "兑现"
-        ],
-        "buildFit": "onKill + requiresStatus:'brand' → 死亡坐标高概率 extraDrop"
-      },
-      "luckyStar2x": {
-        "name": "星运扩散",
-        "summary": "onMerge → mergePulse + 追加 focusPriority 标记",
-        "intent": "传播接口：onMerge → mergePulse + 追加 focusPriority 标记",
-        "keywords": [
-          "传播"
-        ],
-        "buildFit": "onMerge → mergePulse + 追加 focusPriority 标记"
-      },
-      "luckyStar3x": {
-        "name": "转运",
-        "summary": "passive → expiryConvert + dropLifetimeMul",
-        "intent": "转化接口：passive → expiryConvert + dropLifetimeMul",
-        "keywords": [
-          "转化"
-        ],
-        "buildFit": "passive → expiryConvert + dropLifetimeMul"
-      }
-    }
-  },
-  "intermission": {
-    "title": "第 {wave} 波结束",
-    "steps": {
-      "rewardChoice": "选择本波强化",
-      "settle": "正在结算本波成果",
-      "godDecision": "等待神池决策完成",
-      "free": "自由整备：可整理手牌与装备"
-    },
-    "countdown": "{seconds} 秒后自动准备完成",
-    "waiting": "完成选择后进入自由整备",
-    "ready": "准备完成",
-    "rewardsTitle": "本波基础奖励",
-    "selectedRewardTitle": "本波强化选择",
-    "rewardStats": {
-      "damageAdd": "基础伤害",
-      "fireRateAdd": "基础射速",
-      "rangeAdd": "基础射程",
-      "multiAdd": "同发数",
-      "maxHpAdd": "心防上限",
-      "heal": "恢复心防"
-    }
-  },
-  "toast": {
-    "waveStart": "第 {wave} 波追求者开始",
-    "waveClear": "第 {wave} 波完成 · 整理卡槽",
-    "waveBoss": "命定追求者现身——击败它获取万能卡",
-    "bossContactStarted": "命定追求者已突破防线，正在持续侵蚀",
-    "bossReward": "击败 Boss：获得 {desc}",
-    "testDrops": "地面生成四份{name}测试掉落，可合成3星",
-    "testWildcards": "获得 1–5★ 万能卡各 1 张",
-    "wildcardsGranted": "获得 {desc}",
-    "mergeRefunded": "合成补贴：获得 {granted} 张 {star}★ {name}素材卡",
-    "mergeRefundLost": "合成补贴丢失：手牌已满，损失 {lost} 张 {star}★ {name}素材卡",
-    "mergeRefundPartial": "合成补贴：获得 {granted} 张 {star}★ {name}素材卡；手牌已满，损失 {lost} 张",
-    "wildcardMerged": "万能合成：{name} 升至 {star}★",
-    "wildcardMissing": "没有 {star}★ 万能卡",
-    "wildcardMaxStar": "目标已是最高星级",
-    "cardsFull": "卡槽已满：先消耗或腾出位置",
-    "collectMerged": "拾取成功 · 自动合成 {count} 次",
-    "collect": "拾取 {name}卡",
-    "equipFull": "装备栏已满：请拖到指定装备位进行替换",
-    "equipRejectedStar": "星级不足：{threshold}星起可装备",
-    "equipRejectedDuplicate": "同类型装备唯一：同型同星可拖上去喂养升星",
-    "swapped": "已交换：{a} ↔ {b}",
-    "moved": "已移动{name}卡{mergeSuffix}",
-    "fed": "喂养成功：{name}升至 {star}星",
-    "skillConsumed": "消耗释放：{star}星{name}",
-    "equipped": "已装备：{star}星{name}",
-    "shieldBroken": "护盾破裂！",
-    "shieldRestored": "护盾重铸",
-    "breakthrough": "私人空间受压 -{damage}",
-    "bountyAccepted": "已接受赏金：迎战{name}敌群",
-    "bountyCompleted": "赏金完成：{name}奖励已落地",
-    "bountyFailed": "赏金失败：敌群已突破防线",
-    "tunerReset": "已恢复默认参数",
-    "waveBaseRewardChosen": "{stat} +{add} 已生效",
-    "mergeSuffix": "，自动合成 {count} 次"
-  },
-  "wildcard": {
-    "name": "万能",
-    "hint": "拖到同星卡/装备升星"
-  },
-  "result": {
-    "winTitle": "守住了心防",
-    "loseTitle": "被热情淹没",
-    "winDesc": "魅魔主角温和而坚定地守住了私人空间。你拾取 {collected} 份心意，错过 {expired} 份。",
-    "loseDesc": "追求者突破了中心防线。你拾取 {collected} 份心意、错过 {expired} 份；下一局试着调整射程与拾取节奏。",
-    "scoreTotal": "总分",
-    "scoreWin": "通关",
-    "scoreWaves": "波数",
-    "scoreKills": "击杀",
-    "scoreHp": "心防",
-    "scoreBuild": "构筑",
-    "scoreWildcards": "万能卡结余",
-    "topLane": "主要流派：{lane}",
-    "highestCard": "最高成就：{star}★{name}"
-  },
-  "cards": {
-    "chainLightning": {
-      "name": "连锁闪电",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "连锁闪电强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "连锁闪电终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 链弧/电轨/雷暴",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "连锁闪电强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "连锁闪电再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "连锁闪电终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "以雷链为载体的感电铺设核心；链走到哪，感电铺到哪。"
-    },
-    "pierce": {
-      "name": "雷霆贯枪",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "雷霆贯枪强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "雷霆贯枪终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 穿刺/裂空/蓄力雷击",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "雷霆贯枪强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "雷霆贯枪再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "雷霆贯枪终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "并发兑现的主载体；穿几个，兑现几次。"
-    },
-    "staticSurge": {
-      "name": "静电充能",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "静电充能强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "静电充能终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 静电场/感应环/蓄电爆",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "静电充能强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "静电充能再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "静电充能终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "感电的控制向出口；铺得越广，锁得越死。"
-    },
-    "stormcall": {
-      "name": "唤雷",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "唤雷强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "唤雷终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 引雷针/雷云/落雷阵",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "唤雷强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "唤雷再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "唤雷终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "迅霆的区域表达：天空落雷与移动雷云。"
-    },
-    "arcSplitter": {
-      "name": "弧光裂片",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "弧光裂片强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "弧光裂片终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 裂片/散射/跳弹",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "弧光裂片强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "弧光裂片再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "弧光裂片终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "面状并发铺设；弹片越多，感电越广。"
-    },
-    "galvanicWard": {
-      "name": "电磁壁垒",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "电磁壁垒强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "电磁壁垒终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 斥力场/环形放电/紧急放电",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "电磁壁垒强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "电磁壁垒再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "电磁壁垒终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "拒止式防御；感电即边界。"
-    },
-    "overcharge": {
-      "name": "过载核心",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "过载核心强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "过载核心终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 过载/超载力场/临界放电",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "过载核心强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "过载核心再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "过载核心终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "迅霆的经济：并发数就是收益率。（现存三个 3★ 同构，本卡全部重写）"
-    },
-    "frost": {
-      "name": "霜寒",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "霜寒强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "霜寒终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 霜触/霜幕/冰封脉冲",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "霜寒强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "霜寒再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "霜寒终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "寒意铺设核心；一切冰封从这里开始。"
-    },
-    "impact": {
-      "name": "凛冬重锤",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "凛冬重锤强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "凛冬重锤终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 重击/震荡波/落锤",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "凛冬重锤强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "凛冬重锤再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "凛冬重锤终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "冰封的出口：碎冰重锤。"
-    },
-    "glacialSpike": {
-      "name": "冰锥",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "冰锥强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "冰锥终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 冰锥/冰雨/冰枪",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "冰锥强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "冰锥再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "冰锥终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "凛冬的弹道表达；每一发都在叠阈值。"
-    },
-    "permafrost": {
-      "name": "冻土",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "冻土强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "冻土终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 冻原/霜环扩张/冰封地带",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "冻土强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "冻土再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "冻土终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "凛冬的领域表达。（现存三个 3★ 同构，本卡全部重写）"
-    },
-    "iceTomb": {
-      "name": "冰棺",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "冰棺强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "冰棺终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 封棺/冰牢群/定时冰封",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "冰棺强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "冰棺再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "冰棺终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "阈值的快进键：点名冰封。"
-    },
-    "frozenBulwark": {
-      "name": "冰晶壁垒",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "冰晶壁垒强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "冰晶壁垒终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 霜盾/冰墙/紧急冰封",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "冰晶壁垒强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "冰晶壁垒再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "冰晶壁垒终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "不承受伤害，只冻结来路。"
-    },
-    "hoarfrostTithe": {
-      "name": "霜税",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "霜税强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "霜税终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 霜税/收缴领域/结算脉冲",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "霜税强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "霜税再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "霜税终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "凛冬的经济：冻住的都是资产。"
-    },
-    "scorch": {
-      "name": "灼心",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "灼心强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "灼心终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 灼触/火场/燃烧脉冲",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "灼心强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "灼心再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "灼心终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "灼烧铺设核心；燃烧面积就是伤害面积。"
-    },
-    "splitBlast": {
-      "name": "爆裂弹",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "爆裂弹强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "爆裂弹终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 爆裂/散弹/迫击",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "爆裂弹强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "爆裂弹再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "爆裂弹终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "灼烧的出口：哪里在烧，往哪里开炮。"
-    },
-    "meteor": {
-      "name": "陨星",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "陨星强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "陨星终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 陨石/流星雨/定点轰击",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "陨星强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "陨星再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "陨星终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "焚狱的天空炮：每一发都是地形改造。"
-    },
-    "magmaPool": {
-      "name": "熔岩池",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "熔岩池强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "熔岩池终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 熔池/岩浆潮/喷发",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "熔岩池强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "熔岩池再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "熔岩池终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "焚狱的领地：地板本身就是武器。（现存三个 3★ 同构，本卡全部重写）"
-    },
-    "flashfire": {
-      "name": "爆燃冲击",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "爆燃冲击强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "爆燃冲击终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 爆燃/冲击波/定时爆燃",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "爆燃冲击强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "爆燃冲击再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "爆燃冲击终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "焚狱的控制：用爆压推回敌线。（现存三个 3★ 同构，本卡全部重写）"
-    },
-    "cinderheart": {
-      "name": "烬心",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "烬心强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "烬心终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 炽热外壳/燃烧地带/突破焚烧",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "烬心强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "烬心再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "烬心终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "靠近即燃烧。"
-    },
-    "ashHarvest": {
-      "name": "燃灰",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "燃灰强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "燃灰终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 燃灰/灰烬场/焚化脉冲",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "燃灰强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "燃灰再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "燃灰终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "焚狱的经济：火烧得越旺，灰里淘出越多。"
-    },
-    "aegis": {
-      "name": "神盾",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "神盾强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "神盾终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 护盾/再生盾/应激盾",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "神盾强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "神盾再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "神盾终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "壁垒的唯一供应商。"
-    },
-    "thorns": {
-      "name": "荆棘",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "荆棘强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "荆棘终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 荆棘/荆棘环/突破反刺",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "荆棘强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "荆棘再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "荆棘终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "磐垒的出口：让撞墙者付出代价。"
-    },
-    "decoy": {
-      "name": "磐垒图腾",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "磐垒图腾强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "磐垒图腾终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 诱饵/诱饵阵/爆裂诱饵",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "磐垒图腾强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "磐垒图腾再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "磐垒图腾终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "磐垒的控制：让敌人打错目标。（现存三个 3★ 同构，本卡全部重写）"
-    },
-    "sanctum": {
-      "name": "圣域",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "圣域强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "圣域终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 圣域/扩张圣域/波末圣域",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "圣域强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "圣域再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "圣域终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "磐垒的领域表达。（现存 5★ 同构对，本卡重写）"
-    },
-    "sentinel": {
-      "name": "哨戒炮塔",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "哨戒炮塔强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "哨戒炮塔终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 哨戒/轨道哨戒/应急哨戒",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "哨戒炮塔强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "哨戒炮塔再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "哨戒炮塔终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "磐垒的弹道表达：不是炮更强，是炮更多。（现存三个 3★ 同构，本卡全部重写）"
-    },
-    "retribution": {
-      "name": "天罚",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "天罚强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "天罚终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 天罚/震慑/蓄能天罚",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "天罚强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "天罚再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "天罚终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "磐垒的控制：被突破的每一寸都还回去。（现存三个 3★ 同构 + onBreach 打空 ×18，全表最重，全部重写为按 point）"
-    },
-    "ironvine": {
-      "name": "铁蔓",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "铁蔓强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "铁蔓终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 铁蔓/蔓生领域/守成结算",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "铁蔓强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "铁蔓再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "铁蔓终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "磐垒的经济：守得住，就有收成。（修复 requiresSource:'retaliation' 不可达分支）"
-    },
-    "harvest": {
-      "name": "眷恋",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "眷恋强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "眷恋终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 眷恋/广域眷顾/拾取眷顾",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "眷恋强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "眷恋再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "眷恋终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "赏印铺设核心。改造理由：现状 harvest/fateLoom 都不产赏印，副神丰饶 60% 情况下没有身份效果。"
-    },
-    "fateLoom": {
-      "name": "命运织机",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "命运织机强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "命运织机终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 织机/织网/波末织机",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "命运织机强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "命运织机再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "命运织机终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "丰饶的出口：每一次合成都是一发炮弹。"
-    },
-    "goldenVolley": {
-      "name": "鎏金弹",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "鎏金弹强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "鎏金弹终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 鎏金弹/金雨/定点鎏金",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "鎏金弹强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "鎏金弹再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "鎏金弹终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "丰饶的弹道表达：每一发都在铸币。"
-    },
-    "bountyCall": {
-      "name": "富集号令",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "富集号令强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "富集号令终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 号令/广域号令/拾取号令",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "富集号令强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "富集号令再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "富集号令终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "丰饶的控制：用标记指挥战场优先级。"
-    },
-    "overgrowth": {
-      "name": "蔓生",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "蔓生强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "蔓生终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 蔓生/蔓延/波末蔓生",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "蔓生强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "蔓生再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "蔓生终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "丰饶的领域表达。（现存三个 3★ 同构，本卡全部重写；不用 groundZone）"
-    },
-    "springOfLife": {
-      "name": "生命涌泉",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "生命涌泉强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "生命涌泉终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 涌泉/泉域/波末涌泉",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "生命涌泉强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "生命涌泉再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "生命涌泉终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "经济动作就是治疗。"
-    },
-    "luckyStar": {
-      "name": "吉星",
-      "hand": {
-        "shortByTier": {
-          "1": "核心载体 · 拖放释放",
-          "3": "核心载体强化 · 拖放释放",
-          "6": "公共终态 · 拖放释放"
-        },
-        "milestones": {
-          "3": {
-            "title": "吉星强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "6": {
-            "title": "吉星终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "选择 吉星/星域/拾取吉星",
-          "5": "叠加兑现/传播/转化分支",
-          "6": "公共终态 · 终态"
-        },
-        "milestones": {
-          "3": {
-            "title": "吉星强化",
-            "detail": "选择一条 3★ 进化分支。",
-            "fx": "core"
-          },
-          "5": {
-            "title": "吉星再进化",
-            "detail": "独立叠加一条 5★ 接口分支。",
-            "fx": "major"
-          },
-          "6": {
-            "title": "吉星终态",
-            "detail": "解锁公共 6★ 终态。",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "丰饶的纯经济卡：运气也是可以装备的。"
-    },
-    "fusion": {
-      "name": "形态融合",
-      "beamMortar": "已融合：光束轰击",
-      "hand": {
-        "shortByTier": {
-          "1": "形态融合"
-        },
-        "milestones": {}
-      },
-      "equip": {
-        "shortByTier": {
-          "1": "形态融合"
-        },
-        "milestones": {}
-      }
-    },
-    "stormLattice": {
-      "name": "天罗电网",
-      "hand": {
-        "shortByTier": {
-          "1": "巨型贯穿雷矛沿轴铺设导电雷轨",
-          "3": "巨型贯穿雷矛沿轴铺设导电雷轨",
-          "6": "巨型贯穿雷矛沿轴铺设导电雷轨"
-        },
-        "milestones": {
-          "6": {
-            "title": "天罗电网终极形态",
-            "detail": "巨型贯穿雷矛沿轴铺设导电雷轨",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "贯穿雷矛、导电雷轨与自动链网",
-          "5": "贯穿雷矛、导电雷轨与自动链网",
-          "6": "贯穿雷矛、导电雷轨与自动链网"
-        },
-        "milestones": {
-          "6": {
-            "title": "天罗电网终极形态",
-            "detail": "贯穿雷矛、导电雷轨与自动链网",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "把战场织成一张会咬人的电网。"
-    },
-    "thunderRime": {
-      "name": "霜雷云",
-      "hand": {
-        "shortByTier": {
-          "1": "落点召唤静止满强雷云",
-          "3": "落点召唤静止满强雷云",
-          "6": "落点召唤静止满强雷云"
-        },
-        "milestones": {
-          "6": {
-            "title": "霜雷云终极形态",
-            "detail": "落点召唤静止满强雷云",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "追踪雷云、双状态落雷与冻结兑现",
-          "5": "追踪雷云、双状态落雷与冻结兑现",
-          "6": "追踪雷云、双状态落雷与冻结兑现"
-        },
-        "milestones": {
-          "6": {
-            "title": "霜雷云终极形态",
-            "detail": "追踪雷云、双状态落雷与冻结兑现",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "一朵会走路的坏天气。"
-    },
-    "emberSpark": {
-      "name": "引雷火种",
-      "hand": {
-        "shortByTier": {
-          "1": "全场灼烧目标各放电一次",
-          "3": "全场灼烧目标各放电一次",
-          "6": "全场灼烧目标各放电一次"
-        },
-        "milestones": {
-          "6": {
-            "title": "引雷火种终极形态",
-            "detail": "全场灼烧目标各放电一次",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "灼烧起链与双状态死亡爆燃",
-          "5": "灼烧起链与双状态死亡爆燃",
-          "6": "灼烧起链与双状态死亡爆燃"
-        },
-        "milestones": {
-          "6": {
-            "title": "引雷火种终极形态",
-            "detail": "灼烧起链与双状态死亡爆燃",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "点着的敌人，就是你的炮台。"
-    },
-    "voltBastion": {
-      "name": "电容堡垒",
-      "hand": {
-        "shortByTier": {
-          "1": "立即满充并释放放电风暴",
-          "3": "立即满充并释放放电风暴",
-          "6": "立即满充并释放放电风暴"
-        },
-        "milestones": {
-          "6": {
-            "title": "电容堡垒终极形态",
-            "detail": "立即满充并释放放电风暴",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "吸收充电、满档链暴与轻推光环",
-          "5": "吸收充电、满档链暴与轻推光环",
-          "6": "吸收充电、满档链暴与轻推光环"
-        },
-        "milestones": {
-          "6": {
-            "title": "电容堡垒终极形态",
-            "detail": "吸收充电、满档链暴与轻推光环",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "挨的每一下都在充电。"
-    },
-    "ampereFlow": {
-      "name": "盈电金流",
-      "hand": {
-        "shortByTier": {
-          "1": "全场感电并立即结算一波掉落",
-          "3": "全场感电并立即结算一波掉落",
-          "6": "全场感电并立即结算一波掉落"
-        },
-        "milestones": {
-          "6": {
-            "title": "盈电金流终极形态",
-            "detail": "全场感电并立即结算一波掉落",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "感电密度汇率与双持必掉",
-          "5": "感电密度汇率与双持必掉",
-          "6": "感电密度汇率与双持必掉"
-        },
-        "milestones": {
-          "6": {
-            "title": "盈电金流终极形态",
-            "detail": "感电密度汇率与双持必掉",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "战场密度就是汇率。"
-    },
-    "crystalRelay": {
-      "name": "晶脉传导",
-      "hand": {
-        "shortByTier": {
-          "1": "落点立起三座晶柱",
-          "3": "落点立起三座晶柱",
-          "6": "落点立起三座晶柱"
-        },
-        "milestones": {
-          "6": {
-            "title": "晶脉传导终极形态",
-            "detail": "落点立起三座晶柱",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "连锁晶柱中继、链路增伤与碎裂冰爆",
-          "5": "连锁晶柱中继、链路增伤与碎裂冰爆",
-          "6": "连锁晶柱中继、链路增伤与碎裂冰爆"
-        },
-        "milestones": {
-          "6": {
-            "title": "晶脉传导终极形态",
-            "detail": "连锁晶柱中继、链路增伤与碎裂冰爆",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "上一条链决定下一条链能到哪。"
-    },
-    "glacialEpoch": {
-      "name": "冰河世纪",
-      "hand": {
-        "shortByTier": {
-          "1": "立即推出一道全强冰川锋面",
-          "3": "立即推出一道全强冰川锋面",
-          "6": "立即推出一道全强冰川锋面"
-        },
-        "milestones": {
-          "6": {
-            "title": "冰河世纪终极形态",
-            "detail": "立即推出一道全强冰川锋面",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "周期扩张冰环、叠冻与碎冰爆发",
-          "5": "周期扩张冰环、叠冻与碎冰爆发",
-          "6": "周期扩张冰环、叠冻与碎冰爆发"
-        },
-        "milestones": {
-          "6": {
-            "title": "冰河世纪终极形态",
-            "detail": "周期扩张冰环、叠冻与碎冰爆发",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "整个屏幕是一记慢速重锤。"
-    },
-    "rimeShell": {
-      "name": "霜火榴弹",
-      "hand": {
-        "shortByTier": {
-          "1": "落点一发巨型霜火弹并二段爆破",
-          "3": "落点一发巨型霜火弹并二段爆破",
-          "6": "落点一发巨型霜火弹并二段爆破"
-        },
-        "milestones": {
-          "6": {
-            "title": "霜火榴弹终极形态",
-            "detail": "落点一发巨型霜火弹并二段爆破",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "分裂叠冻、弹片灼烧与碎冰倍率",
-          "5": "分裂叠冻、弹片灼烧与碎冰倍率",
-          "6": "分裂叠冻、弹片灼烧与碎冰倍率"
-        },
-        "milestones": {
-          "6": {
-            "title": "霜火榴弹终极形态",
-            "detail": "分裂叠冻、弹片灼烧与碎冰倍率",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "先钉住，再引爆。"
-    },
-    "tombSpire": {
-      "name": "寒棺尖碑",
-      "hand": {
-        "shortByTier": {
-          "1": "在落点立即立起寒棺尖碑",
-          "3": "在落点立即立起寒棺尖碑",
-          "6": "在落点立即立起寒棺尖碑"
-        },
-        "milestones": {
-          "6": {
-            "title": "寒棺尖碑终极形态",
-            "detail": "在落点立即立起寒棺尖碑",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "突破立碑、嘲讽荆棘与碑亡冰爆",
-          "5": "突破立碑、嘲讽荆棘与碑亡冰爆",
-          "6": "突破立碑、嘲讽荆棘与碑亡冰爆"
-        },
-        "milestones": {
-          "6": {
-            "title": "寒棺尖碑终极形态",
-            "detail": "突破立碑、嘲讽荆棘与碑亡冰爆",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "防线的缺口，自己长成塔。"
-    },
-    "stasisLedger": {
-      "name": "冻结时价",
-      "hand": {
-        "shortByTier": {
-          "1": "立即释放一次满强时价脉冲",
-          "3": "立即释放一次满强时价脉冲",
-          "6": "立即释放一次满强时价脉冲"
-        },
-        "milestones": {
-          "6": {
-            "title": "冻结时价终极形态",
-            "detail": "立即释放一次满强时价脉冲",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "合成时停与冰封击杀双倍掉落",
-          "5": "合成时停与冰封击杀双倍掉落",
-          "6": "合成时停与冰封击杀双倍掉落"
-        },
-        "milestones": {
-          "6": {
-            "title": "冻结时价终极形态",
-            "detail": "合成时停与冰封击杀双倍掉落",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "合成键就是时停键。"
-    },
-    "solarPiercer": {
-      "name": "贯日",
-      "hand": {
-        "shortByTier": {
-          "1": "沿轴落下一记满强天顶光柱",
-          "3": "沿轴落下一记满强天顶光柱",
-          "6": "沿轴落下一记满强天顶光柱"
-        },
-        "milestones": {
-          "6": {
-            "title": "贯日终极形态",
-            "detail": "沿轴落下一记满强天顶光柱",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "贯穿光柱、灼热走廊与燃烧兑现",
-          "5": "贯穿光柱、灼热走廊与燃烧兑现",
-          "6": "贯穿光柱、灼热走廊与燃烧兑现"
-        },
-        "milestones": {
-          "6": {
-            "title": "贯日终极形态",
-            "detail": "贯穿光柱、灼热走廊与燃烧兑现",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "把弹道抬到天上，把火留在地上。"
-    },
-    "steamBurst": {
-      "name": "蒸汽爆裂",
-      "hand": {
-        "shortByTier": {
-          "1": "全场冷热双持目标立即起爆",
-          "3": "全场冷热双持目标立即起爆",
-          "6": "全场冷热双持目标立即起爆"
-        },
-        "milestones": {
-          "6": {
-            "title": "蒸汽爆裂终极形态",
-            "detail": "全场冷热双持目标立即起爆",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "减速圈、灼烧与双状态蒸汽爆裂",
-          "5": "减速圈、灼烧与双状态蒸汽爆裂",
-          "6": "减速圈、灼烧与双状态蒸汽爆裂"
-        },
-        "milestones": {
-          "6": {
-            "title": "蒸汽爆裂终极形态",
-            "detail": "减速圈、灼烧与双状态蒸汽爆裂",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "冷热相遇的地方就是爆点。"
-    },
-    "volcanoCore": {
-      "name": "常燃火山",
-      "hand": {
-        "shortByTier": {
-          "1": "落点立起临时火山并连续喷发",
-          "3": "落点立起临时火山并连续喷发",
-          "6": "落点立起临时火山并连续喷发"
-        },
-        "milestones": {
-          "6": {
-            "title": "常燃火山终极形态",
-            "detail": "落点立起临时火山并连续喷发",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "常驻火山、熔弹子火场与击杀蓄能",
-          "5": "常驻火山、熔弹子火场与击杀蓄能",
-          "6": "常驻火山、熔弹子火场与击杀蓄能"
-        },
-        "milestones": {
-          "6": {
-            "title": "常燃火山终极形态",
-            "detail": "常驻火山、熔弹子火场与击杀蓄能",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "火养火，越烧越勤。"
-    },
-    "emberMoat": {
-      "name": "燃烧护城河",
-      "hand": {
-        "shortByTier": {
-          "1": "立即点燃满强护城火环",
-          "3": "立即点燃满强护城火环",
-          "6": "立即点燃满强护城火环"
-        },
-        "milestones": {
-          "6": {
-            "title": "燃烧护城河终极形态",
-            "detail": "立即点燃满强护城火环",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "盾档火环、破盾爆燃与直接灼烧",
-          "5": "盾档火环、破盾爆燃与直接灼烧",
-          "6": "盾档火环、破盾爆燃与直接灼烧"
-        },
-        "milestones": {
-          "6": {
-            "title": "燃烧护城河终极形态",
-            "detail": "盾档火环、破盾爆燃与直接灼烧",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "护城河是烧开的。"
-    },
-    "emberYield": {
-      "name": "余烬收成",
-      "hand": {
-        "shortByTier": {
-          "1": "全场灼烧并立即结算安全余烬",
-          "3": "全场灼烧并立即结算安全余烬",
-          "6": "全场灼烧并立即结算安全余烬"
-        },
-        "milestones": {
-          "6": {
-            "title": "余烬收成终极形态",
-            "detail": "全场灼烧并立即结算安全余烬",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "双持安全余烬与拾取火势叠层",
-          "5": "双持安全余烬与拾取火势叠层",
-          "6": "双持安全余烬与拾取火势叠层"
-        },
-        "milestones": {
-          "6": {
-            "title": "余烬收成终极形态",
-            "detail": "双持安全余烬与拾取火势叠层",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "火的产出要弯腰去捡。"
-    },
-    "pylonCircuit": {
-      "name": "雷枢方阵",
-      "hand": {
-        "shortByTier": {
-          "1": "立即部署一座临时雷枢",
-          "3": "立即部署一座临时雷枢",
-          "6": "立即部署一座临时雷枢"
-        },
-        "milestones": {
-          "6": {
-            "title": "雷枢方阵终极形态",
-            "detail": "立即部署一座临时雷枢",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "三塔中继、塔身感电光环与链路增伤",
-          "5": "三塔中继、塔身感电光环与链路增伤",
-          "6": "三塔中继、塔身感电光环与链路增伤"
-        },
-        "milestones": {
-          "6": {
-            "title": "雷枢方阵终极形态",
-            "detail": "三塔中继、塔身感电光环与链路增伤",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "阵型质量决定链的质量。"
-    },
-    "glacialEffigy": {
-      "name": "冰像阵",
-      "hand": {
-        "shortByTier": {
-          "1": "落点立即一锤并立起冰像",
-          "3": "落点立即一锤并立起冰像",
-          "6": "落点立即一锤并立起冰像"
-        },
-        "milestones": {
-          "6": {
-            "title": "冰像阵终极形态",
-            "detail": "落点立即一锤并立起冰像",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "周期落锤、嘲讽冰像与像亡冰封",
-          "5": "周期落锤、嘲讽冰像与像亡冰封",
-          "6": "周期落锤、嘲讽冰像与像亡冰封"
-        },
-        "milestones": {
-          "6": {
-            "title": "冰像阵终极形态",
-            "detail": "周期落锤、嘲讽冰像与像亡冰封",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "把诱饵砸进敌群正中央。"
-    },
-    "wrathMortar": {
-      "name": "罪火迫击",
-      "hand": {
-        "shortByTier": {
-          "1": "立即满装填并齐射一轮罪火",
-          "3": "立即满装填并齐射一轮罪火",
-          "6": "立即满装填并齐射一轮罪火"
-        },
-        "milestones": {
-          "6": {
-            "title": "罪火迫击终极形态",
-            "detail": "立即满装填并齐射一轮罪火",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "突破装填、周期齐射与罪火余烬",
-          "5": "突破装填、周期齐射与罪火余烬",
-          "6": "突破装填、周期齐射与罪火余烬"
-        },
-        "milestones": {
-          "6": {
-            "title": "罪火迫击终极形态",
-            "detail": "突破装填、周期齐射与罪火余烬",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "每次失守都在填膛。"
-    },
-    "aegisCitadel": {
-      "name": "永固圣域",
-      "hand": {
-        "shortByTier": {
-          "1": "立即在核心外圈补满圣墙",
-          "3": "立即在核心外圈补满圣墙",
-          "6": "立即在核心外圈补满圣墙"
-        },
-        "milestones": {
-          "6": {
-            "title": "永固圣域终极形态",
-            "detail": "立即在核心外圈补满圣墙",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "四段实体圣墙、突破减伤与塌墙反击",
-          "5": "四段实体圣墙、突破减伤与塌墙反击",
-          "6": "四段实体圣墙、突破减伤与塌墙反击"
-        },
-        "milestones": {
-          "6": {
-            "title": "永固圣域终极形态",
-            "detail": "四段实体圣墙、突破减伤与塌墙反击",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "看得见的壁垒，塌了也要咬一口。"
-    },
-    "rootLoom": {
-      "name": "根脉织网",
-      "hand": {
-        "shortByTier": {
-          "1": "立即生长两段根脉",
-          "3": "立即生长两段根脉",
-          "6": "立即生长两段根脉"
-        },
-        "milestones": {
-          "6": {
-            "title": "根脉织网终极形态",
-            "detail": "立即生长两段根脉",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "合成施工、根脉光环与跨波强化",
-          "5": "合成施工、根脉光环与跨波强化",
-          "6": "合成施工、根脉光环与跨波强化"
-        },
-        "milestones": {
-          "6": {
-            "title": "根脉织网终极形态",
-            "detail": "合成施工、根脉光环与跨波强化",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "每次合成都是一次施工。"
-    },
-    "midasChain": {
-      "name": "点金链",
-      "hand": {
-        "shortByTier": {
-          "1": "落点起一条满长镀金链",
-          "3": "落点起一条满长镀金链",
-          "6": "落点起一条满长镀金链"
-        },
-        "milestones": {
-          "6": {
-            "title": "点金链终极形态",
-            "detail": "落点起一条满长镀金链",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "链跳赏印与链上标记铸币",
-          "5": "链跳赏印与链上标记铸币",
-          "6": "链跳赏印与链上标记铸币"
-        },
-        "milestones": {
-          "6": {
-            "title": "点金链终极形态",
-            "detail": "链跳赏印与链上标记铸币",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "链有多长，铸币厂就有多大。"
-    },
-    "frostDew": {
-      "name": "回春霜露",
-      "hand": {
-        "shortByTier": {
-          "1": "按圈内受控目标立即完成大汲取",
-          "3": "按圈内受控目标立即完成大汲取",
-          "6": "按圈内受控目标立即完成大汲取"
-        },
-        "milestones": {
-          "6": {
-            "title": "回春霜露终极形态",
-            "detail": "按圈内受控目标立即完成大汲取",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "减速泉圈、受控计数回复与安全霜露",
-          "5": "减速泉圈、受控计数回复与安全霜露",
-          "6": "减速泉圈、受控计数回复与安全霜露"
-        },
-        "milestones": {
-          "6": {
-            "title": "回春霜露终极形态",
-            "detail": "减速泉圈、受控计数回复与安全霜露",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "把敌人留在圈里，圈就是泉。"
-    },
-    "pyreBrand": {
-      "name": "悬赏烙印",
-      "hand": {
-        "shortByTier": {
-          "1": "立即烙印落点附近最高价值目标",
-          "3": "立即烙印落点附近最高价值目标",
-          "6": "立即烙印落点附近最高价值目标"
-        },
-        "milestones": {
-          "6": {
-            "title": "悬赏烙印终极形态",
-            "detail": "立即烙印落点附近最高价值目标",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "周期烙印、燃烧增伤与击杀接力",
-          "5": "周期烙印、燃烧增伤与击杀接力",
-          "6": "周期烙印、燃烧增伤与击杀接力"
-        },
-        "milestones": {
-          "6": {
-            "title": "悬赏烙印终极形态",
-            "detail": "周期烙印、燃烧增伤与击杀接力",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "火永不熄灭，只换宿主。"
-    },
-    "fortuneThorns": {
-      "name": "福祸相生",
-      "hand": {
-        "shortByTier": {
-          "1": "立即结算当前福缘并掉落",
-          "3": "立即结算当前福缘并掉落",
-          "6": "立即结算当前福缘并掉落"
-        },
-        "milestones": {
-          "6": {
-            "title": "福祸相生终极形态",
-            "detail": "立即结算当前福缘并掉落",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "荆棘投资、满档福缘与突破分红",
-          "5": "荆棘投资、满档福缘与突破分红",
-          "6": "荆棘投资、满档福缘与突破分红"
-        },
-        "milestones": {
-          "6": {
-            "title": "福祸相生终极形态",
-            "detail": "荆棘投资、满档福缘与突破分红",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "挨打是投资，突破是分红。"
-    },
-    "goldenGrove": {
-      "name": "丰饶圣林",
-      "hand": {
-        "shortByTier": {
-          "1": "在落点种下一棵满强金树",
-          "3": "在落点种下一棵满强金树",
-          "6": "在落点种下一棵满强金树"
-        },
-        "milestones": {
-          "6": {
-            "title": "丰饶圣林终极形态",
-            "detail": "在落点种下一棵满强金树",
-            "fx": "transform"
-          }
-        }
-      },
-      "equip": {
-        "shortByTier": {
-          "3": "拾取种树、周期标记产出与赏印成长",
-          "5": "拾取种树、周期标记产出与赏印成长",
-          "6": "拾取种树、周期标记产出与赏印成长"
-        },
-        "milestones": {
-          "6": {
-            "title": "丰饶圣林终极形态",
-            "detail": "拾取种树、周期标记产出与赏印成长",
-            "fx": "transform"
-          }
-        }
-      },
-      "overview": "经济长在地上，去浇水就行。"
-    }
-  },
-  "effectText": {
-    "triggers": {
-      "onFire": "每次开火时",
-      "onHit": "命中敌人时",
-      "onKill": "击杀敌人时",
-      "onWaveStart": "每波开始时",
-      "onBreach": "敌人突破防线时",
-      "onPickup": "拾取掉落时",
-      "interval": "周期触发",
-      "onMerge": "完成合成时",
-      "passive": "持续生效"
-    },
-    "atoms": {
-      "pierce": "穿透",
-      "chain": "连锁",
-      "split": "分裂",
-      "ricochet": "弹射",
-      "aoeOnHit": "范围爆发",
-      "beamMorph": "光束",
-      "mortarMorph": "迫击炮",
-      "slow": "减速",
-      "freeze": "冻结",
-      "stun": "眩晕",
-      "knockback": "击退",
-      "taunt": "嘲讽",
-      "vulnerable": "易伤",
-      "aura": "光环",
-      "groundZone": "领域",
-      "dot": "持续伤害",
-      "summon": "召唤",
-      "dropRateMul": "掉率",
-      "dropLifetimeMul": "掉落时限",
-      "xpMul": "奖励积分获取",
-      "extraDrop": "额外掉落",
-      "expiryConvert": "过期转化",
-      "mergeMaterialRefund": "合成素材返还",
-      "wildcardRewardBonus": "万能卡奖励加成",
-      "mergePulse": "合成脉冲",
-      "shield": "护盾",
-      "thorns": "反伤",
-      "breachReduction": "突破减免",
-      "novaOnBreak": "破盾冲击",
-      "execute": "处决",
-      "burstDamage": "爆发伤害",
-      "focusPriority": "索敌优先",
-      "restore": "恢复",
-      "statBuff": "属性强化",
-      "charge": "计量释放",
-      "summonBuff": "召唤强化"
-    },
-    "sources": {
-      "chain": "连锁",
-      "dot": "持续伤害",
-      "summon": "召唤物",
-      "projectile": "弹道"
-    },
-    "statuses": {
-      "frozen": "冻结",
-      "dot": "持续伤害",
-      "controlled": "受控",
-      "brand": "标记",
-      "vulnerable": "易伤"
-    },
-    "stats": {
-      "damage": "伤害",
-      "fireRate": "攻速",
-      "range": "射程",
-      "multi": "多重射击",
-      "maxHp": "生命上限",
-      "speed": "移动速度"
-    }
-  },
-  "glossary": {
-    "pierce": "弹道命中后继续前进，并可命中后续目标。",
-    "chain": "命中后在搜索范围内寻找新目标并继续传递伤害。",
-    "split": "一枚弹道生成多枚子弹道，子弹道按独立倍率结算。",
-    "ricochet": "弹道命中后改变方向并继续寻找目标。",
-    "aoeOnHit": "在命中点对一定半径内的敌人结算范围伤害。",
-    "beamMorph": "把主炮投射方式改为持续或周期结算的直线光束。",
-    "mortarMorph": "把主炮投射方式改为落点爆炸的抛射攻击。",
-    "slow": "按比例降低目标移动速度，持续时间结束后恢复。",
-    "freeze": "目标暂时无法移动；重复控制仍受抗性与免疫窗限制。",
-    "stun": "目标暂时无法行动；重复控制仍受抗性与免疫窗限制。",
-    "knockback": "把目标沿远离作用点的方向推开。",
-    "taunt": "提高指定单位的索敌优先级，使敌人更倾向攻击它。",
-    "vulnerable": "提高目标受到的伤害，可按配置叠层。",
-    "aura": "以持续存在的来源为中心，周期影响范围内目标。",
-    "groundZone": "在固定位置生成持续区域，并按间隔结算内部效果。",
-    "dot": "在一段时间内按固定间隔重复造成伤害。",
-    "summon": "生成拥有独立生命与行为的临时单位。",
-    "dropRateMul": "乘算调整普通掉落物的生成概率。",
-    "dropLifetimeMul": "乘算调整掉落物从生成到过期的时间。",
-    "xpMul": "乘算调整本局获得的奖励积分。",
-    "extraDrop": "满足触发条件时额外生成掉落物。",
-    "expiryConvert": "掉落物自然过期时把一部分价值转为其他收益。",
-    "mergeMaterialRefund": "普通同型合并或装备喂养完成时，按概率返还同型低星素材卡。",
-    "wildcardRewardBonus": "在 Bounty 或波末 Boss 的基线万能卡奖励上额外增加数量。",
-    "mergePulse": "完成卡牌合成时，以炮台为中心释放一次范围效果。",
-    "shield": "抵挡指定次数的伤害，耗尽后按规则恢复。",
-    "thorns": "受到伤害后，按比例向攻击来源返还伤害。",
-    "breachReduction": "降低敌人突破防线时造成的生命损失。",
-    "novaOnBreak": "护盾耗尽时自动释放一次范围反击。",
-    "execute": "目标生命比例低于阈值时直接完成击杀。",
-    "burstDamage": "按倍率立即结算一次独立伤害。",
-    "focusPriority": "临时改变索敌评分，让符合条件的目标更早被选中。",
-    "restore": "立即恢复固定数值或最大生命比例的生命。",
-    "statBuff": "在指定时间内提高一项基础属性，可按配置叠层。",
-    "charge": "按指定战斗事件积累计量，并在满档或配置时机释放内嵌效果。",
-    "summonBuff": "强化符合类型与来源条件的召唤物，并受等级上限约束。"
-  },
-  "affixHelp": {
-    "damageMul": "按倍率提高炮台基础伤害，与波末永久平加共同结算。",
-    "fireRateMul": "按倍率提高炮台基础射速，与波末永久平加共同结算。",
-    "rangeMul": "按倍率提高炮台基础射程，不改变波末永久射程基数。",
-    "maxHpMul": "按倍率提高基础生命上限，并保持绝对已损生命值。",
-    "effectDamageMul": "强化本卡产生的爆发、分裂、光束、迫击炮、召唤、穿透和连锁伤害。",
-    "quantityAdd": "增加本卡的穿透、连锁、分裂或弹射数量，结果取整数。",
-    "controlPotencyMul": "强化本卡的减速、冻结、眩晕、击退或易伤幅度。",
-    "controlledDamageTakenMul": "提高所有受控敌人承受的伤害。",
-    "areaScaleMul": "扩大本卡光环或领域的范围与持续时间。",
-    "dotDamageMul": "提高本卡持续伤害的每跳倍率。",
-    "defenseDurabilityMul": "提高本卡护盾次数或召唤物生命。",
-    "retaliationMul": "提高本卡破盾、反伤或突破反击的伤害。",
-    "dropRateMul": "提高本卡提供的掉落概率。",
-    "dropLifetimeMul": "延长本卡影响的掉落物存在时间。",
-    "xpMul": "提高本卡提供的奖励积分获取倍率。"
-  },
-  "rewards": {
-    "heartbreakNova": {
-      "name": "心防震爆",
-      "desc": "对全场造成一次高额伤害。"
-    },
-    "absoluteStillness": {
-      "name": "绝对静止",
-      "desc": "冻结全场并使敌人短暂易伤。"
-    },
-    "clarityReflux": {
-      "name": "清醒回流",
-      "desc": "恢复心防并获得一次突破吸收。"
-    },
-    "wildHeart": {
-      "name": "万能心意",
-      "desc": "直接获得一张万能卡。"
-    },
-    "buildResonance": {
-      "name": "构筑共鸣",
-      "desc": "短时强化当前的构筑方向。"
-    }
-  },
-  "rewardReceipt": {
-    "damage": "造成 {damage} 伤害 · 消灭 {kills} 名敌人",
-    "control": "冻结并削弱 {count} 名敌人",
-    "healing": "恢复 {healing} 心防 · 获得 {hits} 次突破吸收",
-    "wildcard": "获得 {count} 张 {star}★ 万能卡",
-    "surge": "强化 {tag} 构筑方向 {duration} 秒",
-    "fallback": "奖励已结算"
-  },
-  "tuner": {
-    "groups": {
-      "waves": {
-        "title": "A · 出怪节奏与波结构",
-        "note": "下波生效"
-      },
-      "combat": {
-        "title": "B · 炮台与弹道"
-      },
-      "enemies": {
-        "title": "C · 敌人数值"
-      },
-      "drops": {
-        "title": "D · 掉落与拾取"
-      },
-      "progression": {
-        "title": "奖励蓄力"
-      },
-      "bounty": {
-        "title": "E · 精英 Bounty"
-      },
-      "p2": {
-        "title": "P2 · 默认冻结"
-      }
-    },
-    "params": {
-      "waves.spawnMode": "出怪模式",
-      "waves.bossWaves": "波末 Boss 波次",
-      "bounty.enabled": "机制启用",
-      "waves.enemyCountBase": "基础出怪数",
-      "waves.enemyCountPerWave": "每波追加数",
-      "waves.spawnInterval.base": "出怪间隔 · 基础",
-      "waves.spawnInterval.perWave": "出怪间隔 · 每波缩短",
-      "waves.spawnInterval.min": "出怪间隔 · 下限",
-      "waves.firstSpawnDelay": "首怪延迟",
-      "waves.intermission.settleSeconds": "波间结算展示",
-      "waves.intermission.freeSeconds.selection": "波间整备 · 招募",
-      "waves.intermission.freeSeconds.buildEarly": "波间整备 · 收敛前期",
-      "waves.intermission.freeSeconds.buildLate": "波间整备 · 收敛后期",
-      "waves.intermission.freeSeconds.validation": "波间整备 · 兑现",
-      "waves.totalWaves": "总波数",
-      "waves.spawnMargin": "出生边距",
-      "waves.typeRoll.tankBase": "重装概率 · 基础",
-      "waves.typeRoll.tankPerWave": "重装概率 · 每波",
-      "waves.typeRoll.fastThreshold": "高速阈值",
-      "combat.defaults.damage": "基础伤害",
-      "combat.defaults.fireRate": "每秒攻击",
-      "combat.defaults.range": "攻击射程",
-      "combat.bullet.speed": "弹速",
-      "combat.bullet.life": "弹丸寿命",
-      "combat.bullet.spread": "散布（弧度）",
-      "combat.hp.max": "心防上限",
-      "combat.breakthroughDist": "突破线距离",
-      "combat.dangerZoneWidth": "危险区宽度",
-      "enemies.defaults.enemySpeed": "全局敌人速度倍率",
-      "enemies.types.normal.hpBase": "普通 · 基础 HP",
-      "enemies.types.normal.hpPerWave": "普通 · 每波 HP",
-      "enemies.types.normal.speedBase": "普通 · 基础速度",
-      "enemies.types.normal.speedPerWave": "普通 · 每波速度",
-      "enemies.types.normal.damage": "普通 · 突破伤害",
-      "enemies.types.normal.r": "普通 · 半径",
-      "enemies.types.normal.xp": "普通 · 奖励积分",
-      "enemies.types.fast.hpBase": "高速 · 基础 HP",
-      "enemies.types.fast.hpPerWave": "高速 · 每波 HP",
-      "enemies.types.fast.speedBase": "高速 · 基础速度",
-      "enemies.types.fast.speedPerWave": "高速 · 每波速度",
-      "enemies.types.fast.damage": "高速 · 突破伤害",
-      "enemies.types.fast.r": "高速 · 半径",
-      "enemies.types.fast.xp": "高速 · 奖励积分",
-      "enemies.types.tank.hpBase": "重装 · 基础 HP",
-      "enemies.types.tank.hpPerWave": "重装 · 每波 HP",
-      "enemies.types.tank.speedBase": "重装 · 基础速度",
-      "enemies.types.tank.speedPerWave": "重装 · 每波速度",
-      "enemies.types.tank.damage": "重装 · 突破伤害",
-      "enemies.types.tank.r": "重装 · 半径",
-      "enemies.types.tank.xp": "重装 · 奖励积分",
-      "enemies.types.boss.hpBase": "Boss · 基础 HP",
-      "enemies.types.boss.hpPerWave": "Boss · 每波 HP",
-      "enemies.types.boss.speedBase": "Boss · 基础速度",
-      "enemies.types.boss.speedPerWave": "Boss · 每波速度",
-      "enemies.types.boss.damage": "Boss · 突破伤害",
-      "enemies.types.boss.r": "Boss · 半径",
-      "enemies.types.boss.xp": "Boss · 奖励积分",
-      "economy.defaults.dropChance": "基础掉落率（仅回退模式生效）",
-      "economy.defaults.dropLifetime": "掉落存在时间",
-      "rewardMeter.pointMul": "奖励积分 · 击破倍率",
-      "combat.bullet.radius": "P2 · 弹丸半径",
-      "combat.bullet.muzzleOffset": "P2 · 炮口偏移",
-      "combat.vfx.shootParticles": "P2 · 开火粒子数",
-      "combat.vfx.killParticles": "P2 · 击杀粒子数",
-      "combat.vfx.breakthroughParticles": "P2 · 突破粒子数",
-      "economy.drops.pickupRadius": "P2 · 拾取半径",
-      "economy.drops.chanceCap": "P2 · 掉率上限（仅回退模式生效）",
-      "economy.dropStarPolicy.star2Share": "P2 · 二星掉落占比",
-      "waves.budget.waveQuota.base": "Budget · 总配额基础",
-      "waves.budget.waveQuota.perWave": "Budget · 总配额每波",
-      "waves.budget.targetOnScreen.base": "Budget · 目标同屏基础",
-      "waves.budget.targetOnScreen.perWave": "Budget · 目标同屏每波",
-      "waves.budget.checkInterval": "Budget · 检查间隔",
-      "waves.budget.batchMax": "Budget · 单次补怪上限",
-      "waves.budget.waveEndSprint.window": "Budget · 波末窗口",
-      "waves.budget.waveEndSprint.multiplier": "Budget · 波末目标倍率",
-      "waves.budget.maxAlive": "Budget · 同屏硬上限",
-      "waves.stagePlan.selectionWaves": "阶段导演 · 选择期波数",
-      "waves.stagePlan.validationWaves": "阶段导演 · 验证期波数",
-      "waves.stagePlan.selection.waveQuota.start": "选择期 · 配额起点",
-      "waves.stagePlan.selection.waveQuota.end": "选择期 · 配额终点",
-      "waves.stagePlan.selection.targetOnScreen.start": "选择期 · 同屏起点",
-      "waves.stagePlan.selection.targetOnScreen.end": "选择期 · 同屏终点",
-      "waves.stagePlan.selection.maxAlive": "选择期 · 同屏硬上限",
-      "waves.stagePlan.build.waveQuota.start": "构筑期 · 配额起点",
-      "waves.stagePlan.build.waveQuota.end": "构筑期 · 配额终点",
-      "waves.stagePlan.build.targetOnScreen.start": "构筑期 · 同屏起点",
-      "waves.stagePlan.build.targetOnScreen.end": "构筑期 · 同屏终点",
-      "waves.stagePlan.build.maxAlive": "构筑期 · 同屏硬上限",
-      "economy.ordinaryDropRate.selectionPerMinute": "普通掉落 · 选择期每分钟",
-      "economy.ordinaryDropRate.buildPerMinute": "普通掉落 · 构筑期每分钟",
-      "economy.ordinaryDropRate.buildTransitionSeconds": "普通掉落 · 构筑过渡秒数",
-      "economy.ordinaryDropRate.carryCap": "普通掉落 · 额度积压上限",
-      "bounty.offer.enabledFromWave": "报价 · 起始波次",
-      "bounty.offer.checkIntervalSeconds": "报价 · 检查间隔（秒）",
-      "bounty.offer.baseChancePerCheck": "报价 · 基础概率",
-      "bounty.offer.minChancePerCheck": "报价 · 概率下限",
-      "bounty.offer.maxChancePerCheck": "报价 · 概率上限",
-      "bounty.offer.noDamageRampSeconds": "报价 · 无伤爬坡时长",
-      "bounty.offer.noDamageBonusMax": "报价 · 无伤加成上限",
-      "bounty.offer.healthyHpThreshold": "报价 · 健康血量阈值",
-      "bounty.offer.healthyHpBonusMax": "报价 · 健康血量加成",
-      "bounty.offer.recentDamagePenalty": "报价 · 近期受伤惩罚",
-      "bounty.offer.recentDamagePenaltySeconds": "报价 · 近期受伤窗口",
-      "bounty.offer.markWindowSeconds": "报价 · 接受窗口",
-      "bounty.offer.cooldownSeconds": "报价 · 冷却时间",
-      "bounty.offer.minOffersPerWave": "报价 · 每波保底次数",
-      "bounty.offer.maxOffersPerWave": "报价 · 每波上限",
-      "bounty.offer.guaranteeAtWaveProgress": "报价 · 保底进度阈值",
-      "bounty.offer.maxConcurrentOffers": "报价 · 同时存在上限",
-      "bounty.offer.maxConcurrentEncounters": "报价 · 未结算敌群上限",
-      "bounty.encounter.enemyCountBase": "敌群 · 基础数量",
-      "bounty.encounter.enemyCountPerWave": "敌群 · 每波追加数量",
-      "bounty.encounter.enemyCountMax": "敌群 · 数量上限",
-      "bounty.encounter.hpMul": "敌群 · 生命倍率",
-      "bounty.encounter.speedMul": "敌群 · 速度倍率",
-      "bounty.encounter.damageMul": "敌群 · 伤害倍率",
-      "bounty.encounter.spawnIntervalSeconds": "敌群 · 分批生成间隔",
-      "bounty.encounter.spawnSpread": "敌群 · 出生散布",
-      "bounty.encounter.emergencyOverrideDistance": "敌群 · 紧急覆盖距离",
-      "bounty.encounter.composition.normalWeight": "敌群 · 普通权重",
-      "bounty.encounter.composition.fastWeight": "敌群 · 高速权重",
-      "bounty.encounter.composition.tankWeight": "敌群 · 重装权重",
-      "bounty.reward.cardCount": "奖励 · 指定卡数量",
-      "bounty.reward.cardStarMax": "奖励 · 指定卡星级上限",
-      "bounty.reward.wildcardCount": "奖励 · 万能卡数量",
-      "bounty.reward.wildcardStarMax": "奖励 · 万能卡星级上限",
-      "bounty.reward.dropLifetimeSeconds": "奖励 · 地面寿命",
-      "bounty.reward.repeatProtection": "奖励 · 重复保护",
-      "bounty.rewardBias.primaryShare": "奖励倾向 · 主流派占比",
-      "bounty.rewardBias.secondaryShare": "奖励倾向 · 次流派占比",
-      "bounty.visual.offerRadius": "视觉 · 报价半径",
-      "bounty.visual.offerEdgeInset": "视觉 · 边缘内缩",
-      "bounty.visual.enemyGlowRadius": "视觉 · 敌群光晕半径",
-      "bounty.visual.enemyPulseSpeed": "视觉 · 敌群脉冲速度",
-      "economy.normalDropTypePolicy.roleBagSize": "掉落导演 · 角色袋长度",
-      "economy.normalDropTypePolicy.earlyMix.discovery": "掉落导演 · 前期探索位",
-      "economy.normalDropTypePolicy.earlyMix.build": "掉落导演 · 前期主线位",
-      "economy.normalDropTypePolicy.earlyMix.pivot": "掉落导演 · 前期调整位",
-      "economy.normalDropTypePolicy.lateMix.discovery": "掉落导演 · 后期探索位",
-      "economy.normalDropTypePolicy.lateMix.build": "掉落导演 · 后期主线位",
-      "economy.normalDropTypePolicy.lateMix.pivot": "掉落导演 · 后期调整位",
-      "economy.normalDropTypePolicy.bootstrapMinDiscovery": "掉落导演 · 启动探索保底",
-      "economy.normalDropTypePolicy.bootstrapForcedDrops": "普通掉落 · 开局强制发牌次数",
-      "economy.normalDropTypePolicy.maturity.fullMergeOps": "掉落导演 · 满成熟合成数",
-      "economy.normalDropTypePolicy.maturity.fullHighestStar": "掉落导演 · 满成熟最高星",
-      "economy.normalDropTypePolicy.maturity.fullEquippedTypes": "掉落导演 · 满成熟装备数",
-      "economy.normalDropTypePolicy.maturity.mergeWeight": "掉落导演 · 合成成熟权重",
-      "economy.normalDropTypePolicy.maturity.starWeight": "掉落导演 · 星级成熟权重",
-      "economy.normalDropTypePolicy.maturity.equipWeight": "掉落导演 · 装备成熟权重",
-      "economy.normalDropTypePolicy.build.topK": "掉落导演 · 主线候选数",
-      "economy.normalDropTypePolicy.build.scorePower": "掉落导演 · 投入分指数",
-      "economy.normalDropTypePolicy.build.mergeReadyMultiplier": "掉落导演 · 可合成倍率",
-      "economy.normalDropTypePolicy.build.equippedBaseBonus": "掉落导演 · 装备基础加分",
-      "economy.normalDropTypePolicy.build.equippedStarBonus": "掉落导演 · 装备星级加分",
-      "economy.normalDropTypePolicy.build.historicalMergeWeight": "掉落导演 · 历史合成权重",
-      "economy.normalDropTypePolicy.build.historicalMergeCap": "掉落导演 · 历史合成封顶",
-      "economy.normalDropTypePolicy.build.maxWeightRatio": "掉落导演 · 最大权重比",
-      "economy.normalDropTypePolicy.pivot.excludeTopK": "掉落导演 · 调整排除头部",
-      "economy.normalDropTypePolicy.pivot.candidateFraction": "掉落导演 · 调整候选比例",
-      "economy.normalDropTypePolicy.maxSameTypeStreak": "掉落导演 · 同型连抽上限",
-      "combat.controlCeiling.freezeSeconds": "控制上限 · 冻结秒数",
-      "combat.controlCeiling.stunSeconds": "控制上限 · 眩晕秒数",
-      "combat.controlCeiling.knockbackDistance": "控制上限 · 击退距离",
-      "combat.controlBudget.maxControlledRatio": "控制预算 · 受控比例上限",
-      "combat.controlBudget.minFreeAdvancers": "控制预算 · 最少自由推进数",
-      "enemies.types.normal.knockbackResist": "普通 · 击退抗性",
-      "enemies.types.normal.ccResist": "普通 · 控制抗性",
-      "enemies.types.fast.knockbackResist": "高速 · 击退抗性",
-      "enemies.types.fast.ccResist": "高速 · 控制抗性",
-      "enemies.types.tank.knockbackResist": "重装 · 击退抗性",
-      "enemies.types.tank.ccResist": "重装 · 控制抗性",
-      "enemies.types.boss.knockbackResist": "Boss · 击退抗性",
-      "enemies.types.boss.ccResist": "Boss · 控制抗性"
-    }
-  }
-}
+        "summary": "受控���5��$z{-���jם����x*�X�Y��zK�NZ�>���K��k:.iʾk�K�^[�>X�X[Y�{�>z�~8""��&f�&U&FT�V�#�.hȞX�x�~h����x*�X�Y��z[N�	����K��k:.iʾk�K�^[�>X�X[Y�{�>z�~8""��'&�vT�V�#�.hȞX�x�~h����x*�X�Y��z[Nz�����K��iK�X��k:.iʾk�K�^[Nz��Y��i[8""��&����V�#�.hȞX�x�~h����Y��zyI�Y�K�������[�nK��h�{��Z��[{.h��yI�Y�X�8""��&VffV7DF�vT�V�#�.[ˮX�ni��X�K�~yI�y�Nx�nX�8X�n�8.8XX�i��8���X{�x*�8X��YJN8z����Y(΋��HK�NZ�>8""��'V�F�G�FB#�.Z)�X�i��X�y�Nz����8���H8X�n�8.h�n[˞[Ni[�x����{�>i��X�ni[Ni[8""��&6��G&���FV�7��V�#�.[ˮX�ni��X�y�NXx��	�8Xk�{�>8yʞi�^8X{��h�ni�>K�N[�^[�n8""��&6��G&���VDF�vUF�V��V�#�.h����h�iȞX�~h�~iX�K��h��X�~y�NK�NZ�>8""��&&V66�T�V�#�.h��ZJ~i��X�XX�x��h�n�(nY��y�N��>Y�NK��h�{��i{n�{N8""��&F�DF�vT�V�#�.h����i��X�h�{��K�NZ�>y�Nj���{>X�x�~8""��&FVfV�6TGW&&�ƗG��V�#�.h����i��X�h�Ny��j�i[h�nX��YJNx��yI�Y�8""��'&WFƖF����V�#�.h����i��X�zNy��8X��K�Nh�nz�zNX��X{�y�NK�NZ�>8""��&G&�&FT�V�#�.h����i��X�h�K�y�Nh螉�jh.x�~8""��&G&�ƖfWF��T�V�#�.[�n�[�i��X�[�Y8�y�Nh螉�x��ZَYʎi{n�{N8""��'��V�#�.h����i��X�h�K�y�NZYnX�zz�X�n��~X�nX�x�~8" ����'&Wv&G2#���&�V'F'&V���f#���&��R#�.[�>��.��~x�b"��&FW62#�.Z��XZ�Yˮ�
+h�K�j�����)�K�NZ�>8" ����&'6��WFU7F����W72#���&��R#�.{��Z���ٞj�""��&FW62#�.Xk�{�>XZ�Yˮ[�nK��iX�K��y��i�.i�>K�N8" ����&6�&�G�&Vf�W�#���&��R#�.k�^�i.Y��kX"��&FW62#�.h.ZH�[�>��.[�n��~[�~K�j�z�zNY�iKn8" ����'v��D�V'B#���&��R#�.K�~�;�[�>hH�"��&FW62#�.y�Nh�^��~[�~K�[�K�~�;�X�8" ����&'V��E&W6���6R#���&��R#�.i�Nz�X[��2"��&FW62#�.y��i{n[ˮX�n[�>X��y�Ni�Nz�ik�Y	8" �Т���'&Wv&E&V6V�B#���&F�vR#�.�
+h��F�vW�K�NZ�2+rkh�x������7�Y�iX�K��"��&6��G&��#�.Xk�{�>[�nX��[��6�V�G�Y�iX�K��"��&�VƖ�r#�.h.ZH���VƖ�w�[�>��"+r��~[�r���G7�j�z�zNY�iKb"��'v��F6&B#�.��~[�r�6�V�G�[��7F'�)�RK�~�;�X�"��'7W&vR#�.[ˮX�b�Fw�i�Nz�ik�Y	�GW&F����zy""��&f��&6�#�.ZYnX�[{.{�>z�r ����'GV�W"#���&w&�W2#���'vfW2#���'F�F�R#�$+rX{�h
+���.ZX�K��k:.{�>i�B"��&��FR#�.K��k:.yI�iX� ����&6��&B#���'F�F�R#�$"+rx*�X�K��[˞�2 ����&V�V֖W2#���'F�F�R#�$2+riX�K��i[X� ����&G&�2#���'F�F�R#�$B+rh螉�K��h��X�b ����'&�w&W76���#���'F�F�R#�.ZYnX��8NX�� ����&&�V�G�#���'F�F�R#�$R+r{+&�V�G� ����'"#���'F�F�R#�%"+r�����NXk�{�2 �Т���'&�2#���'vfW2�7v���FR#�.X{�h
+�j�[��"��'vfW2�&�75vfW2#�.k:.iʲ&�72k:.j�"��&&�V�G��V�&�VB#�.iˮX�nY
+�yJ�"��'vfW2�V�Vה6�V�D&6R#�.Y��zX{�h
+�i["��'vfW2�V�Vה6�V�EW%vfR#�.j��k:.���X�i["��'vfW2�7v��FW'f��&6R#�.X{�h
+��{N��B+rY��z"��'vfW2�7v��FW'f��W%vfR#�.X{�h
+��{N��B+rj��k:.{ʞy��"��'vfW2�7v��FW'f��֖�#�.X{�h
+��{N��B+rK����"��'vfW2�f�'7E7v�FV��#�.�inh
+�[�n���"��'vfW2��FW&֗76����6WGF�U6V6��G2#�.k:.�{N{�>z�~[^zK�"��'vfW2��FW&֗76����g&VU6V6��G2�6V�V7F���#�.k:.�{Ni[NZHr+rh��X��"��'vfW2��FW&֗76����g&VU6V6��G2�'V��DV&ǒ#�.k:.�{Ni[NZHr+riKniY�X��i��"��'vfW2��FW&֗76����g&VU6V6��G2�'V��D�FR#�.k:.�{Ni[NZHr+riKniY�Y�i��"��'vfW2��FW&֗76����g&VU6V6��G2�fƖFF���#�.k:.�{Ni[NZHr+rXYx�"��'vfW2�F�F�vfW2#�.h�k:.i["��'vfW2�7v��&v��#�.X{�yI��랋y�"��'vfW2�G�U&����F�&6R#�.�xފ8^jh.x�r+rY��z"��'vfW2�G�U&����F�W%vfR#�.�xފ8^jh.x�r+rj��k:""��'vfW2�G�U&����f7EF�&W6���B#�.����	����X�"��&6��&B�FVfV�G2�F�vR#�.Y��zK�NZ�2"��&6��&B�FVfV�G2�f�&U&FR#�.j��zy.iK�X{�"��&6��&B�FVfV�G2�&�vR#�.iK�X{�[Nz��"��&6��&B�'V��WB�7VVB#�.[˞�	�"��&6��&B�'V��WB�ƖfR#�.[˞K��Z��Y�"��&6��&B�'V��WB�7&VB#�.iZ>[�>�Ȏ[�~[�n�Ȓ"��&6��&B����#�.[�>��.K����"��&6��&B�'&V�F�&�Vv�F�7B#�.z�zN{���y�zk�"��&6��&B�F�vW%���Uv�GF�#�.X����XˮZ��[�b"��&V�V֖W2�FVfV�G2�V�Vו7VVB#�.XZ�[iX�K���	�[�nX�x�r"��&V�V֖W2�G�W2���&���&6R#�.i��	�+rY��z�"��&V�V֖W2�G�W2���&���W%vfR#�.i��	�+rj��k:"�"��&V�V֖W2�G�W2���&���7VVD&6R#�.i��	�+rY��z�	�[�b"��&V�V֖W2�G�W2���&���7VVEW%vfR#�.i��	�+rj��k:.�	�[�b"��&V�V֖W2�G�W2���&���F�vR#�.i��	�+rz�zNK�NZ�2"��&V�V֖W2�G�W2���&���"#�.i��	�+rXخ[�B"��&V�V֖W2�G�W2���&���#�.i��	�+rZYnX�zz�X�b"��&V�V֖W2�G�W2�f7B�&6R#�.����	�+rY��z�"��&V�V֖W2�G�W2�f7B�W%vfR#�.����	�+rj��k:"�"��&V�V֖W2�G�W2�f7B�7VVD&6R#�.����	�+rY��z�	�[�b"��&V�V֖W2�G�W2�f7B�7VVEW%vfR#�.����	�+rj��k:.�	�[�b"��&V�V֖W2�G�W2�f7B�F�vR#�.����	�+rz�zNK�NZ�2"��&V�V֖W2�G�W2�f7B�"#�.����	�+rXخ[�B"��&V�V֖W2�G�W2�f7B�#�.����	�+rZYnX�zz�X�b"��&V�V֖W2�G�W2�F��&6R#�.�xފ8R+rY��z�"��&V�V֖W2�G�W2�F��W%vfR#�.�xފ8R+rj��k:"�"��&V�V֖W2�G�W2�F��7VVD&6R#�.�xފ8R+rY��z�	�[�b"��&V�V֖W2�G�W2�F��7VVEW%vfR#�.�xފ8R+rj��k:.�	�[�b"��&V�V֖W2�G�W2�F��F�vR#�.�xފ8R+rz�zNK�NZ�2"��&V�V֖W2�G�W2�F��"#�.�xފ8R+rXخ[�B"��&V�V֖W2�G�W2�F��#�.�xފ8R+rZYnX�zz�X�b"��&V�V֖W2�G�W2�&�72�&6R#�$&�72+rY��z�"��&V�V֖W2�G�W2�&�72�W%vfR#�$&�72+rj��k:"�"��&V�V֖W2�G�W2�&�72�7VVD&6R#�$&�72+rY��z�	�[�b"��&V�V֖W2�G�W2�&�72�7VVEW%vfR#�$&�72+rj��k:.�	�[�b"��&V�V֖W2�G�W2�&�72�F�vR#�$&�72+rz�zNK�NZ�2"��&V�V֖W2�G�W2�&�72�"#�$&�72+rXخ[�B"��&V�V֖W2�G�W2�&�72�#�$&�72+rZYnX�zz�X�b"��&V6���ג�FVfV�G2�G&�6��6R#�.Y��zh螉�x�~�ȎK�^Y��j�[��yI�iX��Ȓ"��&V6���ג�FVfV�G2�G&�ƖfWF��R#�.h螉�ZَYʎi{n�{B"��'&Wv&D�WFW"����D�V�#�.ZYnX�zz�X�b+rX{�zNX�x�r"��&6��&B�'V��WB�&F�W2#�%"+r[˞K��Xخ[�B"��&6��&B�'V��WB��W���T�fg6WB#�%"+rx*�X�>X�z{�"��&6��&B�fg��6���E'F�6�W2#�%"+r[�x�{).Z�i["��&6��&B�fg�涖��'F�6�W2#�%"+rX{�i�{).Z�i["��&6��&B�fg��'&V�F�&�Vv�'F�6�W2#�%"+rz�zN{).Z�i["��&V6���ג�G&�2��6�W&F�W2#�%"+rh��X�nXخ[�B"��&V6���ג�G&�2�6��6T6#�%"+rh�x�~K�����ȎK�^Y��j�[��yI�iX��Ȓ"��&V6���ג�G&�7F%�Ɩ7��7F#%6�&R#�%"+rK��i��h螉�X�j�B"��'vfW2�'VFvWB�vfUV�F�&6R#�$'VFvWB+rh��Xޚ)�Y��z"��'vfW2�'VFvWB�vfUV�F�W%vfR#�$'VFvWB+rh��Xޚ)�j��k:""��'vfW2�'VFvWB�F&vWD��67&VV��&6R#�$'VFvWB+ry��j~Y�[�Y��z"��'vfW2�'VFvWB�F&vWD��67&VV��W%vfR#�$'VFvWB+ry��j~Y�[�j��k:""��'vfW2�'VFvWB�6�V6���FW'f�#�$'VFvWB+rj8i�^�{N��B"��'vfW2�'VFvWB�&F6���#�$'VFvWB+rX�^j��^h
+�K����"��'vfW2�'VFvWB�vfTV�E7&��B�v��F�r#�$'VFvWB+rk:.iʾz�~X�2"��'vfW2�'VFvWB�vfTV�E7&��B��V�F�ƖW"#�$'VFvWB+rk:.iʾy��j~X�x�r"��'vfW2�'VFvWB���ƗfR#�$'VFvWB+rY�[�z�K����"��'vfW2�7FvU���6V�V7F���vfW2#�.��nj�^Z��k�B+r��h��i��k:.i["��'vfW2�7FvU���fƖFF���vfW2#�.��nj�^Z��k�B+r��Ί�i��k:.i["��'vfW2�7FvU���6V�V7F����vfUV�F�7F'B#�.��h��i��+r�Xޚ)ދ[~x+�"��'vfW2�7FvU���6V�V7F����vfUV�F�V�B#�.��h��i��+r�Xޚ)�{��x+�"��'vfW2�7FvU���6V�V7F����F&vWD��67&VV��7F'B#�.��h��i��+rY�[��[~x+�"��'vfW2�7FvU���6V�V7F����F&vWD��67&VV��V�B#�.��h��i��+rY�[�{��x+�"��'vfW2�7FvU���6V�V7F������ƗfR#�.��h��i��+rY�[�z�K����"��'vfW2�7FvU���'V��B�vfUV�F�7F'B#�.i�Nz�i��+r�Xޚ)ދ[~x+�"��'vfW2�7FvU���'V��B�vfUV�F�V�B#�.i�Nz�i��+r�Xޚ)�{��x+�"��'vfW2�7FvU���'V��B�F&vWD��67&VV��7F'B#�.i�Nz�i��+rY�[��[~x+�"��'vfW2�7FvU���'V��B�F&vWD��67&VV��V�B#�.i�Nz�i��+rY�[�{��x+�"��'vfW2�7FvU���'V��B���ƗfR#�.i�Nz�i��+rY�[�z�K����"��&V6���ג��&F��'�G&�&FR�6V�V7F���W$֖�WFR#�.i��	�h螉�+r��h��i��j��X�n�)�"��&V6���ג��&F��'�G&�&FR�'V��EW$֖�WFR#�.i��	�h螉�+ri�Nz�i��j��X�n�)�"��&V6���ג��&F��'�G&�&FR�'V��EG&�6�F���6V6��G2#�.i��	�h螉�+ri�Nz���~k�zy.i["��&V6���ג��&F��'�G&�&FR�6''�6#�.i��	�h螉�+r�)�[�nzz�X�K����"��&&�V�G���ffW"�V�&�VDg&��vfR#�.h�^K�r+r�[~Zx�k:.j�"��&&�V�G���ffW"�6�V6���FW'f�6V6��G2#�.h�^K�r+rj8i�^�{N��N�Ȏzy.�Ȓ"��&&�V�G���ffW"�&6T6��6UW$6�V6�#�.h�^K�r+rY��zjh.x�r"��&&�V�G���ffW"�֖�6��6UW$6�V6�#�.h�^K�r+rjh.x�~K����"��&&�V�G���ffW"���6��6UW$6�V6�#�.h�^K�r+rjh.x�~K����"��&&�V�G���ffW"���F�vU&�6V6��G2#�.h�^K�r+rizK�Nx��Y�i{n�[�"��&&�V�G���ffW"���F�vT&��W4��#�.h�^K�r+rizK�NX�h�K����"��&&�V�G���ffW"�V�F���F�&W6���B#�.h�^K�r+rX^[�~��x����X�"��&&�V�G���ffW"�V�F���&��W4��#�.h�^K�r+rX^[�~��x�X�h�"��&&�V�G���ffW"�&V6V�DF�vUV��G�#�.h�^K�r+r��i��X�~K�Nh:�{٢"��&&�V�G���ffW"�&V6V�DF�vUV��G�6V6��G2#�.h�^K�r+r��i��X�~K�Nz�~X�2"��&&�V�G���ffW"��&�v��F�u6V6��G2#�.h�^K�r+rh�^X�~z�~X�2"��&&�V�G���ffW"�6���F�v�6V6��G2#�.h�^K�r+rXk~X�Ni{n�{B"��&&�V�G���ffW"�֖��ffW'5W%vfR#�.h�^K�r+rj��k:.K��[�^j�i["��&&�V�G���ffW"����ffW'5W%vfR#�.h�^K�r+rj��k:.K����"��&&�V�G���ffW"�wV&�FVTEvfU&�w&W72#�.h�^K�r+rK��[�^���[�n���X�"��&&�V�G���ffW"���6��7W'&V�D�ffW'2#�.h�^K�r+rY�i{nZَYʎK����"��&&�V�G���ffW"���6��7W'&V�DV�6�V�FW'2#�.h�^K�r+riʮ{�>z�~iX�{�NK����"��&&�V�G��V�6�V�FW"�V�Vה6�V�D&6R#�.iX�{�B+rY��zi[�x�"��&&�V�G��V�6�V�FW"�V�Vה6�V�EW%vfR#�.iX�{�B+rj��k:.���X�i[�x�"��&&�V�G��V�6�V�FW"�V�Vה6�V�D��#�.iX�{�B+ri[�x�K����"��&&�V�G��V�6�V�FW"��V�#�.iX�{�B+ryI�Y�X�x�r"��&&�V�G��V�6�V�FW"�7VVD�V�#�.iX�{�B+r�	�[�nX�x�r"��&&�V�G��V�6�V�FW"�F�vT�V�#�.iX�{�B+rK�NZ�>X�x�r"��&&�V�G��V�6�V�FW"�7v��FW'f�6V6��G2#�.iX�{�B+rX�nh��yI�h��{N��B"��&&�V�G��V�6�V�FW"�7v�7&VB#�.iX�{�B+rX{�yI�iZ>[�2"��&&�V�G��V�6�V�FW"�V�W&vV�7��fW'&�FTF�7F�6R#�.iX�{�B+r{J~h
+^�hny�n�y�zk�"��&&�V�G��V�6�V�FW"�6���6�F������&��vV�v�B#�.iX�{�B+ri��	�i�>�x�"��&&�V�G��V�6�V�FW"�6���6�F����f7EvV�v�B#�.iX�{�B+r����	�i�>�x�"��&&�V�G��V�6�V�FW"�6���6�F����F�vV�v�B#�.iX�{�B+r�xފ8^i�>�x�"��&&�V�G��&Wv&B�6&D6�V�B#�.ZYnX�+rh�~Z�X�i[�x�"��&&�V�G��&Wv&B�6&E7F$��#�.ZYnX�+rh�~Z�X�i��{�~K����"��&&�V�G��&Wv&B�v��F6&D6�V�B#�.ZYnX�+rK�~�;�X�i[�x�"��&&�V�G��&Wv&B�v��F6&E7F$��#�.ZYnX�+rK�~�;�X�i��{�~K����"��&&�V�G��&Wv&B�G&�ƖfWF��U6V6��G2#�.ZYnX�+rY���.Z��Y�"��&&�V�G��&Wv&B�&WVE&�FV7F���#�.ZYnX�+r�x�ZH�K��h�B"��&&�V�G��&Wv&D&�2�&��'�6�&R#�.ZYnX�X�Y	+rK��kXkK�X�j�B"��&&�V�G��&Wv&D&�2�6V6��F'�6�&R#�.ZYnX�X�Y	+rj�kXkK�X�j�B"��&&�V�G��f�7V���ffW%&F�W2#�.�xn�x�+rh�^K�~Xخ[�B"��&&�V�G��f�7V���ffW$VFvT��6WB#�.�xn�x�+r��{ɎXh^{ʒ"��&&�V�G��f�7V��V�Vהv��u&F�W2#�.�xn�x�+riX�{�NXX�i�^Xخ[�B"��&&�V�G��f�7V��V�VוV�6U7VVB#�.�xn�x�+riX�{�N�H�Xk.�	�[�b"��&V6���ג���&��G&�G�U�Ɩ7��&��T&u6��R#�.h螉�Z��k�B+r�y.��.�(��[�[�b"��&V6���ג���&��G&�G�U�Ɩ7��V&ǔ֗��F�66�fW'�#�.h螉�Z��k�B+rX��i��h�.{J.K��"��&V6���ג���&��G&�G�U�Ɩ7��V&ǔ֗��'V��B#�.h螉�Z��k�B+rX��i��K��{��K��"��&V6���ג���&��G&�G�U�Ɩ7��V&ǔ֗���f�B#�.h螉�Z��k�B+rX��i���>i[NK��"��&V6���ג���&��G&�G�U�Ɩ7���FT֗��F�66�fW'�#�.h螉�Z��k�B+rY�i��h�.{J.K��"��&V6���ג���&��G&�G�U�Ɩ7���FT֗��'V��B#�.h螉�Z��k�B+rY�i��K��{��K��"��&V6���ג���&��G&�G�U�Ɩ7���FT֗���f�B#�.h螉�Z��k�B+rY�i���>i[NK��"��&V6���ג���&��G&�G�U�Ɩ7��&��G7G&֖�F�66�fW'�#�.h螉�Z��k�B+rY
+�X��h�.{J.K��[�R"��&V6���ג���&��G&�G�U�Ɩ7��&��G7G&f�&6VDG&�2#�.i��	�h螉�+r[�[[ˮX�nX�x��j�i["��&V6���ג���&��G&�G�U�Ɩ7���GW&�G��gV���W&vT�2#�.h螉�Z��k�B+rk�h�xi�Y�h�i["��&V6���ג���&��G&�G�U�Ɩ7���GW&�G��gV�Ć�v�W7E7F"#�.h螉�Z��k�B+rk�h�xi�i����i��"��&V6���ג���&��G&�G�U�Ɩ7���GW&�G��gV��WV�VEG�W2#�.h螉�Z��k�B+rk�h�xi��8^ZH~i["��&V6���ג���&��G&�G�U�Ɩ7���GW&�G���W&vUvV�v�B#�.h螉�Z��k�B+rY�h�h�xi�i�>�x�"��&V6���ג���&��G&�G�U�Ɩ7���GW&�G��7F%vV�v�B#�.h螉�Z��k�B+ri��{�~h�xi�i�>�x�"��&V6���ג���&��G&�G�U�Ɩ7���GW&�G��WV�vV�v�B#�.h螉�Z��k�B+r�8^ZH~h�xi�i�>�x�"��&V6���ג���&��G&�G�U�Ɩ7��'V��B�F��#�.h螉�Z��k�B+rK��{��X	���i["��&V6���ג���&��G&�G�U�Ɩ7��'V��B�66�&U�vW"#�.h螉�Z��k�B+rh�^XZ^X�nh�~i["��&V6���ג���&��G&�G�U�Ɩ7��'V��B��W&vU&VG��V�F�ƖW"#�.h螉�Z��k�B+rX��Y�h�X�x�r"��&V6���ג���&��G&�G�U�Ɩ7��'V��B�WV�VD&6T&��W2#�.h螉�Z��k�B+r�8^ZH~Y��zX�X�b"��&V6���ג���&��G&�G�U�Ɩ7��'V��B�WV�VE7F$&��W2#�.h螉�Z��k�B+r�8^ZH~i��{�~X�X�b"��&V6���ג���&��G&�G�U�Ɩ7��'V��B憗7F�&�6��W&vUvV�v�B#�.h螉�Z��k�B+rX�nX�.Y�h�i�>�x�"��&V6���ג���&��G&�G�U�Ɩ7��'V��B憗7F�&�6��W&vT6#�.h螉�Z��k�B+rX�nX�.Y�h�[�b"��&V6���ג���&��G&�G�U�Ɩ7��'V��B���vV�v�E&F��#�.h螉�Z��k�B+ri�ZJ~i�>�x�j�B"��&V6���ג���&��G&�G�U�Ɩ7���f�B�W�6�VFUF��#�.h螉�Z��k�B+r�>i[Nh�.��NZKN�:�"��&V6���ג���&��G&�G�U�Ɩ7���f�B�6�F�FFTg&7F���#�.h螉�Z��k�B+r�>i[NX	���j�NK�"��&V6���ג���&��G&�G�U�Ɩ7����6�UG�U7G&V�#�.h螉�Z��k�B+rY�Y辋��h��K����"��&6��&B�6��G&��6V�Ɩ�r�g&VW�U6V6��G2#�.h�~X�nK����+rXk�{�>zy.i["��&6��&B�6��G&��6V�Ɩ�r�7GV�6V6��G2#�.h�~X�nK����+ryʞi�^zy.i["��&6��&B�6��G&��6V�Ɩ�r���6�&6�F�7F�6R#�.h�~X�nK����+rX{���y�zk�"��&6��&B�6��G&��'VFvWB���6��G&���VE&F��#�.h�~X�n�(Nz�r+rX�~h�~j�NK�K����"��&6��&B�6��G&��'VFvWB�֖�g&VTGf�6W'2#�.h�~X�n�(Nz�r+ri�[	�z�yKhꎋ��i["��&V�V֖W2�G�W2���&�����6�&6�&W6�7B#�.i��	�+rX{��h�~h
+r"��&V�V֖W2�G�W2���&���65&W6�7B#�.i��	�+rh�~X�nh�~h
+r"��&V�V֖W2�G�W2�f7B���6�&6�&W6�7B#�.����	�+rX{��h�~h
+r"��&V�V֖W2�G�W2�f7B�65&W6�7B#�.����	�+rh�~X�nh�~h
+r"��&V�V֖W2�G�W2�F����6�&6�&W6�7B#�.�xފ8R+rX{��h�~h
+r"��&V�V֖W2�G�W2�F��65&W6�7B#�.�xފ8R+rh�~X�nh�~h
+r"��&V�V֖W2�G�W2�&�72���6�&6�&W6�7B#�$&�72+rX{��h�~h
+r"��&V�V֖W2�G�W2�&�72�65&W6�7B#�$&�72+rh�~X�nh�~h
+r �ТЧ�
