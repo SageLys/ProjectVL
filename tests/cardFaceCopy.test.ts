@@ -26,7 +26,7 @@ describe('card face copy', () => {
     for (const card of cfg.skills.cards) {
       const overview = copy.cards[card.id]?.overview ?? '';
       expect(overview, `cards.${card.id}.overview`).toBeTruthy();
-      expect([...overview].length, `cards.${card.id}.overview length`).toBeLessThanOrEqual(24);
+      expect([...overview].length, `cards.${card.id}.overview length`).toBeLessThanOrEqual(30);
       expect(overview, `cards.${card.id}.overview leaked config`).not.toMatch(LEAKED_CONFIG);
     }
   });

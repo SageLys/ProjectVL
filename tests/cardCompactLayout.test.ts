@@ -20,7 +20,7 @@ describe('compact card layout', () => {
     expect(card.querySelector('.card-head > .card-name')).not.toBeNull();
     expect(card.querySelector(':scope > .card-stars')?.textContent).toHaveLength(5);
     expect(card.querySelector('.card-head .card-stars')).toBeNull();
-    expect(card.querySelector('.card-overview')?.textContent).toBe('链走到哪，感电铺到哪。');
+    expect(card.querySelector('.card-overview')?.textContent).toBe('电流会顺着人群一路传下去——他带来的朋友越多，你越省事。');
     expect(card.querySelector('.card-affix-compact')).not.toBeNull();
     expect(card.querySelectorAll('.card-affix-compact .card-affix')).toHaveLength(2);
     expect(card.querySelector('.card-affix .affix-short')?.textContent).toBe('效伤');
@@ -39,7 +39,7 @@ describe('compact card layout', () => {
         { stat: 'controlledDamageTakenMul', value: 0.15, consumableDuration: 4 },
       ],
     }, 'equipment', 0, { dragStart: vi.fn(), inspect: vi.fn() });
-    expect(equipment.querySelector('.card-overview')?.textContent).toBe('链走到哪，感电铺到哪。');
+    expect(equipment.querySelector('.card-overview')?.textContent).toBe('电流会顺着人群一路传下去——他带来的朋友越多，你越省事。');
   });
 
   it('shows a size-neutral empty marker and dispatches inspection on click', () => {

@@ -3,11 +3,16 @@ import { cfg } from '../src/config';
 import { AFFIX_SINKS } from '../src/config/affixSinks';
 import { texts } from '../src/data';
 import { ATOM_LABELS } from '../src/ui/effectText';
+import { DEFAULT_GLOSSARY } from '../src/ui/cardDetailModel';
 
 /** 英文配置串泄漏检测正则：3 字母以上英文单词、@ 符号、箭头、已知配置键名 */
 const LEAKED_CONFIG = /[A-Za-z]{3,}|@|→|requiresStatus|spreadStatus|groundZone|burstDamage/;
 
 describe('player-facing text coverage', () => {
+  it('keeps the runtime glossary and its fallback copy byte-for-byte equal', () => {
+    expect(texts.glossary).toEqual(DEFAULT_GLOSSARY);
+  });
+
   it('covers all cards, branches, atoms, triggers and affix stats without placeholders', () => {
     const copy = texts as unknown as {
       cards: Record<string, { overview: string; hand: { shortByTier: Record<string, string> }; equip: { shortByTier: Record<string, string> } }>;

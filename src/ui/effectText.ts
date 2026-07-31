@@ -39,10 +39,10 @@ export const ATOM_LABELS: Record<AtomName, string> = {
   stun: '眩晕',
   knockback: '击退',
   taunt: '嘲讽',
-  vulnerable: '易伤',
+  vulnerable: '感电',
   aura: '光环',
   groundZone: '领域',
-  dot: '持续伤害',
+  dot: '灼烧',
   summon: '召唤',
   dropRateMul: '掉率',
   dropLifetimeMul: '掉落时限',
@@ -52,10 +52,10 @@ export const ATOM_LABELS: Record<AtomName, string> = {
   mergeMaterialRefund: '合成素材返还',
   wildcardRewardBonus: '万能卡奖励加成',
   mergePulse: '合成脉冲',
-  shield: '护盾',
+  shield: '壁垒',
   thorns: '反伤',
   breachReduction: '突破减免',
-  novaOnBreak: '破盾冲击',
+  novaOnBreak: '破壁反击',
   execute: '处决',
   burstDamage: '爆发伤害',
   focusPriority: '索敌优先',
@@ -93,16 +93,16 @@ const keywordLine = (atom: AtomName, text: string, depth = 0): EffectTextLine =>
 });
 const sourceLabel = (value: string): string => lexicon?.sources?.[value] ?? ({
   chain: '连锁',
-  dot: '持续伤害',
+  dot: '灼烧',
   summon: '召唤物',
   projectile: '弹道',
 } as Record<string, string>)[value] ?? '指定效果';
 const statusLabel = (value: string): string => lexicon?.statuses?.[value] ?? ({
-  frozen: '冻结',
-  dot: '持续伤害',
+  frozen: '冰封',
+  dot: '灼烧',
   controlled: '受控',
-  brand: '标记',
-  vulnerable: '易伤',
+  brand: '赏印',
+  vulnerable: '感电',
 } as Record<string, string>)[value] ?? '指定状态';
 const statLabel = (value: unknown): string => lexicon?.stats?.[String(value)] ?? ({
   damage: '伤害',
@@ -143,174 +143,174 @@ export function formatEffect(effect: EffectDef, depth = 0): EffectTextLine[] {
   let text: string;
   switch (effect.atom) {
     case 'pierce':
-      text = p.count != null ? `弹道穿透 ${shown(p.count)} 个目标` : '释放穿透弹道';
+      text = p.count != null ? `一路穿过 ${shown(p.count)} 个目标` : '子弹会穿透过去';
       if (p.damageRetention != null) text += `，每次保留 ${pct(p.damageRetention)} 伤害`;
       if (p.damageMul != null) text += `，造成 ${pct(p.damageMul)} 基础伤害`;
-      if (p.rampPerPierce != null) text += `，每次穿透后伤害提高 ${pct(p.rampPerPierce)}`;
+      if (p.rampPerPierce != null) text += `，每穿一个伤害再提高 ${pct(p.rampPerPierce)}`;
       if (p.width != null) text += `，宽度 ${shown(p.width)}`;
       break;
     case 'chain':
-      text = `命中后向附近追求者弹跳 ${shown(p.bounces)} 次`;
-      if (p.targets != null) text += `，每次最多连接 ${shown(p.targets)} 个目标`;
+      text = `命中后电流接着往附近追求者跳 ${shown(p.bounces)} 次`;
+      if (p.targets != null) text += `，每次最多连上 ${shown(p.targets)} 个目标`;
       if (p.damageRetention != null) text += `，每次保留 ${pct(p.damageRetention)} 伤害`;
       if (p.searchRange != null) text += `，搜索半径 ${shown(p.searchRange)}`;
       break;
     case 'split':
-      text = `分裂出 ${shown(p.count)} 枚弹道，造成 ${pct(p.damageRatio)} 伤害`;
-      if (p.maxDepth != null) text += `，最多递归 ${shown(p.maxDepth)} 层`;
+      text = `一分为 ${shown(p.count)}，每枚子弹道造成 ${pct(p.damageRatio)} 伤害`;
+      if (p.maxDepth != null) text += `，最多能再分裂 ${shown(p.maxDepth)} 层`;
       if (p.chance != null) text += `，触发概率 ${pct(p.chance)}`;
       break;
     case 'ricochet':
-      text = `弹道额外弹射 ${shown(p.bounces)} 次`;
+      text = `弹道会额外弹开 ${shown(p.bounces)} 次`;
       break;
     case 'aoeOnHit':
-      text = `命中处引发范围爆发，半径 ${shown(p.radius)}，中心造成 ${pct(p.damageRatio)} 伤害`;
-      if (p.falloff != null) text += `，边缘衰减至 ${pct(p.falloff)}`;
+      text = `命中的地方炸开一圈，半径 ${shown(p.radius)}，正中心造成 ${pct(p.damageRatio)} 伤害`;
+      if (p.falloff != null) text += `，越往边上衰减到 ${pct(p.falloff)}`;
       break;
     case 'beamMorph':
-      text = '主炮变为光束';
-      if (p.interval != null) text += `，每 ${seconds(p.interval)}发射`;
+      text = '主炮换成持续输出的光束';
+      if (p.interval != null) text += `，每 ${seconds(p.interval)}打一轮`;
       text += `，宽度 ${shown(p.width)}，每次造成 ${pct(p.damageRatio)} 伤害`;
       break;
     case 'mortarMorph':
-      text = `主炮获得迫击炮形态，爆炸半径 ${shown(p.radius)}，中心造成 ${pct(p.damageRatio)} 伤害`;
-      if (p.falloff != null) text += `，边缘衰减至 ${pct(p.falloff)}`;
+      text = `主炮换成迫击炮，落点爆炸半径 ${shown(p.radius)}，正中心造成 ${pct(p.damageRatio)} 伤害`;
+      if (p.falloff != null) text += `，越往边上衰减到 ${pct(p.falloff)}`;
       if (p.chance != null) text += `，触发概率 ${pct(p.chance)}`;
       break;
     case 'slow':
-      text = `使目标减速 ${pct(p.ratio)}，持续 ${seconds(p.duration)}`;
+      text = `让目标腿变慢 ${pct(p.ratio)}，持续 ${seconds(p.duration)}`;
       if (p.radius != null) text += `，作用半径 ${shown(p.radius)}`;
       break;
     case 'freeze':
-      text = `冻结目标 ${seconds(p.duration)}`;
-      if (p.stacksToTrigger != null) text += `，累计 ${shown(p.stacksToTrigger)} 层触发`;
+      text = `把目标冻住 ${seconds(p.duration)}`;
+      if (p.stacksToTrigger != null) text += `，叠够 ${shown(p.stacksToTrigger)} 层才触发`;
       if (p.radius != null) text += `，作用半径 ${shown(p.radius)}`;
       if (p.chance != null) text += `，触发概率 ${pct(p.chance)}`;
       break;
     case 'stun':
-      text = `眩晕目标 ${seconds(p.duration)}`;
+      text = `让目标当场断片 ${seconds(p.duration)}`;
       if (p.chance != null) text += `，触发概率 ${pct(p.chance)}`;
       if (p.radius != null) text += `，作用半径 ${shown(p.radius)}`;
       break;
     case 'knockback':
-      text = `击退目标 ${shown(p.distance)} 距离`;
-      if (p.collisionDamage != null) text += `，碰撞造成 ${pct(p.collisionDamage)} 伤害`;
+      text = `一巴掌把目标推开 ${shown(p.distance)} 距离`;
+      if (p.collisionDamage != null) text += `，撞上去还会造成 ${pct(p.collisionDamage)} 伤害`;
       if (p.radius != null) text += `，作用半径 ${shown(p.radius)}`;
       break;
     case 'taunt':
-      text = `嘲讽半径 ${shown(p.radius)} 内追求者，持续 ${seconds(p.duration)}`;
+      text = `拉走半径 ${shown(p.radius)} 内追求者的仇恨，持续 ${seconds(p.duration)}`;
       if (p.priorityWeight != null) text += `，索敌权重 ${shown(p.priorityWeight)}`;
       break;
     case 'vulnerable':
-      text = `使目标受到的伤害提高 ${pct(p.ratio)}，持续 ${seconds(p.duration)}`;
-      if (p.maxStacks != null) text += `，最多 ${shown(p.maxStacks)} 层`;
+      text = `让目标感电，受到的伤害提高 ${pct(p.ratio)}，持续 ${seconds(p.duration)}`;
+      if (p.maxStacks != null) text += `，最多叠 ${shown(p.maxStacks)} 层`;
       if (p.radius != null) text += `，作用半径 ${shown(p.radius)}`;
       break;
     case 'aura':
       text = p.radiusRatioOfRange != null
-        ? `生成光环，半径为射程的 ${pct(p.radiusRatioOfRange)}`
-        : `生成半径 ${shown(p.radius)} 的光环`;
-      if (p.tickInterval != null) text += `，每 ${seconds(p.tickInterval)} 结算`;
+        ? `身边展开一圈光环，半径是射程的 ${pct(p.radiusRatioOfRange)}`
+        : `身边展开一圈半径 ${shown(p.radius)} 的光环`;
+      if (p.tickInterval != null) text += `，每 ${seconds(p.tickInterval)} 结算一次`;
       break;
     case 'groundZone':
       if (p.shape === 'line') {
         text = typeof p.radius === 'number'
-          ? `生成朝敌方向延伸、长 ${shown(p.radius * 2)} 宽 ${shown(p.radius)} 的线形领域，持续 ${seconds(p.duration)}`
-          : `生成朝敌方向延伸的线形领域，持续 ${seconds(p.duration)}`;
+          ? `朝敌方向拉出一条长 ${shown(p.radius * 2)} 宽 ${shown(p.radius)} 的领域，持续 ${seconds(p.duration)}`
+          : `朝敌方向拉出一条领域，持续 ${seconds(p.duration)}`;
       } else {
-        text = `生成半径 ${shown(p.radius)} 的${p.shape === 'ring' ? '环形' : ''}领域，持续 ${seconds(p.duration)}`;
+        text = `落地生成一块半径 ${shown(p.radius)} 的${p.shape === 'ring' ? '环形' : ''}领域，持续 ${seconds(p.duration)}`;
       }
-      if (p.tickInterval != null) text += `，每 ${seconds(p.tickInterval)} 结算`;
+      if (p.tickInterval != null) text += `，每 ${seconds(p.tickInterval)} 结算一次`;
       break;
     case 'dot':
       text = p.tickInterval != null
-        ? `使目标持续掉血，每 ${seconds(p.tickInterval)}造成 ${pct(p.damageRatio)} 伤害`
-        : `每次结算造成 ${pct(p.damageRatio)} 持续伤害`;
+        ? `点着目标持续掉血，每 ${seconds(p.tickInterval)}烧掉 ${pct(p.damageRatio)} 伤害`
+        : `每次结算烧掉 ${pct(p.damageRatio)} 的持续伤害`;
       if (p.duration != null) text += `，持续 ${seconds(p.duration)}`;
       if (p.radius != null) text += `，作用半径 ${shown(p.radius)}`;
       break;
     case 'summon':
-      text = `召唤 ${shown(p.count ?? 1)} 个${p.kind === 'decoy' ? '诱饵' : '单位'}，生命 ${shown(p.hp)}`;
+      text = `召来 ${shown(p.count ?? 1)} 个${p.kind === 'decoy' ? '诱饵' : '打手'}，生命 ${shown(p.hp)}`;
       if (p.duration != null) text += `，持续 ${seconds(p.duration)}`;
       if (p.damageRatio != null) text += `，攻击造成 ${pct(p.damageRatio)} 伤害`;
       if (p.fireInterval != null) text += `，攻击间隔 ${seconds(p.fireInterval)}`;
       if (p.tauntRadius != null) text += `，嘲讽半径 ${shown(p.tauntRadius)}`;
-      if (p.explode) text += `，消失时爆炸并造成 ${shown(p.explodeDamageMul)} 倍伤害`;
-      if (p.knockbackDistance != null) text += `、击退 ${shown(p.knockbackDistance)}`;
-      if (p.respawnOnce) text += '，可重生一次';
-      if (p.replacesEarlier) text += '，替换本卡先前的召唤物';
+      if (p.explode) text += `，消失时会爆炸，造成 ${shown(p.explodeDamageMul)} 倍伤害`;
+      if (p.knockbackDistance != null) text += `、顺带击退 ${shown(p.knockbackDistance)}`;
+      if (p.respawnOnce) text += '，能重生一次';
+      if (p.replacesEarlier) text += '，替换掉这张卡之前召唤的单位';
       break;
     case 'dropRateMul':
-      text = `掉落概率 ${plusPctFromMul(p.mul)}`;
+      text = `心意掉落概率 ${plusPctFromMul(p.mul)}`;
       break;
     case 'dropLifetimeMul':
-      text = `掉落物存在时间 ${plusPctFromMul(p.mul)}`;
+      text = `心意在地上能留 ${plusPctFromMul(p.mul)}`;
       break;
     case 'xpMul':
       text = `奖励积分获取 ${plusPctFromMul(p.mul)}`;
       break;
     case 'extraDrop':
       text = p.chance != null
-        ? `${pct(p.chance)} 概率额外生成 ${shown(p.count)} 个${p.at === 'pickup' ? '拾取物' : '掉落物'}`
-        : `额外生成 ${shown(p.count)} 个${p.at === 'pickup' ? '拾取物' : '掉落物'}`;
-      if (p.starWeights && typeof p.starWeights === 'object') text += '，星级按配置权重抽取';
+        ? `${pct(p.chance)} 概率多掉 ${shown(p.count)} 份${p.at === 'pickup' ? '拾取物' : '心意'}`
+        : `直接多掉 ${shown(p.count)} 份${p.at === 'pickup' ? '拾取物' : '心意'}`;
+      if (p.starWeights && typeof p.starWeights === 'object') text += '，星级按权重抽';
       break;
     case 'expiryConvert':
-      text = `掉落物过期时，将其中 ${pct(p.ratio)} 转化为收益`;
+      text = `心意过期消失前，会把其中 ${pct(p.ratio)} 换成收益`;
       break;
     case 'mergeMaterialRefund': {
       const scope = p.scope === 'feed' ? '装备喂养' : p.scope === 'both' ? '普通合并或装备喂养' : '普通同型合并';
-      text = `${scope}时，有 ${pct(p.refundChance)} 概率返还 ${shown(p.count)} 张 ${shown(p.star)}★ 同型素材卡`;
+      text = `${scope}时，有 ${pct(p.refundChance)} 概率退回 ${shown(p.count)} 张 ${shown(p.star)}★ 同型素材卡`;
       break;
     }
     case 'wildcardRewardBonus': {
       const scope = p.scope === 'bounty' ? 'Bounty' : p.scope === 'boss' ? '波末 Boss' : 'Bounty 或波末 Boss';
-      text = `${scope}发放万能卡奖励时，有 ${pct(p.bonusChance)} 概率额外增加 ${shown(p.count)} 张`;
+      text = `${scope}发放万能卡奖励时，有 ${pct(p.bonusChance)} 概率再多给 ${shown(p.count)} 张`;
       break;
     }
     case 'mergePulse':
-      text = `合成时释放半径 ${shown(p.radius)} 的脉冲，每次累计合成造成 ${shown(p.damagePerMergeCount)} 点伤害`;
+      text = `合成成功那一下，会以半径 ${shown(p.radius)} 放一次脉冲，按累计合成次数造成 ${shown(p.damagePerMergeCount)} 点伤害`;
       break;
     case 'shield':
-      text = `获得可抵挡 ${shown(p.absorbHits)} 次伤害的护盾`;
-      if (p.regenSeconds != null) text += `，每 ${seconds(p.regenSeconds)} 恢复`;
+      text = `获得能挡 ${shown(p.absorbHits)} 次伤害的壁垒`;
+      if (p.regenSeconds != null) text += `，每 ${seconds(p.regenSeconds)} 自动补上`;
       if (p.chance != null) text += `，触发概率 ${pct(p.chance)}`;
       break;
     case 'thorns':
-      text = `受到伤害时反弹 ${pct(p.ratio)} 伤害`;
+      text = `挨打时把 ${pct(p.ratio)} 的伤害弹回去`;
       break;
     case 'breachReduction':
-      text = `追求者突破造成的伤害降低 ${pct(p.ratio)}`;
+      text = `追求者突破时造成的伤害降低 ${pct(p.ratio)}`;
       break;
     case 'novaOnBreak':
-      text = `护盾破裂时造成 ${shown(p.damage)} 点范围伤害并击退 ${shown(p.knockbackDistance)} 距离`;
+      text = `壁垒被打空的瞬间，炸出 ${shown(p.damage)} 点范围伤害，还把人推开 ${shown(p.knockbackDistance)} 距离`;
       break;
     case 'execute':
-      text = `处决生命低于 ${pct(p.hpThresholdRatio)} 的目标`;
+      text = `血量低于 ${pct(p.hpThresholdRatio)} 的目标直接送走`;
       if (p.radius != null) text += `，作用半径 ${shown(p.radius)}`;
       break;
     case 'burstDamage':
-      text = `造成 ${shown(p.damageMul)} 倍爆发伤害`;
+      text = `原地炸一下，造成 ${shown(p.damageMul)} 倍爆发伤害`;
       if (p.chance != null) text += `，触发概率 ${pct(p.chance)}`;
       if (p.radius != null) text += `，作用半径 ${shown(p.radius)}`;
       break;
     case 'focusPriority':
-      text = `优先锁定指定目标，索敌权重 ${shown(p.priorityWeight)}`;
+      text = `标记指定目标优先照顾，索敌权重 ${shown(p.priorityWeight)}`;
       if (p.hpThresholdRatio != null) text += `，目标生命阈值 ${pct(p.hpThresholdRatio)}`;
       if (p.duration != null) text += `，持续 ${seconds(p.duration)}`;
       if (p.radius != null) text += `，作用半径 ${shown(p.radius)}`;
       break;
     case 'restore':
       text = p.amountRatio != null
-        ? `恢复最大生命的 ${pct(p.amountRatio)}`
-        : `恢复 ${shown(p.amount)} 点生命`;
+        ? `回一口血，按生命上限的 ${pct(p.amountRatio)} 算`
+        : `直接回 ${shown(p.amount)} 点生命`;
       break;
     case 'statBuff':
       text = `${statLabel(p.stat)}${p.operation === 'mul' ? `提高 ${pct(p.value)}` : `增加 ${shown(p.value)}`}，持续 ${seconds(p.duration)}`;
-      if (p.maxStacks != null) text += `，最多 ${shown(p.maxStacks)} 层`;
+      if (p.maxStacks != null) text += `，最多叠 ${shown(p.maxStacks)} 层`;
       break;
     default:
-      text = `产生${atomLabel(atom)}效果`;
+      text = `触发一次${atomLabel(atom)}`;
   }
   return [keywordLine(atom, text, depth), ...nestedEffects(effect, depth)];
 }

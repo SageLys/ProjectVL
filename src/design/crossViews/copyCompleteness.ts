@@ -81,12 +81,14 @@ export function analyzeCopyCompleteness(cards: CardDef[], texts: Record<string, 
       if (!column.slot.startsWith('evolution.')) {
         const pathParts = column.slot.split('.');
         const value = display(at(node, pathParts));
+        const recipeMilestoneStar = column.slot.match(/\.milestones\.(\d+)$/)?.[1];
+        const applicable = !(card.recipeOnly && recipeMilestoneStar != null && recipeMilestoneStar !== '6');
         return {
           ...column,
-          path: `$.texts.cards.${card.id}.${column.slot}`,
+          path: applicable ? `$.texts.cards.${card.id}.${column.slot}` : undefined,
           value,
-          status: value ? 'complete' as const : 'missing' as const,
-          applicable: true,
+          status: applicable && !value ? 'missing' as const : 'complete' as const,
+          applicable,
         };
       }
       const [, starText, optionText, field] = column.slot.split('.');

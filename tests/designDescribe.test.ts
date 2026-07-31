@@ -25,7 +25,7 @@ describe('design describe layer', () => {
     });
 
     expect(view.nested).toHaveLength(1);
-    expect(view.nested[0].label).toBe('持续伤害');
+    expect(view.nested[0].label).toBe('灼烧');
     expect(view.params.some(param => param.key === 'effects')).toBe(false);
     expect(view.params.find(param => param.key === 'radius')?.value).toBe('80');
   });

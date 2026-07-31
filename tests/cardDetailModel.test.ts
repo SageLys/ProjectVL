@@ -12,7 +12,7 @@ describe('card detail view model', () => {
     }, 'cards');
     expect(model.consume.blocks[0].lines.length).toBeGreaterThan(0);
     expect(model.equip.blocks.length).toBeGreaterThan(0);
-    expect(model.currentRoute).toContain('链弧');
+    expect(model.currentRoute).toContain('一个传一个');
     const node3 = model.tree.nodes.find(node => node.star === 3);
     const node5 = model.tree.nodes.find(node => node.star === 5);
     const node6 = model.tree.nodes.find(node => node.star === 6);

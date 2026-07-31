@@ -30,6 +30,7 @@ describe('design cross-view analysis', () => {
     // v4 全量重写后：summary/intent 已语义分离，占位规则调整为仅检测 summary===intent 与同 checkpoint 重复 summary
     // 内容写完后此处应为 false（零占位）；如写错导致重复 summary，此处会失败，起到防回归作用
     expect(rows.flatMap(row => row.cells).some(cell => cell.status === 'placeholder')).toBe(false);
+    expect(rows.flatMap(row => row.cells).some(cell => cell.applicable && cell.status === 'missing')).toBe(false);
   });
 
   it('counts every top-level and nested effect instance exactly once', () => {

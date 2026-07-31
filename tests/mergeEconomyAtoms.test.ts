@@ -353,11 +353,11 @@ describe('wildcard reward bonus consumer', () => {
 describe('merge economy event text', () => {
   it('formats merge refunds by granted/lost counts and wildcard grants by actual grants', () => {
     expect(formatToast({ type: 'mergeRefunded', cardType: 'pierce', star: 1, granted: 2, lost: 0 }))
-      .toContain('获得 2 张 1★');
+      .toContain('到手 2 张 1★');
     expect(formatToast({ type: 'mergeRefunded', cardType: 'pierce', star: 1, granted: 0, lost: 2 }))
       .toContain('手牌已满，损失 2 张 1★');
     expect(formatToast({ type: 'mergeRefunded', cardType: 'pierce', star: 1, granted: 1, lost: 2 }))
-      .toContain('获得 1 张 1★');
+      .toContain('到手 1 张 1★');
     expect(formatToast({ type: 'wildcardsGranted', grants: [{ star: 3, count: 2 }] }))
       .toBe('获得 2 张 3★ 万能卡');
   });

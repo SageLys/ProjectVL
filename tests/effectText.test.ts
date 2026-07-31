@@ -48,7 +48,7 @@ describe('effect text coverage', () => {
       },
     });
     expect(lines.map(line => line.text).join(' ')).toContain('持续掉血');
-    expect(lines.map(line => line.text).join(' ')).toContain('减速 20%');
+    expect(lines.map(line => line.text).join(' ')).toContain('腿变慢 20%');
     expect(lines.some(line => line.depth === 1)).toBe(true);
   });
 
@@ -57,7 +57,7 @@ describe('effect text coverage', () => {
       atom: 'groundZone',
       params: { shape: 'line', radius: 70, duration: 3, tickInterval: 0.5, effects: [] },
     }).map(line => line.text).join(' ');
-    expect(text).toContain('线形领域');
+    expect(text).toContain('拉出一条');
     expect(text).toContain('长 140');
     expect(text).toContain('宽 70');
   });
