@@ -87,6 +87,7 @@ namespace ProjectVL.Systems
         public WaveRewardsConfig waveRewards;
         public RewardMeterConfig rewardMeter;
         public SettlementConfig settlement;
+        public RecipeProductEffectsConfig recipeProductEffects;
     }
 
     [Serializable]
@@ -292,7 +293,8 @@ namespace ProjectVL.Systems
             string gitCommit = null,
             string autoExportDirectory = null,
             RewardMeterConfig rewardMeter = null,
-            SettlementConfig settlement = null)
+            SettlementConfig settlement = null,
+            RecipeProductEffectsConfig recipeProductEffects = null)
         {
             if (state == null) throw new ArgumentNullException(nameof(state));
             _state = state;
@@ -331,7 +333,8 @@ namespace ProjectVL.Systems
                 evolutionText = evolutionText,
                 waveRewards = waveRewards,
                 rewardMeter = rewardMeter,
-                settlement = settlement
+                settlement = settlement,
+                recipeProductEffects = recipeProductEffects
             };
             _state.TelemetryEvent += RecordCoreEvent;
             RefreshMetadata();

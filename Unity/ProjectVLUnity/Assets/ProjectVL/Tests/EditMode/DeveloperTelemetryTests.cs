@@ -141,7 +141,9 @@ namespace ProjectVL.Tests
                     "abc123",
                     directory,
                     rewardMeter: GameConfigLoader.LoadRewardMeter(),
-                    settlement: GameConfigLoader.LoadSettlement());
+                    settlement: GameConfigLoader.LoadSettlement(),
+                    recipeProductEffects:
+                        GameConfigLoader.LoadRecipeProductEffects());
 
                 state.EndRun();
                 telemetry.Step(state, 0.016f);
@@ -159,6 +161,7 @@ namespace ProjectVL.Tests
                 StringAssert.Contains("\"waveRewards\":", json);
                 StringAssert.Contains("\"rewardMeter\":", json);
                 StringAssert.Contains("\"settlement\":", json);
+                StringAssert.Contains("\"recipeProductEffects\":", json);
             }
             finally
             {

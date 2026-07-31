@@ -1,0 +1,3942 @@
+{
+  "version": "1.0.0",
+  "sourceVersion": "0.6.0",
+  "cards": [
+    {
+      "cardId": "stormLattice",
+      "category": "projectile",
+      "synergyTags": [
+        "projectile",
+        "domain"
+      ],
+      "bindings": [
+        {
+          "trigger": "onFire",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "pierce",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "count",
+                  "kind": "number",
+                  "number": 999
+                },
+                {
+                  "key": "damageRetention",
+                  "kind": "number",
+                  "number": 0.85
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "trigger": "onHit",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "groundZone",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "radius",
+                  "kind": "number",
+                  "number": 80
+                },
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 4
+                },
+                {
+                  "key": "tickInterval",
+                  "kind": "number",
+                  "number": 0.5
+                },
+                {
+                  "key": "shape",
+                  "kind": "string",
+                  "text": "line"
+                },
+                {
+                  "key": "lineFrom",
+                  "kind": "string",
+                  "text": "bulletPath"
+                }
+              ],
+              "children": [
+                {
+                  "atom": "vulnerable",
+                  "relation": "paramEffect",
+                  "params": [
+                    {
+                      "key": "ratio",
+                      "kind": "number",
+                      "number": 0.2
+                    },
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 2.5
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "trigger": "onHit",
+          "at": "",
+          "triggerParams": [
+            {
+              "key": "requiresStatus",
+              "kind": "string",
+              "text": "vulnerable"
+            }
+          ],
+          "effects": [
+            {
+              "atom": "burstDamage",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "radius",
+                  "kind": "number",
+                  "number": 60
+                },
+                {
+                  "key": "damageMul",
+                  "kind": "number",
+                  "number": 0.8
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "trigger": "interval",
+          "at": "",
+          "triggerParams": [
+            {
+              "key": "seconds",
+              "kind": "number",
+              "number": 2
+            }
+          ],
+          "effects": [
+            {
+              "atom": "chain",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "targets",
+                  "kind": "number",
+                  "number": 2
+                },
+                {
+                  "key": "bounces",
+                  "kind": "number",
+                  "number": 3
+                },
+                {
+                  "key": "damageRetention",
+                  "kind": "number",
+                  "number": 0.8
+                },
+                {
+                  "key": "spreadStatus",
+                  "kind": "string",
+                  "text": "vulnerable"
+                }
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "thunderRime",
+      "category": "domain",
+      "synergyTags": [
+        "domain",
+        "control"
+      ],
+      "bindings": [
+        {
+          "trigger": "passive",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "aura",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "radius",
+                  "kind": "number",
+                  "number": 110
+                },
+                {
+                  "key": "tickInterval",
+                  "kind": "number",
+                  "number": 0.5
+                },
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 999
+                },
+                {
+                  "key": "follow",
+                  "kind": "string",
+                  "text": "densestCluster"
+                },
+                {
+                  "key": "followLerp",
+                  "kind": "number",
+                  "number": 0.5
+                }
+              ],
+              "children": [
+                {
+                  "atom": "slow",
+                  "relation": "paramEffect",
+                  "params": [
+                    {
+                      "key": "ratio",
+                      "kind": "number",
+                      "number": 0.3
+                    },
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 1
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "trigger": "interval",
+          "at": "",
+          "triggerParams": [
+            {
+              "key": "seconds",
+              "kind": "number",
+              "number": 2.5
+            }
+          ],
+          "effects": [
+            {
+              "atom": "burstDamage",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "forEach.set.kind",
+                  "kind": "string",
+                  "text": "enemiesWithStatus"
+                },
+                {
+                  "key": "forEach.set.status",
+                  "kind": "string",
+                  "text": "slow"
+                },
+                {
+                  "key": "forEach.maxTargets",
+                  "kind": "number",
+                  "number": 2
+                },
+                {
+                  "key": "forEach.order",
+                  "kind": "string",
+                  "text": "nearest"
+                }
+              ],
+              "children": [
+                {
+                  "atom": "burstDamage",
+                  "relation": "forEachEffect",
+                  "params": [
+                    {
+                      "key": "radius",
+                      "kind": "number",
+                      "number": 55
+                    },
+                    {
+                      "key": "damageMul",
+                      "kind": "number",
+                      "number": 1
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "atom": "vulnerable",
+                  "relation": "forEachEffect",
+                  "params": [
+                    {
+                      "key": "ratio",
+                      "kind": "number",
+                      "number": 0.2
+                    },
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 2
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "trigger": "interval",
+          "at": "",
+          "triggerParams": [
+            {
+              "key": "seconds",
+              "kind": "number",
+              "number": 2.5
+            }
+          ],
+          "effects": [
+            {
+              "atom": "freeze",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "forEach.set.kind",
+                  "kind": "string",
+                  "text": "enemiesWithStatus"
+                },
+                {
+                  "key": "forEach.set.status",
+                  "kind": "array",
+                  "text": "slow|vulnerable"
+                },
+                {
+                  "key": "forEach.maxTargets",
+                  "kind": "number",
+                  "number": 2
+                },
+                {
+                  "key": "forEach.order",
+                  "kind": "string",
+                  "text": "nearest"
+                }
+              ],
+              "children": [
+                {
+                  "atom": "freeze",
+                  "relation": "forEachEffect",
+                  "params": [
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 1
+                    },
+                    {
+                      "key": "stacksToTrigger",
+                      "kind": "number",
+                      "number": 3
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "atom": "burstDamage",
+                  "relation": "forEachEffect",
+                  "params": [
+                    {
+                      "key": "radius",
+                      "kind": "number",
+                      "number": 55
+                    },
+                    {
+                      "key": "damageMul",
+                      "kind": "number",
+                      "number": 1.5
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "emberSpark",
+      "category": "domain",
+      "synergyTags": [
+        "domain",
+        "control"
+      ],
+      "bindings": [
+        {
+          "trigger": "onHit",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "dot",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 3
+                },
+                {
+                  "key": "damageRatio",
+                  "kind": "number",
+                  "number": 0.15
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "trigger": "interval",
+          "at": "",
+          "triggerParams": [
+            {
+              "key": "seconds",
+              "kind": "number",
+              "number": 2
+            }
+          ],
+          "effects": [
+            {
+              "atom": "chain",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "forEach.set.kind",
+                  "kind": "string",
+                  "text": "enemiesWithStatus"
+                },
+                {
+                  "key": "forEach.set.status",
+                  "kind": "string",
+                  "text": "dot"
+                },
+                {
+                  "key": "forEach.maxTargets",
+                  "kind": "number",
+                  "number": 4
+                },
+                {
+                  "key": "forEach.order",
+                  "kind": "string",
+                  "text": "nearest"
+                }
+              ],
+              "children": [
+                {
+                  "atom": "chain",
+                  "relation": "forEachEffect",
+                  "params": [
+                    {
+                      "key": "targets",
+                      "kind": "number",
+                      "number": 1
+                    },
+                    {
+                      "key": "bounces",
+                      "kind": "number",
+                      "number": 1
+                    },
+                    {
+                      "key": "damageMul",
+                      "kind": "number",
+                      "number": 0.5
+                    },
+                    {
+                      "key": "spreadStatus",
+                      "kind": "string",
+                      "text": "vulnerable"
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "trigger": "onKill",
+          "at": "point",
+          "triggerParams": [
+            {
+              "key": "requiresStatus",
+              "kind": "array",
+              "text": "dot|vulnerable"
+            }
+          ],
+          "effects": [
+            {
+              "atom": "burstDamage",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "radius",
+                  "kind": "number",
+                  "number": 70
+                },
+                {
+                  "key": "damageMul",
+                  "kind": "number",
+                  "number": 1.35
+                }
+              ],
+              "children": []
+            },
+            {
+              "atom": "groundZone",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "radius",
+                  "kind": "number",
+                  "number": 55
+                },
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 4
+                },
+                {
+                  "key": "tickInterval",
+                  "kind": "number",
+                  "number": 0.5
+                }
+              ],
+              "children": [
+                {
+                  "atom": "dot",
+                  "relation": "paramEffect",
+                  "params": [
+                    {
+                      "key": "damageRatio",
+                      "kind": "number",
+                      "number": 0.15
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "voltBastion",
+      "category": "defense",
+      "synergyTags": [
+        "defense",
+        "control"
+      ],
+      "bindings": [
+        {
+          "trigger": "onWaveStart",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "shield",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "absorbHits",
+                  "kind": "number",
+                  "number": 3
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "trigger": "onBreach",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "charge",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "by",
+                  "kind": "string",
+                  "text": "shieldAbsorb"
+                },
+                {
+                  "key": "perEvent",
+                  "kind": "number",
+                  "number": 1
+                },
+                {
+                  "key": "max",
+                  "kind": "number",
+                  "number": 5
+                },
+                {
+                  "key": "releaseAt",
+                  "kind": "string",
+                  "text": "full"
+                }
+              ],
+              "children": [
+                {
+                  "atom": "chain",
+                  "relation": "paramEffect",
+                  "params": [
+                    {
+                      "key": "targets",
+                      "kind": "number",
+                      "number": 2
+                    },
+                    {
+                      "key": "bounces",
+                      "kind": "number",
+                      "number": 5
+                    },
+                    {
+                      "key": "spreadStatus",
+                      "kind": "string",
+                      "text": "vulnerable"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "atom": "stun",
+                  "relation": "paramEffect",
+                  "params": [
+                    {
+                      "key": "radius",
+                      "kind": "number",
+                      "number": 160
+                    },
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 0.3
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "trigger": "passive",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "aura",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "radius",
+                  "kind": "number",
+                  "number": 90
+                },
+                {
+                  "key": "tickInterval",
+                  "kind": "number",
+                  "number": 0.5
+                },
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 999
+                }
+              ],
+              "children": [
+                {
+                  "atom": "knockback",
+                  "relation": "paramEffect",
+                  "params": [
+                    {
+                      "key": "distance",
+                      "kind": "number",
+                      "number": 12
+                    },
+                    {
+                      "key": "radius",
+                      "kind": "number",
+                      "number": 90
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "ampereFlow",
+      "category": "economy",
+      "synergyTags": [
+        "utility"
+      ],
+      "bindings": [
+        {
+          "trigger": "passive",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "focusPriority",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "priorityWeight",
+                  "kind": "number",
+                  "number": 2
+                },
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 4
+                }
+              ],
+              "children": []
+            },
+            {
+              "atom": "dropRateMul",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "mul",
+                  "kind": "number",
+                  "number": 1
+                },
+                {
+                  "key": "scaleBy.source",
+                  "kind": "string",
+                  "text": "concurrentStatus:vulnerable"
+                },
+                {
+                  "key": "scaleBy.param",
+                  "kind": "string",
+                  "text": "mul"
+                },
+                {
+                  "key": "scaleBy.perUnit",
+                  "kind": "number",
+                  "number": 0.08
+                },
+                {
+                  "key": "scaleBy.cap",
+                  "kind": "number",
+                  "number": 5
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "trigger": "onHit",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "vulnerable",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "ratio",
+                  "kind": "number",
+                  "number": 0.2
+                },
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 2.5
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "trigger": "onKill",
+          "at": "point",
+          "triggerParams": [
+            {
+              "key": "requiresStatus",
+              "kind": "array",
+              "text": "brand|vulnerable"
+            }
+          ],
+          "effects": [
+            {
+              "atom": "extraDrop",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "count",
+                  "kind": "number",
+                  "number": 1
+                }
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "crystalRelay",
+      "category": "projectile",
+      "synergyTags": [
+        "projectile",
+        "control"
+      ],
+      "bindings": [
+        {
+          "trigger": "onHit",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "chain",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "bounces",
+                  "kind": "number",
+                  "number": 3
+                },
+                {
+                  "key": "spreadStatus",
+                  "kind": "string",
+                  "text": "vulnerable"
+                },
+                {
+                  "key": "preferRelay",
+                  "kind": "boolean",
+                  "flag": true
+                },
+                {
+                  "key": "relayDamageBonus",
+                  "kind": "number",
+                  "number": 0.15
+                },
+                {
+                  "key": "relayBonusCap",
+                  "kind": "number",
+                  "number": 0.45
+                }
+              ],
+              "children": []
+            },
+            {
+              "atom": "summon",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "kind",
+                  "kind": "string",
+                  "text": "crystal"
+                },
+                {
+                  "key": "count",
+                  "kind": "number",
+                  "number": 1
+                },
+                {
+                  "key": "maxCount",
+                  "kind": "number",
+                  "number": 5
+                },
+                {
+                  "key": "hp",
+                  "kind": "number",
+                  "number": 55
+                },
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 6
+                },
+                {
+                  "key": "chainRelay",
+                  "kind": "boolean",
+                  "flag": true
+                }
+              ],
+              "children": [
+                {
+                  "atom": "slow",
+                  "relation": "onDeathEffects",
+                  "params": [
+                    {
+                      "key": "radius",
+                      "kind": "number",
+                      "number": 80
+                    },
+                    {
+                      "key": "ratio",
+                      "kind": "number",
+                      "number": 0.3
+                    },
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 2
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "atom": "burstDamage",
+                  "relation": "onDeathEffects",
+                  "params": [
+                    {
+                      "key": "radius",
+                      "kind": "number",
+                      "number": 80
+                    },
+                    {
+                      "key": "damageMul",
+                      "kind": "number",
+                      "number": 0.4
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "glacialEpoch",
+      "category": "domain",
+      "synergyTags": [
+        "domain",
+        "control"
+      ],
+      "bindings": [
+        {
+          "trigger": "interval",
+          "at": "",
+          "triggerParams": [
+            {
+              "key": "seconds",
+              "kind": "number",
+              "number": 4
+            }
+          ],
+          "effects": [
+            {
+              "atom": "groundZone",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "radius",
+                  "kind": "number",
+                  "number": 260
+                },
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 3
+                },
+                {
+                  "key": "tickInterval",
+                  "kind": "number",
+                  "number": 0.25
+                },
+                {
+                  "key": "shape",
+                  "kind": "string",
+                  "text": "ring"
+                },
+                {
+                  "key": "innerRadius",
+                  "kind": "number",
+                  "number": 45
+                },
+                {
+                  "key": "radiusOverTime.from",
+                  "kind": "number",
+                  "number": 60
+                },
+                {
+                  "key": "radiusOverTime.to",
+                  "kind": "number",
+                  "number": 260
+                },
+                {
+                  "key": "radiusOverTime.easing",
+                  "kind": "string",
+                  "text": "linear"
+                }
+              ],
+              "children": [
+                {
+                  "atom": "slow",
+                  "relation": "paramEffect",
+                  "params": [
+                    {
+                      "key": "ratio",
+                      "kind": "number",
+                      "number": 0.35
+                    },
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 2
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "atom": "freeze",
+                  "relation": "paramEffect",
+                  "params": [
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 1
+                    },
+                    {
+                      "key": "stacksToTrigger",
+                      "kind": "number",
+                      "number": 3
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "atom": "knockback",
+                  "relation": "paramEffect",
+                  "params": [
+                    {
+                      "key": "distance",
+                      "kind": "number",
+                      "number": 40
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "trigger": "onHit",
+          "at": "",
+          "triggerParams": [
+            {
+              "key": "requiresStatus",
+              "kind": "string",
+              "text": "frozen"
+            }
+          ],
+          "effects": [
+            {
+              "atom": "burstDamage",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "damageMul",
+                  "kind": "number",
+                  "number": 1.5
+                },
+                {
+                  "key": "radius",
+                  "kind": "number",
+                  "number": 55
+                }
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "rimeShell",
+      "category": "projectile",
+      "synergyTags": [
+        "projectile",
+        "control"
+      ],
+      "bindings": [
+        {
+          "trigger": "onHit",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "freeze",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 1
+                },
+                {
+                  "key": "stacksToTrigger",
+                  "kind": "number",
+                  "number": 3
+                }
+              ],
+              "children": []
+            },
+            {
+              "atom": "split",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "count",
+                  "kind": "number",
+                  "number": 3
+                },
+                {
+                  "key": "damageRatio",
+                  "kind": "number",
+                  "number": 0.5
+                }
+              ],
+              "children": []
+            },
+            {
+              "atom": "dot",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "damageRatio",
+                  "kind": "number",
+                  "number": 0.08
+                },
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 3
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "trigger": "onHit",
+          "at": "",
+          "triggerParams": [
+            {
+              "key": "requiresStatus",
+              "kind": "string",
+              "text": "frozen"
+            }
+          ],
+          "effects": [
+            {
+              "atom": "burstDamage",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "damageMul",
+                  "kind": "number",
+                  "number": 1.8
+                },
+                {
+                  "key": "radius",
+                  "kind": "number",
+                  "number": 45
+                },
+                {
+                  "key": "scaleBy.source",
+                  "kind": "string",
+                  "text": "statusStacks"
+                },
+                {
+                  "key": "scaleBy.param",
+                  "kind": "string",
+                  "text": "damageMul"
+                },
+                {
+                  "key": "scaleBy.perUnit",
+                  "kind": "number",
+                  "number": 0.25
+                },
+                {
+                  "key": "scaleBy.cap",
+                  "kind": "number",
+                  "number": 4
+                }
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "tombSpire",
+      "category": "defense",
+      "synergyTags": [
+        "defense",
+        "control"
+      ],
+      "bindings": [
+        {
+          "trigger": "passive",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "thorns",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "ratio",
+                  "kind": "number",
+                  "number": 0.3
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "trigger": "onBreach",
+          "at": "point",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "summon",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "kind",
+                  "kind": "string",
+                  "text": "iceSpire"
+                },
+                {
+                  "key": "count",
+                  "kind": "number",
+                  "number": 1
+                },
+                {
+                  "key": "maxCount",
+                  "kind": "number",
+                  "number": 3
+                },
+                {
+                  "key": "hp",
+                  "kind": "number",
+                  "number": 130
+                },
+                {
+                  "key": "tauntRadius",
+                  "kind": "number",
+                  "number": 110
+                },
+                {
+                  "key": "auraRadius",
+                  "kind": "number",
+                  "number": 110
+                }
+              ],
+              "children": [
+                {
+                  "atom": "freeze",
+                  "relation": "onDeathEffects",
+                  "params": [
+                    {
+                      "key": "radius",
+                      "kind": "number",
+                      "number": 100
+                    },
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 1.5
+                    },
+                    {
+                      "key": "stacksToTrigger",
+                      "kind": "number",
+                      "number": 2
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "atom": "burstDamage",
+                  "relation": "onDeathEffects",
+                  "params": [
+                    {
+                      "key": "radius",
+                      "kind": "number",
+                      "number": 100
+                    },
+                    {
+                      "key": "damageMul",
+                      "kind": "number",
+                      "number": 0.8
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "atom": "taunt",
+                  "relation": "auraEffects",
+                  "params": [
+                    {
+                      "key": "radius",
+                      "kind": "number",
+                      "number": 110
+                    },
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 1
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "atom": "thorns",
+                  "relation": "auraEffects",
+                  "params": [
+                    {
+                      "key": "ratio",
+                      "kind": "number",
+                      "number": 0.15
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "stasisLedger",
+      "category": "economy",
+      "synergyTags": [
+        "utility",
+        "control"
+      ],
+      "bindings": [
+        {
+          "trigger": "onMerge",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "mergePulse",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "damagePerMergeCount",
+                  "kind": "number",
+                  "number": 6
+                },
+                {
+                  "key": "radius",
+                  "kind": "string",
+                  "text": "all"
+                }
+              ],
+              "children": []
+            },
+            {
+              "atom": "slow",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "radius",
+                  "kind": "number",
+                  "number": 999
+                },
+                {
+                  "key": "ratio",
+                  "kind": "number",
+                  "number": 0.3
+                },
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 2.5
+                }
+              ],
+              "children": []
+            },
+            {
+              "atom": "freeze",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "forEach.set.kind",
+                  "kind": "string",
+                  "text": "enemiesWithStatus"
+                },
+                {
+                  "key": "forEach.set.status",
+                  "kind": "string",
+                  "text": "slow"
+                },
+                {
+                  "key": "forEach.maxTargets",
+                  "kind": "number",
+                  "number": 2
+                },
+                {
+                  "key": "forEach.order",
+                  "kind": "string",
+                  "text": "nearest"
+                }
+              ],
+              "children": [
+                {
+                  "atom": "freeze",
+                  "relation": "forEachEffect",
+                  "params": [
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 1.5
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "trigger": "onKill",
+          "at": "point",
+          "triggerParams": [
+            {
+              "key": "requiresStatus",
+              "kind": "string",
+              "text": "frozen"
+            }
+          ],
+          "effects": [
+            {
+              "atom": "extraDrop",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "count",
+                  "kind": "number",
+                  "number": 2
+                }
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "solarPiercer",
+      "category": "projectile",
+      "synergyTags": [
+        "projectile",
+        "domain"
+      ],
+      "bindings": [
+        {
+          "trigger": "onFire",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "pierce",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "count",
+                  "kind": "number",
+                  "number": 999
+                },
+                {
+                  "key": "damageRetention",
+                  "kind": "number",
+                  "number": 0.9
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "trigger": "onHit",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "groundZone",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "radius",
+                  "kind": "number",
+                  "number": 90
+                },
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 3.5
+                },
+                {
+                  "key": "tickInterval",
+                  "kind": "number",
+                  "number": 0.5
+                },
+                {
+                  "key": "shape",
+                  "kind": "string",
+                  "text": "line"
+                },
+                {
+                  "key": "lineFrom",
+                  "kind": "string",
+                  "text": "bulletPath"
+                }
+              ],
+              "children": [
+                {
+                  "atom": "dot",
+                  "relation": "paramEffect",
+                  "params": [
+                    {
+                      "key": "damageRatio",
+                      "kind": "number",
+                      "number": 0.18
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "atom": "dot",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "damageRatio",
+                  "kind": "number",
+                  "number": 0.16
+                },
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 3
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "trigger": "onHit",
+          "at": "",
+          "triggerParams": [
+            {
+              "key": "requiresStatus",
+              "kind": "string",
+              "text": "dot"
+            }
+          ],
+          "effects": [
+            {
+              "atom": "burstDamage",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "damageMul",
+                  "kind": "number",
+                  "number": 0.9
+                },
+                {
+                  "key": "radius",
+                  "kind": "number",
+                  "number": 50
+                }
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "steamBurst",
+      "category": "control",
+      "synergyTags": [
+        "control",
+        "domain"
+      ],
+      "bindings": [
+        {
+          "trigger": "passive",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "aura",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "radius",
+                  "kind": "number",
+                  "number": 120
+                },
+                {
+                  "key": "tickInterval",
+                  "kind": "number",
+                  "number": 0.5
+                },
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 999
+                }
+              ],
+              "children": [
+                {
+                  "atom": "slow",
+                  "relation": "paramEffect",
+                  "params": [
+                    {
+                      "key": "ratio",
+                      "kind": "number",
+                      "number": 0.3
+                    },
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 1
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "trigger": "onHit",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "dot",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "damageRatio",
+                  "kind": "number",
+                  "number": 0.12
+                },
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 3
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "trigger": "interval",
+          "at": "",
+          "triggerParams": [
+            {
+              "key": "seconds",
+              "kind": "number",
+              "number": 2.5
+            }
+          ],
+          "effects": [
+            {
+              "atom": "burstDamage",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "forEach.set.kind",
+                  "kind": "string",
+                  "text": "enemiesWithStatus"
+                },
+                {
+                  "key": "forEach.set.status",
+                  "kind": "array",
+                  "text": "slow|dot"
+                },
+                {
+                  "key": "forEach.maxTargets",
+                  "kind": "number",
+                  "number": 6
+                },
+                {
+                  "key": "forEach.order",
+                  "kind": "string",
+                  "text": "nearest"
+                }
+              ],
+              "children": [
+                {
+                  "atom": "burstDamage",
+                  "relation": "forEachEffect",
+                  "params": [
+                    {
+                      "key": "radius",
+                      "kind": "number",
+                      "number": 70
+                    },
+                    {
+                      "key": "damageMul",
+                      "kind": "number",
+                      "number": 1.1
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "atom": "knockback",
+                  "relation": "forEachEffect",
+                  "params": [
+                    {
+                      "key": "radius",
+                      "kind": "number",
+                      "number": 70
+                    },
+                    {
+                      "key": "distance",
+                      "kind": "number",
+                      "number": 30
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "atom": "slow",
+                  "relation": "forEachEffect",
+                  "params": [
+                    {
+                      "key": "radius",
+                      "kind": "number",
+                      "number": 70
+                    },
+                    {
+                      "key": "ratio",
+                      "kind": "number",
+                      "number": 0.3
+                    },
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 2
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "volcanoCore",
+      "category": "domain",
+      "synergyTags": [
+        "domain"
+      ],
+      "bindings": [
+        {
+          "trigger": "onWaveStart",
+          "at": "densestCluster",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "groundZone",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "radius",
+                  "kind": "number",
+                  "number": 90
+                },
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 999
+                },
+                {
+                  "key": "tickInterval",
+                  "kind": "number",
+                  "number": 0.5
+                }
+              ],
+              "children": [
+                {
+                  "atom": "dot",
+                  "relation": "paramEffect",
+                  "params": [
+                    {
+                      "key": "damageRatio",
+                      "kind": "number",
+                      "number": 0.18
+                    },
+                    {
+                      "key": "tickInterval",
+                      "kind": "number",
+                      "number": 0.5
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "trigger": "interval",
+          "at": "densestCluster",
+          "triggerParams": [
+            {
+              "key": "seconds",
+              "kind": "number",
+              "number": 3.5
+            }
+          ],
+          "effects": [
+            {
+              "atom": "mortarMorph",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "radius",
+                  "kind": "number",
+                  "number": 80
+                },
+                {
+                  "key": "damageRatio",
+                  "kind": "number",
+                  "number": 1.4
+                }
+              ],
+              "children": []
+            },
+            {
+              "atom": "groundZone",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "radius",
+                  "kind": "number",
+                  "number": 70
+                },
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 5
+                },
+                {
+                  "key": "tickInterval",
+                  "kind": "number",
+                  "number": 0.5
+                }
+              ],
+              "children": [
+                {
+                  "atom": "dot",
+                  "relation": "paramEffect",
+                  "params": [
+                    {
+                      "key": "damageRatio",
+                      "kind": "number",
+                      "number": 0.16
+                    },
+                    {
+                      "key": "tickInterval",
+                      "kind": "number",
+                      "number": 0.5
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "trigger": "onKill",
+          "at": "",
+          "triggerParams": [
+            {
+              "key": "requiresSource",
+              "kind": "string",
+              "text": "dot"
+            }
+          ],
+          "effects": [
+            {
+              "atom": "charge",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "by",
+                  "kind": "string",
+                  "text": "killWithSource:dot"
+                },
+                {
+                  "key": "perEvent",
+                  "kind": "number",
+                  "number": 1
+                },
+                {
+                  "key": "max",
+                  "kind": "number",
+                  "number": 3
+                },
+                {
+                  "key": "releaseAt",
+                  "kind": "string",
+                  "text": "full"
+                }
+              ],
+              "children": [
+                {
+                  "atom": "mortarMorph",
+                  "relation": "paramEffect",
+                  "params": [
+                    {
+                      "key": "radius",
+                      "kind": "number",
+                      "number": 80
+                    },
+                    {
+                      "key": "damageRatio",
+                      "kind": "number",
+                      "number": 1.4
+                    },
+                    {
+                      "key": "at",
+                      "kind": "string",
+                      "text": "densestCluster"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "atom": "groundZone",
+                  "relation": "paramEffect",
+                  "params": [
+                    {
+                      "key": "radius",
+                      "kind": "number",
+                      "number": 70
+                    },
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 5
+                    },
+                    {
+                      "key": "tickInterval",
+                      "kind": "number",
+                      "number": 0.5
+                    }
+                  ],
+                  "children": [
+                    {
+                      "atom": "dot",
+                      "relation": "paramEffect",
+                      "params": [
+                        {
+                          "key": "damageRatio",
+                          "kind": "number",
+                          "number": 0.16
+                        }
+                      ],
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "trigger": "onHit",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "dot",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "damageRatio",
+                  "kind": "number",
+                  "number": 0.14
+                },
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 3
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "trigger": "onHit",
+          "at": "",
+          "triggerParams": [
+            {
+              "key": "requiresStatus",
+              "kind": "string",
+              "text": "dot"
+            }
+          ],
+          "effects": [
+            {
+              "atom": "burstDamage",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "damageMul",
+                  "kind": "number",
+                  "number": 0.5
+                },
+                {
+                  "key": "radius",
+                  "kind": "number",
+                  "number": 55
+                }
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "emberMoat",
+      "category": "defense",
+      "synergyTags": [
+        "defense",
+        "domain"
+      ],
+      "bindings": [
+        {
+          "trigger": "onWaveStart",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "shield",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "absorbHits",
+                  "kind": "number",
+                  "number": 2
+                },
+                {
+                  "key": "regenSeconds",
+                  "kind": "number",
+                  "number": 10
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "trigger": "passive",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "aura",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "radius",
+                  "kind": "number",
+                  "number": 150
+                },
+                {
+                  "key": "shape",
+                  "kind": "string",
+                  "text": "ring"
+                },
+                {
+                  "key": "innerRadius",
+                  "kind": "number",
+                  "number": 110
+                },
+                {
+                  "key": "tickInterval",
+                  "kind": "number",
+                  "number": 0.5
+                },
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 999
+                }
+              ],
+              "children": [
+                {
+                  "atom": "dot",
+                  "relation": "paramEffect",
+                  "params": [
+                    {
+                      "key": "damageRatio",
+                      "kind": "number",
+                      "number": 0.18
+                    },
+                    {
+                      "key": "scaleBy.source",
+                      "kind": "string",
+                      "text": "shieldTier"
+                    },
+                    {
+                      "key": "scaleBy.param",
+                      "kind": "string",
+                      "text": "damageRatio"
+                    },
+                    {
+                      "key": "scaleBy.perUnit",
+                      "kind": "number",
+                      "number": 0.054
+                    },
+                    {
+                      "key": "scaleBy.cap",
+                      "kind": "number",
+                      "number": 2
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "trigger": "passive",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "novaOnBreak",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "damage",
+                  "kind": "number",
+                  "number": 36
+                },
+                {
+                  "key": "knockbackDistance",
+                  "kind": "number",
+                  "number": 45
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "trigger": "onHit",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "dot",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "damageRatio",
+                  "kind": "number",
+                  "number": 0.12
+                },
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 3
+                }
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "emberYield",
+      "category": "economy",
+      "synergyTags": [
+        "utility",
+        "domain"
+      ],
+      "bindings": [
+        {
+          "trigger": "onHit",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "dot",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "damageRatio",
+                  "kind": "number",
+                  "number": 0.14
+                },
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 3
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "trigger": "passive",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "focusPriority",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "priorityWeight",
+                  "kind": "number",
+                  "number": 2
+                },
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 4
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "trigger": "onKill",
+          "at": "point",
+          "triggerParams": [
+            {
+              "key": "requiresStatus",
+              "kind": "array",
+              "text": "dot|brand"
+            }
+          ],
+          "effects": [
+            {
+              "atom": "extraDrop",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "count",
+                  "kind": "number",
+                  "number": 1
+                },
+                {
+                  "key": "secure",
+                  "kind": "boolean",
+                  "flag": true
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "trigger": "onPickup",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "statBuff",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "stat",
+                  "kind": "string",
+                  "text": "dotDamageMul"
+                },
+                {
+                  "key": "operation",
+                  "kind": "string",
+                  "text": "mul"
+                },
+                {
+                  "key": "value",
+                  "kind": "number",
+                  "number": 1.05
+                },
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 6
+                },
+                {
+                  "key": "maxStacks",
+                  "kind": "number",
+                  "number": 5
+                }
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "pylonCircuit",
+      "category": "projectile",
+      "synergyTags": [
+        "projectile",
+        "domain"
+      ],
+      "bindings": [
+        {
+          "trigger": "onWaveStart",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "summon",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "kind",
+                  "kind": "string",
+                  "text": "pylon"
+                },
+                {
+                  "key": "count",
+                  "kind": "number",
+                  "number": 3
+                },
+                {
+                  "key": "maxCount",
+                  "kind": "number",
+                  "number": 3
+                },
+                {
+                  "key": "hp",
+                  "kind": "number",
+                  "number": 90
+                },
+                {
+                  "key": "placement",
+                  "kind": "string",
+                  "text": "ring"
+                },
+                {
+                  "key": "distanceFromTurret",
+                  "kind": "number",
+                  "number": 155
+                },
+                {
+                  "key": "chainRelay",
+                  "kind": "boolean",
+                  "flag": true
+                },
+                {
+                  "key": "auraRadius",
+                  "kind": "number",
+                  "number": 70
+                }
+              ],
+              "children": [
+                {
+                  "atom": "vulnerable",
+                  "relation": "auraEffects",
+                  "params": [
+                    {
+                      "key": "ratio",
+                      "kind": "number",
+                      "number": 0.15
+                    },
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 1.2
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "trigger": "onHit",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "chain",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "bounces",
+                  "kind": "number",
+                  "number": 3
+                },
+                {
+                  "key": "spreadStatus",
+                  "kind": "string",
+                  "text": "vulnerable"
+                },
+                {
+                  "key": "preferRelay",
+                  "kind": "boolean",
+                  "flag": true
+                },
+                {
+                  "key": "relayDamageBonus",
+                  "kind": "number",
+                  "number": 0.15
+                },
+                {
+                  "key": "relayBonusCap",
+                  "kind": "number",
+                  "number": 0.45
+                }
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "glacialEffigy",
+      "category": "control",
+      "synergyTags": [
+        "control",
+        "domain"
+      ],
+      "bindings": [
+        {
+          "trigger": "interval",
+          "at": "densestCluster",
+          "triggerParams": [
+            {
+              "key": "seconds",
+              "kind": "number",
+              "number": 3
+            }
+          ],
+          "effects": [
+            {
+              "atom": "mortarMorph",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "radius",
+                  "kind": "number",
+                  "number": 70
+                },
+                {
+                  "key": "damageRatio",
+                  "kind": "number",
+                  "number": 1.1
+                }
+              ],
+              "children": []
+            },
+            {
+              "atom": "summon",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "kind",
+                  "kind": "string",
+                  "text": "iceDecoy"
+                },
+                {
+                  "key": "count",
+                  "kind": "number",
+                  "number": 1
+                },
+                {
+                  "key": "maxCount",
+                  "kind": "number",
+                  "number": 2
+                },
+                {
+                  "key": "hp",
+                  "kind": "number",
+                  "number": 90
+                },
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 8
+                },
+                {
+                  "key": "tauntRadius",
+                  "kind": "number",
+                  "number": 130
+                }
+              ],
+              "children": [
+                {
+                  "atom": "freeze",
+                  "relation": "onDeathEffects",
+                  "params": [
+                    {
+                      "key": "radius",
+                      "kind": "number",
+                      "number": 90
+                    },
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 1.5
+                    },
+                    {
+                      "key": "stacksToTrigger",
+                      "kind": "number",
+                      "number": 2
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "trigger": "onHit",
+          "at": "",
+          "triggerParams": [
+            {
+              "key": "requiresStatus",
+              "kind": "string",
+              "text": "frozen"
+            }
+          ],
+          "effects": [
+            {
+              "atom": "burstDamage",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "damageMul",
+                  "kind": "number",
+                  "number": 1.4
+                },
+                {
+                  "key": "radius",
+                  "kind": "number",
+                  "number": 55
+                }
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "wrathMortar",
+      "category": "projectile",
+      "synergyTags": [
+        "projectile",
+        "defense"
+      ],
+      "bindings": [
+        {
+          "trigger": "onBreach",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "charge",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "by",
+                  "kind": "string",
+                  "text": "breach"
+                },
+                {
+                  "key": "perEvent",
+                  "kind": "number",
+                  "number": 1
+                },
+                {
+                  "key": "max",
+                  "kind": "number",
+                  "number": 4
+                },
+                {
+                  "key": "releaseAt",
+                  "kind": "string",
+                  "text": "interval"
+                },
+                {
+                  "key": "chargeKey",
+                  "kind": "string",
+                  "text": "magazine"
+                }
+              ],
+              "children": [
+                {
+                  "atom": "mortarMorph",
+                  "relation": "paramEffect",
+                  "params": [
+                    {
+                      "key": "radius",
+                      "kind": "number",
+                      "number": 70
+                    },
+                    {
+                      "key": "damageRatio",
+                      "kind": "number",
+                      "number": 1.2
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "atom": "groundZone",
+                  "relation": "paramEffect",
+                  "params": [
+                    {
+                      "key": "radius",
+                      "kind": "number",
+                      "number": 60
+                    },
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 4
+                    },
+                    {
+                      "key": "tickInterval",
+                      "kind": "number",
+                      "number": 0.5
+                    }
+                  ],
+                  "children": [
+                    {
+                      "atom": "dot",
+                      "relation": "paramEffect",
+                      "params": [
+                        {
+                          "key": "damageRatio",
+                          "kind": "number",
+                          "number": 0.15
+                        }
+                      ],
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "trigger": "interval",
+          "at": "densestCluster",
+          "triggerParams": [
+            {
+              "key": "seconds",
+              "kind": "number",
+              "number": 4
+            }
+          ],
+          "effects": [
+            {
+              "atom": "charge",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "by",
+                  "kind": "string",
+                  "text": "breach"
+                },
+                {
+                  "key": "perEvent",
+                  "kind": "number",
+                  "number": 1
+                },
+                {
+                  "key": "max",
+                  "kind": "number",
+                  "number": 4
+                },
+                {
+                  "key": "releaseAt",
+                  "kind": "string",
+                  "text": "interval"
+                },
+                {
+                  "key": "chargeKey",
+                  "kind": "string",
+                  "text": "magazine"
+                }
+              ],
+              "children": [
+                {
+                  "atom": "mortarMorph",
+                  "relation": "paramEffect",
+                  "params": [
+                    {
+                      "key": "radius",
+                      "kind": "number",
+                      "number": 70
+                    },
+                    {
+                      "key": "damageRatio",
+                      "kind": "number",
+                      "number": 1.2
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "atom": "groundZone",
+                  "relation": "paramEffect",
+                  "params": [
+                    {
+                      "key": "radius",
+                      "kind": "number",
+                      "number": 60
+                    },
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 4
+                    },
+                    {
+                      "key": "tickInterval",
+                      "kind": "number",
+                      "number": 0.5
+                    }
+                  ],
+                  "children": [
+                    {
+                      "atom": "dot",
+                      "relation": "paramEffect",
+                      "params": [
+                        {
+                          "key": "damageRatio",
+                          "kind": "number",
+                          "number": 0.15
+                        }
+                      ],
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "trigger": "onHit",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "dot",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "damageRatio",
+                  "kind": "number",
+                  "number": 0.12
+                },
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 3
+                }
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "aegisCitadel",
+      "category": "defense",
+      "synergyTags": [
+        "defense",
+        "domain"
+      ],
+      "bindings": [
+        {
+          "trigger": "onWaveStart",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "summon",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "kind",
+                  "kind": "string",
+                  "text": "wall"
+                },
+                {
+                  "key": "count",
+                  "kind": "number",
+                  "number": 4
+                },
+                {
+                  "key": "maxCount",
+                  "kind": "number",
+                  "number": 4
+                },
+                {
+                  "key": "hp",
+                  "kind": "number",
+                  "number": 180
+                },
+                {
+                  "key": "placement",
+                  "kind": "string",
+                  "text": "ring"
+                },
+                {
+                  "key": "distanceFromTurret",
+                  "kind": "number",
+                  "number": 125
+                }
+              ],
+              "children": [
+                {
+                  "atom": "burstDamage",
+                  "relation": "onDeathEffects",
+                  "params": [
+                    {
+                      "key": "radius",
+                      "kind": "number",
+                      "number": 90
+                    },
+                    {
+                      "key": "damageMul",
+                      "kind": "number",
+                      "number": 1.2
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "atom": "knockback",
+                  "relation": "onDeathEffects",
+                  "params": [
+                    {
+                      "key": "radius",
+                      "kind": "number",
+                      "number": 90
+                    },
+                    {
+                      "key": "distance",
+                      "kind": "number",
+                      "number": 40
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "trigger": "passive",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "breachReduction",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "ratio",
+                  "kind": "number",
+                  "number": 0.15
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "trigger": "interval",
+          "at": "",
+          "triggerParams": [
+            {
+              "key": "seconds",
+              "kind": "number",
+              "number": 9
+            }
+          ],
+          "effects": [
+            {
+              "atom": "summon",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "kind",
+                  "kind": "string",
+                  "text": "wall"
+                },
+                {
+                  "key": "count",
+                  "kind": "number",
+                  "number": 1
+                },
+                {
+                  "key": "maxCount",
+                  "kind": "number",
+                  "number": 4
+                },
+                {
+                  "key": "hp",
+                  "kind": "number",
+                  "number": 180
+                },
+                {
+                  "key": "placement",
+                  "kind": "string",
+                  "text": "ring"
+                },
+                {
+                  "key": "distanceFromTurret",
+                  "kind": "number",
+                  "number": 125
+                }
+              ],
+              "children": [
+                {
+                  "atom": "burstDamage",
+                  "relation": "onDeathEffects",
+                  "params": [
+                    {
+                      "key": "radius",
+                      "kind": "number",
+                      "number": 90
+                    },
+                    {
+                      "key": "damageMul",
+                      "kind": "number",
+                      "number": 1.2
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "atom": "knockback",
+                  "relation": "onDeathEffects",
+                  "params": [
+                    {
+                      "key": "radius",
+                      "kind": "number",
+                      "number": 90
+                    },
+                    {
+                      "key": "distance",
+                      "kind": "number",
+                      "number": 40
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "rootLoom",
+      "category": "economy",
+      "synergyTags": [
+        "utility",
+        "defense"
+      ],
+      "bindings": [
+        {
+          "trigger": "onMerge",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "mergePulse",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "damagePerMergeCount",
+                  "kind": "number",
+                  "number": 5
+                },
+                {
+                  "key": "radius",
+                  "kind": "number",
+                  "number": 180
+                }
+              ],
+              "children": []
+            },
+            {
+              "atom": "summon",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "kind",
+                  "kind": "string",
+                  "text": "rootSegment"
+                },
+                {
+                  "key": "count",
+                  "kind": "number",
+                  "number": 1
+                },
+                {
+                  "key": "maxCount",
+                  "kind": "number",
+                  "number": 6
+                },
+                {
+                  "key": "hp",
+                  "kind": "number",
+                  "number": 100
+                },
+                {
+                  "key": "placement",
+                  "kind": "string",
+                  "text": "threatDirection"
+                },
+                {
+                  "key": "auraRadius",
+                  "kind": "number",
+                  "number": 75
+                }
+              ],
+              "children": [
+                {
+                  "atom": "dot",
+                  "relation": "auraEffects",
+                  "params": [
+                    {
+                      "key": "damageRatio",
+                      "kind": "number",
+                      "number": 0.08
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "atom": "knockback",
+                  "relation": "auraEffects",
+                  "params": [
+                    {
+                      "key": "distance",
+                      "kind": "number",
+                      "number": 10
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "trigger": "onWaveStart",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "summonBuff",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "target",
+                  "kind": "string",
+                  "text": "all"
+                },
+                {
+                  "key": "kind",
+                  "kind": "string",
+                  "text": "rootSegment"
+                },
+                {
+                  "key": "damageMul",
+                  "kind": "number",
+                  "number": 1.15
+                },
+                {
+                  "key": "capLevels",
+                  "kind": "number",
+                  "number": 4
+                }
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "midasChain",
+      "category": "projectile",
+      "synergyTags": [
+        "projectile",
+        "utility"
+      ],
+      "bindings": [
+        {
+          "trigger": "onHit",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "chain",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "bounces",
+                  "kind": "number",
+                  "number": 4
+                },
+                {
+                  "key": "spreadStatus",
+                  "kind": "string",
+                  "text": "brand"
+                },
+                {
+                  "key": "spreadParams.ratio",
+                  "kind": "number",
+                  "number": 2
+                },
+                {
+                  "key": "spreadParams.duration",
+                  "kind": "number",
+                  "number": 5
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "trigger": "onKill",
+          "at": "point",
+          "triggerParams": [
+            {
+              "key": "requiresStatus",
+              "kind": "string",
+              "text": "brand"
+            }
+          ],
+          "effects": [
+            {
+              "atom": "extraDrop",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "count",
+                  "kind": "number",
+                  "number": 1
+                }
+              ],
+              "children": []
+            },
+            {
+              "atom": "extraDrop",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "forEach.set.kind",
+                  "kind": "string",
+                  "text": "enemiesWithStatus"
+                },
+                {
+                  "key": "forEach.set.status",
+                  "kind": "string",
+                  "text": "brand"
+                },
+                {
+                  "key": "forEach.maxTargets",
+                  "kind": "number",
+                  "number": 6
+                },
+                {
+                  "key": "forEach.order",
+                  "kind": "string",
+                  "text": "nearest"
+                }
+              ],
+              "children": [
+                {
+                  "atom": "extraDrop",
+                  "relation": "forEachEffect",
+                  "params": [
+                    {
+                      "key": "count",
+                      "kind": "number",
+                      "number": 1
+                    },
+                    {
+                      "key": "chance",
+                      "kind": "number",
+                      "number": 0.35
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "frostDew",
+      "category": "defense",
+      "synergyTags": [
+        "defense",
+        "utility"
+      ],
+      "bindings": [
+        {
+          "trigger": "passive",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "aura",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "radius",
+                  "kind": "number",
+                  "number": 130
+                },
+                {
+                  "key": "tickInterval",
+                  "kind": "number",
+                  "number": 0.5
+                },
+                {
+                  "key": "duration",
+                  "kind": "number",
+                  "number": 999
+                }
+              ],
+              "children": [
+                {
+                  "atom": "slow",
+                  "relation": "paramEffect",
+                  "params": [
+                    {
+                      "key": "ratio",
+                      "kind": "number",
+                      "number": 0.25
+                    },
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 1
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "trigger": "interval",
+          "at": "",
+          "triggerParams": [
+            {
+              "key": "seconds",
+              "kind": "number",
+              "number": 3
+            }
+          ],
+          "effects": [
+            {
+              "atom": "restore",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "amount",
+                  "kind": "number",
+                  "number": 1
+                },
+                {
+                  "key": "scaleBy.source",
+                  "kind": "string",
+                  "text": "controlledInAura"
+                },
+                {
+                  "key": "scaleBy.param",
+                  "kind": "string",
+                  "text": "amount"
+                },
+                {
+                  "key": "scaleBy.perUnit",
+                  "kind": "number",
+                  "number": 1
+                },
+                {
+                  "key": "scaleBy.cap",
+                  "kind": "number",
+                  "number": 6
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "trigger": "onKill",
+          "at": "point",
+          "triggerParams": [
+            {
+              "key": "requiresStatus",
+              "kind": "string",
+              "text": "frozen"
+            }
+          ],
+          "effects": [
+            {
+              "atom": "extraDrop",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "count",
+                  "kind": "number",
+                  "number": 1
+                },
+                {
+                  "key": "secure",
+                  "kind": "boolean",
+                  "flag": true
+                }
+              ],
+              "children": []
+            },
+            {
+              "atom": "restore",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "amount",
+                  "kind": "number",
+                  "number": 4
+                }
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "pyreBrand",
+      "category": "control",
+      "synergyTags": [
+        "control",
+        "utility"
+      ],
+      "bindings": [
+        {
+          "trigger": "onWaveStart",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "dot",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "forEach.set.kind",
+                  "kind": "string",
+                  "text": "enemiesWithoutStatus"
+                },
+                {
+                  "key": "forEach.set.status",
+                  "kind": "string",
+                  "text": "dot"
+                },
+                {
+                  "key": "forEach.maxTargets",
+                  "kind": "number",
+                  "number": 2
+                },
+                {
+                  "key": "forEach.order",
+                  "kind": "string",
+                  "text": "nearest"
+                }
+              ],
+              "children": [
+                {
+                  "atom": "dot",
+                  "relation": "forEachEffect",
+                  "params": [
+                    {
+                      "key": "damageRatio",
+                      "kind": "number",
+                      "number": 0.14
+                    },
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 6
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "atom": "focusPriority",
+                  "relation": "forEachEffect",
+                  "params": [
+                    {
+                      "key": "priorityWeight",
+                      "kind": "number",
+                      "number": 3
+                    },
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 6
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "trigger": "interval",
+          "at": "",
+          "triggerParams": [
+            {
+              "key": "seconds",
+              "kind": "number",
+              "number": 4
+            }
+          ],
+          "effects": [
+            {
+              "atom": "dot",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "forEach.set.kind",
+                  "kind": "string",
+                  "text": "enemiesWithoutStatus"
+                },
+                {
+                  "key": "forEach.set.status",
+                  "kind": "string",
+                  "text": "dot"
+                },
+                {
+                  "key": "forEach.maxTargets",
+                  "kind": "number",
+                  "number": 2
+                },
+                {
+                  "key": "forEach.order",
+                  "kind": "string",
+                  "text": "nearest"
+                }
+              ],
+              "children": [
+                {
+                  "atom": "dot",
+                  "relation": "forEachEffect",
+                  "params": [
+                    {
+                      "key": "damageRatio",
+                      "kind": "number",
+                      "number": 0.14
+                    },
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 6
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "atom": "focusPriority",
+                  "relation": "forEachEffect",
+                  "params": [
+                    {
+                      "key": "priorityWeight",
+                      "kind": "number",
+                      "number": 3
+                    },
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 6
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "trigger": "onHit",
+          "at": "",
+          "triggerParams": [
+            {
+              "key": "requiresStatus",
+              "kind": "string",
+              "text": "dot"
+            }
+          ],
+          "effects": [
+            {
+              "atom": "burstDamage",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "damageMul",
+                  "kind": "number",
+                  "number": 0.3
+                },
+                {
+                  "key": "radius",
+                  "kind": "number",
+                  "number": 45
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "trigger": "onKill",
+          "at": "point",
+          "triggerParams": [
+            {
+              "key": "requiresStatus",
+              "kind": "string",
+              "text": "dot"
+            }
+          ],
+          "effects": [
+            {
+              "atom": "dot",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "forEach.set.kind",
+                  "kind": "string",
+                  "text": "enemiesWithoutStatus"
+                },
+                {
+                  "key": "forEach.set.status",
+                  "kind": "string",
+                  "text": "dot"
+                },
+                {
+                  "key": "forEach.maxTargets",
+                  "kind": "number",
+                  "number": 1
+                },
+                {
+                  "key": "forEach.order",
+                  "kind": "string",
+                  "text": "nearest"
+                }
+              ],
+              "children": [
+                {
+                  "atom": "dot",
+                  "relation": "forEachEffect",
+                  "params": [
+                    {
+                      "key": "damageRatio",
+                      "kind": "number",
+                      "number": 0.14
+                    },
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 6
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "atom": "focusPriority",
+                  "relation": "forEachEffect",
+                  "params": [
+                    {
+                      "key": "priorityWeight",
+                      "kind": "number",
+                      "number": 3
+                    },
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 6
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "fortuneThorns",
+      "category": "defense",
+      "synergyTags": [
+        "defense",
+        "utility"
+      ],
+      "bindings": [
+        {
+          "trigger": "passive",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "thorns",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "ratio",
+                  "kind": "number",
+                  "number": 0.35
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "trigger": "onBreach",
+          "at": "",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "charge",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "by",
+                  "kind": "string",
+                  "text": "breach"
+                },
+                {
+                  "key": "perEvent",
+                  "kind": "number",
+                  "number": 25
+                },
+                {
+                  "key": "max",
+                  "kind": "number",
+                  "number": 100
+                },
+                {
+                  "key": "releaseAt",
+                  "kind": "string",
+                  "text": "full"
+                }
+              ],
+              "children": [
+                {
+                  "atom": "extraDrop",
+                  "relation": "paramEffect",
+                  "params": [
+                    {
+                      "key": "count",
+                      "kind": "number",
+                      "number": 1
+                    },
+                    {
+                      "key": "at",
+                      "kind": "string",
+                      "text": "turret"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "atom": "statBuff",
+                  "relation": "paramEffect",
+                  "params": [
+                    {
+                      "key": "stat",
+                      "kind": "string",
+                      "text": "retaliationMul"
+                    },
+                    {
+                      "key": "operation",
+                      "kind": "string",
+                      "text": "mul"
+                    },
+                    {
+                      "key": "value",
+                      "kind": "number",
+                      "number": 1.2
+                    },
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 6
+                    },
+                    {
+                      "key": "maxStacks",
+                      "kind": "number",
+                      "number": 1
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "trigger": "onBreach",
+          "at": "point",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "extraDrop",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "count",
+                  "kind": "number",
+                  "number": 2
+                }
+              ],
+              "children": []
+            },
+            {
+              "atom": "burstDamage",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "radius",
+                  "kind": "number",
+                  "number": 80
+                },
+                {
+                  "key": "damageMul",
+                  "kind": "number",
+                  "number": 0.6
+                }
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "goldenGrove",
+      "category": "economy",
+      "synergyTags": [
+        "utility",
+        "domain"
+      ],
+      "bindings": [
+        {
+          "trigger": "onPickup",
+          "at": "point",
+          "triggerParams": [],
+          "effects": [
+            {
+              "atom": "summon",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "kind",
+                  "kind": "string",
+                  "text": "goldenTree"
+                },
+                {
+                  "key": "count",
+                  "kind": "number",
+                  "number": 1
+                },
+                {
+                  "key": "maxCount",
+                  "kind": "number",
+                  "number": 3
+                },
+                {
+                  "key": "hp",
+                  "kind": "number",
+                  "number": 100
+                },
+                {
+                  "key": "intervalSeconds",
+                  "kind": "number",
+                  "number": 4
+                },
+                {
+                  "key": "fireInterval",
+                  "kind": "number",
+                  "number": 4
+                }
+              ],
+              "children": [
+                {
+                  "atom": "focusPriority",
+                  "relation": "intervalEffects",
+                  "params": [
+                    {
+                      "key": "priorityWeight",
+                      "kind": "number",
+                      "number": 1
+                    },
+                    {
+                      "key": "duration",
+                      "kind": "number",
+                      "number": 4
+                    },
+                    {
+                      "key": "radius",
+                      "kind": "number",
+                      "number": 150
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "atom": "extraDrop",
+                  "relation": "intervalEffects",
+                  "params": [
+                    {
+                      "key": "count",
+                      "kind": "number",
+                      "number": 1
+                    },
+                    {
+                      "key": "chance",
+                      "kind": "number",
+                      "number": 0.5
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "trigger": "onKill",
+          "at": "point",
+          "triggerParams": [
+            {
+              "key": "requiresStatus",
+              "kind": "string",
+              "text": "brand"
+            }
+          ],
+          "effects": [
+            {
+              "atom": "summonBuff",
+              "relation": "direct",
+              "params": [
+                {
+                  "key": "target",
+                  "kind": "string",
+                  "text": "nearestToPoint"
+                },
+                {
+                  "key": "kind",
+                  "kind": "string",
+                  "text": "goldenTree"
+                },
+                {
+                  "key": "radiusAdd",
+                  "kind": "number",
+                  "number": 10
+                },
+                {
+                  "key": "dropChanceAdd",
+                  "kind": "number",
+                  "number": 0.05
+                },
+                {
+                  "key": "capLevels",
+                  "kind": "number",
+                  "number": 5
+                }
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -65,6 +65,12 @@ namespace ProjectVL.Config
             return Load<EvolutionTextConfig>("Config/evolutionText");
         }
 
+        public static RecipeProductEffectsConfig LoadRecipeProductEffects()
+        {
+            return Load<RecipeProductEffectsConfig>(
+                "Config/recipeProductEffects");
+        }
+
         public static RelicsConfig LoadRelics()
         {
             return Load<RelicsConfig>("Config/relics");

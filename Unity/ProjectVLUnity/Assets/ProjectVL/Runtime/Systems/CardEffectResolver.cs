@@ -146,7 +146,10 @@ namespace ProjectVL.Systems
                         ApplyLuckyStar(card, profile);
                         break;
                     default:
-                        ApplyRecipeProductFallback(card, profile);
+                        if (card.Star >= 6)
+                            RecipeProductProfileCompiler.Apply(
+                                card.Type,
+                                profile);
                         break;
                 }
             }
@@ -154,35 +157,6 @@ namespace ProjectVL.Systems
             RelicScalingSystem.Apply(state, profile);
             CardAffixSystem.ApplyProfile(state, profile);
             return profile;
-        }
-
-        private static void ApplyRecipeProductFallback(
-            CardState card,
-            CardCombatProfile profile)
-        {
-            CardDefinitionConfig definition =
-                CardCatalog.Default.Find(card.Type);
-            if (definition?.recipeOnly != true || card.Star < 6)
-                return;
-
-            switch (definition.category)
-            {
-                case "projectile":
-                    ApplyPierce(card, profile);
-                    break;
-                case "control":
-                    ApplyFrost(card, profile);
-                    break;
-                case "domain":
-                    ApplyScorch(card, profile);
-                    break;
-                case "defense":
-                    ApplyAegis(card, profile);
-                    break;
-                case "economy":
-                    ApplyHarvest(card, profile);
-                    break;
-            }
         }
 
         private static void ApplyPierce(
