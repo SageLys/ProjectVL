@@ -69,5 +69,36 @@ namespace ProjectVL.Tests
             Assert.That(binding.Binding.effects[0].atom,
                 Is.EqualTo("groundZone"));
         }
+
+        [Test]
+        public void WaveStartGroundZoneExecutesItsNestedDot()
+        {
+            CombatConfig combat = CombatConfigLoader.LoadDefault();
+            GameState state = GameStateFactory.Create(combat);
+            var system = new CombatSystem(
+                combat,
+                GameConfigLoader.LoadEnemies());
+            state.Equipment[0] = state.CreateCard("volcanoCore", 6);
+            state.BeginWave(1);
+            var enemy = new EnemyState(
+                1,
+                EnemyKind.Normal,
+                new Float2(260f, 320f),
+                100f,
+                10f,
+                8f,
+                1f);
+            state.Enemies.Add(enemy);
+
+            system.StepPassives(state, 0f);
+
+            Assert.That(state.GroundZones, Has.Count.EqualTo(1));
+            GroundZoneState zone = state.GroundZones[0];
+            Assert.That(zone.Position, Is.EqualTo(enemy.Position));
+            Assert.That(zone.Radius, Is.EqualTo(90f));
+            Assert.That(zone.LifeRemaining, Is.EqualTo(999f));
+            Assert.That(zone.TickInterval, Is.EqualTo(0.5f));
+            Assert.That(zone.DamagePerTick, Is.GreaterThan(0f));
+        }
     }
 }

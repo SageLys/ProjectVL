@@ -754,9 +754,10 @@ namespace ProjectVL.Systems
                 }
             }
 
-            float duration = Math.Min(
-                5f,
-                EffectNumber(atom, "duration", tier.duration));
+            float duration = EffectNumber(
+                atom,
+                "duration",
+                tier.duration);
             float radius = EffectNumber(atom, "radius", tier.radius);
             float initialRadius = EffectNumber(
                 atom,
@@ -4036,6 +4037,7 @@ namespace ProjectVL.Systems
             state.SpringPulseRemaining =
                 profile.SpringRestoreInterval;
             state.GroundZones.Clear();
+            ExecuteCompiledWaveStartZones(state);
             state.ScorchAuraTickRemaining =
                 profile.ScorchAuraTickInterval;
             state.SanctumPulseRemaining =
@@ -4099,6 +4101,40 @@ namespace ProjectVL.Systems
                 _drops?.SpawnTestDrop(
                     state,
                     TurretPosition + new Float2(offset, -55f));
+            }
+        }
+
+        private void ExecuteCompiledWaveStartZones(GameState state)
+        {
+            foreach (RuntimeEquipmentBinding source
+                in EquipmentEffectBindingRuntime.Resolve(
+                    state,
+                    "onWaveStart"))
+            {
+                foreach (CompiledEffectAtomConfig atom
+                    in source.Binding.effects
+                        ?? Array.Empty<CompiledEffectAtomConfig>())
+                {
+                    if (atom?.atom != "groundZone"
+                        || atom.children == null
+                        || atom.children.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    EnemyState target = FindTarget(state);
+                    Float2 point = source.Binding.at == "densestCluster"
+                        && target != null
+                            ? target.Position
+                            : TurretPosition;
+                    var tier = new CompiledConsumableTierConfig
+                    {
+                        radius = EffectNumber(atom, "radius", AttackRange(state)),
+                        duration = EffectNumber(atom, "duration", 1f),
+                        effects = new[] { atom }
+                    };
+                    CastCompiledGroundZone(state, tier, atom, point);
+                }
             }
         }
 
