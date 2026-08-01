@@ -3273,6 +3273,10 @@ namespace ProjectVL.Systems
                         state,
                         profile);
                 }
+                ExecuteCompiledKillZones(
+                    state,
+                    enemy,
+                    source);
                 if (killedWhileFrozen
                     && profile.FrozenKillRestore > 0f)
                 {
@@ -4239,6 +4243,63 @@ namespace ProjectVL.Systems
                     source,
                     hitPosition);
             }
+        }
+
+        private void ExecuteCompiledKillZones(
+            GameState state,
+            EnemyState enemy,
+            DamageSource damageSource)
+        {
+            foreach (RuntimeEquipmentBinding source
+                in EquipmentEffectBindingRuntime.Resolve(state, "onKill"))
+            {
+                if (!HasNestedGroundZone(source.Binding)
+                    || !BindingStatusConditionMet(source.Binding, enemy)
+                    || !BindingSourceConditionMet(
+                        source.Binding,
+                        damageSource))
+                {
+                    continue;
+                }
+
+                foreach (CompiledEffectAtomConfig atom
+                    in source.Binding.effects
+                        ?? Array.Empty<CompiledEffectAtomConfig>())
+                {
+                    if (atom?.atom == "groundZone"
+                        && EffectText(atom, "forEach.set.kind")
+                            == "ownZones")
+                    {
+                        continue;
+                    }
+                    if (atom?.atom != "groundZone"
+                        || atom.children == null
+                        || atom.children.Length == 0)
+                    {
+                        continue;
+                    }
+                    var tier = new CompiledConsumableTierConfig
+                    {
+                        radius = EffectNumber(atom, "radius", AttackRange(state)),
+                        duration = EffectNumber(atom, "duration", 1f),
+                        effects = new[] { atom }
+                    };
+                    CastCompiledGroundZone(
+                        state,
+                        tier,
+                        atom,
+                        enemy.Position);
+                }
+            }
+        }
+
+        private static bool BindingSourceConditionMet(
+            CompiledEffectBindingConfig binding,
+            DamageSource source)
+        {
+            string required = BindingText(binding, "requiresSource");
+            return string.IsNullOrEmpty(required)
+                || required == "dot" && source == DamageSource.Dot;
         }
 
         private static bool BindingStatusConditionMet(
