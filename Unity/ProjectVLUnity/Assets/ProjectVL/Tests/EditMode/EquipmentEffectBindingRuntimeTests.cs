@@ -219,5 +219,33 @@ namespace ProjectVL.Tests
             Assert.That(zone.LifeRemaining, Is.EqualTo(4f));
             Assert.That(zone.DamagePerTick, Is.GreaterThan(0f));
         }
+
+        [Test]
+        public void ShieldAbsorbChargeAccumulatesPerCardInstance()
+        {
+            CombatConfig combat = CombatConfigLoader.LoadDefault();
+            GameState state = GameStateFactory.Create(combat);
+            var system = new CombatSystem(
+                combat,
+                GameConfigLoader.LoadEnemies());
+            CardState card = state.CreateCard("voltBastion", 6);
+            state.Equipment[0] = card;
+            state.BeginWave(1);
+            system.StepPassives(state, 0f);
+            state.Enemies.Add(new EnemyState(
+                1,
+                EnemyKind.Normal,
+                new Float2(combat.turret.x, combat.turret.y),
+                1f,
+                10f,
+                8f,
+                1f));
+
+            system.StepEnemies(state, 0f);
+
+            string key = "charge:voltBastion/" + card.Id + "/main";
+            Assert.That(state.EquipmentBindingCharges[key], Is.EqualTo(1f));
+            Assert.That(state.Hp, Is.EqualTo(state.MaxHp));
+        }
     }
 }

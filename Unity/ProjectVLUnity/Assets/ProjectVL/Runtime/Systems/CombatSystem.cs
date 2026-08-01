@@ -3085,7 +3085,12 @@ namespace ProjectVL.Systems
 
                 state.Enemies.RemoveAt(index);
                 _bounties?.NotifyBreached(state, enemy);
+                bool shieldAbsorbed = state.ShieldHits > 0;
                 HandleBreach(state, profile, enemy.Damage);
+                ExecuteCompiledBreachEffects(
+                    state,
+                    enemy.Position,
+                    shieldAbsorbed);
             }
         }
 
@@ -4157,7 +4162,10 @@ namespace ProjectVL.Systems
                 in EquipmentEffectBindingRuntime.Resolve(state, "interval"))
             {
                 if (!HasNestedGroundZone(source.Binding))
-                    continue;
+                {
+                    if (!HasNestedCharge(source.Binding))
+                        continue;
+                }
 
                 string key = "interval:" + source.SourceKey;
                 liveKeys.Add(key);
@@ -4173,6 +4181,14 @@ namespace ProjectVL.Systems
                 if (remaining <= 0f)
                 {
                     ExecuteCompiledBindingZones(state, source);
+                    ExecuteCompiledBindingCharges(
+                        state,
+                        source,
+                        "interval",
+                        TurretPosition,
+                        null,
+                        DamageSource.Direct,
+                        false);
                     remaining += seconds;
                 }
                 state.EquipmentBindingClocks[key] = remaining;
@@ -4253,14 +4269,25 @@ namespace ProjectVL.Systems
             foreach (RuntimeEquipmentBinding source
                 in EquipmentEffectBindingRuntime.Resolve(state, "onKill"))
             {
-                if (!HasNestedGroundZone(source.Binding)
-                    || !BindingStatusConditionMet(source.Binding, enemy)
+                if (!BindingStatusConditionMet(source.Binding, enemy)
                     || !BindingSourceConditionMet(
                         source.Binding,
                         damageSource))
                 {
                     continue;
                 }
+
+                ExecuteCompiledBindingCharges(
+                    state,
+                    source,
+                    "onKill",
+                    enemy.Position,
+                    enemy,
+                    damageSource,
+                    false);
+
+                if (!HasNestedGroundZone(source.Binding))
+                    continue;
 
                 foreach (CompiledEffectAtomConfig atom
                     in source.Binding.effects
@@ -4289,6 +4316,110 @@ namespace ProjectVL.Systems
                         tier,
                         atom,
                         enemy.Position);
+                }
+            }
+        }
+
+        private void ExecuteCompiledBreachEffects(
+            GameState state,
+            Float2 point,
+            bool shieldAbsorbed)
+        {
+            foreach (RuntimeEquipmentBinding source
+                in EquipmentEffectBindingRuntime.Resolve(state, "onBreach"))
+            {
+                ExecuteCompiledBindingCharges(
+                    state,
+                    source,
+                    "onBreach",
+                    point,
+                    null,
+                    DamageSource.Direct,
+                    shieldAbsorbed);
+            }
+        }
+
+        private void ExecuteCompiledBindingCharges(
+            GameState state,
+            RuntimeEquipmentBinding source,
+            string trigger,
+            Float2 point,
+            EnemyState target,
+            DamageSource damageSource,
+            bool shieldAbsorbed)
+        {
+            foreach (CompiledEffectAtomConfig atom
+                in source.Binding.effects
+                    ?? Array.Empty<CompiledEffectAtomConfig>())
+            {
+                if (atom?.atom != "charge"
+                    || atom.children == null
+                    || atom.children.Length == 0)
+                {
+                    continue;
+                }
+
+                string by = EffectText(atom, "by");
+                bool eventMatches = by == "breach"
+                        && trigger == "onBreach"
+                    || by == "shieldAbsorb"
+                        && trigger == "onBreach"
+                        && shieldAbsorbed
+                    || by == "killWithSource:dot"
+                        && trigger == "onKill"
+                        && damageSource == DamageSource.Dot;
+                string chargeKey = EffectText(atom, "chargeKey");
+                if (string.IsNullOrEmpty(chargeKey))
+                    chargeKey = "main";
+                string key = "charge:"
+                    + source.Card.Type
+                    + "/"
+                    + source.Card.Id
+                    + "/"
+                    + chargeKey;
+                float current = state.EquipmentBindingCharges.TryGetValue(
+                    key,
+                    out float stored)
+                        ? stored
+                        : 0f;
+                float maximum = Math.Max(
+                    1f,
+                    EffectNumber(atom, "max", 1f));
+                if (eventMatches)
+                {
+                    current = Math.Min(
+                        maximum,
+                        current + EffectNumber(atom, "perEvent", 1f));
+                }
+
+                string releaseAt = EffectText(atom, "releaseAt");
+                bool release = releaseAt == "full" && current >= maximum
+                    || releaseAt == "interval"
+                        && trigger == "interval"
+                        && current > 0f;
+                state.EquipmentBindingCharges[key] = release
+                    ? 0f
+                    : current;
+                if (!release)
+                    continue;
+
+                var tier = new CompiledConsumableTierConfig
+                {
+                    radius = AttackRange(state),
+                    duration = 1f,
+                    effects = atom.children
+                };
+                foreach (CompiledEffectAtomConfig child in atom.children)
+                {
+                    if (child?.relation != "paramEffect")
+                        continue;
+                    ExecuteCompiledConsumableAtom(
+                        state,
+                        source.Card.Type,
+                        tier,
+                        child,
+                        point,
+                        target);
                 }
             }
         }
@@ -4328,6 +4459,22 @@ namespace ProjectVL.Systems
                 in binding.effects ?? Array.Empty<CompiledEffectAtomConfig>())
             {
                 if (atom?.atom == "groundZone"
+                    && atom.children != null
+                    && atom.children.Length > 0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static bool HasNestedCharge(
+            CompiledEffectBindingConfig binding)
+        {
+            foreach (CompiledEffectAtomConfig atom
+                in binding.effects ?? Array.Empty<CompiledEffectAtomConfig>())
+            {
+                if (atom?.atom == "charge"
                     && atom.children != null
                     && atom.children.Length > 0)
                 {

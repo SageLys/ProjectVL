@@ -17,7 +17,7 @@ namespace ProjectVL.Systems
             {
                 foreach (CompiledEffectAtomConfig atom in binding.effects)
                 {
-                    if (UsesNestedZoneRuntime(binding, atom))
+                    if (UsesNestedRuntime(binding, atom))
                         continue;
                     ApplyAtom(binding, atom, null, profile);
                 }
@@ -41,13 +41,15 @@ namespace ProjectVL.Systems
             return true;
         }
 
-        private static bool UsesNestedZoneRuntime(
+        private static bool UsesNestedRuntime(
             CompiledEffectBindingConfig binding,
             CompiledEffectAtomConfig atom)
         {
-            return atom?.atom == "groundZone"
-                && atom.children != null
-                && atom.children.Length > 0
+            if (atom?.children == null || atom.children.Length == 0)
+                return false;
+            if (atom.atom == "charge")
+                return true;
+            return atom.atom == "groundZone"
                 && (binding.trigger == "onWaveStart"
                     || binding.trigger == "interval");
         }

@@ -172,6 +172,8 @@ namespace ProjectVL.Core
             new Dictionary<string, float>();
         public Dictionary<string, float> EquipmentBindingClocks { get; } =
             new Dictionary<string, float>();
+        public Dictionary<string, float> EquipmentBindingCharges { get; } =
+            new Dictionary<string, float>();
         public LevelUpgradeChoice PendingLevelUpgrade =>
             _pendingLevelUpgrades.Count > 0
                 ? _pendingLevelUpgrades[0]
@@ -370,6 +372,7 @@ namespace ProjectVL.Core
             GroundDrops.Clear();
             GroundZones.Clear();
             EquipmentBindingClocks.Clear();
+            EquipmentBindingCharges.Clear();
             BountyOffers.Clear();
             BountyEncounters.Clear();
             _pendingLevelUpgrades.Clear();
