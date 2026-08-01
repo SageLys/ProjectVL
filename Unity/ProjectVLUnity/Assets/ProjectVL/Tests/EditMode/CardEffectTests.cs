@@ -2555,6 +2555,67 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void DotSourceEffectSkipsDirectKillOfBurningEnemy()
+        {
+            EquipResolved(
+                "magmaPool",
+                5,
+                "3:magmaPoolA",
+                "5:magmaPool2x");
+            _state.GroundZones.Add(new GroundZoneState(
+                new Float2(240f, 240f),
+                40f,
+                2f,
+                0.5f,
+                1f,
+                0f,
+                0f));
+            EnemyState victim = AddEnemy(
+                new Float2(200f, 200f),
+                1f);
+            victim.DotRemaining = 1f;
+
+            HitWithProfile(
+                victim.Position,
+                CardEffectResolver.Resolve(_state));
+
+            Assert.That(_state.GroundZones, Has.Count.EqualTo(1));
+        }
+
+        [Test]
+        public void DotSourceEffectRunsForDotTickKill()
+        {
+            EquipResolved(
+                "magmaPool",
+                5,
+                "3:magmaPoolA",
+                "5:magmaPool2x");
+            _state.GroundZones.Add(new GroundZoneState(
+                new Float2(240f, 240f),
+                40f,
+                2f,
+                0.5f,
+                1f,
+                0f,
+                0f));
+            EnemyState victim = AddEnemy(
+                new Float2(200f, 200f),
+                1f);
+            victim.DotRemaining = 1f;
+            victim.DotDamagePerTick = 2f;
+            victim.DotTickInterval = 0.5f;
+            victim.DotTickRemaining = 0f;
+
+            _system.StepEnemies(_state, 0f);
+
+            Assert.That(_state.Enemies.Contains(victim), Is.False);
+            Assert.That(_state.GroundZones, Has.Count.EqualTo(2));
+            Assert.That(
+                _state.GroundZones[1].Radius,
+                Is.EqualTo(85f));
+        }
+
+        [Test]
         public void FlashfireConsumableKnocksBackAndIgnites()
         {
             EnemyState enemy = AddEnemy(

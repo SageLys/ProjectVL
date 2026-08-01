@@ -6,6 +6,13 @@ namespace ProjectVL.Systems
 {
     public sealed class CombatSystem
     {
+        private enum DamageSource
+        {
+            Direct,
+            Dot,
+            Retaliation
+        }
+
         private readonly CombatConfig _combat;
         private readonly EnemiesConfig _enemies;
         private readonly DropSystem _drops;
@@ -3107,7 +3114,7 @@ namespace ProjectVL.Systems
             GameState state,
             EnemyState enemy,
             float damage,
-            bool retaliationSource = false)
+            DamageSource source = DamageSource.Direct)
         {
             bool killedWhileFrozen = enemy.FrozenRemaining > 0f;
             bool killedWhileDot = enemy.DotRemaining > 0f
@@ -3240,7 +3247,7 @@ namespace ProjectVL.Systems
                         enemy.Position,
                         profile.KillExtraDropChance);
                 }
-                if (retaliationSource)
+                if (source == DamageSource.Retaliation)
                 {
                     ApplyRetaliationKillCardEffects(
                         state,
@@ -3253,6 +3260,12 @@ namespace ProjectVL.Systems
                         state,
                         profile,
                         enemy.Position);
+                }
+                if (source == DamageSource.Dot)
+                {
+                    ApplyDotSourceKillCardEffects(
+                        state,
+                        profile);
                 }
                 if (killedWhileFrozen
                     && profile.FrozenKillRestore > 0f)
@@ -3943,7 +3956,11 @@ namespace ProjectVL.Systems
                     enemy.DotTickRemaining += Math.Max(
                         0.01f,
                         enemy.DotTickInterval);
-                    DamageEnemy(state, enemy, enemy.DotDamagePerTick);
+                    DamageEnemy(
+                        state,
+                        enemy,
+                        enemy.DotDamagePerTick,
+                        DamageSource.Dot);
                 }
             }
 
@@ -3963,7 +3980,8 @@ namespace ProjectVL.Systems
                     DamageEnemy(
                         state,
                         enemy,
-                        enemy.SecondaryDotDamagePerTick);
+                        enemy.SecondaryDotDamagePerTick,
+                        DamageSource.Dot);
                 }
             }
 
@@ -4742,29 +4760,6 @@ namespace ProjectVL.Systems
                     0f);
             }
 
-            if (profile.DotKillZoneCount > 0
-                && profile.DotKillZoneRadius > 0f)
-            {
-                var sourceZones =
-                    new System.Collections.Generic.List<GroundZoneState>(
-                        state.GroundZones);
-                int count = Math.Min(
-                    profile.DotKillZoneCount,
-                    sourceZones.Count);
-                for (int index = 0; index < count; index++)
-                {
-                    state.GroundZones.Add(new GroundZoneState(
-                        sourceZones[index].Position,
-                        profile.DotKillZoneRadius,
-                        profile.DotKillZoneDuration,
-                        profile.DotKillZoneTickInterval,
-                        BaseDamage(state)
-                            * profile.DotKillZoneDamageRatio,
-                        0f,
-                        0f));
-                }
-            }
-
             if (profile.DotKillDamageMultiplier > 1f
                 && profile.DotKillDamageMaxStacks > 0)
             {
@@ -4787,6 +4782,36 @@ namespace ProjectVL.Systems
                 state.KillXpBuffRemaining = Math.Max(
                     state.KillXpBuffRemaining,
                     profile.DotKillXpDuration);
+            }
+        }
+
+        private void ApplyDotSourceKillCardEffects(
+            GameState state,
+            CardCombatProfile profile)
+        {
+            if (profile.DotKillZoneCount <= 0
+                || profile.DotKillZoneRadius <= 0f)
+            {
+                return;
+            }
+
+            var sourceZones =
+                new System.Collections.Generic.List<GroundZoneState>(
+                    state.GroundZones);
+            int count = Math.Min(
+                profile.DotKillZoneCount,
+                sourceZones.Count);
+            for (int index = 0; index < count; index++)
+            {
+                state.GroundZones.Add(new GroundZoneState(
+                    sourceZones[index].Position,
+                    profile.DotKillZoneRadius,
+                    profile.DotKillZoneDuration,
+                    profile.DotKillZoneTickInterval,
+                    BaseDamage(state)
+                        * profile.DotKillZoneDamageRatio,
+                    0f,
+                    0f));
             }
         }
 
@@ -5820,7 +5845,9 @@ namespace ProjectVL.Systems
                     state,
                     enemy,
                     damage * damageMultiplier,
-                    retaliationSource);
+                    retaliationSource
+                        ? DamageSource.Retaliation
+                        : DamageSource.Direct);
                 if (!state.Enemies.Contains(enemy))
                 {
                     continue;
@@ -5997,7 +6024,7 @@ namespace ProjectVL.Systems
                             state,
                             boss,
                             reflectedDamage,
-                            true);
+                            DamageSource.Retaliation);
                         break;
                     }
                 }
@@ -6014,7 +6041,7 @@ namespace ProjectVL.Systems
                         state,
                         boss,
                         damage * profile.ThornsRatio,
-                        true);
+                        DamageSource.Retaliation);
                     if (!state.Enemies.Contains(boss))
                     {
                         break;
