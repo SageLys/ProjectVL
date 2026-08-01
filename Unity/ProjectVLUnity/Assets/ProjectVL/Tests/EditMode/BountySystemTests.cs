@@ -81,6 +81,37 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void BottomBountyOfferAndMembersStayAboveCardLoadout()
+        {
+            var random = new ConstantRandomSource(0.5f);
+            var enemies = new EnemyFactory(
+                _combat,
+                GameConfigLoader.LoadEnemies(),
+                _waves,
+                random);
+            var bounties = new BountySystem(
+                GameConfigLoader.LoadBounty(),
+                _combat,
+                _waves,
+                enemies,
+                _cards,
+                _drops,
+                random);
+            BountyOfferState offer = bounties.CreateOffer(_state, false);
+            float bottomSpawnY = _combat.canvas.height
+                - _waves.bottomSpawnInset;
+
+            Assert.That(offer.Side, Is.EqualTo(BountySide.Bottom));
+            Assert.That(offer.Position.Y, Is.LessThan(bottomSpawnY));
+            Assert.That(bounties.AcceptAt(_state, offer.Position), Is.True);
+            bounties.Step(_state, 1f);
+            Assert.That(
+                _state.Enemies,
+                Has.All.Matches<EnemyState>(
+                    enemy => enemy.Position.Y <= bottomSpawnY));
+        }
+
+        [Test]
         public void RepeatedBountyOfferProtectsPreviousRewardType()
         {
             string first = _bounties.CreateOffer(
