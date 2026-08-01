@@ -135,7 +135,7 @@ namespace ProjectVL.Tests
         }
 
         [Test]
-        public void RuntimeSwitchCoversNinetyNineFiveStarOptions()
+        public void RuntimeSwitchCoversAllFiveStarOptions()
         {
             EvolutionBranchEffectsConfig config =
                 GameConfigLoader.LoadEvolutionBranchEffects();
@@ -153,7 +153,35 @@ namespace ProjectVL.Tests
                 }
             }
 
-            Assert.That(supported, Is.EqualTo(99));
+            Assert.That(supported, Is.EqualTo(105));
+        }
+
+        [Test]
+        public void FormerCompatibilityOptionsUseIndependentCompiledAxes()
+        {
+            CardCombatProfile scorch = Compile("scorch", "scorch2x");
+            CardCombatProfile magma = Compile("magmaPool", "magmaPool2x");
+            CardCombatProfile aegis = Compile("aegis", "aegis1x");
+            CardCombatProfile thorns = Compile("thorns", "thorns1x");
+            CardCombatProfile decoy = Compile("decoy", "decoy1x");
+            CardCombatProfile retribution =
+                Compile("retribution", "retribution1x");
+
+            Assert.That(scorch.SecondaryDotDamageRatio, Is.EqualTo(0.07f));
+            Assert.That(magma.DotKillZoneCount, Is.EqualTo(4));
+            Assert.That(magma.DotKillZoneDamageRatio, Is.EqualTo(0.08f));
+            Assert.That(aegis.ShieldBreakDamage, Is.EqualTo(12f));
+            Assert.That(aegis.ShieldBreakKnockback, Is.EqualTo(45f));
+            Assert.That(thorns.BreachBurstThornsScale, Is.EqualTo(1.2f));
+            Assert.That(thorns.BreachBurstThornsScaleCap, Is.EqualTo(1f));
+            Assert.That(decoy.DecoyDamageRatio, Is.EqualTo(0.35f));
+            Assert.That(decoy.DecoyFireInterval, Is.EqualTo(0.8f));
+            Assert.That(
+                retribution.BreachBurstShieldScale,
+                Is.EqualTo(0.18f));
+            Assert.That(
+                retribution.BreachBurstShieldScaleCap,
+                Is.EqualTo(5f));
         }
 
         private static int CountAtoms(CompiledEffectAtomConfig atom)
@@ -165,6 +193,20 @@ namespace ProjectVL.Tests
                 count += CountAtoms(child);
             }
             return count;
+        }
+
+        private static CardCombatProfile Compile(
+            string cardId,
+            string optionId)
+        {
+            var profile = new CardCombatProfile();
+            Assert.That(
+                EvolutionBranchProfileCompiler.ApplyOption(
+                    cardId,
+                    optionId,
+                    profile),
+                Is.True);
+            return profile;
         }
 
         private static bool HasEffect(CardCombatProfile profile)

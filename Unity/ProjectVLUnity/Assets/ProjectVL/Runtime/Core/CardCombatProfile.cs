@@ -114,6 +114,10 @@ namespace ProjectVL.Core
         public float ThornsRatio { get; set; }
         public float BreachBurstDamageMultiplier { get; set; }
         public float BreachBurstRadius { get; set; }
+        public float BreachBurstThornsScale { get; set; }
+        public float BreachBurstThornsScaleCap { get; set; }
+        public float BreachBurstShieldScale { get; set; }
+        public float BreachBurstShieldScaleCap { get; set; }
         public float BreachKnockback { get; set; }
         public float BreachSlowRatio { get; set; }
         public float BreachSlowDuration { get; set; }
@@ -246,6 +250,11 @@ namespace ProjectVL.Core
         public float DotKillRestore { get; set; }
         public float DotKillBurstRadius { get; set; }
         public float DotKillBurstDamageMultiplier { get; set; }
+        public int DotKillZoneCount { get; set; }
+        public float DotKillZoneRadius { get; set; }
+        public float DotKillZoneDuration { get; set; }
+        public float DotKillZoneTickInterval { get; set; }
+        public float DotKillZoneDamageRatio { get; set; }
         public float WaveStartDamageMultiplier { get; set; } = 1f;
         public float WaveStartDamageDuration { get; set; }
         public float WaveStartRestoreRatio { get; set; }

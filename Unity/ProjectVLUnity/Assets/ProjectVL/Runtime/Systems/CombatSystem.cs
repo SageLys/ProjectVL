@@ -4742,6 +4742,29 @@ namespace ProjectVL.Systems
                     0f);
             }
 
+            if (profile.DotKillZoneCount > 0
+                && profile.DotKillZoneRadius > 0f)
+            {
+                var sourceZones =
+                    new System.Collections.Generic.List<GroundZoneState>(
+                        state.GroundZones);
+                int count = Math.Min(
+                    profile.DotKillZoneCount,
+                    sourceZones.Count);
+                for (int index = 0; index < count; index++)
+                {
+                    state.GroundZones.Add(new GroundZoneState(
+                        sourceZones[index].Position,
+                        profile.DotKillZoneRadius,
+                        profile.DotKillZoneDuration,
+                        profile.DotKillZoneTickInterval,
+                        BaseDamage(state)
+                            * profile.DotKillZoneDamageRatio,
+                        0f,
+                        0f));
+                }
+            }
+
             if (profile.DotKillDamageMultiplier > 1f
                 && profile.DotKillDamageMaxStacks > 0)
             {
@@ -5522,8 +5545,18 @@ namespace ProjectVL.Systems
                 return;
             }
 
+            float dynamicMultiplier =
+                Math.Min(
+                    profile.BreachBurstThornsScaleCap,
+                    profile.ThornsRatio)
+                    * profile.BreachBurstThornsScale
+                + Math.Min(
+                    profile.BreachBurstShieldScaleCap,
+                    state.ShieldHits)
+                    * profile.BreachBurstShieldScale;
             float damage = BaseDamage(state)
-                * profile.BreachBurstDamageMultiplier;
+                * (profile.BreachBurstDamageMultiplier
+                    + dynamicMultiplier);
             DamageArea(
                 state,
                 TurretPosition,

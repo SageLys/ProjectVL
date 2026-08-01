@@ -161,6 +161,12 @@ namespace ProjectVL.Systems
                     profile.DecoyAuraRadius = Math.Max(
                         profile.DecoyAuraRadius,
                         Number(atom, "auraRadius"));
+                    profile.DecoyDamageRatio = Math.Max(
+                        profile.DecoyDamageRatio,
+                        Number(atom, "damageRatio"));
+                    profile.DecoyFireInterval = MaxPositive(
+                        profile.DecoyFireInterval,
+                        Number(atom, "fireInterval"));
                     break;
                 case "focusPriority":
                     if (binding.trigger == "onHit")
@@ -264,12 +270,9 @@ namespace ProjectVL.Systems
                     profile.MeteorCount = Math.Max(profile.MeteorCount, 1);
                     break;
                 case "novaOnBreak":
-                    profile.ShieldBreakDamage = Math.Max(
-                        profile.ShieldBreakDamage,
-                        Number(atom, "damage"));
-                    profile.ShieldBreakKnockback = Math.Max(
-                        profile.ShieldBreakKnockback,
-                        Number(atom, "knockbackDistance"));
+                    profile.ShieldBreakDamage = Number(atom, "damage");
+                    profile.ShieldBreakKnockback =
+                        Number(atom, "knockbackDistance");
                     break;
                 case "statBuff":
                     ApplyStatBuff(binding, atom, profile);
@@ -341,6 +344,20 @@ namespace ProjectVL.Systems
                     ratio);
                 profile.MagmaTickInterval = MaxPositive(
                     profile.MagmaTickInterval,
+                    tick);
+            }
+            else if (binding.trigger == "onHit"
+                && Text(binding.triggerParams, "requiresStatus")
+                    .Contains("dot"))
+            {
+                profile.SecondaryDotDamageRatio = Math.Max(
+                    profile.SecondaryDotDamageRatio,
+                    ratio);
+                profile.SecondaryDotDuration = Math.Max(
+                    profile.SecondaryDotDuration,
+                    duration);
+                profile.SecondaryDotTickInterval = MaxPositive(
+                    profile.SecondaryDotTickInterval,
                     tick);
             }
             else if (binding.trigger == "onHit")
@@ -423,6 +440,25 @@ namespace ProjectVL.Systems
                 profile.BreachBurstRadius = Math.Max(
                     profile.BreachBurstRadius,
                     radius);
+                string scaleSource = Text(atom, "scaleBy.source");
+                if (scaleSource == "thornsRatio")
+                {
+                    profile.BreachBurstThornsScale = Math.Max(
+                        profile.BreachBurstThornsScale,
+                        Number(atom, "scaleBy.perUnit"));
+                    profile.BreachBurstThornsScaleCap = Math.Max(
+                        profile.BreachBurstThornsScaleCap,
+                        Number(atom, "scaleBy.cap"));
+                }
+                else if (scaleSource == "shieldTier")
+                {
+                    profile.BreachBurstShieldScale = Math.Max(
+                        profile.BreachBurstShieldScale,
+                        Number(atom, "scaleBy.perUnit"));
+                    profile.BreachBurstShieldScaleCap = Math.Max(
+                        profile.BreachBurstShieldScaleCap,
+                        Number(atom, "scaleBy.cap"));
+                }
             }
             else if (required.Contains("dot"))
             {
@@ -461,6 +497,32 @@ namespace ProjectVL.Systems
             if (binding.trigger == "onHit")
             {
                 profile.DotAreaRadius = Math.Max(profile.DotAreaRadius, radius);
+            }
+            else if (binding.trigger == "onKill"
+                && Text(binding.triggerParams, "requiresSource") == "dot")
+            {
+                profile.DotKillZoneCount = Math.Max(
+                    profile.DotKillZoneCount,
+                    Math.Max(1, Integer(atom, "forEach.maxTargets")));
+                profile.DotKillZoneRadius = Math.Max(
+                    profile.DotKillZoneRadius,
+                    radius);
+                profile.DotKillZoneDuration = Math.Max(
+                    profile.DotKillZoneDuration,
+                    duration);
+                profile.DotKillZoneTickInterval = MaxPositive(
+                    profile.DotKillZoneTickInterval,
+                    Positive(atom, "tickInterval", 0.5f));
+                foreach (CompiledEffectAtomConfig child
+                    in atom.children ?? Array.Empty<CompiledEffectAtomConfig>())
+                {
+                    if (child.atom == "dot")
+                    {
+                        profile.DotKillZoneDamageRatio = Math.Max(
+                            profile.DotKillZoneDamageRatio,
+                            Number(child, "damageRatio"));
+                    }
+                }
             }
             else
             {
