@@ -224,8 +224,12 @@ namespace ProjectVL.Systems
         private Float2 RandomEdgePosition()
         {
             int side = Math.Min(3, (int)(_random.NextFloat() * 4f));
+            float bottomSpawnY = Math.Max(
+                70f,
+                _combat.canvas.height - Math.Max(0f, _waves.bottomSpawnInset));
             float horizontal = 35f + _random.NextFloat() * (_combat.canvas.width - 70f);
-            float vertical = 35f + _random.NextFloat() * (_combat.canvas.height - 70f);
+            float vertical = 35f
+                + _random.NextFloat() * Math.Max(0f, bottomSpawnY - 70f);
 
             switch (side)
             {
@@ -234,7 +238,7 @@ namespace ProjectVL.Systems
                 case 1:
                     return new Float2(_combat.canvas.width + _waves.spawnMargin, vertical);
                 case 2:
-                    return new Float2(horizontal, _combat.canvas.height + _waves.spawnMargin);
+                    return new Float2(horizontal, bottomSpawnY);
                 default:
                     return new Float2(-_waves.spawnMargin, vertical);
             }

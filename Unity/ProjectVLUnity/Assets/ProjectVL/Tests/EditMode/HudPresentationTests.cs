@@ -82,6 +82,23 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void ConfiguredLowerSpawnBoundaryMatchesArenaBottom()
+        {
+            var viewport = new Rect(
+                0f,
+                0f,
+                MobileHudLayout.ReferenceWidth,
+                MobileHudLayout.ReferenceHeight);
+            Rect arena = MobileHudLayout.ArenaRect(viewport);
+            CombatConfig combat = CombatConfigLoader.LoadDefault();
+            WavesConfig waves = GameConfigLoader.LoadWaves();
+
+            Assert.That(
+                combat.canvas.height - waves.bottomSpawnInset,
+                Is.EqualTo(arena.yMax).Within(0.001f));
+        }
+
+        [Test]
         public void CardDetailIncludesIdentityEvolutionAffixesAndCastability()
         {
             var card = new CardState(1, "pierce", 5);

@@ -141,6 +141,7 @@
     "autoReadyHighlight": true
   },
   "spawnMargin": 25,
+  "bottomSpawnInset": 226,
   "typeRoll": {
     "tankBase": 0.2,
     "tankPerWave": 0.025,

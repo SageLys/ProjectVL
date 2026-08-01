@@ -103,6 +103,29 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void LowerRegularAndEliteSpawnsStayAboveCardLoadout()
+        {
+            _state.BeginWave(1);
+            float expectedBottom =
+                _combat.canvas.height - _waves.bottomSpawnInset;
+
+            EnemyState regular = _factory.SpawnRegular(_state);
+            EnemyState elite = _factory.SpawnValidationElite(
+                _state,
+                new ValidationEnemyConfig
+                {
+                    type = "tank",
+                    hpMul = 1f,
+                    damageMul = 1f,
+                    speedMul = 1f
+                });
+
+            Assert.That(regular.Position.Y, Is.EqualTo(expectedBottom));
+            Assert.That(elite.Position.Y, Is.EqualTo(expectedBottom));
+            Assert.That(expectedBottom, Is.LessThan(_combat.canvas.height));
+        }
+
+        [Test]
         public void BossCurvesIntoContactAndDealsPulseDamage()
         {
             _state.BeginWave(1);
