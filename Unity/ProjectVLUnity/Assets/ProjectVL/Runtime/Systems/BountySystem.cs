@@ -548,6 +548,7 @@ namespace ProjectVL.Systems
             float offset =
                 (_random.NextFloat() - 0.5f) * _config.encounter.spawnSpread;
             float margin = _waves.spawnMargin;
+            float topSpawnY = TopSpawnY();
             float bottomSpawnY = BottomSpawnY();
             if (encounter.Side == BountySide.Top
                 || encounter.Side == BountySide.Bottom)
@@ -558,7 +559,7 @@ namespace ProjectVL.Systems
                         35f,
                         _combat.canvas.width - 35f),
                     encounter.Side == BountySide.Top
-                        ? -margin
+                        ? topSpawnY
                         : bottomSpawnY);
             }
 
@@ -568,7 +569,7 @@ namespace ProjectVL.Systems
                     : _combat.canvas.width + margin,
                 Clamp(
                     encounter.LastKillPosition.Y + offset,
-                    35f,
+                    topSpawnY + 35f,
                     bottomSpawnY - 35f));
         }
 
@@ -577,7 +578,14 @@ namespace ProjectVL.Systems
             float inset = Math.Max(
                 _config.visual.offerEdgeInset,
                 _config.visual.offerRadius + 2f);
+            float topSpawnY = TopSpawnY();
             float bottomSpawnY = BottomSpawnY();
+            float offerTopY = Math.Min(
+                bottomSpawnY,
+                topSpawnY + inset);
+            float offerBottomY = Math.Max(
+                offerTopY,
+                bottomSpawnY - inset);
             if (side == BountySide.Top || side == BountySide.Bottom)
             {
                 return new Float2(
@@ -585,23 +593,32 @@ namespace ProjectVL.Systems
                         + _random.NextFloat()
                         * Math.Max(0f, _combat.canvas.width - inset * 2f),
                     side == BountySide.Top
-                        ? inset
-                        : Math.Max(inset, bottomSpawnY - inset));
+                        ? offerTopY
+                        : offerBottomY);
             }
 
             return new Float2(
                 side == BountySide.Left
                     ? inset
                     : _combat.canvas.width - inset,
-                inset
+                offerTopY
                     + _random.NextFloat()
-                    * Math.Max(0f, bottomSpawnY - inset * 2f));
+                    * Math.Max(0f, offerBottomY - offerTopY));
+        }
+
+        private float TopSpawnY()
+        {
+            return Math.Max(
+                0f,
+                Math.Min(
+                    _combat.canvas.height - 70f,
+                    Math.Max(0f, _waves.topSpawnInset)));
         }
 
         private float BottomSpawnY()
         {
             return Math.Max(
-                70f,
+                TopSpawnY() + 70f,
                 _combat.canvas.height
                     - Math.Max(0f, _waves.bottomSpawnInset));
         }

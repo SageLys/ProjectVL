@@ -15,6 +15,7 @@ namespace ProjectVL.Config
         public StagePlanConfig stagePlan = new StagePlanConfig();
         public IntermissionConfig intermission = new IntermissionConfig();
         public float spawnMargin;
+        public float topSpawnInset = 106f;
         public float bottomSpawnInset = 226f;
         public TypeRollConfig typeRoll = new TypeRollConfig();
         public int[] bossWaves = Array.Empty<int>();

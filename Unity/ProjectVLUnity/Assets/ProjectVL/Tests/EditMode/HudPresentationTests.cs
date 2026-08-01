@@ -99,6 +99,22 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void ConfiguredUpperSpawnBoundaryMatchesArenaTop()
+        {
+            var viewport = new Rect(
+                0f,
+                0f,
+                MobileHudLayout.ReferenceWidth,
+                MobileHudLayout.ReferenceHeight);
+            Rect arena = MobileHudLayout.ArenaRect(viewport);
+            WavesConfig waves = GameConfigLoader.LoadWaves();
+
+            Assert.That(
+                waves.topSpawnInset,
+                Is.EqualTo(arena.yMin).Within(0.001f));
+        }
+
+        [Test]
         public void CardDetailIncludesIdentityEvolutionAffixesAndCastability()
         {
             var card = new CardState(1, "pierce", 5);

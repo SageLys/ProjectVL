@@ -112,6 +112,35 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void TopBountyOfferAndMembersStayBelowHealthBar()
+        {
+            var random = new ConstantRandomSource(0f);
+            var enemies = new EnemyFactory(
+                _combat,
+                GameConfigLoader.LoadEnemies(),
+                _waves,
+                random);
+            var bounties = new BountySystem(
+                GameConfigLoader.LoadBounty(),
+                _combat,
+                _waves,
+                enemies,
+                _cards,
+                _drops,
+                random);
+            BountyOfferState offer = bounties.CreateOffer(_state, false);
+
+            Assert.That(offer.Side, Is.EqualTo(BountySide.Top));
+            Assert.That(offer.Position.Y, Is.GreaterThan(_waves.topSpawnInset));
+            Assert.That(bounties.AcceptAt(_state, offer.Position), Is.True);
+            bounties.Step(_state, 1f);
+            Assert.That(
+                _state.Enemies,
+                Has.All.Matches<EnemyState>(
+                    enemy => enemy.Position.Y >= _waves.topSpawnInset));
+        }
+
+        [Test]
         public void RepeatedBountyOfferProtectsPreviousRewardType()
         {
             string first = _bounties.CreateOffer(

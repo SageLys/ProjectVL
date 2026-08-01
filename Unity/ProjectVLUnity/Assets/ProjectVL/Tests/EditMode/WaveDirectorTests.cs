@@ -126,6 +126,34 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void UpperRegularEliteAndBossSpawnsStayBelowHealthBar()
+        {
+            _state.BeginWave(1);
+            var factory = new EnemyFactory(
+                _combat,
+                _enemies,
+                _waves,
+                new ConstantRandomSource(0f));
+
+            EnemyState regular = factory.SpawnRegular(_state);
+            EnemyState elite = factory.SpawnValidationElite(
+                _state,
+                new ValidationEnemyConfig
+                {
+                    type = "tank",
+                    hpMul = 1f,
+                    damageMul = 1f,
+                    speedMul = 1f
+                });
+            EnemyState boss = factory.SpawnWaveBoss(_state);
+
+            Assert.That(regular.Position.Y, Is.EqualTo(_waves.topSpawnInset));
+            Assert.That(elite.Position.Y, Is.EqualTo(_waves.topSpawnInset));
+            Assert.That(boss.Position.Y, Is.EqualTo(_waves.topSpawnInset));
+            Assert.That(_waves.topSpawnInset, Is.GreaterThan(0f));
+        }
+
+        [Test]
         public void BossCurvesIntoContactAndDealsPulseDamage()
         {
             _state.BeginWave(1);
