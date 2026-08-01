@@ -1803,10 +1803,11 @@ namespace ProjectVL.Presentation
         }
     }
 
-    internal static class MobileHudLayout
+    public static class MobileHudLayout
     {
         public const float ReferenceWidth = 402f;
         public const float ReferenceHeight = 874f;
+        public const float LoadoutGap = 12f;
         private const float SafeTop = 62f;
         private const float SafeBottom = 34f;
         private const float SafeSide = 8f;
@@ -1847,7 +1848,7 @@ namespace ProjectVL.Presentation
                 viewport.width / ReferenceWidth,
                 viewport.height / ReferenceHeight);
             Rect arena = ArenaRect(viewport);
-            float y = arena.yMax + 3f * scale;
+            float y = arena.yMax + LoadoutGap * scale;
             return new Rect(
                 safe.x + 3f * scale,
                 y,

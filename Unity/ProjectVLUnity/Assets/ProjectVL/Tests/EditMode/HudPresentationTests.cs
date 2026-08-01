@@ -44,6 +44,25 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void LoadoutLeavesRequestedGapBelowArena()
+        {
+            var viewport = new Rect(
+                0f,
+                0f,
+                MobileHudLayout.ReferenceWidth,
+                MobileHudLayout.ReferenceHeight);
+
+            Rect arena = MobileHudLayout.ArenaRect(viewport);
+            Rect loadout = MobileHudLayout.LoadoutRect(viewport);
+            Rect safe = MobileHudLayout.SafeRect(viewport);
+
+            Assert.That(
+                loadout.y - arena.yMax,
+                Is.EqualTo(MobileHudLayout.LoadoutGap).Within(0.001f));
+            Assert.That(loadout.yMax, Is.LessThanOrEqualTo(safe.yMax));
+        }
+
+        [Test]
         public void CardDetailIncludesIdentityEvolutionAffixesAndCastability()
         {
             var card = new CardState(1, "pierce", 5);
