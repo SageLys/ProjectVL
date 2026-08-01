@@ -17,6 +17,9 @@ namespace ProjectVL.Presentation
         private GUIStyle _mainMenuTitleStyle;
         private GUIStyle _mainMenuButtonStyle;
         private GUIStyle _mainMenuOptionStyle;
+        private GUIStyle _choiceButtonStyle;
+        private GUIStyle _cardSlotStyle;
+        private GUIStyle _compactLeftStyle;
         private readonly MainMenuState _mainMenu = new MainMenuState();
         private Vector2 _difficultyScroll;
         private Rect _physicalViewport;
@@ -1109,8 +1112,8 @@ namespace ProjectVL.Presentation
                         panel.y + 98f,
                         width,
                         126f),
-                    $"{GodName(god.id)}\n\n{GodTheme(god.id)}",
-                    _buttonStyle))
+                    $"{GodName(god.id)}\n{GodTheme(god.id)}",
+                    _choiceButtonStyle))
                 {
                     _controller.ChooseGod(index);
                 }
@@ -1136,8 +1139,8 @@ namespace ProjectVL.Presentation
 
             GUI.Label(
                 new Rect(panel.x + padding, panel.y + 2f, contentWidth, 17f),
-                "装备  ·  放入 3★ 以上卡牌",
-                _leftStyle);
+                "装备 · 放入3★以上卡牌",
+                _compactLeftStyle);
             float equipmentY = panel.y + 19f;
             for (int i = 0; i < state.Equipment.Length && i < 3; i++)
             {
@@ -1155,8 +1158,8 @@ namespace ProjectVL.Presentation
             float handLabelY = equipmentY + 42f;
             GUI.Label(
                 new Rect(panel.x + padding, handLabelY, contentWidth, 17f),
-                $"手牌 · 点击卡牌移动或交换 · {_controller.LastCardAction}",
-                _leftStyle);
+                "手牌 · 点击或拖动进行移动/交换",
+                _compactLeftStyle);
 
             float firstRowY = handLabelY + 17f;
             for (int i = 0; i < state.Hand.Length && i < 4; i++)
@@ -1286,7 +1289,7 @@ namespace ProjectVL.Presentation
                 GUI.backgroundColor = new Color(0.18f, 0.32f, 0.45f);
             }
 
-            if (GUI.Button(rect, text, _buttonStyle))
+            if (GUI.Button(rect, text, _cardSlotStyle))
             {
                 _controller.SelectCardSlot(kind, index);
             }
@@ -1776,6 +1779,26 @@ namespace ProjectVL.Presentation
                 fontSize = 17,
                 alignment = TextAnchor.MiddleCenter,
                 normal = { textColor = Color.white }
+            };
+            _choiceButtonStyle = new GUIStyle(_buttonStyle)
+            {
+                fontSize = 12,
+                alignment = TextAnchor.MiddleCenter,
+                wordWrap = true,
+                padding = new RectOffset(5, 5, 5, 5)
+            };
+            _cardSlotStyle = new GUIStyle(_buttonStyle)
+            {
+                fontSize = 11,
+                alignment = TextAnchor.MiddleCenter,
+                wordWrap = true,
+                padding = new RectOffset(3, 3, 2, 2)
+            };
+            _compactLeftStyle = new GUIStyle(_leftStyle)
+            {
+                fontSize = 11,
+                wordWrap = false,
+                clipping = TextClipping.Clip
             };
         }
     }
