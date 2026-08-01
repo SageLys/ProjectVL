@@ -33,6 +33,10 @@ namespace ProjectVL.Core
             new Dictionary<int, int>();
         public int ConsumedCards { get; internal set; }
         public int Merges { get; internal set; }
+        public int DropPickups { get; internal set; }
+        public Float2 LastDropPickupPosition { get; internal set; }
+        public int EquipmentProcessedMerges { get; internal set; }
+        public int EquipmentProcessedPickups { get; internal set; }
         public float RunDamageAdd { get; internal set; }
         public float RunFireRateAdd { get; internal set; }
         public float RunRangeAdd { get; internal set; }

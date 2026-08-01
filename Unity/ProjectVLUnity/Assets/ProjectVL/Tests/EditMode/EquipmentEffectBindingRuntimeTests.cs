@@ -279,5 +279,102 @@ namespace ProjectVL.Tests
                 Assert.That(summon.AuraEffects, Has.Length.EqualTo(1));
             }
         }
+
+        [Test]
+        public void PickupSummonUsesCollectedDropPosition()
+        {
+            CombatConfig combat = CombatConfigLoader.LoadDefault();
+            GameState state = GameStateFactory.Create(combat);
+            var system = new CombatSystem(
+                combat,
+                GameConfigLoader.LoadEnemies());
+            state.Equipment[0] = state.CreateCard("goldenGrove", 6);
+            var drops = new DropSystem(
+                new EconomyConfig(),
+                new ConstantRandomSource(0.5f));
+            GroundDropState drop = drops.SpawnTestDrop(
+                state,
+                new Float2(210f, 330f));
+            Assert.That(
+                drops.CollectNearest(state, drop.Position),
+                Is.EqualTo(DropCollectResult.Collected));
+
+            system.StepPassives(state, 0f);
+
+            Assert.That(state.EquipmentSummons, Has.Count.EqualTo(1));
+            Assert.That(state.EquipmentSummons[0].Kind, Is.EqualTo("goldenTree"));
+            Assert.That(
+                state.EquipmentSummons[0].Position,
+                Is.EqualTo(drop.Position));
+            Assert.That(
+                state.EquipmentSummons[0].IntervalEffects,
+                Has.Length.EqualTo(2));
+        }
+
+        [Test]
+        public void WaveStartFanoutTargetsAuthoredMaximum()
+        {
+            CombatConfig combat = CombatConfigLoader.LoadDefault();
+            GameState state = GameStateFactory.Create(combat);
+            var system = new CombatSystem(
+                combat,
+                GameConfigLoader.LoadEnemies());
+            state.Equipment[0] = state.CreateCard("pyreBrand", 6);
+            for (int index = 0; index < 3; index++)
+            {
+                state.Enemies.Add(new EnemyState(
+                    index + 1,
+                    EnemyKind.Normal,
+                    new Float2(200f + index * 20f, 260f),
+                    100f,
+                    10f,
+                    8f,
+                    1f));
+            }
+            state.BeginWave(1);
+
+            system.StepPassives(state, 0f);
+
+            Assert.That(
+                state.Enemies.Count(item => item.DotRemaining > 0f),
+                Is.EqualTo(2));
+            Assert.That(
+                state.Enemies.Count(item => item.FocusPriorityRemaining > 0f),
+                Is.EqualTo(2));
+        }
+
+        [Test]
+        public void PassiveAuraBecomesPersistentNestedZone()
+        {
+            CombatConfig combat = CombatConfigLoader.LoadDefault();
+            GameState state = GameStateFactory.Create(combat);
+            var system = new CombatSystem(
+                combat,
+                GameConfigLoader.LoadEnemies());
+            state.Equipment[0] = state.CreateCard("frostDew", 6);
+            state.BeginWave(1);
+
+            system.StepPassives(state, 0f);
+
+            Assert.That(state.GroundZones, Has.Count.EqualTo(1));
+            Assert.That(state.GroundZones[0].Radius, Is.EqualTo(130f));
+            Assert.That(state.GroundZones[0].LifeRemaining, Is.EqualTo(999f));
+            Assert.That(state.GroundZones[0].SlowRatio, Is.EqualTo(0.25f));
+        }
+
+        private sealed class ConstantRandomSource : IRandomSource
+        {
+            private readonly float _value;
+
+            public ConstantRandomSource(float value)
+            {
+                _value = value;
+            }
+
+            public float NextFloat()
+            {
+                return _value;
+            }
+        }
     }
 }

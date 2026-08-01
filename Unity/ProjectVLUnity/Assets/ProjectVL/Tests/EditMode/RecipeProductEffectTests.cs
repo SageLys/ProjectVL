@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using System.Linq;
 using NUnit.Framework;
 using ProjectVL.Config;
 using ProjectVL.Core;
@@ -82,7 +83,15 @@ namespace ProjectVL.Tests
                 lattice.PierceDamageRetention,
                 Is.EqualTo(0.85f).Within(0.001f));
             Assert.That(lattice.ChainPulseInterval, Is.EqualTo(2f));
-            Assert.That(rime.AuraSlowRatio, Is.EqualTo(0.3f));
+            CompiledEffectAtomConfig rimeAura =
+                RecipeProductEffectCatalog.Default.Find("thunderRime")
+                    .bindings[0].effects[0];
+            Assert.That(rimeAura.atom, Is.EqualTo("aura"));
+            Assert.That(rimeAura.children[0].atom, Is.EqualTo("slow"));
+            Assert.That(
+                rimeAura.children[0].Params.Single(item => item.key == "ratio")
+                    .number,
+                Is.EqualTo(0.3f));
             Assert.That(bastion.ShieldHits, Is.EqualTo(3));
             Assert.That(flow.DropRateMultiplier, Is.EqualTo(2f));
             Assert.That(

@@ -2766,6 +2766,7 @@ namespace ProjectVL.Systems
                 InitializeWaveEffects(state, profile);
             }
             ExecuteCompiledIntervalZones(state, deltaTime);
+            ProcessCompiledEquipmentEvents(state);
             StepCompiledEquipmentSummons(state, deltaTime);
 
             if (state.FireRateBuffRemaining > 0f)
@@ -4096,6 +4097,7 @@ namespace ProjectVL.Systems
             state.EquipmentSummons.Clear();
             state.EquipmentBindingClocks.Clear();
             ExecuteCompiledWaveStartZones(state);
+            ExecuteCompiledPassiveAuras(state);
             state.ScorchAuraTickRemaining =
                 profile.ScorchAuraTickInterval;
             state.SanctumPulseRemaining =
@@ -4169,6 +4171,7 @@ namespace ProjectVL.Systems
                     state,
                     "onWaveStart"))
             {
+                ExecuteCompiledBindingFanouts(state, source);
                 foreach (CompiledEffectAtomConfig atom
                     in source.Binding.effects
                         ?? Array.Empty<CompiledEffectAtomConfig>())
@@ -4219,7 +4222,8 @@ namespace ProjectVL.Systems
                 if (!HasNestedGroundZone(source.Binding))
                 {
                     if (!HasNestedCharge(source.Binding)
-                        && !HasNestedSummon(source.Binding))
+                        && !HasNestedSummon(source.Binding)
+                        && !HasNestedFanout(source.Binding))
                         continue;
                 }
 
@@ -4238,6 +4242,7 @@ namespace ProjectVL.Systems
                 {
                     ExecuteCompiledBindingZones(state, source);
                     ExecuteCompiledBindingSummons(state, source);
+                    ExecuteCompiledBindingFanouts(state, source);
                     ExecuteCompiledBindingCharges(
                         state,
                         source,
@@ -4320,6 +4325,11 @@ namespace ProjectVL.Systems
                     state,
                     source,
                     hitPosition);
+                ExecuteCompiledBindingFanouts(
+                    state,
+                    source,
+                    hitPosition,
+                    enemy);
             }
         }
 
@@ -4347,6 +4357,11 @@ namespace ProjectVL.Systems
                     enemy,
                     damageSource,
                     false);
+                ExecuteCompiledBindingFanouts(
+                    state,
+                    source,
+                    enemy.Position,
+                    enemy);
 
                 if (!HasNestedGroundZone(source.Binding))
                     continue;
@@ -4391,6 +4406,7 @@ namespace ProjectVL.Systems
                 in EquipmentEffectBindingRuntime.Resolve(state, "onBreach"))
             {
                 ExecuteCompiledBindingSummons(state, source, point);
+                ExecuteCompiledBindingFanouts(state, source, point, null);
                 ExecuteCompiledBindingCharges(
                     state,
                     source,
@@ -4399,6 +4415,112 @@ namespace ProjectVL.Systems
                     null,
                     DamageSource.Direct,
                     shieldAbsorbed);
+            }
+        }
+
+        private void ProcessCompiledEquipmentEvents(GameState state)
+        {
+            while (state.EquipmentProcessedPickups < state.DropPickups)
+            {
+                foreach (RuntimeEquipmentBinding source
+                    in EquipmentEffectBindingRuntime.Resolve(
+                        state,
+                        "onPickup"))
+                {
+                    ExecuteCompiledBindingSummons(
+                        state,
+                        source,
+                        state.LastDropPickupPosition);
+                    ExecuteCompiledBindingFanouts(
+                        state,
+                        source,
+                        state.LastDropPickupPosition,
+                        null);
+                }
+                state.EquipmentProcessedPickups++;
+            }
+
+            while (state.EquipmentProcessedMerges < state.Merges)
+            {
+                foreach (RuntimeEquipmentBinding source
+                    in EquipmentEffectBindingRuntime.Resolve(
+                        state,
+                        "onMerge"))
+                {
+                    ExecuteCompiledBindingSummons(state, source);
+                    ExecuteCompiledBindingFanouts(
+                        state,
+                        source,
+                        TurretPosition,
+                        null);
+                }
+                state.EquipmentProcessedMerges++;
+            }
+        }
+
+        private void ExecuteCompiledPassiveAuras(GameState state)
+        {
+            foreach (RuntimeEquipmentBinding source
+                in EquipmentEffectBindingRuntime.Resolve(state, "passive"))
+            {
+                foreach (CompiledEffectAtomConfig atom
+                    in source.Binding.effects
+                        ?? Array.Empty<CompiledEffectAtomConfig>())
+                {
+                    if (atom?.atom != "aura"
+                        || atom.children == null
+                        || atom.children.Length == 0)
+                    {
+                        continue;
+                    }
+                    EnemyState target = FindTarget(state);
+                    Float2 point = EffectText(atom, "follow")
+                            == "densestCluster"
+                        && target != null
+                            ? target.Position
+                            : TurretPosition;
+                    var tier = new CompiledConsumableTierConfig
+                    {
+                        radius = EffectNumber(atom, "radius", AttackRange(state)),
+                        duration = EffectNumber(atom, "duration", 999f),
+                        effects = new[] { atom }
+                    };
+                    CastCompiledGroundZone(state, tier, atom, point);
+                }
+            }
+        }
+
+        private void ExecuteCompiledBindingFanouts(
+            GameState state,
+            RuntimeEquipmentBinding source,
+            Float2? suppliedPoint = null,
+            EnemyState target = null)
+        {
+            foreach (CompiledEffectAtomConfig atom
+                in source.Binding.effects
+                    ?? Array.Empty<CompiledEffectAtomConfig>())
+            {
+                if (atom?.children == null
+                    || atom.children.Length == 0
+                    || string.IsNullOrEmpty(
+                        EffectText(atom, "forEach.set.kind")))
+                {
+                    continue;
+                }
+                Float2 point = suppliedPoint ?? TurretPosition;
+                var tier = new CompiledConsumableTierConfig
+                {
+                    radius = EffectNumber(atom, "radius", AttackRange(state)),
+                    duration = EffectNumber(atom, "duration", 1f),
+                    effects = new[] { atom }
+                };
+                ExecuteCompiledConsumableAtom(
+                    state,
+                    source.Card.Type,
+                    tier,
+                    atom,
+                    point,
+                    target);
             }
         }
 
@@ -4739,6 +4861,23 @@ namespace ProjectVL.Systems
                 if (atom?.atom == "summon"
                     && atom.children != null
                     && atom.children.Length > 0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static bool HasNestedFanout(
+            CompiledEffectBindingConfig binding)
+        {
+            foreach (CompiledEffectAtomConfig atom
+                in binding.effects ?? Array.Empty<CompiledEffectAtomConfig>())
+            {
+                if (atom?.children != null
+                    && atom.children.Length > 0
+                    && !string.IsNullOrEmpty(
+                        EffectText(atom, "forEach.set.kind")))
                 {
                     return true;
                 }

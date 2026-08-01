@@ -318,6 +318,8 @@ namespace ProjectVL.Systems
             }
 
             state.GroundDrops.Remove(nearest);
+            state.DropPickups++;
+            state.LastDropPickupPosition = nearest.Position;
             state.EmitTelemetry(new TelemetryEventRecord
             {
                 type = "pickup",

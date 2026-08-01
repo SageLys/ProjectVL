@@ -49,9 +49,15 @@ namespace ProjectVL.Systems
                 return false;
             if (atom.atom == "charge" || atom.atom == "summon")
                 return true;
-            return atom.atom == "groundZone"
-                && (binding.trigger == "onWaveStart"
-                    || binding.trigger == "interval");
+            if (atom.atom == "aura")
+                return true;
+            foreach (CompiledEffectParamConfig parameter
+                in atom.Params ?? Array.Empty<CompiledEffectParamConfig>())
+            {
+                if (parameter?.key == "forEach.set.kind")
+                    return true;
+            }
+            return atom.atom == "groundZone";
         }
 
         private static void ApplyAtom(
