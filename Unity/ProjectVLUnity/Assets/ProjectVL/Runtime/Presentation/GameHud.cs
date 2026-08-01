@@ -595,42 +595,31 @@ namespace ProjectVL.Presentation
         private void DrawTopBar()
         {
             GameState state = _controller.State;
-            Rect viewport = MobileHudLayout.SafeRect(ViewportRect());
-            Rect bar = new Rect(
-                viewport.x + 3f,
-                viewport.y + 3f,
-                viewport.width - 6f,
-                38f);
-            GUI.Box(bar, GUIContent.none);
+            HudTopBarLayout layout =
+                MobileHudLayout.TopBarLayout(ViewportRect());
+            GUI.Box(layout.Bar, GUIContent.none);
 
-            float contentX = bar.x + 4f;
-            float hpWidth = bar.width * 0.27f;
+            GUI.Label(
+                layout.HpLabel,
+                $"生命 {state.Hp:0}/{state.MaxHp:0}",
+                _compactLeftStyle);
             DrawProgressBar(
-                new Rect(contentX, bar.y + 3f, hpWidth, 7f),
+                layout.HpBar,
                 state.MaxHp <= 0f ? 0f : state.Hp / state.MaxHp,
                 new Color(0.95f, 0.35f, 0.58f));
             GUI.Label(
-                new Rect(contentX, bar.y + 11f, hpWidth, 22f),
-                $"生命 {state.Hp:0}/{state.MaxHp:0}",
-                _leftStyle);
-
-            float waveWidth = bar.width * 0.16f;
-            float waveX = contentX + hpWidth;
-            GUI.Label(
-                new Rect(waveX, bar.y, waveWidth, 34f),
+                layout.WaveLabel,
                 $"波次 {state.Wave}/{_controller.TotalWaves}",
-                _hudStyle);
+                _compactLeftStyle);
 
             float rewardSpan = Mathf.Max(1f, state.RewardThreshold);
             float rewardPoints = Mathf.Max(0f, state.RewardPoints);
-            float levelX = waveX + waveWidth;
-            float levelWidth = bar.width * 0.22f;
             GUI.Label(
-                new Rect(levelX, bar.y, levelWidth, 19f),
-                $"欢愉蓄力 · {rewardPoints:0.#}/{rewardSpan:0.#}",
-                _leftStyle);
+                layout.RewardLabel,
+                $"欢愉 {rewardPoints:0.#}/{rewardSpan:0.#}",
+                _compactLeftStyle);
             DrawProgressBar(
-                new Rect(levelX, bar.y + 25f, levelWidth, 6f),
+                layout.RewardBar,
                 rewardPoints / rewardSpan,
                 new Color(0.18f, 0.55f, 0.9f));
         }
@@ -639,7 +628,7 @@ namespace ProjectVL.Presentation
         {
             GameState state = _controller.State;
             Rect viewport = MobileHudLayout.SafeRect(ViewportRect());
-            float x = viewport.x + viewport.width * 0.65f;
+            float x = MobileHudLayout.ControlStartX(ViewportRect());
             float width = viewport.xMax - 4f - x;
             float speedWidth = width * 0.28f;
             float pauseWidth = width * 0.31f;
@@ -1824,6 +1813,52 @@ namespace ProjectVL.Presentation
                 viewport.height - (SafeTop + SafeBottom) * scale);
         }
 
+        public static float ControlStartX(Rect viewport)
+        {
+            Rect safe = SafeRect(viewport);
+            return safe.x + safe.width * 0.65f;
+        }
+
+        public static HudTopBarLayout TopBarLayout(Rect viewport)
+        {
+            Rect safe = SafeRect(viewport);
+            Rect bar = new Rect(
+                safe.x + 3f,
+                safe.y + 3f,
+                safe.width - 6f,
+                38f);
+            float contentX = bar.x + 4f;
+            float contentRight = ControlStartX(viewport) - 5f;
+            const float labelWidth = 78f;
+            const float waveWidth = 61f;
+            const float gap = 4f;
+            float hpBarWidth = Mathf.Max(
+                48f,
+                contentRight - contentX
+                    - labelWidth - waveWidth - gap * 2f);
+            return new HudTopBarLayout(
+                bar,
+                new Rect(contentX, bar.y + 1f, labelWidth, 18f),
+                new Rect(
+                    contentX + labelWidth + gap,
+                    bar.y + 7f,
+                    hpBarWidth,
+                    7f),
+                new Rect(
+                    contentX + labelWidth + gap + hpBarWidth + gap,
+                    bar.y + 1f,
+                    waveWidth,
+                    18f),
+                new Rect(contentX, bar.y + 19f, labelWidth, 18f),
+                new Rect(
+                    contentX + labelWidth + gap,
+                    bar.y + 26f,
+                    Mathf.Max(
+                        48f,
+                        contentRight - contentX - labelWidth - gap),
+                    6f));
+        }
+
         public static Rect ArenaRect(Rect viewport)
         {
             Rect safe = SafeRect(viewport);
@@ -1854,6 +1889,32 @@ namespace ProjectVL.Presentation
                 y,
                 safe.width - 6f * scale,
                 safe.yMax - y - 3f * scale);
+        }
+    }
+
+    public readonly struct HudTopBarLayout
+    {
+        public Rect Bar { get; }
+        public Rect HpLabel { get; }
+        public Rect HpBar { get; }
+        public Rect WaveLabel { get; }
+        public Rect RewardLabel { get; }
+        public Rect RewardBar { get; }
+
+        public HudTopBarLayout(
+            Rect bar,
+            Rect hpLabel,
+            Rect hpBar,
+            Rect waveLabel,
+            Rect rewardLabel,
+            Rect rewardBar)
+        {
+            Bar = bar;
+            HpLabel = hpLabel;
+            HpBar = hpBar;
+            WaveLabel = waveLabel;
+            RewardLabel = rewardLabel;
+            RewardBar = rewardBar;
         }
     }
 

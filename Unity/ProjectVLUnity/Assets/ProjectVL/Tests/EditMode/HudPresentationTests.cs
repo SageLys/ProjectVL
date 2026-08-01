@@ -63,6 +63,25 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void TopBarStacksRewardProgressBelowHealth()
+        {
+            var viewport = new Rect(
+                0f,
+                0f,
+                MobileHudLayout.ReferenceWidth,
+                MobileHudLayout.ReferenceHeight);
+            HudTopBarLayout layout = MobileHudLayout.TopBarLayout(viewport);
+            float controlsX = MobileHudLayout.ControlStartX(viewport);
+
+            Assert.That(layout.HpLabel.xMax, Is.LessThan(layout.HpBar.xMin));
+            Assert.That(layout.RewardBar.yMin, Is.GreaterThan(layout.HpBar.yMax));
+            Assert.That(layout.RewardBar.xMax, Is.LessThanOrEqualTo(controlsX));
+            Assert.That(layout.WaveLabel.xMax, Is.LessThanOrEqualTo(controlsX));
+            Assert.That(layout.Bar.Contains(layout.HpBar.min), Is.True);
+            Assert.That(layout.Bar.Contains(layout.RewardBar.max), Is.True);
+        }
+
+        [Test]
         public void CardDetailIncludesIdentityEvolutionAffixesAndCastability()
         {
             var card = new CardState(1, "pierce", 5);
