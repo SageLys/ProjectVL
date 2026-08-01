@@ -192,6 +192,9 @@ namespace ProjectVL.Presentation
             const float buttonX = 69f;
             const float buttonWidth = 264f;
             const float buttonHeight = 58f;
+            bool previousEnabled = GUI.enabled;
+            GUI.enabled = previousEnabled
+                && !_mainMenu.DifficultyPromptVisible;
             if (GUI.Button(
                 new Rect(buttonX, 288f, buttonWidth, buttonHeight),
                 "进入游戏",
@@ -225,6 +228,7 @@ namespace ProjectVL.Presentation
                 new Rect(69f, codexY + 63f, 264f, 24f),
                 "功能预留",
                 _hudStyle);
+            GUI.enabled = previousEnabled;
 
             if (_mainMenu.DifficultyPromptVisible)
             {

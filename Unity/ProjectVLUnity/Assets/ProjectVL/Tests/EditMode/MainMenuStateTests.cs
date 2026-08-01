@@ -17,6 +17,18 @@ namespace ProjectVL.Tests
             Assert.That(menu.DifficultyPromptVisible, Is.True);
         }
 
+        [Test]
+        public void DifficultyPromptCanBeDismissed()
+        {
+            var menu = new MainMenuState();
+            menu.RequestStart();
+
+            menu.DismissDifficultyPrompt();
+
+            Assert.That(menu.DifficultyPromptVisible, Is.False);
+            Assert.That(menu.SelectedDifficulty, Is.Null);
+        }
+
         [TestCase(0, DifficultyId.Relaxed, "轻松")]
         [TestCase(1, DifficultyId.Standard, "标准")]
         [TestCase(2, DifficultyId.Hard, "困难")]
