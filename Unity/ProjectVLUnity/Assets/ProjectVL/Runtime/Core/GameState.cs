@@ -139,6 +139,18 @@ namespace ProjectVL.Core
         public Dictionary<string, List<string>> RosterByGod { get; } =
             new Dictionary<string, List<string>>();
         public List<string> RunRoster { get; } = new List<string>();
+        public List<string> CompatibleRecipeIds { get; } =
+            new List<string>();
+        public List<string> ReadyRecipeIds { get; } =
+            new List<string>();
+        public string DirectedRecipeId { get; internal set; }
+        public bool RecipeAssistClosed { get; internal set; }
+        public int RecipeAssistBudgetUsed { get; internal set; }
+        public int? FirstReadyRecipeWave { get; internal set; }
+        public Dictionary<string, int> RecipeAssistCorrections { get; } =
+            new Dictionary<string, int>();
+        public HashSet<int> RecipeAssistProcessedCheckpoints { get; } =
+            new HashSet<int>();
         public List<string> ActiveCardPool { get; } = new List<string>();
         public List<string> PreviousActiveCardPool { get; } =
             new List<string>();

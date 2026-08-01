@@ -249,13 +249,15 @@ namespace ProjectVL.Presentation
                 recipes,
                 cardAffixSystem,
                 economy.evolution,
-                cardCatalog);
+                cardCatalog,
+                economy.mergeCopies);
             var difficultySystem =
                 new DifficultySystem(difficulty, waves.totalWaves);
             var cardPoolSystem = new CardPoolSystem(
                 random,
                 economy,
-                cardCatalog);
+                cardCatalog,
+                recipes);
             _godPoolSystem = new GodPoolSystem(gods, random);
             _cardInventory = new CardInventorySystem(
                 economy,
@@ -370,6 +372,8 @@ namespace ProjectVL.Presentation
         {
             HandleKeyboard();
             HandleDropPickup();
+            _recipeSystem?.RefreshState(State);
+            _recipeSystem?.TryGrantMaterialAssistance(State);
             _simulation.AdvanceFrame(Time.unscaledDeltaTime);
             _presenter.Sync();
         }

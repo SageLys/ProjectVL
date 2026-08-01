@@ -242,6 +242,66 @@ namespace ProjectVL.Tests
             Assert.That(_state.CompletedRecipes, Has.Count.EqualTo(2));
         }
 
+        [Test]
+        public void FrozenRosterDefinesCompatibleRecipePool()
+        {
+            _state.RunRoster.Add("meteor");
+            _state.RunRoster.Add("pierce");
+
+            _system.RefreshState(_state);
+
+            Assert.That(
+                _state.CompatibleRecipeIds,
+                Is.EqualTo(new[] { "r_meteor_pierce" }));
+        }
+
+        [Test]
+        public void DirectorChoosesCompatibleRecipeDeterministically()
+        {
+            EconomyConfig economy = GameConfigLoader.LoadEconomy();
+            _system = new RecipeSystem(
+                _recipes,
+                null,
+                economy.evolution);
+            _state.RunRoster.Add("meteor");
+            _state.RunRoster.Add("pierce");
+            _state.BeginWave(4);
+            AddResolvedCard("meteor", 3, 0);
+
+            _system.RefreshState(_state);
+
+            Assert.That(
+                _state.DirectedRecipeId,
+                Is.EqualTo("r_meteor_pierce"));
+            Assert.That(_state.RecipeAssistClosed, Is.False);
+        }
+
+        [Test]
+        public void MaterialAssistanceCompletesMinimumMergePair()
+        {
+            EconomyConfig economy = GameConfigLoader.LoadEconomy();
+            _system = new RecipeSystem(
+                _recipes,
+                null,
+                economy.evolution,
+                CardCatalog.Default,
+                economy.mergeCopies);
+            _state.RunRoster.Add("meteor");
+            _state.RunRoster.Add("pierce");
+            _state.BeginWave(6);
+            _state.Hand[0] = CreateResolvedCard("meteor", 1);
+
+            bool granted = _system.TryGrantMaterialAssistance(_state);
+
+            Assert.That(granted, Is.True);
+            Assert.That(_state.RecipeAssistBudgetUsed, Is.EqualTo(1));
+            Assert.That(
+                _state.RecipeAssistCorrections["meteor"],
+                Is.EqualTo(1));
+            Assert.That(_state.Hand[0].Type, Is.EqualTo("meteor"));
+            Assert.That(_state.Hand[0].Star, Is.EqualTo(2));
+        }
+
         private void AddResolvedCard(string type, int star, int slot)
         {
             _state.Hand[slot] = CreateResolvedCard(type, star);

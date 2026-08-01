@@ -157,6 +157,30 @@ namespace ProjectVL.Tests
         }
 
         [Test]
+        public void DirectedRecipeBuildRolePrioritizesMissingMaterial()
+        {
+            EconomyConfig economy = GameConfigLoader.LoadEconomy();
+            _cards = new CardPoolSystem(
+                new ConstantRandomSource(0f),
+                economy,
+                CardCatalog.Default,
+                GameConfigLoader.LoadEvolutionRecipes());
+            SetActivePool("meteor", "pierce");
+            _state.RunRoster.Add("meteor");
+            _state.RunRoster.Add("pierce");
+            _state.BeginWave(4);
+            _state.Hand[0] = _state.CreateCard("meteor", 4);
+            new RecipeSystem(
+                GameConfigLoader.LoadEvolutionRecipes(),
+                null,
+                economy.evolution).RefreshState(_state);
+
+            string selected = _cards.SelectBuildType(_state);
+
+            Assert.That(selected, Is.EqualTo("pierce"));
+        }
+
+        [Test]
         public void PivotSelectionAvoidsTwoMostCommittedCards()
         {
             SetActivePool("pierce", "chainLightning", "frost");

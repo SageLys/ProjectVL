@@ -11,17 +11,23 @@ namespace ProjectVL.Systems
         private readonly NormalDropTypePolicyConfig _dropPolicy;
         private readonly int _equipThreshold;
         private readonly CardCatalog _catalog;
+        private readonly EconomyEvolutionConfig _evolution;
+        private readonly EvolutionRecipesConfig _recipes;
 
         public CardPoolSystem(
             IRandomSource random,
             EconomyConfig economy = null,
-            CardCatalog catalog = null)
+            CardCatalog catalog = null,
+            EvolutionRecipesConfig recipes = null)
         {
             _random = random ?? throw new ArgumentNullException(nameof(random));
             _dropPolicy = economy?.normalDropTypePolicy
                 ?? new NormalDropTypePolicyConfig();
             _equipThreshold = economy?.equipThreshold ?? 3;
             _catalog = catalog ?? CardCatalog.Default;
+            _evolution = economy?.evolution
+                ?? new EconomyEvolutionConfig();
+            _recipes = recipes ?? new EvolutionRecipesConfig();
         }
 
         public static bool IsPlayable(string cardType)
@@ -619,9 +625,15 @@ namespace ProjectVL.Systems
                 float affinity = includeAffinity
                     ? CalculateAffinityScore(state, type)
                     : 0f;
+                float commitment = CalculateCommitmentScore(state, type);
+                if (includeAffinity
+                    && IsDirectedRecipeMaterial(state, type))
+                {
+                    commitment = Math.Max(0f, 16f - commitment);
+                }
                 result.Add(new ScoredCard(
                     type,
-                    CalculateCommitmentScore(state, type) + affinity,
+                    commitment + affinity,
                     affinity));
             }
 
@@ -849,21 +861,26 @@ namespace ProjectVL.Systems
             GameState state,
             List<string> target)
         {
+            int limit = 3 + Math.Max(0, _evolution.recipeProtectionSlots);
+            foreach (string material in DirectedRecipeMaterials(state))
+            {
+                AddUnique(target, material, limit);
+            }
             foreach (CardState card in state.Equipment)
             {
-                AddProtectedCard(state, target, card);
+                AddProtectedCard(state, target, card, limit);
             }
 
             foreach (CardState card in state.Hand)
             {
-                if (target.Count >= 3)
+                if (target.Count >= limit)
                 {
                     return;
                 }
 
                 if (card != null && card.Star >= 2)
                 {
-                    AddProtectedCard(state, target, card);
+                    AddProtectedCard(state, target, card, limit);
                 }
             }
         }
@@ -871,16 +888,68 @@ namespace ProjectVL.Systems
         private static void AddProtectedCard(
             GameState state,
             List<string> target,
-            CardState card)
+            CardState card,
+            int limit)
         {
             if (card != null
                 && IsPlayable(card.Type)
                 && state.RunRoster.Contains(card.Type)
                 && !target.Contains(card.Type)
-                && target.Count < 3)
+                && target.Count < limit)
             {
                 target.Add(card.Type);
             }
+        }
+
+        private bool IsDirectedRecipeMaterial(
+            GameState state,
+            string cardType)
+        {
+            foreach (string material in DirectedRecipeMaterials(state))
+            {
+                if (material == cardType)
+                    return true;
+            }
+            return false;
+        }
+
+        private IEnumerable<string> DirectedRecipeMaterials(GameState state)
+        {
+            if (state == null
+                || state.RecipeAssistClosed
+                || state.Wave < AssistWindowStart()
+                || state.Wave > AssistWindowEnd()
+                || string.IsNullOrEmpty(state.DirectedRecipeId))
+            {
+                yield break;
+            }
+            foreach (EvolutionRecipeConfig recipe
+                in _recipes.recipes ?? Array.Empty<EvolutionRecipeConfig>())
+            {
+                if (recipe.id != state.DirectedRecipeId)
+                    continue;
+                if (state.RunRoster.Contains(recipe.ingredientVariable.cardId))
+                    yield return recipe.ingredientVariable.cardId;
+                if (state.RunRoster.Contains(recipe.ingredientAnchor.cardId))
+                    yield return recipe.ingredientAnchor.cardId;
+                yield break;
+            }
+        }
+
+        private int AssistWindowStart()
+        {
+            return _evolution.assistWindowWaves != null
+                && _evolution.assistWindowWaves.Length > 0
+                    ? _evolution.assistWindowWaves[0]
+                    : int.MaxValue;
+        }
+
+        private int AssistWindowEnd()
+        {
+            return _evolution.assistWindowWaves != null
+                && _evolution.assistWindowWaves.Length > 1
+                    ? _evolution.assistWindowWaves[1]
+                    : int.MinValue;
         }
 
         private void AddGodRoster(

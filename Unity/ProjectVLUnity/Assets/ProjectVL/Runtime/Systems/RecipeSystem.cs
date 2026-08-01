@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using ProjectVL.Config;
 using ProjectVL.Core;
 
@@ -10,6 +12,7 @@ namespace ProjectVL.Systems
         private readonly CardAffixSystem _affixes;
         private readonly EconomyEvolutionConfig _evolution;
         private readonly CardCatalog _cards;
+        private readonly int _mergeCopies;
         private readonly HashSet<string> _announced =
             new HashSet<string>();
 
@@ -17,16 +20,133 @@ namespace ProjectVL.Systems
             EvolutionRecipesConfig config,
             CardAffixSystem affixes = null,
             EconomyEvolutionConfig evolution = null,
-            CardCatalog cards = null)
+            CardCatalog cards = null,
+            int mergeCopies = 2)
         {
             _config = config;
             _affixes = affixes;
             _evolution = evolution ?? new EconomyEvolutionConfig();
             _cards = cards ?? CardCatalog.Default;
+            _mergeCopies = Math.Max(2, mergeCopies);
+        }
+
+        public void RefreshState(GameState state)
+        {
+            if (state == null)
+                return;
+
+            state.CompatibleRecipeIds.Clear();
+            foreach (EvolutionRecipeConfig recipe in _config.recipes)
+            {
+                bool rosterReady = state.RunRoster.Count == 0
+                    || state.RunRoster.Contains(recipe.ingredientVariable.cardId)
+                        && state.RunRoster.Contains(recipe.ingredientAnchor.cardId);
+                if (rosterReady)
+                    state.CompatibleRecipeIds.Add(recipe.id);
+            }
+
+            if (state.Wave >= AssistWindowStart()
+                && !state.RecipeAssistClosed
+                && string.IsNullOrEmpty(state.DirectedRecipeId)
+                && state.CompatibleRecipeIds.Count > 0)
+            {
+                state.DirectedRecipeId = state.CompatibleRecipeIds
+                    .OrderByDescending(id => RecipeProgress(state, FindRecipe(id)))
+                    .ThenBy(id => id, StringComparer.Ordinal)
+                    .First();
+                state.NormalDropRoleBag.Clear();
+            }
+
+            state.ReadyRecipeIds.Clear();
+            foreach (string recipeId in state.CompatibleRecipeIds)
+            {
+                EvolutionRecipeConfig recipe = FindRecipe(recipeId);
+                if (recipe != null
+                    && !state.CompletedRecipes.Contains(recipeId)
+                    && TryFindMaterials(
+                        state,
+                        recipe,
+                        out CardLocation _,
+                        out CardLocation _))
+                {
+                    state.ReadyRecipeIds.Add(recipeId);
+                }
+            }
+            if (state.ReadyRecipeIds.Count > 0
+                && !state.FirstReadyRecipeWave.HasValue)
+            {
+                state.FirstReadyRecipeWave = state.Wave;
+                state.RecipeAssistClosed = true;
+            }
+        }
+
+        public bool TryGrantMaterialAssistance(GameState state)
+        {
+            RefreshState(state);
+            if (state == null
+                || state.RecipeAssistClosed
+                || state.RecipeAssistBudgetUsed
+                    >= _evolution.assistMaxCorrections
+                || string.IsNullOrEmpty(state.DirectedRecipeId))
+            {
+                return false;
+            }
+
+            int checkpoint = 0;
+            foreach (int candidate in _evolution.assistCheckpoints
+                ?? Array.Empty<int>())
+            {
+                if (state.Wave >= candidate
+                    && !state.RecipeAssistProcessedCheckpoints.Contains(candidate))
+                {
+                    checkpoint = candidate;
+                    break;
+                }
+            }
+            if (checkpoint <= 0)
+                return false;
+            state.RecipeAssistProcessedCheckpoints.Add(checkpoint);
+
+            EvolutionRecipeConfig recipe = FindRecipe(state.DirectedRecipeId);
+            if (recipe == null)
+                return false;
+            var requirements = new[]
+            {
+                recipe.ingredientVariable,
+                recipe.ingredientAnchor
+            };
+            foreach (CardRequirementConfig requirement in requirements
+                .OrderByDescending(item =>
+                    16 - MaterialCommitment(state, item.cardId))
+                .ThenBy(item => item.cardId, StringComparer.Ordinal))
+            {
+                int corrected = state.RecipeAssistCorrections.TryGetValue(
+                    requirement.cardId,
+                    out int count)
+                        ? count
+                        : 0;
+                if (corrected >= _evolution.assistMaxCorrectionsPerMaterial)
+                    continue;
+                for (int star = 1; star < requirement.minStar; star++)
+                {
+                    int copies = CountCards(state, requirement.cardId, star);
+                    if (copies < _mergeCopies - 1)
+                        continue;
+                    if (!state.TryGrantCard(requirement.cardId, star))
+                        return false;
+                    state.RecipeAssistBudgetUsed++;
+                    state.RecipeAssistCorrections[requirement.cardId] =
+                        corrected + 1;
+                    RefreshState(state);
+                    return true;
+                }
+            }
+            return false;
         }
 
         public string FirstAvailableRecipe(GameState state)
         {
+            RefreshState(state);
             if (state == null || !state.IntermissionActive)
             {
                 return null;
@@ -39,7 +159,8 @@ namespace ProjectVL.Systems
 
             foreach (EvolutionRecipeConfig recipe in _config.recipes)
             {
-                if (!state.CompletedRecipes.Contains(recipe.id)
+                if (state.CompatibleRecipeIds.Contains(recipe.id)
+                    && !state.CompletedRecipes.Contains(recipe.id)
                     && TryFindMaterials(
                         state,
                         recipe,
@@ -66,13 +187,15 @@ namespace ProjectVL.Systems
 
         public RecipeCraftResult Craft(GameState state, string recipeId)
         {
+            RefreshState(state);
             if (state == null || !state.IntermissionActive)
             {
                 return RecipeCraftResult.WrongPhase;
             }
 
             EvolutionRecipeConfig recipe = FindRecipe(recipeId);
-            if (recipe == null)
+            if (recipe == null
+                || !state.CompatibleRecipeIds.Contains(recipeId))
             {
                 return RecipeCraftResult.UnknownRecipe;
             }
@@ -122,6 +245,7 @@ namespace ProjectVL.Systems
                 cardType = recipe.outputCardId,
                 outputStar = recipe.outputStar
             });
+            RefreshState(state);
             return RecipeCraftResult.Crafted;
         }
 
@@ -134,6 +258,7 @@ namespace ProjectVL.Systems
         {
             if (state == null)
                 return RecipeCraftResult.UnknownRecipe;
+            RefreshState(state);
 
             CardState[] source = Slots(state, sourceKind);
             CardState[] target = Slots(state, targetKind);
@@ -148,7 +273,10 @@ namespace ProjectVL.Systems
 
             CardState first = source[sourceIndex];
             CardState second = target[targetIndex];
-            EvolutionRecipeConfig recipe = FindPairRecipe(first, second);
+            EvolutionRecipeConfig recipe = FindPairRecipe(
+                state,
+                first,
+                second);
             if (recipe == null
                 || state.CompletedRecipes.Contains(recipe.id)
                 || state.CompletedRecipes.Count
@@ -202,6 +330,7 @@ namespace ProjectVL.Systems
                 cardType = recipe.outputCardId,
                 outputStar = recipe.outputStar
             });
+            RefreshState(state);
             return RecipeCraftResult.Crafted;
         }
 
@@ -219,6 +348,7 @@ namespace ProjectVL.Systems
         }
 
         private EvolutionRecipeConfig FindPairRecipe(
+            GameState state,
             CardState first,
             CardState second)
         {
@@ -233,6 +363,8 @@ namespace ProjectVL.Systems
 
             foreach (EvolutionRecipeConfig recipe in _config.recipes)
             {
+                if (!state.CompatibleRecipeIds.Contains(recipe.id))
+                    continue;
                 bool forward = Matches(first, recipe.ingredientVariable)
                     && Matches(second, recipe.ingredientAnchor);
                 bool reverse = Matches(second, recipe.ingredientVariable)
@@ -242,6 +374,54 @@ namespace ProjectVL.Systems
             }
 
             return null;
+        }
+
+        private int AssistWindowStart()
+        {
+            return _evolution.assistWindowWaves != null
+                && _evolution.assistWindowWaves.Length > 0
+                    ? _evolution.assistWindowWaves[0]
+                    : int.MaxValue;
+        }
+
+        private static float RecipeProgress(
+            GameState state,
+            EvolutionRecipeConfig recipe)
+        {
+            return recipe == null
+                ? 0f
+                : MaterialCommitment(
+                    state,
+                    recipe.ingredientVariable.cardId)
+                    + MaterialCommitment(
+                        state,
+                        recipe.ingredientAnchor.cardId);
+        }
+
+        private static int MaterialCommitment(
+            GameState state,
+            string cardType)
+        {
+            int total = 0;
+            foreach (CardState card in state.Hand.Concat(state.Equipment))
+            {
+                if (card?.Type == cardType && !card.Provisional)
+                {
+                    total += 1 << Math.Max(0, card.Star - 1);
+                }
+            }
+            return Math.Min(16, total);
+        }
+
+        private static int CountCards(
+            GameState state,
+            string cardType,
+            int star)
+        {
+            return state.Hand.Concat(state.Equipment).Count(card =>
+                card?.Type == cardType
+                && card.Star == star
+                && !card.Provisional);
         }
 
         private static bool Matches(
