@@ -237,6 +237,8 @@ namespace ProjectVL.Core
             new List<GroundDropState>();
         public List<GroundZoneState> GroundZones { get; } =
             new List<GroundZoneState>();
+        public List<EquipmentSummonState> EquipmentSummons { get; } =
+            new List<EquipmentSummonState>();
         public List<BountyOfferState> BountyOffers { get; } =
             new List<BountyOfferState>();
         public List<BountyEncounterState> BountyEncounters { get; } =
@@ -259,6 +261,7 @@ namespace ProjectVL.Core
         private int _nextCardId = 1;
         private int _nextBountyOfferId = 1;
         private int _nextBountyEncounterId = 1;
+        private int _nextEquipmentSummonId = 1;
         private CardInventorySystem _inventory;
         private SettlementSystem _settlement = new SettlementSystem();
         private readonly List<LevelUpgradeChoice> _pendingLevelUpgrades =
@@ -270,6 +273,11 @@ namespace ProjectVL.Core
             && !DecisionLocked;
 
         public bool CanAdvanceCombat => CanAdvance && !IntermissionActive;
+
+        internal int NextEquipmentSummonId()
+        {
+            return _nextEquipmentSummonId++;
+        }
 
         internal GameState(float maxHp, EconomyConfig economy)
         {
@@ -371,6 +379,7 @@ namespace ProjectVL.Core
             Bullets.Clear();
             GroundDrops.Clear();
             GroundZones.Clear();
+            EquipmentSummons.Clear();
             EquipmentBindingClocks.Clear();
             EquipmentBindingCharges.Clear();
             BountyOffers.Clear();
@@ -746,6 +755,60 @@ namespace ProjectVL.Core
             FreezeDuration = freezeDuration;
             FreezeStacksToTrigger = freezeStacksToTrigger;
             KnockbackDistance = knockbackDistance;
+        }
+    }
+
+    public sealed class EquipmentSummonState
+    {
+        public int Id { get; }
+        public string Kind { get; }
+        public string SourceKey { get; }
+        public string CardType { get; }
+        public Float2 Position { get; }
+        public float Hp { get; set; }
+        public float MaxHp { get; }
+        public float LifeRemaining { get; set; }
+        public float TauntRadius { get; }
+        public float AuraRadius { get; }
+        public float IntervalSeconds { get; }
+        public float IntervalRemaining { get; set; }
+        public CompiledEffectAtomConfig[] OnDeathEffects { get; }
+        public CompiledEffectAtomConfig[] IntervalEffects { get; }
+        public CompiledEffectAtomConfig[] AuraEffects { get; }
+
+        public EquipmentSummonState(
+            int id,
+            string kind,
+            string sourceKey,
+            string cardType,
+            Float2 position,
+            float hp,
+            float lifeRemaining,
+            float tauntRadius,
+            float auraRadius,
+            float intervalSeconds,
+            CompiledEffectAtomConfig[] onDeathEffects,
+            CompiledEffectAtomConfig[] intervalEffects,
+            CompiledEffectAtomConfig[] auraEffects)
+        {
+            Id = id;
+            Kind = kind ?? "decoy";
+            SourceKey = sourceKey ?? string.Empty;
+            CardType = cardType ?? string.Empty;
+            Position = position;
+            Hp = hp;
+            MaxHp = hp;
+            LifeRemaining = lifeRemaining;
+            TauntRadius = tauntRadius;
+            AuraRadius = auraRadius;
+            IntervalSeconds = intervalSeconds;
+            IntervalRemaining = intervalSeconds;
+            OnDeathEffects = onDeathEffects
+                ?? Array.Empty<CompiledEffectAtomConfig>();
+            IntervalEffects = intervalEffects
+                ?? Array.Empty<CompiledEffectAtomConfig>();
+            AuraEffects = auraEffects
+                ?? Array.Empty<CompiledEffectAtomConfig>();
         }
     }
 }

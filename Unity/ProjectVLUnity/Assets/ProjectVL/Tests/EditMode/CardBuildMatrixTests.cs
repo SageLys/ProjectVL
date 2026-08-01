@@ -136,7 +136,10 @@ namespace ProjectVL.Tests
                     6);
 
                 Assert.That(
-                    HasEquipmentEffect(profile),
+                    HasEquipmentEffect(profile)
+                        || definition.recipeOnly
+                            && RecipeProductEffectCatalog.Default
+                                .Find(definition.id)?.bindings?.Length > 0,
                     Is.True,
                     $"{definition.id} six-star profile");
             }

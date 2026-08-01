@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using ProjectVL.Config;
 using ProjectVL.Core;
 
@@ -2765,6 +2766,7 @@ namespace ProjectVL.Systems
                 InitializeWaveEffects(state, profile);
             }
             ExecuteCompiledIntervalZones(state, deltaTime);
+            StepCompiledEquipmentSummons(state, deltaTime);
 
             if (state.FireRateBuffRemaining > 0f)
             {
@@ -3050,13 +3052,39 @@ namespace ProjectVL.Systems
                 bool targetingSecondary = secondaryInRange
                     && (!primaryInRange
                         || secondaryDistance < primaryDistance);
-                bool targetingDecoy =
+                EquipmentSummonState equipmentTarget = null;
+                float equipmentDistance = float.MaxValue;
+                foreach (EquipmentSummonState summon
+                    in state.EquipmentSummons)
+                {
+                    float distance = Float2.Distance(
+                        enemy.Position,
+                        summon.Position);
+                    if (summon.TauntRadius > 0f
+                        && distance <= summon.TauntRadius
+                        && distance < equipmentDistance)
+                    {
+                        equipmentTarget = summon;
+                        equipmentDistance = distance;
+                    }
+                }
+                bool targetingLegacyDecoy =
                     primaryInRange || secondaryInRange;
-                Float2 destination = targetingDecoy
-                    ? targetingSecondary
-                        ? state.SecondaryDecoyPosition
-                        : state.DecoyPosition
-                    : turret;
+                float legacyDistance = targetingSecondary
+                    ? secondaryDistance
+                    : primaryDistance;
+                bool targetingEquipment = equipmentTarget != null
+                    && (!targetingLegacyDecoy
+                        || equipmentDistance < legacyDistance);
+                bool targetingDecoy = targetingLegacyDecoy
+                    || targetingEquipment;
+                Float2 destination = targetingEquipment
+                    ? equipmentTarget.Position
+                    : targetingLegacyDecoy
+                        ? targetingSecondary
+                            ? state.SecondaryDecoyPosition
+                            : state.DecoyPosition
+                        : turret;
                 Float2 toDestination = destination - enemy.Position;
                 enemy.Position += toDestination.Normalized()
                     * enemy.Speed
@@ -3069,11 +3097,25 @@ namespace ProjectVL.Systems
                         destination) < enemy.Radius + 12f)
                 {
                     state.Enemies.RemoveAt(index);
-                    DamageDecoy(
-                        state,
-                        profile,
-                        enemy.Damage,
-                        targetingSecondary);
+                    if (targetingEquipment)
+                    {
+                        equipmentTarget.Hp -= enemy.Damage;
+                        if (equipmentTarget.Hp <= 0f)
+                        {
+                            ExecuteCompiledSummonDeath(
+                                state,
+                                equipmentTarget);
+                            state.EquipmentSummons.Remove(equipmentTarget);
+                        }
+                    }
+                    else
+                    {
+                        DamageDecoy(
+                            state,
+                            profile,
+                            enemy.Damage,
+                            targetingSecondary);
+                    }
                     continue;
                 }
 
@@ -4051,6 +4093,7 @@ namespace ProjectVL.Systems
             state.SpringPulseRemaining =
                 profile.SpringRestoreInterval;
             state.GroundZones.Clear();
+            state.EquipmentSummons.Clear();
             state.EquipmentBindingClocks.Clear();
             ExecuteCompiledWaveStartZones(state);
             state.ScorchAuraTickRemaining =
@@ -4131,6 +4174,7 @@ namespace ProjectVL.Systems
                         ?? Array.Empty<CompiledEffectAtomConfig>())
                 {
                     if (atom?.atom != "groundZone"
+                        && atom?.atom != "summon"
                         || atom.children == null
                         || atom.children.Length == 0)
                     {
@@ -4142,13 +4186,24 @@ namespace ProjectVL.Systems
                         && target != null
                             ? target.Position
                             : TurretPosition;
-                    var tier = new CompiledConsumableTierConfig
+                    if (atom.atom == "summon")
                     {
-                        radius = EffectNumber(atom, "radius", AttackRange(state)),
-                        duration = EffectNumber(atom, "duration", 1f),
-                        effects = new[] { atom }
-                    };
-                    CastCompiledGroundZone(state, tier, atom, point);
+                        CastCompiledEquipmentSummon(
+                            state,
+                            source,
+                            atom,
+                            point);
+                    }
+                    else
+                    {
+                        var tier = new CompiledConsumableTierConfig
+                        {
+                            radius = EffectNumber(atom, "radius", AttackRange(state)),
+                            duration = EffectNumber(atom, "duration", 1f),
+                            effects = new[] { atom }
+                        };
+                        CastCompiledGroundZone(state, tier, atom, point);
+                    }
                 }
             }
         }
@@ -4163,7 +4218,8 @@ namespace ProjectVL.Systems
             {
                 if (!HasNestedGroundZone(source.Binding))
                 {
-                    if (!HasNestedCharge(source.Binding))
+                    if (!HasNestedCharge(source.Binding)
+                        && !HasNestedSummon(source.Binding))
                         continue;
                 }
 
@@ -4181,6 +4237,7 @@ namespace ProjectVL.Systems
                 if (remaining <= 0f)
                 {
                     ExecuteCompiledBindingZones(state, source);
+                    ExecuteCompiledBindingSummons(state, source);
                     ExecuteCompiledBindingCharges(
                         state,
                         source,
@@ -4247,7 +4304,8 @@ namespace ProjectVL.Systems
             foreach (RuntimeEquipmentBinding source
                 in EquipmentEffectBindingRuntime.Resolve(state, "onHit"))
             {
-                if (!HasNestedGroundZone(source.Binding)
+                if ((!HasNestedGroundZone(source.Binding)
+                        && !HasNestedSummon(source.Binding))
                     || !BindingStatusConditionMet(
                         source.Binding,
                         enemy))
@@ -4255,6 +4313,10 @@ namespace ProjectVL.Systems
                     continue;
                 }
                 ExecuteCompiledBindingZones(
+                    state,
+                    source,
+                    hitPosition);
+                ExecuteCompiledBindingSummons(
                     state,
                     source,
                     hitPosition);
@@ -4328,6 +4390,7 @@ namespace ProjectVL.Systems
             foreach (RuntimeEquipmentBinding source
                 in EquipmentEffectBindingRuntime.Resolve(state, "onBreach"))
             {
+                ExecuteCompiledBindingSummons(state, source, point);
                 ExecuteCompiledBindingCharges(
                     state,
                     source,
@@ -4336,6 +4399,189 @@ namespace ProjectVL.Systems
                     null,
                     DamageSource.Direct,
                     shieldAbsorbed);
+            }
+        }
+
+        private void ExecuteCompiledBindingSummons(
+            GameState state,
+            RuntimeEquipmentBinding source,
+            Float2? suppliedPoint = null)
+        {
+            foreach (CompiledEffectAtomConfig atom
+                in source.Binding.effects
+                    ?? Array.Empty<CompiledEffectAtomConfig>())
+            {
+                if (atom?.atom != "summon"
+                    || atom.children == null
+                    || atom.children.Length == 0)
+                {
+                    continue;
+                }
+                EnemyState target = FindTarget(state);
+                Float2 point = suppliedPoint
+                    ?? (source.Binding.at == "densestCluster"
+                        && target != null
+                            ? target.Position
+                            : TurretPosition);
+                CastCompiledEquipmentSummon(state, source, atom, point);
+            }
+        }
+
+        private void CastCompiledEquipmentSummon(
+            GameState state,
+            RuntimeEquipmentBinding source,
+            CompiledEffectAtomConfig atom,
+            Float2 point)
+        {
+            string kind = EffectText(atom, "kind");
+            if (string.IsNullOrEmpty(kind))
+                kind = "decoy";
+            int maximum = Math.Max(1, EffectInteger(atom, "maxCount", 1));
+            int existing = state.EquipmentSummons.Count(item =>
+                item.SourceKey.StartsWith(
+                    source.Card.Type + "/" + source.Card.Id + "/",
+                    StringComparison.Ordinal)
+                && item.Kind == kind);
+            int createCount = Math.Min(
+                Math.Max(1, EffectInteger(atom, "count", 1)),
+                Math.Max(0, maximum - existing));
+            string placement = EffectText(atom, "placement");
+            float distance = EffectNumber(atom, "distanceFromTurret", 120f);
+            var death = new System.Collections.Generic.List<CompiledEffectAtomConfig>();
+            var interval = new System.Collections.Generic.List<CompiledEffectAtomConfig>();
+            var aura = new System.Collections.Generic.List<CompiledEffectAtomConfig>();
+            foreach (CompiledEffectAtomConfig child in atom.children)
+            {
+                if (child?.relation == "onDeathEffects")
+                    death.Add(child);
+                else if (child?.relation == "intervalEffects")
+                    interval.Add(child);
+                else if (child?.relation == "auraEffects")
+                    aura.Add(child);
+            }
+            for (int index = 0; index < createCount; index++)
+            {
+                int formationIndex = existing + index;
+                Float2 position = point;
+                if (placement == "ring")
+                {
+                    float angle = formationIndex
+                        / (float)Math.Max(1, maximum)
+                        * (float)(Math.PI * 2d);
+                    position = TurretPosition + new Float2(
+                        (float)Math.Cos(angle) * distance,
+                        (float)Math.Sin(angle) * distance);
+                }
+                else if (placement == "threatDirection")
+                {
+                    Float2 direction = (point - TurretPosition).Normalized();
+                    if (direction.Length <= 0.000001f)
+                        direction = new Float2(1f, 0f);
+                    position = TurretPosition + direction * distance;
+                }
+
+                float duration = EffectNumber(atom, "duration", 0f);
+                state.EquipmentSummons.Add(new EquipmentSummonState(
+                    state.NextEquipmentSummonId(),
+                    kind,
+                    source.SourceKey,
+                    source.Card.Type,
+                    position,
+                    EffectNumber(atom, "hp", 40f),
+                    duration > 0f ? duration : float.PositiveInfinity,
+                    EffectNumber(atom, "tauntRadius", 0f),
+                    EffectNumber(atom, "auraRadius", 0f),
+                    EffectNumber(atom, "intervalSeconds", 0f),
+                    death.ToArray(),
+                    interval.ToArray(),
+                    aura.ToArray()));
+            }
+        }
+
+        private void StepCompiledEquipmentSummons(
+            GameState state,
+            float deltaTime)
+        {
+            for (int index = state.EquipmentSummons.Count - 1;
+                index >= 0;
+                index--)
+            {
+                EquipmentSummonState summon = state.EquipmentSummons[index];
+                summon.LifeRemaining -= deltaTime;
+                var tier = new CompiledConsumableTierConfig
+                {
+                    radius = summon.AuraRadius > 0f
+                        ? summon.AuraRadius
+                        : AttackRange(state),
+                    duration = 1f
+                };
+                if (summon.IntervalEffects.Length > 0
+                    && summon.IntervalSeconds > 0f)
+                {
+                    summon.IntervalRemaining -= deltaTime;
+                    if (summon.IntervalRemaining <= 0f)
+                    {
+                        foreach (CompiledEffectAtomConfig child
+                            in summon.IntervalEffects)
+                        {
+                            ExecuteCompiledConsumableAtom(
+                                state,
+                                summon.CardType,
+                                tier,
+                                child,
+                                summon.Position,
+                                null);
+                        }
+                        summon.IntervalRemaining += summon.IntervalSeconds;
+                    }
+                }
+                if (summon.AuraEffects.Length > 0 && summon.AuraRadius > 0f)
+                {
+                    foreach (EnemyState enemy in state.Enemies.ToArray())
+                    {
+                        if (Float2.Distance(enemy.Position, summon.Position)
+                            > summon.AuraRadius + enemy.Radius)
+                        {
+                            continue;
+                        }
+                        foreach (CompiledEffectAtomConfig child
+                            in summon.AuraEffects)
+                        {
+                            ExecuteCompiledConsumableAtom(
+                                state,
+                                summon.CardType,
+                                tier,
+                                child,
+                                summon.Position,
+                                enemy);
+                        }
+                    }
+                }
+                if (summon.Hp > 0f && summon.LifeRemaining > 0f)
+                    continue;
+                ExecuteCompiledSummonDeath(state, summon);
+                state.EquipmentSummons.RemoveAt(index);
+            }
+        }
+
+        private void ExecuteCompiledSummonDeath(
+            GameState state,
+            EquipmentSummonState summon)
+        {
+            var tier = new CompiledConsumableTierConfig
+            {
+                radius = Math.Max(120f, summon.AuraRadius),
+                duration = 1f
+            };
+            foreach (CompiledEffectAtomConfig child in summon.OnDeathEffects)
+            {
+                ExecuteCompiledConsumableAtom(
+                    state,
+                    summon.CardType,
+                    tier,
+                    child,
+                    summon.Position,
+                    null);
             }
         }
 
@@ -4475,6 +4721,22 @@ namespace ProjectVL.Systems
                 in binding.effects ?? Array.Empty<CompiledEffectAtomConfig>())
             {
                 if (atom?.atom == "charge"
+                    && atom.children != null
+                    && atom.children.Length > 0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static bool HasNestedSummon(
+            CompiledEffectBindingConfig binding)
+        {
+            foreach (CompiledEffectAtomConfig atom
+                in binding.effects ?? Array.Empty<CompiledEffectAtomConfig>())
+            {
+                if (atom?.atom == "summon"
                     && atom.children != null
                     && atom.children.Length > 0)
                 {

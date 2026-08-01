@@ -47,7 +47,7 @@ namespace ProjectVL.Systems
         {
             if (atom?.children == null || atom.children.Length == 0)
                 return false;
-            if (atom.atom == "charge")
+            if (atom.atom == "charge" || atom.atom == "summon")
                 return true;
             return atom.atom == "groundZone"
                 && (binding.trigger == "onWaveStart"

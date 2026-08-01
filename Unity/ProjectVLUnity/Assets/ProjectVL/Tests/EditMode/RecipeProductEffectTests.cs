@@ -60,7 +60,9 @@ namespace ProjectVL.Tests
                     Is.True,
                     definition.id);
                 Assert.That(
-                    HasEquipmentEffect(profile),
+                    HasEquipmentEffect(profile)
+                        || RecipeProductEffectCatalog.Default
+                            .Find(definition.id)?.bindings?.Length > 0,
                     Is.True,
                     definition.id);
             }

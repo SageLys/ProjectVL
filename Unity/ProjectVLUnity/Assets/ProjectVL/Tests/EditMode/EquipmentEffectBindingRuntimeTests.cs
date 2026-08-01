@@ -247,5 +247,37 @@ namespace ProjectVL.Tests
             Assert.That(state.EquipmentBindingCharges[key], Is.EqualTo(1f));
             Assert.That(state.Hp, Is.EqualTo(state.MaxHp));
         }
+
+        [Test]
+        public void WaveStartSummonPreservesFormationAndCountCap()
+        {
+            CombatConfig combat = CombatConfigLoader.LoadDefault();
+            GameState state = GameStateFactory.Create(combat);
+            var system = new CombatSystem(
+                combat,
+                GameConfigLoader.LoadEnemies());
+            state.Equipment[0] = state.CreateCard("pylonCircuit", 6);
+            state.BeginWave(1);
+
+            system.StepPassives(state, 0f);
+
+            Assert.That(state.EquipmentSummons, Has.Count.EqualTo(3));
+            Assert.That(
+                state.EquipmentSummons.Select(item => item.Kind),
+                Is.All.EqualTo("pylon"));
+            Assert.That(
+                state.EquipmentSummons.Select(item => item.Position)
+                    .Distinct().ToArray(),
+                Has.Length.EqualTo(3));
+            foreach (EquipmentSummonState summon in state.EquipmentSummons)
+            {
+                Assert.That(
+                    Float2.Distance(
+                        summon.Position,
+                        new Float2(combat.turret.x, combat.turret.y)),
+                    Is.EqualTo(155f).Within(0.01f));
+                Assert.That(summon.AuraEffects, Has.Length.EqualTo(1));
+            }
+        }
     }
 }
