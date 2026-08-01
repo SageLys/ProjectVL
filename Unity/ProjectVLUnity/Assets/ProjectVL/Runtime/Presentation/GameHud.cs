@@ -14,7 +14,11 @@ namespace ProjectVL.Presentation
         private GUIStyle _centerStyle;
         private GUIStyle _buttonStyle;
         private GUIStyle _detailStyle;
-        private int _selectedDifficulty = 1;
+        private GUIStyle _mainMenuTitleStyle;
+        private GUIStyle _mainMenuButtonStyle;
+        private GUIStyle _mainMenuOptionStyle;
+        private readonly MainMenuState _mainMenu = new MainMenuState();
+        private Vector2 _difficultyScroll;
         private Rect _physicalViewport;
         private float _uiScale = 1f;
         private CardSlotKind? _pressedSlotKind;
@@ -43,6 +47,12 @@ namespace ProjectVL.Presentation
             }
 
             RefreshViewport();
+            if (_controller.State.Mode == GameMode.Ready)
+            {
+                ClearPressedSlot();
+                return;
+            }
+
             if (_controller.DeveloperTools != null
                 && _controller.DeveloperTools.Visible)
             {
@@ -140,6 +150,13 @@ namespace ProjectVL.Presentation
                 new Vector3(_physicalViewport.x, _physicalViewport.y, 0f),
                 Quaternion.identity,
                 new Vector3(_uiScale, _uiScale, 1f));
+            if (_controller.State.Mode == GameMode.Ready)
+            {
+                DrawMainMenu();
+                GUI.matrix = previousMatrix;
+                return;
+            }
+
             DrawArenaFrame();
             DrawTopBar();
             DrawControls();
@@ -148,6 +165,132 @@ namespace ProjectVL.Presentation
             DrawCenterPanel();
             DrawDeveloperPanel();
             GUI.matrix = previousMatrix;
+        }
+
+        private void DrawMainMenu()
+        {
+            Rect viewport = ViewportRect();
+            Color previousColor = GUI.color;
+            GUI.color = new Color(0.025f, 0.045f, 0.075f, 1f);
+            GUI.DrawTexture(viewport, Texture2D.whiteTexture);
+            GUI.color = previousColor;
+
+            GUI.color = new Color(0.08f, 0.22f, 0.30f, 0.72f);
+            GUI.DrawTexture(new Rect(24f, 72f, 354f, 2f), Texture2D.whiteTexture);
+            GUI.DrawTexture(new Rect(74f, 232f, 254f, 2f), Texture2D.whiteTexture);
+            GUI.color = previousColor;
+
+            GUI.Label(
+                new Rect(28f, 94f, 346f, 96f),
+                "守住心防",
+                _mainMenuTitleStyle);
+            GUI.Label(
+                new Rect(28f, 184f, 346f, 30f),
+                "PROJECT  VL",
+                _hudStyle);
+
+            const float buttonX = 69f;
+            const float buttonWidth = 264f;
+            const float buttonHeight = 58f;
+            if (GUI.Button(
+                new Rect(buttonX, 288f, buttonWidth, buttonHeight),
+                "进入游戏",
+                _mainMenuButtonStyle))
+            {
+                if (_mainMenu.RequestStart())
+                {
+                    _controller.StartGame();
+                }
+            }
+
+            if (GUI.Button(
+                new Rect(buttonX, 370f, buttonWidth, buttonHeight),
+                $"难度选择  ·  {_mainMenu.SelectedDifficultyName}",
+                _mainMenuButtonStyle))
+            {
+                _mainMenu.ToggleDifficultyOptions();
+            }
+
+            float codexY = _mainMenu.DifficultyOptionsVisible ? 640f : 452f;
+            if (_mainMenu.DifficultyOptionsVisible)
+            {
+                DrawDifficultyMenu(buttonX, 438f, buttonWidth);
+            }
+
+            GUI.Button(
+                new Rect(buttonX, codexY, buttonWidth, buttonHeight),
+                "图鉴",
+                _mainMenuButtonStyle);
+            GUI.Label(
+                new Rect(69f, codexY + 63f, 264f, 24f),
+                "功能预留",
+                _hudStyle);
+
+            if (_mainMenu.DifficultyPromptVisible)
+            {
+                DrawDifficultyPrompt();
+            }
+        }
+
+        private void DrawDifficultyMenu(float x, float y, float width)
+        {
+            string[] labels = { "轻松", "标准", "困难", "地狱" };
+            Rect scrollRect = new Rect(x, y, width, 180f);
+            Rect contentRect = new Rect(0f, 0f, width - 18f, 212f);
+            Color previous = GUI.backgroundColor;
+            GUI.backgroundColor = new Color(0.055f, 0.10f, 0.16f, 0.98f);
+            GUI.Box(scrollRect, GUIContent.none);
+            GUI.backgroundColor = previous;
+            _difficultyScroll = GUI.BeginScrollView(
+                scrollRect,
+                _difficultyScroll,
+                contentRect);
+            for (int i = 0; i < labels.Length; i++)
+            {
+                GUI.backgroundColor = i == _mainMenu.SelectedDifficultyIndex
+                    ? new Color(0.22f, 0.72f, 0.88f)
+                    : new Color(0.16f, 0.26f, 0.36f);
+                if (GUI.Button(
+                    new Rect(6f, 5f + i * 51f, width - 34f, 45f),
+                    labels[i],
+                    _mainMenuOptionStyle))
+                {
+                    _mainMenu.SelectDifficulty(i);
+                    _controller.SelectDifficulty(i);
+                }
+            }
+
+            GUI.EndScrollView();
+            GUI.backgroundColor = previous;
+        }
+
+        private void DrawDifficultyPrompt()
+        {
+            Color previousColor = GUI.color;
+            GUI.color = new Color(0f, 0f, 0f, 0.72f);
+            GUI.DrawTexture(ViewportRect(), Texture2D.whiteTexture);
+            GUI.color = previousColor;
+
+            Rect panel = new Rect(51f, 326f, 300f, 190f);
+            Color previousBackground = GUI.backgroundColor;
+            GUI.backgroundColor = new Color(0.07f, 0.12f, 0.19f, 1f);
+            GUI.Box(panel, GUIContent.none);
+            GUI.backgroundColor = previousBackground;
+            GUI.Label(
+                new Rect(panel.x + 20f, panel.y + 28f, panel.width - 40f, 52f),
+                "请选择难度",
+                _centerStyle);
+            GUI.Label(
+                new Rect(panel.x + 24f, panel.y + 78f, panel.width - 48f, 34f),
+                "选择难度后才能进入游戏",
+                _hudStyle);
+            if (GUI.Button(
+                new Rect(panel.x + 72f, panel.y + 126f, panel.width - 144f, 42f),
+                "确定",
+                _mainMenuButtonStyle))
+            {
+                _mainMenu.DismissDifficultyPrompt();
+            }
         }
 
         private void DrawDeveloperPanel()
@@ -634,12 +777,6 @@ namespace ProjectVL.Presentation
                 _hudStyle);
 
             float actionY = panel.y + 112f;
-            if (state.Mode == GameMode.Ready)
-            {
-                DrawDifficultyButtons(panel);
-                actionY = panel.y + 150f;
-            }
-
             if (GUI.Button(
                 new Rect(panel.x + 75f, actionY, panel.width - 150f, 44f),
                 button,
@@ -802,33 +939,6 @@ namespace ProjectVL.Presentation
         {
             int totalSeconds = Mathf.Max(0, Mathf.FloorToInt(seconds));
             return $"{totalSeconds / 60:00}:{totalSeconds % 60:00}";
-        }
-
-        private void DrawDifficultyButtons(Rect panel)
-        {
-            string[] labels = { "轻松", "标准", "困难", "地狱" };
-            float width = (panel.width - 52f) / 4f;
-            for (int i = 0; i < labels.Length; i++)
-            {
-                Color previous = GUI.backgroundColor;
-                GUI.backgroundColor = i == _selectedDifficulty
-                    ? new Color(0.25f, 0.75f, 1f)
-                    : new Color(0.25f, 0.32f, 0.43f);
-                if (GUI.Button(
-                    new Rect(
-                        panel.x + 20f + i * (width + 4f),
-                        panel.y + 88f,
-                        width,
-                        30f),
-                    labels[i],
-                    _buttonStyle))
-                    {
-                        _selectedDifficulty = i;
-                        _controller.SelectDifficulty(i);
-                    }
-
-                GUI.backgroundColor = previous;
-            }
         }
 
         private void DrawLevelUpgradePanel(LevelUpgradeChoice choice)
@@ -1643,6 +1753,25 @@ namespace ProjectVL.Presentation
                 alignment = TextAnchor.UpperLeft,
                 wordWrap = true,
                 richText = false
+            };
+            _mainMenuTitleStyle = new GUIStyle(_centerStyle)
+            {
+                fontSize = 52,
+                fontStyle = FontStyle.Bold,
+                alignment = TextAnchor.MiddleCenter,
+                normal = { textColor = new Color(0.72f, 0.94f, 1f) }
+            };
+            _mainMenuButtonStyle = new GUIStyle(_buttonStyle)
+            {
+                fontSize = 20,
+                alignment = TextAnchor.MiddleCenter,
+                normal = { textColor = Color.white }
+            };
+            _mainMenuOptionStyle = new GUIStyle(_buttonStyle)
+            {
+                fontSize = 17,
+                alignment = TextAnchor.MiddleCenter,
+                normal = { textColor = Color.white }
             };
         }
     }

@@ -33,6 +33,7 @@ namespace ProjectVL.Presentation
         private CardSlotKind? _draggedSlotKind;
         private int _draggedSlotIndex = -1;
         private int _totalWaves;
+        private DifficultyId? _selectedDifficulty;
         private int _effectDemoIndex;
         private int _advancedDemoIndex;
         private int _transformDemoIndex;
@@ -378,32 +379,36 @@ namespace ProjectVL.Presentation
             _presenter.Sync();
         }
 
-        public void StartGame()
+        public bool StartGame()
         {
             _audio?.Play("ui.button", AudioBus.Ui);
-            if (State.Mode != GameMode.Ready)
+            if (State.Mode != GameMode.Ready
+                || !_selectedDifficulty.HasValue)
             {
-                return;
+                return false;
             }
 
+            State.SelectDifficulty(_selectedDifficulty.Value);
             State.StartRun();
             _telemetry?.RecordInput(State, "startRun");
             if (!_godPoolSystem.OfferInitial(State))
             {
                 _waveSystem.StartNextWave(State);
             }
+
+            return true;
         }
 
         public void SelectDifficulty(int optionIndex)
         {
-            DifficultyId difficulty = optionIndex <= 0
-                ? DifficultyId.Relaxed
-                : optionIndex == 1
-                    ? DifficultyId.Standard
-                    : optionIndex == 2
-                        ? DifficultyId.Hard
-                        : DifficultyId.Hell;
-            State.SelectDifficulty(difficulty);
+            if (optionIndex < 0 || optionIndex > 3)
+            {
+                throw new System.ArgumentOutOfRangeException(
+                    nameof(optionIndex));
+            }
+
+            _selectedDifficulty = (DifficultyId)optionIndex;
+            State.SelectDifficulty(_selectedDifficulty.Value);
         }
 
         public void ChooseLevelUpgrade(int optionIndex)
