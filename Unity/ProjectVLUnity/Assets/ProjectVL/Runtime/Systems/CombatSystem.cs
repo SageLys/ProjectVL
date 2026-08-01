@@ -2936,6 +2936,10 @@ namespace ProjectVL.Systems
                         enemy.FocusPriorityRemaining > 0f;
                     DamageEnemy(state, enemy, bullet.Damage);
                     ApplyStatusEffects(enemy, bullet);
+                    ExecuteCompiledHitZones(
+                        state,
+                        enemy,
+                        hitPosition);
                     if (wasFrozen
                         && state.Enemies.Contains(enemy)
                         && bullet.FrozenHitExecuteThresholdRatio > 0f
@@ -4185,7 +4189,8 @@ namespace ProjectVL.Systems
 
         private void ExecuteCompiledBindingZones(
             GameState state,
-            RuntimeEquipmentBinding source)
+            RuntimeEquipmentBinding source,
+            Float2? suppliedPoint = null)
         {
             foreach (CompiledEffectAtomConfig atom
                 in source.Binding.effects
@@ -4199,10 +4204,11 @@ namespace ProjectVL.Systems
                 }
 
                 EnemyState target = FindTarget(state);
-                Float2 point = source.Binding.at == "densestCluster"
-                    && target != null
-                        ? target.Position
-                        : TurretPosition;
+                Float2 point = suppliedPoint
+                    ?? (source.Binding.at == "densestCluster"
+                        && target != null
+                            ? target.Position
+                            : TurretPosition);
                 var tier = new CompiledConsumableTierConfig
                 {
                     radius = EffectNumber(atom, "radius", AttackRange(state)),
@@ -4211,6 +4217,47 @@ namespace ProjectVL.Systems
                 };
                 CastCompiledGroundZone(state, tier, atom, point);
             }
+        }
+
+        private void ExecuteCompiledHitZones(
+            GameState state,
+            EnemyState enemy,
+            Float2 hitPosition)
+        {
+            foreach (RuntimeEquipmentBinding source
+                in EquipmentEffectBindingRuntime.Resolve(state, "onHit"))
+            {
+                if (!HasNestedGroundZone(source.Binding)
+                    || !BindingStatusConditionMet(
+                        source.Binding,
+                        enemy))
+                {
+                    continue;
+                }
+                ExecuteCompiledBindingZones(
+                    state,
+                    source,
+                    hitPosition);
+            }
+        }
+
+        private static bool BindingStatusConditionMet(
+            CompiledEffectBindingConfig binding,
+            EnemyState enemy)
+        {
+            string required = BindingText(
+                binding,
+                "requiresStatus");
+            if (string.IsNullOrEmpty(required))
+                return true;
+            foreach (string status in required.Split(
+                new[] { '|' },
+                StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (enemy == null || !HasCompiledStatus(enemy, status))
+                    return false;
+            }
+            return true;
         }
 
         private static bool HasNestedGroundZone(
@@ -4242,6 +4289,20 @@ namespace ProjectVL.Systems
                     return item.number;
             }
             return fallback;
+        }
+
+        private static string BindingText(
+            CompiledEffectBindingConfig binding,
+            string key)
+        {
+            foreach (CompiledEffectParamConfig item
+                in binding.triggerParams
+                    ?? Array.Empty<CompiledEffectParamConfig>())
+            {
+                if (item?.key == key && item.kind == "string")
+                    return item.text ?? string.Empty;
+            }
+            return string.Empty;
         }
 
         private void ApplySanctumAura(

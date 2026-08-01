@@ -143,5 +143,43 @@ namespace ProjectVL.Tests
             Assert.That(zone.FreezeStacksToTrigger, Is.EqualTo(3));
             Assert.That(zone.KnockbackDistance, Is.EqualTo(40f));
         }
+
+        [Test]
+        public void OnHitGroundZoneExecutesAtImpactPoint()
+        {
+            CombatConfig combat = CombatConfigLoader.LoadDefault();
+            GameState state = GameStateFactory.Create(combat);
+            var system = new CombatSystem(
+                combat,
+                GameConfigLoader.LoadEnemies());
+            state.Equipment[0] = state.CreateCard("solarPiercer", 6);
+            var enemy = new EnemyState(
+                1,
+                EnemyKind.Normal,
+                new Float2(260f, 320f),
+                100f,
+                10f,
+                8f,
+                1f);
+            state.Enemies.Add(enemy);
+            state.Bullets.Add(new BulletState(
+                1,
+                enemy.Position,
+                new Float2(),
+                5f,
+                1f,
+                1f,
+                new CardCombatProfile()));
+
+            system.StepBullets(state, 0f);
+
+            Assert.That(state.GroundZones, Has.Count.EqualTo(1));
+            GroundZoneState zone = state.GroundZones[0];
+            Assert.That(zone.Position, Is.EqualTo(enemy.Position));
+            Assert.That(zone.Shape, Is.EqualTo("line"));
+            Assert.That(zone.Radius, Is.EqualTo(90f));
+            Assert.That(zone.LifeRemaining, Is.EqualTo(3.5f));
+            Assert.That(zone.DamagePerTick, Is.GreaterThan(0f));
+        }
     }
 }
