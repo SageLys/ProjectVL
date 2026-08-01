@@ -5,7 +5,10 @@
     "config": {},
     "presetName": "seed42_acceptance",
     "seed": 42,
-    "gitCommit": "fixture"
+    "gitCommit": "fc90797",
+    "rulesVersion": "0.6.0",
+    "scenarioVersion": "2.0.0",
+    "configFingerprint": "v0.6-seed42-selection-build-validation"
   },
   "events": [
     { "type": "waveStart", "at": 0, "wave": 1 },
@@ -16,7 +19,27 @@
     { "type": "pickup", "at": 26, "wave": 1, "dropId": 1 },
     { "type": "mergeOpportunity", "at": 26, "wave": 1 },
     { "type": "perkPopup", "at": 28, "wave": 1 },
-    { "type": "waveCleared", "at": 30, "wave": 1 }
+    { "type": "waveCleared", "at": 30, "wave": 1 },
+    { "type": "waveStart", "at": 40, "wave": 4 },
+    { "type": "spawn", "at": 44, "wave": 4, "enemyId": 41 },
+    { "type": "dangerEnter", "at": 52, "wave": 4, "enemyId": 41, "visibleSeconds": 3 },
+    { "type": "kill", "at": 55, "wave": 4, "enemyId": 41, "distance": 120, "range": 200 },
+    { "type": "dropLanded", "at": 58, "wave": 4, "dropId": 41 },
+    { "type": "pickup", "at": 60, "wave": 4, "dropId": 41 },
+    { "type": "mergeOpportunity", "at": 60, "wave": 4 },
+    { "type": "recipe_available", "at": 61, "wave": 4, "recipeIds": ["r_meteor_pierce"] },
+    { "type": "recipe_completed", "at": 63, "wave": 4, "recipeId": "r_meteor_pierce", "cardType": "solarPiercer", "outputStar": 6 },
+    { "type": "perkPopup", "at": 64, "wave": 4 },
+    { "type": "waveCleared", "at": 70, "wave": 4 },
+    { "type": "waveStart", "at": 80, "wave": 10 },
+    { "type": "spawn", "at": 84, "wave": 10, "enemyId": 101 },
+    { "type": "waveBossSpawned", "at": 90, "wave": 10, "enemyId": 101 },
+    { "type": "dangerEnter", "at": 96, "wave": 10, "enemyId": 101, "visibleSeconds": 12 },
+    { "type": "kill", "at": 108, "wave": 10, "enemyId": 101, "distance": 180, "range": 220 },
+    { "type": "waveBossKilled", "at": 108, "wave": 10, "enemyId": 101 },
+    { "type": "bossRewardGranted", "at": 108.2, "wave": 10, "wildcardStar": 3, "wildcardCount": 1 },
+    { "type": "perkPopup", "at": 108.5, "wave": 10 },
+    { "type": "waveCleared", "at": 110, "wave": 10 }
   ],
   "samples": [
     { "at": 0, "wave": 1, "enemies": 0 },
@@ -25,11 +48,29 @@
     { "at": 15, "wave": 1, "enemies": 6 },
     { "at": 20, "wave": 1, "enemies": 8 },
     { "at": 25, "wave": 1, "enemies": 4 },
-    { "at": 30, "wave": 1, "enemies": 0 }
+    { "at": 30, "wave": 1, "enemies": 0 },
+    { "at": 40, "wave": 4, "enemies": 0 },
+    { "at": 45, "wave": 4, "enemies": 3 },
+    { "at": 50, "wave": 4, "enemies": 6 },
+    { "at": 55, "wave": 4, "enemies": 7 },
+    { "at": 60, "wave": 4, "enemies": 5 },
+    { "at": 65, "wave": 4, "enemies": 2 },
+    { "at": 70, "wave": 4, "enemies": 0 },
+    { "at": 80, "wave": 10, "enemies": 0 },
+    { "at": 85, "wave": 10, "enemies": 4 },
+    { "at": 90, "wave": 10, "enemies": 8 },
+    { "at": 95, "wave": 10, "enemies": 10 },
+    { "at": 100, "wave": 10, "enemies": 6 },
+    { "at": 105, "wave": 10, "enemies": 3 },
+    { "at": 110, "wave": 10, "enemies": 0 }
   ],
   "inputs": [
     { "type": "pickupClick", "at": 26, "wave": 1 },
     { "type": "dragDrop", "at": 27, "wave": 1 },
-    { "type": "perkSelect", "at": 29, "wave": 1 }
+    { "type": "perkSelect", "at": 29, "wave": 1 },
+    { "type": "pickupClick", "at": 60, "wave": 4 },
+    { "type": "dragDrop", "at": 63, "wave": 4 },
+    { "type": "perkSelect", "at": 64, "wave": 4 },
+    { "type": "perkSelect", "at": 109, "wave": 10 }
   ]
 }

@@ -108,6 +108,9 @@ namespace ProjectVL.Systems
         public string build;
         public string presetName;
         public string gitCommit;
+        public string rulesVersion;
+        public string scenarioVersion;
+        public string configFingerprint;
         public TelemetryDifficultyMeta difficulty;
         public TelemetryConfigSnapshot config;
     }
