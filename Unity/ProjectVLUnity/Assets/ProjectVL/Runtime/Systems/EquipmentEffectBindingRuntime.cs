@@ -70,13 +70,12 @@ namespace ProjectVL.Systems
         private static CompiledEffectBindingConfig[] BindingsFor(
             CardState card)
         {
-            CardDefinitionConfig definition =
-                CardCatalog.Default.Find(card.Type);
-            if (definition?.recipeOnly == true && card.Star >= 6)
+            if (card.Star >= 6)
             {
-                return RecipeProductEffectCatalog.Default.Find(card.Type)
-                    ?.bindings
-                    ?? Array.Empty<CompiledEffectBindingConfig>();
+                RecipeProductCardEffectsConfig recipe =
+                    RecipeProductEffectCatalog.Default.Find(card.Type);
+                if (recipe != null)
+                    return recipe.bindings;
             }
 
             if (card.Star < 5)

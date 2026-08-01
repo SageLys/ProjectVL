@@ -2764,6 +2764,7 @@ namespace ProjectVL.Systems
             {
                 InitializeWaveEffects(state, profile);
             }
+            ExecuteCompiledIntervalZones(state, deltaTime);
 
             if (state.FireRateBuffRemaining > 0f)
             {
@@ -4037,6 +4038,7 @@ namespace ProjectVL.Systems
             state.SpringPulseRemaining =
                 profile.SpringRestoreInterval;
             state.GroundZones.Clear();
+            state.EquipmentBindingClocks.Clear();
             ExecuteCompiledWaveStartZones(state);
             state.ScorchAuraTickRemaining =
                 profile.ScorchAuraTickInterval;
@@ -4136,6 +4138,110 @@ namespace ProjectVL.Systems
                     CastCompiledGroundZone(state, tier, atom, point);
                 }
             }
+        }
+
+        private void ExecuteCompiledIntervalZones(
+            GameState state,
+            float deltaTime)
+        {
+            var liveKeys = new System.Collections.Generic.HashSet<string>();
+            foreach (RuntimeEquipmentBinding source
+                in EquipmentEffectBindingRuntime.Resolve(state, "interval"))
+            {
+                if (!HasNestedGroundZone(source.Binding))
+                    continue;
+
+                string key = "interval:" + source.SourceKey;
+                liveKeys.Add(key);
+                float seconds = Math.Max(
+                    0.05f,
+                    BindingNumber(source.Binding, "seconds", 1f));
+                float remaining = state.EquipmentBindingClocks.TryGetValue(
+                    key,
+                    out float clock)
+                        ? clock
+                        : seconds;
+                remaining -= deltaTime;
+                if (remaining <= 0f)
+                {
+                    ExecuteCompiledBindingZones(state, source);
+                    remaining += seconds;
+                }
+                state.EquipmentBindingClocks[key] = remaining;
+            }
+
+            var stale = new System.Collections.Generic.List<string>();
+            foreach (string key in state.EquipmentBindingClocks.Keys)
+            {
+                if (key.StartsWith("interval:", StringComparison.Ordinal)
+                    && !liveKeys.Contains(key))
+                {
+                    stale.Add(key);
+                }
+            }
+            foreach (string key in stale)
+                state.EquipmentBindingClocks.Remove(key);
+        }
+
+        private void ExecuteCompiledBindingZones(
+            GameState state,
+            RuntimeEquipmentBinding source)
+        {
+            foreach (CompiledEffectAtomConfig atom
+                in source.Binding.effects
+                    ?? Array.Empty<CompiledEffectAtomConfig>())
+            {
+                if (atom?.atom != "groundZone"
+                    || atom.children == null
+                    || atom.children.Length == 0)
+                {
+                    continue;
+                }
+
+                EnemyState target = FindTarget(state);
+                Float2 point = source.Binding.at == "densestCluster"
+                    && target != null
+                        ? target.Position
+                        : TurretPosition;
+                var tier = new CompiledConsumableTierConfig
+                {
+                    radius = EffectNumber(atom, "radius", AttackRange(state)),
+                    duration = EffectNumber(atom, "duration", 1f),
+                    effects = new[] { atom }
+                };
+                CastCompiledGroundZone(state, tier, atom, point);
+            }
+        }
+
+        private static bool HasNestedGroundZone(
+            CompiledEffectBindingConfig binding)
+        {
+            foreach (CompiledEffectAtomConfig atom
+                in binding.effects ?? Array.Empty<CompiledEffectAtomConfig>())
+            {
+                if (atom?.atom == "groundZone"
+                    && atom.children != null
+                    && atom.children.Length > 0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static float BindingNumber(
+            CompiledEffectBindingConfig binding,
+            string key,
+            float fallback)
+        {
+            foreach (CompiledEffectParamConfig item
+                in binding.triggerParams
+                    ?? Array.Empty<CompiledEffectParamConfig>())
+            {
+                if (item?.key == key && item.kind == "number")
+                    return item.number;
+            }
+            return fallback;
         }
 
         private void ApplySanctumAura(

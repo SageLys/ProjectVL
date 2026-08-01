@@ -100,5 +100,48 @@ namespace ProjectVL.Tests
             Assert.That(zone.TickInterval, Is.EqualTo(0.5f));
             Assert.That(zone.DamagePerTick, Is.GreaterThan(0f));
         }
+
+        [Test]
+        public void IntervalGroundZoneKeepsNestedControlEffects()
+        {
+            CombatConfig combat = CombatConfigLoader.LoadDefault();
+            GameState state = GameStateFactory.Create(combat);
+            var system = new CombatSystem(
+                combat,
+                GameConfigLoader.LoadEnemies());
+            state.Equipment[0] = state.CreateCard("glacialEpoch", 6);
+            state.BeginWave(1);
+            var enemy = new EnemyState(
+                1,
+                EnemyKind.Normal,
+                new Float2(260f, 320f),
+                100f,
+                10f,
+                8f,
+                1f);
+            state.Enemies.Add(enemy);
+
+            system.StepPassives(state, 0f);
+            Assert.That(state.EquipmentBindingClocks, Has.Count.EqualTo(1));
+            Assert.That(
+                state.EquipmentBindingClocks.Values.Single(),
+                Is.EqualTo(4f));
+            for (int step = 0; step < 8; step++)
+                system.StepPassives(state, 0.5f);
+
+            Assert.That(
+                state.EquipmentBindingClocks.Values.Single(),
+                Is.EqualTo(4f));
+            Assert.That(state.GroundZones, Has.Count.EqualTo(1));
+            GroundZoneState zone = state.GroundZones[0];
+            Assert.That(zone.Shape, Is.EqualTo("ring"));
+            Assert.That(zone.InitialRadius, Is.EqualTo(60f));
+            Assert.That(zone.InnerRadius, Is.EqualTo(45f));
+            Assert.That(zone.TargetRadius, Is.EqualTo(260f));
+            Assert.That(zone.SlowRatio, Is.EqualTo(0.35f));
+            Assert.That(zone.FreezeDuration, Is.EqualTo(1f));
+            Assert.That(zone.FreezeStacksToTrigger, Is.EqualTo(3));
+            Assert.That(zone.KnockbackDistance, Is.EqualTo(40f));
+        }
     }
 }

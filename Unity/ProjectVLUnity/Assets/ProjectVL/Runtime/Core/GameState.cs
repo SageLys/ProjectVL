@@ -170,6 +170,8 @@ namespace ProjectVL.Core
             new Dictionary<string, int>();
         public Dictionary<string, float> RelicScaling { get; } =
             new Dictionary<string, float>();
+        public Dictionary<string, float> EquipmentBindingClocks { get; } =
+            new Dictionary<string, float>();
         public LevelUpgradeChoice PendingLevelUpgrade =>
             _pendingLevelUpgrades.Count > 0
                 ? _pendingLevelUpgrades[0]
@@ -367,6 +369,7 @@ namespace ProjectVL.Core
             Bullets.Clear();
             GroundDrops.Clear();
             GroundZones.Clear();
+            EquipmentBindingClocks.Clear();
             BountyOffers.Clear();
             BountyEncounters.Clear();
             _pendingLevelUpgrades.Clear();

@@ -13,7 +13,16 @@ namespace ProjectVL.Systems
             if (card == null || profile == null)
                 return false;
 
-            return Apply(card.bindings, profile);
+            foreach (CompiledEffectBindingConfig binding in card.bindings)
+            {
+                foreach (CompiledEffectAtomConfig atom in binding.effects)
+                {
+                    if (UsesNestedZoneRuntime(binding, atom))
+                        continue;
+                    ApplyAtom(binding, atom, null, profile);
+                }
+            }
+            return true;
         }
 
         public static bool Apply(
@@ -30,6 +39,17 @@ namespace ProjectVL.Systems
             }
 
             return true;
+        }
+
+        private static bool UsesNestedZoneRuntime(
+            CompiledEffectBindingConfig binding,
+            CompiledEffectAtomConfig atom)
+        {
+            return atom?.atom == "groundZone"
+                && atom.children != null
+                && atom.children.Length > 0
+                && (binding.trigger == "onWaveStart"
+                    || binding.trigger == "interval");
         }
 
         private static void ApplyAtom(
