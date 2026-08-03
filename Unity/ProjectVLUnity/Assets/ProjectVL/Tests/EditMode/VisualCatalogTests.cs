@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using ProjectVL.Config;
 using ProjectVL.Core;
+using ProjectVL.Editor;
 using ProjectVL.Presentation;
 using UnityEngine;
 
@@ -136,6 +137,53 @@ namespace ProjectVL.Tests
                 Assert.That(
                     catalog.FindGod(god.id).accent,
                     Is.Not.EqualTo(Color.clear));
+            }
+        }
+
+        [Test]
+        public void CardArtBindingTableContainsBaseAndRecipeCards()
+        {
+            VisualCatalog catalog =
+                Resources.Load<VisualCatalog>("VisualCatalog");
+            CardsConfig cards = GameConfigLoader.LoadCards();
+
+            var rows = CardArtBindingUtility.BuildRows(catalog, cards);
+
+            Assert.That(rows, Has.Count.EqualTo(60));
+            Assert.That(
+                rows.FindAll(row => !row.Card.recipeOnly),
+                Has.Count.EqualTo(35));
+            Assert.That(
+                rows.FindAll(row => row.Card.recipeOnly),
+                Has.Count.EqualTo(25));
+            Assert.That(
+                rows,
+                Has.All.Matches<CardArtBindingRow>(
+                    row => row.CardVisual != null
+                        && row.DropVisual != null));
+        }
+
+        [Test]
+        public void CardArtBindingAlsoUpdatesMatchingDropArt()
+        {
+            Sprite sprite = CreateSprite();
+            var cardEntry = new VisualResourceEntry { id = "pierce" };
+            var dropEntry = new VisualResourceEntry { id = "pierce" };
+            var row = new CardArtBindingRow(
+                new CardDefinitionConfig { id = "pierce" },
+                cardEntry,
+                dropEntry);
+
+            try
+            {
+                CardArtBindingUtility.AssignSprite(row, sprite);
+
+                Assert.That(cardEntry.sprite, Is.SameAs(sprite));
+                Assert.That(dropEntry.sprite, Is.SameAs(sprite));
+            }
+            finally
+            {
+                DestroySprite(sprite);
             }
         }
 
