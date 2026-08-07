@@ -1,0 +1,36 @@
+思考或决定	聊天或文档来源	日期	Git版本或提交	实际修改	测试结果	后续修正	当前状态	证据强度
+单文件原型转模块化，用行为契约锁死行为一致	会话 local_75dac01c / docs/H5重构计划_ClaudeCode提示词.md	2026-07-07	阶段0，7个commit（归档/平移/refactor数据·规则·表现/docs）	抽出core纯规则层、render/ui/input三层分离、数值文案外置到src/data/*.json	core层38项Vitest全绿	后续所有AI协作建立在此边界上	现行架构	强（commit分组语义化，可逐条对照）
+全自动炮台、砍掉有限行动次数、固定波次+Boss	记忆 projectvl-game-design-decisions（07-08）	2026-07-08	无直接commit（设计期，早于工程化后的首个玩法commit）	—	—	至今未被推翻	有效	弱（只有记忆转述，无文档无commit）
+体验目标一页纸+可检验KPI	会话 local_88f27a3d（用户原话）→ docs/ProjectVL_体验目标一页纸.docx	2026-07-09	docs commit（阶段1「添加当前版本策划与模拟资料」）	产出一页纸docx + 三池竞品调研附录 + KPI表	不适用	单局时长8-12→10-14分；通关率30-40→15-25%；07-23波数8→10	一页纸现行；KPI表已清空	强（用户首条指令完整可读 + 交付物在库）
+废除纯数值加成卡、星级质变、一卡两用	记忆 projectvl-game-design-decisions（07-10）→ docs/P2_技能体系框架与首批卡牌设计表.md	2026-07-10	阶段1「定案六星技能与不可逆装备设计」	skills-schema v0.1.0：31原子/8触发器/硬规则R1-R7	不适用	星级模板被合成经济仿真重构；再扩到6★双质变节点	仍是现行卡牌设计根原则	中（有设计表与schema，用户原话仅记忆转述）
+4000局仿真定3★上限/二合/门槛2★	记忆 + docs/sim/merge_sim.py	2026-07-10	docs/sim 相关commit	merge_sim.py 脚本 + P4前置结论D1-D6文档	4000局/配置	07-12被人工推翻为6★/3★入装；结论文档随回退删除	已推翻，脚本待按6档重写（未做）	中（脚本在库，结论文档已删）
+结论强度分级（序数/不敏感性/默认值/设计锚）	记忆 projectvl-game-design-decisions（07-10 用户质疑后复审）	2026-07-10	无对应commit（纯方法论）	—	—	两天后被自己违反，见07-12	方法论有效	弱（仅记忆，原始质疑内容未读到）
+P3 配置六域+通用效果解释器	项目总览.md / 记忆	2026-07-12	阶段1「重构配置并实现技能效果系统」	config六域+variants+深合并加载器；31原子8触发器+passive；schema v0.3.0	测试38→108全绿	支撑后来60卡25配方而未重写引擎	现行架构	强（文档+测试数+commit齐全）
+真人试玩判定无聊，五个根因，四条方法论	docs/P6_体验重标定_反思与重构计划.md	2026-07-12	阶段1 三条docs commit（07-12）	产出反思文档 + 新P6计划	不适用（这是否定既有验证）	导致回退、KPI重建、流程重排	项目主线叙事	强（文档全文在库，Git事实核查已逐条验证）
+主动回退到P3完成态，废弃P4/P4.1/P5	会话 local_73dd0297（用户原话）/ docs/S0_差距盘点报告.md	2026-07-12	tag restart-s0；「制定可玩原型重启计划」「完成S0设计代码差距盘点」	P4/P4.1/P5代码与结论废弃，相关文档删除	不适用	S0报告定性为已知、主动、非事故	已完成	强（tag + 用户原话 + 文档三重佐证）
+铁律一删旧界面 / 铁律二真人验收	会话 local_73dd0297（用户原话）/ docs/可玩原型_重启开发总计划.md §0	2026-07-12	阶段1 移动端交互专题（07-13~14）	竖屏三分区布局、指针输入统一、pointerRouter	验收=线框逐项截图+grep零残留	铁律二在C系列被继续引用	已执行	强（用户原话可逐字引用 + 布局落地commit）
+人工拍板6★上限/3★入装/方案A	记忆 projectvl-game-design-decisions（07-12）	2026-07-12	skills schema升v0.4.0相关commit	stars锚点3/5/6 + amplifyAxis + anchors 1/3/6	—	装备语义两条两天后被自己推翻	6★/3★/方案A现行	中（记忆+schema，拍板原文未读到）
+装备语义改为可撤销/可消耗	记忆（07-14）/ docs/Git事实核查报告 已核实	2026-07-14	3f31f5a「allow equipped cards to be consumed」	economy.json：equipIrreversible=false、unequipPolicy=consume	—	与P2硬规则R11冲突，记忆写「S5前须拍板」，未见关闭	现行值	中强（commit可核，但推翻动机零记录）
+先R1手动调参环再回填KPI（否决直接定版门槛）	记忆 / docs/P6_R1_手动调参环_执行计划.md	2026-07-12	调参面板/遥测HUD相关commit（07-13~14）	分组调参面板+preset+跳波/锁血/timeScale/seed；遥测HUD+会话导出；出怪双轨interval/budget	156测试绿（07-14）	R1-B只锁定E1/E4/E5/E7；E2/E3/E6至今未回填	部分完成	中强（工具链在库，遥测46份可证）
+预算式并发出怪（维持同屏目标数）	docs/P6_R1_手动调参环_执行计划.md	2026-07-14	ecd61b4 / 2d74009「Add budget-based wave spawning」	budget.targetOnScreen 主动维持同屏数	遥测阶段B同屏P50升到10-18	07-21判定平铺14是错的，改分段曲线	被三阶段导演取代/包裹	强（遥测数据可直接对照commit）
+把满意preset焙入base，修6个config耦合测试	记忆 / docs/S4a_经济拍板_provisional.md	2026-07-14	S4a相关commit	base改为budget/range150/dmg18·fr5/dropChance0.27/8波	19/20测试文件执行绿	S4b从未执行，口径澄清悬空	现行base源头	中强
+精英Bounty全流程	记忆（07-10定案）/ codex-prompt-精英Bounty重做.md	2026-07-16	168f60c ～ 86289b4（六连击，一天内）	模型重构→报价导演→敌群结算→优先索敌→视觉反馈→遥测接入	遥测含bountyAccept语义化输入	—	已实装	强（六个commit构成完整闭环，作品集可直接用）
+掉落导演三角色袋	docs/普通掉落导演_设计说明.md / D_掉落与拾取_调参说明.md	2026-07-16	阶段2 掉落相关commit	dropTypePolicy.ts：roleBagSize=10、earlyMix 6/3/1→lateMix 1/7/2、build.topK=3	—	build.topK=3 在07-23被反用为「并行链≈3」的证据	现行	强（参数可直接读代码核对）
+四档难度只乘敌人侧，hell=恒等对照	记忆（HEAD 673afff核实）/ codex-prompt-多难度系统.md	2026-07-17	阶段2 难度框架+曲线微调	难度倍率乘在createEnemy基础公式；Enemy加statMods保外部倍率	阶段1硬门禁：全档恒1证地狱恒等	顺带修syncEnemyConfig抹掉Bounty倍率的bug	已实装	中强
+三阶段体验导演+掉落节拍（密度分段曲线）	docs/作品集证据核对报告 §三	2026-07-21	36300cf（07-21 22:21）	stagePlan.targetOnScreen 分段递增	遥测阶段C前90秒同屏P50回到6-7；波1/3/8命中目标	波9/10结构断裂（P50 4-8 / P95 47-66）	现行，有已知问题	强（配置目标vs实测逐波对照表可生成）
+BOSS贴身持续伤害与曲线逼近	会话 local_942ff1ab / codex-prompt-BOSS贴身持续伤害与曲线逼近重构.md	2026-07-22	阶段3 相关commit	消除瞬移导致的约16s空转；持续伤害+曲线逼近	按真实坐标540×730重算	纠正参考稿画布尺寸与hell倍率错误	已实装	中强
+神池构筑系统C0-C9（锚=并行链≈3）	会话 local_4510df03 / local_ed76fa24 / docs/神池构筑系统_总纲与阶段计划.md	2026-07-23	1d8e53e ～ e34a9d5（07-23~24）	数据契约→决策队列→波末奖励→神池活跃池→遗物化经验→单卡进化树→卡间进化→随机数值槽→35卡落地	C1-C3架构分水岭硬门禁；整体验收8条	门禁拦住了顺序错误，未拦住能力缺失（见目标定位原语）	已实装并扩到60卡	强（九个prompt+commit区间+总纲三重对应）
+10波三段式，第10波即终局Boss	docs/神池构筑系统_总纲与阶段计划.md 决策4	2026-07-23	阶段4 waves配置commit	totalWaves=10，3招募+5收敛+2兑现	10×59+9×20≈12.8分钟落回10-14中位	docs/P6_新KPI体系_v2_定版.md 因此被清空至今未重写	波次现行；KPI表仍空	强（配置可读，清空原因写在文件里）
+maxHpAdd词条失效等四项缺陷修复	会话 local_c531f803 / codex-prompt-BUG-数值词条未生效-血上限修复.md	2026-07-24	阶段4后期 BUG修复commit	引入baseMaxHp+totalMaxHp+reconcileMaxHp；HUD分母修复；取整校验	数据驱动测试清单	纠正ChatGPT两处不实项（heal降级为防御性修复）	已修	中强
+防御反馈六种CombatVfx + 确定性护栏	会话 local_9d9aedbc	2026-07-24	阶段4 防御反馈VFX commit	吸收闪/破盾环/重铸环/反伤回冲弧/反击冲击环/减伤内闪；四处结算点接线	确定性护栏测试（一律走state.vfx，绝不新增spawnParticle）	—	已实装	中
+配置管线v1+配置编辑器v1+Excel双向同步+内容工作台	会话 local_b7898cb0 / docs/配置管线v1_说明.md 等	2026-07-26~29	阶段5「固化1-4」系列 + 编辑器commit（ff1d1ce等）	15个可写域；/__config/validate 实时校验；422不落盘；ATOM_CONTRACT驱动表单	npm run validate 0 error/0 warning，76文件648用例	后扩为内容设计工作台三步迭代	现行	强（可实跑npm run validate复验）
+内容差异化诊断：缺的是可交易资源	记忆 projectvl-content-differentiation-diagnosis / scripts/audit_content.py	2026-07-29	阶段6 相关commit	五段体检脚本；神印方案；chain.spreadStatus（唯一新增引擎能力，3-5行）	41卡硬数据可复跑	同日被代码事实推翻两次（九宫格/equipSlots=3）	方案已定，部分实装	强（脚本可复跑）
+mergeRule退役，经济原子改零行为契约	记忆 / S0报告更新	2026-07-29	277a380（mergeRule退役）+ 阶段6 commit	由mergeMaterialRefund / wildcardRewardBonus 两个专用原子承接	tests/fusionOrderInvariance.test.ts 守着	—	已完成	强
+25格有向矩阵配方系统	会话 local_398de36d / 记忆 projectvl-evolution-recipe-system	2026-07-30	e4ff2f9 / e87249c / 3c75312（07-30，单日20commit）	25条命名配方5×5矩阵；灰盒B0-B3分期；名册生成逻辑一行未改	7500状态穷举，零配方局0%	接受2:1不对称并改KPI口径；保底只发最低星复制卡	已实装	强（commit+数学验证+脚本核验三重）
+奖励蓄力条替换经验/等级/遗物	记忆 reward-meter-refactor-prompt	2026-07-30	e8d839c / 3142b47 / c61a2dd；checkpoint提交 + archive/pre-reward-meter-v4 与 -2026-07-30 两分支	删relics.json/relicsEditor/relicView/xlsx relics sheet；REWARD_CELEBRATION_MS=2200非阻塞	—	08-04复核：它正是终局构筑兑现来源，结论改为「谁都不许加屏蔽开关」	现行	强（含显式风险备份提交与两个归档分支）
+目标定位原语缺口+设计指纹夹具	docs/目标定位原语与卡牌回填_规格_v1.md / 记忆	2026-07-30	对应07-30内容重写批次；codex-prompt-全卡正式实装-原语与回填与配方卡.md	T1-T6原语契约；designFingerprints.json；V15硬失败/V16	64/210支跨卡字节级同构的实测	25配方卡实装规格§1.0作废，C6/C7由T5/T6取代	规格已出，回填进行中	强（可grep复验）
+基础属性词条分区（乘区拆分）	codex-prompt-N2-基础属性倍率词条与词条分区.md / docs/基础属性词条分区_落地说明.md	2026-07-30	分支 refactor/affix-base-stat-mul（已合入main）	乘区拆分	—	—	已合入	中强
+texts.json事故与加固	记忆 projectvl-main-broken-2afc292-recovery	2026-07-31	2afc292（事故）→ 13324f3 / 6bc5217 / 78d5516（40分钟内止血三连）	恢复texts.json；补齐5个模块；新增validateTextsFile接入构建	validateTextsFile 至今在绿（170699字节/20顶层键/35节点/210分支）	—	已闭环	强（commit序列+校验脚本可复跑）
+卡面尺寸预算与三条红线测试	记忆 projectvl-card-face-layout-budget	2026-07-31	阶段6~7 卡面文案重排commit	standard/compact两套变体实测；dock只剩2px	cardTitleLayout / renderSmoke / compactStageProportion 三条红线测试	—	现行	强（实测值+测试守护）
+AI报告事实核查与作品集定级	会话 local_81450cb6 / docs/作品集证据核对报告 + Git事实核查报告	2026-08-04~06	7c10f3c（08-04）；建议的 portfolio-baseline tag 未打	三份专项报告；实跑13项基线	94测试文件/756测试全绿；tsc干净；配置16项×2变体0错0警	新增原则：AI分析进母档前必须人工用可复现命令核验	进行中	强（全部数字本次实跑）
+Unity移植线（协作者独立复刻）	docs/Git事实核查报告 §二.3	2026-07-28~08-03	origin/agent/unity-port：240提交，领先main 120；PR#4（草稿）	414文件改动，+65774/-4	团结EditMode测试240/240通过；卡池核对35/35+6/6缺失为0；Windows构建成功	—	进行中，作者 wlh219627-art	强（GitHub API可核）
