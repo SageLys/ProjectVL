@@ -90,8 +90,12 @@ export class ConfigEditorApp {
       this.renderSelected();
     });
     this.saveButton.addEventListener('click', () => void this.save());
-    this.previewButton.addEventListener('click', () => window.open('/index.html', 'projectvl-h5-preview'));
+    this.previewButton.addEventListener('click', () => window.open(new URL('./index.html', location.href), 'projectvl-h5-preview'));
     actions.append(this.modeButton, this.previewButton, this.saveButton);
+    if (import.meta.env.PROD) {
+      this.saveButton.disabled = true;
+      this.saveButton.title = '只读演示模式：请在本地开发服务器中保存';
+    }
     top.append(heading, actions);
     const center = el('section', 'editor-workspace');
     center.append(top, this.status, this.content);
@@ -243,9 +247,9 @@ export class ConfigEditorApp {
     const dirtyReports = [...this.dirty].map(domain => this.reports[domain]);
     const allReported = dirtyReports.every((report): report is ValidationReportDto => Boolean(report));
     const hasError = dirtyReports.some(report => Boolean(report && reportHasErrors(report)));
-    this.saveButton.disabled = !this.dirty.size || this.saving || this.validating.size > 0 || !allReported || hasError;
+    this.saveButton.disabled = import.meta.env.PROD || !this.dirty.size || this.saving || this.validating.size > 0 || !allReported || hasError;
     this.saveButton.textContent = this.saving ? '保存中…' : this.dirty.size ? `保存 ${this.dirty.size} 个域` : '保存';
-    const pieces = [this.message];
+    const pieces = [import.meta.env.PROD ? '只读演示模式：本页使用随构建打包的配置执行本地校验，不会写回仓库。' : this.message];
     if (this.dirty.size) pieces.push(`未保存：${[...this.dirty].join(', ')}`);
     if (hasError) pieces.push('存在 error，已禁用保存');
     if (!pieces.filter(Boolean).length) pieces.push('配置已加载；改动会自动校验。');

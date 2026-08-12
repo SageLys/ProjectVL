@@ -180,5 +180,13 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     target: 'es2020',
+    rollupOptions: {
+      input: {
+        game: resolve(process.cwd(), 'index.html'),
+        editor: resolve(process.cwd(), 'editor.html'),
+        design: resolve(process.cwd(), 'design.html'),
+        hub: resolve(process.cwd(), 'hub.html'),
+      },
+    },
   },
 });

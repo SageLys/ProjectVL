@@ -43,16 +43,17 @@ import { createIntermissionPanel } from './ui/intermissionPanel';
 import { formatPlaySpeed, nextPlaySpeed } from './ui/gameSpeed';
 import type { DevTelemetry } from './telemetry/devTelemetry';
 import type { DifficultyId } from './config/types';
-import { resyncEnemyStats, type EnemyStatConfigKey } from './core/systems/enemySystem';
+import { createEnemy, resyncEnemyStats, type EnemyStatConfigKey } from './core/systems/enemySystem';
 import { DEV_TOOLS_ENABLED } from './debug/devToolsMode';
 import { cardDisplayName } from './ui/cardMeta';
 import { simulationSteps } from './core/simulationClock';
 import { resizeCanvasBackingStore } from './render/renderMetrics';
+import { makeRng } from './core/rng';
 
 // 技能 = 数据 + 解释器：把配置里的卡定义注入解释器（P5 实装 12 张正式卡后自动生效）。
 registerSkillDefs(cfg.skills.cards);
 
-let rngSource: Rng = Math.random;
+let rngSource: Rng = DEV_TOOLS_ENABLED ? makeRng(1) : Math.random;
 const rng: Rng = DEV_TOOLS_ENABLED ? () => rngSource() : Math.random;
 let tuner: TunerPanel | null = null;
 let telemetry: DevTelemetry | null = null;
@@ -62,6 +63,7 @@ let devInvincible = false;
 let manualPaused = false;
 const uiPauseReasons = new Set<'cardDetail'>();
 const evidenceMode = DEV_TOOLS_ENABLED ? new URLSearchParams(location.search).get('evidence') : null;
+if (evidenceMode) document.documentElement.dataset.evidence = evidenceMode;
 const refs = getDomRefs();
 let selectedDifficulty: DifficultyId = cfg.difficulty.defaultDifficulty;
 const difficultyButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[role="radio"][data-difficulty]'));
@@ -290,6 +292,28 @@ function reset(): void {
     if (DEV_TOOLS_ENABLED) telemetry?.recordGameEvents(created.events);
     return created.card;
   };
+  const addEvidenceEnemies = (count: number, wave: number, kind: 'regular' | 'validationElite' | 'bounty' = 'regular'): void => {
+    const { width, height } = cfg.combat.canvas;
+    for (let index = 0; index < count; index++) {
+      const angle = -Math.PI / 2 + (index / count) * Math.PI * 2;
+      const ring = index % 3;
+      const radiusX = width * (0.34 + ring * 0.055);
+      const radiusY = height * (0.32 + ring * 0.04);
+      const type = kind === 'validationElite' ? (index % 4 === 0 ? 'boss' : 'tank') : index % 5 === 0 ? 'tank' : index % 3 === 0 ? 'fast' : 'normal';
+      state.enemies.push(createEnemy(state, type, wave, {
+        x: width / 2 + Math.cos(angle) * radiusX,
+        y: height / 2 + Math.sin(angle) * radiusY,
+      }, kind === 'bounty'
+        ? { hpMul: cfg.bounty.encounter.hpMul, speedMul: cfg.bounty.encounter.speedMul, damageMul: cfg.bounty.encounter.damageMul, bountyEncounterId: 1, bountyRewardType: 'chainLightning', spawnKind: 'bounty' }
+        : { spawnKind: kind }));
+    }
+  };
+  const stageEvidence = (wave: number): void => {
+    state.mode = 'playing';
+    state.wave = wave;
+    state.paused = true;
+    state.combatTelemetry.wave = wave;
+  };
   if (evidenceMode === 'equip') {
     state.cards[0] = createEvidenceCard('pierce', 4);
   } else if (evidenceMode === 'upgrade4' || evidenceMode === 'upgrade5' || evidenceMode === 'upgrade6') {
@@ -298,6 +322,7 @@ function reset(): void {
     state.cards[0] = createEvidenceCard('pierce', sourceStar);
     state.cards[1] = createEvidenceCard('frost', 1);
   } else if (evidenceMode === 'mobileLayout') {
+    stageEvidence(6);
     const cardTypes = ['emberMoat', 'chainLightning', 'pierce', 'frozenBulwark', 'springOfLife', 'stormLattice', 'bountyCall'];
     state.cards = cardTypes.map((type, index) => createEvidenceCard(type, index === 0 ? 6 : 1 + index % 5));
     state.equipment = ['pierce', 'frozenBulwark', 'bountyCall'].map((type, index) => createEvidenceCard(type, 3 + index));
@@ -318,6 +343,70 @@ function reset(): void {
       guaranteed: true,
       createdAt: 0,
     });
+    addEvidenceEnemies(14, 6);
+  } else if (evidenceMode === 'selection') {
+    // 截图 01 / 案例 A：手空出来后，选择期仍有拾取与手牌取舍。
+    stageEvidence(2);
+    state.cards.splice(0, 4, ...['pierce', 'frost', 'scorch', 'aegis'].map(type => createEvidenceCard(type, 1)));
+    [[115, 190, 'pierce'], [420, 230, 'frost'], [150, 475, 'scorch'], [390, 520, 'aegis'], [270, 145, 'chainLightning']].forEach(([x, y, type], index) => spawnGroundDrop(state, config, rng, Number(x), Number(y), String(type), index % 2 + 1));
+    addEvidenceEnemies(10, 2);
+  } else if (evidenceMode === 'build') {
+    // 截图 02 / 案例 D：构筑期承担整局最高压力，同屏超过 20 敌人。
+    stageEvidence(7);
+    state.cards.splice(0, 5, ...['pierce', 'frost', 'scorch', 'chainLightning', 'impact'].map((type, index) => createEvidenceCard(type, index % 3 + 2)));
+    state.equipment.splice(0, 2, createEvidenceCard('chainLightning', 4), createEvidenceCard('impact', 4));
+    addEvidenceEnemies(28, 7);
+  } else if (evidenceMode === 'validation') {
+    // 截图 05 / 案例 E：验证期关闭普通掉落，只留下高强敌人检验 Build。
+    stageEvidence(9);
+    state.equipment.splice(0, 3, createEvidenceCard('chainLightning', 5), createEvidenceCard('pierce', 5), createEvidenceCard('frost', 4));
+    state.groundDrops = [];
+    addEvidenceEnemies(16, 9, 'validationElite');
+  } else if (evidenceMode === 'bounty') {
+    // 截图 03 / 案例 A：接单前看清确定奖励，并保留拒绝权。
+    stageEvidence(3);
+    addEvidenceEnemies(9, 3);
+    state.bountyOffers.push({ id: 1, rewardCardType: 'chainLightning', rewardCardStar: 3, rewardCardCount: 1, wildcardStar: 2, wildcardCount: 2, side: 'right', x: 500, y: 285, remaining: cfg.bounty.offer.markWindowSeconds, guaranteed: true, createdAt: 0 });
+  } else if (evidenceMode === 'bountyActive') {
+    // 截图 04 / 案例 A：接受后，对应方向的强化敌群带着赏金标记推进。
+    stageEvidence(4);
+    state.bountyEncounters.push({ id: 1, offerId: 1, rewardCardType: 'chainLightning', rewardCardStar: 3, rewardCardCount: 1, wildcardStar: 2, wildcardCount: 2, side: 'right', status: 'active', memberIds: [], pendingSpawnCount: 0, spawnTimer: 0, guaranteed: true, acceptedAt: 0, hpAtAccept: state.hp, lastKillX: 500, lastKillY: 365 });
+    addEvidenceEnemies(14, 4, 'bounty');
+    state.bountyEncounters[0].memberIds = state.enemies.map(enemy => enemy.id);
+  } else if (evidenceMode === 'handFull') {
+    // 截图 06 / 案例 B：固定 7 格已经全满，同型同星合成机会仍清晰可见。
+    stageEvidence(5);
+    state.cards = ['pierce', 'pierce', 'frost', 'scorch', 'aegis', 'impact', 'chainLightning'].map((type, index) => createEvidenceCard(type, index < 2 ? 2 : index % 3 + 1));
+    addEvidenceEnemies(14, 5);
+  } else if (evidenceMode === 'cardDetail') {
+    // 截图 07 / 案例 B：二级详情展开，技能描述、路线与数值词条同屏可读。
+    stageEvidence(5);
+    state.cards[0] = createEvidenceCard('chainLightning', 5);
+    state.cards[0]!.evolutionPath = ['3:chainLightningA', '5:chainLightning1x'];
+    addEvidenceEnemies(12, 5);
+  } else if (evidenceMode === 'evolution') {
+    // 截图 08 / 案例 B：3★ 检查点把内容深度压进同一个槽的分叉选择。
+    stageEvidence(5);
+    const card = createEvidenceCard('pierce', 3);
+    card.provisional = true;
+    state.cards[0] = card;
+    const options = cfg.skills.cards.find(item => item.id === card.type)?.evolutionTree?.checkpoints.find(item => item.star === 3)?.options.map(item => item.id) ?? [];
+    state.decisions.current = { kind: 'evolutionBranch', cardType: card.type, checkpointStar: 3, options, provisionalCardId: card.id };
+  } else if (evidenceMode === 'fusion') {
+    // 截图 09 / 案例 C：三件装备占满，光束与榴弹在主炮上正交融合。
+    stageEvidence(8);
+    state.equipment = [createEvidenceCard('chainLightning', 6), createEvidenceCard('pierce', 6), createEvidenceCard('frost', 5)];
+    addEvidenceEnemies(22, 8);
+  } else if (evidenceMode === 'tuner') {
+    // 截图 10–11 / 副题与案例 A：完全展开几十项参数及掉落、出怪、TTK 派生读数。
+    stageEvidence(4);
+    addEvidenceEnemies(15, 4);
+  } else if (evidenceMode === 'telemetryHud') {
+    // 截图 12 / 案例 D：E1–E7 实时读数是用来检验体验曲线的自建尺子。
+    stageEvidence(7);
+    state.cards.splice(0, 4, createEvidenceCard('pierce', 2), createEvidenceCard('pierce', 2), createEvidenceCard('frost', 3), createEvidenceCard('scorch', 2));
+    state.equipment.splice(0, 2, createEvidenceCard('chainLightning', 5), createEvidenceCard('pierce', 5));
+    addEvidenceEnemies(24, 7);
   }
   modals.hideResult();
   modals.hideDecision();
@@ -334,6 +423,26 @@ function reset(): void {
   refreshSlots();
   renderHud(refs, state, config);
   intermissionPanel.render(state);
+  if (evidenceMode && !['equip', 'upgrade4', 'upgrade5', 'upgrade6'].includes(evidenceMode)) {
+    refs.readyOverlay.hidden = true;
+    refs.pauseBtn.disabled = false;
+    refs.speedBtn.disabled = false;
+    modals.message('', '', false);
+    syncDecisionUi();
+    if (evidenceMode === 'cardDetail') requestAnimationFrame(() => cardDetail.open(state.cards[0]!, 'cards', refs.cards));
+    if (evidenceMode === 'bounty') requestAnimationFrame(showBountyEvidenceOffer);
+  }
+}
+
+function showBountyEvidenceOffer(): void {
+  document.querySelector('[data-evidence-bounty-dialog]')?.remove();
+  const offer = state.bountyOffers[0];
+  if (!offer) return;
+  const dialog = document.createElement('aside');
+  dialog.className = 'evidence-bounty-dialog';
+  dialog.dataset.evidenceBountyDialog = '';
+  dialog.innerHTML = `<small>精英悬赏契约 · 确定奖励</small><h2>${cardDisplayName(offer.rewardCardType)} ${offer.rewardCardStar}★ × ${offer.rewardCardCount}</h2><p>附赠万能卡 ${offer.wildcardStar}★ × ${offer.wildcardCount}。接受后，右侧将生成一组定向强化敌群；任一突破则整组失败。</p><div><button type="button">拒绝 · 无惩罚</button><button type="button" class="accept">接受悬赏</button></div>`;
+  document.body.append(dialog);
 }
 
 function start(): void {
@@ -472,6 +581,10 @@ if (DEV_TOOLS_ENABLED) void Promise.all([import('./debug/exposeDebugApi'), impor
       getDifficultyId: () => state.difficultyId,
     },
   });
+  if (evidenceMode === 'tuner') {
+    devTools.open = true;
+    devTools.querySelectorAll<HTMLDetailsElement>('details').forEach(details => { details.open = true; });
+  }
   if (evidenceMode?.startsWith('upgrade') || evidenceMode === 'mobileLayout') devTools.hidden = true;
 
   telemetry = telemetryModule.createDevTelemetry({

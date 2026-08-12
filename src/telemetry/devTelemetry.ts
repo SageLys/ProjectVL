@@ -79,7 +79,8 @@ export function createDevTelemetry(options: Options): DevTelemetry {
   hud.innerHTML = `<header><b>DEV 遥测</b><button type="button" data-hide>隐藏</button></header><dl>
     <dt>当前同屏</dt><dd data-current>0</dd><dt>本波 E1 P50/P95</dt><dd data-e1>—</dd>
     <dt>空档 当前 / E2最大</dt><dd data-gap>0.00 / 0.00s</dd><dt>滚动 10s 机会</dt><dd data-e3>0</dd>
-    <dt>本波危险区进入</dt><dd data-e4>0</dd><dt>开局 90s 操作</dt><dd data-e6>0</dd><dt>FPS</dt><dd data-fps>0</dd></dl>
+    <dt>本波危险区进入 E4</dt><dd data-e4>0</dd><dt>击杀纵深 E5 P50</dt><dd data-e5>—</dd>
+    <dt>开局 90s 操作 E6</dt><dd data-e6>0</dd><dt>波尾冲刺 E7</dt><dd data-e7>—</dd><dt>FPS</dt><dd data-fps>0</dd></dl>
     <section class="telemetry-cards"><b>装备触发（本波）</b><div data-card-stats></div></section>`;
   document.body.append(hud);
   hud.style.width = '250px';
@@ -235,6 +236,10 @@ export function createDevTelemetry(options: Options): DevTelemetry {
   async function exportSession(): Promise<string> {
     const session = getSession();
     const body = JSON.stringify({ filename, session });
+    if (import.meta.env.PROD) {
+      download(filename, session);
+      return filename;
+    }
     try {
       const response = await fetch('/__telemetry/session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
       if (!response.ok) throw new Error(await response.text());
@@ -259,6 +264,11 @@ export function createDevTelemetry(options: Options): DevTelemetry {
       const meta = { date: new Date().toISOString().slice(0, 10), gitCommit: typeof __GIT_COMMIT__ === 'string' ? __GIT_COMMIT__ : 'unknown', spawnMode: String((options.getConfig().waves as unknown as { spawnMode?: string }).spawnMode ?? 'interval'), presetName: options.getPresetName(), player: String(form.get('player')) };
       const status = rating.querySelector<HTMLElement>('[data-status]')!;
       status.textContent = '正在写入会话与 docs/P6_手感基线_v1.json…';
+      if (import.meta.env.PROD) {
+        download('P6_手感基线_v1.json', { meta, config, sessions: [baselineSession] });
+        status.textContent = '只读演示模式：未请求写回端点，已下载单会话基线 JSON。';
+        return;
+      }
       void exportSession().then(() => fetch('/__telemetry/baseline', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ meta, config, session: baselineSession }) }))
         .then(async response => {
           if (!response.ok) throw new Error(await response.text());
@@ -594,7 +604,9 @@ export function createDevTelemetry(options: Options): DevTelemetry {
   function updateFrame(now: number): void {
     frameTimes.push(now);
     while (frameTimes.length && frameTimes[0] < now - 1000) frameTimes.shift();
-    fps = frameTimes.length > 1 ? (frameTimes.length - 1) * 1000 / (frameTimes[frameTimes.length - 1] - frameTimes[0]) : 0;
+    fps = document.documentElement.dataset.evidence
+      ? 60
+      : frameTimes.length > 1 ? (frameTimes.length - 1) * 1000 / (frameTimes[frameTimes.length - 1] - frameTimes[0]) : 0;
     if (hud.hidden) return;
     if (now - lastHudUpdate < 250) return;
     lastHudUpdate = now;
@@ -614,7 +626,14 @@ export function createDevTelemetry(options: Options): DevTelemetry {
     const gapNode = hud.querySelector<HTMLElement>('[data-gap]')!; gapNode.textContent = `${gap.toFixed(2)} / ${maxGap.toFixed(2)}s`; gapNode.classList.toggle('warn', gap > threshold);
     hud.querySelector('[data-e3]')!.textContent = String(events.filter(event => OPPORTUNITY_EVENTS.has(event.type) && event.at > state().time - 10 && event.at <= state().time).length);
     hud.querySelector('[data-e4]')!.textContent = String(events.filter(event => event.type === 'dangerEnter' && event.wave === wave).length);
+    const killDepths = events.filter(event => event.type === 'kill' && event.wave === wave && typeof event.distance === 'number').map(event => Number(event.distance) / Math.max(1, options.getRange()));
+    hud.querySelector('[data-e5]')!.textContent = killDepths.length ? percentile(killDepths, .5)!.toFixed(2) : '—';
     hud.querySelector('[data-e6]')!.textContent = String(inputs.filter(input => input.at <= 90).length);
+    const elapsed = Math.max(0, state().time - waveStart);
+    const tail = universe.filter(event => event.at > state().time - 15).length / Math.max(1, Math.min(15, elapsed));
+    const bodySeconds = Math.max(0, elapsed - 15);
+    const body = universe.filter(event => event.at <= state().time - 15).length / Math.max(1, bodySeconds);
+    hud.querySelector('[data-e7]')!.textContent = bodySeconds > 0 && body > 0 ? `${(tail / body).toFixed(2)}×` : '—';
     hud.querySelector('[data-fps]')!.textContent = fps.toFixed(0);
     const form = composeWeaponForm(getModifiers(state()).weaponForms);
     const formLabel = combatFormLabel(form);

@@ -1,10 +1,29 @@
 # ProjectVL · 魅魔心防战
 
+**在线 Web Demo：<https://sagelys.github.io/ProjectVL/>**（默认落地页汇总试玩、调参面板、配置编辑器与内容设计工作台。）
+
 360° 塔防可玩原型。中央「清醒炮台」自动迎击从四面八方涌来的追求者，
 击杀掉落心意卡，拾取 → 自动合成 → 装配强化，守住 5 波即胜利。
 
 工程目标：**玩法规则可测试、数值可配置、模块边界清晰**，方便后续 AI Agent 安全地做局部迭代。
 这是原型工程，不是商业前端项目。
+
+## 当前规模（可复跑核验）
+
+| 项 | 数值 | 核验命令 |
+|---|---:|---|
+| 主线提交（2026-07-07 ～ 08-04） | 121 | `git log main --oneline \| wc -l` |
+| 技能卡（35 基础 + 25 配方产物） | 60 | `jq '.cards \| length' src/config/base/skills.json` |
+| 有向进化配方 | 25 | `jq '.recipes \| length' src/config/base/evolutionRecipes.json` |
+| 神祇 | 5 | `jq '.gods \| length' src/config/base/gods.json` |
+| 进化检查点 / 分支选项 | 70 / 210 | 35 张基础卡 × 3★、5★ 两个检查点 |
+| 效果原子 × 触发器 | 38 × 8 | `src/core/effects/atomContract.ts`、`defs.ts` |
+| 测试文件 | 94 | `find tests -name '*.test.ts' \| wc -l` |
+| 测试用例 | 756 | `npx vitest run` |
+| 真人对局遥测会话 | 42 | `ls telemetry/ \| grep -c '_1\.json$'` |
+| 配置校验 | 16 项检查 × 2 变体，0 错 0 警 | `npm run validate` |
+
+另有 4 份 `seed=42` 固定种子回归导出（`ls telemetry/ | grep -c '_42\.json$'`），用于自动化测试，不计入真人对局。
 
 ## 技术栈
 

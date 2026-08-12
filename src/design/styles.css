@@ -18,6 +18,8 @@
 body { margin: 0; min-width: 1180px; background: #f3eef0; }
 button, input, select, textarea { font: inherit; }
 button { color: inherit; }
+.readonly-banner { position:sticky; top:0; z-index:100; padding:9px 16px; border-bottom:1px solid #b77b19; color:#321f00; background:#ffe7a3; font-size:12px; line-height:1.45; }
+.readonly-banner[hidden] { display:none; }
 code { margin-left: .55rem; color: #81747b; font-family: "Cascadia Mono", Consolas, monospace; font-size: .72em; font-weight: 500; overflow-wrap: anywhere; }
 h1, h2, h3, h4, p { margin-top: 0; }
 h1 { color: #4e2638; font-size: 1.75rem; }

@@ -382,18 +382,22 @@ export function createTunerPanel(root: HTMLElement, config: Config, hooks: Tuner
     if (existing >= 0) presets[existing] = preset; else presets.push(preset);
     localStorage.setItem(PRESET_KEY, JSON.stringify(presets));
     updatePresetOptions(); presetSel.value = String(existing >= 0 ? existing : presets.length - 1);
-    presetSaveStatus.textContent = '正在写入项目 presets/…';
-    void fetch('/__tuner/preset', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, preset }),
-    }).then(async response => {
-      const result = await response.json() as { ok?: boolean; path?: string };
-      if (!response.ok || !result.ok || !result.path) throw new Error('保存失败');
-      presetSaveStatus.textContent = `已写入项目：${result.path}；也已下载到浏览器下载目录。`;
-    }).catch(() => {
-      presetSaveStatus.textContent = '项目内写入失败；JSON 仍已下载到浏览器下载目录。请通过 npm run dev 打开页面后重试。';
-    });
+    if (import.meta.env.PROD) {
+      presetSaveStatus.textContent = '只读演示模式：不会请求写回端点；preset 将仅下载到浏览器。';
+    } else {
+      presetSaveStatus.textContent = '正在写入项目 presets/…';
+      void fetch('/__tuner/preset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, preset }),
+      }).then(async response => {
+        const result = await response.json() as { ok?: boolean; path?: string };
+        if (!response.ok || !result.ok || !result.path) throw new Error('保存失败');
+        presetSaveStatus.textContent = `已写入项目：${result.path}；也已下载到浏览器下载目录。`;
+      }).catch(() => {
+        presetSaveStatus.textContent = '项目内写入失败；JSON 仍已下载到浏览器下载目录。请通过 npm run dev 打开页面后重试。';
+      });
+    }
     const blob = new Blob([JSON.stringify(preset, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob); const anchor = document.createElement('a');
     anchor.href = url; anchor.download = `${name.replace(/[^\w\u4e00-\u9fa5-]+/g, '_')}.tuner.json`;

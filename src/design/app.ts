@@ -266,9 +266,13 @@ export class DesignWorkbenchApp {
   private updateSaveState(): void {
     if (!this.status || !this.saveButton) return;
     const errors = this.dirtyReportsHaveErrors();
-    this.saveButton.disabled = !this.hasDirtyDomains() || this.isValidating() || this.saving || errors;
+    this.saveButton.disabled = import.meta.env.PROD || !this.hasDirtyDomains() || this.isValidating() || this.saving || errors;
     this.status.className = 'status-badge';
-    if (this.saving) {
+    if (import.meta.env.PROD) {
+      this.status.classList.add('status-badge--warning');
+      this.status.textContent = '只读演示 · 本地校验可用';
+      this.saveButton.title = '静态部署不执行写回；请在本地开发服务器中保存';
+    } else if (this.saving) {
       this.status.classList.add('status-badge--busy');
       this.status.textContent = '更改保存中';
     } else if (this.isValidating()) {
