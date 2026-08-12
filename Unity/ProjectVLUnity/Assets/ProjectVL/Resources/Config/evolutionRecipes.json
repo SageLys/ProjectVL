@@ -1,0 +1,405 @@
+{
+  "version": "0.2.0",
+  "recipes": [
+    {
+      "id": "r_arcSplitter_pierce",
+      "recipeType": "sameGod",
+      "variableGod": "storm",
+      "anchorGod": "storm",
+      "ingredientVariable": {
+        "cardId": "arcSplitter",
+        "minStar": 5
+      },
+      "ingredientAnchor": {
+        "cardId": "pierce",
+        "minStar": 5
+      },
+      "outputCardId": "stormLattice",
+      "outputStar": 6
+    },
+    {
+      "id": "r_stormcall_frost",
+      "recipeType": "crossGod",
+      "variableGod": "storm",
+      "anchorGod": "winter",
+      "ingredientVariable": {
+        "cardId": "stormcall",
+        "minStar": 5
+      },
+      "ingredientAnchor": {
+        "cardId": "frost",
+        "minStar": 5
+      },
+      "outputCardId": "thunderRime",
+      "outputStar": 6
+    },
+    {
+      "id": "r_staticSurge_scorch",
+      "recipeType": "crossGod",
+      "variableGod": "storm",
+      "anchorGod": "inferno",
+      "ingredientVariable": {
+        "cardId": "staticSurge",
+        "minStar": 5
+      },
+      "ingredientAnchor": {
+        "cardId": "scorch",
+        "minStar": 5
+      },
+      "outputCardId": "emberSpark",
+      "outputStar": 6
+    },
+    {
+      "id": "r_galvanicWard_aegis",
+      "recipeType": "crossGod",
+      "variableGod": "storm",
+      "anchorGod": "bulwark",
+      "ingredientVariable": {
+        "cardId": "galvanicWard",
+        "minStar": 5
+      },
+      "ingredientAnchor": {
+        "cardId": "aegis",
+        "minStar": 5
+      },
+      "outputCardId": "voltBastion",
+      "outputStar": 6
+    },
+    {
+      "id": "r_overcharge_harvest",
+      "recipeType": "crossGod",
+      "variableGod": "storm",
+      "anchorGod": "plenty",
+      "ingredientVariable": {
+        "cardId": "overcharge",
+        "minStar": 5
+      },
+      "ingredientAnchor": {
+        "cardId": "harvest",
+        "minStar": 5
+      },
+      "outputCardId": "ampereFlow",
+      "outputStar": 6
+    },
+    {
+      "id": "r_glacialSpike_chainLightning",
+      "recipeType": "crossGod",
+      "variableGod": "winter",
+      "anchorGod": "storm",
+      "ingredientVariable": {
+        "cardId": "glacialSpike",
+        "minStar": 5
+      },
+      "ingredientAnchor": {
+        "cardId": "chainLightning",
+        "minStar": 5
+      },
+      "outputCardId": "crystalRelay",
+      "outputStar": 6
+    },
+    {
+      "id": "r_permafrost_impact",
+      "recipeType": "sameGod",
+      "variableGod": "winter",
+      "anchorGod": "winter",
+      "ingredientVariable": {
+        "cardId": "permafrost",
+        "minStar": 5
+      },
+      "ingredientAnchor": {
+        "cardId": "impact",
+        "minStar": 5
+      },
+      "outputCardId": "glacialEpoch",
+      "outputStar": 6
+    },
+    {
+      "id": "r_frozenBulwark_splitBlast",
+      "recipeType": "crossGod",
+      "variableGod": "winter",
+      "anchorGod": "inferno",
+      "ingredientVariable": {
+        "cardId": "frozenBulwark",
+        "minStar": 5
+      },
+      "ingredientAnchor": {
+        "cardId": "splitBlast",
+        "minStar": 5
+      },
+      "outputCardId": "rimeShell",
+      "outputStar": 6
+    },
+    {
+      "id": "r_iceTomb_thorns",
+      "recipeType": "crossGod",
+      "variableGod": "winter",
+      "anchorGod": "bulwark",
+      "ingredientVariable": {
+        "cardId": "iceTomb",
+        "minStar": 5
+      },
+      "ingredientAnchor": {
+        "cardId": "thorns",
+        "minStar": 5
+      },
+      "outputCardId": "tombSpire",
+      "outputStar": 6
+    },
+    {
+      "id": "r_hoarfrostTithe_fateLoom",
+      "recipeType": "crossGod",
+      "variableGod": "winter",
+      "anchorGod": "plenty",
+      "ingredientVariable": {
+        "cardId": "hoarfrostTithe",
+        "minStar": 5
+      },
+      "ingredientAnchor": {
+        "cardId": "fateLoom",
+        "minStar": 5
+      },
+      "outputCardId": "stasisLedger",
+      "outputStar": 6
+    },
+    {
+      "id": "r_meteor_pierce",
+      "recipeType": "crossGod",
+      "variableGod": "inferno",
+      "anchorGod": "storm",
+      "ingredientVariable": {
+        "cardId": "meteor",
+        "minStar": 5
+      },
+      "ingredientAnchor": {
+        "cardId": "pierce",
+        "minStar": 5
+      },
+      "outputCardId": "solarPiercer",
+      "outputStar": 6
+    },
+    {
+      "id": "r_flashfire_frost",
+      "recipeType": "crossGod",
+      "variableGod": "inferno",
+      "anchorGod": "winter",
+      "ingredientVariable": {
+        "cardId": "flashfire",
+        "minStar": 5
+      },
+      "ingredientAnchor": {
+        "cardId": "frost",
+        "minStar": 5
+      },
+      "outputCardId": "steamBurst",
+      "outputStar": 6
+    },
+    {
+      "id": "r_magmaPool_scorch",
+      "recipeType": "sameGod",
+      "variableGod": "inferno",
+      "anchorGod": "inferno",
+      "ingredientVariable": {
+        "cardId": "magmaPool",
+        "minStar": 5
+      },
+      "ingredientAnchor": {
+        "cardId": "scorch",
+        "minStar": 5
+      },
+      "outputCardId": "volcanoCore",
+      "outputStar": 6
+    },
+    {
+      "id": "r_cinderheart_aegis",
+      "recipeType": "crossGod",
+      "variableGod": "inferno",
+      "anchorGod": "bulwark",
+      "ingredientVariable": {
+        "cardId": "cinderheart",
+        "minStar": 5
+      },
+      "ingredientAnchor": {
+        "cardId": "aegis",
+        "minStar": 5
+      },
+      "outputCardId": "emberMoat",
+      "outputStar": 6
+    },
+    {
+      "id": "r_ashHarvest_harvest",
+      "recipeType": "crossGod",
+      "variableGod": "inferno",
+      "anchorGod": "plenty",
+      "ingredientVariable": {
+        "cardId": "ashHarvest",
+        "minStar": 5
+      },
+      "ingredientAnchor": {
+        "cardId": "harvest",
+        "minStar": 5
+      },
+      "outputCardId": "emberYield",
+      "outputStar": 6
+    },
+    {
+      "id": "r_sentinel_chainLightning",
+      "recipeType": "crossGod",
+      "variableGod": "bulwark",
+      "anchorGod": "storm",
+      "ingredientVariable": {
+        "cardId": "sentinel",
+        "minStar": 5
+      },
+      "ingredientAnchor": {
+        "cardId": "chainLightning",
+        "minStar": 5
+      },
+      "outputCardId": "pylonCircuit",
+      "outputStar": 6
+    },
+    {
+      "id": "r_decoy_impact",
+      "recipeType": "crossGod",
+      "variableGod": "bulwark",
+      "anchorGod": "winter",
+      "ingredientVariable": {
+        "cardId": "decoy",
+        "minStar": 5
+      },
+      "ingredientAnchor": {
+        "cardId": "impact",
+        "minStar": 5
+      },
+      "outputCardId": "glacialEffigy",
+      "outputStar": 6
+    },
+    {
+      "id": "r_retribution_splitBlast",
+      "recipeType": "crossGod",
+      "variableGod": "bulwark",
+      "anchorGod": "inferno",
+      "ingredientVariable": {
+        "cardId": "retribution",
+        "minStar": 5
+      },
+      "ingredientAnchor": {
+        "cardId": "splitBlast",
+        "minStar": 5
+      },
+      "outputCardId": "wrathMortar",
+      "outputStar": 6
+    },
+    {
+      "id": "r_sanctum_aegis",
+      "recipeType": "sameGod",
+      "variableGod": "bulwark",
+      "anchorGod": "bulwark",
+      "ingredientVariable": {
+        "cardId": "sanctum",
+        "minStar": 5
+      },
+      "ingredientAnchor": {
+        "cardId": "aegis",
+        "minStar": 5
+      },
+      "outputCardId": "aegisCitadel",
+      "outputStar": 6
+    },
+    {
+      "id": "r_ironvine_fateLoom",
+      "recipeType": "crossGod",
+      "variableGod": "bulwark",
+      "anchorGod": "plenty",
+      "ingredientVariable": {
+        "cardId": "ironvine",
+        "minStar": 5
+      },
+      "ingredientAnchor": {
+        "cardId": "fateLoom",
+        "minStar": 5
+      },
+      "outputCardId": "rootLoom",
+      "outputStar": 6
+    },
+    {
+      "id": "r_goldenVolley_chainLightning",
+      "recipeType": "crossGod",
+      "variableGod": "plenty",
+      "anchorGod": "storm",
+      "ingredientVariable": {
+        "cardId": "goldenVolley",
+        "minStar": 5
+      },
+      "ingredientAnchor": {
+        "cardId": "chainLightning",
+        "minStar": 5
+      },
+      "outputCardId": "midasChain",
+      "outputStar": 6
+    },
+    {
+      "id": "r_springOfLife_frost",
+      "recipeType": "crossGod",
+      "variableGod": "plenty",
+      "anchorGod": "winter",
+      "ingredientVariable": {
+        "cardId": "springOfLife",
+        "minStar": 5
+      },
+      "ingredientAnchor": {
+        "cardId": "frost",
+        "minStar": 5
+      },
+      "outputCardId": "frostDew",
+      "outputStar": 6
+    },
+    {
+      "id": "r_bountyCall_scorch",
+      "recipeType": "crossGod",
+      "variableGod": "plenty",
+      "anchorGod": "inferno",
+      "ingredientVariable": {
+        "cardId": "bountyCall",
+        "minStar": 5
+      },
+      "ingredientAnchor": {
+        "cardId": "scorch",
+        "minStar": 5
+      },
+      "outputCardId": "pyreBrand",
+      "outputStar": 6
+    },
+    {
+      "id": "r_luckyStar_thorns",
+      "recipeType": "crossGod",
+      "variableGod": "plenty",
+      "anchorGod": "bulwark",
+      "ingredientVariable": {
+        "cardId": "luckyStar",
+        "minStar": 5
+      },
+      "ingredientAnchor": {
+        "cardId": "thorns",
+        "minStar": 5
+      },
+      "outputCardId": "fortuneThorns",
+      "outputStar": 6
+    },
+    {
+      "id": "r_overgrowth_harvest",
+      "recipeType": "sameGod",
+      "variableGod": "plenty",
+      "anchorGod": "plenty",
+      "ingredientVariable": {
+        "cardId": "overgrowth",
+        "minStar": 5
+      },
+      "ingredientAnchor": {
+        "cardId": "harvest",
+        "minStar": 5
+      },
+      "outputCardId": "goldenGrove",
+      "outputStar": 6
+    }
+  ]
+}

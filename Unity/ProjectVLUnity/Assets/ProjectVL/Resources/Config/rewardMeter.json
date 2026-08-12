@@ -1,0 +1,67 @@
+{
+  "version": "0.1.0",
+  "pointMul": 1,
+  "expiryConvertPointsPerStar": 4,
+  "thresholds": [10, 12, 16, 24, 33, 45, 60, 80],
+  "afterSchedule": "repeatLast",
+  "rewardKillsGrantPoints": false,
+  "preventImmediateRepeat": true,
+  "lowHpWeightBoost": {
+    "hpRatioBelow": 0.4,
+    "rewardId": "clarityReflux",
+    "weightMul": 3
+  },
+  "rewards": [
+    {
+      "id": "heartbreakNova",
+      "textKey": "rewards.heartbreakNova",
+      "weight": 1,
+      "action": {
+        "kind": "globalDamage",
+        "damageMul": 8,
+        "bossMaxHpRatioCap": 0.1
+      }
+    },
+    {
+      "id": "absoluteStillness",
+      "textKey": "rewards.absoluteStillness",
+      "weight": 1,
+      "action": {
+        "kind": "globalControl",
+        "freezeSeconds": 2.5,
+        "vulnerableRatio": 0.3,
+        "vulnerableSeconds": 5
+      }
+    },
+    {
+      "id": "clarityReflux",
+      "textKey": "rewards.clarityReflux",
+      "weight": 1,
+      "action": {
+        "kind": "restoreAndShield",
+        "healRatio": 0.25,
+        "shieldHits": 1
+      }
+    },
+    {
+      "id": "wildHeart",
+      "textKey": "rewards.wildHeart",
+      "weight": 1,
+      "action": {
+        "kind": "grantWildcards",
+        "count": 1,
+        "starSchedule": [1, 1, 2, 2, 3, 3, 4, 5]
+      }
+    },
+    {
+      "id": "buildResonance",
+      "textKey": "rewards.buildResonance",
+      "weight": 1,
+      "action": {
+        "kind": "buildSurge",
+        "duration": 12,
+        "value": 0.25
+      }
+    }
+  ]
+}

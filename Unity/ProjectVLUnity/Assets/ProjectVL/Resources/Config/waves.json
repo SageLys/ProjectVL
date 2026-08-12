@@ -1,0 +1,173 @@
+{
+  "totalWaves": 10,
+  "spawnMode": "budget",
+  "enemyCountBase": 5,
+  "enemyCountPerWave": 3,
+  "firstSpawnDelay": 0.4,
+  "spawnInterval": {
+    "base": 0.72,
+    "perWave": 0.05,
+    "min": 0.28
+  },
+  "budget": {
+    "waveQuota": {
+      "base": 51,
+      "perWave": 52
+    },
+    "targetOnScreen": {
+      "base": 5,
+      "perWave": 10
+    },
+    "checkInterval": 1.95,
+    "batchMax": 10,
+    "waveEndSprint": {
+      "window": 7,
+      "multiplier": 3
+    },
+    "maxAlive": 100
+  },
+  "stagePlan": {
+    "selectionWaves": 3,
+    "validationWaves": 2,
+    "selection": {
+      "waveQuota": {
+        "start": 60,
+        "end": 75,
+        "power": 1
+      },
+      "targetOnScreen": {
+        "start": 7,
+        "end": 10,
+        "power": 1
+      },
+      "checkInterval": 1.95,
+      "batchMax": 6,
+      "maxAlive": 24,
+      "waveEndSprint": {
+        "window": 0,
+        "multiplier": 1
+      }
+    },
+    "build": {
+      "waveQuota": {
+        "start": 95,
+        "end": 170,
+        "power": 1
+      },
+      "targetOnScreen": {
+        "start": 14,
+        "end": 28,
+        "power": 1
+      },
+      "checkInterval": 1.95,
+      "batchMax": 10,
+      "maxAlive": 40,
+      "waveEndSprint": {
+        "window": 5,
+        "multiplier": 1.5
+      }
+    },
+    "validation": [
+      {
+        "enemies": [
+          {
+            "type": "tank",
+            "hpMul": 14,
+            "damageMul": 2,
+            "speedMul": 0.75,
+            "ccResistOverride": 0.7,
+            "knockbackResistOverride": 0.8,
+            "reward": {
+              "kind": "card",
+              "star": 4,
+              "count": 1,
+              "typePolicy": "focusGod"
+            }
+          }
+        ],
+        "bossReward": {
+          "kind": "wildcard",
+          "star": 5,
+          "count": 1
+        }
+      },
+      {
+        "enemies": [
+          {
+            "type": "tank",
+            "hpMul": 20,
+            "damageMul": 2.5,
+            "speedMul": 0.7,
+            "ccResistOverride": 0.7,
+            "knockbackResistOverride": 0.8,
+            "reward": {
+              "kind": "card",
+              "star": 5,
+              "count": 1,
+              "typePolicy": "focusGod"
+            }
+          },
+          {
+            "type": "fast",
+            "hpMul": 10,
+            "damageMul": 2,
+            "speedMul": 1.1,
+            "ccResistOverride": 0.5,
+            "knockbackResistOverride": 0.6,
+            "reward": {
+              "kind": "card",
+              "star": 3,
+              "count": 1,
+              "typePolicy": "focusGod"
+            }
+          }
+        ],
+        "bossReward": {
+          "kind": "wildcard",
+          "star": 5,
+          "count": 1
+        }
+      }
+    ]
+  },
+  "intermission": {
+    "freeSeconds": {
+      "selection": 23,
+      "buildEarly": 20,
+      "buildLate": 18,
+      "validation": 17
+    },
+    "settleSeconds": 2.5,
+    "autoReadyHighlight": true
+  },
+  "spawnMargin": 25,
+  "topSpawnInset": 106,
+  "bottomSpawnInset": 226,
+  "typeRoll": {
+    "tankBase": 0.2,
+    "tankPerWave": 0.025,
+    "fastThreshold": 0.47
+  },
+  "bossWaves": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "waveBoss": {
+    "reward": {
+      "schedule": {
+        "selection": [1, 1, 1],
+        "build": [2, 2, 3, 4, 4],
+        "validation": [5, 5]
+      },
+      "count": 1
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "floor": [
+    { "id": "floorHeal", "stat": "heal", "add": 8 },
+    { "id": "floorDamage", "stat": "damageAdd", "add": 1 },
+    { "id": "floorRange", "stat": "rangeAdd", "add": 4 }
+  ],
+  "choice": [
+    { "id": "optDamage", "stat": "damageAdd", "add": 2 },
+    { "id": "optFireRate", "stat": "fireRateAdd", "add": 0.15 },
+    { "id": "optMaxHp", "stat": "maxHpAdd", "add": 10 },
+    { "id": "optRange", "stat": "rangeAdd", "add": 8 },
+    { "id": "optXpGain", "stat": "xpGainPct", "add": 0.08 }
+  ]
+}

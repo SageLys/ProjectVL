@@ -147,6 +147,9 @@ export interface SessionMeta {
   seed: number;
   difficulty?: { id: string; hpMultiplierAtWave1: number; damageMultiplierAtWave1: number };
   gitCommit: string;
+  rulesVersion?: string;
+  scenarioVersion?: string;
+  configFingerprint?: string;
 }
 
 export interface TelemetrySession {

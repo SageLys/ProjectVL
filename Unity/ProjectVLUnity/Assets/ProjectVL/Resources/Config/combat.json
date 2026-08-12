@@ -1,0 +1,56 @@
+{
+  "canvas": {
+    "width": 402,
+    "height": 874
+  },
+  "turret": {
+    "x": 201,
+    "y": 437
+  },
+  "hp": {
+    "max": 100
+  },
+  "defaults": {
+    "damage": 18,
+    "fireRate": 5,
+    "range": 150
+  },
+  "attackPreviewMargin": 60,
+  "bullet": {
+    "speed": 465,
+    "life": 1.6,
+    "radius": 4,
+    "spread": 0.05,
+    "muzzleOffset": 24
+  },
+  "weaponFusion": {
+    "damping": 0.75,
+    "radiusMul": 0.6
+  },
+  "breakthroughDist": 48,
+  "dangerZoneWidth": 72,
+  "dtCap": 0.033,
+  "knockbackFatigue": {
+    "decayFactor": 0.5,
+    "windowSeconds": 2,
+    "minMultiplier": 0.125
+  },
+  "ccImmunity": {
+    "afterFreezeSeconds": 1.2,
+    "afterStunSeconds": 0.8
+  },
+  "controlCeiling": {
+    "freezeSeconds": 2.5,
+    "stunSeconds": 1.5,
+    "knockbackDistance": 120
+  },
+  "controlBudget": {
+    "maxControlledRatio": 0.6,
+    "minFreeAdvancers": 2
+  },
+  "vfx": {
+    "shootParticles": 4,
+    "killParticles": 12,
+    "breakthroughParticles": 10
+  }
+}

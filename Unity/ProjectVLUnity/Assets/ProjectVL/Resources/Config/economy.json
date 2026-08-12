@@ -1,0 +1,99 @@
+{
+  "maxStar": 6,
+  "mergeCopies": 2,
+  "mergeCopiesWhenTwoCopyDisabled": 3,
+  "equipThreshold": 3,
+  "handSlots": 7,
+  "equipSlots": 3,
+  "equipIrreversible": false,
+  "unequipPolicy": "consume",
+  "equipSwappable": true,
+  "inRunSlotExpansion": false,
+  "equipDistinctTypes": true,
+  "feedEquipped": true,
+  "placeholderAssumptions": {
+    "twoCopyMerge": true,
+    "normalDropsOnlyOneStar": true,
+    "feedEquipped": true,
+    "distinctEquippedTypes": true
+  },
+  "dropStarPolicy": {
+    "normal": 1,
+    "bountyBossMax": 2,
+    "star2Share": 0.05
+  },
+  "drops": {
+    "pickupRadius": 34,
+    "chanceCap": 0.95
+  },
+  "defaults": {
+    "dropChance": 0.27,
+    "dropLifetime": 5
+  },
+  "ordinaryDropRate": {
+    "enabled": true,
+    "selectionPerMinute": 35,
+    "buildPerMinute": 40,
+    "buildTransitionSeconds": 20,
+    "carryCap": 1.5,
+    "modifiersAffectTarget": true
+  },
+  "evolution": {
+    "maxRecipeCompletions": 2,
+    "completionLimitPerRecipe": 1,
+    "assistWindowWaves": [
+      4,
+      8
+    ],
+    "assistCheckpoints": [
+      6,
+      8
+    ],
+    "assistMaxCorrections": 2,
+    "assistMaxCorrectionsPerMaterial": 1,
+    "assistRewardPolicy": "minimumMergeCompletion",
+    "allowDirectFiveStarAssist": false,
+    "recipeProtectionSlots": 2,
+    "bountyRecipeMaterialBonus": 1.6,
+    "bountyReadySideMultiplier": 0.5
+  },
+  "normalDropTypePolicy": {
+    "enabled": true,
+    "roleBagSize": 10,
+    "earlyMix": {
+      "discovery": 6,
+      "build": 3,
+      "pivot": 1
+    },
+    "lateMix": {
+      "discovery": 1,
+      "build": 7,
+      "pivot": 2
+    },
+    "bootstrapMinDiscovery": 6,
+    "bootstrapForcedDrops": 9,
+    "maturity": {
+      "fullMergeOps": 10,
+      "fullHighestStar": 4,
+      "fullEquippedTypes": 2,
+      "mergeWeight": 0.25,
+      "starWeight": 0.35,
+      "equipWeight": 0.4
+    },
+    "build": {
+      "topK": 3,
+      "scorePower": 1.25,
+      "mergeReadyMultiplier": 1.5,
+      "equippedBaseBonus": 6,
+      "equippedStarBonus": 2,
+      "historicalMergeWeight": 0.5,
+      "historicalMergeCap": 8,
+      "maxWeightRatio": 6
+    },
+    "pivot": {
+      "excludeTopK": 2,
+      "candidateFraction": 0.5
+    },
+    "maxSameTypeStreak": 2
+  }
+}
